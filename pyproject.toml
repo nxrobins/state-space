@@ -1,0 +1,18 @@
+[project]
+name = "state-space"
+version = "0.1.0"
+description = "GPU-driven cellular automata game engine built via evolutionary search"
+requires-python = ">=3.10"
+dependencies = [
+    "wgpu>=0.19.0",
+    "numpy>=1.24.0",
+    "anthropic>=0.40.0",
+    "glfw",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["engine", "eval"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head><title>Bare WebGPU Test</title></head>
+<body style="margin:0;background:#111">
+<canvas id="c" width="256" height="256" style="width:512px;height:512px;image-rendering:pixelated"></canvas>
+<div id="info" style="color:#fff;font-family:monospace;padding:8px">Loading...</div>
+<script>
+// Bare minimum: trivial compute (identity copy) + render, no imported shaders
+const W = 256, H = 256, N = W * H;
+
+const COMPUTE_SHADER = `
+@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
+@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
+
+@compute @workgroup_size(16, 16)
+fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
+    let x = gid.x; let y = gid.y;
+    if (x >= ${W}u || y >= ${H}u) { return; }
+    let idx = y * ${W}u + x;
+    grid_out[idx] = grid_in[idx];
+}
+`;
+
+const RENDER_SHADER = `
+struct VO { @builtin(position) pos: vec4<f32>, @location(0) uv: vec2<f32> }
+
+@vertex fn vs(@builtin(vertex_index) vi: u32) -> VO {
+    var o: VO;
+    o.pos = vec4<f32>(f32(vi & 1u) * 2.0 - 1.0, -(f32((vi >> 1u) & 1u) * 2.0 - 1.0), 0.0, 1.0);
+    o.uv = vec2<f32>(f32(vi & 1u), f32((vi >> 1u) & 1u));
+    return o;
+}
+
+@group(0) @binding(0) var<storage, read> grid: array<u32>;
+
+@fragment fn fs(in: VO) -> @location(0) vec4<f32> {
+    let gx = u32(in.uv.x * ${W}.0);
+    let gy = u32(in.uv.y * ${H}.0);
+    if (gx >= ${W}u || gy >= ${H}u) { return vec4<f32>(0,0,0,1); }
+    let v = grid[gy * ${W}u + gx];
+    let mat = v & 0xFFu;
+    let t = f32((v >> 8u) & 0xFFu) / 255.0;
+    // Simple color: stone=gray, sand=tan, air=dark
+    var r = 0.05; var g = 0.05; var b = 0.08;
+    if (mat == 1u) { r = 0.5; g = 0.5; b = 0.5; }
+    if (mat == 3u) { r = 0.76; g = 0.70; b = 0.50; }
+    return vec4<f32>(r, g, b, 1.0);
+}
+`;
+
+async function main() {
+    const info = document.getElementById('info');
+    const adapter = await navigator.gpu.requestAdapter();
+    const device = await adapter.requestDevice();
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('webgpu');
+    const format = navigator.gpu.getPreferredCanvasFormat();
+    ctx.configure({ device, format, alphaMode: 'opaque' });
+
+    // Grid with stone floor + sand pile
+    const grid = new Uint32Array(N);
+    for (let i = 0; i < N; i++) grid[i] = (20 << 8); // air, thermal=20
+    for (let x = 0; x < W; x++)
+        for (let y = H-20; y < H; y++)
+            grid[y*W+x] = 1 | (20 << 8); // stone
+    for (let x = 100; x < 156; x++)
+        for (let y = 50; y < 80; y++)
+            grid[y*W+x] = 3 | (20 << 8) | (1 << 24); // sand, phase=powder
+
+    const bufA = device.createBuffer({ size: N*4, usage: GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST });
+    const bufB = device.createBuffer({ size: N*4, usage: GPUBufferUsage.STORAGE });
+    device.queue.writeBuffer(bufA, 0, grid);
+
+    // Compute
+    const cMod = device.createShaderModule({ code: COMPUTE_SHADER });
+    const cBGL = device.createBindGroupLayout({ entries:[
+        {binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:'read-only-storage'}},
+        {binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:'storage'}},
+    ]});
+    const cPipe = device.createComputePipeline({
+        layout:device.createPipelineLayout({bindGroupLayouts:[cBGL]}),
+        compute:{module:cMod,entryPoint:'tick'},
+    });
+    const cBG_AB = device.createBindGroup({layout:cBGL,entries:[
+        {binding:0,resource:{buffer:bufA}},{binding:1,resource:{buffer:bufB}},
+    ]});
+    const cBG_BA = device.createBindGroup({layout:cBGL,entries:[
+        {binding:0,resource:{buffer:bufB}},{binding:1,resource:{buffer:bufA}},
+    ]});
+
+    // Render
+    const rMod = device.createShaderModule({ code: RENDER_SHADER });
+    const rBGL = device.createBindGroupLayout({ entries:[
+        {binding:0,visibility:GPUShaderStage.FRAGMENT,buffer:{type:'read-only-storage'}},
+    ]});
+    const rPipe = device.createRenderPipeline({
+        layout:device.createPipelineLayout({bindGroupLayouts:[rBGL]}),
+        vertex:{module:rMod,entryPoint:'vs'},
+        fragment:{module:rMod,entryPoint:'fs',targets:[{format}]},
+        primitive:{topology:'triangle-strip'},
+    });
+    const rBG_A = device.createBindGroup({layout:rBGL,entries:[{binding:0,resource:{buffer:bufA}}]});
+    const rBG_B = device.createBindGroup({layout:rBGL,entries:[{binding:0,resource:{buffer:bufB}}]});
+
+    let tick = 0, isA = true;
+    const wgX = Math.ceil(W/16), wgY = Math.ceil(H/16);
+
+    function frame() {
+        const enc = device.createCommandEncoder();
+        const cp = enc.beginComputePass();
+        cp.setPipeline(cPipe);
+        cp.setBindGroup(0, isA ? cBG_AB : cBG_BA);
+        cp.dispatchWorkgroups(wgX, wgY);
+        cp.end();
+        isA = !isA;
+        const rp = enc.beginRenderPass({colorAttachments:[{
+            view:ctx.getCurrentTexture().createView(),loadOp:'clear',storeOp:'store',clearValue:{r:0,g:0,b:0,a:1},
+        }]});
+        rp.setPipeline(rPipe);
+        rp.setBindGroup(0, isA ? rBG_A : rBG_B);
+        rp.draw(4);
+        rp.end();
+        device.queue.submit([enc.finish()]);
+        tick++;
+        info.textContent = 'Tick: ' + tick;
+        requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+main().catch(e => { document.getElementById('info').textContent = 'ERR: ' + e.message; console.error(e); });
+</script>
+</body>
+</html>

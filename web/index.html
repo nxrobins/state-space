@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>State Space</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #111; color: #ddd; font-family: 'Courier New', monospace; overflow: hidden; }
+#container { display: flex; height: 100vh; }
+canvas { flex: 1; image-rendering: pixelated; cursor: crosshair; }
+#sidebar {
+    width: 180px; padding: 12px; background: #1a1a1a; border-left: 1px solid #333;
+    display: flex; flex-direction: column; gap: 8px; font-size: 12px;
+    overflow-y: auto;
+}
+.mat-btn {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+    border: 1px solid #333; border-radius: 4px; cursor: pointer;
+    background: #222; transition: border-color 0.15s;
+}
+.mat-btn:hover { border-color: #666; }
+.mat-btn.selected { border-color: #fff; background: #2a2a2a; }
+.mat-swatch { width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+.mat-name { flex: 1; }
+.mat-key { color: #666; font-size: 10px; }
+#stats { padding: 8px; background: #0a0a0a; border-radius: 4px; font-size: 11px; line-height: 1.6; }
+#controls { font-size: 11px; line-height: 1.8; color: #888; }
+h3 { color: #aaa; font-size: 12px; margin-bottom: 4px; }
+#brush-size { width: 100%; }
+</style>
+</head>
+<body>
+<div id="container">
+    <canvas id="canvas"></canvas>
+    <div id="sidebar">
+        <h3>MATERIALS</h3>
+        <div id="palette"></div>
+        <h3>BRUSH</h3>
+        <div>
+            Size: <span id="brush-val">3</span>
+            <input type="range" id="brush-size" min="1" max="20" value="3">
+        </div>
+        <h3>SIMULATION</h3>
+        <div id="stats">Loading...</div>
+        <h3>CONTROLS</h3>
+        <div id="controls">
+            Left click: place<br>
+            Right click: erase<br>
+            Space: pause/play<br>
+            C: clear grid<br>
+            1-9: select material
+        </div>
+    </div>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

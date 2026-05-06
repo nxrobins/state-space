@@ -1,0 +1,27 @@
+{"id": "gen3_7484", "parents": ["seed_seed_simple_burn", "seed_seed_radiant_burn", "seed_seed_conservative_burn"], "description": "vectorizing air counting, using select() to reduce branches, fusing combustion checks with bitwise AND, and inlining the", "timestamp": "2026-04-04T00:24:44.501804"}
+{"id": "gen4_7526", "parents": ["seed_seed_simple_burn", "gen3_7484", "seed_seed_radiant_burn"], "description": "```wgsl", "timestamp": "2026-04-04T00:25:26.043891"}
+{"id": "gen5_7562", "parents": ["seed_seed_simple_burn", "gen3_7484", "seed_seed_radiant_burn"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:26:02.776119"}
+{"id": "gen6_7602", "parents": ["seed_seed_simple_burn", "gen3_7484", "seed_seed_radiant_burn"], "description": "- Further reduce branching by using more bitwise operations", "timestamp": "2026-04-04T00:26:42.116727"}
+{"id": "gen7_7638", "parents": ["seed_seed_simple_burn", "gen3_7484", "seed_seed_radiant_burn"], "description": "1. Avoids the type errors from failed attempts (especially with i32/u32 mixing)", "timestamp": "2026-04-04T00:27:18.595662"}
+{"id": "gen8_7673", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:27:53.590132"}
+{"id": "gen9_7710", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "Fused combustion check with branchless air consumption using bit manipulation", "timestamp": "2026-04-04T00:28:30.813424"}
+{"id": "gen10_7745", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:29:05.609818"}
+{"id": "gen11_7781", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "1. Reducing redundant neighbor checks for air consumption", "timestamp": "2026-04-04T00:29:41.198170"}
+{"id": "gen12_7820", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:30:20.035888"}
+{"id": "gen13_7851", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:30:51.540640"}
+{"id": "gen14_7891", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:31:31.003655"}
+{"id": "gen15_7928", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:32:08.371539"}
+{"id": "gen16_7963", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "** Fused burning checks with early-exit air detection and inline direction handling to minimize branching overhead.", "timestamp": "2026-04-04T00:32:43.280300"}
+{"id": "gen17_8003", "parents": ["gen7_7638", "seed_seed_simple_burn", "gen3_7484"], "description": "```wgsl", "timestamp": "2026-04-04T00:33:23.916556"}
+{"id": "gen18_8040", "parents": ["gen7_7638", "gen3_7484", "gen16_7963"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:34:00.574410"}
+{"id": "gen19_8079", "parents": ["gen7_7638", "gen16_7963", "gen12_7820"], "description": "```wgsl", "timestamp": "2026-04-04T00:34:39.597969"}
+{"id": "gen20_8116", "parents": ["gen7_7638", "gen19_8079", "gen16_7963"], "description": "```wgsl", "timestamp": "2026-04-04T00:35:16.107565"}
+{"id": "gen21_8153", "parents": ["gen7_7638", "gen19_8079", "gen16_7963"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:35:53.992518"}
+{"id": "gen22_8189", "parents": ["gen7_7638", "gen19_8079", "gen16_7963"], "description": "fusing the combustion checks into bitwise operations to minimize branching.", "timestamp": "2026-04-04T00:36:29.730989"}
+{"id": "gen23_8225", "parents": ["gen19_8079", "gen16_7963", "gen12_7820"], "description": "use vec4 operations for parallel neighbor data loading (like Parent 1), but simplify the burning check logic by pre-comp", "timestamp": "2026-04-04T00:37:05.121585"}
+{"id": "gen24_8262", "parents": ["gen19_8079", "gen16_7963", "gen12_7820"], "description": "Vectorized combustion with fused conditions and minimal branching", "timestamp": "2026-04-04T00:37:42.938757"}
+{"id": "gen25_8290", "parents": ["gen24_8262", "gen19_8079", "gen16_7963"], "description": "Vectorized neighbor processing with fused combustion checks and minimal branching", "timestamp": "2026-04-04T00:38:10.829586"}
+{"id": "gen26_8328", "parents": ["gen24_8262", "gen19_8079", "gen16_7963"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:38:48.851585"}
+{"id": "gen27_8367", "parents": ["gen24_8262", "gen19_8079", "gen16_7963"], "description": "Vectorized combustion with single-pass neighbor evaluation", "timestamp": "2026-04-04T00:39:27.255781"}
+{"id": "gen28_8405", "parents": ["gen24_8262", "gen19_8079", "gen16_7963"], "description": "```wgsl", "timestamp": "2026-04-04T00:40:05.357624"}
+{"id": "gen29_8442", "parents": ["gen24_8262", "gen19_8079", "gen16_7963"], "description": "LLM-generated WGSL variant", "timestamp": "2026-04-04T00:40:42.436397"}

@@ -1,0 +1,392 @@
+[
+  {
+    "id": "seed_seed_basic",
+    "generation": 0,
+    "parent_ids": [],
+    "mutation_description": "Seed: seed_basic",
+    "code_diff": "initial seed",
+    "fitness": {
+      "roundtrip_errors": 0,
+      "cycle_time_us": 0.0009125232722229093,
+      "total_time_ms": 0.9568500026944093,
+      "diverged": false
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:39:48.244973",
+    "evolvable_code": {
+      "_full_shader": "// Seed 1: Basic shift-and-mask bitops\n// Straightforward pack/unpack using individual bit shifts.\n\nfn pack_voxel(mat: u32, thermal: u32, kx: i32, ky: i32, phase: u32, flags: u32) -> u32 {\n    var packed: u32 = 0u;\n    packed = packed | ((mat & MATERIAL_MASK) << MATERIAL_SHIFT);\n    packed = packed | ((thermal & THERMAL_MASK) << THERMAL_SHIFT);\n    packed = packed | ((u32(kx) & KINETIC_X_MASK) << KINETIC_X_SHIFT);\n    packed = packed | ((u32(ky) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT);\n    packed = packed | ((phase & PHASE_MASK) << PHASE_SHIFT);\n    packed = packed | ((flags & FLAGS_MASK) << FLAGS_SHIFT);\n    return packed;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material = (packed >> MATERIAL_SHIFT) & MATERIAL_MASK;\n    state.thermal = (packed >> THERMAL_SHIFT) & THERMAL_MASK;\n\n    // Sign-extend 4-bit kinetic values\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    state.kinetic_x = i32(kx_raw) - i32((kx_raw & 0x8u) << 1u);\n    state.kinetic_y = i32(ky_raw) - i32((ky_raw & 0x8u) << 1u);\n\n    state.phase = (packed >> PHASE_SHIFT) & PHASE_MASK;\n    state.flags = (packed >> FLAGS_SHIFT) & FLAGS_MASK;\n    return state;\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Simple thermal diffusion: average neighboring temperatures\n    let thermal_a = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n\n    let diff = i32(thermal_a) - i32(thermal_b);\n    let transfer = diff / 4;  // 25% diffusion rate\n\n    let new_thermal_a = u32(clamp(i32(thermal_a) - transfer, 0, 255));\n    let new_thermal_b = u32(clamp(i32(thermal_b) + transfer, 0, 255));\n\n    let new_a = (a & ~(THERMAL_MASK << THERMAL_SHIFT)) | (new_thermal_a << THERMAL_SHIFT);\n    let new_b = (b & ~(THERMAL_MASK << THERMAL_SHIFT)) | (new_thermal_b << THERMAL_SHIFT);\n\n    return vec2<u32>(new_a, new_b);\n}\n\n// \u00e2\u201d\u20ac\u00e2\u201d\u20ac Compute entry point \u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let idx = gid.x;\n    if (idx >= arrayLength(&input)) {\n        return;\n    }\n\n    let packed = input[idx];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(\n        state.material, state.thermal,\n        state.kinetic_x, state.kinetic_y,\n        state.phase, state.flags\n    );\n    output[idx] = repacked;\n}\n"
+    }
+  },
+  {
+    "id": "seed_seed_branchless",
+    "generation": 0,
+    "parent_ids": [],
+    "mutation_description": "Seed: seed_branchless",
+    "code_diff": "initial seed",
+    "fitness": {
+      "roundtrip_errors": 0,
+      "cycle_time_us": 0.0008933258063836824,
+      "total_time_ms": 0.9367200007545762,
+      "diverged": false
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:39:48.244973",
+    "evolvable_code": {
+      "_full_shader": "// Seed 2: Branchless optimized pack/unpack\n// Uses bitwise tricks to avoid branching for sign extension.\n\nfn pack_voxel(mat: u32, thermal: u32, kx: i32, ky: i32, phase: u32, flags: u32) -> u32 {\n    // Single expression pack \u00e2\u20ac\u201d compiler can fuse these\n    return ((mat & MATERIAL_MASK) << MATERIAL_SHIFT)\n         | ((thermal & THERMAL_MASK) << THERMAL_SHIFT)\n         | ((u32(kx) & KINETIC_X_MASK) << KINETIC_X_SHIFT)\n         | ((u32(ky) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT)\n         | ((phase & PHASE_MASK) << PHASE_SHIFT)\n         | ((flags & FLAGS_MASK) << FLAGS_SHIFT);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material = (packed >> MATERIAL_SHIFT) & MATERIAL_MASK;\n    state.thermal = (packed >> THERMAL_SHIFT) & THERMAL_MASK;\n\n    // Branchless sign extension: (val ^ 0x8) - 0x8 converts 4-bit unsigned to signed\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    state.kinetic_x = i32((kx_raw ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((ky_raw ^ 0x8u) - 0x8u);\n\n    state.phase = (packed >> PHASE_SHIFT) & PHASE_MASK;\n    state.flags = (packed >> FLAGS_SHIFT) & FLAGS_MASK;\n    return state;\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Branchless thermal exchange with configurable rate\n    let ta = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let tb = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n\n    // Arithmetic shift for signed division\n    let diff = i32(ta) - i32(tb);\n    let transfer = diff >> 2;  // Divide by 4 via shift\n\n    let new_ta = u32(max(min(i32(ta) - transfer, 255), 0));\n    let new_tb = u32(max(min(i32(tb) + transfer, 255), 0));\n\n    let clear_mask = ~(THERMAL_MASK << THERMAL_SHIFT);\n    return vec2<u32>(\n        (a & clear_mask) | (new_ta << THERMAL_SHIFT),\n        (b & clear_mask) | (new_tb << THERMAL_SHIFT)\n    );\n}\n\n// \u00e2\u201d\u20ac\u00e2\u201d\u20ac Compute entry point \u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let idx = gid.x;\n    if (idx >= arrayLength(&input)) {\n        return;\n    }\n\n    let packed = input[idx];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(\n        state.material, state.thermal,\n        state.kinetic_x, state.kinetic_y,\n        state.phase, state.flags\n    );\n    output[idx] = repacked;\n}\n"
+    }
+  },
+  {
+    "id": "seed_seed_vectorized",
+    "generation": 0,
+    "parent_ids": [],
+    "mutation_description": "Seed: seed_vectorized",
+    "code_diff": "initial seed",
+    "fitness": {
+      "roundtrip_errors": 0,
+      "cycle_time_us": 0.00121994018636995,
+      "total_time_ms": 1.2792000008630566,
+      "diverged": false
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:39:48.244973",
+    "evolvable_code": {
+      "_full_shader": "// Seed 3: Vectorized approach\n// Packs material+thermal into one u32 half, kinetic+phase+flags into other half.\n// Uses vec2<u32> intermediate for potential SIMD-style operations.\n\nfn pack_voxel(mat: u32, thermal: u32, kx: i32, ky: i32, phase: u32, flags: u32) -> u32 {\n    // Lower 16 bits: material (8) + thermal (8)\n    let lower = (mat & MATERIAL_MASK) | ((thermal & THERMAL_MASK) << 8u);\n    // Upper 16 bits: kx (4) + ky (4) + phase (4) + flags (4)\n    let upper = ((u32(kx) & KINETIC_X_MASK))\n              | ((u32(ky) & KINETIC_Y_MASK) << 4u)\n              | ((phase & PHASE_MASK) << 8u)\n              | ((flags & FLAGS_MASK) << 12u);\n    return lower | (upper << 16u);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    // Split into halves\n    let lower = packed & 0xFFFFu;\n    let upper = packed >> 16u;\n\n    state.material = lower & 0xFFu;\n    state.thermal = (lower >> 8u) & 0xFFu;\n\n    let kx_raw = upper & 0xFu;\n    let ky_raw = (upper >> 4u) & 0xFu;\n    // Branchless sign extension\n    state.kinetic_x = i32((kx_raw ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((ky_raw ^ 0x8u) - 0x8u);\n\n    state.phase = (upper >> 8u) & 0xFu;\n    state.flags = (upper >> 12u) & 0xFu;\n    return state;\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Extract thermal from lower half directly\n    let ta = (a >> 8u) & 0xFFu;\n    let tb = (b >> 8u) & 0xFFu;\n\n    let diff = i32(ta) - i32(tb);\n    let transfer = diff >> 2;\n\n    let new_ta = u32(max(min(i32(ta) - transfer, 255), 0));\n    let new_tb = u32(max(min(i32(tb) + transfer, 255), 0));\n\n    let clear_mask = ~(0xFFu << 8u);\n    return vec2<u32>(\n        (a & clear_mask) | (new_ta << 8u),\n        (b & clear_mask) | (new_tb << 8u)\n    );\n}\n\n// \u00e2\u201d\u20ac\u00e2\u201d\u20ac Compute entry point \u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\u00e2\u201d\u20ac\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let idx = gid.x;\n    if (idx >= arrayLength(&input)) {\n        return;\n    }\n\n    let packed = input[idx];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(\n        state.material, state.thermal,\n        state.kinetic_x, state.kinetic_y,\n        state.phase, state.flags\n    );\n    output[idx] = repacked;\n}\n"
+    }
+  },
+  {
+    "id": "gen18_3020",
+    "generation": 18,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: redefinition of `VoxelState`\n   \u250c\u2500 wgsl:71:8\n   \u2502\n71 \u2502 struct VoxelState {\n   \u2502        ^^^^^^^^^^ previous definition of `VoxelState`\n   \u00b7\n86 \u2502 struct VoxelState {\n   \u2502        ^^^^^^^^^^ redefinition of `VoxelState`\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:43:40.086061",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 operations for parallel processing\n    let fields = vec4<u32>(\n        state.material_id & MATERIAL_MASK,\n        (state.thermal_energy & THERMAL_MASK) << 8u,\n        ((u32(state.kinetic_x) & KINETIC_MASK) << 16u) | ((u32(state.kinetic_y) & KINETIC_MASK) << 20u),\n        ((state.phase_state & PHASE_MASK) << 24u) | ((state.flags & FLAGS_MASK) << 28u)\n    );\n    return fields.x | fields.y | fields.z | fields.w;\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Parallel extraction using vec2 for kinetic components\n    let kinetic_raw = vec2<u32>(\n        (packed >> 16u) & KINETIC_MASK,\n        (packed >> 20u) & KINETIC_MASK\n    );\n    \n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> 8u) & THERMAL_MASK,\n        i32((kinetic_raw.x ^ 0x8u) - 0x8u),\n        i32((kinetic_raw.y ^ 0x8u) - 0x8u),\n        (packed >> 24u) & PHASE_MASK,\n        (packed >> 28u) & FLAGS_MASK\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Direct thermal extraction without full unpacking\n    let thermal_a = (voxel_a >> 8u) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> 8u) & THERMAL_MASK;\n    \n    // Simple diffusion: average the temperatures\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Mask out old thermal bits and insert new ones\n    let mask_thermal = ~(THERMAL_MASK << 8u);\n    let new_thermal_bits = avg_thermal << 8u;\n    \n    return vec2<u32>(\n        (voxel_a & mask_thermal) | new_thermal_bits,\n        (voxel_b & mask_thermal) | new_thermal_bits\n    );\n}",
+      "_full_shader": "struct VoxelState {\n    material_id: u32,\n    thermal_energy: u32,\n    kinetic_x: i32,\n    kinetic_y: i32,\n    phase_state: u32,\n    flags: u32,\n}\n\nconst MATERIAL_MASK: u32 = 0xFFu;\nconst THERMAL_MASK: u32 = 0xFFu;\nconst KINETIC_MASK: u32 = 0xFu;\nconst PHASE_MASK: u32 = 0xFu;\nconst FLAGS_MASK: u32 = 0xFu;\n\nfn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 operations for parallel processing\n    let fields = vec4<u32>(\n        state.material_id & MATERIAL_MASK,\n        (state.thermal_energy & THERMAL_MASK) << 8u,\n        ((u32(state.kinetic_x) & KINETIC_MASK) << 16u) | ((u32(state.kinetic_y) & KINETIC_MASK) << 20u),\n        ((state.phase_state & PHASE_MASK) << 24u) | ((state.flags & FLAGS_MASK) << 28u)\n    );\n    return fields.x | fields.y | fields.z | fields.w;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Parallel extraction using vec2 for kinetic components\n    let kinetic_raw = vec2<u32>(\n        (packed >> 16u) & KINETIC_MASK,\n        (packed >> 20u) & KINETIC_MASK\n    );\n    \n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> 8u) & THERMAL_MASK,\n        i32((kinetic_raw.x ^ 0x8u) - 0x8u),\n        i32((kinetic_raw.y ^ 0x8u) - 0x8u),\n        (packed >> 24u) & PHASE_MASK,\n        (packed >> 28u) & FLAGS_MASK\n    );\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Direct thermal extraction without full unpacking\n    let thermal_a = (voxel_a >> 8u) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> 8u) & THERMAL_MASK;\n    \n    // Simple diffusion: average the temperatures\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Mask out old thermal bits and insert new ones\n    let mask_thermal = ~(THERMAL_MASK << 8u);\n    let new_thermal_bits = avg_thermal << 8u;\n    \n    return vec2<u32>(\n        (voxel_a & mask_thermal) | new_thermal_bits,\n        (voxel_b & mask_thermal) | new_thermal_bits\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    let state = unpack_voxel(input[index]);\n    let repacked = pack_voxel(state);\n    output[index] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen19_3031",
+    "generation": 19,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "Optimized bitwise operations with vectorized packing and direct thermal exchange**",
+    "code_diff": "Optimized bitwise operations with vectorized packing and direct thermal exchange**",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:87:23\n   \u2502\n87 \u2502     return (u32(state.material_id) & 0xFFu) |\n   \u2502                       ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:43:51.858621",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & 0xFFu) |\n           ((u32(state.thermal) & 0xFFu) << 8u) |\n           ((u32(state.kinetic_x) & 0xFu) << 16u) |\n           ((u32(state.kinetic_y) & 0xFu) << 20u) |\n           ((u32(state.phase) & 0xFu) << 24u) |\n           ((u32(state.flags) & 0xFu) << 28u);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & 0xFFu);\n    state.thermal = u32((packed >> 8u) & 0xFFu);\n    \n    // Sign extend 4-bit kinetic values using XOR trick\n    let kx_raw = (packed >> 16u) & 0xFu;\n    let ky_raw = (packed >> 20u) & 0xFu;\n    state.kinetic_x = i32((kx_raw ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((ky_raw ^ 0x8u) - 0x8u);\n    \n    state.phase = u32((packed >> 24u) & 0xFu);\n    state.flags = u32((packed >> 28u) & 0xFu);\n    \n    return state;\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> 8u) & 0xFFu;\n    let thermal_b = (voxel_b >> 8u) & 0xFFu;\n    \n    if (thermal_a == thermal_b) {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let total_thermal = thermal_a + thermal_b;\n    let avg_thermal = total_thermal >> 1u;\n    let remainder = total_thermal & 1u;\n    \n    let new_thermal_a = avg_thermal + remainder;\n    let new_thermal_b = avg_thermal;\n    \n    let result_a = (voxel_a & 0xFFFF00FFu) | (new_thermal_a << 8u);\n    let result_b = (voxel_b & 0xFFFF00FFu) | (new_thermal_b << 8u);\n    \n    return vec2<u32>(result_a, result_b);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & 0xFFu) |\n           ((u32(state.thermal) & 0xFFu) << 8u) |\n           ((u32(state.kinetic_x) & 0xFu) << 16u) |\n           ((u32(state.kinetic_y) & 0xFu) << 20u) |\n           ((u32(state.phase) & 0xFu) << 24u) |\n           ((u32(state.flags) & 0xFu) << 28u);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & 0xFFu);\n    state.thermal = u32((packed >> 8u) & 0xFFu);\n    \n    // Sign extend 4-bit kinetic values using XOR trick\n    let kx_raw = (packed >> 16u) & 0xFu;\n    let ky_raw = (packed >> 20u) & 0xFu;\n    state.kinetic_x = i32((kx_raw ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((ky_raw ^ 0x8u) - 0x8u);\n    \n    state.phase = u32((packed >> 24u) & 0xFu);\n    state.flags = u32((packed >> 28u) & 0xFu);\n    \n    return state;\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> 8u) & 0xFFu;\n    let thermal_b = (voxel_b >> 8u) & 0xFFu;\n    \n    if (thermal_a == thermal_b) {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let total_thermal = thermal_a + thermal_b;\n    let avg_thermal = total_thermal >> 1u;\n    let remainder = total_thermal & 1u;\n    \n    let new_thermal_a = avg_thermal + remainder;\n    let new_thermal_b = avg_thermal;\n    \n    let result_a = (voxel_a & 0xFFFF00FFu) | (new_thermal_a << 8u);\n    let result_b = (voxel_b & 0xFFFF00FFu) | (new_thermal_b << 8u);\n    \n    return vec2<u32>(result_a, result_b);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    let state = unpack_voxel(input[index]);\n    let packed = pack_voxel(state);\n    output[index] = packed;\n}"
+    }
+  },
+  {
+    "id": "gen20_3043",
+    "generation": 20,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n    \u250c\u2500 wgsl:139:37\n    \u2502\n139 \u2502     let repacked = pack_voxel(state.material_id, state.thermal, state.kinetic_x, state.kinetic_y, state.phase, state.flags);\n    \u2502                                     ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:44:03.253153",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(material_id: u32, thermal: u32, kinetic_x: i32, kinetic_y: i32, phase: u32, flags: u32) -> u32 {\n    let kx_u32 = u32(kinetic_x) & KINETIC_X_MASK;\n    let ky_u32 = u32(kinetic_y) & KINETIC_Y_MASK;\n    return (material_id & MATERIAL_MASK) |\n           ((thermal & THERMAL_MASK) << THERMAL_SHIFT) |\n           (kx_u32 << KINETIC_X_SHIFT) |\n           (ky_u32 << KINETIC_Y_SHIFT) |\n           ((phase & PHASE_MASK) << PHASE_SHIFT) |\n           ((flags & FLAGS_MASK) << FLAGS_SHIFT);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    if thermal_a == thermal_b {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let avg = (thermal_a + thermal_b) >> 1u;\n    let thermal_mask_shifted = THERMAL_MASK << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (voxel_a & ~thermal_mask_shifted) | (avg << THERMAL_SHIFT),\n        (voxel_b & ~thermal_mask_shifted) | (avg << THERMAL_SHIFT)\n    );\n}",
+      "_full_shader": "fn pack_voxel(material_id: u32, thermal: u32, kinetic_x: i32, kinetic_y: i32, phase: u32, flags: u32) -> u32 {\n    let kx_u32 = u32(kinetic_x) & KINETIC_X_MASK;\n    let ky_u32 = u32(kinetic_y) & KINETIC_Y_MASK;\n    return (material_id & MATERIAL_MASK) |\n           ((thermal & THERMAL_MASK) << THERMAL_SHIFT) |\n           (kx_u32 << KINETIC_X_SHIFT) |\n           (ky_u32 << KINETIC_Y_SHIFT) |\n           ((phase & PHASE_MASK) << PHASE_SHIFT) |\n           ((flags & FLAGS_MASK) << FLAGS_SHIFT);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    if thermal_a == thermal_b {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let avg = (thermal_a + thermal_b) >> 1u;\n    let thermal_mask_shifted = THERMAL_MASK << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (voxel_a & ~thermal_mask_shifted) | (avg << THERMAL_SHIFT),\n        (voxel_b & ~thermal_mask_shifted) | (avg << THERMAL_SHIFT)\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if index >= arrayLength(&input) {\n        return;\n    }\n    \n    let packed = input[index];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(state.material_id, state.thermal, state.kinetic_x, state.kinetic_y, state.phase, state.flags);\n    output[index] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen21_3059",
+    "generation": 21,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: redefinition of `VoxelState`\n   \u250c\u2500 wgsl:71:8\n   \u2502\n71 \u2502 struct VoxelState {\n   \u2502        ^^^^^^^^^^ previous definition of `VoxelState`\n   \u00b7\n86 \u2502 struct VoxelState {\n   \u2502        ^^^^^^^^^^ redefinition of `VoxelState`\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:44:19.091236",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 to process multiple fields simultaneously\n    let low_fields = vec2<u32>(\n        state.material_id & MATERIAL_MASK,\n        (state.thermal & THERMAL_MASK) << THERMAL_SHIFT\n    );\n    let high_fields = vec2<u32>(\n        ((u32(state.kinetic_x) & KINETIC_MASK) << KINETIC_X_SHIFT) |\n        ((u32(state.kinetic_y) & KINETIC_MASK) << KINETIC_Y_SHIFT),\n        ((state.phase & PHASE_MASK) << PHASE_SHIFT) |\n        ((state.flags & FLAGS_MASK) << FLAGS_SHIFT)\n    );\n    \n    return low_fields.x | low_fields.y | high_fields.x | high_fields.y;\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Optimized unpacking with XOR sign extension for kinetic values\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_MASK;\n    \n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        i32((kx_raw ^ 0x8u) - 0x8u),  // XOR sign extension trick\n        i32((ky_raw ^ 0x8u) - 0x8u),  // XOR sign extension trick\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Direct bitwise thermal exchange without full unpack/repack\n    let thermal_a = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    // Simple averaging for thermal equilibrium\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Mask out thermal bits and insert new values\n    let mask_out_thermal = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let thermal_bits = avg_thermal << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (a & mask_out_thermal) | thermal_bits,\n        (b & mask_out_thermal) | thermal_bits\n    );\n}",
+      "_full_shader": "struct VoxelState {\n    material_id: u32,\n    thermal: u32,\n    kinetic_x: i32,\n    kinetic_y: i32,\n    phase: u32,\n    flags: u32,\n}\n\nconst MATERIAL_MASK: u32 = 0xFFu;\nconst THERMAL_MASK: u32 = 0xFFu;\nconst KINETIC_MASK: u32 = 0xFu;\nconst PHASE_MASK: u32 = 0xFu;\nconst FLAGS_MASK: u32 = 0xFu;\n\nconst THERMAL_SHIFT: u32 = 8u;\nconst KINETIC_X_SHIFT: u32 = 16u;\nconst KINETIC_Y_SHIFT: u32 = 20u;\nconst PHASE_SHIFT: u32 = 24u;\nconst FLAGS_SHIFT: u32 = 28u;\n\nfn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 to process multiple fields simultaneously\n    let low_fields = vec2<u32>(\n        state.material_id & MATERIAL_MASK,\n        (state.thermal & THERMAL_MASK) << THERMAL_SHIFT\n    );\n    let high_fields = vec2<u32>(\n        ((u32(state.kinetic_x) & KINETIC_MASK) << KINETIC_X_SHIFT) |\n        ((u32(state.kinetic_y) & KINETIC_MASK) << KINETIC_Y_SHIFT),\n        ((state.phase & PHASE_MASK) << PHASE_SHIFT) |\n        ((state.flags & FLAGS_MASK) << FLAGS_SHIFT)\n    );\n    \n    return low_fields.x | low_fields.y | high_fields.x | high_fields.y;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Optimized unpacking with XOR sign extension for kinetic values\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_MASK;\n    \n    return VoxelState(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        i32((kx_raw ^ 0x8u) - 0x8u),  // XOR sign extension trick\n        i32((ky_raw ^ 0x8u) - 0x8u),  // XOR sign extension trick\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Direct bitwise thermal exchange without full unpack/repack\n    let thermal_a = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    // Simple averaging for thermal equilibrium\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Mask out thermal bits and insert new values\n    let mask_out_thermal = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let thermal_bits = avg_thermal << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (a & mask_out_thermal) | thermal_bits,\n        (b & mask_out_thermal) | thermal_bits\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    let state = unpack_voxel(input[index]);\n    let repacked = pack_voxel(state);\n    output[index] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen22_3071",
+    "generation": 22,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "Streamlined bitwise operations with vectorized thermal exchange and minimal branching**",
+    "code_diff": "Streamlined bitwise operations with vectorized thermal exchange and minimal branching**",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:90:23\n   \u2502\n90 \u2502     return (u32(state.material_id) & MATERIAL_MASK) |\n   \u2502                       ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:44:31.826180",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    let kx_bits = u32(state.kinetic_x) & KINETIC_X_MASK;\n    let ky_bits = u32(state.kinetic_y) & KINETIC_Y_MASK;\n    \n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           (kx_bits << KINETIC_X_SHIFT) |\n           (ky_bits << KINETIC_Y_SHIFT) |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    let diff = i32(thermal_a) - i32(thermal_b);\n    let exchange = u32(max(0, min(abs(diff) / 4, i32(min(thermal_a, thermal_b)))));\n    \n    let new_a = select(thermal_a - exchange, thermal_a + exchange, diff < 0);\n    let new_b = select(thermal_b + exchange, thermal_b - exchange, diff < 0);\n    \n    let mask_out = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let result_a = (voxel_a & mask_out) | (new_a << THERMAL_SHIFT);\n    let result_b = (voxel_b & mask_out) | (new_b << THERMAL_SHIFT);\n    \n    return vec2<u32>(result_a, result_b);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    let kx_bits = u32(state.kinetic_x) & KINETIC_X_MASK;\n    let ky_bits = u32(state.kinetic_y) & KINETIC_Y_MASK;\n    \n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           (kx_bits << KINETIC_X_SHIFT) |\n           (ky_bits << KINETIC_Y_SHIFT) |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    let diff = i32(thermal_a) - i32(thermal_b);\n    let exchange = u32(max(0, min(abs(diff) / 4, i32(min(thermal_a, thermal_b)))));\n    \n    let new_a = select(thermal_a - exchange, thermal_a + exchange, diff < 0);\n    let new_b = select(thermal_b + exchange, thermal_b - exchange, diff < 0);\n    \n    let mask_out = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let result_a = (voxel_a & mask_out) | (new_a << THERMAL_SHIFT);\n    let result_b = (voxel_b & mask_out) | (new_b << THERMAL_SHIFT);\n    \n    return vec2<u32>(result_a, result_b);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    let packed = input[index];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(state);\n    output[index] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen23_3086",
+    "generation": 23,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:88:48\n   \u2502\n88 \u2502     let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK,\n   \u2502                                                ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:44:46.680404",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing: combine related fields in vec2 operations\n    let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK, \n                                   (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT);\n    let kinetic_xy = vec2<u32>((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n                              (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT);\n    let phase_flags = vec2<u32>((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT,\n                               (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    // Reduce to scalar with vectorized OR reduction\n    return (material_thermal.x | material_thermal.y) | (kinetic_xy.x | kinetic_xy.y) | (phase_flags.x | phase_flags.y);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Vectorized extraction: extract multiple fields in parallel\n    let raw_fields = vec4<u32>(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK,\n        (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK\n    );\n    \n    let phase_flags = vec2<u32>(\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n    \n    // XOR sign extension for kinetic fields in parallel\n    let kinetic_signed = vec2<i32>(\n        i32((raw_fields.z ^ 0x8u) - 0x8u),\n        i32((raw_fields.w ^ 0x8u) - 0x8u)\n    );\n    \n    return VoxelState(\n        u32(raw_fields.x),\n        u32(raw_fields.y),\n        kinetic_signed.x,\n        kinetic_signed.y,\n        u32(phase_flags.x),\n        u32(phase_flags.y)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Extract thermal fields with vectorized shift-mask operations\n    let thermals = vec2<u32>(\n        (a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Compute exchange with vectorized arithmetic\n    let sum = thermals.x + thermals.y;\n    let avg = sum >> 1u;\n    let remainder = sum & 1u;\n    \n    // Distribute remainder to higher temperature voxel\n    let new_thermals = vec2<u32>(\n        avg + select(0u, remainder, thermals.x >= thermals.y),\n        avg + select(remainder, 0u, thermals.x >= thermals.y)\n    );\n    \n    // Mask out old thermal and OR in new values\n    let masked_voxels = vec2<u32>(a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                                  b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return masked_voxels | (new_thermals << THERMAL_SHIFT);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing: combine related fields in vec2 operations\n    let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK, \n                                   (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT);\n    let kinetic_xy = vec2<u32>((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n                              (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT);\n    let phase_flags = vec2<u32>((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT,\n                               (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    // Reduce to scalar with vectorized OR reduction\n    return (material_thermal.x | material_thermal.y) | (kinetic_xy.x | kinetic_xy.y) | (phase_flags.x | phase_flags.y);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Vectorized extraction: extract multiple fields in parallel\n    let raw_fields = vec4<u32>(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK,\n        (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK,\n        (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK\n    );\n    \n    let phase_flags = vec2<u32>(\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n    \n    // XOR sign extension for kinetic fields in parallel\n    let kinetic_signed = vec2<i32>(\n        i32((raw_fields.z ^ 0x8u) - 0x8u),\n        i32((raw_fields.w ^ 0x8u) - 0x8u)\n    );\n    \n    return VoxelState(\n        u32(raw_fields.x),\n        u32(raw_fields.y),\n        kinetic_signed.x,\n        kinetic_signed.y,\n        u32(phase_flags.x),\n        u32(phase_flags.y)\n    );\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Extract thermal fields with vectorized shift-mask operations\n    let thermals = vec2<u32>(\n        (a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Compute exchange with vectorized arithmetic\n    let sum = thermals.x + thermals.y;\n    let avg = sum >> 1u;\n    let remainder = sum & 1u;\n    \n    // Distribute remainder to higher temperature voxel\n    let new_thermals = vec2<u32>(\n        avg + select(0u, remainder, thermals.x >= thermals.y),\n        avg + select(remainder, 0u, thermals.x >= thermals.y)\n    );\n    \n    // Mask out old thermal and OR in new values\n    let masked_voxels = vec2<u32>(a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                                  b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return masked_voxels | (new_thermals << THERMAL_SHIFT);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    if (gid.x >= arrayLength(&input)) { return; }\n    \n    let state = unpack_voxel(input[gid.x]);\n    let repacked = pack_voxel(state);\n    output[gid.x] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen24_3100",
+    "generation": 24,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "Vectorized bit operations with minimal branching for maximum throughput**",
+    "code_diff": "Vectorized bit operations with minimal branching for maximum throughput**",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:89:19\n   \u2502\n89 \u2502         u32(state.material_id) & MATERIAL_MASK,\n   \u2502                   ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:45:00.149324",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Use vec4 for parallel packing of multiple fields\n    let fields = vec4<u32>(\n        u32(state.material_id) & MATERIAL_MASK,\n        (u32(state.thermal_energy) & THERMAL_MASK) << THERMAL_SHIFT,\n        (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n        (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT\n    );\n    \n    // Combine phase and flags in a single operation\n    let phase_flags = ((u32(state.phase_state) & PHASE_MASK) << PHASE_SHIFT) |\n                     ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    return fields.x | fields.y | fields.z | fields.w | phase_flags;\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Extract all fields using vec4 for parallel operations\n    let shifts = vec4<u32>(0u, THERMAL_SHIFT, KINETIC_X_SHIFT, KINETIC_Y_SHIFT);\n    let masks = vec4<u32>(MATERIAL_MASK, THERMAL_MASK, KINETIC_X_MASK, KINETIC_Y_MASK);\n    let shifted = vec4<u32>(packed) >> shifts;\n    let masked = shifted & masks;\n    \n    // Sign extension for kinetic components using XOR trick\n    let kx_raw = masked.z;\n    let ky_raw = masked.w;\n    \n    return VoxelState(\n        u32(masked.x),\n        u32(masked.y),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Extract thermal values using vec2 for parallel operations\n    let thermal_vec = vec2<u32>(\n        (a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate average without branching\n    let sum = thermal_vec.x + thermal_vec.y;\n    let avg = sum >> 1u;\n    let remainder = sum & 1u;\n    \n    // Distribute remainder to first voxel\n    let new_thermal = vec2<u32>(avg + remainder, avg);\n    \n    // Clear old thermal and insert new values\n    let cleared = vec2<u32>(a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                           b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return cleared | (new_thermal << THERMAL_SHIFT);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Use vec4 for parallel packing of multiple fields\n    let fields = vec4<u32>(\n        u32(state.material_id) & MATERIAL_MASK,\n        (u32(state.thermal_energy) & THERMAL_MASK) << THERMAL_SHIFT,\n        (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n        (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT\n    );\n    \n    // Combine phase and flags in a single operation\n    let phase_flags = ((u32(state.phase_state) & PHASE_MASK) << PHASE_SHIFT) |\n                     ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    return fields.x | fields.y | fields.z | fields.w | phase_flags;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Extract all fields using vec4 for parallel operations\n    let shifts = vec4<u32>(0u, THERMAL_SHIFT, KINETIC_X_SHIFT, KINETIC_Y_SHIFT);\n    let masks = vec4<u32>(MATERIAL_MASK, THERMAL_MASK, KINETIC_X_MASK, KINETIC_Y_MASK);\n    let shifted = vec4<u32>(packed) >> shifts;\n    let masked = shifted & masks;\n    \n    // Sign extension for kinetic components using XOR trick\n    let kx_raw = masked.z;\n    let ky_raw = masked.w;\n    \n    return VoxelState(\n        u32(masked.x),\n        u32(masked.y),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Extract thermal values using vec2 for parallel operations\n    let thermal_vec = vec2<u32>(\n        (a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate average without branching\n    let sum = thermal_vec.x + thermal_vec.y;\n    let avg = sum >> 1u;\n    let remainder = sum & 1u;\n    \n    // Distribute remainder to first voxel\n    let new_thermal = vec2<u32>(avg + remainder, avg);\n    \n    // Clear old thermal and insert new values\n    let cleared = vec2<u32>(a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                           b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return cleared | (new_thermal << THERMAL_SHIFT);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    // Simple roundtrip test\n    let state = unpack_voxel(input[index]);\n    output[index] = pack_voxel(state);\n}"
+    }
+  },
+  {
+    "id": "gen25_3113",
+    "generation": 25,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "Direct bitwise operations with vectorized packing and optimized thermal exchange using proper WGSL types**",
+    "code_diff": "Direct bitwise operations with vectorized packing and optimized thermal exchange using proper WGSL types**",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:87:23\n   \u2502\n87 \u2502     return (u32(state.material_id) & 0xFFu) |\n   \u2502                       ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:45:13.368757",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & 0xFFu) |\n           ((u32(state.thermal_energy) & 0xFFu) << 8u) |\n           ((u32(state.kinetic_x) & 0xFu) << 16u) |\n           ((u32(state.kinetic_y) & 0xFu) << 20u) |\n           ((u32(state.phase_state) & 0xFu) << 24u) |\n           ((u32(state.flags) & 0xFu) << 28u);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & 0xFFu);\n    state.thermal_energy = u32((packed >> 8u) & 0xFFu);\n    state.kinetic_x = i32((packed >> 16u) & 0xFu);\n    state.kinetic_y = i32((packed >> 20u) & 0xFu);\n    state.phase_state = u32((packed >> 24u) & 0xFu);\n    state.flags = u32((packed >> 28u) & 0xFu);\n    \n    // Apply two's complement sign extension for kinetic values\n    if (state.kinetic_x >= 8) {\n        state.kinetic_x = state.kinetic_x - 16;\n    }\n    if (state.kinetic_y >= 8) {\n        state.kinetic_y = state.kinetic_y - 16;\n    }\n    \n    return state;\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> 8u) & 0xFFu;\n    let thermal_b = (voxel_b >> 8u) & 0xFFu;\n    \n    if (thermal_a == thermal_b) {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    let mask_thermal = ~(0xFFu << 8u);\n    let new_a = (voxel_a & mask_thermal) | (avg_thermal << 8u);\n    let new_b = (voxel_b & mask_thermal) | (avg_thermal << 8u);\n    \n    return vec2<u32>(new_a, new_b);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & 0xFFu) |\n           ((u32(state.thermal_energy) & 0xFFu) << 8u) |\n           ((u32(state.kinetic_x) & 0xFu) << 16u) |\n           ((u32(state.kinetic_y) & 0xFu) << 20u) |\n           ((u32(state.phase_state) & 0xFu) << 24u) |\n           ((u32(state.flags) & 0xFu) << 28u);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & 0xFFu);\n    state.thermal_energy = u32((packed >> 8u) & 0xFFu);\n    state.kinetic_x = i32((packed >> 16u) & 0xFu);\n    state.kinetic_y = i32((packed >> 20u) & 0xFu);\n    state.phase_state = u32((packed >> 24u) & 0xFu);\n    state.flags = u32((packed >> 28u) & 0xFu);\n    \n    // Apply two's complement sign extension for kinetic values\n    if (state.kinetic_x >= 8) {\n        state.kinetic_x = state.kinetic_x - 16;\n    }\n    if (state.kinetic_y >= 8) {\n        state.kinetic_y = state.kinetic_y - 16;\n    }\n    \n    return state;\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> 8u) & 0xFFu;\n    let thermal_b = (voxel_b >> 8u) & 0xFFu;\n    \n    if (thermal_a == thermal_b) {\n        return vec2<u32>(voxel_a, voxel_b);\n    }\n    \n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    let mask_thermal = ~(0xFFu << 8u);\n    let new_a = (voxel_a & mask_thermal) | (avg_thermal << 8u);\n    let new_b = (voxel_b & mask_thermal) | (avg_thermal << 8u);\n    \n    return vec2<u32>(new_a, new_b);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    if (gid.x >= arrayLength(&input)) { return; }\n    \n    let state = unpack_voxel(input[gid.x]);\n    output[gid.x] = pack_voxel(state);\n}"
+    }
+  },
+  {
+    "id": "gen26_3128",
+    "generation": 26,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:88:48\n   \u2502\n88 \u2502     let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK, (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT);\n   \u2502                                                ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:45:28.342557",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 to process multiple fields simultaneously\n    let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK, (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT);\n    let kinetic_xy = vec2<u32>((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT, (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT);\n    let phase_flags = vec2<u32>((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT, (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    return material_thermal.x | material_thermal.y | kinetic_xy.x | kinetic_xy.y | phase_flags.x | phase_flags.y;\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Optimized unpacking with minimal operations and XOR sign extension trick\n    let kinetic_x_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let kinetic_y_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kinetic_x_raw ^ 0x8u) - 0x8u), // XOR sign extension for 4-bit two's complement\n        i32((kinetic_y_raw ^ 0x8u) - 0x8u), // XOR sign extension for 4-bit two's complement\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Direct bitwise thermal exchange without full unpack/repack\n    let thermal_a = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    // Simple thermal diffusion: average the temperatures\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Clear thermal bits and set new values using bitwise operations\n    let mask_clear = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let new_thermal = avg_thermal << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (a & mask_clear) | new_thermal,\n        (b & mask_clear) | new_thermal\n    );\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Vectorized packing using vec4 to process multiple fields simultaneously\n    let material_thermal = vec2<u32>(u32(state.material_id) & MATERIAL_MASK, (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT);\n    let kinetic_xy = vec2<u32>((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT, (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT);\n    let phase_flags = vec2<u32>((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT, (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n    \n    return material_thermal.x | material_thermal.y | kinetic_xy.x | kinetic_xy.y | phase_flags.x | phase_flags.y;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Optimized unpacking with minimal operations and XOR sign extension trick\n    let kinetic_x_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let kinetic_y_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kinetic_x_raw ^ 0x8u) - 0x8u), // XOR sign extension for 4-bit two's complement\n        i32((kinetic_y_raw ^ 0x8u) - 0x8u), // XOR sign extension for 4-bit two's complement\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}\n\nfn exchange_thermal(a: u32, b: u32) -> vec2<u32> {\n    // Direct bitwise thermal exchange without full unpack/repack\n    let thermal_a = (a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    // Simple thermal diffusion: average the temperatures\n    let avg_thermal = (thermal_a + thermal_b) >> 1u;\n    \n    // Clear thermal bits and set new values using bitwise operations\n    let mask_clear = ~(THERMAL_MASK << THERMAL_SHIFT);\n    let new_thermal = avg_thermal << THERMAL_SHIFT;\n    \n    return vec2<u32>(\n        (a & mask_clear) | new_thermal,\n        (b & mask_clear) | new_thermal\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let index = gid.x;\n    if (index >= arrayLength(&input)) {\n        return;\n    }\n    \n    let state = unpack_voxel(input[index]);\n    let repacked = pack_voxel(state);\n    output[index] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen27_3143",
+    "generation": 27,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "Vectorized bit operations with vec2 packing and optimized thermal exchange using proper field access**",
+    "code_diff": "Vectorized bit operations with vec2 packing and optimized thermal exchange using proper field access**",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader validation error: Function [2] 'exchange_thermal' is invalid\n    \u250c\u2500 :132:1\n    \u2502\n132 \u2502 \u256d fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n133 \u2502 \u2502     // Extract thermal values using vectorized operations\n134 \u2502 \u2502     let thermals = vec2<u32>(\n135 \u2502 \u2502         (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK,\n    \u00b7 \u2502\n153 \u2502 \u2502\n154 \u2502 \u2502     return masks | (new_thermals << THERMAL_SHIFT);\n    \u2502 \u2502                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ naga::ir::Expression [42]\n    \u2502 \u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500^ naga::ir::Function [2]\n    \u2502\n    = Expression [42] is invalid\n    = Operation ShiftLeft can't work with [35] (of type Vector { size: Bi, scalar: Scalar { kind: Uint, width: 4 } }) and [41] (of type Scalar(Scalar { kind: Uint, width: 4 }))\n\n\n      Expression [42] is invalid\n        Operation ShiftLeft can't work with [35] (of type Vector { size: Bi, scalar: Scalar { kind: Uint, width: 4 } }) and [41] (of type Scalar(Scalar { kind: Uint, width: 4 }))",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:45:43.569727",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Pack using vectorized operations for better throughput\n    let material_thermal = vec2<u32>(\n        u32(state.material) & MATERIAL_MASK,\n        (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT\n    );\n    let kinetic_phase = vec2<u32>(\n        (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n        (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT\n    );\n    let phase_flags = vec2<u32>(\n        (u32(state.phase) & PHASE_MASK) << PHASE_SHIFT,\n        (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT\n    );\n    \n    return material_thermal.x | material_thermal.y | \n           kinetic_phase.x | kinetic_phase.y |\n           phase_flags.x | phase_flags.y;\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    // Extract fields using vectorized shifts for parallel processing\n    let low_fields = vec2<u32>(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    let kinetic_fields = vec2<u32>(\n        (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK,\n        (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK\n    );\n    let high_fields = vec2<u32>(\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n    \n    // Sign extend kinetics using XOR trick\n    return VoxelState(\n        u32(low_fields.x),\n        u32(low_fields.y),\n        i32((kinetic_fields.x ^ 0x8u) - 0x8u),\n        i32((kinetic_fields.y ^ 0x8u) - 0x8u),\n        u32(high_fields.x),\n        u32(high_fields.y)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Extract thermal values using vectorized operations\n    let thermals = vec2<u32>(\n        (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate exchange amount (1/8th of difference)\n    let diff = i32(thermals.x) - i32(thermals.y);\n    let exchange = abs(diff) >> 3u;\n    \n    // Determine direction and apply exchange\n    let new_thermals = select(\n        vec2<u32>(thermals.x - u32(exchange), thermals.y + u32(exchange)),\n        vec2<u32>(thermals.x + u32(exchange), thermals.y - u32(exchange)),\n        diff > 0\n    );\n    \n    // Repack with preserved non-thermal bits\n    let masks = vec2<u32>(voxel_a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                         voxel_b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return masks | (new_thermals << THERMAL_SHIFT);\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    // Pack using vectorized operations for better throughput\n    let material_thermal = vec2<u32>(\n        u32(state.material) & MATERIAL_MASK,\n        (u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT\n    );\n    let kinetic_phase = vec2<u32>(\n        (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT,\n        (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT\n    );\n    let phase_flags = vec2<u32>(\n        (u32(state.phase) & PHASE_MASK) << PHASE_SHIFT,\n        (u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT\n    );\n    \n    return material_thermal.x | material_thermal.y | \n           kinetic_phase.x | kinetic_phase.y |\n           phase_flags.x | phase_flags.y;\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    // Extract fields using vectorized shifts for parallel processing\n    let low_fields = vec2<u32>(\n        packed & MATERIAL_MASK,\n        (packed >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    let kinetic_fields = vec2<u32>(\n        (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK,\n        (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK\n    );\n    let high_fields = vec2<u32>(\n        (packed >> PHASE_SHIFT) & PHASE_MASK,\n        (packed >> FLAGS_SHIFT) & FLAGS_MASK\n    );\n    \n    // Sign extend kinetics using XOR trick\n    return VoxelState(\n        u32(low_fields.x),\n        u32(low_fields.y),\n        i32((kinetic_fields.x ^ 0x8u) - 0x8u),\n        i32((kinetic_fields.y ^ 0x8u) - 0x8u),\n        u32(high_fields.x),\n        u32(high_fields.y)\n    );\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Extract thermal values using vectorized operations\n    let thermals = vec2<u32>(\n        (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate exchange amount (1/8th of difference)\n    let diff = i32(thermals.x) - i32(thermals.y);\n    let exchange = abs(diff) >> 3u;\n    \n    // Determine direction and apply exchange\n    let new_thermals = select(\n        vec2<u32>(thermals.x - u32(exchange), thermals.y + u32(exchange)),\n        vec2<u32>(thermals.x + u32(exchange), thermals.y - u32(exchange)),\n        diff > 0\n    );\n    \n    // Repack with preserved non-thermal bits\n    let masks = vec2<u32>(voxel_a & ~(THERMAL_MASK << THERMAL_SHIFT), \n                         voxel_b & ~(THERMAL_MASK << THERMAL_SHIFT));\n    \n    return masks | (new_thermals << THERMAL_SHIFT);\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    if (gid.x >= arrayLength(&input)) { return; }\n    \n    let state = unpack_voxel(input[gid.x]);\n    output[gid.x] = pack_voxel(state);\n}"
+    }
+  },
+  {
+    "id": "gen28_3156",
+    "generation": 28,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:90:23\n   \u2502\n90 \u2502     return (u32(state.material_id) & MATERIAL_MASK) |\n   \u2502                       ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:45:56.313429",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    let kx_packed = (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT;\n    let ky_packed = (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT;\n    \n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           kx_packed |\n           ky_packed |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    let diff = thermal_a - thermal_b;\n    let exchange = diff >> 2u;\n    \n    let new_thermal_a = thermal_a - exchange;\n    let new_thermal_b = thermal_b + exchange;\n    \n    let mask_no_thermal = ~(THERMAL_MASK << THERMAL_SHIFT);\n    \n    return vec2<u32>(\n        (voxel_a & mask_no_thermal) | (new_thermal_a << THERMAL_SHIFT),\n        (voxel_b & mask_no_thermal) | (new_thermal_b << THERMAL_SHIFT)\n    );\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    let kx_packed = (u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT;\n    let ky_packed = (u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT;\n    \n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           kx_packed |\n           ky_packed |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    let kx_raw = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let ky_raw = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    \n    return VoxelState(\n        u32(packed & MATERIAL_MASK),\n        u32((packed >> THERMAL_SHIFT) & THERMAL_MASK),\n        i32((kx_raw ^ 0x8u) - 0x8u),\n        i32((ky_raw ^ 0x8u) - 0x8u),\n        u32((packed >> PHASE_SHIFT) & PHASE_MASK),\n        u32((packed >> FLAGS_SHIFT) & FLAGS_MASK)\n    );\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    let thermal_a = (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK;\n    let thermal_b = (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK;\n    \n    let diff = thermal_a - thermal_b;\n    let exchange = diff >> 2u;\n    \n    let new_thermal_a = thermal_a - exchange;\n    let new_thermal_b = thermal_b + exchange;\n    \n    let mask_no_thermal = ~(THERMAL_MASK << THERMAL_SHIFT);\n    \n    return vec2<u32>(\n        (voxel_a & mask_no_thermal) | (new_thermal_a << THERMAL_SHIFT),\n        (voxel_b & mask_no_thermal) | (new_thermal_b << THERMAL_SHIFT)\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let idx = gid.x;\n    if (idx >= arrayLength(&input)) { return; }\n    \n    let voxel = input[idx];\n    let state = unpack_voxel(voxel);\n    let repacked = pack_voxel(state);\n    \n    output[idx] = repacked;\n}"
+    }
+  },
+  {
+    "id": "gen29_3169",
+    "generation": 29,
+    "parent_ids": [
+      "seed_seed_branchless",
+      "seed_seed_basic",
+      "seed_seed_vectorized"
+    ],
+    "mutation_description": "LLM-generated WGSL variant",
+    "code_diff": "LLM-generated WGSL variant",
+    "fitness": {
+      "roundtrip_errors": 1048576,
+      "cycle_time_us": Infinity,
+      "total_time_ms": Infinity,
+      "diverged": true,
+      "error": "Validation Error\n\nCaused by:\n  In wgpuDeviceCreateShaderModule\n\nShader '' parsing error: invalid field accessor `material_id`\n   \u250c\u2500 wgsl:87:23\n   \u2502\n87 \u2502     return (u32(state.material_id) & MATERIAL_MASK) |\n   \u2502                       ^^^^^^^^^^^ invalid accessor\n\n",
+      "disqualified": true,
+      "disqualification_reason": "Shader compilation or pipeline creation failed"
+    },
+    "phase": "1a",
+    "created_at": "2026-04-03T03:46:09.318718",
+    "evolvable_code": {
+      "pack_voxel": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           ((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT) |\n           ((u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT) |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}",
+      "unpack_voxel": "fn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & MATERIAL_MASK);\n    state.thermal = u32((packed >> THERMAL_SHIFT) & THERMAL_MASK);\n    \n    // Sign extension for kinetic values using XOR trick\n    let raw_kx = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let raw_ky = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    state.kinetic_x = i32((raw_kx ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((raw_ky ^ 0x8u) - 0x8u);\n    \n    state.phase = u32((packed >> PHASE_SHIFT) & PHASE_MASK);\n    state.flags = u32((packed >> FLAGS_SHIFT) & FLAGS_MASK);\n    return state;\n}",
+      "exchange_thermal": "fn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Extract thermal values using vectorized operations\n    let thermal_vec = vec2<u32>(\n        (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate average and exchange amount\n    let avg_thermal = (thermal_vec.x + thermal_vec.y) >> 1u;\n    let exchange_amount = max(thermal_vec.x, thermal_vec.y) - avg_thermal;\n    \n    // Apply thermal exchange with minimal branching\n    let new_thermal_a = thermal_vec.x - min(exchange_amount, thermal_vec.x - avg_thermal);\n    let new_thermal_b = thermal_vec.y - min(exchange_amount, thermal_vec.y - avg_thermal);\n    \n    // Clear old thermal bits and pack new values\n    let clear_mask = ~(THERMAL_MASK << THERMAL_SHIFT);\n    return vec2<u32>(\n        (voxel_a & clear_mask) | (new_thermal_a << THERMAL_SHIFT),\n        (voxel_b & clear_mask) | (new_thermal_b << THERMAL_SHIFT)\n    );\n}",
+      "_full_shader": "fn pack_voxel(state: VoxelState) -> u32 {\n    return (u32(state.material_id) & MATERIAL_MASK) |\n           ((u32(state.thermal) & THERMAL_MASK) << THERMAL_SHIFT) |\n           ((u32(state.kinetic_x) & KINETIC_X_MASK) << KINETIC_X_SHIFT) |\n           ((u32(state.kinetic_y) & KINETIC_Y_MASK) << KINETIC_Y_SHIFT) |\n           ((u32(state.phase) & PHASE_MASK) << PHASE_SHIFT) |\n           ((u32(state.flags) & FLAGS_MASK) << FLAGS_SHIFT);\n}\n\nfn unpack_voxel(packed: u32) -> VoxelState {\n    var state: VoxelState;\n    state.material_id = u32(packed & MATERIAL_MASK);\n    state.thermal = u32((packed >> THERMAL_SHIFT) & THERMAL_MASK);\n    \n    // Sign extension for kinetic values using XOR trick\n    let raw_kx = (packed >> KINETIC_X_SHIFT) & KINETIC_X_MASK;\n    let raw_ky = (packed >> KINETIC_Y_SHIFT) & KINETIC_Y_MASK;\n    state.kinetic_x = i32((raw_kx ^ 0x8u) - 0x8u);\n    state.kinetic_y = i32((raw_ky ^ 0x8u) - 0x8u);\n    \n    state.phase = u32((packed >> PHASE_SHIFT) & PHASE_MASK);\n    state.flags = u32((packed >> FLAGS_SHIFT) & FLAGS_MASK);\n    return state;\n}\n\nfn exchange_thermal(voxel_a: u32, voxel_b: u32) -> vec2<u32> {\n    // Extract thermal values using vectorized operations\n    let thermal_vec = vec2<u32>(\n        (voxel_a >> THERMAL_SHIFT) & THERMAL_MASK,\n        (voxel_b >> THERMAL_SHIFT) & THERMAL_MASK\n    );\n    \n    // Calculate average and exchange amount\n    let avg_thermal = (thermal_vec.x + thermal_vec.y) >> 1u;\n    let exchange_amount = max(thermal_vec.x, thermal_vec.y) - avg_thermal;\n    \n    // Apply thermal exchange with minimal branching\n    let new_thermal_a = thermal_vec.x - min(exchange_amount, thermal_vec.x - avg_thermal);\n    let new_thermal_b = thermal_vec.y - min(exchange_amount, thermal_vec.y - avg_thermal);\n    \n    // Clear old thermal bits and pack new values\n    let clear_mask = ~(THERMAL_MASK << THERMAL_SHIFT);\n    return vec2<u32>(\n        (voxel_a & clear_mask) | (new_thermal_a << THERMAL_SHIFT),\n        (voxel_b & clear_mask) | (new_thermal_b << THERMAL_SHIFT)\n    );\n}\n\n@group(0) @binding(0) var<storage, read> input: array<u32>;\n@group(0) @binding(1) var<storage, read_write> output: array<u32>;\n\n@compute @workgroup_size(64)\nfn main(@builtin(global_invocation_id) gid: vec3<u32>) {\n    let idx = gid.x;\n    if (idx >= arrayLength(&input)) { return; }\n    \n    let packed = input[idx];\n    let state = unpack_voxel(packed);\n    let repacked = pack_voxel(state);\n    output[idx] = repacked;\n}"
+    }
+  }
+]
