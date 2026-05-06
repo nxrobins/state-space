@@ -33,9 +33,9 @@ fn should_swap(upper: u32, lower: u32) -> bool {
     let upper_mat = get_material(upper);
     let lower_mat = get_material(lower);
     let upper_phase = get_phase(upper);
-    let lower_phase = get_phase(lower);
 
-    if (!can_move(upper_mat, upper_phase) && !can_move(lower_mat, lower_phase)) {
+    // Immovable structural solids can support air and movable materials.
+    if (!can_move(upper_mat, upper_phase)) {
         return false;
     }
 

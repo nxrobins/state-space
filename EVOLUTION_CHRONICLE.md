@@ -502,3 +502,33 @@ instead of `y * 256 + x` — reading wrong cells. Fixed by matching constants.
 - Total voxel count preserved
 - Thermal drift under 1%
 - Deterministic replay
+
+---
+
+## Phase 1: Engine Invariant Harness
+
+**Date:** 2026-05-06
+**Status:** ACTIVE BASELINE
+
+### Changes
+- Added `ENGINE_INVARIANTS.md` as the core contract for determinism, voxel count,
+  material accounting, phase-transition accounting, combustion accounting, and
+  grid-size correctness.
+- Added `test_invariants.py`, a composed-engine scenario suite covering
+  structural solids, sand/water movement, nonreactive conservation, oxygen-gated
+  combustion, and one-to-one phase transitions.
+- Tightened gravity so only movable source voxels may swap downward. Stone,
+  metal, glass, and cold wood now behave as fixed structural supports unless a
+  later phase explicitly rewrites them.
+- Synced the browser gravity shader and generated shader bundle to the locked
+  engine gravity kernel.
+
+### Validation
+`python test_invariants.py` passes 10 invariant scenarios:
+- Structural solids remain fixed.
+- Sand and water settle while preserving material counts.
+- Smoke and mixed nonreactive materials preserve exact counts.
+- Sealed hot wood cannot burn without adjacent air.
+- Exposed hot wood consumes exactly one fuel voxel and one air voxel.
+- Ice, water, and sand phase transitions rewrite exactly one voxel into the
+  expected material.
