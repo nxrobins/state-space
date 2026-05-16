@@ -1,0 +1,610 @@
+:root {
+  --ink: #edf4f7;
+  --muted: #b8c6cf;
+  --panel: rgba(9, 13, 17, 0.78);
+  --panel-strong: rgba(7, 10, 14, 0.9);
+  --line: rgba(213, 235, 245, 0.18);
+  --line-strong: rgba(213, 235, 245, 0.34);
+  --water: #54c7ff;
+  --earth: #d0ad6d;
+  --fire: #ff7848;
+  --meter: #74f3d0;
+  --danger: #ff5b4a;
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #080b0f;
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#app {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 320px;
+  background:
+    linear-gradient(180deg, rgba(84, 199, 255, 0.06), transparent 30%),
+    #080b0f;
+}
+
+#game-root {
+  width: min(100vw, 177.78vh);
+  height: min(56.25vw, 100vh);
+  background: #171a1e;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+#game-root canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+#hud {
+  position: absolute;
+  inset: 12px 16px auto;
+  display: grid;
+  grid-template-columns: minmax(210px, 1fr) minmax(260px, auto) minmax(210px, 1fr);
+  grid-template-areas: "p1 center cpu";
+  gap: 12px;
+  align-items: start;
+  pointer-events: none;
+  text-shadow: 0 1px 1px #000;
+}
+
+.fighter-panel,
+.center-panel,
+#recovery-banner,
+#utility-tray,
+#help-drawer,
+#debug-overlay {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+}
+
+.fighter-panel {
+  min-width: 0;
+  padding: 8px;
+}
+
+.fighter-panel--p1 {
+  grid-area: p1;
+  border-left-color: rgba(84, 199, 255, 0.62);
+}
+
+.fighter-panel--cpu {
+  grid-area: cpu;
+  border-right-color: rgba(255, 120, 72, 0.62);
+  text-align: right;
+}
+
+.fighter-panel--cpu .row {
+  justify-content: flex-end;
+}
+
+.fighter-name {
+  margin-bottom: 6px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar {
+  width: 100%;
+  height: 10px;
+  margin: 4px 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.44);
+}
+
+.bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #2fd076, #e7cf5e);
+}
+
+.bar--meter {
+  height: 8px;
+}
+
+.bar--meter span {
+  background: linear-gradient(90deg, #3579ff, var(--meter));
+}
+
+.row {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.state-chip {
+  padding: 1px 6px;
+  border: 1px solid rgba(213, 235, 245, 0.24);
+  border-radius: 999px;
+  color: #d7e4eb;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.state-chip[data-tone="boost"] {
+  border-color: rgba(116, 243, 208, 0.55);
+  color: #9ff6e0;
+}
+
+.state-chip[data-tone="warning"] {
+  border-color: rgba(247, 206, 113, 0.55);
+  color: #f7ce71;
+}
+
+.state-chip[data-tone="danger"] {
+  border-color: rgba(255, 112, 94, 0.62);
+  color: #ff9a8a;
+}
+
+.bar-fill--damaged {
+  animation: health-damage-flash 220ms ease-out 2;
+}
+
+@keyframes health-damage-flash {
+  0% {
+    filter: saturate(1);
+  }
+  50% {
+    filter: saturate(1.5) brightness(1.18);
+    background: linear-gradient(90deg, #ff835c, #ff5b4a);
+  }
+  100% {
+    filter: saturate(1);
+  }
+}
+
+.center-panel {
+  grid-area: center;
+  min-width: 260px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 0.95;
+}
+
+#status {
+  min-height: 17px;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #d3dfe6;
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  pointer-events: auto;
+}
+
+.select-row button,
+#utility-tray button,
+#recovery-banner button {
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(34, 42, 50, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+
+.select-row button:hover,
+.select-row button:focus-visible,
+#utility-tray button:hover,
+#utility-tray button:focus-visible,
+#recovery-banner button:hover,
+#recovery-banner button:focus-visible {
+  border-color: var(--line-strong);
+  outline: none;
+}
+
+#debug-toggle[aria-pressed="true"] {
+  border-color: rgba(84, 199, 255, 0.8);
+  color: #d9f4ff;
+}
+
+#recovery-banner {
+  position: absolute;
+  left: 50%;
+  top: 124px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  color: #f6fbff;
+  font-size: 12px;
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+#utility-tray {
+  position: absolute;
+  top: 124px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  pointer-events: auto;
+}
+
+#help-drawer {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: min(260px, calc(100vw - 32px));
+  padding: 10px;
+  color: #dce8ef;
+  pointer-events: auto;
+}
+
+.drawer-title {
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 12px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.control-grid span:nth-child(odd) {
+  min-width: 58px;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  text-align: center;
+}
+
+#debug-overlay {
+  position: absolute;
+  top: 172px;
+  right: 16px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 214px);
+  margin: 0;
+  overflow: auto;
+  padding: 10px;
+  border-color: rgba(131, 218, 255, 0.35);
+  background: rgba(5, 9, 12, 0.86);
+  color: #d9f4ff;
+  font: 11px/1.45 "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  pointer-events: none;
+  white-space: pre-wrap;
+}
+
+#touch-controls {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  display: none;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+#touch-hint {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 94px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(116, 243, 208, 0.36);
+  border-radius: 8px;
+  background: rgba(6, 12, 16, 0.9);
+  color: #ddf2fb;
+  pointer-events: auto;
+}
+
+.touch-hint__title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #a8f7e3;
+}
+
+.touch-hint__text {
+  grid-column: 1 / 2;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+#touch-hint-dismiss {
+  grid-row: 1 / span 2;
+  min-height: 26px;
+  border: 1px solid rgba(213, 235, 245, 0.28);
+  border-radius: 6px;
+  background: rgba(19, 28, 36, 0.9);
+  color: #edf4f7;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
+#touch-controls[data-active="true"] {
+  display: flex;
+}
+
+.touch-cluster {
+  display: grid;
+  gap: 6px;
+}
+
+.touch-cluster--move {
+  grid-template-columns: repeat(2, minmax(68px, 78px));
+}
+
+.touch-cluster--combat {
+  grid-template-columns: repeat(3, minmax(58px, 70px));
+}
+
+.touch-cluster button {
+  min-height: 34px;
+  border: 1px solid rgba(213, 235, 245, 0.28);
+  border-radius: 8px;
+  background: rgba(12, 18, 24, 0.9);
+  color: #edf4f7;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  touch-action: none;
+}
+
+.touch-cluster button[aria-pressed="true"] {
+  border-color: rgba(116, 243, 208, 0.84);
+  background: rgba(27, 50, 48, 0.94);
+}
+
+@media (max-width: 820px) {
+  #app {
+    place-items: start center;
+  }
+
+  #app.touch-controls-active {
+    padding-bottom: 168px;
+  }
+
+  #game-root {
+    width: 100vw;
+    height: 56.25vw;
+    margin-top: 104px;
+  }
+
+  #hud {
+    inset: 8px 8px auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "center center"
+      "p1 cpu";
+    gap: 6px;
+  }
+
+  .center-panel {
+    min-width: 0;
+    padding: 6px;
+  }
+
+  #timer {
+    font-size: 22px;
+  }
+
+  #status {
+    display: none;
+  }
+
+  .select-row {
+    margin-top: 5px;
+  }
+
+  .select-row button {
+    min-height: 24px;
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+
+  .fighter-panel {
+    padding: 6px;
+  }
+
+  .fighter-name {
+    font-size: 11px;
+  }
+
+  .bar {
+    height: 8px;
+    margin: 3px 0;
+  }
+
+  .bar--meter {
+    height: 6px;
+  }
+
+  .row {
+    font-size: 10px;
+  }
+
+  #recovery-banner {
+    top: auto;
+    bottom: 54px;
+  }
+
+  #utility-tray {
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+  }
+
+  #utility-tray button {
+    min-height: 26px;
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+
+  #help-drawer {
+    left: 8px;
+    right: auto;
+    bottom: 122px;
+    width: min(250px, calc(100vw - 16px));
+  }
+
+  #debug-overlay {
+    top: 124px;
+    right: 8px;
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 178px);
+  }
+
+  #touch-hint {
+    left: 8px;
+    right: 8px;
+    bottom: 84px;
+  }
+
+  #app.touch-controls-active #utility-tray {
+    bottom: 126px;
+  }
+
+  #app.touch-controls-active #recovery-banner {
+    bottom: 96px;
+  }
+
+  #app.touch-controls-active #help-drawer {
+    bottom: 200px;
+  }
+}
+
+@media (max-height: 520px) {
+  #app.touch-controls-active #utility-tray {
+    bottom: 160px;
+    top: auto;
+  }
+
+  #app.touch-controls-active #recovery-banner {
+    top: auto;
+    bottom: 156px;
+  }
+
+  #app.touch-controls-active #help-drawer {
+    bottom: 196px;
+  }
+
+  #app:not(.touch-controls-active) #utility-tray {
+    bottom: 8px;
+  }
+
+  #app:not(.touch-controls-active) #recovery-banner {
+    bottom: 50px;
+  }
+
+  #app:not(.touch-controls-active) #help-drawer {
+    bottom: 46px;
+  }
+}
+
+@media (max-width: 560px) {
+  #touch-hint {
+    left: 8px;
+    right: 8px;
+    bottom: 78px;
+    padding: 7px 8px;
+  }
+
+  .touch-hint__text,
+  .touch-hint__title {
+    font-size: 10px;
+  }
+
+  #touch-hint-dismiss {
+    min-height: 24px;
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  #touch-controls {
+    left: 8px;
+    right: 8px;
+    gap: 8px;
+  }
+
+  .touch-cluster--move {
+    grid-template-columns: repeat(2, minmax(60px, 70px));
+  }
+
+  .touch-cluster--combat {
+    grid-template-columns: repeat(3, minmax(50px, 60px));
+  }
+
+  .touch-cluster button {
+    min-height: 30px;
+    font-size: 10px;
+  }
+}

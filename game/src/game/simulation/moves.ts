@@ -1,0 +1,220 @@
+import { MaterialType } from './constants';
+import type { FighterSpecId, InputCommand, MoveSpec } from './types';
+
+const sharedBasic = (fighter: FighterSpecId): MoveSpec => ({
+  id: `${fighter}-basic`,
+  name: 'Strike',
+  command: 'basic',
+  meterCost: 0,
+  boostedMeterCost: 0,
+  cooldownTicks: 18,
+  startupTicks: 5,
+  activeTicks: 6,
+  recoveryTicks: 8,
+  damage: 6,
+  knockbackX: 5.5,
+  knockbackY: -3,
+  hitbox: { offsetX: 30, offsetY: -4, width: 42, height: 34 },
+  materialSpawns: [],
+  boost: { stat: 'knockback', amount: 1 },
+});
+
+export const FIGHTER_MOVES: Record<FighterSpecId, MoveSpec[]> = {
+  water: [
+    sharedBasic('water'),
+    {
+      id: 'water-lash',
+      name: 'Water Lash',
+      command: 'special1',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 42,
+      startupTicks: 9,
+      activeTicks: 10,
+      recoveryTicks: 14,
+      damage: 9,
+      knockbackX: 8,
+      knockbackY: -4,
+      hitbox: { offsetX: 58, offsetY: -8, width: 92, height: 30 },
+      materialSpawns: [
+        { offsetCellsX: 3, offsetCellsY: -4, widthCells: 12, heightCells: 3, material: MaterialType.Water, lifetimeTicks: 180 },
+      ],
+      boost: { stat: 'size', amount: 4 },
+    },
+    {
+      id: 'water-ice-snare',
+      name: 'Ice Snare',
+      command: 'special2',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 58,
+      startupTicks: 12,
+      activeTicks: 12,
+      recoveryTicks: 18,
+      damage: 5,
+      knockbackX: 3,
+      knockbackY: -7,
+      hitbox: { offsetX: 44, offsetY: 30, width: 82, height: 24 },
+      materialSpawns: [
+        { offsetCellsX: 2, offsetCellsY: 4, widthCells: 10, heightCells: 2, material: MaterialType.Ice, lifetimeTicks: 210 },
+      ],
+      boost: { stat: 'duration', amount: 90 },
+    },
+    {
+      id: 'water-steam-burst',
+      name: 'Steam Burst',
+      command: 'special3',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 50,
+      startupTicks: 8,
+      activeTicks: 12,
+      recoveryTicks: 16,
+      damage: 7,
+      knockbackX: 4,
+      knockbackY: -10,
+      hitbox: { offsetX: 34, offsetY: -34, width: 64, height: 80 },
+      materialSpawns: [
+        { offsetCellsX: 2, offsetCellsY: -9, widthCells: 7, heightCells: 9, material: MaterialType.Steam, lifetimeTicks: 120 },
+      ],
+      boost: { stat: 'knockback', amount: 1.35 },
+    },
+  ],
+  earth: [
+    sharedBasic('earth'),
+    {
+      id: 'earth-stone-fist',
+      name: 'Stone Fist',
+      command: 'special1',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 48,
+      startupTicks: 11,
+      activeTicks: 8,
+      recoveryTicks: 18,
+      damage: 13,
+      knockbackX: 10,
+      knockbackY: -5,
+      hitbox: { offsetX: 46, offsetY: -6, width: 62, height: 44 },
+      materialSpawns: [
+        { offsetCellsX: 4, offsetCellsY: -4, widthCells: 4, heightCells: 5, material: MaterialType.Stone, lifetimeTicks: 150 },
+      ],
+      boost: { stat: 'knockback', amount: 1.3 },
+    },
+    {
+      id: 'earth-sand-wave',
+      name: 'Sand Wave',
+      command: 'special2',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 46,
+      startupTicks: 10,
+      activeTicks: 12,
+      recoveryTicks: 14,
+      damage: 8,
+      knockbackX: 9,
+      knockbackY: -3,
+      hitbox: { offsetX: 66, offsetY: 28, width: 108, height: 28 },
+      materialSpawns: [
+        { offsetCellsX: 3, offsetCellsY: 4, widthCells: 14, heightCells: 2, material: MaterialType.Sand, lifetimeTicks: 180 },
+      ],
+      boost: { stat: 'size', amount: 5 },
+    },
+    {
+      id: 'earth-wall-rise',
+      name: 'Wall Rise',
+      command: 'special3',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 70,
+      startupTicks: 14,
+      activeTicks: 8,
+      recoveryTicks: 20,
+      damage: 6,
+      knockbackX: 4,
+      knockbackY: -8,
+      hitbox: { offsetX: 38, offsetY: -26, width: 34, height: 90 },
+      materialSpawns: [
+        { offsetCellsX: 4, offsetCellsY: -9, widthCells: 3, heightCells: 10, material: MaterialType.Stone, lifetimeTicks: 240 },
+      ],
+      boost: { stat: 'duration', amount: 120 },
+    },
+  ],
+  fire: [
+    sharedBasic('fire'),
+    {
+      id: 'fire-flame-shot',
+      name: 'Flame Shot',
+      command: 'special1',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 38,
+      startupTicks: 7,
+      activeTicks: 9,
+      recoveryTicks: 13,
+      damage: 10,
+      knockbackX: 8,
+      knockbackY: -3,
+      hitbox: { offsetX: 62, offsetY: -10, width: 96, height: 30 },
+      materialSpawns: [
+        { offsetCellsX: 3, offsetCellsY: -4, widthCells: 12, heightCells: 3, material: MaterialType.Fire, lifetimeTicks: 110 },
+      ],
+      boost: { stat: 'size', amount: 4 },
+    },
+    {
+      id: 'fire-blast-dash',
+      name: 'Blast Dash',
+      command: 'special2',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 54,
+      startupTicks: 5,
+      activeTicks: 10,
+      recoveryTicks: 18,
+      damage: 8,
+      knockbackX: 9,
+      knockbackY: -4,
+      hitbox: { offsetX: 36, offsetY: -2, width: 62, height: 42 },
+      materialSpawns: [
+        { offsetCellsX: -2, offsetCellsY: 2, widthCells: 6, heightCells: 2, material: MaterialType.Fire, lifetimeTicks: 90 },
+        { offsetCellsX: -4, offsetCellsY: 0, widthCells: 4, heightCells: 3, material: MaterialType.Smoke, lifetimeTicks: 120 },
+      ],
+      boost: { stat: 'knockback', amount: 1.25 },
+      selfImpulseX: 7,
+      selfImpulseY: -1,
+    },
+    {
+      id: 'fire-lava-break',
+      name: 'Lava Break',
+      command: 'special3',
+      meterCost: 25,
+      boostedMeterCost: 15,
+      cooldownTicks: 68,
+      startupTicks: 16,
+      activeTicks: 12,
+      recoveryTicks: 20,
+      damage: 12,
+      knockbackX: 7,
+      knockbackY: -8,
+      hitbox: { offsetX: 48, offsetY: 26, width: 82, height: 30 },
+      materialSpawns: [
+        { offsetCellsX: 3, offsetCellsY: 4, widthCells: 10, heightCells: 2, material: MaterialType.Lava, lifetimeTicks: 150 },
+      ],
+      boost: { stat: 'duration', amount: 80 },
+    },
+  ],
+};
+
+export function moveForCommand(specId: FighterSpecId, command: InputCommand): MoveSpec {
+  const move = FIGHTER_MOVES[specId].find((candidate) => candidate.command === command);
+  if (!move) throw new Error(`Missing move ${specId}:${command}`);
+  return move;
+}
+
+export function commandFromActions(actions: Record<InputCommand, boolean>): InputCommand | null {
+  if (actions.basic) return 'basic';
+  if (actions.special1) return 'special1';
+  if (actions.special2) return 'special2';
+  if (actions.special3) return 'special3';
+  return null;
+}

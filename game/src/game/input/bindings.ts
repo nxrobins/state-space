@@ -1,0 +1,15 @@
+export const KEY_BINDINGS = {
+  left: 'A',
+  right: 'D',
+  up: 'W',
+  jumpAlt: 'SPACE',
+  down: 'S',
+  dash: 'SHIFT',
+  block: 'K',
+  basic: 'J',
+  special1: 'U',
+  special2: 'I',
+  special3: 'O',
+  restart: 'R',
+  debug: 'BACKTICK',
+} as const;

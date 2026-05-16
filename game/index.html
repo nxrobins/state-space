@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>State Space: Element Fighter</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="game-root"></div>
+      <div id="hud">
+        <div class="fighter-panel fighter-panel--p1">
+          <div class="fighter-name" id="p1-name">Water</div>
+          <div class="bar"><span id="p1-health"></span></div>
+          <div class="bar bar--meter"><span id="p1-meter"></span></div>
+          <div class="row">
+            <span id="p1-stocks"></span><span id="p1-boost"></span><span id="p1-state" class="state-chip"></span>
+          </div>
+        </div>
+        <div class="center-panel">
+          <div id="timer">3:00</div>
+          <div id="status" aria-live="polite">Choose a fighter or press any move to start.</div>
+          <div class="select-row">
+            <button data-fighter="water">Water</button>
+            <button data-fighter="earth">Earth</button>
+            <button data-fighter="fire">Fire</button>
+          </div>
+        </div>
+        <div class="fighter-panel fighter-panel--cpu">
+          <div class="fighter-name" id="cpu-name">Earth CPU</div>
+          <div class="bar"><span id="cpu-health"></span></div>
+          <div class="bar bar--meter"><span id="cpu-meter"></span></div>
+          <div class="row">
+            <span id="cpu-stocks"></span><span id="cpu-boost"></span><span id="cpu-state" class="state-chip"></span>
+          </div>
+        </div>
+      </div>
+      <div id="recovery-banner" hidden>
+        <span>Recovered previous match</span>
+        <button id="recovery-dismiss" type="button">Continue</button>
+        <button id="recovery-new" type="button">New match</button>
+      </div>
+      <div id="utility-tray">
+        <button id="help-toggle" type="button" aria-expanded="false" aria-controls="help-drawer">Controls</button>
+        <button id="debug-toggle" type="button" aria-pressed="false">Debug</button>
+        <button id="restart-match" type="button">Restart</button>
+      </div>
+      <aside id="help-drawer" hidden>
+        <div class="drawer-title">Controls</div>
+        <div class="control-grid">
+          <span>A/D</span><span>Move</span>
+          <span>W/Space</span><span>Jump</span>
+          <span>S</span><span>Fast fall</span>
+          <span>Shift</span><span>Dash</span>
+          <span>J</span><span>Strike</span>
+          <span>K</span><span>Block</span>
+          <span>U/I/O</span><span>Bend</span>
+          <span>`</span><span>Debug</span>
+        </div>
+      </aside>
+      <div id="touch-hint" hidden>
+        <span class="touch-hint__title">Touch quick start</span>
+        <span class="touch-hint__text">Hold Left or Right to move. Tap Strike to attack. Use U / I / O to bend nearby materials.</span>
+        <button id="touch-hint-dismiss" type="button">Hide</button>
+      </div>
+      <div id="touch-controls" hidden>
+        <div class="touch-cluster touch-cluster--move" role="group" aria-label="Movement">
+          <button type="button" data-touch-action="left">Left</button>
+          <button type="button" data-touch-action="right">Right</button>
+          <button type="button" data-touch-action="up">Jump</button>
+          <button type="button" data-touch-action="down">Down</button>
+        </div>
+        <div class="touch-cluster touch-cluster--combat" role="group" aria-label="Combat">
+          <button type="button" data-touch-action="dash">Dash</button>
+          <button type="button" data-touch-action="block">Block</button>
+          <button type="button" data-touch-action="basic">Strike</button>
+          <button type="button" data-touch-action="special1">U</button>
+          <button type="button" data-touch-action="special2">I</button>
+          <button type="button" data-touch-action="special3">O</button>
+        </div>
+      </div>
+      <pre id="debug-overlay" hidden></pre>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
