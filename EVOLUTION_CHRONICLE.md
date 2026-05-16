@@ -532,3 +532,33 @@ instead of `y * 256 + x` — reading wrong cells. Fixed by matching constants.
 - Exposed hot wood consumes exactly one fuel voxel and one air voxel.
 - Ice, water, and sand phase transitions rewrite exactly one voxel into the
   expected material.
+
+---
+
+## Phase 2: Conservative Movement V2
+
+**Date:** 2026-05-06
+**Status:** ACTIVE BASELINE
+
+### Changes
+- Split movement into explicit conservative swap passes: vertical gravity,
+  diagonal fall, horizontal liquid spread, gas buoyancy, and gas spread.
+- Added a salted movement schedule so each tick dispatches 13 passes while
+  horizontal decisions vary deterministically across ticks.
+- Tightened structural eligibility: solid/frozen voxels can fall vertically as
+  loose matter, but cannot be displaced as targets by falling matter.
+- Removed gas from downward gravity; non-air gas/plasma now use thermal
+  buoyancy rank and spread sideways only when upward motion is blocked.
+- Strengthened liquid spread so a pair with only one valid liquid source always
+  moves that source; the salted hash is used only to break true two-way ties.
+- Synced the browser runtime to the same movement schedule and shader set.
+
+### Validation
+`python test_invariants.py` passes 18 invariant scenarios:
+- Structural targets resist displacement by falling sand.
+- Sand falls diagonally around blockers.
+- Water and viscous oil spread horizontally while preserving exact counts.
+- Water pillars collapse into shallow floor spread instead of stacking.
+- Cool smoke does not sink and spreads sideways.
+- Hot smoke and steam rise through thermal buoyancy.
+- Existing combustion and phase-transition accounting remains covered.

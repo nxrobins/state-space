@@ -90,7 +90,10 @@ def main():
     print("=" * 60)
     print(f"Grid: {W}x{H}")
     print(f"Ticks: {N_TICKS}")
-    print(f"Dispatch order: Gravity(phase 0) -> Gravity(phase 1) -> Thermal -> Phase Transitions -> Combustion")
+    print(
+        "Dispatch order: movement V2 "
+        "(vertical -> diagonal -> liquid -> gas) -> Thermal -> Phase Transitions -> Combustion"
+    )
     print()
 
     # Build scenario

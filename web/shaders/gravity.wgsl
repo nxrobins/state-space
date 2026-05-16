@@ -1,9 +1,8 @@
-// Conservative vertical gravity with phased symmetric density swaps.
+// Conservative vertical matter gravity with phased symmetric density swaps.
 //
-// This kernel intentionally avoids diagonal and horizontal spreading. Movement
-// is limited to disjoint row pairs selected by GRAVITY_PHASE, so a cell can
-// participate in at most one swap per pass and per-material counts are
-// preserved exactly. Run phase 0 then phase 1 for continuous falling.
+// Movement is limited to disjoint row pairs selected by GRAVITY_PHASE, so a
+// cell can participate in at most one swap per pass and per-material counts are
+// preserved exactly. Gas is handled by separate buoyancy/spread passes.
 
 @group(0) @binding(0) var<storage, read> grid_in: array<u32>;
 @group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
@@ -21,21 +20,26 @@ fn density_of(mat: u32) -> u32 {
     return cold_table[mat * COLD_STRIDE + COLD_DENSITY];
 }
 
-fn is_movable(ph: u32) -> bool {
-    return ph == PHASE_POWDER || ph == PHASE_LIQUID || ph == PHASE_VISCOUS || ph == PHASE_GAS;
+fn is_structural(ph: u32) -> bool {
+    return ph == PHASE_SOLID || ph == PHASE_FROZEN;
 }
 
-fn can_move(mat: u32, ph: u32) -> bool {
-    return mat == MAT_AIR || is_movable(ph);
+fn is_vertical_falling_matter(ph: u32) -> bool {
+    return ph == PHASE_SOLID
+        || ph == PHASE_FROZEN
+        || ph == PHASE_POWDER
+        || ph == PHASE_LIQUID
+        || ph == PHASE_VISCOUS
+        || ph == PHASE_MOLTEN;
 }
 
 fn should_swap(upper: u32, lower: u32) -> bool {
     let upper_mat = get_material(upper);
     let lower_mat = get_material(lower);
     let upper_phase = get_phase(upper);
+    let lower_phase = get_phase(lower);
 
-    // Immovable structural solids can support air and movable materials.
-    if (!can_move(upper_mat, upper_phase)) {
+    if (!is_vertical_falling_matter(upper_phase) || is_structural(lower_phase)) {
         return false;
     }
 
