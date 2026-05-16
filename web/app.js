@@ -1,12 +1,14 @@
 // State Space — WebGPU Cellular Automata Engine
 // Phase 3a+3b: Renderer + Input Bridge
 
-import { BITMASK_DEFS, LOCKED_1A, GRAVITY_SHADER, THERMAL_SHADER,
-         PHASE_SHADER, COMBUSTION_SHADER, RENDER_SHADER } from './shaders.js';
+import { BITMASK_DEFS, LOCKED_1A, GRAVITY_SHADER, DIAGONAL_SHADER, LIQUID_SHADER,
+         GAS_BUOYANCY_SHADER, GAS_SPREAD_SHADER, THERMAL_SHADER, PHASE_SHADER,
+         COMBUSTION_SHADER, RENDER_SHADER } from './shaders.js';
 
 const GRID_W = 256;
 const GRID_H = 256;
 const GRID_SIZE = GRID_W * GRID_H;
+const MOVEMENT_SALT_COUNT = 4;
 
 // Material IDs (must match schema.py)
 const MAT = {
@@ -32,7 +34,7 @@ const PHASE = { SOLID:0, POWDER:1, LIQUID:2, VISCOUS:3, GAS:4, PLASMA:5, FROZEN:
 
 // Default phase per material
 // Phase determines gravity behavior:
-// POWDER/LIQUID/VISCOUS/GAS = movable (participates in gravity/buoyancy)
+// POWDER/LIQUID/VISCOUS = falling/spreading matter; GAS rises/spreads separately.
 // SOLID/FROZEN = structural (stays in place)
 // Fire=GAS (rises via buoyancy), Lava=VISCOUS (flows downhill like heavy fluid)
 const MAT_PHASE = [
@@ -101,6 +103,82 @@ function packVoxel(mat, thermal, kx, ky, phase, flags) {
         | ((flags & 0xF) << 28);
 }
 
+function withGrid(constants = {}) {
+    return { GRID_WIDTH: GRID_W, GRID_HEIGHT: GRID_H, ...constants };
+}
+
+function buildKernelSpecs() {
+    const specs = [
+        { id: 'vertical0', source: GRAVITY_SHADER, constants: withGrid({ GRAVITY_PHASE: 0 }) },
+        { id: 'vertical1', source: GRAVITY_SHADER, constants: withGrid({ GRAVITY_PHASE: 1 }) },
+    ];
+
+    for (let salt = 0; salt < MOVEMENT_SALT_COUNT; salt++) {
+        for (let phase = 0; phase < 2; phase++) {
+            specs.push({
+                id: `diagonal${phase}_s${salt}`,
+                source: DIAGONAL_SHADER,
+                constants: withGrid({ MOVE_PHASE: phase, MOVE_SALT: salt }),
+            });
+        }
+    }
+
+    for (let salt = 0; salt < MOVEMENT_SALT_COUNT; salt++) {
+        for (let phase = 0; phase < 2; phase++) {
+            specs.push({
+                id: `liquid${phase}_s${salt}`,
+                source: LIQUID_SHADER,
+                constants: withGrid({ MOVE_PHASE: phase, MOVE_SALT: salt }),
+            });
+        }
+    }
+
+    specs.push(
+        { id: 'gas_buoyancy0', source: GAS_BUOYANCY_SHADER, constants: withGrid({ MOVE_PHASE: 0 }) },
+        { id: 'gas_buoyancy1', source: GAS_BUOYANCY_SHADER, constants: withGrid({ MOVE_PHASE: 1 }) },
+    );
+
+    for (let salt = 0; salt < MOVEMENT_SALT_COUNT; salt++) {
+        for (let phase = 0; phase < 2; phase++) {
+            specs.push({
+                id: `gas_spread${phase}_s${salt}`,
+                source: GAS_SPREAD_SHADER,
+                constants: withGrid({ MOVE_PHASE: phase, MOVE_SALT: salt }),
+            });
+        }
+    }
+
+    specs.push(
+        { id: 'thermal', source: THERMAL_SHADER, constants: withGrid() },
+        { id: 'phase', source: PHASE_SHADER, constants: withGrid() },
+        { id: 'combustion', source: COMBUSTION_SHADER, constants: withGrid() },
+    );
+
+    return specs.map((spec) => ({
+        ...spec,
+        source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + spec.source,
+    }));
+}
+
+function movementScheduleForTick(tick) {
+    const salt = tick % MOVEMENT_SALT_COUNT;
+    return [
+        'vertical0',
+        'vertical1',
+        `diagonal0_s${salt}`,
+        `diagonal1_s${salt}`,
+        `liquid0_s${salt}`,
+        `liquid1_s${salt}`,
+        'gas_buoyancy0',
+        'gas_buoyancy1',
+        `gas_spread0_s${salt}`,
+        `gas_spread1_s${salt}`,
+        'thermal',
+        'phase',
+        'combustion',
+    ];
+}
+
 // ── WebGPU Init ───────────────────────────────────────────────────
 
 async function init() {
@@ -166,13 +244,7 @@ async function init() {
     // ── Shaders (bundled, no fetch needed) ──────────────────────
     log('Preparing shaders...');
     // Dispatch order matches the core CompositionEngine.
-    const kernelSpecs = [
-        { source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + GRAVITY_SHADER, constants: { GRAVITY_PHASE: 0 } },
-        { source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + GRAVITY_SHADER, constants: { GRAVITY_PHASE: 1 } },
-        { source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + THERMAL_SHADER },
-        { source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + PHASE_SHADER },
-        { source: BITMASK_DEFS + '\n' + LOCKED_1A + '\n' + COMBUSTION_SHADER },
-    ];
+    const kernelSpecs = buildKernelSpecs();
     const renderWGSL = RENDER_SHADER;
 
     // ── Create compute pipelines ──────────────────────────────────
@@ -187,13 +259,14 @@ async function init() {
     const computePL = device.createPipelineLayout({ bindGroupLayouts: [computeBGL] });
 
     log('Creating compute pipelines...');
-    const computePipelines = kernelSpecs.map((spec) => {
+    const computePipelines = new Map(kernelSpecs.map((spec) => {
         const module = device.createShaderModule({ code: spec.source });
-        return device.createComputePipeline({
+        const pipeline = device.createComputePipeline({
             layout: computePL,
             compute: { module, entryPoint: 'tick', constants: spec.constants || {} },
         });
-    });
+        return [spec.id, pipeline];
+    }));
 
     const computeBG_AB = device.createBindGroup({
         layout: computeBGL,
@@ -405,10 +478,12 @@ async function init() {
 
         if (!paused) {
             const encoder = device.createCommandEncoder();
-            for (let i = 0; i < computePipelines.length; i++) {
+            for (const pipelineId of movementScheduleForTick(tickCount)) {
+                const pipeline = computePipelines.get(pipelineId);
+                if (!pipeline) throw new Error('Missing compute pipeline: ' + pipelineId);
                 const bg = currentIsA ? computeBG_AB : computeBG_BA;
                 const pass = encoder.beginComputePass();
-                pass.setPipeline(computePipelines[i]);
+                pass.setPipeline(pipeline);
                 pass.setBindGroup(0, bg);
                 pass.dispatchWorkgroups(wgX, wgY);
                 pass.end();

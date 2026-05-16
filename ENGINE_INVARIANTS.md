@@ -24,12 +24,18 @@ allowed to become gameplay features.
 
 ## Current Movement Contract
 
-Gravity is currently conservative vertical movement only:
+Movement is conservative and split into separate phased swap passes:
 
-- Phase 0 handles even row pairs.
-- Phase 1 handles odd row pairs.
-- Only movable source voxels may swap downward; structural solids such as
-  stone, metal, glass, and cold wood remain fixed unless a later phase
-  explicitly rewrites them.
-- Lateral, diagonal, and gas-spread movement are intentionally deferred until
-  they can be expressed as separate conservative passes.
+- Vertical gravity handles falling matter in even and odd row-pair phases.
+- Diagonal fall handles blocked falling matter in disjoint 2x2 blocks.
+- Horizontal liquid spread handles liquid-like phases after downward and
+  diagonal movement are blocked.
+- Gas buoyancy handles non-air gas and plasma with thermal buoyancy rank.
+- Gas spread handles non-air gas and plasma after upward buoyancy is blocked.
+- Solid/frozen matter can fall vertically through lower-density non-structural
+  targets, but cannot be displaced as a target unless a later phase explicitly
+  rewrites it.
+- Gas is not a downward-gravity source; smoke, steam, and fire move through gas
+  buoyancy/spread passes.
+- Every movement pass must be a conservative pairwise swap with exact
+  per-material accounting.
