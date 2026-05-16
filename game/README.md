@@ -41,3 +41,16 @@ npm run build
 ```
 
 Use `?debug=1` or the debug control in-game for match ID, seed, frame stats, material counts, and combat telemetry.
+
+## Fighter Art Pipeline
+
+Portraits live in `public/assets/fighters/*/portrait.png`. Runtime combat sprites live in `public/assets/sprites/fighters/*` as transparent 96x96 sheets plus individual source frames and preview sheets.
+
+Regenerate the deterministic placeholder combat collection with:
+
+```powershell
+cd D:\state-space
+python game\scripts\generate_fighter_sprites.py
+```
+
+The generator keeps the sprite manifest, sheets, per-frame PNGs, preview frame lists, and preview sheets in sync with `game/src/game/sprites.ts`.

@@ -160,6 +160,10 @@ export interface FighterSpec {
   id: FighterSpecId;
   name: string;
   element: FighterSpecId;
+  styleName: string;
+  difficulty: string;
+  summary: string;
+  portraitUrl: string;
   color: number;
   accentColor: number;
   spawn: { x: number; y: number };

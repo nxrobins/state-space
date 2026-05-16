@@ -10,7 +10,13 @@
       <div id="game-root"></div>
       <div id="hud">
         <div class="fighter-panel fighter-panel--p1">
-          <div class="fighter-name" id="p1-name">Water</div>
+          <div class="fighter-identity">
+            <img id="p1-portrait" class="fighter-portrait" src="/assets/fighters/water/portrait.png" alt="" />
+            <div>
+              <div class="fighter-name" id="p1-name">Tide Warden</div>
+              <div class="fighter-style" id="p1-style">Flow Control</div>
+            </div>
+          </div>
           <div class="bar"><span id="p1-health"></span></div>
           <div class="bar bar--meter"><span id="p1-meter"></span></div>
           <div class="row">
@@ -19,7 +25,7 @@
         </div>
         <div class="center-panel">
           <div id="timer">3:00</div>
-          <div id="status" aria-live="polite">Choose a fighter or press any move to start.</div>
+          <div id="status" aria-live="polite">Choose a fighter to enter the arena.</div>
           <div class="select-row">
             <button data-fighter="water">Water</button>
             <button data-fighter="earth">Earth</button>
@@ -27,7 +33,13 @@
           </div>
         </div>
         <div class="fighter-panel fighter-panel--cpu">
-          <div class="fighter-name" id="cpu-name">Earth CPU</div>
+          <div class="fighter-identity fighter-identity--cpu">
+            <div>
+              <div class="fighter-name" id="cpu-name">Stone Breaker CPU</div>
+              <div class="fighter-style" id="cpu-style">Arena Lockdown</div>
+            </div>
+            <img id="cpu-portrait" class="fighter-portrait" src="/assets/fighters/earth/portrait.png" alt="" />
+          </div>
           <div class="bar"><span id="cpu-health"></span></div>
           <div class="bar bar--meter"><span id="cpu-meter"></span></div>
           <div class="row">
@@ -35,6 +47,77 @@
           </div>
         </div>
       </div>
+      <section id="fighter-select" class="screen-overlay screen-overlay--select" aria-labelledby="fighter-select-title">
+        <div class="select-shell">
+          <div class="select-copy">
+            <div class="eyebrow">State Space Arena</div>
+            <h1 id="fighter-select-title">Choose Your Element</h1>
+            <p>Pick a specialist. The CPU takes the counter slot and the arena starts with live material rules.</p>
+          </div>
+          <div class="fighter-select-grid" id="fighter-select-grid">
+            <button class="fighter-select-card" data-fighter="water" data-element="water" type="button">
+              <img src="/assets/fighters/water/portrait.png" alt="" />
+              <span class="fighter-select-card__body">
+                <span class="fighter-select-card__kicker">Water / Balanced</span>
+                <span class="fighter-select-card__name">Tide Warden</span>
+                <span class="fighter-select-card__style">Flow Control</span>
+                <span class="fighter-select-card__summary">Controls lanes with water, ice, and steam.</span>
+                <span class="fighter-select-card__cta">Fight</span>
+              </span>
+            </button>
+            <button class="fighter-select-card" data-fighter="earth" data-element="earth" type="button">
+              <img src="/assets/fighters/earth/portrait.png" alt="" />
+              <span class="fighter-select-card__body">
+                <span class="fighter-select-card__kicker">Earth / Deliberate</span>
+                <span class="fighter-select-card__name">Stone Breaker</span>
+                <span class="fighter-select-card__style">Arena Lockdown</span>
+                <span class="fighter-select-card__summary">Builds walls, footing, and heavy knockback.</span>
+                <span class="fighter-select-card__cta">Fight</span>
+              </span>
+            </button>
+            <button class="fighter-select-card" data-fighter="fire" data-element="fire" type="button">
+              <img src="/assets/fighters/fire/portrait.png" alt="" />
+              <span class="fighter-select-card__body">
+                <span class="fighter-select-card__kicker">Fire / Volatile</span>
+                <span class="fighter-select-card__name">Ember Striker</span>
+                <span class="fighter-select-card__style">Burst Rushdown</span>
+                <span class="fighter-select-card__summary">Creates pressure with flame, smoke, and lava.</span>
+                <span class="fighter-select-card__cta">Fight</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section id="versus-overlay" class="screen-overlay screen-overlay--versus" hidden aria-live="polite">
+        <div class="versus-card versus-card--p1">
+          <img id="vs-p1-portrait" src="/assets/fighters/water/portrait.png" alt="" />
+          <div class="versus-card__name" id="vs-p1-name">Tide Warden</div>
+          <div class="versus-card__style" id="vs-p1-style">Flow Control</div>
+        </div>
+        <div class="versus-center">
+          <div class="versus-mark">VS</div>
+          <div class="versus-count" id="versus-count">3</div>
+        </div>
+        <div class="versus-card versus-card--cpu">
+          <img id="vs-cpu-portrait" src="/assets/fighters/earth/portrait.png" alt="" />
+          <div class="versus-card__name" id="vs-cpu-name">Stone Breaker</div>
+          <div class="versus-card__style" id="vs-cpu-style">Arena Lockdown</div>
+        </div>
+      </section>
+      <section id="result-overlay" class="screen-overlay screen-overlay--result" hidden aria-live="polite">
+        <div class="result-shell">
+          <img id="result-portrait" src="/assets/fighters/water/portrait.png" alt="" />
+          <div class="result-copy">
+            <div class="eyebrow" id="result-reason">Match Complete</div>
+            <h2 id="result-title">Tide Warden Wins</h2>
+            <p id="result-summary">Final stocks and health are recorded.</p>
+            <div class="result-actions">
+              <button id="result-rematch" type="button">Rematch</button>
+              <button id="result-change-fighter" type="button">Change Fighter</button>
+            </div>
+          </div>
+        </div>
+      </section>
       <div id="recovery-banner" hidden>
         <span>Recovered previous match</span>
         <button id="recovery-dismiss" type="button">Continue</button>

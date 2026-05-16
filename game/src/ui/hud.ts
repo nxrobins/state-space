@@ -5,6 +5,7 @@ import type { ActionState, BattleState, FighterId, FighterSpecId, FighterState }
 export interface HudControlHandlers {
   onSelect: (specId: FighterSpecId) => void;
   onRestart: () => void;
+  onOpenSelect?: () => void;
   onToggleDebug: () => void;
   onDismissRecovery: () => void;
   onTouchAction?: (action: keyof ActionState, pressed: boolean) => void;
@@ -56,6 +57,8 @@ export function bindHudControls(handlers: HudControlHandlers): void {
     });
   }
   document.getElementById('restart-match')?.addEventListener('click', handlers.onRestart);
+  document.getElementById('result-rematch')?.addEventListener('click', handlers.onRestart);
+  document.getElementById('result-change-fighter')?.addEventListener('click', () => handlers.onOpenSelect?.());
   document.getElementById('debug-toggle')?.addEventListener('click', handlers.onToggleDebug);
   document.getElementById('recovery-new')?.addEventListener('click', handlers.onRestart);
   document.getElementById('recovery-dismiss')?.addEventListener('click', handlers.onDismissRecovery);
@@ -81,6 +84,7 @@ export function resolveTouchAction(value: string | undefined): TouchActionKey | 
 export function updateHud(state: BattleState): void {
   updateFighterHud('p1', state.fighters.p1, state.fighters.cpu, state.tick);
   updateFighterHud('cpu', state.fighters.cpu, state.fighters.p1, state.tick);
+  updateFighterSelectCards(state.fighters.p1.specId);
   const timer = document.getElementById('timer');
   if (timer) timer.textContent = formatTimer(state.matchPhase === 'suddenDeath' ? 0 : state.timerTicks);
 
@@ -95,7 +99,57 @@ export function updateHud(state: BattleState): void {
       status.textContent = lastEvent ? lastEvent.message : 'Bend nearby materials to discount and strengthen specials.';
     }
   }
+  setResultOverlayVisible(Boolean(state.result), state);
   renderTouchHint(state.tick);
+}
+
+export function setCharacterSelectVisible(visible: boolean): void {
+  const overlay = document.getElementById('fighter-select');
+  if (overlay) overlay.hidden = !visible;
+  setAppModeClass('screen-mode-select', visible);
+}
+
+export function setVersusIntroVisible(visible: boolean, state: BattleState, ticksRemaining = 0): void {
+  const overlay = document.getElementById('versus-overlay');
+  if (!overlay) return;
+  overlay.hidden = !visible;
+  setAppModeClass('screen-mode-versus', visible);
+  if (!visible) return;
+
+  const p1Spec = FIGHTER_SPECS[state.fighters.p1.specId];
+  const cpuSpec = FIGHTER_SPECS[state.fighters.cpu.specId];
+  setImage('vs-p1-portrait', p1Spec.portraitUrl);
+  setImage('vs-cpu-portrait', cpuSpec.portraitUrl);
+  setText('vs-p1-name', p1Spec.name);
+  setText('vs-cpu-name', cpuSpec.name);
+  setText('vs-p1-style', p1Spec.styleName);
+  setText('vs-cpu-style', cpuSpec.styleName);
+
+  const count = Math.max(0, Math.ceil(ticksRemaining / TICK_RATE));
+  setText('versus-count', count > 0 ? String(count) : 'BEND');
+}
+
+export function setResultOverlayVisible(visible: boolean, state: BattleState): void {
+  const overlay = document.getElementById('result-overlay');
+  if (!overlay) return;
+  overlay.hidden = !visible;
+  setAppModeClass('screen-mode-result', visible);
+  if (!visible || !state.result) return;
+
+  const winnerId = state.result.winner;
+  const winner = winnerId ? state.fighters[winnerId] : null;
+  const winnerSpec = winner ? FIGHTER_SPECS[winner.specId] : FIGHTER_SPECS[state.fighters.p1.specId];
+  setImage('result-portrait', winnerSpec.portraitUrl);
+  setText('result-reason', `${state.result.reason.toUpperCase()} / ${state.matchId}`);
+  setText('result-title', winner ? `${winnerSpec.name} Wins` : 'No Winner');
+  setText(
+    'result-summary',
+    `Stocks ${state.result.finalStocks.p1}-${state.result.finalStocks.cpu} / Health ${Math.ceil(state.result.finalHealth.p1)}-${Math.ceil(state.result.finalHealth.cpu)}`,
+  );
+}
+
+function setAppModeClass(className: string, active: boolean): void {
+  document.getElementById('app')?.classList.toggle(className, active);
 }
 
 export function setRecoveryNoticeVisible(visible: boolean): void {
@@ -195,7 +249,10 @@ function renderTouchHint(tick: number): void {
 
 function updateFighterHud(id: FighterId, fighter: FighterState, opponent: FighterState, tick: number): void {
   const prefix = id === 'p1' ? 'p1' : 'cpu';
-  setText(`${prefix}-name`, id === 'p1' ? FIGHTER_SPECS[fighter.specId].name : `${FIGHTER_SPECS[fighter.specId].name} CPU`);
+  const spec = FIGHTER_SPECS[fighter.specId];
+  setText(`${prefix}-name`, id === 'p1' ? spec.name : `${spec.name} CPU`);
+  setText(`${prefix}-style`, spec.styleName);
+  setImage(`${prefix}-portrait`, spec.portraitUrl);
   setText(`${prefix}-stocks`, `Stocks ${fighter.stocks}`);
   setText(`${prefix}-boost`, fighter.boosted ? 'Boost ready' : 'No boost');
   setFighterState(`${prefix}-state`, fighter, opponent, tick);
@@ -203,9 +260,22 @@ function updateFighterHud(id: FighterId, fighter: FighterState, opponent: Fighte
   setBar(`${prefix}-meter`, fighter.meter);
 }
 
+function updateFighterSelectCards(selectedSpecId: FighterSpecId): void {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('.fighter-select-card[data-fighter]')) {
+    const active = button.dataset.fighter === selectedSpecId;
+    button.classList.toggle('fighter-select-card--active', active);
+    button.setAttribute('aria-pressed', String(active));
+  }
+}
+
 function setText(id: string, text: string): void {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
+}
+
+function setImage(id: string, src: string): void {
+  const el = document.getElementById(id);
+  if (el instanceof HTMLImageElement && el.getAttribute('src') !== src) el.src = src;
 }
 
 function setBar(id: string, value: number, damaged = false): void {
