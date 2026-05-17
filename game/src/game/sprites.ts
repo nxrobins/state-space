@@ -5,7 +5,7 @@ export const FIGHTER_SPRITE_FRAME_WIDTH = 96;
 export const FIGHTER_SPRITE_FRAME_HEIGHT = 96;
 
 export const FIGHTER_SPRITE_ANIMATIONS = {
-  idle: { frames: 6, frameRate: 8, repeat: -1 },
+  idle: { frames: 6, frameRate: 2, repeat: -1 },
   run: { frames: 8, frameRate: 14, repeat: -1 },
   jump: { frames: 4, frameRate: 10, repeat: 0 },
   block: { frames: 4, frameRate: 10, repeat: -1 },

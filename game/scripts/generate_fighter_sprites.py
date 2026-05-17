@@ -45,7 +45,7 @@ FIGHTERS: dict[str, dict[str, Any]] = {
 }
 
 ANIMATIONS: dict[str, dict[str, int | bool]] = {
-    "idle": {"frames": 6, "fps": 8, "loop": True},
+    "idle": {"frames": 6, "fps": 2, "loop": True},
     "run": {"frames": 8, "fps": 14, "loop": True},
     "jump": {"frames": 4, "fps": 10, "loop": False},
     "block": {"frames": 4, "fps": 10, "loop": True},
@@ -167,10 +167,11 @@ def render_frame(fighter_id: str, palette: dict[str, tuple[int, int, int, int]],
 
 
 def pose_for(animation: str, t: float, wave: float) -> dict[str, Any]:
+    idle_bob = round(math.sin(t * math.tau) * 0.4) if animation == "idle" else round(wave * 1.6)
     pose: dict[str, Any] = {
         "x": CENTER_X,
         "y": GROUND_Y - 30,
-        "bob": round(wave * 1.6),
+        "bob": idle_bob,
         "lean": 0,
         "crouch": 0,
         "left_arm": (-12, 5, -21, 19),
@@ -291,7 +292,7 @@ def draw_element_fx(
     t: float,
     pose: dict[str, Any],
 ) -> None:
-    if animation not in {"idle", "block", "basic", "special1", "special2", "special3"}:
+    if animation not in {"block", "basic", "special1", "special2", "special3"}:
         return
 
     fx = palette["fx"]

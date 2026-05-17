@@ -5,7 +5,7 @@
   "animations": {
     "idle": {
       "frames": 6,
-      "fps": 8,
+      "fps": 2,
       "loop": true
     },
     "run": {

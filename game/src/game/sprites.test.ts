@@ -67,6 +67,8 @@ describe('fighter sprite catalog', () => {
       'special3',
       'ko',
     ]);
+    expect(FIGHTER_SPRITE_ANIMATIONS.idle.frameRate).toBeLessThan(FIGHTER_SPRITE_ANIMATIONS.run.frameRate);
+    expect(FIGHTER_SPRITE_ANIMATIONS.idle.frameRate).toBeLessThanOrEqual(3);
   });
 
   it('has generated PNG sheets for every fighter animation', () => {
