@@ -1,0 +1,101 @@
+{
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": "bottom-center",
+  "animations": {
+    "idle": {
+      "frames": 6,
+      "fps": 2,
+      "loop": true
+    },
+    "run": {
+      "frames": 8,
+      "fps": 14,
+      "loop": true
+    },
+    "jump": {
+      "frames": 4,
+      "fps": 10,
+      "loop": false
+    },
+    "block": {
+      "frames": 4,
+      "fps": 10,
+      "loop": true
+    },
+    "hurt": {
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "basic": {
+      "frames": 6,
+      "fps": 16,
+      "loop": false
+    },
+    "special1": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "special2": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "special3": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "ko": {
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    }
+  },
+  "fighters": {
+    "water": {
+      "sheets": {
+        "idle": "/assets/sprites/fighters/water/idle.png",
+        "run": "/assets/sprites/fighters/water/run.png",
+        "jump": "/assets/sprites/fighters/water/jump.png",
+        "block": "/assets/sprites/fighters/water/block.png",
+        "hurt": "/assets/sprites/fighters/water/hurt.png",
+        "basic": "/assets/sprites/fighters/water/basic.png",
+        "special1": "/assets/sprites/fighters/water/special1.png",
+        "special2": "/assets/sprites/fighters/water/special2.png",
+        "special3": "/assets/sprites/fighters/water/special3.png",
+        "ko": "/assets/sprites/fighters/water/ko.png"
+      }
+    },
+    "earth": {
+      "sheets": {
+        "idle": "/assets/sprites/fighters/earth/idle.png",
+        "run": "/assets/sprites/fighters/earth/run.png",
+        "jump": "/assets/sprites/fighters/earth/jump.png",
+        "block": "/assets/sprites/fighters/earth/block.png",
+        "hurt": "/assets/sprites/fighters/earth/hurt.png",
+        "basic": "/assets/sprites/fighters/earth/basic.png",
+        "special1": "/assets/sprites/fighters/earth/special1.png",
+        "special2": "/assets/sprites/fighters/earth/special2.png",
+        "special3": "/assets/sprites/fighters/earth/special3.png",
+        "ko": "/assets/sprites/fighters/earth/ko.png"
+      }
+    },
+    "fire": {
+      "sheets": {
+        "idle": "/assets/sprites/fighters/fire/idle.png",
+        "run": "/assets/sprites/fighters/fire/run.png",
+        "jump": "/assets/sprites/fighters/fire/jump.png",
+        "block": "/assets/sprites/fighters/fire/block.png",
+        "hurt": "/assets/sprites/fighters/fire/hurt.png",
+        "basic": "/assets/sprites/fighters/fire/basic.png",
+        "special1": "/assets/sprites/fighters/fire/special1.png",
+        "special2": "/assets/sprites/fighters/fire/special2.png",
+        "special3": "/assets/sprites/fighters/fire/special3.png",
+        "ko": "/assets/sprites/fighters/fire/ko.png"
+      }
+    }
+  }
+}

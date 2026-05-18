@@ -15,12 +15,30 @@ import { consumeDirtyMaterialIndices } from '../../game/simulation/grid';
 import { createBattleState, EMPTY_ACTIONS, stepBattle } from '../../game/simulation/battle';
 import { emptyActions } from '../../game/input/actions';
 import { KEY_BINDINGS } from '../../game/input/bindings';
-import { bindHudControls, setDebugButtonActive, setRecoveryNoticeVisible, updateHud } from '../../ui/hud';
+import {
+  bindHudControls,
+  setCharacterSelectVisible,
+  setDebugButtonActive,
+  setRecoveryNoticeVisible,
+  setResultOverlayVisible,
+  setVersusIntroVisible,
+  updateHud,
+} from '../../ui/hud';
 import { installGlobalOpsHandlers, recordOpsEvent, syncRuntimeStats } from '../../game/ops';
 import { appendReplayFrame, createReplayLog, replayBattle } from '../../game/replay';
 import { clearRunningReplay, loadRunningReplay, saveCompletedReplay, saveRunningReplay } from '../../game/replayStorage';
+import {
+  FIGHTER_SPRITE_ANIMATION_IDS,
+  FIGHTER_SPRITE_ANIMATIONS,
+  FIGHTER_SPRITE_FRAME_HEIGHT,
+  FIGHTER_SPRITE_FRAME_WIDTH,
+  fighterAnimationKey,
+  fighterSpriteSheetKey,
+  fighterSpriteSheetUrl,
+  selectFighterAnimation,
+} from '../../game/sprites';
 import { setDebugOverlayVisible, updateDebugOverlay } from '../../ui/debugOverlay';
-import type { ActionState, BattleState, FighterSpecId, FighterState, MoveSpec, Rect, ReplayLog } from '../../game/simulation/types';
+import type { ActionState, BattleState, FighterId, FighterSpecId, FighterState, MoveSpec, Rect, ReplayLog } from '../../game/simulation/types';
 
 const STEP_MS = 1000 / TICK_RATE;
 const MAX_SIM_STEPS_PER_FRAME = 4;
@@ -33,7 +51,9 @@ export class BattleScene extends Phaser.Scene {
   private materialTexture!: Phaser.Textures.CanvasTexture;
   private materialCtx!: CanvasRenderingContext2D;
   private materialImage!: Phaser.GameObjects.Image;
-  private fighters!: Phaser.GameObjects.Graphics;
+  private fighterUnderlays!: Phaser.GameObjects.Graphics;
+  private fighterOverlays!: Phaser.GameObjects.Graphics;
+  private fighterSprites!: Record<FighterId, Phaser.GameObjects.Sprite>;
   private effects!: Phaser.GameObjects.Graphics;
   private keys!: Record<keyof typeof KEY_BINDINGS, Phaser.Input.Keyboard.Key>;
   private replayLog: ReplayLog | null = null;
@@ -44,19 +64,35 @@ export class BattleScene extends Phaser.Scene {
   private hitstopTicks = 0;
   private impactFlashTicks = 0;
   private lastCombatImpactSeq = 0;
+  private matchStarted = false;
+  private introTicks = 0;
 
   constructor() {
     super('BattleScene');
   }
 
+  preload(): void {
+    for (const specId of Object.keys(FIGHTER_SPECS) as FighterSpecId[]) {
+      for (const animation of FIGHTER_SPRITE_ANIMATION_IDS) {
+        this.load.spritesheet(fighterSpriteSheetKey(specId, animation), fighterSpriteSheetUrl(specId, animation), {
+          frameWidth: FIGHTER_SPRITE_FRAME_WIDTH,
+          frameHeight: FIGHTER_SPRITE_FRAME_HEIGHT,
+        });
+      }
+    }
+  }
+
   create(): void {
     this.cameras.main.setBounds(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
     this.cameras.main.setBackgroundColor(0x171a1e);
-    this.backdrop = this.add.graphics();
+    this.backdrop = this.add.graphics().setDepth(0);
     this.drawStaticBackdrop();
     this.createMaterialLayer();
-    this.fighters = this.add.graphics();
-    this.effects = this.add.graphics();
+    this.fighterUnderlays = this.add.graphics().setDepth(2);
+    this.registerFighterAnimations();
+    this.createFighterSprites();
+    this.fighterOverlays = this.add.graphics().setDepth(4);
+    this.effects = this.add.graphics().setDepth(5);
     this.keys = this.input.keyboard!.addKeys(KEY_BINDINGS) as Record<keyof typeof KEY_BINDINGS, Phaser.Input.Keyboard.Key>;
 
     bindHudControls({
@@ -68,6 +104,10 @@ export class BattleScene extends Phaser.Scene {
         clearRunningReplay();
         this.startMatch(this.selectedSpec);
       },
+      onOpenSelect: () => {
+        clearRunningReplay();
+        this.openCharacterSelect();
+      },
       onToggleDebug: () => this.toggleDebugOverlay(),
       onDismissRecovery: () => setRecoveryNoticeVisible(false),
       onTouchAction: (action, pressed) => {
@@ -78,18 +118,37 @@ export class BattleScene extends Phaser.Scene {
     this.debugVisible = new URLSearchParams(window.location.search).get('debug') === '1';
     setDebugOverlayVisible(this.debugVisible);
     setDebugButtonActive(this.debugVisible);
-    if (!this.recoverRunningMatch()) {
-      this.startMatch(this.selectedSpec);
+    if (this.recoverRunningMatch()) {
+      this.matchStarted = true;
+    } else {
+      this.openCharacterSelect();
     }
   }
 
   update(_time: number, delta: number): void {
     if (Phaser.Input.Keyboard.JustDown(this.keys.restart)) {
       clearRunningReplay();
-      this.startMatch(this.selectedSpec);
+      if (this.matchStarted) {
+        this.startMatch(this.selectedSpec);
+      } else {
+        this.openCharacterSelect();
+      }
     }
     if (Phaser.Input.Keyboard.JustDown(this.keys.debug)) {
       this.toggleDebugOverlay();
+    }
+    if (!this.matchStarted) {
+      this.renderState();
+      updateHud(this.state);
+      updateDebugOverlay(this.state, this.debugVisible);
+      return;
+    }
+    if (this.introTicks > 0) {
+      this.tickIntro(delta);
+      this.renderState();
+      updateHud(this.state);
+      updateDebugOverlay(this.state, this.debugVisible);
+      return;
     }
 
     if (this.hitstopTicks > 0) {
@@ -135,6 +194,8 @@ export class BattleScene extends Phaser.Scene {
   private startMatch(specId: FighterSpecId): void {
     this.selectedSpec = specId;
     this.state = createBattleState(specId);
+    this.matchStarted = true;
+    this.introTicks = TICK_RATE * 3;
     this.replayLog = createReplayLog(specId, this.state.initialSeed, this.state.matchId);
     this.lastReplayFlushTick = 0;
     this.completedReplaySaved = false;
@@ -144,7 +205,10 @@ export class BattleScene extends Phaser.Scene {
     this.impactFlashTicks = 0;
     this.lastCombatImpactSeq = this.state.runtimeStats.combatImpactSeq;
     this.resetMaterialLayer();
+    setCharacterSelectVisible(false);
     setRecoveryNoticeVisible(false);
+    setResultOverlayVisible(false, this.state);
+    setVersusIntroVisible(true, this.state, this.introTicks);
     saveRunningReplay(this.replayLog);
     recordOpsEvent({
       matchId: this.state.matchId,
@@ -153,6 +217,26 @@ export class BattleScene extends Phaser.Scene {
       message: `Started ${specId} match.`,
       details: { seed: this.state.initialSeed, schemaVersion: REPLAY_SCHEMA_VERSION },
     });
+    updateHud(this.state);
+  }
+
+  private openCharacterSelect(): void {
+    this.matchStarted = false;
+    this.introTicks = 0;
+    this.state = createBattleState(this.selectedSpec);
+    this.replayLog = null;
+    this.completedReplaySaved = false;
+    this.accumulator = 0;
+    this.touchActions = emptyActions();
+    this.hitstopTicks = 0;
+    this.impactFlashTicks = 0;
+    this.lastCombatImpactSeq = this.state.runtimeStats.combatImpactSeq;
+    this.resetMaterialLayer();
+    setRecoveryNoticeVisible(false);
+    setCharacterSelectVisible(true);
+    setVersusIntroVisible(false, this.state);
+    setResultOverlayVisible(false, this.state);
+    this.renderState();
     updateHud(this.state);
   }
 
@@ -167,6 +251,8 @@ export class BattleScene extends Phaser.Scene {
     this.selectedSpec = log.selectedFighter;
     this.state = recovered;
     this.replayLog = log;
+    this.matchStarted = true;
+    this.introTicks = 0;
     this.lastReplayFlushTick = recovered.tick;
     this.completedReplaySaved = false;
     this.accumulator = 0;
@@ -175,6 +261,9 @@ export class BattleScene extends Phaser.Scene {
     this.impactFlashTicks = 0;
     this.lastCombatImpactSeq = this.state.runtimeStats.combatImpactSeq;
     this.resetMaterialLayer();
+    setCharacterSelectVisible(false);
+    setVersusIntroVisible(false, this.state);
+    setResultOverlayVisible(false, this.state);
     setRecoveryNoticeVisible(true);
     recordOpsEvent({
       matchId: recovered.matchId,
@@ -185,6 +274,20 @@ export class BattleScene extends Phaser.Scene {
     });
     updateHud(this.state);
     return true;
+  }
+
+  private tickIntro(delta: number): void {
+    this.accumulator += Math.min(delta, 250);
+    while (this.accumulator >= STEP_MS && this.introTicks > 0) {
+      this.introTicks--;
+      this.accumulator -= STEP_MS;
+    }
+    if (this.introTicks > 0) {
+      setVersusIntroVisible(true, this.state, this.introTicks);
+      return;
+    }
+    this.accumulator = 0;
+    setVersusIntroVisible(false, this.state);
   }
 
   private readActions(): ActionState {
@@ -230,6 +333,41 @@ export class BattleScene extends Phaser.Scene {
     this.materialImage = this.add.image(0, 0, 'material-grid');
     this.materialImage.setOrigin(0, 0);
     this.materialImage.setDisplaySize(ARENA_WIDTH, ARENA_HEIGHT);
+    this.materialImage.setDepth(1);
+  }
+
+  private registerFighterAnimations(): void {
+    for (const specId of Object.keys(FIGHTER_SPECS) as FighterSpecId[]) {
+      for (const animationId of FIGHTER_SPRITE_ANIMATION_IDS) {
+        const animationKey = fighterAnimationKey(specId, animationId);
+        if (this.anims.exists(animationKey)) continue;
+        const config = FIGHTER_SPRITE_ANIMATIONS[animationId];
+        this.anims.create({
+          key: animationKey,
+          frames: this.anims.generateFrameNumbers(fighterSpriteSheetKey(specId, animationId), {
+            start: 0,
+            end: config.frames - 1,
+          }),
+          frameRate: config.frameRate,
+          repeat: config.repeat,
+        });
+      }
+    }
+  }
+
+  private createFighterSprites(): void {
+    this.fighterSprites = {
+      p1: this.createFighterSprite(this.state.fighters.p1),
+      cpu: this.createFighterSprite(this.state.fighters.cpu),
+    };
+  }
+
+  private createFighterSprite(fighter: FighterState): Phaser.GameObjects.Sprite {
+    return this.add
+      .sprite(fighter.x, fighter.y + fighter.height / 2 + 7, fighterSpriteSheetKey(fighter.specId, 'idle'), 0)
+      .setOrigin(0.5, 1)
+      .setScale(1.08)
+      .setDepth(3);
   }
 
   private resetMaterialLayer(): void {
@@ -289,7 +427,8 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private drawFighters(): void {
-    this.fighters.clear();
+    this.fighterUnderlays.clear();
+    this.fighterOverlays.clear();
     this.drawFighter(this.state.fighters.p1);
     this.drawFighter(this.state.fighters.cpu);
   }
@@ -297,26 +436,27 @@ export class BattleScene extends Phaser.Scene {
   private drawFighter(fighter: FighterState): void {
     const spec = FIGHTER_SPECS[fighter.specId];
     const alpha = fighter.invulnTicks > 0 && fighter.invulnTicks % 12 < 6 ? 0.45 : 1;
-    const left = fighter.x - fighter.width / 2;
-    const top = fighter.y - fighter.height / 2;
+    const sprite = this.fighterSprites[fighter.id];
+    const animation = selectFighterAnimation(fighter);
+    const animationKey = fighterAnimationKey(fighter.specId, animation);
 
-    this.fighters.fillStyle(0x050708, 0.4 * alpha);
-    this.fighters.fillEllipse(fighter.x, fighter.y + fighter.height / 2 + 5, fighter.width * 1.2, 10);
-    this.fighters.fillStyle(spec.color, alpha);
-    this.fighters.fillRoundedRect(left, top + 14, fighter.width, fighter.height - 14, 6);
-    this.fighters.fillStyle(spec.accentColor, alpha);
-    this.fighters.fillCircle(fighter.x, top + 12, fighter.width * 0.42);
-    this.fighters.lineStyle(3, spec.accentColor, alpha);
-    this.fighters.lineBetween(fighter.x, fighter.y - 6, fighter.x + fighter.facing * 24, fighter.y - 12);
+    this.fighterUnderlays.fillStyle(0x050708, 0.4 * alpha);
+    this.fighterUnderlays.fillEllipse(fighter.x, fighter.y + fighter.height / 2 + 5, fighter.width * 1.25, 10);
+
+    sprite.setVisible(true);
+    sprite.setPosition(fighter.x, fighter.y + fighter.height / 2 + 7);
+    sprite.setAlpha(alpha);
+    sprite.setFlipX(fighter.facing === -1);
+    sprite.play(animationKey, true);
 
     if (fighter.blockTicks > 0) {
-      this.fighters.lineStyle(4, 0xddeaff, 0.72);
-      this.fighters.strokeCircle(fighter.x + fighter.facing * 11, fighter.y - 2, 33);
+      this.fighterOverlays.lineStyle(4, 0xddeaff, 0.72);
+      this.fighterOverlays.strokeCircle(fighter.x + fighter.facing * 11, fighter.y - 2, 33);
     }
 
     if (fighter.boosted) {
-      this.fighters.lineStyle(2, spec.accentColor, 0.7);
-      this.fighters.strokeCircle(fighter.x, fighter.y, Math.max(fighter.width, fighter.height) * 0.72);
+      this.fighterOverlays.lineStyle(2, spec.accentColor, 0.7);
+      this.fighterOverlays.strokeCircle(fighter.x, fighter.y, Math.max(fighter.width, fighter.height) * 0.72);
     }
   }
 
