@@ -582,3 +582,24 @@ instead of `y * 256 + x` — reading wrong cells. Fixed by matching constants.
 ### Validation
 `python test_invariants.py` passes the 18 named invariant scenarios plus the
 movement and phase fuzz suites.
+
+---
+
+## Phase 2g: Fuzz Variant Consolidation
+
+**Date:** 2026-05-18
+**Status:** INVARIANT COVERAGE CONSOLIDATED
+
+### Changes
+- Salvaged the remaining distinct overnight fuzz ideas into `test_invariants.py`:
+  - hot smoke/steam buoyancy through random stone baffles
+  - small-grid `24x24` fuzz to exercise shader dimension overrides away from
+    the standard `64x64` invariant harness
+- Rejected the remaining detached worktree variants as duplicate formulations
+  of the already-merged movement and phase fuzz coverage.
+- No WGSL kernel, schedule, schema, cold-table, or browser runtime changes were
+  required.
+
+### Validation
+`python test_invariants.py` passes the named scenarios plus movement fuzz,
+phase fuzz, baffled-gas fuzz, and small-grid fuzz suites.

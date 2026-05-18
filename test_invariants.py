@@ -637,6 +637,36 @@ def assert_not_sinking(initial: np.ndarray, final: np.ndarray, mat: int, label: 
     assert_true(after <= before + 0.75, f"{label}: {mat} sank (y {before:.2f}->{after:.2f})")
 
 
+def rect_indices_for(width: int, x0: int, y0: int, rect_width: int, rect_height: int) -> np.ndarray:
+    xs = np.tile(np.arange(x0, x0 + rect_width, dtype=np.int32), rect_height)
+    ys = np.repeat(np.arange(y0, y0 + rect_height, dtype=np.int32), rect_width)
+    return ys * width + xs
+
+
+def center_y_for(grid: np.ndarray, mat: int, width: int) -> float:
+    pos = positions(grid, mat)
+    if len(pos) == 0:
+        return float("nan")
+    return float(np.mean(pos // width))
+
+
+def x_span_for(grid: np.ndarray, mat: int, width: int) -> int:
+    pos = positions(grid, mat)
+    if len(pos) == 0:
+        return 0
+    xs = pos % width
+    return int(xs.max() - xs.min() + 1)
+
+
+def max_column_height_for(grid: np.ndarray, mat: int, width: int) -> int:
+    pos = positions(grid, mat)
+    if len(pos) == 0:
+        return 0
+    xs = pos % width
+    _, counts = np.unique(xs, return_counts=True)
+    return int(counts.max())
+
+
 def run_phase_fuzz_suite(engine: CompositionEngine, cold_table: np.ndarray) -> None:
     """
     Bounded deterministic phase fuzz.
@@ -674,6 +704,133 @@ def run_phase_fuzz_suite(engine: CompositionEngine, cold_table: np.ndarray) -> N
         print(f"PASS fuzz_phase_{case:02d}             ticks={ticks:3d} mean={mean_tick_ms:.3f}ms")
 
 
+def run_baffled_gas_buoyancy_suite(engine: CompositionEngine, cold_table: np.ndarray) -> None:
+    """
+    Gas buoyancy stress with hot gas and random stone baffles.
+
+    These cases are intentionally conservative: exact material counts must hold
+    and smoke/steam must not trend downward even when lateral routes are noisy.
+    """
+
+    print("FUZZ: baffled gas buoyancy")
+    cases = 6
+
+    for case in range(cases):
+        rng = np.random.RandomState(91000 + case)
+        grid = air_grid(thermal=200)
+        stone = voxel(MAT_STONE, 200, PHASE_SOLID)
+        smoke = voxel(MAT_SMOKE, 200, PHASE_GAS)
+        steam = voxel(MAT_STEAM, 200, PHASE_GAS)
+
+        baffle_idx = rect_indices_for(WIDTH, 10, 16, 44, 30)
+        baffles = rng.choice(baffle_idx, size=120, replace=False)
+        grid[baffles] = stone
+
+        gas_idx = rect_indices_for(WIDTH, 8, HEIGHT - 18, 48, 16)
+        gas_cells = rng.choice(gas_idx, size=192, replace=False)
+        grid[gas_cells[:96]] = smoke
+        grid[gas_cells[96:]] = steam
+
+        initial = grid
+        ticks = int(rng.randint(8, 25))
+        final, mean_tick_ms = run_deterministic(engine, cold_table, initial, ticks, f"fuzz_baffled_gas_{case}")
+
+        assert_same_counts(initial, final, f"fuzz_baffled_gas_{case}")
+        assert_not_sinking(initial, final, MAT_SMOKE, f"fuzz_baffled_gas_{case}")
+        assert_not_sinking(initial, final, MAT_STEAM, f"fuzz_baffled_gas_{case}")
+        print(f"PASS fuzz_baffled_gas_{case:02d}       ticks={ticks:3d} mean={mean_tick_ms:.3f}ms")
+
+
+def run_small_grid_fuzz_suite(cold_table: np.ndarray) -> None:
+    """
+    Small-grid fuzz validates the override-sized schedule away from 64x64.
+    """
+
+    fuzz_width = 24
+    fuzz_height = 24
+    fuzz_n = fuzz_width * fuzz_height
+    engine = CompositionEngine(fuzz_width, fuzz_height)
+
+    def small_air_grid(thermal: int = 60) -> np.ndarray:
+        grid = np.empty(fuzz_n, dtype=np.uint32)
+        grid[:] = voxel(MAT_AIR, thermal, PHASE_GAS)
+        return grid
+
+    def run_small_case(initial: np.ndarray, ticks: int, label: str) -> np.ndarray:
+        result_a = engine.run(initial, cold_table, fuzz_width, fuzz_height, n_ticks=ticks)
+        result_b = engine.run(initial, cold_table, fuzz_width, fuzz_height, n_ticks=ticks)
+        final = result_a["final_grid"]
+        assert_voxel_count(initial, final, label)
+        assert_true(np.array_equal(final, result_b["final_grid"]), f"{label}: deterministic replay failed")
+        print(f"PASS {label:28s} ticks={ticks:3d} mean={result_a['mean_tick_ms']:.3f}ms")
+        return final
+
+    print(f"FUZZ: small-grid invariants ({fuzz_width}x{fuzz_height})")
+
+    materials = [
+        voxel(MAT_AIR, 60, PHASE_GAS),
+        voxel(MAT_STONE, 60, PHASE_SOLID),
+        voxel(MAT_WATER, 60, PHASE_LIQUID),
+        voxel(MAT_SAND, 60, PHASE_POWDER),
+        voxel(MAT_SMOKE, 60, PHASE_GAS),
+        voxel(MAT_WOOD, 60, PHASE_SOLID),
+        voxel(MAT_ASH, 60, PHASE_POWDER),
+    ]
+
+    for case in range(5):
+        rng = np.random.RandomState(24000 + case)
+        grid = small_air_grid()
+        fill_count = int(rng.randint(fuzz_n // 8, fuzz_n // 4))
+        for idx in rng.choice(fuzz_n, size=fill_count, replace=False):
+            grid[int(idx)] = materials[int(rng.randint(0, len(materials)))]
+        ticks = int(rng.randint(1, 31))
+        final = run_small_case(grid, ticks, f"fuzz_small_mix_{case}")
+        assert_same_counts(grid, final, f"fuzz_small_mix_{case}")
+
+    for case in range(4):
+        rng = np.random.RandomState(25000 + case)
+        grid = small_air_grid()
+        stone = voxel(MAT_STONE, 60, PHASE_SOLID)
+        water = voxel(MAT_WATER, 60, PHASE_LIQUID)
+        sand = voxel(MAT_SAND, 60, PHASE_POWDER)
+        smoke = voxel(MAT_SMOKE, 60, PHASE_GAS)
+
+        grid[rect_indices_for(fuzz_width, 0, fuzz_height - 1, fuzz_width, 1)] = stone
+        top_cells = rect_indices_for(fuzz_width, 2, 1, fuzz_width - 4, 8)
+        for idx in rng.choice(top_cells, size=36, replace=False):
+            grid[int(idx)] = sand
+
+        pillar_x = int(rng.randint(5, fuzz_width - 5))
+        for y in range(fuzz_height - 13, fuzz_height - 1):
+            grid[y * fuzz_width + pillar_x] = water
+
+        gas_cells = rect_indices_for(fuzz_width, 4, fuzz_height - 10, fuzz_width - 8, 6)
+        for idx in rng.choice(gas_cells, size=24, replace=False):
+            grid[int(idx)] = smoke
+
+        initial_sand_y = center_y_for(grid, MAT_SAND, fuzz_width)
+        initial_smoke_y = center_y_for(grid, MAT_SMOKE, fuzz_width)
+        initial_water_span = x_span_for(grid, MAT_WATER, fuzz_width)
+        initial_water_column = max_column_height_for(grid, MAT_WATER, fuzz_width)
+
+        ticks = int(rng.randint(12, 31))
+        final = run_small_case(grid, ticks, f"fuzz_small_movement_{case}")
+        assert_same_counts(grid, final, f"fuzz_small_movement_{case}")
+        assert_true(
+            center_y_for(final, MAT_SAND, fuzz_width) > initial_sand_y + 3.0,
+            f"fuzz_small_movement_{case}: sand did not fall",
+        )
+        assert_true(
+            center_y_for(final, MAT_SMOKE, fuzz_width) <= initial_smoke_y + 0.75,
+            f"fuzz_small_movement_{case}: smoke sank",
+        )
+        assert_true(
+            x_span_for(final, MAT_WATER, fuzz_width) > initial_water_span
+            or max_column_height_for(final, MAT_WATER, fuzz_width) < initial_water_column,
+            f"fuzz_small_movement_{case}: water remained stacked",
+        )
+
+
 def main() -> bool:
     print("ENGINE INVARIANT SCENARIO SUITE")
     print(f"Grid: {WIDTH}x{HEIGHT}")
@@ -687,6 +844,8 @@ def main() -> bool:
 
     run_movement_fuzz_suite(engine, cold_table)
     run_phase_fuzz_suite(engine, cold_table)
+    run_baffled_gas_buoyancy_suite(engine, cold_table)
+    run_small_grid_fuzz_suite(cold_table)
 
     print("ALL INVARIANT SCENARIOS PASSED")
     return True

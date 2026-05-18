@@ -16,6 +16,8 @@ allowed to become gameplay features.
 - Deterministic fuzz coverage: seeded fuzz/property passes must preserve
   deterministic replay, voxel count, and the relevant material-accounting
   contract without introducing nondeterministic inputs.
+- Grid-size coverage: at least one invariant pass must run the composed engine
+  on a non-default grid size so shader override dimensions stay exercised.
 
 ## Reaction-Specific Accounting
 
@@ -42,5 +44,7 @@ Movement is conservative and split into separate phased swap passes:
   rewrites it.
 - Gas is not a downward-gravity source; smoke, steam, and fire move through gas
   buoyancy/spread passes.
+- Gas buoyancy must remain conservative even with obstacles that force lateral
+  routing around baffles.
 - Every movement pass must be a conservative pairwise swap with exact
   per-material accounting.
