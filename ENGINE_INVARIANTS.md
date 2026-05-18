@@ -13,6 +13,9 @@ allowed to become gameplay features.
   within their documented drift budget.
 - Grid-size correctness: compute shaders must run against the actual grid
   dimensions used by the caller.
+- Deterministic fuzz coverage: seeded fuzz/property passes must preserve
+  deterministic replay, voxel count, and the relevant material-accounting
+  contract without introducing nondeterministic inputs.
 
 ## Reaction-Specific Accounting
 
@@ -21,6 +24,8 @@ allowed to become gameplay features.
   product count must equal consumed fuel plus consumed air.
 - Phase transitions must rewrite exactly one material into exactly one target
   material per transitioned voxel.
+- Phase fuzz may allow water, steam, and ice to rewrite into each other, but
+  the combined water-system material count must remain constant.
 
 ## Current Movement Contract
 

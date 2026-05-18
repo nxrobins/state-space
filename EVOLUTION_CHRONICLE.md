@@ -562,3 +562,23 @@ instead of `y * 256 + x` — reading wrong cells. Fixed by matching constants.
 - Cool smoke does not sink and spreads sideways.
 - Hot smoke and steam rise through thermal buoyancy.
 - Existing combustion and phase-transition accounting remains covered.
+
+---
+
+## Phase 2f: Deterministic Fuzz Invariant Coverage
+
+**Date:** 2026-05-18
+**Status:** INVARIANT COVERAGE EXPANDED
+
+### Changes
+- Extended `test_invariants.py` with a bounded seeded movement fuzz pass:
+  random-looking nonreactive mixtures, loose powder fall, water pillar
+  flattening, and gas non-sinking cases across 1-30 tick horizons.
+- Added a separate phase-transition fuzz pass where water, steam, and ice may
+  rewrite into each other while preserving combined water-system mass.
+- No WGSL kernel, schedule, schema, cold-table, or browser runtime changes were
+  required.
+
+### Validation
+`python test_invariants.py` passes the 18 named invariant scenarios plus the
+movement and phase fuzz suites.

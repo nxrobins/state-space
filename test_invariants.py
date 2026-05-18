@@ -151,6 +151,25 @@ def assert_voxel_count(initial: np.ndarray, final: np.ndarray, label: str) -> No
     assert_true(int(np.sum(material_counts(final))) == len(final), f"{label}: bad final count")
 
 
+def run_deterministic(
+    engine: CompositionEngine,
+    cold_table: np.ndarray,
+    initial: np.ndarray,
+    ticks: int,
+    label: str,
+) -> tuple[np.ndarray, float]:
+    result_a = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=int(ticks))
+    result_b = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=int(ticks))
+    final = result_a["final_grid"]
+
+    assert_voxel_count(initial, final, label)
+    assert_true(
+        np.array_equal(final, result_b["final_grid"]),
+        f"{label}: deterministic replay failed",
+    )
+    return final, float(result_a["mean_tick_ms"])
+
+
 def build_sand_column() -> np.ndarray:
     grid = air_grid()
     fill_rect(grid, 0, HEIGHT - 4, WIDTH, 4, voxel(MAT_STONE, 20, PHASE_SOLID))
@@ -440,21 +459,219 @@ SCENARIOS = [
 
 def run_scenario(engine: CompositionEngine, scenario: Scenario, cold_table: np.ndarray) -> None:
     initial = scenario.build()
-    result_a = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=scenario.ticks)
-    result_b = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=scenario.ticks)
-    final = result_a["final_grid"]
-
-    assert_voxel_count(initial, final, scenario.name)
-    assert_true(
-        np.array_equal(final, result_b["final_grid"]),
-        f"{scenario.name}: deterministic replay failed",
-    )
+    final, mean_tick_ms = run_deterministic(engine, cold_table, initial, scenario.ticks, scenario.name)
     scenario.check(initial, final)
 
     print(
         f"PASS {scenario.name:28s} ticks={scenario.ticks:3d} "
-        f"mean={result_a['mean_tick_ms']:.3f}ms"
+        f"mean={mean_tick_ms:.3f}ms"
     )
+
+
+def run_fuzz_case(
+    engine: CompositionEngine,
+    cold_table: np.ndarray,
+    name: str,
+    initial: np.ndarray,
+    ticks: int,
+    *,
+    require_same_counts: bool,
+    extra_check: Callable[[np.ndarray, np.ndarray], None] | None = None,
+) -> None:
+    final, mean_tick_ms = run_deterministic(engine, cold_table, initial, ticks, name)
+    if require_same_counts:
+        assert_same_counts(initial, final, name)
+    if extra_check is not None:
+        extra_check(initial, final)
+    print(f"PASS {name:28s} ticks={ticks:3d} mean={mean_tick_ms:.3f}ms")
+
+
+def run_movement_fuzz_suite(engine: CompositionEngine, cold_table: np.ndarray) -> None:
+    """
+    Bounded deterministic movement fuzz.
+
+    This widens coverage without introducing nondeterministic test input:
+    fixed seeds generate random-looking nonreactive grids, targeted powder,
+    liquid, and gas layouts, and 1-30 tick horizons.
+    """
+
+    fuzz_thermal = 95
+    stone = voxel(MAT_STONE, fuzz_thermal, PHASE_SOLID)
+    sand = voxel(MAT_SAND, fuzz_thermal, PHASE_POWDER)
+    ash = voxel(MAT_ASH, fuzz_thermal, PHASE_POWDER)
+    water = voxel(MAT_WATER, fuzz_thermal, PHASE_LIQUID)
+    smoke = voxel(MAT_SMOKE, fuzz_thermal, PHASE_GAS)
+    steam = voxel(MAT_STEAM, fuzz_thermal, PHASE_GAS)
+    wood = voxel(MAT_WOOD, fuzz_thermal, PHASE_SOLID)
+
+    def build_mix(seed: int) -> tuple[np.ndarray, int]:
+        rng = np.random.RandomState(seed)
+        grid = air_grid(thermal=fuzz_thermal)
+        materials = [stone, sand, water, smoke, steam, wood, ash]
+        fill_count = int(rng.randint(N // 12, N // 5))
+        for idx in rng.choice(N, size=fill_count, replace=False):
+            grid[int(idx)] = materials[int(rng.randint(0, len(materials)))]
+        return grid, int(rng.randint(1, 31))
+
+    def build_powder(seed: int) -> tuple[np.ndarray, int]:
+        rng = np.random.RandomState(seed)
+        grid = air_grid(thermal=fuzz_thermal)
+        fill_rect(grid, 0, HEIGHT - 1, WIDTH, 1, stone)
+        upper = np.arange(0, (HEIGHT // 2) * WIDTH, dtype=np.int32)
+        for idx in rng.choice(upper, size=140, replace=False):
+            grid[int(idx)] = sand if (int(idx) & 1) == 0 else ash
+        return grid, int(rng.randint(8, 31))
+
+    def build_water_pillar(seed: int) -> tuple[np.ndarray, int]:
+        rng = np.random.RandomState(seed)
+        grid = air_grid(thermal=fuzz_thermal)
+        fill_rect(grid, 0, HEIGHT - 1, WIDTH, 1, stone)
+        x = int(rng.randint(2, WIDTH - 2))
+        height = int(rng.randint(10, 26))
+        y0 = max(1, HEIGHT - 1 - height - int(rng.randint(0, 6)))
+        fill_rect(grid, x, y0, 1, min(height, HEIGHT - 1 - y0), water)
+        return grid, int(rng.randint(12, 31))
+
+    def build_gas_blob(seed: int) -> tuple[np.ndarray, int]:
+        rng = np.random.RandomState(seed)
+        grid = air_grid(thermal=fuzz_thermal)
+        x0 = int(rng.randint(8, WIDTH - 12))
+        y0 = int(rng.randint(HEIGHT // 2, HEIGHT - 12))
+        fill_rect(grid, x0, y0, 4, 4, smoke)
+        fill_rect(grid, x0 + 6, y0, 4, 4, steam)
+        return grid, int(rng.randint(8, 31))
+
+    def check_powder_falls(initial: np.ndarray, final: np.ndarray) -> None:
+        assert_true(center_y(final, MAT_SAND) > center_y(initial, MAT_SAND) + 4.0, "fuzz_powder: sand did not fall")
+        assert_true(center_y(final, MAT_ASH) > center_y(initial, MAT_ASH) + 4.0, "fuzz_powder: ash did not fall")
+
+    def check_liquid_flattens(_initial: np.ndarray, final: np.ndarray) -> None:
+        pos = positions(final, MAT_WATER)
+        ys = pos // WIDTH
+        assert_true(int(ys.max() - ys.min() + 1) <= 3, "fuzz_liquid: water remained stacked in a tall pillar")
+
+    def check_gas_does_not_sink(initial: np.ndarray, final: np.ndarray) -> None:
+        for mat, label in [(MAT_SMOKE, "smoke"), (MAT_STEAM, "steam")]:
+            assert_true(
+                center_y(final, mat) <= center_y(initial, mat) + 0.5,
+                f"fuzz_gas: {label} sank under gravity",
+            )
+
+    print("FUZZ: movement invariants")
+
+    for idx, seed in enumerate(range(1000, 1008)):
+        grid, ticks = build_mix(seed)
+        run_fuzz_case(engine, cold_table, f"fuzz_mix_{idx}", grid, ticks, require_same_counts=True)
+
+    for idx, seed in enumerate(range(2000, 2004)):
+        grid, ticks = build_powder(seed)
+        run_fuzz_case(
+            engine,
+            cold_table,
+            f"fuzz_powder_{idx}",
+            grid,
+            ticks,
+            require_same_counts=True,
+            extra_check=check_powder_falls,
+        )
+
+    for idx, seed in enumerate(range(3000, 3004)):
+        grid, ticks = build_water_pillar(seed)
+        run_fuzz_case(
+            engine,
+            cold_table,
+            f"fuzz_liquid_{idx}",
+            grid,
+            ticks,
+            require_same_counts=True,
+            extra_check=check_liquid_flattens,
+        )
+
+    for idx, seed in enumerate(range(4000, 4004)):
+        grid, ticks = build_gas_blob(seed)
+        run_fuzz_case(
+            engine,
+            cold_table,
+            f"fuzz_gas_{idx}",
+            grid,
+            ticks,
+            require_same_counts=True,
+            extra_check=check_gas_does_not_sink,
+        )
+
+
+def build_phase_fuzz_grid(rng: np.random.RandomState) -> np.ndarray:
+    grid = air_grid(thermal=20)
+    fill_rect(grid, 0, HEIGHT - 1, WIDTH, 1, voxel(MAT_STONE, 60, PHASE_SOLID))
+
+    placements = [
+        (voxel(MAT_WATER, 90, PHASE_LIQUID), 260),
+        (voxel(MAT_STEAM, 220, PHASE_GAS), 260),
+        (voxel(MAT_SAND, 20, PHASE_POWDER), 200),
+        (voxel(MAT_SMOKE, 20, PHASE_GAS), 220),
+        (voxel(MAT_WOOD, 20, PHASE_SOLID), 120),
+        (voxel(MAT_ASH, 20, PHASE_POWDER), 140),
+        (voxel(MAT_STONE, 20, PHASE_SOLID), 220),
+    ]
+
+    available = np.arange(0, (HEIGHT - 1) * WIDTH, dtype=np.int32)
+    total = min(int(sum(amount for _, amount in placements)), len(available))
+    chosen = rng.choice(available, size=total, replace=False)
+
+    cursor = 0
+    for packed, amount in placements:
+        take = min(int(amount), total - cursor)
+        grid[chosen[cursor : cursor + take]] = packed
+        cursor += take
+        if cursor >= total:
+            break
+
+    return grid
+
+
+def assert_not_sinking(initial: np.ndarray, final: np.ndarray, mat: int, label: str) -> None:
+    before = center_y(initial, mat)
+    after = center_y(final, mat)
+    if np.isnan(before) or np.isnan(after):
+        return
+    assert_true(after <= before + 0.75, f"{label}: {mat} sank (y {before:.2f}->{after:.2f})")
+
+
+def run_phase_fuzz_suite(engine: CompositionEngine, cold_table: np.ndarray) -> None:
+    """
+    Bounded deterministic phase fuzz.
+
+    Water, steam, and ice may rewrite into each other, but their combined mass
+    must remain constant. Unrelated materials must remain exact.
+    """
+
+    rng = np.random.RandomState(20260518 ^ 0x5A5A5A5A)
+    cases = 14
+
+    print("FUZZ: phase-transition invariants")
+
+    for case in range(cases):
+        seed = int(rng.randint(0, 2**31 - 1))
+        case_rng = np.random.RandomState(seed)
+        ticks = int(case_rng.randint(1, 31))
+        initial = build_phase_fuzz_grid(case_rng)
+        final, mean_tick_ms = run_deterministic(engine, cold_table, initial, ticks, f"fuzz_phase_{case}")
+
+        before = material_counts(initial)
+        after = material_counts(final)
+        water_system_before = int(before[MAT_WATER] + before[MAT_STEAM] + before[MAT_ICE])
+        water_system_after = int(after[MAT_WATER] + after[MAT_STEAM] + after[MAT_ICE])
+        assert_true(
+            water_system_after == water_system_before,
+            f"fuzz_phase_{case}: water-system mass changed ({water_system_before}->{water_system_after})",
+        )
+
+        for mat in (MAT_SAND, MAT_STONE, MAT_SMOKE, MAT_WOOD, MAT_ASH, MAT_AIR):
+            assert_true(int(before[mat]) == int(after[mat]), f"fuzz_phase_{case}: {mat} count changed")
+
+        assert_not_sinking(initial, final, MAT_SMOKE, f"fuzz_phase_{case}")
+        assert_not_sinking(initial, final, MAT_STEAM, f"fuzz_phase_{case}")
+        print(f"PASS fuzz_phase_{case:02d}             ticks={ticks:3d} mean={mean_tick_ms:.3f}ms")
 
 
 def main() -> bool:
@@ -467,6 +684,9 @@ def main() -> bool:
 
     for scenario in SCENARIOS:
         run_scenario(engine, scenario, cold_table)
+
+    run_movement_fuzz_suite(engine, cold_table)
+    run_phase_fuzz_suite(engine, cold_table)
 
     print("ALL INVARIANT SCENARIOS PASSED")
     return True
