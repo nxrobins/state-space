@@ -22,6 +22,10 @@ That boundary is intentional for now:
 
 When the fighter proves its design loop, the next integration step is replacing selected TypeScript material rules with snapshots or services from the engine, not wiring Phaser directly to the live shader pipeline.
 
+That bridge now exists at `game/src/game/engineSnapshot.ts`. It accepts row-major engine snapshots of packed `u32` voxels, decodes the material byte from the root schema, resamples into the fighter's fixed `160x90` combat grid, and returns ordinary `MaterialCell` data. Phaser still never talks to the live shader pipeline.
+
+Engine `player` markers and unknown material IDs become air by default because fighters are represented by combat state, not terrain cells.
+
 ## Run
 
 ```powershell

@@ -2,6 +2,7 @@ import {
   ARENA_WIDTH,
   BOOST_REQUIRED_CELLS,
   CELL_SIZE,
+  GRID_HEIGHT,
   GRID_WIDTH,
   MATCH_TICKS,
   MAX_HEALTH,
@@ -44,6 +45,7 @@ import type {
   InputCommand,
   MatchEndReason,
   MatchResult,
+  MaterialCell,
   MoveActivationResult,
   MoveDenialReason,
   MoveSpec,
@@ -129,10 +131,15 @@ export const EMPTY_ACTIONS: ActionState = {
   special3: false,
 };
 
+interface CreateBattleStateOptions {
+  matchId?: string;
+  initialMaterialGrid?: MaterialCell[];
+}
+
 export function createBattleState(
   playerSpecId: FighterSpecId = 'water',
   seed = 0xc0ffee,
-  options: { matchId?: string } = {},
+  options: CreateBattleStateOptions = {},
 ): BattleState {
   const cpuSpecId = cpuOpponentFor(playerSpecId);
   const state: BattleState = {
@@ -142,7 +149,7 @@ export function createBattleState(
     timerTicks: MATCH_TICKS,
     initialSeed: seed >>> 0,
     rngSeed: seed >>> 0,
-    materialGrid: buildArenaGrid(),
+    materialGrid: options.initialMaterialGrid ? cloneInitialMaterialGrid(options.initialMaterialGrid) : buildArenaGrid(),
     temporaryCells: [],
     temporaryCellHead: 0,
     temporaryCellCount: 0,
@@ -162,6 +169,14 @@ export function createBattleState(
   ensureSpawnSafety(state, state.fighters.cpu);
   markNonAirCellsDirty(state);
   return state;
+}
+
+function cloneInitialMaterialGrid(grid: MaterialCell[]): MaterialCell[] {
+  const expectedCells = GRID_WIDTH * GRID_HEIGHT;
+  if (grid.length !== expectedCells) {
+    throw new Error(`Initial material grid must contain ${expectedCells} cells, received ${grid.length}.`);
+  }
+  return grid.map((cell) => ({ material: cell.material, expiresAtTick: null }));
 }
 
 export function stepBattle(
