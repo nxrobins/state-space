@@ -1,0 +1,45 @@
+
+added 56 packages, and audited 57 packages in 4s
+
+15 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> state-space-element-fighter@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 D:/state-space-release-check/game
+
+ ✓ src/bootstrap.test.ts (3 tests) 7ms
+ ✓ src/ui/hud.test.ts (16 tests) 7ms
+ ✓ src/game/sprites.test.ts (5 tests) 33ms
+ ✓ src/game/engineSnapshot.test.ts (9 tests) 87ms
+ ✓ src/game/simulation/battle.test.ts (45 tests) 151ms
+
+ Test Files  5 passed (5)
+      Tests  78 passed (78)
+   Start at  20:50:45
+   Duration  1.10s (transform 940ms, setup 0ms, collect 1.33s, tests 285ms, environment 1ms, prepare 1.78s)
+
+
+> state-space-element-fighter@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 25 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          9.19 kB │ gzip:   1.96 kB
+dist/assets/index-DHOaKJMN.css          14.39 kB │ gzip:   3.92 kB
+dist/assets/index-CKMM54S9.js            3.54 kB │ gzip:   1.92 kB
+dist/assets/BattleScene-CEwI7_qL.js     49.14 kB │ gzip:  15.38 kB
+dist/assets/phaser-C1IXbtjv.js       1,482.21 kB │ gzip: 340.02 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.07s

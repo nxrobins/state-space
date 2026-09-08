@@ -1,0 +1,1 @@
+{"success":true,"data":{"origin":"http://127.0.0.1:8765/examples/lab/","result":{"canvas":{"boxHeight":520,"boxWidth":799,"height":560,"width":800},"ready":true,"sample":{"anchored":false,"bonds":768,"energyQ":5120,"flags":0,"integrity":255,"material":5,"materialName":"metal","phase":0,"structure":1023,"temperatureQ":5120,"thermal":20}}},"error":null}

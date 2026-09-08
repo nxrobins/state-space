@@ -1,18 +1,33 @@
 [project]
 name = "state-space"
-version = "0.1.0"
-description = "GPU-driven cellular automata game engine built via evolutionary search"
+version = "0.3.0"
+description = "Deterministic GPU material simulation with explicit energy accounting"
 requires-python = ">=3.10"
 dependencies = [
-    "wgpu>=0.19.0",
+    "wgpu>=0.31,<0.32",
     "numpy>=1.24.0",
-    "anthropic>=0.40.0",
-    "glfw",
 ]
+
+[project.optional-dependencies]
+evolution = ["anthropic>=0.40.0"]
+viewer = ["glfw"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["engine", "eval"]
+exclude = ["**/*.ts", "**/*.mjs", "**/tsconfig*.json", "**/node_modules/**"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py310"
+include = ["engine/**/*.py", "eval/**/*.py", "tests/**/*.py", "scripts/verify*.py", "examples/sdk/*.py", "evolve_ss.py", "test_*.py", "verify_gpu.py"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.6",
+]

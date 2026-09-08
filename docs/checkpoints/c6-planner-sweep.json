@@ -1,0 +1,25 @@
+{
+  "scope": "Executed C6 prototype negative controls; production integration remains open",
+  "sharedDestinationLoadLoss": {
+    "error": "Support reactions must balance the supported weight exactly",
+    "expectedReaction": 12,
+    "mutantReaction": 8,
+    "expectedWeight": 12,
+    "sourceHash": "d62f82fe64d2e3c2a682f5ce6ddfa63a7a2110332783d1d58b8585b803cae2ba",
+    "mutantHash": "fe530eda47b1338947a04d909f944cad5c25f7215718f90cdba90e5416fc321d"
+  },
+  "fixtureIdentity": {
+    "requestedName": "specified-probe",
+    "mutantName": "phase_energy",
+    "correctName": "specified-probe",
+    "mutantHash": "1779694e3f80106d3b1c9a0f3df1f996ea252441502e5bd9f5f2d1bbff7fe367"
+  },
+  "prevention": [
+    "SS033 integer and non-narrowing capacity/load arithmetic",
+    "SS034 full plan geometry checks",
+    "SS035 complete three-coordinate GPU transport",
+    "SS036 stable scenario identity",
+    "SS037 accumulating shared-destination load scatter"
+  ],
+  "geometryBaseline": "c6-plan-geometry-baseline.json"
+}

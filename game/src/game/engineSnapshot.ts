@@ -1,3 +1,5 @@
+import { MAT, SCHEMA_VERSION } from '../../../engine/generated/materials';
+import { checkedInteger, validateDimensions, validatePackedCells } from '../../../engine/contracts';
 import { GRID_HEIGHT, GRID_WIDTH, MaterialType } from './simulation/constants';
 import { createAirCell, gridIndex } from './simulation/grid';
 import type { MaterialCell } from './simulation/types';
@@ -5,21 +7,24 @@ import type { MaterialCell } from './simulation/types';
 export const ENGINE_MATERIAL_MASK = 0xff;
 
 export enum EngineMaterialId {
-  Air = 0,
-  Stone = 1,
-  Water = 2,
-  Sand = 3,
-  Fire = 4,
-  Metal = 5,
-  Oil = 6,
-  Wood = 7,
-  Ice = 8,
-  Steam = 9,
-  Lava = 10,
-  Glass = 11,
-  Player = 12,
-  Ash = 13,
-  Smoke = 14,
+  Air = MAT.AIR,
+  Stone = MAT.STONE,
+  Water = MAT.WATER,
+  Sand = MAT.SAND,
+  Fire = MAT.FIRE,
+  Metal = MAT.METAL,
+  Oil = MAT.OIL,
+  Wood = MAT.WOOD,
+  Ice = MAT.ICE,
+  Steam = MAT.STEAM,
+  Lava = MAT.LAVA,
+  Glass = MAT.GLASS,
+  Player = MAT.PLAYER,
+  Ash = MAT.ASH,
+  Smoke = MAT.SMOKE,
+  OilVapor = MAT.OIL_VAPOR,
+  MoltenMetal = MAT.MOLTEN_METAL,
+  MoltenGlass = MAT.MOLTEN_GLASS,
 }
 
 export interface EngineMaterialSnapshot {
@@ -51,22 +56,28 @@ export interface CombatGridImport {
   report: EngineSnapshotImportReport;
 }
 
-const ENGINE_TO_COMBAT_MATERIAL: Partial<Record<EngineMaterialId, MaterialType>> = {
-  [EngineMaterialId.Air]: MaterialType.Air,
-  [EngineMaterialId.Stone]: MaterialType.Stone,
-  [EngineMaterialId.Water]: MaterialType.Water,
-  [EngineMaterialId.Sand]: MaterialType.Sand,
-  [EngineMaterialId.Fire]: MaterialType.Fire,
-  [EngineMaterialId.Metal]: MaterialType.Metal,
-  [EngineMaterialId.Oil]: MaterialType.Oil,
-  [EngineMaterialId.Wood]: MaterialType.Wood,
-  [EngineMaterialId.Ice]: MaterialType.Ice,
-  [EngineMaterialId.Steam]: MaterialType.Steam,
-  [EngineMaterialId.Lava]: MaterialType.Lava,
-  [EngineMaterialId.Glass]: MaterialType.Glass,
-  [EngineMaterialId.Ash]: MaterialType.Ash,
-  [EngineMaterialId.Smoke]: MaterialType.Smoke,
-};
+type MappedEngineMaterial = Exclude<typeof MAT[keyof typeof MAT], typeof MAT.PLAYER>;
+
+const ENGINE_TO_COMBAT_MATERIAL: Readonly<Partial<Record<number, MaterialType>>> = {
+  [MAT.AIR]: MaterialType.Air,
+  [MAT.STONE]: MaterialType.Stone,
+  [MAT.WATER]: MaterialType.Water,
+  [MAT.SAND]: MaterialType.Sand,
+  [MAT.FIRE]: MaterialType.Fire,
+  [MAT.METAL]: MaterialType.Metal,
+  [MAT.OIL]: MaterialType.Oil,
+  [MAT.WOOD]: MaterialType.Wood,
+  [MAT.ICE]: MaterialType.Ice,
+  [MAT.STEAM]: MaterialType.Steam,
+  [MAT.LAVA]: MaterialType.Lava,
+  [MAT.GLASS]: MaterialType.Glass,
+  [MAT.ASH]: MaterialType.Ash,
+  [MAT.SMOKE]: MaterialType.Smoke,
+  // This is a lossy material import; phase, energy and structure are discarded.
+  [MAT.OIL_VAPOR]: MaterialType.Oil,
+  [MAT.MOLTEN_METAL]: MaterialType.Metal,
+  [MAT.MOLTEN_GLASS]: MaterialType.Glass,
+} satisfies Record<MappedEngineMaterial, MaterialType>;
 
 export function decodeEngineMaterialId(packedCell: number): number {
   return (packedCell >>> 0) & ENGINE_MATERIAL_MASK;
@@ -126,12 +137,10 @@ function sampleSourceCoordinate(targetCoordinate: number, targetSize: number, so
 }
 
 function validateSnapshot(snapshot: EngineMaterialSnapshot): void {
-  if (!Number.isInteger(snapshot.width) || !Number.isInteger(snapshot.height) || snapshot.width <= 0 || snapshot.height <= 0) {
-    throw new Error(`Invalid engine snapshot dimensions: ${snapshot.width}x${snapshot.height}.`);
+  if (snapshot.schemaVersion !== undefined && ![1, 2, SCHEMA_VERSION].includes(snapshot.schemaVersion)) {
+    throw new Error('Unsupported engine snapshot schema version.');
   }
-
-  const expectedCells = snapshot.width * snapshot.height;
-  if (snapshot.packedCells.length !== expectedCells) {
-    throw new Error(`Engine snapshot cell length mismatch: expected ${expectedCells}, received ${snapshot.packedCells.length}.`);
-  }
+  if (snapshot.tick !== undefined) checkedInteger(snapshot.tick, 0, Number.MAX_SAFE_INTEGER, 'tick');
+  const expectedCells = validateDimensions(snapshot.width, snapshot.height);
+  validatePackedCells(snapshot.packedCells, expectedCells);
 }

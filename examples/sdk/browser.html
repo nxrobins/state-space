@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>State Space · SDK example</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.5 system-ui, sans-serif; background:#12171b; color:#e5edf0; }
+    body { max-width:1000px; margin:40px auto; padding:0 24px; }
+    h1 { font-size:28px; margin-bottom:8px; } p { color:#acbec6; }
+    nav { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:24px 0; }
+    button, select { font:inherit; border:1px solid #546a76; background:#24323a; color:inherit; padding:8px 12px; border-radius:5px; }
+    button { cursor:pointer; } button:disabled { opacity:.45; cursor:wait; }
+    main { display:grid; grid-template-columns:minmax(300px,640px) 1fr; gap:24px; }
+    canvas { width:100%; image-rendering:pixelated; border:1px solid #546a76; background:#1f252b; }
+    output { display:block; padding:12px 0; color:#8ee6c4; white-space:pre-wrap; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; color:#d0dde2; }
+    #palette { display:flex; gap:14px; flex-wrap:wrap; } .swatch { display:inline-block; width:12px; height:12px; margin-right:6px; }
+    @media (max-width:800px) { main { grid-template-columns:1fr; } body { margin-top:20px; } }
+  </style>
+  <script type="importmap">{"imports":{"state-space-engine":"../../dist/sdk/state-space.js"}}</script>
+</head>
+<body>
+  <h1>State Space SDK</h1>
+  <p>Custom copper, resin, and powder. Step the simulation, inspect energy, and replay a saved state through the public API.</p>
+  <nav>
+    <label>Backend <select id="backend"><option value="gpu">WebGPU</option><option value="cpu">CPU</option></select></label>
+    <button id="reset">Reset scene</button><button id="step">Step 16 ticks</button>
+    <button id="save">Save snapshot</button><button id="restore" disabled>Restore snapshot</button>
+    <label><input type="checkbox" id="inspect"> Inspect passes</label>
+    <button id="verify">Verify CPU / GPU</button>
+  </nav>
+  <div id="palette"></div>
+  <output id="status" aria-live="polite">Creating the field…</output>
+  <main>
+    <div><canvas id="world" width="64" height="48" aria-label="Material simulation"></canvas><p id="sample">Point at a cell to inspect its state.</p></div>
+    <aside><strong>Field accounting</strong><pre id="accounting"></pre><strong>Pass inspection</strong><pre id="passes">Enable inspection before stepping.</pre></aside>
+  </main>
+  <script type="module" src="./browser.js"></script>
+</body>
+</html>

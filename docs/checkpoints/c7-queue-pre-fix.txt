@@ -1,0 +1,57 @@
+TAP version 13
+# [{"scene":"span","ticks":16,"passed":true},{"scene":"fragment","ticks":12,"passed":true},{"scene":"fire","ticks":12,"passed":true},{"scene":"phase","ticks":8,"passed":true},{"scene":"extension","ticks":8,"passed":true}]
+# Subtest: all lab scenes exhibit their named behavior while retaining exact energy and replay
+ok 1 - all lab scenes exhibit their named behavior while retaining exact energy and replay
+  ---
+  duration_ms: 667.0788
+  type: 'test'
+  ...
+# Subtest: queued GPU steps, edits, export and backend switches retain one complete state
+ok 2 - queued GPU steps, edits, export and backend switches retain one complete state
+  ---
+  duration_ms: 65.2487
+  type: 'test'
+  ...
+# Subtest: bond overlay draws the reciprocal edges returned by the public sample API
+ok 3 - bond overlay draws the reciprocal edges returned by the public sample API
+  ---
+  duration_ms: 10.1355
+  type: 'test'
+  ...
+# Subtest: a queued scene change follows the selected backend at execution time
+not ok 4 - a queued scene change follows the selected backend at execution time
+  ---
+  duration_ms: 18.7373
+  type: 'test'
+  location: 'D:\\state-space\\examples\\lab\\lab.test.mjs:98:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'cpu' !== 'webgpu'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'webgpu'
+  actual: 'cpu'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/state-space/examples/lab/lab.test.mjs:103:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: public client lint rejects compact bond bits and internal physics imports
+ok 5 - public client lint rejects compact bond bits and internal physics imports
+  ---
+  duration_ms: 13.7477
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1104.9219

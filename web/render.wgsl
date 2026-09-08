@@ -30,26 +30,7 @@ fn hash_pos(x: u32, y: u32) -> f32 {
     return f32(h & 0xFFFFu) / 65535.0;  // 0.0 to 1.0
 }
 
-fn material_color(mat_id: u32) -> vec3<f32> {
-    switch(mat_id) {
-        case 0u:  { return vec3<f32>(0.06, 0.06, 0.10); }  // air
-        case 1u:  { return vec3<f32>(0.45, 0.43, 0.42); }  // stone
-        case 2u:  { return vec3<f32>(0.12, 0.32, 0.75); }  // water
-        case 3u:  { return vec3<f32>(0.78, 0.72, 0.48); }  // sand
-        case 4u:  { return vec3<f32>(1.00, 0.45, 0.05); }  // fire
-        case 5u:  { return vec3<f32>(0.68, 0.70, 0.73); }  // metal
-        case 6u:  { return vec3<f32>(0.18, 0.10, 0.04); }  // oil
-        case 7u:  { return vec3<f32>(0.52, 0.33, 0.14); }  // wood
-        case 8u:  { return vec3<f32>(0.72, 0.88, 0.94); }  // ice
-        case 9u:  { return vec3<f32>(0.82, 0.82, 0.86); }  // steam
-        case 10u: { return vec3<f32>(1.00, 0.28, 0.00); }  // lava
-        case 11u: { return vec3<f32>(0.65, 0.82, 0.88); }  // glass
-        case 12u: { return vec3<f32>(0.20, 0.78, 0.38); }  // player
-        case 13u: { return vec3<f32>(0.28, 0.26, 0.24); }  // ash
-        case 14u: { return vec3<f32>(0.38, 0.38, 0.40); }  // smoke
-        default:  { return vec3<f32>(1.00, 0.00, 1.00); }  // unknown
-    }
-}
+// material_color() is generated from engine/materials.json by the bundler.
 
 // How much color variation each material gets (0 = flat, 0.15 = noisy)
 fn material_variation(mat_id: u32) -> f32 {

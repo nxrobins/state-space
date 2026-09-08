@@ -1,0 +1,14 @@
+{
+  "canvasAspectRatio": 1.4285885994170495,
+  "customFileImport": true,
+  "externalHeatQ": 51200,
+  "finalTick": 2,
+  "inspectedPasses": 18,
+  "passed": true,
+  "pickedCell": {
+    "x": 13,
+    "y": 4
+  },
+  "playback": true,
+  "snapshotControls": true
+}

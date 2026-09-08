@@ -1,0 +1,262 @@
+{
+  "origin": "http://127.0.0.1:63919/examples/lab/",
+  "refs": {
+    "e1": {
+      "name": "STATE SPACE ENGINE LAB",
+      "role": "link"
+    },
+    "e10": {
+      "name": "Reset scene",
+      "role": "button"
+    },
+    "e11": {
+      "name": "Inspect passes",
+      "role": "checkbox"
+    },
+    "e12": {
+      "name": "Measured limits & extension paths \u2197",
+      "role": "link"
+    },
+    "e13": {
+      "name": "Experiment",
+      "role": "combobox"
+    },
+    "e14": {
+      "name": "Compute backend",
+      "role": "combobox"
+    },
+    "e15": {
+      "name": "Field view",
+      "role": "combobox"
+    },
+    "e16": {
+      "name": "Next structural solve",
+      "role": "heading"
+    },
+    "e17": {
+      "name": "Last step",
+      "role": "heading"
+    },
+    "e18": {
+      "name": "Continue elsewhere",
+      "role": "heading"
+    },
+    "e19": {
+      "name": "Save in memory",
+      "role": "button"
+    },
+    "e2": {
+      "name": "Live engine laboratory",
+      "role": "region"
+    },
+    "e20": {
+      "name": "Restore saved",
+      "role": "button"
+    },
+    "e21": {
+      "name": "Download session",
+      "role": "button"
+    },
+    "e22": {
+      "name": "",
+      "role": "LabelText"
+    },
+    "e23": {
+      "name": "Cell inspector 0, 0",
+      "role": "heading"
+    },
+    "e24": {
+      "name": "Intervene",
+      "role": "heading"
+    },
+    "e25": {
+      "name": "Energy ledger",
+      "role": "heading"
+    },
+    "e26": {
+      "name": "Open session",
+      "role": "button"
+    },
+    "e27": {
+      "name": "A span that carries its load",
+      "role": "option"
+    },
+    "e28": {
+      "name": "A fragment falls as one",
+      "role": "option"
+    },
+    "e29": {
+      "name": "Fire changes what can stand",
+      "role": "option"
+    },
+    "e3": {
+      "name": "Capabilities",
+      "role": "link"
+    },
+    "e30": {
+      "name": "Heat changes a structure",
+      "role": "option"
+    },
+    "e31": {
+      "name": "A material of your own",
+      "role": "option"
+    },
+    "e32": {
+      "name": "Restored session",
+      "role": "option"
+    },
+    "e33": {
+      "name": "CPU reference",
+      "role": "option"
+    },
+    "e34": {
+      "name": "WebGPU",
+      "role": "option"
+    },
+    "e35": {
+      "name": "Materials + bonds",
+      "role": "option"
+    },
+    "e36": {
+      "name": "Temperature",
+      "role": "option"
+    },
+    "e37": {
+      "name": "Integrity",
+      "role": "option"
+    },
+    "e38": {
+      "name": "Support distance",
+      "role": "option"
+    },
+    "e39": {
+      "name": "Click action",
+      "role": "combobox"
+    },
+    "e4": {
+      "name": "Build with it \u2197",
+      "role": "link"
+    },
+    "e40": {
+      "name": "Material",
+      "role": "combobox"
+    },
+    "e41": {
+      "name": "Inspect only",
+      "role": "option"
+    },
+    "e42": {
+      "name": "Place material",
+      "role": "option"
+    },
+    "e43": {
+      "name": "Add 200 \u00d7 256 Q",
+      "role": "option"
+    },
+    "e44": {
+      "name": "Break bonds",
+      "role": "option"
+    },
+    "e45": {
+      "name": "Repair and weld",
+      "role": "option"
+    },
+    "e46": {
+      "name": "Toggle anchor",
+      "role": "option"
+    },
+    "e47": {
+      "name": "air \u00b7 0",
+      "role": "option"
+    },
+    "e48": {
+      "name": "stone \u00b7 1",
+      "role": "option"
+    },
+    "e49": {
+      "name": "water \u00b7 2",
+      "role": "option"
+    },
+    "e5": {
+      "name": "Small rules. Interacting worlds.",
+      "role": "heading"
+    },
+    "e50": {
+      "name": "sand \u00b7 3",
+      "role": "option"
+    },
+    "e51": {
+      "name": "fire \u00b7 4",
+      "role": "option"
+    },
+    "e52": {
+      "name": "metal \u00b7 5",
+      "role": "option"
+    },
+    "e53": {
+      "name": "oil \u00b7 6",
+      "role": "option"
+    },
+    "e54": {
+      "name": "wood \u00b7 7",
+      "role": "option"
+    },
+    "e55": {
+      "name": "ice \u00b7 8",
+      "role": "option"
+    },
+    "e56": {
+      "name": "steam \u00b7 9",
+      "role": "option"
+    },
+    "e57": {
+      "name": "lava \u00b7 10",
+      "role": "option"
+    },
+    "e58": {
+      "name": "glass \u00b7 11",
+      "role": "option"
+    },
+    "e59": {
+      "name": "player \u00b7 12",
+      "role": "option"
+    },
+    "e6": {
+      "name": "A span that carries its load",
+      "role": "heading"
+    },
+    "e60": {
+      "name": "ash \u00b7 13",
+      "role": "option"
+    },
+    "e61": {
+      "name": "smoke \u00b7 14",
+      "role": "option"
+    },
+    "e62": {
+      "name": "oil vapor \u00b7 15",
+      "role": "option"
+    },
+    "e63": {
+      "name": "molten metal \u00b7 16",
+      "role": "option"
+    },
+    "e64": {
+      "name": "molten glass \u00b7 17",
+      "role": "option"
+    },
+    "e7": {
+      "name": "Material field. Arrow keys move the inspected cell. Enter applies the selected edit.",
+      "role": "Canvas"
+    },
+    "e8": {
+      "name": "Play",
+      "role": "button"
+    },
+    "e9": {
+      "name": "Step 1 tick",
+      "role": "button"
+    }
+  },
+  "snapshot": "- link \"STATE SPACE ENGINE LAB\" [ref=e1]\n- link \"Capabilities\" [ref=e3]\n- link \"Build with it \u2197\" [ref=e4]\n- heading \"Small rules. Interacting worlds.\" [level=1, ref=e5]\n- region \"Live engine laboratory\" [ref=e2]\n  - combobox \"Experiment\" [expanded=false, ref=e13]: A span that carries its load\n    - option \"A span that carries its load\" [selected, ref=e27]\n    - option \"A fragment falls as one\" [ref=e28]\n    - option \"Fire changes what can stand\" [ref=e29]\n    - option \"Heat changes a structure\" [ref=e30]\n    - option \"A material of your own\" [ref=e31]\n    - option \"Restored session\" [disabled, ref=e32]\n  - combobox \"Compute backend\" [expanded=false, ref=e14]: CPU reference\n    - option \"CPU reference\" [selected, ref=e33]\n    - option \"WebGPU\" [ref=e34]\n  - heading \"A span that carries its load\" [level=2, ref=e6]\n  - Canvas \"Material field. Arrow keys move the inspected cell. Enter applies the selected edit.\" [ref=e7] focusable [tabindex]\n  - button \"Play\" [ref=e8]\n  - button \"Step 1 tick\" [ref=e9]\n  - button \"Reset scene\" [ref=e10]\n  - checkbox \"Inspect passes\" [checked=false, ref=e11]\n  - combobox \"Field view\" [expanded=false, ref=e15]: Materials + bonds\n    - option \"Materials + bonds\" [selected, ref=e35]\n    - option \"Temperature\" [ref=e36]\n    - option \"Integrity\" [ref=e37]\n    - option \"Support distance\" [ref=e38]\n  - heading \"Cell inspector 0, 0\" [level=3, ref=e23]\n  - heading \"Intervene\" [level=3, ref=e24]\n  - combobox \"Click action\" [expanded=false, ref=e39]: Inspect only\n    - option \"Inspect only\" [selected, ref=e41]\n    - option \"Place material\" [ref=e42]\n    - option \"Add 200 \u00d7 256 Q\" [ref=e43]\n    - option \"Break bonds\" [ref=e44]\n    - option \"Repair and weld\" [ref=e45]\n    - option \"Toggle anchor\" [ref=e46]\n  - combobox \"Material\" [expanded=false, ref=e40]: air \u00b7 0\n    - option \"air \u00b7 0\" [selected, ref=e47]\n    - option \"stone \u00b7 1\" [ref=e48]\n    - option \"water \u00b7 2\" [ref=e49]\n    - option \"sand \u00b7 3\" [ref=e50]\n    - option \"fire \u00b7 4\" [ref=e51]\n    - option \"metal \u00b7 5\" [ref=e52]\n    - option \"oil \u00b7 6\" [ref=e53]\n    - option \"wood \u00b7 7\" [ref=e54]\n    - option \"ice \u00b7 8\" [ref=e55]\n    - option \"steam \u00b7 9\" [ref=e56]\n    - option \"lava \u00b7 10\" [ref=e57]\n    - option \"glass \u00b7 11\" [ref=e58]\n    - option \"player \u00b7 12\" [ref=e59]\n    - option \"ash \u00b7 13\" [ref=e60]\n    - option \"smoke \u00b7 14\" [ref=e61]\n    - option \"oil vapor \u00b7 15\" [ref=e62]\n    - option \"molten metal \u00b7 16\" [ref=e63]\n    - option \"molten glass \u00b7 17\" [ref=e64]\n  - heading \"Energy ledger\" [level=3, ref=e25]\n  - heading \"Next structural solve\" [level=3, ref=e16]\n  - heading \"Last step\" [level=3, ref=e17]\n  - heading \"Continue elsewhere\" [level=3, ref=e18]\n  - button \"Save in memory\" [ref=e19]\n  - button \"Restore saved\" [disabled, ref=e20]\n  - button \"Download session\" [ref=e21]\n  - LabelText \"Open session\" [ref=e22] clickable [cursor:pointer]\n    - button \"Open session\" [ref=e26]: No file chosen\n- link \"Measured limits & extension paths \u2197\" [ref=e12]"
+}

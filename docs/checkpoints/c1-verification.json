@@ -1,0 +1,235 @@
+{
+  "reportVersion": 1,
+  "startedAt": "2026-09-07T18:42:39.689563+00:00",
+  "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+  "sourceHashes": {
+    "engine/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "engine/_generated_schema.py": "961998513e17f396cc7e05fe7a23f94f3fee60f711e83aeabd3a17f4937c1e90",
+    "engine/browser_state_space.ts": "382eba00bf9492e8ab31f9f8da1d73602ca6dee3a573beb33bfcd43c4e733cd3",
+    "engine/catalog.py": "74e749e9bca14f72744d5abf2985dbdb0b1ae44c557ec2198acad5b6b7640107",
+    "engine/compositor.py": "bc9cfec96274de7202d194f36e606ee538b467f4a0afb2657ef319552fa194df",
+    "engine/contracts.py": "287db14287b0e4fae0cfb2a417dafbd4a299fe73547ec9f966972a35ad173970",
+    "engine/contracts.test.ts": "4ceda18f0d819bd1976c22d09e5cff310b426d18d551a2deef41a013425fe9bb",
+    "engine/contracts.ts": "ad5fab845e67ab9b8e63ecb6ef16c69e62012b0f69ff0cf6c598854baff8d771",
+    "engine/generate.py": "2aeadba793b27a433b192c22f116f656204f624a6f15db962a53bfe37e401e3c",
+    "engine/generated/materials.ts": "e7bea06f5fe8830abe39192950b662a3fa12e51f2439303266f94263557076e5",
+    "engine/lint.py": "339ffb08f3256ea7fcec04920f0b45fd6f1904555d1bb694baf7cdc1c2f520c8",
+    "engine/materials.json": "47d7692f9d9c35cbb4cd8857896fda5d83da3327a776b0cff3e54e887c5e6877",
+    "engine/runner.py": "801f7a5aff06e3fae92c8eac6990f5e1e84eb8abb8377dbe242b2f81e5d96205",
+    "engine/schema.py": "e779dffbbecff3227f2d5e6e844ee0237225fcbbef86e1a09db0607c3d644bcf",
+    "engine/shaders/bitmask_defs.wgsl": "0054965988baff9a9b3095a663cc7d762b7640a6dcd09a681106b7df57a098eb",
+    "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+    "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+    "engine/verify.py": "41c215642ccc332f78afa6526ee4a5c4c60c5e8ae054756b87db7f7fb75a9fee",
+    "engine/vitest.config.ts": "2307405526250bebfb5c84fc68868d99e5a2cfd6d3bfd027113c83161f6d3eb0",
+    "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+    "ENGINE_CONTRACT.md": "2a208c32fc9747b534ca6a1975d634da9b20d96d22cd238c832b6f0023f4506a",
+    "ENGINE_INVARIANTS.md": "3c099eb687d79fa945d411fd657e7d72deb765ce9d6d25715de3fae95cd19a54",
+    "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eval/correctness.py": "41201e1926625d1e3343e9b9b720e9bdaba392d8e714c1daddc9e52a39a6f32c",
+    "evolve_ss.py": "2fd72ffdfd8ad7fb611d17ce510d899a43c3b7a8d842d987e06c32ec0a429274",
+    "game/src/bootstrap.test.ts": "e4dd654d62b6131112aa71494e442e8423fb335b35bc2dc2a74c60ada7a1a060",
+    "game/src/bootstrap.ts": "46cc0d674b640739094cafaa2e94caa95ca2cfae6a05dba991d633e2becdf660",
+    "game/src/game/combatFeel.test.ts": "333cca4ad2415e09292b0fab4899e344a13add18ed7de1c93f2f5c31b7e23ac3",
+    "game/src/game/combatFeel.ts": "fd890697d5ac135361061d12127f7243ccb26662e7d4343df6ae752e86a5a13a",
+    "game/src/game/engineSnapshot.test.ts": "2a8fd0dad5bb2aef84ddfdf419df13746805adb759755af1fe942fcebe2e8a21",
+    "game/src/game/engineSnapshot.ts": "450b94e9f6b0cefe68dab3efa20e94030370fbea9599e7f62d498b566f2b099e",
+    "game/src/game/input/actions.ts": "5a82080f07f5d5c4614696d2f65432067ddeb16e5f88ededc864f48dd63bc665",
+    "game/src/game/input/bindings.ts": "564d3fceeabda1c5303ec51fe2e8f68b618619f9c54fa76dacb4c7aced7cf939",
+    "game/src/game/input/commandResolver.test.ts": "bdc9ac8c15be8f7133b4b98d073b02f131bea53459588ee0ee9da424825293c1",
+    "game/src/game/input/commandResolver.ts": "5207aed2b4134bc5ea928d6297200698f007311c199c688957f5ab0a4e595241",
+    "game/src/game/ops.ts": "5a99bd2945526b0d022e77e45b398ac890bd736809a32633a081ec8543a4c2cd",
+    "game/src/game/replay.ts": "8fb698c36365ffea2123b324692aed16a2c0927164e8bf0c929cdb01c1eaa2ed",
+    "game/src/game/replayStorage.ts": "19216eac651a2f853f0368756755ec8c66df6e45278ba11dea0b311bba838100",
+    "game/src/game/simulation/battle.test.ts": "c554cd670af9ba3dfffd98a907e3cb4086f953398bdd932137a05fef6c128f38",
+    "game/src/game/simulation/battle.ts": "41cbe6be526381f5963cd736f34d592107223d1f5b775ed9776e42af2418064f",
+    "game/src/game/simulation/constants.ts": "85745a07bd651ef93543534dc94428cc198b3bf016b692642597578991bc5baa",
+    "game/src/game/simulation/fighters.ts": "5945fff6601e5851441cfa26ab2bd52c77d38b9f1f10cae99b95a03643127319",
+    "game/src/game/simulation/grid.ts": "0929b787fc6869236dca1966b59d0e557dafaadcb7a489e87043a23935cf54f6",
+    "game/src/game/simulation/materialCombos.test.ts": "c4593531005e40444414ab9a68f46a0edbda3d0828ad59b1f8c3c9ae419decda",
+    "game/src/game/simulation/materialCombos.ts": "b6ff0892f14ebac6d72df55da271c0dca982ba82ab82d47eaac3a7d0dbf8bd6b",
+    "game/src/game/simulation/moves.ts": "3830513f0d2a2018a4bf2cdac3ba5a7d98e517f4e0bd515c3b0be628e72d5885",
+    "game/src/game/simulation/rng.ts": "edcc0fe6baeb72f9c3bc5eaff73bd12f3025c6fcb7a825760f924faa902d35c8",
+    "game/src/game/simulation/types.ts": "647f89074a4e9c2e4d7debf21b44de872c8e0f20b86e3e2fa7fb2cfd400d75a6",
+    "game/src/game/sprites.test.ts": "4ecfd264d39e33042cbeaae041464c11047a2b4c1fdd05e130a3fef8236a7089",
+    "game/src/game/sprites.ts": "b8959e4d607aac623ef457d6d7cc7b185830da1fe393ec8553adc2a8c0a33518",
+    "game/src/main.ts": "93c0031dc57bc69e977e666df5b233f755c04d4a34ae4c24749d24e85e1e0fc8",
+    "game/src/phaser/combatAudio.test.ts": "2876a3cb36451e87527d95731afe48d025a57e422520e8de06ab251499f40647",
+    "game/src/phaser/combatAudio.ts": "03e72ac8a1cc04c2962a0bc0c31c73109290fd95b6c30ba6519baf80497d3783",
+    "game/src/phaser/scenes/BattleScene.ts": "de70015cd4b8bfe26e178cbe74a33ae3f1a323817e82da3e4be83035e2872438",
+    "game/src/ui/debugOverlay.ts": "9bb79bd268513581eccee1ae3d3e4e47ff723284f33f8e02cdbd698a9355db83",
+    "game/src/ui/hud.test.ts": "83d57eee018ecddd2662aef05cf91f81ada725940666339e7a73c253544745c0",
+    "game/src/ui/hud.ts": "74258636b5e25c4f90b4ad2575f1ce0cde8bc3075aa601c156318dcff53c5cdc",
+    "locked/phase_1a_winner.wgsl": "023411305d81845d727793f863ac984d72a97c0f7904e048c7dcb352306a3546",
+    "locked/phase_1b_winner.wgsl": "1eaa09eff078f1a2b9cf935d84c74ae2e4abc73b71643068ff2badbc9f3dca8b",
+    "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+    "locked/phase_2a_winner.wgsl": "899e51457d318d0d3aceddc573589a9f3b2feef8032eec60d0cf54171dbd8ec9",
+    "locked/phase_2b_diagonal_winner.wgsl": "da38745ba2c178e05b985b16bed6b35089dcde6d44eb2a0886d3818b19b24c01",
+    "locked/phase_2b_gas_buoyancy_winner.wgsl": "94acc87590b07c3f18a85f035e366c11dc97df79197c905d943cd644bef64a2a",
+    "locked/phase_2b_gas_spread_winner.wgsl": "41c99a53cb01f3275a9917aa2789501de79447bf54db04eba9a60793dbf63587",
+    "locked/phase_2b_liquid_winner.wgsl": "3238fd759b3d6bc01a6fbdfe78fe375c389f0f04261b206b48fd39737700986a",
+    "locked/phase_2b_winner.wgsl": "420eeacf290728b2e106c5d19fce7ad58ce277edecbba4968c2f7ad6e63f5a75",
+    "locked/phase_2c_winner.wgsl": "2a70d109b6b4ccc7d11f830d101ade3cafe36ef4cda497e96377b9757c97bf74",
+    "locked/phase_2d_winner.wgsl": "86d085c926ff431bb59b6bb87c1154b104d3e550e5280f777ed96d20a1ec3097",
+    "package-lock.json": "be6d94458949ccc70a8332675b8b29e0b2f79c266ff0d3b9ea738dd35f1c7b72",
+    "package.json": "19cc1c6a798d003109418b59569a2e3ca1ec02c29650fdfcbd08aa29fe16e753",
+    "pyproject.toml": "38be86795101a335c6841efcba03dd3a755a01207eb9334c111fc24200eb2af3",
+    "test_cascade.py": "70636bc5613046c71feb2dd0042e01190a42ca353640c621818b7648ff7ce143",
+    "test_invariants.py": "1d39703ed95aced48c20c4f40a6a08fead4c257804f5fd0bbe228fa80fd649e6",
+    "tests/test_contracts.py": "2067a7928fad5dac9887a3fb4e7de3800b6ee7ac6352b20e44f7e9517ff88788",
+    "tests/test_gpu_contracts.py": "a441f8e460154fba44da4f8245505071badc7a1b3ee1c2d06dbcae7f460be714",
+    "tower-defense-rogue/src/game/content.ts": "16d1aaf6c5e26f44a388ba3ae2597fc29058391b40874c4625402444c2e45542",
+    "tower-defense-rogue/src/game/profile.test.ts": "d22c0745199ea2c688a7fb01ee5fb11b7a5cda6475d8fac4335e78e9334bf214",
+    "tower-defense-rogue/src/game/profile.ts": "adf5d8355bad21e91985e743429e75ad1f3c183a3f85970a7c86ee51cd1634cd",
+    "tower-defense-rogue/src/game/rng.ts": "f09525601410433d340daeccf4fdddb5314eaa0684de9801a369f060f3262d0e",
+    "tower-defense-rogue/src/game/simulation.test.ts": "8133e375b9a28922c2f038a0b1bd1fe375b45f34d92e8da5fdcc6b757fdb0a02",
+    "tower-defense-rogue/src/game/simulation.ts": "22f3795348b19ee4aea312fcdcca0913fdbbc44c60d7a0839a43772269a63364",
+    "tower-defense-rogue/src/game/stateSpaceBridge.test.ts": "42dba4ad80b42a9155f889afddaaf17ade44874da2e7a3c4090296e87884fada",
+    "tower-defense-rogue/src/game/terrainContract.test.ts": "8822b4f5bab29cbd5ea0dfbc12716a01105a5d6e47b1f0e7dfae67977dc82219",
+    "tower-defense-rogue/src/main.ts": "5ee6631dd68f5298c34b230f397dc3bfa74971c20417a14b975636aee0e9c8ce",
+    "tower-defense-rogue/src/phaser/DefenseScene.ts": "dbbd675258bc1dbccad2f3a81920daf1254db194d444167eef27f95835562ee4",
+    "tower-defense-rogue/src/ui/hud.ts": "2fc1717cbd913faf8213fb535e9682a37694d69c7ecab0e95a99d4e291ae6c92",
+    "uv.lock": "a18154f50a1ed81eadbcde07795891300760e64a90ce3ea6081a8adbad0db90f",
+    "web/app.js": "e9145dea46646046f6fd68bc91de714a742a94475af3ebca3ca2eb3ba4b9fecb",
+    "web/materials.generated.js": "f07dd5ef073da73fc9e61b392970634712d930e4ad94c4aed0383717ef7ab7ff",
+    "web/render.wgsl": "85ea45fb53e2212e85588f877bcadbfedb389d0647d8ac1053d4bc7436dc50b3",
+    "web/shaders/bitmask_defs.wgsl": "0054965988baff9a9b3095a663cc7d762b7640a6dcd09a681106b7df57a098eb",
+    "web/shaders/combustion.wgsl": "85287446c7dc5fe0d85f34c42a219526b7b19a594033b13f72c3afeff2ce57a5",
+    "web/shaders/diagonal.wgsl": "da7d095d279f12c7d1ab5e25f61cf955db48240bed047d3d4be424362330735f",
+    "web/shaders/gas_buoyancy.wgsl": "6b16d4524f8a2360b287826fafbcbe160356309ae648b169ae456a16d061b9db",
+    "web/shaders/gas_spread.wgsl": "e83454eb72ab706fa92f78063a00522c81c2ea3e2b3c29671b0e523dbc5b3592",
+    "web/shaders/gravity.wgsl": "0cae8375052600e5222d44481ad7d3c3f1f6515dd8d66f8233fb66eb38360482",
+    "web/shaders/liquid.wgsl": "5f1b1472d746c9168a5fd7ef226b2470fb2dcff6ab98a5125932367e81ee9deb",
+    "web/shaders/locked_1a.wgsl": "934595495f6e7310fd24aed843155d2d10a4162c5562e1561c829d2694c18949",
+    "web/shaders/phase.wgsl": "2a70d109b6b4ccc7d11f830d101ade3cafe36ef4cda497e96377b9757c97bf74",
+    "web/shaders/thermal.wgsl": "899e51457d318d0d3aceddc573589a9f3b2feef8032eec60d0cf54171dbd8ec9",
+    "web/shaders.js": "bec1298ee1d8264889bf07e5b19dfc5f70bf57ddcd84c553bd98446525240adf"
+  },
+  "checks": [
+    {
+      "cwd": ".",
+      "command": [
+        "D:\\state-space\\.venv\\Scripts\\python.exe",
+        "-m",
+        "engine.lint"
+      ],
+      "exitCode": 0,
+      "stdout": "Engine structural lint passed\n",
+      "stderr": ""
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "D:\\state-space\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "D:\\state-space\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "stdout": "CompositionEngine: 31 pipelines compiled for 7x5\n  Tick schedule:\n    Vertical gravity phase 0         [vertical0]\n    Vertical gravity phase 1         [vertical1]\n    Diagonal fall phase 0 salt 0     [diagonal0_s0]\n    Diagonal fall phase 1 salt 0     [diagonal1_s0]\n    Liquid spread phase 0 salt 0     [liquid0_s0]\n    Liquid spread phase 1 salt 0     [liquid1_s0]\n    Gas buoyancy phase 0             [gas_buoyancy0]\n    Gas buoyancy phase 1             [gas_buoyancy1]\n    Gas spread phase 0 salt 0        [gas_spread0_s0]\n    Gas spread phase 1 salt 0        [gas_spread1_s0]\n    Thermal                          [thermal]\n    Phase transitions                [phase]\n    Combustion                       [combustion]\nCompositionEngine: 31 pipelines compiled for 1x1\n  Tick schedule:\n    Vertical gravity phase 0         [vertical0]\n    Vertical gravity phase 1         [vertical1]\n    Diagonal fall phase 0 salt 0     [diagonal0_s0]\n    Diagonal fall phase 1 salt 0     [diagonal1_s0]\n    Liquid spread phase 0 salt 0     [liquid0_s0]\n    Liquid spread phase 1 salt 0     [liquid1_s0]\n    Gas buoyancy phase 0             [gas_buoyancy0]\n    Gas buoyancy phase 1             [gas_buoyancy1]\n    Gas spread phase 0 salt 0        [gas_spread0_s0]\n    Gas spread phase 1 salt 0        [gas_spread1_s0]\n    Thermal                          [thermal]\n    Phase transitions                [phase]\n    Combustion                       [combustion]\n",
+      "stderr": "test_nested_malformed_structures_are_rejected (test_contracts.CatalogProperties) ... ok\ntest_packed_cold_table_matches_every_property_and_reserved_slot (test_contracts.CatalogProperties) ... ok\ntest_rejects_abi_changes_without_version_change (test_contracts.CatalogProperties) ... ok\ntest_rejects_dangling_targets_and_incomplete_reactions (test_contracts.CatalogProperties) ... ok\ntest_rejects_duplicate_json_keys (test_contracts.CatalogProperties) ... ok\ntest_rejects_duplicate_material_ids_and_names (test_contracts.CatalogProperties) ... ok\ntest_rejects_invalid_numeric_properties (test_contracts.CatalogProperties) ... ok\ntest_rejects_renamed_materials_swapped_phases_and_flags (test_contracts.CatalogProperties) ... ok\ntest_generated_drift_is_detected_on_disk (test_contracts.PreventionRules) ... ok\ntest_mutated_consumers_cannot_redeclare_material_tables (test_contracts.PreventionRules) ... ok\ntest_mutated_python_cannot_use_silent_override_or_removable_guard (test_contracts.PreventionRules) ... ok\ntest_mutated_shader_cannot_change_stride_or_dimensions (test_contracts.PreventionRules) ... ok\ntest_repository_passes_engine_lint (test_contracts.PreventionRules) ... ok\ntest_gpu_run_rejects_bad_state_before_compilation (test_contracts.SnapshotProperties) ... ok\ntest_packers_reject_overflow_instead_of_wrapping (test_contracts.SnapshotProperties) ... ok\ntest_rejects_cells_before_coercion (test_contracts.SnapshotProperties) ... ok\ntest_rejects_incompatible_or_missing_metadata (test_contracts.SnapshotProperties) ... ok\ntest_rejects_invalid_dimensions (test_contracts.SnapshotProperties) ... ok\ntest_seeded_all_bit_roundtrips (test_contracts.SnapshotProperties) ... ok\ntest_snapshot_copies_and_roundtrips_every_field (test_contracts.SnapshotProperties) ... ok\ntest_validation_survives_optimized_python (test_contracts.SnapshotProperties) ... ok\ntest_chunked_runs_preserve_absolute_tick_schedule (test_gpu_contracts.GpuContractProperties) ... ok\ntest_zero_steps_is_identity_with_finite_timing (test_gpu_contracts.GpuContractProperties) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 1.671s\n\nOK\n"
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "D:\\state-space\\.venv\\Scripts\\python.exe",
+        "test_cascade.py"
+      ],
+      "exitCode": 0,
+      "stdout": "============================================================\nPHASE 2e: COMPOSITION CASCADE TEST\n============================================================\nGrid: 128x128\nTicks: 200\nDispatch order: movement V2 (vertical -> diagonal -> liquid -> gas) -> Thermal -> Phase Transitions -> Combustion\n\nINITIAL STATE:\n  air       : 16352\n  stone     : 7\n  wood      : 25\n  total_thermal: 331180\n\nCompiling physics kernels...\n\nRunning 200 ticks...\nCompositionEngine: 31 pipelines compiled for 128x128\n  Tick schedule:\n    Vertical gravity phase 0         [vertical0]\n    Vertical gravity phase 1         [vertical1]\n    Diagonal fall phase 0 salt 0     [diagonal0_s0]\n    Diagonal fall phase 1 salt 0     [diagonal1_s0]\n    Liquid spread phase 0 salt 0     [liquid0_s0]\n    Liquid spread phase 1 salt 0     [liquid1_s0]\n    Gas buoyancy phase 0             [gas_buoyancy0]\n    Gas buoyancy phase 1             [gas_buoyancy1]\n    Gas spread phase 0 salt 0        [gas_spread0_s0]\n    Gas spread phase 1 salt 0        [gas_spread1_s0]\n    Thermal                          [thermal]\n    Phase transitions                [phase]\n    Combustion                       [combustion]\n  Total time: 452.9ms\n  Mean tick: 2.265ms\n  Min tick: 1.512ms\n  Max tick: 96.190ms\n\nFINAL STATE:\n  air       : 16347\n  ash       : 3\n  smoke     : 7\n  stone     : 7\n  wood      : 20\n  total_thermal: 332753\n\n============================================================\nCONSERVATION AUDIT\n============================================================\n\n[1] FUEL/OXYGEN PAIRING:\n  Wood initial:   25\n  Wood remaining: 20\n  Wood burned:    5\n  Air consumed:   5\n  PASS: wood_burned (5) == air_consumed (5)\n\n[2] COMBUSTION PRODUCT ACCOUNTING:\n  Air initial:  16352\n  Air remaining: 16347\n  Ash final:     3\n  Fire final:    0\n  Smoke final:   7\n  Products:      10\n  PASS: products (10) == wood_burned + air_consumed (10)\n\n[3] TOTAL VOXEL COUNT:\n  Initial: 16384\n  Final:   16384\n  PASS: voxel count preserved (16384)\n\n[4] ENERGY BUDGET:\n  Thermal initial:        331180\n  Wood burned:            5 x fuel_energy=80 = +400\n  Expected final thermal: 331580\n  Actual final thermal:   332753\n  Drift: 1173 (0.35%)\n  PASS: thermal drift < 1% (0.35%)\n\n[5] DETERMINISM:\n  PASS: Two runs of 200 ticks produce identical output\n\n--- Cascade Progression ---\n  Tick  50: wood= 20 ash=  3 fire=  0 smoke=  7 thermal=332753\n  Tick 100: wood= 20 ash=  3 fire=  0 smoke=  7 thermal=332753\n  Tick 150: wood= 20 ash=  3 fire=  0 smoke=  7 thermal=332753\n  Tick 200: wood= 20 ash=  3 fire=  0 smoke=  7 thermal=332753\n\n============================================================\nALL CONSERVATION TESTS PASSED\nTHE ENGINE IS REAL.\n============================================================\n",
+      "stderr": ""
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "D:\\state-space\\.venv\\Scripts\\python.exe",
+        "test_invariants.py"
+      ],
+      "exitCode": 0,
+      "stdout": "ENGINE INVARIANT SCENARIO SUITE\nGrid: 64x64\nScenarios: 18\nCompositionEngine: 31 pipelines compiled for 64x64\n  Tick schedule:\n    Vertical gravity phase 0         [vertical0]\n    Vertical gravity phase 1         [vertical1]\n    Diagonal fall phase 0 salt 0     [diagonal0_s0]\n    Diagonal fall phase 1 salt 0     [diagonal1_s0]\n    Liquid spread phase 0 salt 0     [liquid0_s0]\n    Liquid spread phase 1 salt 0     [liquid1_s0]\n    Gas buoyancy phase 0             [gas_buoyancy0]\n    Gas buoyancy phase 1             [gas_buoyancy1]\n    Gas spread phase 0 salt 0        [gas_spread0_s0]\n    Gas spread phase 1 salt 0        [gas_spread1_s0]\n    Thermal                          [thermal]\n    Phase transitions                [phase]\n    Combustion                       [combustion]\nPASS solid_matter_falls           ticks= 10 mean=10.369ms\nPASS structural_targets_resist_displacement ticks=  1 mean=1.540ms\nPASS sand_column                  ticks= 24 mean=1.584ms\nPASS sand_diagonal_fall           ticks=  8 mean=1.762ms\nPASS water_basin                  ticks= 28 mean=1.580ms\nPASS water_horizontal_spread      ticks=  4 mean=1.860ms\nPASS water_pillar_collapses       ticks= 16 mean=1.506ms\nPASS viscous_oil_spread           ticks=  4 mean=1.496ms\nPASS smoke_column_conservation    ticks= 16 mean=1.593ms\nPASS cool_smoke_spread            ticks= 16 mean=1.511ms\nPASS hot_smoke_rises              ticks= 16 mean=1.618ms\nPASS hot_steam_rises              ticks=  8 mean=1.989ms\nPASS sealed_hot_wood_starves      ticks= 12 mean=1.648ms\nPASS exposed_hot_wood_burns_once  ticks=  1 mean=1.502ms\nPASS ice_melts_to_water           ticks=  1 mean=1.531ms\nPASS water_boils_to_steam         ticks=  1 mean=1.849ms\nPASS sand_vitrifies_to_glass      ticks=  1 mean=1.553ms\nPASS mixed_nonreactive_stress     ticks= 18 mean=1.658ms\nFUZZ: movement invariants\nPASS fuzz_mix_0                   ticks= 26 mean=1.560ms\nPASS fuzz_mix_1                   ticks= 13 mean=1.630ms\nPASS fuzz_mix_2                   ticks= 15 mean=1.675ms\nPASS fuzz_mix_3                   ticks= 22 mean=1.616ms\nPASS fuzz_mix_4                   ticks=  4 mean=1.471ms\nPASS fuzz_mix_5                   ticks= 11 mean=1.574ms\nPASS fuzz_mix_6                   ticks=  8 mean=1.508ms\nPASS fuzz_mix_7                   ticks=  7 mean=1.587ms\nPASS fuzz_powder_0                ticks= 20 mean=1.539ms\nPASS fuzz_powder_1                ticks= 19 mean=1.565ms\nPASS fuzz_powder_2                ticks= 29 mean=1.544ms\nPASS fuzz_powder_3                ticks= 17 mean=1.602ms\nPASS fuzz_liquid_0                ticks= 26 mean=1.526ms\nPASS fuzz_liquid_1                ticks= 14 mean=1.609ms\nPASS fuzz_liquid_2                ticks= 27 mean=1.590ms\nPASS fuzz_liquid_3                ticks= 17 mean=1.591ms\nPASS fuzz_gas_0                   ticks=  8 mean=1.600ms\nPASS fuzz_gas_1                   ticks= 30 mean=1.611ms\nPASS fuzz_gas_2                   ticks= 11 mean=1.615ms\nPASS fuzz_gas_3                   ticks= 15 mean=1.642ms\nFUZZ: phase-transition invariants\nPASS fuzz_phase_00             ticks= 15 mean=1.539ms\nPASS fuzz_phase_01             ticks=  6 mean=1.447ms\nPASS fuzz_phase_02             ticks= 15 mean=1.627ms\nPASS fuzz_phase_03             ticks=  8 mean=1.557ms\nPASS fuzz_phase_04             ticks= 11 mean=1.538ms\nPASS fuzz_phase_05             ticks= 11 mean=1.666ms\nPASS fuzz_phase_06             ticks= 20 mean=1.528ms\nPASS fuzz_phase_07             ticks= 26 mean=1.619ms\nPASS fuzz_phase_08             ticks= 25 mean=1.553ms\nPASS fuzz_phase_09             ticks= 14 mean=1.545ms\nPASS fuzz_phase_10             ticks= 25 mean=1.532ms\nPASS fuzz_phase_11             ticks= 24 mean=1.529ms\nPASS fuzz_phase_12             ticks=  9 mean=1.709ms\nPASS fuzz_phase_13             ticks= 11 mean=1.582ms\nFUZZ: baffled gas buoyancy\nPASS fuzz_baffled_gas_00       ticks= 18 mean=1.559ms\nPASS fuzz_baffled_gas_01       ticks= 16 mean=1.676ms\nPASS fuzz_baffled_gas_02       ticks= 16 mean=1.581ms\nPASS fuzz_baffled_gas_03       ticks= 21 mean=1.613ms\nPASS fuzz_baffled_gas_04       ticks=  9 mean=1.605ms\nPASS fuzz_baffled_gas_05       ticks=  9 mean=1.547ms\nCompositionEngine: 31 pipelines compiled for 24x24\n  Tick schedule:\n    Vertical gravity phase 0         [vertical0]\n    Vertical gravity phase 1         [vertical1]\n    Diagonal fall phase 0 salt 0     [diagonal0_s0]\n    Diagonal fall phase 1 salt 0     [diagonal1_s0]\n    Liquid spread phase 0 salt 0     [liquid0_s0]\n    Liquid spread phase 1 salt 0     [liquid1_s0]\n    Gas buoyancy phase 0             [gas_buoyancy0]\n    Gas buoyancy phase 1             [gas_buoyancy1]\n    Gas spread phase 0 salt 0        [gas_spread0_s0]\n    Gas spread phase 1 salt 0        [gas_spread1_s0]\n    Thermal                          [thermal]\n    Phase transitions                [phase]\n    Combustion                       [combustion]\nFUZZ: small-grid invariants (24x24)\nPASS fuzz_small_mix_0             ticks=  1 mean=2.856ms\nPASS fuzz_small_mix_1             ticks= 18 mean=1.674ms\nPASS fuzz_small_mix_2             ticks= 11 mean=1.599ms\nPASS fuzz_small_mix_3             ticks= 16 mean=1.700ms\nPASS fuzz_small_mix_4             ticks= 12 mean=1.573ms\nPASS fuzz_small_movement_0        ticks= 16 mean=1.599ms\nPASS fuzz_small_movement_1        ticks= 12 mean=1.602ms\nPASS fuzz_small_movement_2        ticks= 23 mean=1.558ms\nPASS fuzz_small_movement_3        ticks= 14 mean=1.583ms\nALL INVARIANT SCENARIOS PASSED\n",
+      "stderr": ""
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "test"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-engine@0.1.0 test\n> vitest run --config engine/vitest.config.ts\n\n\n RUN  v3.2.7 D:/state-space\n\n \u2713 engine/contracts.test.ts (7 tests) 277ms\n\n Test Files  1 passed (1)\n      Tests  7 passed (7)\n   Start at  11:42:54\n   Duration  651ms (transform 66ms, setup 0ms, collect 68ms, tests 277ms, environment 0ms, prepare 108ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "cwd": ".",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-engine@0.1.0 typecheck\n> tsc --noEmit -p engine/tsconfig.json\n\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "game",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "test"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-element-fighter@0.1.0 test\n> vitest run\n\n\n RUN  v3.2.4 D:/state-space/game\n\n \u2713 src/bootstrap.test.ts (3 tests) 6ms\n \u2713 src/phaser/combatAudio.test.ts (1 test) 2ms\n \u2713 src/game/input/commandResolver.test.ts (4 tests) 4ms\n \u2713 src/ui/hud.test.ts (16 tests) 6ms\n \u2713 src/game/combatFeel.test.ts (5 tests) 9ms\n \u2713 src/game/engineSnapshot.test.ts (8 tests) 20ms\n \u2713 src/game/simulation/materialCombos.test.ts (7 tests) 41ms\n \u2713 src/game/sprites.test.ts (6 tests) 156ms\n \u2713 src/game/simulation/battle.test.ts (54 tests) 201ms\n\n Test Files  9 passed (9)\n      Tests  104 passed (104)\n   Start at  11:42:57\n   Duration  786ms (transform 566ms, setup 0ms, collect 1.27s, tests 444ms, environment 2ms, prepare 1.19s)\n\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "game",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-element-fighter@0.1.0 build\n> tsc --noEmit && vite build\n\nvite v6.4.2 building for production...\ntransforming...\n\u2713 29 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                          9.19 kB \u2502 gzip:   1.97 kB\ndist/assets/index-NySr12lN.css          16.20 kB \u2502 gzip:   4.26 kB\ndist/assets/index-DeeO9i_-.js            3.54 kB \u2502 gzip:   1.92 kB\ndist/assets/BattleScene-F6sXIun7.js     76.88 kB \u2502 gzip:  23.51 kB\ndist/assets/phaser-C1IXbtjv.js       1,482.21 kB \u2502 gzip: 340.02 kB\n\u2713 built in 4.90s\n",
+      "stderr": "\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n"
+    },
+    {
+      "cwd": "tower-defense-rogue",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "test"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-tower-defense-rogue@0.1.0 test\n> vitest run\n\n\n RUN  v3.2.4 D:/state-space/tower-defense-rogue\n\n \u2713 src/game/profile.test.ts (3 tests) 5ms\n \u2713 src/game/stateSpaceBridge.test.ts (2 tests) 5ms\n \u2713 src/game/simulation.test.ts (31 tests) 169ms\n \u2713 src/game/terrainContract.test.ts (1 test) 389ms\n   \u2713 terrain obeys the engine encoding contract > keeps every generated placement in range across maps and seeds  387ms\n\n Test Files  4 passed (4)\n      Tests  37 passed (37)\n   Start at  11:43:08\n   Duration  869ms (transform 256ms, setup 0ms, collect 577ms, tests 568ms, environment 1ms, prepare 485ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "tower-defense-rogue",
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "stdout": "\n> state-space-tower-defense-rogue@0.1.0 build\n> tsc --noEmit && vite build\n\nvite v6.4.2 building for production...\ntransforming...\n\u2713 17 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                     0.51 kB \u2502 gzip:   0.30 kB\ndist/assets/index-Cbjmn9hO.css     13.21 kB \u2502 gzip:   3.31 kB\ndist/assets/index-CQmvgjA3.js   1,616.38 kB \u2502 gzip: 381.08 kB\n\u2713 built in 4.45s\n",
+      "stderr": "\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n"
+    }
+  ],
+  "sourceUnchangedDuringVerification": true,
+  "passed": true,
+  "finishedAt": "2026-09-07T18:43:18.206047+00:00"
+}

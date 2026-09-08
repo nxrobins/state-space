@@ -4,9 +4,6 @@
 // cell can participate in at most one swap per pass and per-material counts are
 // preserved exactly. Gas is handled by separate buoyancy/spread passes.
 
-@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
-@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
-@group(0) @binding(2) var<storage, read> cold_table: array<u32>;
 
 const COLD_STRIDE: u32 = 24u;
 const COLD_DENSITY: u32 = 0u;
@@ -34,16 +31,7 @@ fn is_vertical_falling_matter(ph: u32) -> bool {
 }
 
 fn should_swap(upper: u32, lower: u32) -> bool {
-    let upper_mat = get_material(upper);
-    let lower_mat = get_material(lower);
-    let upper_phase = get_phase(upper);
-    let lower_phase = get_phase(lower);
-
-    if (!is_vertical_falling_matter(upper_phase) || is_structural(lower_phase)) {
-        return false;
-    }
-
-    return density_of(upper_mat) > density_of(lower_mat);
+    return io_can_fall(upper, lower);
 }
 
 @compute @workgroup_size(16, 16)
@@ -57,19 +45,19 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
 
     if (y < GRID_HEIGHT - 1u && ((y & 1u) == GRAVITY_PHASE)) {
         let below = grid_in[get_idx(x, y + 1u)];
-        if (should_swap(voxel, below)) {
-            grid_out[idx] = below;
+        if (should_swap(idx, get_idx(x, y + 1u))) {
+            io_copy(idx, get_idx(x, y + 1u));
             return;
         }
     }
 
     if (y > 0u && (((y - 1u) & 1u) == GRAVITY_PHASE)) {
         let above = grid_in[get_idx(x, y - 1u)];
-        if (should_swap(above, voxel)) {
-            grid_out[idx] = above;
+        if (should_swap(get_idx(x, y - 1u), idx)) {
+            io_copy(idx, get_idx(x, y - 1u));
             return;
         }
     }
 
-    grid_out[idx] = voxel;
+    io_copy(idx, idx);
 }

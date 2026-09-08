@@ -1,0 +1,171 @@
+{
+  "frameAnchors": "bottom-center for characters/towers, center for tools/fx",
+  "terrain": {
+    "key": "terrain:tiles",
+    "path": "terrain/tiles.png",
+    "frameWidth": 48,
+    "frameHeight": 48,
+    "frames": 8
+  },
+  "enemies": {
+    "siltling": {
+      "key": "enemy:siltling",
+      "path": "enemies/siltling.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "thornback": {
+      "key": "enemy:thornback",
+      "path": "enemies/thornback.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "glassWisp": {
+      "key": "enemy:glassWisp",
+      "path": "enemies/glassWisp.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "ironMite": {
+      "key": "enemy:ironMite",
+      "path": "enemies/ironMite.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "oilSlug": {
+      "key": "enemy:oilSlug",
+      "path": "enemies/oilSlug.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "frostDrone": {
+      "key": "enemy:frostDrone",
+      "path": "enemies/frostDrone.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "ashHusk": {
+      "key": "enemy:ashHusk",
+      "path": "enemies/ashHusk.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "relicEater": {
+      "key": "enemy:relicEater",
+      "path": "enemies/relicEater.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    }
+  },
+  "towers": {
+    "emberCoil": {
+      "key": "tower:emberCoil",
+      "path": "towers/emberCoil.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 3
+    },
+    "frostLoom": {
+      "key": "tower:frostLoom",
+      "path": "towers/frostLoom.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 3
+    },
+    "bloomMortar": {
+      "key": "tower:bloomMortar",
+      "path": "towers/bloomMortar.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 3
+    },
+    "voltSpire": {
+      "key": "tower:voltSpire",
+      "path": "towers/voltSpire.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 3
+    },
+    "sunForge": {
+      "key": "tower:sunForge",
+      "path": "towers/sunForge.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 3
+    }
+  },
+  "heroes": {
+    "kiteRanger": {
+      "key": "hero:kiteRanger",
+      "path": "heroes/kiteRanger.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "bulwark": {
+      "key": "hero:bulwark",
+      "path": "heroes/bulwark.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "fieldMechanic": {
+      "key": "hero:fieldMechanic",
+      "path": "heroes/fieldMechanic.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    },
+    "cinderChemist": {
+      "key": "hero:cinderChemist",
+      "path": "heroes/cinderChemist.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    }
+  },
+  "machines": {
+    "aetherMill": {
+      "key": "machine:aetherMill",
+      "path": "machines/aether-mill.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 4
+    }
+  },
+  "tools": {
+    "path": "tools/tools.png",
+    "frameWidth": 48,
+    "frameHeight": 48,
+    "frames": 4
+  },
+  "powerups": {
+    "path": "powerups/powerups.png",
+    "frameWidth": 48,
+    "frameHeight": 48,
+    "frames": 4
+  },
+  "relics": {
+    "path": "relics/relics.png",
+    "frameWidth": 48,
+    "frameHeight": 48,
+    "frames": 6
+  },
+  "fx": {
+    "projectiles": {
+      "key": "fx:projectiles",
+      "path": "fx/projectiles.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 6
+    }
+  }
+}

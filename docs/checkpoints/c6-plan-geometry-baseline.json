@@ -1,0 +1,152 @@
+{
+  "plannedDimensions": [
+    5,
+    3
+  ],
+  "appliedDimensions": [
+    3,
+    5
+  ],
+  "acceptedByGpu": true,
+  "resultValidation": "Structural bonds must be reciprocal, in bounds, and between intact cohesive cells",
+  "sourceIndices": [
+    0,
+    1,
+    2,
+    8,
+    9,
+    5,
+    6,
+    7,
+    3,
+    4,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "initialState": [
+    [
+      76026880,
+      344527872,
+      613028864,
+      814420997,
+      1082921989,
+      1418531840,
+      1687032832,
+      1955533824,
+      2222986240,
+      2491487232,
+      2759988224,
+      3028489216,
+      3296990208,
+      3565491200,
+      3833992192
+    ],
+    [
+      5120,
+      5121,
+      5122,
+      5123,
+      5124,
+      5125,
+      5126,
+      5127,
+      5128,
+      5129,
+      5130,
+      5131,
+      5132,
+      5133,
+      5134
+    ],
+    [
+      0,
+      0,
+      0,
+      767,
+      511,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "finalState": [
+    [
+      76026880,
+      344527872,
+      613028864,
+      2222986240,
+      2491487232,
+      1418531840,
+      1687032832,
+      1955533824,
+      814420997,
+      1082921989,
+      2759988224,
+      3028489216,
+      3296990208,
+      3565491200,
+      3833992192
+    ],
+    [
+      5120,
+      5121,
+      5122,
+      5128,
+      5129,
+      5125,
+      5126,
+      5127,
+      5123,
+      5124,
+      5130,
+      5131,
+      5132,
+      5133,
+      5134
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      767,
+      511,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "device": {
+    "vendor": "NVIDIA",
+    "architecture": "",
+    "device": "NVIDIA GeForce RTX 4090",
+    "description": "595.79",
+    "stackgroup_min_size": 4,
+    "stackgroup_max_size": 128,
+    "vendor_id": 4318,
+    "device_id": 9860,
+    "adapter_type": "DiscreteGPU",
+    "backend_type": "Vulkan"
+  },
+  "sourceHashes": {
+    "engine/shaders/structure_apply.wgsl": "53f626556498f6a15bffd3ecff9451ee72d96ab896e9a0e9e26d87cf25a3fe4c",
+    "engine/structure.py": "254e873de75b043495059f42b169fbd49f2eb82422ce893b112660b228da1f00",
+    "engine/structure_gpu.py": "61b25d86e0c21c511377f913661c4bcd200b6aa18fe9b4f77ea4c60e0d481ced"
+  }
+}

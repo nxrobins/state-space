@@ -4,9 +4,6 @@
 // each block is eligible, chosen by a deterministic hash and MOVE_SALT. This
 // preserves exact per-material counts without atomics.
 
-@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
-@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
-@group(0) @binding(2) var<storage, read> cold_table: array<u32>;
 
 const COLD_STRIDE: u32 = 24u;
 const COLD_DENSITY: u32 = 0u;
@@ -29,19 +26,9 @@ fn is_falling_matter(ph: u32) -> bool {
     return ph == PHASE_POWDER || ph == PHASE_LIQUID || ph == PHASE_VISCOUS || ph == PHASE_MOLTEN;
 }
 
-fn can_fall_into(src: u32, dst: u32) -> bool {
-    let src_phase = get_phase(src);
-    let dst_phase = get_phase(dst);
-    if (!is_falling_matter(src_phase) || is_structural(dst_phase)) {
-        return false;
-    }
-    return density_of(get_material(src)) > density_of(get_material(dst));
-}
-
 fn vertical_blocked(x: u32, y: u32, src: u32) -> bool {
     if (y >= GRID_HEIGHT - 1u) { return true; }
-    let below = grid_in[get_idx(x, y + 1u)];
-    return !can_fall_into(src, below);
+    return !io_can_fall(get_idx(x, y), get_idx(x, y + 1u));
 }
 
 fn hash_pair(x: u32, y: u32, salt: u32) -> u32 {
@@ -53,7 +40,7 @@ fn hash_pair(x: u32, y: u32, salt: u32) -> u32 {
 fn should_swap(src_x: u32, src_y: u32, dst_x: u32, dst_y: u32) -> bool {
     let src = grid_in[get_idx(src_x, src_y)];
     let dst = grid_in[get_idx(dst_x, dst_y)];
-    return vertical_blocked(src_x, src_y, src) && can_fall_into(src, dst);
+    return vertical_blocked(src_x, src_y, src) && io_can_fall(get_idx(src_x, src_y), get_idx(dst_x, dst_y));
 }
 
 @compute @workgroup_size(16, 16)
@@ -68,19 +55,19 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     var upper_y = y;
     if ((y & 1u) != MOVE_PHASE) {
         if (y == 0u) {
-            grid_out[idx] = voxel;
+            io_copy(idx, idx);
             return;
         }
         upper_y = y - 1u;
     }
     if (upper_y >= GRID_HEIGHT - 1u) {
-        grid_out[idx] = voxel;
+        io_copy(idx, idx);
         return;
     }
 
     let pair_left = x - (x & 1u);
     if (pair_left >= GRID_WIDTH - 1u) {
-        grid_out[idx] = voxel;
+        io_copy(idx, idx);
         return;
     }
 
@@ -92,13 +79,13 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     let do_swap = should_swap(src_x, src_y, dst_x, dst_y);
 
     if (do_swap && x == src_x && y == src_y) {
-        grid_out[idx] = grid_in[get_idx(dst_x, dst_y)];
+        io_copy(idx, get_idx(dst_x, dst_y));
         return;
     }
     if (do_swap && x == dst_x && y == dst_y) {
-        grid_out[idx] = grid_in[get_idx(src_x, src_y)];
+        io_copy(idx, get_idx(src_x, src_y));
         return;
     }
 
-    grid_out[idx] = voxel;
+    io_copy(idx, idx);
 }

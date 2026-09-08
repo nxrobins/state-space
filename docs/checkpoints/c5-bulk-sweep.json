@@ -1,0 +1,41 @@
+{
+  "sourceHash": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+  "unsignedPhaseOffset": {
+    "materials": [
+      9
+    ],
+    "energyQ": [
+      0
+    ],
+    "expectedTemperatureQ": [
+      0
+    ],
+    "mutantTemperatureQ": [
+      23040
+    ]
+  },
+  "narrowLedgerSum": {
+    "materials": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "energyQ": [
+      1073741823,
+      1073741823,
+      1073741823,
+      1073741823,
+      1073741823,
+      1073741823,
+      1073741823,
+      1073741823
+    ],
+    "expectedTotalQ": 8589934584,
+    "mutantTotalQ": 4294967288
+  }
+}

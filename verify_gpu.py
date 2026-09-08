@@ -22,7 +22,7 @@ def main():
 
     # Request device
     device = adapter.request_device_sync()
-    print(f"Device created successfully")
+    print("Device created successfully")
 
     # Simple compute shader: doubles each u32 in the buffer
     shader_code = """

@@ -1,0 +1,12 @@
+{
+  "labFilesMissingFromVerificationManifest": [
+    "examples/lab/app.js",
+    "examples/lab/controller.js",
+    "examples/lab/index.html",
+    "examples/lab/lab.test.mjs",
+    "examples/lab/scenarios.js",
+    "examples/lab/style.css",
+    "examples/lab/verify.js",
+    "examples/lab/view.js"
+  ]
+}

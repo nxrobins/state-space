@@ -1,0 +1,61 @@
+{
+  "finding": "Historical failed-trial records contain non-standard Infinity. Explicit legacy import preserves sources but discards all scores and receipts; current evidence remains strict JSON.",
+  "archives": [
+    {
+      "path": "archive\\archive_phase_1a.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "de9fd608ee98792e6f200896ca33dabdb18b0fef97dcfbc7559dbe37cc121bc4"
+    },
+    {
+      "path": "archive\\archive_phase_1b.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "810a1778f48ce8d8f5e00787547c3a1a413de8c7274d5cc80278f2f1fcdcc734"
+    },
+    {
+      "path": "archive\\archive_phase_1c.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "3f5f6b7b958441bc813f344ba7077d56abd864d080da2ae973bffd85741cd0a7"
+    },
+    {
+      "path": "archive\\archive_phase_2a.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "3b3e2a63a6f21d9e96e43984351d0fc231e1f66b58880638395f0c913671cc81"
+    },
+    {
+      "path": "archive\\archive_phase_2b.json",
+      "strictRead": "valid JSON",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "0aa46b71eb9270ee04fa705c90b3359e502e032c4e9bcb98d16a5fafcd2b2da6"
+    },
+    {
+      "path": "archive\\archive_phase_2c.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "9a75b807c0a8bda142896248919e78f843ea2f423394addeacff17f660059318"
+    },
+    {
+      "path": "archive\\archive_phase_2d.json",
+      "strictRead": "Non-finite JSON value: Infinity",
+      "sourceEntries": 15,
+      "qualifiedParents": 0,
+      "sourceUnchanged": true,
+      "originalHash": "8237bd1ddcf6b0c5fea837be4a96741da42a638357c00c78f3d248ebef5d46b4"
+    }
+  ]
+}

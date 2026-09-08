@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>State Space · Engine Lab</title><link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><a class="wordmark" href="./">STATE SPACE <span>ENGINE LAB</span></a><nav><a href="../../docs/CAPABILITIES.md">Capabilities</a><a href="../../docs/SDK.md">Build with it ↗</a></nav></header>
+  <main>
+    <div class="intro"><p class="eyebrow">MATERIALS / ENERGY / STRUCTURES</p><h1>Small rules.<br><em>Interacting worlds.</em></h1><p>Run the engine. Inspect a cell. Change what happens next.<br>Every scene uses the public State Space SDK.</p></div>
+    <section class="workspace" aria-label="Live engine laboratory">
+      <div class="scene-bar"><label>Experiment<select id="scenario" aria-label="Experiment"></select></label><label>Compute<select id="backend" aria-label="Compute backend"><option value="cpu">CPU reference</option><option value="webgpu">WebGPU</option></select></label><span id="device">Initializing…</span></div>
+      <div class="lab-grid"><div class="stage">
+        <div class="stage-title"><div><p id="category" class="eyebrow"></p><h2 id="title">Loading the engine</h2></div><span class="live-dot">LIVE SIMULATION</span></div>
+        <div class="canvas-wrap"><canvas id="world" width="800" height="560" tabindex="0" aria-label="Material field. Arrow keys move the inspected cell. Enter applies the selected edit."></canvas></div>
+        <div class="transport"><button id="play" class="primary">Play</button><button id="step">Step 1 tick</button><button id="reset">Reset scene</button><label class="check"><input id="inspect" type="checkbox">Inspect passes</label><label class="overlay">View<select id="overlay" aria-label="Field view"><option value="material">Materials + bonds</option><option value="temperature">Temperature</option><option value="integrity">Integrity</option><option value="support">Support distance</option></select></label></div>
+        <p id="description" class="description"></p><p id="limit" class="limit"></p>
+      </div><aside>
+        <div class="metrics"><div><span>COMPLETED TICK</span><strong id="tick">0</strong></div><div><span>ENERGY DRIFT</span><strong id="drift">0 <small>Q</small></strong></div></div>
+        <section class="panel"><h3>Cell inspector <span id="coordinates">0, 0</span></h3><p class="hint">Point or click to inspect. Arrow keys work too.</p><dl id="sample"></dl></section>
+        <section class="panel"><h3>Intervene</h3><label>Click action<select id="action"><option value="inspect">Inspect only</option><option value="paint">Place material</option><option value="heat">Add 200 × 256 Q</option><option value="break">Break bonds</option><option value="weld">Repair and weld</option><option value="pin">Toggle anchor</option></select></label><label>Material<select id="material"></select></label><p class="hint">Edits track external energy. Erase by placing air.</p></section>
+        <section class="panel"><h3>Energy ledger</h3><dl id="ledger"></dl><p class="hint">Thermal, latent and chemical energy. Gravity has no mechanical ledger.</p></section>
+      </aside></div>
+      <div class="details"><section><h3>Next structural solve</h3><p id="structure"></p><p class="hint">Loads and support distances refer to the current cells before damage and motion. Component IDs change as bodies move.</p></section><section><h3>Last step</h3><p id="timing"></p><pre id="passes">Enable “Inspect passes” and step to see which rules changed the state.</pre></section><section><h3>Continue elsewhere</h3><div class="session-actions"><button id="save">Save in memory</button><button id="restore" disabled>Restore saved</button><button id="download">Download session</button><label class="file-button">Open session<input id="upload" type="file" accept=".json,application/json"></label></div><p class="hint">Includes the complete snapshot and its material catalog. Restore and backend changes start a new accounting baseline.</p></section></div>
+      <p id="status" role="status" aria-live="polite">Preparing a live field…</p>
+    </section>
+    <footer><span>ca-v3 · SDK 0.3 · deterministic cellular model</span><span>Small, inspectable scenes. <a href="../../docs/CAPABILITIES.md">Measured limits & extension paths ↗</a></span></footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body></html>

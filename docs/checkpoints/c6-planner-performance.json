@@ -1,0 +1,202 @@
+{
+  "scope": "C6 standalone host planners only; not production tick or browser throughput",
+  "startedAt": "2026-09-07T23:34:51.144738+00:00",
+  "warmups": 2,
+  "samples": 5,
+  "sourceHashes": {
+    "engine/structure.py": "537a4237fe23aa091b61fa2cfb8a6af38370a3ed954307c3d35f9f7d0085df62",
+    "engine/structure.ts": "89e8aabf50ea6a5b9ad4ec91291fdaa6617028b69964ebfe852fbf220dc528a5",
+    "engine/structure_gpu.py": "482081f3976ae6084d1418c854717b9500dbcf82bb45051a27963fbd1837109d",
+    "engine/structure_bulk.py": "d62f82fe64d2e3c2a682f5ce6ddfa63a7a2110332783d1d58b8585b803cae2ba",
+    "engine/structure_conformance.py": "61445c9c0e7dcb0365da2030a8e87e04c551dd49424dd5a603e14fa17c78c7d2",
+    "engine/shaders/structure_apply.wgsl": "53f626556498f6a15bffd3ecff9451ee72d96ab896e9a0e9e26d87cf25a3fe4c",
+    "engine/state.py": "3fd1260482a488f3af0577b3411bfbc57155a17916668db062f08f3f1490cc66",
+    "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+    "engine/enthalpy.py": "a9ad8fdb476a0b788c9076e47c28c7d13f74196b377247d5652ff2af18cb675f",
+    "engine/thermal.ts": "7196da43ca026822cf935db2362965d6e237854dd6b8a253c18d0be60eeeec00",
+    "engine/registry.py": "8d88a2098a7762927e62da516f6ad249f86a927af340783e5580ce1d58a857e7",
+    "engine/registry.ts": "92caf65e49b8f6f718a75b9ceb8bc4c172e96690513214e8b4e267d7abb73f86",
+    "engine/materials.json": "9a6ec2b86cc53cbe5f98e570ab8025e1c3be6ca5cf4a29a8b3c323ff52da0a57"
+  },
+  "benchmarkSourceHash": "5a39ba715ae974f5bac0c8db26d997b344d788d4c68cf5e144988ded30d8d083",
+  "runtime": {
+    "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+    "logicalCpus": 16
+  },
+  "rows": [
+    {
+      "width": 32,
+      "height": 32,
+      "kind": "sparse",
+      "inputHash": "bf3f046d3cd6f784c5bb66d16410ca43042fa50764b44458c13aa52a84236b09",
+      "fullResultHash": "f1a61f787a9562490aa034753b1d421a71bf690ed3ffd7e936ef2a0d20a5d0cb",
+      "samplesMs": {
+        "scalar": [
+          3.5182000137865543,
+          7.09120009560138,
+          6.621299893595278,
+          6.312099983915687,
+          5.616699927486479
+        ],
+        "bulk": [
+          1.5954000409692526,
+          1.3896999880671501,
+          2.210599952377379,
+          1.3031000271439552,
+          1.4498999807983637
+        ]
+      },
+      "medianMs": {
+        "scalar": 6.312099983915687,
+        "bulk": 1.4498999807983637
+      },
+      "ratio": 4.353472699847911
+    },
+    {
+      "width": 32,
+      "height": 32,
+      "kind": "dense",
+      "inputHash": "4e4e7d5dd4eab1da6ec35e85fa3d4581dde8b413387bc61cb21cad1a4b52a99c",
+      "fullResultHash": "f92d05017c6cb391163b3e196cc9e392565b2df959786e5cbeafdf7116009bfe",
+      "samplesMs": {
+        "scalar": [
+          29.728899942710996,
+          30.15649993903935,
+          27.700900100171566,
+          27.99939992837608,
+          40.56059999857098
+        ],
+        "bulk": [
+          3.676600055769086,
+          4.426000057719648,
+          4.560200031846762,
+          5.37369993980974,
+          4.266100004315376
+        ]
+      },
+      "medianMs": {
+        "scalar": 29.728899942710996,
+        "bulk": 4.426000057719648
+      },
+      "ratio": 6.716877441259647
+    },
+    {
+      "width": 128,
+      "height": 128,
+      "kind": "sparse",
+      "inputHash": "e64d978e88ab012b5455432118cafb22c017c549dc662c02eb7292ad62896c74",
+      "fullResultHash": "58a26d41dc099c9c0d2c35036aac64cf7599628c5d2f50aacc7b3f3008559108",
+      "samplesMs": {
+        "scalar": [
+          73.73309996910393,
+          85.59169992804527,
+          62.589799985289574,
+          68.87519999872893,
+          87.17069996055216
+        ],
+        "bulk": [
+          10.793699999339879,
+          12.02940009534359,
+          11.995999957434833,
+          10.834399960003793,
+          11.383500066585839
+        ]
+      },
+      "medianMs": {
+        "scalar": 73.73309996910393,
+        "bulk": 11.383500066585839
+      },
+      "ratio": 6.477190630106273
+    },
+    {
+      "width": 128,
+      "height": 128,
+      "kind": "dense",
+      "inputHash": "8700887cfaf401c24b4b16da8f3c2d56619cb1bb55ab1aaf21a87b167fd00df0",
+      "fullResultHash": "4bcdbe109464c7b8ae336c514003eb04377a60d8252b09ed423480bc02b88d7f",
+      "samplesMs": {
+        "scalar": [
+          512.2481000144035,
+          547.5674000335857,
+          504.74390003364533,
+          548.7697999924421,
+          445.11099997907877
+        ],
+        "bulk": [
+          44.88339996896684,
+          45.223599998280406,
+          45.137800043448806,
+          42.61530004441738,
+          35.4698000010103
+        ]
+      },
+      "medianMs": {
+        "scalar": 512.2481000144035,
+        "bulk": 44.88339996896684
+      },
+      "ratio": 11.412863115730552
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "kind": "sparse",
+      "inputHash": "b91d1918004549f0b72d056b39163b1e331d58e66a4c4f37c4a689d62271455c",
+      "fullResultHash": "0366452c9071d12b659a2257b1e686e11647d683bf7213841763d67e6d91548c",
+      "samplesMs": {
+        "scalar": [
+          283.58189994469285,
+          265.021099941805,
+          307.5832000467926,
+          333.70930003002286,
+          287.60350006632507
+        ],
+        "bulk": [
+          46.97589995339513,
+          39.280900033190846,
+          36.60759993363172,
+          40.140500059351325,
+          49.072899972088635
+        ]
+      },
+      "medianMs": {
+        "scalar": 287.60350006632507,
+        "bulk": 40.140500059351325
+      },
+      "ratio": 7.164920707043448
+    },
+    {
+      "width": 256,
+      "height": 256,
+      "kind": "dense",
+      "inputHash": "0a158166ea4bf4ed35eacf9801c7422e2bc0d0029e923e909f6267f532ef69f8",
+      "fullResultHash": "b70d44c9e0a21d424c8159ccee250cc1647a63acfb544c029b9b6672856dd6f1",
+      "samplesMs": {
+        "scalar": [
+          1989.865200011991,
+          1773.6243999097496,
+          1579.2411000002176,
+          1597.0880000386387,
+          2142.904800013639
+        ],
+        "bulk": [
+          147.98490004613996,
+          122.51060002017766,
+          102.98919992055744,
+          105.62629997730255,
+          158.5464000236243
+        ]
+      },
+      "medianMs": {
+        "scalar": 1773.6243999097496,
+        "bulk": 122.51060002017766
+      },
+      "ratio": 14.477313796664381
+    }
+  ],
+  "sourceUnchanged": true,
+  "finishedAt": "2026-09-07T23:35:17.456688+00:00",
+  "passed": true
+}

@@ -8,4 +8,7 @@ dist/
 build/
 *.log
 checkpoints/
+!docs/checkpoints/
+!docs/checkpoints/**
 .cuda_cache/
+evolution-v2/

@@ -1,0 +1,8 @@
+{
+  "originalC5Receipt": "20f1afd3703df0e8d351fd907ef9e0742258437e230b0c369d850b918fcdf2d8",
+  "firstC6Receipt": "c206df87f8ef7015e1010fb8b61f54d00cd2822edff28b218794e7ea505c2f16",
+  "restoredC5Summary": true,
+  "preservedC6Summary": "c6-planner-evaluation-first.json",
+  "fix": "engine.verify supplies a report-specific --output to eval.verify",
+  "prevention": "SS038 and an executed aggregate-command routing property"
+}

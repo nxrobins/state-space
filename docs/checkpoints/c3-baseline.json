@@ -1,0 +1,612 @@
+{
+  "rulesVersion": "ca-v1",
+  "purpose": "Native GPU counterexamples before C3 fidelity corrections; thermal units are not a complete energy ledger.",
+  "sourceHashes": {
+    "locked/phase_2a_winner.wgsl": "899e51457d318d0d3aceddc573589a9f3b2feef8032eec60d0cf54171dbd8ec9",
+    "locked/phase_2c_winner.wgsl": "8bb268061f26508628ca57fb82cec39c6e5d83e64cf26286005c79d83e2768d3",
+    "locked/phase_2d_winner.wgsl": "86d085c926ff431bb59b6bb87c1154b104d3e550e5280f777ed96d20a1ec3097",
+    "engine/materials.json": "47d7692f9d9c35cbb4cd8857896fda5d83da3327a776b0cff3e54e887c5e6877"
+  },
+  "cases": [
+    {
+      "name": "finite-lava-heater",
+      "width": 2,
+      "height": 1,
+      "initial": {
+        "cells": [
+          50395658,
+          67113984
+        ],
+        "materials": [
+          10,
+          0
+        ],
+        "thermal": [
+          250,
+          20
+        ],
+        "thermalSum": 270,
+        "chemicalSum": 0
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            67116032,
+            50395658
+          ],
+          "materials": [
+            0,
+            10
+          ],
+          "thermal": [
+            28,
+            250
+          ],
+          "thermalSum": 278,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            67116032,
+            50395658
+          ],
+          "materials": [
+            0,
+            10
+          ],
+          "thermal": [
+            28,
+            250
+          ],
+          "thermalSum": 278,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            67116032,
+            50395658
+          ],
+          "materials": [
+            0,
+            10
+          ],
+          "thermal": [
+            28,
+            250
+          ],
+          "thermalSum": 278,
+          "chemicalSum": 0
+        }
+      ]
+    },
+    {
+      "name": "high-conductivity-hot-ring",
+      "width": 3,
+      "height": 3,
+      "initial": {
+        "cells": [
+          65285,
+          65285,
+          65285,
+          65285,
+          5,
+          65285,
+          65285,
+          65285,
+          65285
+        ],
+        "materials": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "thermal": [
+          255,
+          255,
+          255,
+          255,
+          0,
+          255,
+          255,
+          255,
+          255
+        ],
+        "thermalSum": 2040,
+        "chemicalSum": 0
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            65285,
+            14341,
+            65285,
+            14341,
+            65285,
+            14341,
+            65285,
+            14341,
+            65285
+          ],
+          "materials": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "thermal": [
+            255,
+            56,
+            255,
+            56,
+            255,
+            56,
+            255,
+            56,
+            255
+          ],
+          "thermalSum": 1499,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762
+          ],
+          "materials": [
+            10,
+            5,
+            10,
+            5,
+            10,
+            5,
+            10,
+            5,
+            10
+          ],
+          "thermal": [
+            220,
+            56,
+            220,
+            56,
+            220,
+            56,
+            220,
+            56,
+            220
+          ],
+          "thermalSum": 1324,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762,
+            14341,
+            33610762
+          ],
+          "materials": [
+            10,
+            5,
+            10,
+            5,
+            10,
+            5,
+            10,
+            5,
+            10
+          ],
+          "thermal": [
+            220,
+            56,
+            220,
+            56,
+            220,
+            56,
+            220,
+            56,
+            220
+          ],
+          "thermalSum": 1324,
+          "chemicalSum": 0
+        }
+      ]
+    },
+    {
+      "name": "isolated-melt-freeze",
+      "width": 1,
+      "height": 1,
+      "initial": {
+        "cells": [
+          100672264
+        ],
+        "materials": [
+          8
+        ],
+        "thermal": [
+          35
+        ],
+        "thermalSum": 35,
+        "chemicalSum": 0
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            100672264
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            35
+          ],
+          "thermalSum": 35,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            33559554
+          ],
+          "materials": [
+            2
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            33559554
+          ],
+          "materials": [
+            2
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 1,
+          "pass": "thermal",
+          "cells": [
+            33559554
+          ],
+          "materials": [
+            2
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 1,
+          "pass": "phase",
+          "cells": [
+            100668424
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 1,
+          "pass": "combustion",
+          "cells": [
+            100668424
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 2,
+          "pass": "thermal",
+          "cells": [
+            100668424
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 2,
+          "pass": "phase",
+          "cells": [
+            100668424
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 2,
+          "pass": "combustion",
+          "cells": [
+            100668424
+          ],
+          "materials": [
+            8
+          ],
+          "thermal": [
+            20
+          ],
+          "thermalSum": 20,
+          "chemicalSum": 0
+        }
+      ]
+    },
+    {
+      "name": "isolated-condensation",
+      "width": 1,
+      "height": 1,
+      "initial": {
+        "cells": [
+          67131913
+        ],
+        "materials": [
+          9
+        ],
+        "thermal": [
+          90
+        ],
+        "thermalSum": 90,
+        "chemicalSum": 0
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            67131913
+          ],
+          "materials": [
+            9
+          ],
+          "thermal": [
+            90
+          ],
+          "thermalSum": 90,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            67131913
+          ],
+          "materials": [
+            9
+          ],
+          "thermal": [
+            90
+          ],
+          "thermalSum": 90,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            67131913
+          ],
+          "materials": [
+            9
+          ],
+          "thermal": [
+            90
+          ],
+          "thermalSum": 90,
+          "chemicalSum": 0
+        }
+      ]
+    },
+    {
+      "name": "oil-vaporization-fuel",
+      "width": 1,
+      "height": 1,
+      "initial": {
+        "cells": [
+          50354694
+        ],
+        "materials": [
+          6
+        ],
+        "thermal": [
+          90
+        ],
+        "thermalSum": 90,
+        "chemicalSum": 150
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            50354694
+          ],
+          "materials": [
+            6
+          ],
+          "thermal": [
+            90
+          ],
+          "thermalSum": 90,
+          "chemicalSum": 150
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            67124233
+          ],
+          "materials": [
+            9
+          ],
+          "thermal": [
+            60
+          ],
+          "thermalSum": 60,
+          "chemicalSum": 0
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            67124233
+          ],
+          "materials": [
+            9
+          ],
+          "thermal": [
+            60
+          ],
+          "thermalSum": 60,
+          "chemicalSum": 0
+        }
+      ]
+    },
+    {
+      "name": "hot-wood-air",
+      "width": 2,
+      "height": 1,
+      "initial": {
+        "cells": [
+          65287,
+          67113984
+        ],
+        "materials": [
+          7,
+          0
+        ],
+        "thermal": [
+          255,
+          20
+        ],
+        "thermalSum": 275,
+        "chemicalSum": 80
+      },
+      "passes": [
+        {
+          "tick": 0,
+          "pass": "thermal",
+          "cells": [
+            63751,
+            67115520
+          ],
+          "materials": [
+            7,
+            0
+          ],
+          "thermal": [
+            249,
+            26
+          ],
+          "thermalSum": 275,
+          "chemicalSum": 80
+        },
+        {
+          "tick": 0,
+          "pass": "phase",
+          "cells": [
+            63751,
+            67115520
+          ],
+          "materials": [
+            7,
+            0
+          ],
+          "thermal": [
+            249,
+            26
+          ],
+          "thermalSum": 275,
+          "chemicalSum": 80
+        },
+        {
+          "tick": 0,
+          "pass": "combustion",
+          "cells": [
+            16842509,
+            67174148
+          ],
+          "materials": [
+            13,
+            4
+          ],
+          "thermal": [
+            255,
+            255
+          ],
+          "thermalSum": 510,
+          "chemicalSum": 0
+        }
+      ]
+    }
+  ]
+}

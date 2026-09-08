@@ -3,9 +3,6 @@
 // Each pass partitions rows into disjoint horizontal pairs. Direction is chosen
 // by a deterministic coordinate hash plus MOVE_SALT to avoid global drift.
 
-@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
-@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
-@group(0) @binding(2) var<storage, read> cold_table: array<u32>;
 
 const COLD_STRIDE: u32 = 24u;
 const COLD_DENSITY: u32 = 0u;
@@ -32,20 +29,11 @@ fn is_falling_matter(ph: u32) -> bool {
     return ph == PHASE_POWDER || ph == PHASE_LIQUID || ph == PHASE_VISCOUS || ph == PHASE_MOLTEN;
 }
 
-fn can_fall_into(src: u32, dst: u32) -> bool {
-    let src_phase = get_phase(src);
-    let dst_phase = get_phase(dst);
-    if (!is_falling_matter(src_phase) || is_structural(dst_phase)) {
-        return false;
-    }
-    return density_of(get_material(src)) > density_of(get_material(dst));
-}
-
 fn has_down_or_diagonal_fall(x: u32, y: u32, src: u32) -> bool {
     if (y >= GRID_HEIGHT - 1u) { return false; }
-    if (can_fall_into(src, grid_in[get_idx(x, y + 1u)])) { return true; }
-    if (x > 0u && can_fall_into(src, grid_in[get_idx(x - 1u, y + 1u)])) { return true; }
-    if (x < GRID_WIDTH - 1u && can_fall_into(src, grid_in[get_idx(x + 1u, y + 1u)])) { return true; }
+    if (io_can_fall(get_idx(x, y), get_idx(x, y + 1u))) { return true; }
+    if (x > 0u && io_can_fall(get_idx(x, y), get_idx(x - 1u, y + 1u))) { return true; }
+    if (x < GRID_WIDTH - 1u && io_can_fall(get_idx(x, y), get_idx(x + 1u, y + 1u))) { return true; }
     return false;
 }
 
@@ -78,13 +66,13 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     var pair_left = x;
     if (((x + MOVE_PHASE) & 1u) != 0u) {
         if (x == 0u) {
-            grid_out[idx] = voxel;
+            io_copy(idx, idx);
             return;
         }
         pair_left = x - 1u;
     }
     if (pair_left >= GRID_WIDTH - 1u) {
-        grid_out[idx] = voxel;
+        io_copy(idx, idx);
         return;
     }
 
@@ -104,13 +92,13 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     let do_swap = left_can || right_can;
 
     if (do_swap && x == src_x) {
-        grid_out[idx] = dst;
+        io_copy(idx, get_idx(dst_x, y));
         return;
     }
     if (do_swap && x == dst_x) {
-        grid_out[idx] = src;
+        io_copy(idx, get_idx(src_x, y));
         return;
     }
 
-    grid_out[idx] = voxel;
+    io_copy(idx, idx);
 }

@@ -1,0 +1,2050 @@
+{
+  "passed": true,
+  "context": {
+    "policy": "ca-v3-evaluation-1",
+    "sourceHashes": {
+      "engine/__init__.py": "ada1f2399ec58602dff5c7bfdc27674f4ea71c0c01893945d875045f36f082a9",
+      "engine/_generated_schema.py": "955c650e26213fddae5280d4ef1db57bbfef3e7e2949ae393e798b74733231db",
+      "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+      "engine/browser_state_space.ts": "a4d17b86b790573eaeb8bd0b57d6c8dd87afcb8899f1b4d63c6ac55055c997b9",
+      "engine/catalog.py": "df00bc2d4496c784a90f4a38e6981539404b7f4bd8d283b20d12bac0c7d667a4",
+      "engine/compositor.py": "7826f07aeea02973e8160e4171aeeee5f996951bb08b521b558e75bc1a9d04a0",
+      "engine/conformance.py": "9100e9e740755f8996309ea888bdef43d1e923d1de44b29e4db7f84db60adeea",
+      "engine/conformance.test.ts": "336e1a95710f86273d95bdd7b9d1b46694fd8f2fe4b61ea94d69d3a809c0d14b",
+      "engine/contracts.py": "a92816510c938b2a86492b32fa5e7ad8782a85f40ba247202665ff10f11c9108",
+      "engine/contracts.test.ts": "044ca10b0cb79dd4be29a3f76c773d545661793a4ce8b0ccdf75ff2f27b23c6c",
+      "engine/contracts.ts": "5867755908fa8d2eae5942629f60fa8d669948d096c0826e2e67b0820f973a63",
+      "engine/cpu_physics.ts": "a02aefe0944cb00f5fe90bbbe0e8a7350f592b3fd189657833f56594189ee78e",
+      "engine/enthalpy.py": "3e78c3bb38664df2a8a7e95246071017d01461b74db4cae906a84983b9012ec3",
+      "engine/enthalpy_gpu.py": "ea6a3a0ece529c0c2795b8297c8feb53838a3e00638a1d51ef269ed0039768ba",
+      "engine/fidelity.test.ts": "2f5cd0502166541b7576d70879526354305f0e76c1e0c462d1c46d1666316215",
+      "engine/field.py": "302f39857e75d860d25a86e1841e94ec3434349b1cd36030e083adf183ce0b9a",
+      "engine/generate.py": "ca6f4593334c6cafd5851a67b02c3a4459af4aa84de1f6e2e886de2ca1411f35",
+      "engine/generated/materials.ts": "71d0b2064813e34a1f46b96a4582e3be9d05af53745fdfc93d60429acc0b3111",
+      "engine/generated/schedule.ts": "5c666a69e5b36c9eb59180101238e7f8628dc81f160cd40ccc529b80a7e65f4b",
+      "engine/generated/shaders.ts": "8b1671c16a13798d31322b0457dde716270eeb7ab53fc52886878ceffe6f6875",
+      "engine/index.ts": "1ac1d7f124e2b8856a9e33e78e4d390039488924844afc0d14814d2dc007a0ca",
+      "engine/inspection.ts": "9c7a47d428853fa483f57da5c6f8c69c2f3f7619f42ba8a8fd4bb66f096312ba",
+      "engine/kernels/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+      "engine/kernels/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+      "engine/kernels/phase_2b_diagonal_winner.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+      "engine/kernels/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+      "engine/kernels/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+      "engine/kernels/phase_2b_liquid_winner.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+      "engine/kernels/phase_2b_winner.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+      "engine/kernels/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+      "engine/kernels/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+      "engine/kernels/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+      "engine/kernels/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+      "engine/lint.py": "c034cea11bdf81561d28f3592ab6e870107f5064fdd498eaf46ad614909f4ef4",
+      "engine/lint_ts.mjs": "7c4df67ad07684acdfad6df2a4e0693854589a2253d1642df244c9f177817e95",
+      "engine/materials.json": "106e3c33e2ea8d8ddb35e6de02994645dbaacdade9077364e19d69d77102aa3c",
+      "engine/mutations.test.ts": "33e38515febfe5eef593e4a18bcda21078bdb49598267dfc6207fc161c693cc1",
+      "engine/registry.py": "a88dd4fe6a9bce0172aa1891ce90885bf98959b9c505c38642be11118b1d3a59",
+      "engine/registry.ts": "9704a297a2a6db05949784554eab7a4a87895efbd847f87f67d218b7f45414c2",
+      "engine/resources.py": "669f59e39472da4981c2cbfa424aed25262402031f0557594eb16f4c2e53a965",
+      "engine/runner.py": "415eccf4b47909639933965945d1397642fb9eec1e208cf695a779534482ab26",
+      "engine/schedule.py": "2327a9486d9d8cf916800df6ce97c5460ff7d36330c29da258feaf5229444150",
+      "engine/schema.py": "e5ab59128bc38b5718badddf3b6a22aae18acbddf1c56fc73395dddd6dd1ccb1",
+      "engine/sdk.test.ts": "1de1cb8914c43bbe7858e7ccd74016d3225435cab602fcda5cea17d610438635",
+      "engine/shaders/bitmask_defs.wgsl": "b2090b88d3640467eb00f18736670f56677a71c8d1bdaff17f2f70e7606f3994",
+      "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+      "engine/shaders/enthalpy.wgsl": "1ce6cce6bf6289bf1fd39a2b32475ef3d5c53dab394bc62c7f07c3e3f117848e",
+      "engine/shaders/enthalpy_law.wgsl": "f7225674ab4d7f9688b123b8e9fc2f57418a6fb1cd918616c9deec08987cfb5b",
+      "engine/shaders/state_io.wgsl": "a0bbe30f7cc60c59f758ddb21fd17f239f0bc71d35ffa75bd4c93b2d796c131c",
+      "engine/shaders/structure_apply.wgsl": "53f626556498f6a15bffd3ecff9451ee72d96ab896e9a0e9e26d87cf25a3fe4c",
+      "engine/sources.py": "291f8a152d4ce818d4f6b5723b22af345ad5d131cdb44bc8ea652804f0b4f5f9",
+      "engine/state.py": "935ab1ef507d21ecc3fb465db0e4662b312922d137a51a8e8937c2bb2ec74b7f",
+      "engine/structure.py": "318937f7df20056d9f551ae6b2492dd05622ba7102bc44d38b6ec4b0fd3019f8",
+      "engine/structure.test.ts": "f0d4048767d61d9809633c651430ee1a002c953da3eb97158929e36f35bdb218",
+      "engine/structure.ts": "30b4fa11732d50576374de3e157c0f12b3c11d19c28793c7ff5793a51acb0786",
+      "engine/structure_benchmark.py": "5a39ba715ae974f5bac0c8db26d997b344d788d4c68cf5e144988ded30d8d083",
+      "engine/structure_bulk.py": "60a5e1599db83ad0cbfb4a69d2ef95ac13584aedf1242d39de20470b1d8b4fe1",
+      "engine/structure_conformance.py": "61445c9c0e7dcb0365da2030a8e87e04c551dd49424dd5a603e14fa17c78c7d2",
+      "engine/structure_gpu.py": "482081f3976ae6084d1418c854717b9500dbcf82bb45051a27963fbd1837109d",
+      "engine/structure_public.test.ts": "2a6dee0ab765e36ad741cbe051d4928618d3ecf0b54d6e5151fde3808cbef7f7",
+      "engine/thermal.ts": "0a3a9f70e9750fbc2bd6ab63214a99a2dd2b0ee2e40b36a4f73920309462f8fd",
+      "engine/thermal_registry.py": "88d94a92770abe3afee2edd5c379f6405d1f9a03760828b66ba9cf4a8d83d0b0",
+      "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+      "engine/tsconfig.sdk.json": "ffd752882c5c52421e1531a229878bcafcdc8167ecd39142b739440f0847fe2c",
+      "engine/validation.py": "8c1beaafb993458f28a5e535eb57f4f15ee3e660aec5f32855948c6d5e0c4cca",
+      "engine/validation.ts": "d46f2b540293ab07af7945be44e36beed708af8411090f25e7282ce03458b891",
+      "engine/verify.py": "1e0b6790199194f0c316b2ace82c2e05571d71307e3b42eb395d27d4c6dff9dc",
+      "engine/version.py": "3bce100960b45f84b2ac6ce77e322188c58fc9664c2b15faabbb74f63dadaebc",
+      "engine/vite.sdk.config.ts": "c8280e3d6cfb39baaa4f72c4a296069452d8d7a2e0870eff12e3b70355d69847",
+      "engine/vitest.config.ts": "2307405526250bebfb5c84fc68868d99e5a2cfd6d3bfd027113c83161f6d3eb0",
+      "engine/webgpu_field.ts": "7b43430f409abf5f07e986b09efbc1b4cc20b9ca04b38b9e25c07f912a705cb7",
+      "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+      "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "eval/archive.py": "49960301ac145de810ed076af740ee4810d3799401c1553d51db8ae5c6b68041",
+      "eval/benchmark.py": "546680fac1b3903d09af836b8a20a84827e23f807abe6f23466f4fee8bd4450d",
+      "eval/codec.py": "8d74c689d40cdc4e93c5c19accb9ce4b83aad2f496669b3df0d1645975d31adc",
+      "eval/correctness.py": "4b527465e879d34572fd429990d68fd6694cf7350d4b143bde1ec2c39053450e",
+      "eval/evaluator.py": "3d20538cf318c2f8dbc5e02ea294ff2be62a94dcc429525431952e78b4b7439e",
+      "eval/policy.py": "5d1e5f711e462b25255dedf19a4abc98db50298b4b7b3c42cf09f531f1ec9f89",
+      "eval/provenance.py": "56ec2a9d7afa73e78cba95e5ca327ed4b7da18b37c03d96d985d1e96211f2b2c",
+      "eval/reference.mjs": "5b5388ed55a2e4936ead9a94fea81e743cc46271ca46eff3fa3c317c84c11206",
+      "eval/scenes.py": "2927803da7a59c647de2b8a4f0f7dfebf0ba026daf456e275f5cd200d0ee049a",
+      "eval/verify.py": "cc43dbef7c9c71c0def01ea88053d409bc81003c334a90882b094c9dd7b245f7",
+      "eval/worker.py": "9af70be0ed37e080269e720f7d1e9878ff4e881cae4f10810048759fb632c9fb",
+      "evolve_ss.py": "c86b16bda88c9265f9f544f7e5257e637bd67d28252ac9fa848312082079e9da",
+      "locked/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+      "locked/phase_1b_winner.wgsl": "a7ed9a6267e94ab9bc8895cc30b670fc284d066457762d8c2af2599a83417de9",
+      "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+      "locked/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+      "locked/phase_2b_diagonal_winner.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+      "locked/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+      "locked/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+      "locked/phase_2b_liquid_winner.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+      "locked/phase_2b_winner.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+      "locked/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+      "locked/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+      "locked/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+      "locked/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+      "package-lock.json": "50178742e2fc3a3b59fe4bc4199d16cba789324f01a1f2486ce71daeca26832c",
+      "package.json": "b4aa3db61454deeefd7bb6b4964e858ea4465b0ed41cfec9915613aae08c3425",
+      "pyproject.toml": "6221c50026f227abe0edce1e0b7ffd14009bd0a7a548a11fff3d10651a5219ba",
+      "uv.lock": "c64c8b3ed5ecbcd2a5dda9563e9c9d709f91d915e296b190479bea938bf331e9"
+    },
+    "device": {
+      "info": {
+        "vendor": "NVIDIA",
+        "architecture": "",
+        "device": "NVIDIA GeForce RTX 4090",
+        "description": "595.79",
+        "stackgroup_min_size": 4,
+        "stackgroup_max_size": 128,
+        "vendor_id": 4318,
+        "device_id": 9860,
+        "adapter_type": "DiscreteGPU",
+        "backend_type": "Vulkan"
+      },
+      "features": [
+        "bgra8unorm-storage",
+        "buffer-binding-array",
+        "conservative-rasterization",
+        "depth-clip-control",
+        "depth32float-stencil8",
+        "dual-source-blending",
+        "float32-filterable",
+        "indirect-first-instance",
+        "mappable-primary-buffers",
+        "multi-draw-indirect-count",
+        "partially-bound-binding-array",
+        "pipeline-statistics-query",
+        "polygon-mode-line",
+        "polygon-mode-point",
+        "push-constants",
+        "ray-query",
+        "rg11b10ufloat-renderable",
+        "sampled-texture-and-storage-buffer-array-non-uniform-indexing",
+        "shader-early-depth-test",
+        "shader-f16",
+        "shader-f64",
+        "shader-int64",
+        "shader-primitive-index",
+        "storage-resource-binding-array",
+        "subgroup",
+        "subgroup-barrier",
+        "subgroup-vertex",
+        "texture-adapter-specific-format-features",
+        "texture-binding-array",
+        "texture-compression-bc",
+        "texture-format-nv12",
+        "texture-format16bit-norm",
+        "timestamp-query",
+        "timestamp-query-inside-encoders",
+        "timestamp-query-inside-passes",
+        "vertex-writable-storage"
+      ],
+      "limits": {
+        "max-bind-groups": 8,
+        "max-bind-groups-plus-vertex-buffers": 0,
+        "max-bindings-per-bind-group": 1000,
+        "max-buffer-size": 4503599627370496,
+        "max-color-attachment-bytes-per-sample": 128,
+        "max-color-attachments": 8,
+        "max-compute-invocations-per-workgroup": 1024,
+        "max-compute-workgroup-size-x": 1024,
+        "max-compute-workgroup-size-y": 1024,
+        "max-compute-workgroup-size-z": 64,
+        "max-compute-workgroup-storage-size": 49152,
+        "max-compute-workgroups-per-dimension": 65535,
+        "max-dynamic-storage-buffers-per-pipeline-layout": 16,
+        "max-dynamic-uniform-buffers-per-pipeline-layout": 15,
+        "max-inter-stage-shader-variables": 0,
+        "max-non-sampler-bindings": 4294967295,
+        "max-push-constant-size": 256,
+        "max-sampled-textures-per-shader-stage": 1048576,
+        "max-samplers-per-shader-stage": 1048576,
+        "max-storage-buffer-binding-size": 2147483647,
+        "max-storage-buffers-per-shader-stage": 1048576,
+        "max-storage-textures-per-shader-stage": 1048576,
+        "max-texture-array-layers": 2048,
+        "max-texture-dimension-1d": 32768,
+        "max-texture-dimension-2d": 32768,
+        "max-texture-dimension-3d": 16384,
+        "max-uniform-buffer-binding-size": 65536,
+        "max-uniform-buffers-per-shader-stage": 1048576,
+        "max-vertex-attributes": 32,
+        "max-vertex-buffer-array-stride": 2048,
+        "max-vertex-buffers": 16,
+        "min-storage-buffer-offset-alignment": 32,
+        "min-uniform-buffer-offset-alignment": 64
+      }
+    },
+    "runtime": {
+      "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "node": "v22.22.3",
+      "typescript": "5.8.3",
+      "typescriptHash": "dd17428736a07e1db1a138d8a14295ddb2699ba780ee15038acdd2c6da5373a0",
+      "hostHash": "1f12d0566288d0ca1b88194ca06ac654a8d0f574b11bc99cf0290c8395acf423",
+      "processor": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+      "logicalCpus": 16,
+      "numpy": "2.2.6",
+      "wgpu": "0.31.0"
+    }
+  },
+  "config": {
+    "seed": 8173,
+    "warmup": 1,
+    "samples": 3,
+    "ticks": 4,
+    "timeout_seconds": 180
+  },
+  "checks": [
+    {
+      "name": "baseline-thermal",
+      "passed": true,
+      "receipt": "c3bf8e0f4dc45546e38f6b109683b966e8d3f9219a246c3b3caa8db50563d7f4",
+      "fitness": {
+        "compared_passes": 2682,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 30.97598750900943,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 4,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 6.609853124246001
+      }
+    },
+    {
+      "name": "baseline-codec",
+      "passed": true,
+      "receipt": "a16ca92a54ee2f8ec6496dc054311d05aeab9088c47baa84d159368fd6225af4",
+      "fitness": {
+        "codec_exchange_errors": 0,
+        "codec_field_errors": 0,
+        "codec_pack_errors": 0,
+        "compared_passes": 2682,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 29.68882501590997,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 36,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 6.282553127675783
+      }
+    },
+    {
+      "name": "baseline-structure",
+      "passed": true,
+      "receipt": "42aca1fb34e4f72670e630c27c40852a663ed61e6e4f50ab76912cd7bf7d6e2e",
+      "fitness": {
+        "compared_passes": 2682,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 30.6888750201324,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 1,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 6.505706252937671
+      }
+    },
+    {
+      "name": "baseline-normalize",
+      "passed": true,
+      "receipt": "bc49f68cc4506c347d2198ff460d846b559d874703a73b6517e3168de8a917cc",
+      "fitness": {
+        "compared_passes": 2682,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 31.640537519706413,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 1,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 6.727187497745035
+      }
+    },
+    {
+      "name": "noop-thermal",
+      "passed": true,
+      "receipt": "685de44eb3c52eaca2c643c7ffd3dc4a2ecaafd1d01232184dc75d6b52496871",
+      "firstDifference": {
+        "actual": [
+          3257358850,
+          26880,
+          0
+        ],
+        "expected": [
+          3257358594,
+          26693,
+          0
+        ],
+        "index": 0,
+        "pass": "thermal_y0",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 288,
+        "composed_mismatches": 412,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-gravity",
+      "passed": true,
+      "receipt": "0ea95367bbac2150aaab2ff1c04a0a2c2edd95012a3c9bf92ce77dcfe05e6e81",
+      "firstDifference": {
+        "actual": [
+          3251389453,
+          17408,
+          0
+        ],
+        "expected": [
+          3257358850,
+          26880,
+          0
+        ],
+        "index": 0,
+        "pass": "vertical0",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 288,
+        "composed_mismatches": 458,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-diagonal",
+      "passed": true,
+      "receipt": "8715cb703cf36f4260f70ff5905b9051ffd150af04858432ac48ffdcab524b2d",
+      "firstDifference": {
+        "actual": [
+          3775142669,
+          7078,
+          0
+        ],
+        "expected": [
+          1412258313,
+          36730,
+          0
+        ],
+        "index": 4,
+        "pass": "diagonal0_s1",
+        "scene": "mixed-7x5-0",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 720,
+        "composed_mismatches": 830,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-liquid",
+      "passed": true,
+      "receipt": "e3b841deabdd4ade39f1523752914859617baa0810bed29281471483342c9c47",
+      "firstDifference": {
+        "actual": [
+          1387080450,
+          14990,
+          0
+        ],
+        "expected": [
+          615223566,
+          37139,
+          0
+        ],
+        "index": 5,
+        "pass": "liquid1_s1",
+        "scene": "mixed-7x1-0",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 504,
+        "composed_mismatches": 206,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-buoyancy",
+      "passed": true,
+      "receipt": "ddf9f136464f6baf16476e43e73c9dcbc7d971f22717d74951d8792b4b894f1c",
+      "firstDifference": {
+        "actual": [
+          345196047,
+          60135,
+          0
+        ],
+        "expected": [
+          3295519759,
+          88102,
+          0
+        ],
+        "index": 0,
+        "pass": "gas_buoyancy0",
+        "scene": "mixed-1x7-1",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 360,
+        "composed_mismatches": 194,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-spread",
+      "passed": true,
+      "receipt": "0a33c9765cfcc0fa6c11bd1f319c2c5a4383d2e33203c53719cd75c3440dd49c",
+      "firstDifference": {
+        "actual": [
+          3831986953,
+          45785,
+          0
+        ],
+        "expected": [
+          76696334,
+          19267,
+          0
+        ],
+        "index": 4,
+        "pass": "gas_spread0_s3",
+        "scene": "mixed-7x1-1",
+        "tick": 3
+      },
+      "fitness": {
+        "compared_passes": 576,
+        "composed_mismatches": 30,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-phase",
+      "passed": true,
+      "receipt": "629e6f0aa88a6c516307cf3ef8aa491aa823ab004576da2a49ee108a3ea30c01",
+      "firstDifference": {
+        "actual": [
+          3084529169,
+          18332,
+          0
+        ],
+        "expected": [
+          2967088651,
+          18332,
+          8447
+        ],
+        "index": 4,
+        "pass": "phase",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 288,
+        "composed_mismatches": 219,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-combustion",
+      "passed": true,
+      "receipt": "3044281c412b773b95695bdece9d92331d5a7af623d4127fc8769eb36c4ac5e1",
+      "firstDifference": {
+        "actual": [
+          615221764,
+          35491,
+          0
+        ],
+        "expected": [
+          615221774,
+          35491,
+          0
+        ],
+        "index": 3,
+        "pass": "combustion",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 288,
+        "composed_mismatches": 164,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-structure",
+      "passed": true,
+      "receipt": "9d893dc7bb6663545f283a39c918c9b7ea5b646227bd6118ae821a81970dee13",
+      "firstDifference": {
+        "actual": [
+          272256779,
+          26624,
+          255
+        ],
+        "expected": [
+          3257358850,
+          26880,
+          0
+        ],
+        "index": 1,
+        "pass": "structure",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 288,
+        "composed_mismatches": 501,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "noop-normalize",
+      "passed": true,
+      "receipt": "0dd1e0ef76f675a0202c9db9114a51224600d95389a61c3bf05352ee06c517d2",
+      "firstDifference": {
+        "actual": [
+          2967088651,
+          18332,
+          8447
+        ],
+        "expected": [
+          2967088651,
+          18332,
+          2303
+        ],
+        "index": 4,
+        "pass": "normalize",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 216,
+        "composed_mismatches": 2,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "created-energy",
+      "passed": true,
+      "receipt": "e17016ead8e58c7e7b9e383705cfeeadf37fa6eed29ee520004d8e964671fc5c",
+      "firstDifference": {
+        "actual": [
+          1635425805,
+          40449,
+          0
+        ],
+        "expected": [
+          1635425805,
+          40448,
+          0
+        ],
+        "index": 0,
+        "pass": "thermal_x0",
+        "scene": "mixed-1x1-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 72,
+        "composed_mismatches": 61,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 520,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "shared-oxidizer",
+      "passed": true,
+      "receipt": "c7fa2ac755b6af2db1fa308783e0ffc814c3cf556c3e06b3ac88ddbf746f6a75",
+      "firstDifference": {
+        "actual": [
+          3558276878,
+          106491,
+          0
+        ],
+        "expected": [
+          3558276879,
+          125691,
+          0
+        ],
+        "index": 17,
+        "pass": "combustion",
+        "scene": "mixed-8x8-2",
+        "tick": 3
+      },
+      "fitness": {
+        "compared_passes": 1080,
+        "composed_mismatches": 2,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 38400,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "duplicate-chemical-release",
+      "passed": true,
+      "receipt": "fe375feb252d832b70c736535fc2952896d8a6841c007f5d0982e6a32dfe96cf",
+      "firstDifference": {
+        "actual": [
+          2177433357,
+          85565,
+          0
+        ],
+        "expected": [
+          2177433101,
+          65085,
+          0
+        ],
+        "index": 16,
+        "pass": "combustion",
+        "scene": "mixed-7x5-2",
+        "tick": 3
+      },
+      "fitness": {
+        "compared_passes": 864,
+        "composed_mismatches": 2,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 40960,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "broken-codec-field",
+      "passed": true,
+      "receipt": "3c7fa4a81597746f410757b907cf91757935755dbbab579f62345fd74717b16f",
+      "firstDifference": null,
+      "fitness": {
+        "codec_exchange_errors": 0,
+        "codec_field_errors": 16361,
+        "codec_pack_errors": 0,
+        "compared_passes": 0,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      }
+    },
+    {
+      "name": "inconsistent-score",
+      "passed": true,
+      "rejectedReceipt": "a3f0cbf32f3aa003675fd944e724dcdeb44a520de897650359da051c7d02d55a"
+    },
+    {
+      "name": "missing-pass-evidence",
+      "passed": true,
+      "rejectedReceipt": "7b98ef92ee0be9971bd85667947aa80ade6f09f6320db4e4dc44839dc8610985"
+    },
+    {
+      "name": "missing-timing-row",
+      "passed": true,
+      "rejectedReceipt": "837ff3cb2fc3392f36825b7dbcae9f5002394af37f52be4c38b8ea78006bf178"
+    },
+    {
+      "name": "missing-structural-reference",
+      "passed": true,
+      "rejectedReceipt": "316b123dfcdcd58e7dbfd4085eae38aab5e8ea3ca2d79abcb4adae201aaaa6b9"
+    },
+    {
+      "name": "wrong-final-structure-hash",
+      "passed": true,
+      "rejectedReceipt": "a514400bc0a6b8062cc4fc780b0d023bad01e788ac747022abe5acc973d729b3"
+    },
+    {
+      "name": "code-changed",
+      "passed": true
+    },
+    {
+      "name": "target-changed",
+      "passed": true
+    },
+    {
+      "name": "device-changed",
+      "passed": true
+    },
+    {
+      "name": "host-changed",
+      "passed": true
+    },
+    {
+      "name": "policy-changed",
+      "passed": true
+    },
+    {
+      "name": "seed-changed",
+      "passed": true
+    },
+    {
+      "name": "measurement-changed",
+      "passed": true
+    },
+    {
+      "name": "archive-restart-eviction-tamper-history",
+      "passed": true,
+      "historical": {
+        "archive_phase_1a.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_1b.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_1c.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_2a.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_2b.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_2c.json": {
+          "entries": 15,
+          "eligible": 0
+        },
+        "archive_phase_2d.json": {
+          "entries": 15,
+          "eligible": 0
+        }
+      }
+    },
+    {
+      "name": "stage-revalidates",
+      "passed": true,
+      "staged": "1ac176b587d25133f4c6baa4fd2ed04a57b87ff944fbe64ec7be98d6730eab4c",
+      "receipt": "ea4d5ed309445acf332b28af08129b748f4358f630298b30016d6b5325a1be5e",
+      "patchEmpty": true
+    }
+  ],
+  "note": "14 behavioral adversaries actually compiled and ran. Rejection was observed in output, not inferred from source.",
+  "benchmark": {
+    "config": {
+      "seed": 8173,
+      "warmup": 2,
+      "samples": 7,
+      "ticks": 4,
+      "timeout_seconds": 180
+    },
+    "context": {
+      "policy": "ca-v3-evaluation-1",
+      "sourceHashes": {
+        "engine/__init__.py": "ada1f2399ec58602dff5c7bfdc27674f4ea71c0c01893945d875045f36f082a9",
+        "engine/_generated_schema.py": "955c650e26213fddae5280d4ef1db57bbfef3e7e2949ae393e798b74733231db",
+        "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+        "engine/browser_state_space.ts": "a4d17b86b790573eaeb8bd0b57d6c8dd87afcb8899f1b4d63c6ac55055c997b9",
+        "engine/catalog.py": "df00bc2d4496c784a90f4a38e6981539404b7f4bd8d283b20d12bac0c7d667a4",
+        "engine/compositor.py": "7826f07aeea02973e8160e4171aeeee5f996951bb08b521b558e75bc1a9d04a0",
+        "engine/conformance.py": "9100e9e740755f8996309ea888bdef43d1e923d1de44b29e4db7f84db60adeea",
+        "engine/conformance.test.ts": "336e1a95710f86273d95bdd7b9d1b46694fd8f2fe4b61ea94d69d3a809c0d14b",
+        "engine/contracts.py": "a92816510c938b2a86492b32fa5e7ad8782a85f40ba247202665ff10f11c9108",
+        "engine/contracts.test.ts": "044ca10b0cb79dd4be29a3f76c773d545661793a4ce8b0ccdf75ff2f27b23c6c",
+        "engine/contracts.ts": "5867755908fa8d2eae5942629f60fa8d669948d096c0826e2e67b0820f973a63",
+        "engine/cpu_physics.ts": "a02aefe0944cb00f5fe90bbbe0e8a7350f592b3fd189657833f56594189ee78e",
+        "engine/enthalpy.py": "3e78c3bb38664df2a8a7e95246071017d01461b74db4cae906a84983b9012ec3",
+        "engine/enthalpy_gpu.py": "ea6a3a0ece529c0c2795b8297c8feb53838a3e00638a1d51ef269ed0039768ba",
+        "engine/fidelity.test.ts": "2f5cd0502166541b7576d70879526354305f0e76c1e0c462d1c46d1666316215",
+        "engine/field.py": "302f39857e75d860d25a86e1841e94ec3434349b1cd36030e083adf183ce0b9a",
+        "engine/generate.py": "ca6f4593334c6cafd5851a67b02c3a4459af4aa84de1f6e2e886de2ca1411f35",
+        "engine/generated/materials.ts": "71d0b2064813e34a1f46b96a4582e3be9d05af53745fdfc93d60429acc0b3111",
+        "engine/generated/schedule.ts": "5c666a69e5b36c9eb59180101238e7f8628dc81f160cd40ccc529b80a7e65f4b",
+        "engine/generated/shaders.ts": "8b1671c16a13798d31322b0457dde716270eeb7ab53fc52886878ceffe6f6875",
+        "engine/index.ts": "1ac1d7f124e2b8856a9e33e78e4d390039488924844afc0d14814d2dc007a0ca",
+        "engine/inspection.ts": "9c7a47d428853fa483f57da5c6f8c69c2f3f7619f42ba8a8fd4bb66f096312ba",
+        "engine/kernels/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+        "engine/kernels/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+        "engine/kernels/phase_2b_diagonal_winner.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+        "engine/kernels/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+        "engine/kernels/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+        "engine/kernels/phase_2b_liquid_winner.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+        "engine/kernels/phase_2b_winner.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+        "engine/kernels/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+        "engine/kernels/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+        "engine/kernels/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+        "engine/kernels/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+        "engine/lint.py": "c034cea11bdf81561d28f3592ab6e870107f5064fdd498eaf46ad614909f4ef4",
+        "engine/lint_ts.mjs": "7c4df67ad07684acdfad6df2a4e0693854589a2253d1642df244c9f177817e95",
+        "engine/materials.json": "106e3c33e2ea8d8ddb35e6de02994645dbaacdade9077364e19d69d77102aa3c",
+        "engine/mutations.test.ts": "33e38515febfe5eef593e4a18bcda21078bdb49598267dfc6207fc161c693cc1",
+        "engine/registry.py": "a88dd4fe6a9bce0172aa1891ce90885bf98959b9c505c38642be11118b1d3a59",
+        "engine/registry.ts": "9704a297a2a6db05949784554eab7a4a87895efbd847f87f67d218b7f45414c2",
+        "engine/resources.py": "669f59e39472da4981c2cbfa424aed25262402031f0557594eb16f4c2e53a965",
+        "engine/runner.py": "415eccf4b47909639933965945d1397642fb9eec1e208cf695a779534482ab26",
+        "engine/schedule.py": "2327a9486d9d8cf916800df6ce97c5460ff7d36330c29da258feaf5229444150",
+        "engine/schema.py": "e5ab59128bc38b5718badddf3b6a22aae18acbddf1c56fc73395dddd6dd1ccb1",
+        "engine/sdk.test.ts": "1de1cb8914c43bbe7858e7ccd74016d3225435cab602fcda5cea17d610438635",
+        "engine/shaders/bitmask_defs.wgsl": "b2090b88d3640467eb00f18736670f56677a71c8d1bdaff17f2f70e7606f3994",
+        "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+        "engine/shaders/enthalpy.wgsl": "1ce6cce6bf6289bf1fd39a2b32475ef3d5c53dab394bc62c7f07c3e3f117848e",
+        "engine/shaders/enthalpy_law.wgsl": "f7225674ab4d7f9688b123b8e9fc2f57418a6fb1cd918616c9deec08987cfb5b",
+        "engine/shaders/state_io.wgsl": "a0bbe30f7cc60c59f758ddb21fd17f239f0bc71d35ffa75bd4c93b2d796c131c",
+        "engine/shaders/structure_apply.wgsl": "53f626556498f6a15bffd3ecff9451ee72d96ab896e9a0e9e26d87cf25a3fe4c",
+        "engine/sources.py": "291f8a152d4ce818d4f6b5723b22af345ad5d131cdb44bc8ea652804f0b4f5f9",
+        "engine/state.py": "935ab1ef507d21ecc3fb465db0e4662b312922d137a51a8e8937c2bb2ec74b7f",
+        "engine/structure.py": "318937f7df20056d9f551ae6b2492dd05622ba7102bc44d38b6ec4b0fd3019f8",
+        "engine/structure.test.ts": "f0d4048767d61d9809633c651430ee1a002c953da3eb97158929e36f35bdb218",
+        "engine/structure.ts": "30b4fa11732d50576374de3e157c0f12b3c11d19c28793c7ff5793a51acb0786",
+        "engine/structure_benchmark.py": "5a39ba715ae974f5bac0c8db26d997b344d788d4c68cf5e144988ded30d8d083",
+        "engine/structure_bulk.py": "60a5e1599db83ad0cbfb4a69d2ef95ac13584aedf1242d39de20470b1d8b4fe1",
+        "engine/structure_conformance.py": "61445c9c0e7dcb0365da2030a8e87e04c551dd49424dd5a603e14fa17c78c7d2",
+        "engine/structure_gpu.py": "482081f3976ae6084d1418c854717b9500dbcf82bb45051a27963fbd1837109d",
+        "engine/structure_public.test.ts": "2a6dee0ab765e36ad741cbe051d4928618d3ecf0b54d6e5151fde3808cbef7f7",
+        "engine/thermal.ts": "0a3a9f70e9750fbc2bd6ab63214a99a2dd2b0ee2e40b36a4f73920309462f8fd",
+        "engine/thermal_registry.py": "88d94a92770abe3afee2edd5c379f6405d1f9a03760828b66ba9cf4a8d83d0b0",
+        "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+        "engine/tsconfig.sdk.json": "ffd752882c5c52421e1531a229878bcafcdc8167ecd39142b739440f0847fe2c",
+        "engine/validation.py": "8c1beaafb993458f28a5e535eb57f4f15ee3e660aec5f32855948c6d5e0c4cca",
+        "engine/validation.ts": "d46f2b540293ab07af7945be44e36beed708af8411090f25e7282ce03458b891",
+        "engine/verify.py": "1e0b6790199194f0c316b2ace82c2e05571d71307e3b42eb395d27d4c6dff9dc",
+        "engine/version.py": "3bce100960b45f84b2ac6ce77e322188c58fc9664c2b15faabbb74f63dadaebc",
+        "engine/vite.sdk.config.ts": "c8280e3d6cfb39baaa4f72c4a296069452d8d7a2e0870eff12e3b70355d69847",
+        "engine/vitest.config.ts": "2307405526250bebfb5c84fc68868d99e5a2cfd6d3bfd027113c83161f6d3eb0",
+        "engine/webgpu_field.ts": "7b43430f409abf5f07e986b09efbc1b4cc20b9ca04b38b9e25c07f912a705cb7",
+        "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+        "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "eval/archive.py": "49960301ac145de810ed076af740ee4810d3799401c1553d51db8ae5c6b68041",
+        "eval/benchmark.py": "546680fac1b3903d09af836b8a20a84827e23f807abe6f23466f4fee8bd4450d",
+        "eval/codec.py": "8d74c689d40cdc4e93c5c19accb9ce4b83aad2f496669b3df0d1645975d31adc",
+        "eval/correctness.py": "4b527465e879d34572fd429990d68fd6694cf7350d4b143bde1ec2c39053450e",
+        "eval/evaluator.py": "3d20538cf318c2f8dbc5e02ea294ff2be62a94dcc429525431952e78b4b7439e",
+        "eval/policy.py": "5d1e5f711e462b25255dedf19a4abc98db50298b4b7b3c42cf09f531f1ec9f89",
+        "eval/provenance.py": "56ec2a9d7afa73e78cba95e5ca327ed4b7da18b37c03d96d985d1e96211f2b2c",
+        "eval/reference.mjs": "5b5388ed55a2e4936ead9a94fea81e743cc46271ca46eff3fa3c317c84c11206",
+        "eval/scenes.py": "2927803da7a59c647de2b8a4f0f7dfebf0ba026daf456e275f5cd200d0ee049a",
+        "eval/verify.py": "cc43dbef7c9c71c0def01ea88053d409bc81003c334a90882b094c9dd7b245f7",
+        "eval/worker.py": "9af70be0ed37e080269e720f7d1e9878ff4e881cae4f10810048759fb632c9fb",
+        "evolve_ss.py": "c86b16bda88c9265f9f544f7e5257e637bd67d28252ac9fa848312082079e9da",
+        "locked/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+        "locked/phase_1b_winner.wgsl": "a7ed9a6267e94ab9bc8895cc30b670fc284d066457762d8c2af2599a83417de9",
+        "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+        "locked/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+        "locked/phase_2b_diagonal_winner.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+        "locked/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+        "locked/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+        "locked/phase_2b_liquid_winner.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+        "locked/phase_2b_winner.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+        "locked/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+        "locked/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+        "locked/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+        "locked/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+        "package-lock.json": "50178742e2fc3a3b59fe4bc4199d16cba789324f01a1f2486ce71daeca26832c",
+        "package.json": "b4aa3db61454deeefd7bb6b4964e858ea4465b0ed41cfec9915613aae08c3425",
+        "pyproject.toml": "6221c50026f227abe0edce1e0b7ffd14009bd0a7a548a11fff3d10651a5219ba",
+        "uv.lock": "c64c8b3ed5ecbcd2a5dda9563e9c9d709f91d915e296b190479bea938bf331e9"
+      },
+      "device": {
+        "info": {
+          "vendor": "NVIDIA",
+          "architecture": "",
+          "device": "NVIDIA GeForce RTX 4090",
+          "description": "595.79",
+          "stackgroup_min_size": 4,
+          "stackgroup_max_size": 128,
+          "vendor_id": 4318,
+          "device_id": 9860,
+          "adapter_type": "DiscreteGPU",
+          "backend_type": "Vulkan"
+        },
+        "features": [
+          "bgra8unorm-storage",
+          "buffer-binding-array",
+          "conservative-rasterization",
+          "depth-clip-control",
+          "depth32float-stencil8",
+          "dual-source-blending",
+          "float32-filterable",
+          "indirect-first-instance",
+          "mappable-primary-buffers",
+          "multi-draw-indirect-count",
+          "partially-bound-binding-array",
+          "pipeline-statistics-query",
+          "polygon-mode-line",
+          "polygon-mode-point",
+          "push-constants",
+          "ray-query",
+          "rg11b10ufloat-renderable",
+          "sampled-texture-and-storage-buffer-array-non-uniform-indexing",
+          "shader-early-depth-test",
+          "shader-f16",
+          "shader-f64",
+          "shader-int64",
+          "shader-primitive-index",
+          "storage-resource-binding-array",
+          "subgroup",
+          "subgroup-barrier",
+          "subgroup-vertex",
+          "texture-adapter-specific-format-features",
+          "texture-binding-array",
+          "texture-compression-bc",
+          "texture-format-nv12",
+          "texture-format16bit-norm",
+          "timestamp-query",
+          "timestamp-query-inside-encoders",
+          "timestamp-query-inside-passes",
+          "vertex-writable-storage"
+        ],
+        "limits": {
+          "max-bind-groups": 8,
+          "max-bind-groups-plus-vertex-buffers": 0,
+          "max-bindings-per-bind-group": 1000,
+          "max-buffer-size": 4503599627370496,
+          "max-color-attachment-bytes-per-sample": 128,
+          "max-color-attachments": 8,
+          "max-compute-invocations-per-workgroup": 1024,
+          "max-compute-workgroup-size-x": 1024,
+          "max-compute-workgroup-size-y": 1024,
+          "max-compute-workgroup-size-z": 64,
+          "max-compute-workgroup-storage-size": 49152,
+          "max-compute-workgroups-per-dimension": 65535,
+          "max-dynamic-storage-buffers-per-pipeline-layout": 16,
+          "max-dynamic-uniform-buffers-per-pipeline-layout": 15,
+          "max-inter-stage-shader-variables": 0,
+          "max-non-sampler-bindings": 4294967295,
+          "max-push-constant-size": 256,
+          "max-sampled-textures-per-shader-stage": 1048576,
+          "max-samplers-per-shader-stage": 1048576,
+          "max-storage-buffer-binding-size": 2147483647,
+          "max-storage-buffers-per-shader-stage": 1048576,
+          "max-storage-textures-per-shader-stage": 1048576,
+          "max-texture-array-layers": 2048,
+          "max-texture-dimension-1d": 32768,
+          "max-texture-dimension-2d": 32768,
+          "max-texture-dimension-3d": 16384,
+          "max-uniform-buffer-binding-size": 65536,
+          "max-uniform-buffers-per-shader-stage": 1048576,
+          "max-vertex-attributes": 32,
+          "max-vertex-buffer-array-stride": 2048,
+          "max-vertex-buffers": 16,
+          "min-storage-buffer-offset-alignment": 32,
+          "min-uniform-buffer-offset-alignment": 64
+        }
+      },
+      "runtime": {
+        "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+        "platform": "Windows-10-10.0.26200-SP0",
+        "node": "v22.22.3",
+        "typescript": "5.8.3",
+        "typescriptHash": "dd17428736a07e1db1a138d8a14295ddb2699ba780ee15038acdd2c6da5373a0",
+        "hostHash": "1f12d0566288d0ca1b88194ca06ac654a8d0f574b11bc99cf0290c8395acf423",
+        "processor": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+        "logicalCpus": 16,
+        "numpy": "2.2.6",
+        "wgpu": "0.31.0"
+      }
+    },
+    "rows": [
+      {
+        "scene": "sparse-32x32",
+        "width": 32,
+        "height": 32,
+        "ticks": 4,
+        "seed": 8173,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "0bdcbd9248ec317903fb69ad142770720e495ab664a44c281a267fcd218ebb04",
+        "finalHash": "6e0561bc39cdad1e4c59640f35e84c57b2c5f4af9963ddcf767cda05cd56e8e4",
+        "energyQ": 6435840,
+        "endToEndMs": {
+          "samples": [
+            29.28809996228665,
+            30.47230001538992,
+            30.2454000338912,
+            31.340699992142618,
+            31.315999920479953,
+            30.3505000192672,
+            30.791600001975894
+          ],
+          "count": 7,
+          "min": 29.28809996228665,
+          "max": 31.340699992142618,
+          "median": 30.47230001538992,
+          "mean": 30.543514277919062,
+          "p95": 31.340699992142618,
+          "stdev": 0.6547680984269197
+        },
+        "syncTickMs": {
+          "samples": [
+            6.195049994857982,
+            6.452874979004264,
+            6.350124982418492,
+            6.70795000041835,
+            6.720199977280572,
+            6.473349989391863,
+            6.565374991623685
+          ],
+          "count": 7,
+          "min": 6.195049994857982,
+          "max": 6.720199977280572,
+          "median": 6.473349989391863,
+          "mean": 6.494989273570744,
+          "p95": 6.720199977280572,
+          "stdev": 0.17493565663782445
+        },
+        "planningMs": {
+          "samples": [
+            2.0911750034429133,
+            2.1975249692332,
+            2.124399965396151,
+            2.2172750323079526,
+            2.1972499671392143,
+            2.120924968039617,
+            2.1408500033430755
+          ],
+          "count": 7,
+          "min": 2.0911750034429133,
+          "max": 2.2172750323079526,
+          "median": 2.1408500033430755,
+          "mean": 2.155628558414589,
+          "p95": 2.2172750323079526,
+          "stdev": 0.0444653465272243
+        }
+      },
+      {
+        "scene": "dense-32x32",
+        "width": 32,
+        "height": 32,
+        "ticks": 4,
+        "seed": 8174,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "b7b74bbff302723d8f078fbb3bc0c39be339398769fa8e6486d432e38f6fc347",
+        "finalHash": "0646c572f8800c1b826ae616398d4b9a6391cdc3b3f3e34ce068c1d44b6f0a53",
+        "energyQ": 14877440,
+        "endToEndMs": {
+          "samples": [
+            30.50920006353408,
+            30.978500028140843,
+            28.387199970893562,
+            29.341199900954962,
+            29.75230000447482,
+            29.27070006262511,
+            27.679799939505756
+          ],
+          "count": 7,
+          "min": 27.679799939505756,
+          "max": 30.978500028140843,
+          "median": 29.341199900954962,
+          "mean": 29.416985710018448,
+          "p95": 30.978500028140843,
+          "stdev": 1.0589152728185747
+        },
+        "syncTickMs": {
+          "samples": [
+            6.4983250049408525,
+            6.627074995776638,
+            5.930249986704439,
+            6.21690001571551,
+            6.3521499978378415,
+            6.242899980861694,
+            5.828049994306639
+          ],
+          "count": 7,
+          "min": 5.828049994306639,
+          "max": 6.627074995776638,
+          "median": 6.242899980861694,
+          "mean": 6.242235710877659,
+          "p95": 6.627074995776638,
+          "stdev": 0.26599983641686886
+        },
+        "planningMs": {
+          "samples": [
+            2.337325015105307,
+            2.1458000119309872,
+            2.068900008453056,
+            2.1630499977618456,
+            2.099224948324263,
+            2.139624994015321,
+            2.074499992886558
+          ],
+          "count": 7,
+          "min": 2.068900008453056,
+          "max": 2.337325015105307,
+          "median": 2.139624994015321,
+          "mean": 2.14691785263962,
+          "p95": 2.337325015105307,
+          "stdev": 0.08466346194873126
+        }
+      },
+      {
+        "scene": "thermal-32x32",
+        "width": 32,
+        "height": 32,
+        "ticks": 4,
+        "seed": 8175,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "2c89fcc1c7d82701720980ea81dfffedb124376d639484034291d76cd4965387",
+        "finalHash": "a0442c55d5592c9909201daa830da2755d635fda71d6e834b0eb09a5459410c0",
+        "energyQ": 96187640,
+        "endToEndMs": {
+          "samples": [
+            31.5108000067994,
+            26.66580001823604,
+            26.60939993802458,
+            27.43769995868206,
+            28.520199935883284,
+            26.76789998076856,
+            28.183399932458997
+          ],
+          "count": 7,
+          "min": 26.60939993802458,
+          "max": 31.5108000067994,
+          "median": 27.43769995868206,
+          "mean": 27.956457110121846,
+          "p95": 31.5108000067994,
+          "stdev": 1.6108914227404063
+        },
+        "syncTickMs": {
+          "samples": [
+            6.75470000714995,
+            5.593050009338185,
+            5.55782500305213,
+            5.710325000109151,
+            6.0533749929163605,
+            5.570199980866164,
+            5.817624973133206
+          ],
+          "count": 7,
+          "min": 5.55782500305213,
+          "max": 6.75470000714995,
+          "median": 5.710325000109151,
+          "mean": 5.865299995223593,
+          "p95": 6.75470000714995,
+          "stdev": 0.39793030382449396
+        },
+        "planningMs": {
+          "samples": [
+            2.7500000142026693,
+            1.7545000300742686,
+            1.725425012409687,
+            1.7593000375200063,
+            1.7190249636769295,
+            1.794649986550212,
+            1.7435499757993966
+          ],
+          "count": 7,
+          "min": 1.7190249636769295,
+          "max": 2.7500000142026693,
+          "median": 1.7545000300742686,
+          "mean": 1.8923500028904527,
+          "p95": 2.7500000142026693,
+          "stdev": 0.3508888128972115
+        }
+      },
+      {
+        "scene": "reactive-32x32",
+        "width": 32,
+        "height": 32,
+        "ticks": 4,
+        "seed": 8176,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "cccbe67648d5521bf9d7296927b6d79af0f46e5d4bdbba2120eea4eaf3ed1952",
+        "finalHash": "750f72b30d7443b375a5d5351f43c323a6869dc3f498545aca788178575556ca",
+        "energyQ": 41866496,
+        "endToEndMs": {
+          "samples": [
+            30.430000042542815,
+            29.98930006287992,
+            29.933899990282953,
+            30.01420001965016,
+            30.22950002923608,
+            30.0897000124678,
+            29.556699912063777
+          ],
+          "count": 7,
+          "min": 29.556699912063777,
+          "max": 30.430000042542815,
+          "median": 30.01420001965016,
+          "mean": 30.03475715273193,
+          "p95": 30.430000042542815,
+          "stdev": 0.25024567444298973
+        },
+        "syncTickMs": {
+          "samples": [
+            6.489124993095174,
+            6.335499987471849,
+            6.391749979229644,
+            6.414950010366738,
+            6.45422501838766,
+            6.416549993446097,
+            6.248799996683374
+          ],
+          "count": 7,
+          "min": 6.248799996683374,
+          "max": 6.489124993095174,
+          "median": 6.414950010366738,
+          "mean": 6.392985711240077,
+          "p95": 6.489124993095174,
+          "stdev": 0.07380125419039395
+        },
+        "planningMs": {
+          "samples": [
+            2.3692499671597034,
+            2.487274963641539,
+            2.409250009804964,
+            2.401250007096678,
+            2.420425007585436,
+            2.3237249988596886,
+            2.4021750141400844
+          ],
+          "count": 7,
+          "min": 2.3237249988596886,
+          "max": 2.487274963641539,
+          "median": 2.4021750141400844,
+          "mean": 2.4019071383268704,
+          "p95": 2.487274963641539,
+          "stdev": 0.04608057567471112
+        }
+      },
+      {
+        "scene": "sparse-128x128",
+        "width": 128,
+        "height": 128,
+        "ticks": 4,
+        "seed": 8173,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "1031a9deb394f195fe73f621f76b11b8ddae83126be8e0f011bc2567bc2639f0",
+        "finalHash": "47f18097b79b298290843162d972737afe8b64908fa773915d6ad164d1526f27",
+        "energyQ": 101349120,
+        "endToEndMs": {
+          "samples": [
+            63.2862999336794,
+            61.884899972938,
+            61.808599974028766,
+            64.69359993934631,
+            62.907999963499606,
+            62.968799960799515,
+            64.10509999841452
+          ],
+          "count": 7,
+          "min": 61.808599974028766,
+          "max": 64.69359993934631,
+          "median": 62.968799960799515,
+          "mean": 63.09361424895802,
+          "p95": 64.69359993934631,
+          "stdev": 0.9843394130959625
+        },
+        "syncTickMs": {
+          "samples": [
+            13.920274999691173,
+            13.534775003790855,
+            13.615875010145828,
+            14.217350049875677,
+            13.708899990888312,
+            13.754849991528317,
+            14.064450020669028
+          ],
+          "count": 7,
+          "min": 13.534775003790855,
+          "max": 14.217350049875677,
+          "median": 13.754849991528317,
+          "mean": 13.830925009512741,
+          "p95": 14.217350049875677,
+          "stdev": 0.22880762507534297
+        },
+        "planningMs": {
+          "samples": [
+            8.350475021870807,
+            8.042250003200024,
+            7.824850035831332,
+            8.138025033986196,
+            8.212349988752976,
+            8.323249989189208,
+            8.335050020832568
+          ],
+          "count": 7,
+          "min": 7.824850035831332,
+          "max": 8.350475021870807,
+          "median": 8.212349988752976,
+          "mean": 8.175178584809016,
+          "p95": 8.350475021870807,
+          "stdev": 0.17783421547096293
+        }
+      },
+      {
+        "scene": "dense-128x128",
+        "width": 128,
+        "height": 128,
+        "ticks": 4,
+        "seed": 8174,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "9c52f433c03485388cb98b2711ce4acde46890dd4862b315aceb30ad0540be5e",
+        "finalHash": "131e71f89b88f67e8e5871fb058b6cd5b15cfd790f88f2ccf850a60f4c01b173",
+        "energyQ": 239467520,
+        "endToEndMs": {
+          "samples": [
+            64.99350001104176,
+            65.4352999990806,
+            63.25450004078448,
+            63.031199970282614,
+            65.78950001858175,
+            64.32809995021671,
+            62.158800079487264
+          ],
+          "count": 7,
+          "min": 62.158800079487264,
+          "max": 65.78950001858175,
+          "median": 64.32809995021671,
+          "mean": 64.14155715278217,
+          "p95": 65.78950001858175,
+          "stdev": 1.2593184151231132
+        },
+        "syncTickMs": {
+          "samples": [
+            14.289549988461658,
+            14.32335001300089,
+            13.83519999217242,
+            13.916175026679412,
+            14.3762000661809,
+            14.136799989501014,
+            13.647574989590794
+          ],
+          "count": 7,
+          "min": 13.647574989590794,
+          "max": 14.3762000661809,
+          "median": 14.136799989501014,
+          "mean": 14.074978580798156,
+          "p95": 14.3762000661809,
+          "stdev": 0.25847677356067955
+        },
+        "planningMs": {
+          "samples": [
+            8.292699989397079,
+            8.16702499287203,
+            8.059100015088916,
+            8.096300036413595,
+            8.483200072078034,
+            8.450799999991432,
+            7.9343499965034425
+          ],
+          "count": 7,
+          "min": 7.9343499965034425,
+          "max": 8.483200072078034,
+          "median": 8.16702499287203,
+          "mean": 8.211925014620647,
+          "p95": 8.483200072078034,
+          "stdev": 0.19009942161465412
+        }
+      },
+      {
+        "scene": "thermal-128x128",
+        "width": 128,
+        "height": 128,
+        "ticks": 4,
+        "seed": 8175,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "07c815776174414ca226ebc511d3ef149855c2626e6513f8015db9c023e666c4",
+        "finalHash": "4429be51feb5accc2780915f86c9a596c08f2cadc692906297a840bdfb6a65c6",
+        "energyQ": 1584461625,
+        "endToEndMs": {
+          "samples": [
+            71.4923000195995,
+            67.8172999760136,
+            68.27010004781187,
+            67.96390004456043,
+            71.35589991230518,
+            65.18769997637719,
+            65.7824999652803
+          ],
+          "count": 7,
+          "min": 65.18769997637719,
+          "max": 71.4923000195995,
+          "median": 67.96390004456043,
+          "mean": 68.26709999170687,
+          "p95": 71.4923000195995,
+          "stdev": 2.264407875221057
+        },
+        "syncTickMs": {
+          "samples": [
+            15.870875009568408,
+            15.081249992363155,
+            15.128549974178895,
+            15.12762502534315,
+            15.84397503756918,
+            14.324349991511554,
+            14.478899975074455
+          ],
+          "count": 7,
+          "min": 14.324349991511554,
+          "max": 15.870875009568408,
+          "median": 15.12762502534315,
+          "mean": 15.122217857944113,
+          "p95": 15.870875009568408,
+          "stdev": 0.5520894967419723
+        },
+        "planningMs": {
+          "samples": [
+            9.517574973870069,
+            9.230699972249568,
+            9.273274976294488,
+            9.351275046356022,
+            9.987325000111014,
+            9.031125024193898,
+            8.708674955414608
+          ],
+          "count": 7,
+          "min": 8.708674955414608,
+          "max": 9.987325000111014,
+          "median": 9.273274976294488,
+          "mean": 9.299992849784237,
+          "p95": 9.987325000111014,
+          "stdev": 0.36836694375504314
+        }
+      },
+      {
+        "scene": "reactive-128x128",
+        "width": 128,
+        "height": 128,
+        "ticks": 4,
+        "seed": 8176,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "4305efdd7fd85b589ed0eac4c50a5a5e38acea00c76ac7a04a29194d707806ea",
+        "finalHash": "3db85894ad09b4abb39db712782275ac16f09f56b78ec04ca878c7ac041a4e06",
+        "energyQ": 719123200,
+        "endToEndMs": {
+          "samples": [
+            77.85430003423244,
+            83.67189997807145,
+            76.23780006542802,
+            77.74119998794049,
+            85.12659999541938,
+            73.25219991616905,
+            79.3353000190109
+          ],
+          "count": 7,
+          "min": 73.25219991616905,
+          "max": 85.12659999541938,
+          "median": 77.85430003423244,
+          "mean": 79.03132857089597,
+          "p95": 85.12659999541938,
+          "stdev": 3.836508695981696
+        },
+        "syncTickMs": {
+          "samples": [
+            17.40345000871457,
+            18.96697501069866,
+            17.087974993046373,
+            17.275099991820753,
+            18.762425024760887,
+            16.438000049674883,
+            17.615524993743747
+          ],
+          "count": 7,
+          "min": 16.438000049674883,
+          "max": 18.96697501069866,
+          "median": 17.40345000871457,
+          "mean": 17.64992143892284,
+          "p95": 18.96697501069866,
+          "stdev": 0.84170354466721
+        },
+        "planningMs": {
+          "samples": [
+            12.06297500175424,
+            12.746100022923201,
+            11.356375005561858,
+            11.589600006118417,
+            12.472750007873401,
+            11.332725029205903,
+            12.122649990487844
+          ],
+          "count": 7,
+          "min": 11.332725029205903,
+          "max": 12.746100022923201,
+          "median": 12.06297500175424,
+          "mean": 11.954739294846409,
+          "p95": 12.746100022923201,
+          "stdev": 0.5088873212689031
+        }
+      },
+      {
+        "scene": "sparse-257x129",
+        "width": 257,
+        "height": 129,
+        "ticks": 4,
+        "seed": 8173,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "786ad85cc10d3143a8ed10ef5b36e5188d32f23ee205dae8259866b6d2990378",
+        "finalHash": "d0382712b8de5a8826777f36609e69421fc4b3c05f1d9969f4c876d746800305",
+        "energyQ": 205056000,
+        "endToEndMs": {
+          "samples": [
+            82.6568000484258,
+            88.03410001564771,
+            86.29730006214231,
+            92.850900022313,
+            85.7889000326395,
+            83.85950000956655,
+            85.63119999598712
+          ],
+          "count": 7,
+          "min": 82.6568000484258,
+          "max": 92.850900022313,
+          "median": 85.7889000326395,
+          "mean": 86.44552859810314,
+          "p95": 92.850900022313,
+          "stdev": 3.063858770492641
+        },
+        "syncTickMs": {
+          "samples": [
+            18.01084997714497,
+            19.298999977763742,
+            18.62037499086,
+            20.41147497948259,
+            18.780624988721684,
+            18.407374998787418,
+            18.898524984251708
+          ],
+          "count": 7,
+          "min": 18.01084997714497,
+          "max": 20.41147497948259,
+          "median": 18.780624988721684,
+          "mean": 18.9183178424303,
+          "p95": 20.41147497948259,
+          "stdev": 0.7138545932457866
+        },
+        "planningMs": {
+          "samples": [
+            11.322475009365007,
+            11.860049969982356,
+            11.873299983562902,
+            13.220449996879324,
+            12.083924986654893,
+            11.701150011504069,
+            11.823375010862947
+          ],
+          "count": 7,
+          "min": 11.322475009365007,
+          "max": 13.220449996879324,
+          "median": 11.860049969982356,
+          "mean": 11.983532138401642,
+          "p95": 13.220449996879324,
+          "stdev": 0.5490029905489896
+        }
+      },
+      {
+        "scene": "dense-257x129",
+        "width": 257,
+        "height": 129,
+        "ticks": 4,
+        "seed": 8174,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "ca09db72537121a68c65f827cccfab7b796beeb944278217e40610cc7cd01f2c",
+        "finalHash": "640628dad2941675329319ad06f12994a9e1ea18bf84cc4e9f92efad9d7af96d",
+        "energyQ": 487376640,
+        "endToEndMs": {
+          "samples": [
+            80.89550002478063,
+            84.36560002155602,
+            85.05819994024932,
+            82.66229997389019,
+            89.14120006375015,
+            85.66520002204925,
+            81.54600008856505
+          ],
+          "count": 7,
+          "min": 80.89550002478063,
+          "max": 89.14120006375015,
+          "median": 84.36560002155602,
+          "mean": 84.19057144783437,
+          "p95": 89.14120006375015,
+          "stdev": 2.6091469427614227
+        },
+        "syncTickMs": {
+          "samples": [
+            17.61717497720383,
+            17.983749974519014,
+            18.625999975483865,
+            18.12814999721013,
+            19.407999992836267,
+            18.76964999246411,
+            17.894824995892122
+          ],
+          "count": 7,
+          "min": 17.61717497720383,
+          "max": 19.407999992836267,
+          "median": 18.12814999721013,
+          "mean": 18.346792843658477,
+          "p95": 19.407999992836267,
+          "stdev": 0.5731052495988934
+        },
+        "planningMs": {
+          "samples": [
+            11.28400000743568,
+            11.5104999858886,
+            11.350549961207435,
+            11.161400034325197,
+            12.147825007559732,
+            12.243450008099899,
+            11.214999976800755
+          ],
+          "count": 7,
+          "min": 11.161400034325197,
+          "max": 12.243450008099899,
+          "median": 11.350549961207435,
+          "mean": 11.558960711616757,
+          "p95": 12.243450008099899,
+          "stdev": 0.4162823744472563
+        }
+      },
+      {
+        "scene": "thermal-257x129",
+        "width": 257,
+        "height": 129,
+        "ticks": 4,
+        "seed": 8175,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "8698161105612cfe5cb5b1e6d014274e668b7a75f255bd817f116e914fbf5398",
+        "finalHash": "f5093b488a033aa089ba1bbb4af85ab9af0fbeca4155beaab675577d20c11109",
+        "energyQ": 3205019771,
+        "endToEndMs": {
+          "samples": [
+            99.3787000188604,
+            108.98869996890426,
+            102.61699999682605,
+            101.15059989038855,
+            117.88769997656345,
+            105.93329998664558,
+            103.17659995052963
+          ],
+          "count": 7,
+          "min": 99.3787000188604,
+          "max": 117.88769997656345,
+          "median": 103.17659995052963,
+          "mean": 105.59037139838827,
+          "p95": 117.88769997656345,
+          "stdev": 5.804606418477987
+        },
+        "syncTickMs": {
+          "samples": [
+            22.241275029955432,
+            24.471675016684458,
+            22.90729997912422,
+            22.596374998101965,
+            26.80412496556528,
+            23.73035001801327,
+            23.023200017632917
+          ],
+          "count": 7,
+          "min": 22.241275029955432,
+          "max": 26.80412496556528,
+          "median": 23.023200017632917,
+          "mean": 23.682042860725364,
+          "p95": 26.80412496556528,
+          "stdev": 1.44726521743262
+        },
+        "planningMs": {
+          "samples": [
+            16.037374996813014,
+            17.487875040387735,
+            16.644349962007254,
+            15.918824967229739,
+            19.243024958996102,
+            16.60117498249747,
+            15.755200030980632
+          ],
+          "count": 7,
+          "min": 15.755200030980632,
+          "max": 19.243024958996102,
+          "median": 16.60117498249747,
+          "mean": 16.812546419844562,
+          "p95": 19.243024958996102,
+          "stdev": 1.1309839435482996
+        }
+      },
+      {
+        "scene": "reactive-257x129",
+        "width": 257,
+        "height": 129,
+        "ticks": 4,
+        "seed": 8176,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "3d4db17da8153ab4b51386b63951316c55cb67fce2b9ae9ca111c60b236c2ea3",
+        "finalHash": "6ada906d5b48ea6b6bcbccd39678b1d5658ac206d6b943a5737770752e34edf9",
+        "energyQ": 1468669696,
+        "endToEndMs": {
+          "samples": [
+            117.99889989197254,
+            118.49589995108545,
+            114.23559999093413,
+            115.50039995927364,
+            121.27200001850724,
+            117.5952999619767,
+            113.56510000769049
+          ],
+          "count": 7,
+          "min": 113.56510000769049,
+          "max": 121.27200001850724,
+          "median": 117.5952999619767,
+          "mean": 116.95188568306288,
+          "p95": 121.27200001850724,
+          "stdev": 2.4932172158441914
+        },
+        "syncTickMs": {
+          "samples": [
+            26.85162500711158,
+            26.7464249918703,
+            25.687274988740683,
+            26.18245003395714,
+            27.311225043376908,
+            26.426725002238527,
+            25.570950005203485
+          ],
+          "count": 7,
+          "min": 25.570950005203485,
+          "max": 27.311225043376908,
+          "median": 26.426725002238527,
+          "mean": 26.396667867499804,
+          "p95": 27.311225043376908,
+          "stdev": 0.5852437622766041
+        },
+        "planningMs": {
+          "samples": [
+            19.541849964298308,
+            19.619325030362234,
+            18.388599972240627,
+            18.811749963788316,
+            20.6667750608176,
+            19.550925062503666,
+            18.417974992189556
+          ],
+          "count": 7,
+          "min": 18.388599972240627,
+          "max": 20.6667750608176,
+          "median": 19.541849964298308,
+          "mean": 19.28531429231433,
+          "p95": 20.6667750608176,
+          "stdev": 0.7499517952988962
+        }
+      },
+      {
+        "scene": "sparse-512x512",
+        "width": 512,
+        "height": 512,
+        "ticks": 4,
+        "seed": 8173,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "29701f9796541e97f572c572352a825116ab57ca9a785cf4781ef098ded4a33c",
+        "finalHash": "780574699957cebe2f098e2fa5b512c5f4d7c503d1fef9375cc5d78d365b907f",
+        "energyQ": 1628832000,
+        "endToEndMs": {
+          "samples": [
+            786.8632000172511,
+            847.9138999246061,
+            845.7771999528632,
+            727.4490999989212,
+            713.6824000626802,
+            698.4177000122145,
+            696.6322999214754
+          ],
+          "count": 7,
+          "min": 696.6322999214754,
+          "max": 847.9138999246061,
+          "median": 727.4490999989212,
+          "mean": 759.5336856985731,
+          "p95": 847.9138999246061,
+          "stdev": 61.89786223349981
+        },
+        "syncTickMs": {
+          "samples": [
+            169.34054999728687,
+            181.47352503729053,
+            180.7034250232391,
+            154.31262500351295,
+            151.58044997951947,
+            148.0857000569813,
+            148.1098749791272
+          ],
+          "count": 7,
+          "min": 148.0857000569813,
+          "max": 181.47352503729053,
+          "median": 154.31262500351295,
+          "mean": 161.94373572527962,
+          "p95": 181.47352503729053,
+          "stdev": 13.820811804387017
+        },
+        "planningMs": {
+          "samples": [
+            126.80770002771169,
+            136.16972501040436,
+            134.2950749967713,
+            114.11022499669343,
+            112.11260000709444,
+            109.58915000082925,
+            109.9918750114739
+          ],
+          "count": 7,
+          "min": 109.58915000082925,
+          "max": 136.16972501040436,
+          "median": 114.11022499669343,
+          "mean": 120.43947857871119,
+          "p95": 136.16972501040436,
+          "stdev": 10.798484401086448
+        }
+      },
+      {
+        "scene": "dense-512x512",
+        "width": 512,
+        "height": 512,
+        "ticks": 4,
+        "seed": 8174,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "ea53d2b2fa4e0ef9c7d21475e4e05c1ba258a544ad8ca7bdd3809d8543f84ae8",
+        "finalHash": "c799b565c407e3e8dd8326a774e197f03dd8793c538ef5b817627f46775170c3",
+        "energyQ": 3871404800,
+        "endToEndMs": {
+          "samples": [
+            689.1044999938458,
+            691.3904000539333,
+            686.0765001038089,
+            729.1291999863461,
+            770.985099952668,
+            820.1213999418542,
+            749.9228999949992
+          ],
+          "count": 7,
+          "min": 686.0765001038089,
+          "max": 820.1213999418542,
+          "median": 729.1291999863461,
+          "mean": 733.8185714324936,
+          "p95": 820.1213999418542,
+          "stdev": 46.58275576076303
+        },
+        "syncTickMs": {
+          "samples": [
+            146.21979999355972,
+            146.01807497092523,
+            145.6066500104498,
+            154.92527501191944,
+            164.8161250341218,
+            176.69864997151308,
+            159.28272501332685
+          ],
+          "count": 7,
+          "min": 145.6066500104498,
+          "max": 176.69864997151308,
+          "median": 154.92527501191944,
+          "mean": 156.22390000083084,
+          "p95": 176.69864997151308,
+          "stdev": 10.830192146813703
+        },
+        "planningMs": {
+          "samples": [
+            108.57567496714182,
+            108.04220000864007,
+            107.01400000834838,
+            114.65637502260506,
+            122.11925003794022,
+            129.81032498646528,
+            118.05007499060594
+          ],
+          "count": 7,
+          "min": 107.01400000834838,
+          "max": 129.81032498646528,
+          "median": 114.65637502260506,
+          "mean": 115.46684286024954,
+          "p95": 129.81032498646528,
+          "stdev": 7.850241268375254
+        }
+      },
+      {
+        "scene": "thermal-512x512",
+        "width": 512,
+        "height": 512,
+        "ticks": 4,
+        "seed": 8175,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "e85d44a90a4ca3306d970357db5ebe445d6a6a99acd54b48a9713692b2506f59",
+        "finalHash": "a2087ae95b60bf3b169a550da64242b5bd93eddba40c446444c83053aa9e804b",
+        "energyQ": 25323639781,
+        "endToEndMs": {
+          "samples": [
+            963.215499999933,
+            957.5057999463752,
+            950.8588000899181,
+            944.115599966608,
+            986.979499924928,
+            1070.8563999505714,
+            1108.3586999448016
+          ],
+          "count": 7,
+          "min": 944.115599966608,
+          "max": 1108.3586999448016,
+          "median": 963.215499999933,
+          "mean": 997.4128999747336,
+          "p95": 1108.3586999448016,
+          "stdev": 60.452696097562736
+        },
+        "syncTickMs": {
+          "samples": [
+            213.050274993293,
+            211.96632503415458,
+            210.35310000297613,
+            208.55399998254143,
+            217.75352500844747,
+            235.14845003955998,
+            246.20225001126528
+          ],
+          "count": 7,
+          "min": 208.55399998254143,
+          "max": 246.20225001126528,
+          "median": 213.050274993293,
+          "mean": 220.4325607246054,
+          "p95": 246.20225001126528,
+          "stdev": 13.398734160659728
+        },
+        "planningMs": {
+          "samples": [
+            173.42829998233356,
+            171.43842502264306,
+            170.9539000003133,
+            168.63689999445342,
+            174.7265250014607,
+            189.87755003036,
+            198.59072502003983
+          ],
+          "count": 7,
+          "min": 168.63689999445342,
+          "max": 198.59072502003983,
+          "median": 173.42829998233356,
+          "mean": 178.2360464359434,
+          "p95": 198.59072502003983,
+          "stdev": 10.533278141583121
+        }
+      },
+      {
+        "scene": "reactive-512x512",
+        "width": 512,
+        "height": 512,
+        "ticks": 4,
+        "seed": 8176,
+        "startTick": 3,
+        "warmup": 2,
+        "initialHash": "3ca5365f7f60dd5764a71708f0012fa6c03945e4d2da3850ab4f5215ee027052",
+        "finalHash": "3031a9664531019d435a6e05b4f6e7d2156ceae5d2e0407aab3e8c74574a9cc8",
+        "energyQ": 11691256576,
+        "endToEndMs": {
+          "samples": [
+            1030.6487999623641,
+            995.0015000067651,
+            1016.5376999648288,
+            1006.9032999454066,
+            1012.3048999812454,
+            1034.4406000804156,
+            1036.670200061053
+          ],
+          "count": 7,
+          "min": 995.0015000067651,
+          "max": 1036.670200061053,
+          "median": 1016.5376999648288,
+          "mean": 1018.9295714288684,
+          "p95": 1036.670200061053,
+          "stdev": 14.439298361362638
+        },
+        "syncTickMs": {
+          "samples": [
+            229.86962509457953,
+            221.6864749789238,
+            225.3603249846492,
+            224.37147496384569,
+            225.34927498782054,
+            230.63800000818446,
+            231.0437499836553
+          ],
+          "count": 7,
+          "min": 221.6864749789238,
+          "max": 231.0437499836553,
+          "median": 225.3603249846492,
+          "mean": 226.9027035716655,
+          "p95": 231.0437499836553,
+          "stdev": 3.3447519499237224
+        },
+        "planningMs": {
+          "samples": [
+            189.24820004031062,
+            181.65409998618998,
+            185.1150750007946,
+            181.43055000109598,
+            186.26852502347901,
+            189.84945002011955,
+            187.4665749783162
+          ],
+          "count": 7,
+          "min": 181.43055000109598,
+          "max": 189.84945002011955,
+          "median": 186.26852502347901,
+          "mean": 185.8617821500437,
+          "p95": 189.84945002011955,
+          "stdev": 3.1169605174854165
+        }
+      }
+    ],
+    "sourceBundleHash": "7660d7deae9ce7eabe60bffb20a04362818950244e377251694d27983808a99a",
+    "measurement": "Synchronized host wall time. Compilation and registry construction excluded. End-to-end includes validation, allocation, uploads, structural planning and all three readbacks per tick. Tick time includes planning, upload, dispatch, readback and completed-state validation. PlanningMs isolates the host solve."
+  },
+  "receipt": "71f0a5e1e8759b3b2330de924557107b9b23f70e2c37a55706d9011a04556c94"
+}
