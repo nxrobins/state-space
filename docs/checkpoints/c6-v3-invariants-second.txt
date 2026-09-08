@@ -1,0 +1,115 @@
+ENGINE INVARIANT SCENARIO SUITE
+Grid: 64x64
+Scenarios: 18
+CompositionEngine: 36 pipelines compiled for 64x64
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+PASS solid_matter_falls           ticks= 10 mean=23.666ms
+PASS structural_targets_resist_displacement ticks=  1 mean=7.486ms
+PASS sand_column                  ticks= 24 mean=6.371ms
+PASS sand_diagonal_fall           ticks=  8 mean=7.719ms
+PASS water_basin                  ticks= 28 mean=7.717ms
+PASS water_horizontal_spread      ticks=  4 mean=6.102ms
+PASS water_pillar_collapses       ticks= 16 mean=5.783ms
+PASS viscous_oil_spread           ticks=  4 mean=6.202ms
+PASS smoke_column_conservation    ticks= 16 mean=6.165ms
+PASS cool_smoke_spread            ticks= 16 mean=5.590ms
+PASS hot_smoke_rises              ticks= 16 mean=6.025ms
+PASS hot_steam_rises              ticks=  8 mean=5.701ms
+PASS sealed_hot_wood_starves      ticks= 12 mean=6.124ms
+PASS exposed_hot_wood_burns_once  ticks=  1 mean=6.709ms
+PASS ice_melts_to_water           ticks=  1 mean=5.851ms
+PASS water_boils_to_steam         ticks=  1 mean=6.625ms
+PASS sand_vitrifies_to_glass      ticks=  1 mean=6.374ms
+PASS mixed_nonreactive_stress     ticks= 18 mean=7.120ms
+FUZZ: movement invariants
+PASS fuzz_mix_0                   ticks= 26 mean=6.749ms
+PASS fuzz_mix_1                   ticks= 13 mean=9.092ms
+PASS fuzz_mix_2                   ticks= 15 mean=7.224ms
+PASS fuzz_mix_3                   ticks= 22 mean=7.657ms
+PASS fuzz_mix_4                   ticks=  4 mean=6.815ms
+PASS fuzz_mix_5                   ticks= 11 mean=6.874ms
+PASS fuzz_mix_6                   ticks=  8 mean=6.751ms
+PASS fuzz_mix_7                   ticks=  7 mean=6.537ms
+PASS fuzz_powder_0                ticks= 20 mean=6.337ms
+PASS fuzz_powder_1                ticks= 19 mean=6.524ms
+PASS fuzz_powder_2                ticks= 29 mean=6.175ms
+PASS fuzz_powder_3                ticks= 17 mean=6.276ms
+PASS fuzz_liquid_0                ticks= 26 mean=7.438ms
+PASS fuzz_liquid_1                ticks= 14 mean=6.179ms
+PASS fuzz_liquid_2                ticks= 27 mean=6.434ms
+PASS fuzz_liquid_3                ticks= 17 mean=6.847ms
+PASS fuzz_gas_0                   ticks=  8 mean=7.015ms
+PASS fuzz_gas_1                   ticks= 30 mean=7.255ms
+PASS fuzz_gas_2                   ticks= 11 mean=8.675ms
+PASS fuzz_gas_3                   ticks= 15 mean=6.011ms
+FUZZ: phase-transition invariants
+PASS fuzz_phase_00             ticks= 15 mean=8.805ms
+PASS fuzz_phase_01             ticks=  6 mean=7.710ms
+PASS fuzz_phase_02             ticks= 15 mean=9.774ms
+PASS fuzz_phase_03             ticks=  8 mean=8.678ms
+PASS fuzz_phase_04             ticks= 11 mean=9.633ms
+PASS fuzz_phase_05             ticks= 11 mean=9.614ms
+PASS fuzz_phase_06             ticks= 20 mean=10.120ms
+PASS fuzz_phase_07             ticks= 26 mean=10.405ms
+PASS fuzz_phase_08             ticks= 25 mean=8.480ms
+PASS fuzz_phase_09             ticks= 14 mean=8.046ms
+PASS fuzz_phase_10             ticks= 25 mean=7.735ms
+PASS fuzz_phase_11             ticks= 24 mean=7.871ms
+PASS fuzz_phase_12             ticks=  9 mean=7.846ms
+PASS fuzz_phase_13             ticks= 11 mean=8.005ms
+FUZZ: baffled gas buoyancy
+PASS fuzz_baffled_gas_00       ticks= 18 mean=6.632ms
+PASS fuzz_baffled_gas_01       ticks= 16 mean=7.131ms
+PASS fuzz_baffled_gas_02       ticks= 16 mean=6.988ms
+PASS fuzz_baffled_gas_03       ticks= 21 mean=7.331ms
+PASS fuzz_baffled_gas_04       ticks=  9 mean=6.849ms
+PASS fuzz_baffled_gas_05       ticks=  9 mean=6.871ms
+CompositionEngine: 36 pipelines compiled for 24x24
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+FUZZ: small-grid invariants (24x24)
+PASS fuzz_small_mix_0             ticks=  1 mean=7.015ms
+PASS fuzz_small_mix_1             ticks= 18 mean=5.805ms
+PASS fuzz_small_mix_2             ticks= 11 mean=5.579ms
+PASS fuzz_small_mix_3             ticks= 16 mean=5.675ms
+PASS fuzz_small_mix_4             ticks= 12 mean=5.792ms
+PASS fuzz_small_movement_0        ticks= 16 mean=5.175ms
+PASS fuzz_small_movement_1        ticks= 12 mean=5.266ms
+PASS fuzz_small_movement_2        ticks= 23 mean=5.477ms
+PASS fuzz_small_movement_3        ticks= 14 mean=7.429ms
+ALL INVARIANT SCENARIOS PASSED

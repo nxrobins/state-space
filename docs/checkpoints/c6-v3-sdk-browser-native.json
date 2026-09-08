@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "passDeltas": 54,
+  "allThreeCoordinates": true,
+  "schemaVersion": 3,
+  "browserBackend": {
+    "architecture": "lovelace",
+    "description": "",
+    "device": "",
+    "isFallbackAdapter": false,
+    "vendor": "nvidia"
+  },
+  "packageEvidenceHash": "9de13a0221ede5a34390e77d3ea60a437f83835926b425f82189f78546c7e04b"
+}

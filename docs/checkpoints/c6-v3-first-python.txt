@@ -1,0 +1,397 @@
+Verify (.): -m engine.lint
+  PASS
+Verify (.): -m ruff check .
+  PASS
+Verify (.): -m unittest discover -s tests -v
+  PASS
+Verify (.): test_cascade.py
+  PASS
+Verify (.): test_invariants.py
+  PASS
+Verify (.): test
+  PASS
+Verify (.): run lint
+  PASS
+Verify (.): run typecheck
+  PASS
+Verify (game): test
+  PASS
+Verify (game): run build
+  PASS
+Verify (tower-defense-rogue): test
+  PASS
+Verify (tower-defense-rogue): run build
+  PASS
+Verify (.): scripts/verify_sdk.py --report C:\Users\nxrob\AppData\Local\Temp\tmp2386f_1f\report-sdk.json
+  PASS
+Verify (.): -m eval.verify --benchmark --output C:\Users\nxrob\AppData\Local\Temp\tmp2386f_1f\report-evaluation
+  FAIL
+======================================================================
+ERROR: test_generated_drift_is_detected_on_disk (test_contracts.PreventionRules)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_contracts.py", line 176, in test_generated_drift_is_detected_on_disk
+    self.assertEqual(check_generated(root), [])
+  File "D:\state-space\engine\generate.py", line 146, in check_generated
+    return [str(path.relative_to(root)) for path, expected in generated_outputs(root).items()
+  File "D:\state-space\engine\generate.py", line 98, in generated_outputs
+    source = (root / "engine" / f"{name}.ts").read_text(encoding="utf-8")
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\pathlib.py", line 1134, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\nxrob\\AppData\\Local\\Temp\\tmpwhzpsm5c\\engine\\structure.ts'
+
+======================================================================
+ERROR: test_rejects_incompatible_or_missing_metadata (test_contracts.SnapshotProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_contracts.py", line 104, in test_rejects_incompatible_or_missing_metadata
+    original = Snapshot(1, 1, 0, [0], [0]).to_dict()
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_snapshot_copies_and_roundtrips_every_field (test_contracts.SnapshotProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_contracts.py", line 95, in test_snapshot_copies_and_roundtrips_every_field
+    snapshot = Snapshot(2, 1, 7, cells, energy)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_incomplete_or_inconsistent_state_cannot_resume (test_fidelity.ProductionFidelity) (bad=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 112, in test_incomplete_or_inconsistent_state_cannot_resume
+    Snapshot(1, 1, 5, grid, bad)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_incomplete_or_inconsistent_state_cannot_resume (test_fidelity.ProductionFidelity) (bad=[0])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 112, in test_incomplete_or_inconsistent_state_cannot_resume
+    Snapshot(1, 1, 5, grid, bad)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_incomplete_or_inconsistent_state_cannot_resume (test_fidelity.ProductionFidelity) (bad=[1073741824])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 112, in test_incomplete_or_inconsistent_state_cannot_resume
+    Snapshot(1, 1, 5, grid, bad)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_incomplete_or_inconsistent_state_cannot_resume (test_fidelity.ProductionFidelity) (bad=[51200.0])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 112, in test_incomplete_or_inconsistent_state_cannot_resume
+    Snapshot(1, 1, 5, grid, bad)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_incomplete_or_inconsistent_state_cannot_resume (test_fidelity.ProductionFidelity) (bad=[51456])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 112, in test_incomplete_or_inconsistent_state_cannot_resume
+    Snapshot(1, 1, 5, grid, bad)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_long_flow_keeps_every_cell_and_energy_with_fractional_restart (test_fidelity.ProductionFidelity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 97, in test_long_flow_keeps_every_cell_and_energy_with_fractional_restart
+    snapshot = Snapshot(width, height, 317, first["final_grid"], first["final_energy"])
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+ERROR: test_phase_families_and_latent_energy_survive_native_roundtrips (test_fidelity.ProductionFidelity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 72, in test_phase_families_and_latent_energy_survive_native_roundtrips
+    cold = self.engine.run(cooled, self.cold, 1, 1, 8, initial_energy=[cold_energy], start_tick=8)
+  File "D:\state-space\engine\compositor.py", line 153, in run
+    raise ValueError("Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either")
+ValueError: Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either
+
+======================================================================
+ERROR: test_chunked_runs_preserve_absolute_tick_schedule (test_gpu_contracts.GpuContractProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_gpu_contracts.py", line 33, in test_chunked_runs_preserve_absolute_tick_schedule
+    tail = self.engine.run(first["final_grid"], self.cold, 7, 5, n_ticks=4, start_tick=first["end_tick"], snapshot_interval=1, initial_energy=first["final_energy"])
+  File "D:\state-space\engine\compositor.py", line 153, in run
+    raise ValueError("Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either")
+ValueError: Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either
+
+======================================================================
+ERROR: test_snapshots_cannot_be_made_writable_and_require_the_same_registry (test_sdk.RegistryProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_sdk.py", line 62, in test_snapshots_cannot_be_made_writable_and_require_the_same_registry
+    saved = Snapshot(1, 1, 0, grid, energy, registry=registry)
+TypeError: Snapshot.__init__() missing 1 required positional argument: 'structure'
+
+======================================================================
+FAIL: test_repository_passes_engine_lint (test_contracts.PreventionRules)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_contracts.py", line 161, in test_repository_passes_engine_lint
+    self.assertEqual(lint(), [])
+AssertionError: Lists differ: ['SS015 engine\\shaders\\state_io.wgsl: io[55 chars]ell'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'SS015 engine\\shaders\\state_io.wgsl: io_copy must transport both arrays from the same source cell'
+
++ []
+- ['SS015 engine\\shaders\\state_io.wgsl: io_copy must transport both arrays '
+-  'from the same source cell']
+
+======================================================================
+FAIL: test_transport_lint_rejects_half_state_and_wrong_source_writes (test_fidelity.ProductionFidelity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_fidelity.py", line 122, in test_transport_lint_rejects_half_state_and_wrong_source_writes
+    self.assertEqual(lint_wgsl(source, "state_io.wgsl", values), [])
+AssertionError: Lists differ: ['SS015 state_io.wgsl: io_copy must transp[38 chars]ell'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'SS015 state_io.wgsl: io_copy must transport both arrays from the same source cell'
+
++ []
+- ['SS015 state_io.wgsl: io_copy must transport both arrays from the same source '
+-  'cell']
+
+======================================================================
+FAIL: test_allocated_buffers_are_destroyed_when_dispatch_setup_fails (test_sdk.NativeFieldProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_sdk.py", line 185, in test_allocated_buffers_are_destroyed_when_dispatch_setup_fails
+    self.assertEqual(len(resources), 5)
+AssertionError: 8 != 5
+
+======================================================================
+FAIL: test_custom_phase_family_and_fractional_replay (test_sdk.NativeFieldProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_sdk.py", line 111, in test_custom_phase_family_and_fractional_replay
+    self.assertEqual(len(report), 48)
+AssertionError: 54 != 48
+
+======================================================================
+FAIL: test_runtime_prevention_rules_have_negative_controls (test_sdk.RegistryProperties)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\state-space\tests\test_sdk.py", line 86, in test_runtime_prevention_rules_have_negative_controls
+    self.assertNotEqual(mutant, source)
+AssertionError: '"""\nPhase 2e: Composition Engine\n\nDispatches the physics kernels per tick in locked order. Phase 2 movement is\nsplit into conservative swap passes before thermal/reaction work:\n  vertical0 -> vertical1 -> diagonal0 -> diagonal1 -> liquid0 -> liquid1\n  -> gas_buoyancy0 -> gas_buoyancy1 -> gas_spread0 -> gas_spread1\n  -> thermal_x0 -> thermal_x1 -> thermal_y0 -> thermal_y1 -> phase -> combustion\n\nEach kernel runs as a full double-buffer pass: reads grid_A, writes grid_B,\nthen swap.\n\nThe cold table is shared read-only across all kernels.\n"""\n\nimport time\nfrom contextlib import ExitStack\nimport numpy as np\nimport wgpu\n\nfrom engine.wgsl_fixer import strip_entry_points_and_bindings\nfrom engine.schedule import KERNEL_SPECS as KERNEL_SPECS, movement_schedule_for_tick as movement_schedule_for_tick\nfrom engine.contracts import MAX_TICK, checked_integer, validate_dimensions, validate_packed\nfrom engine.schema import COLD_TABLE_ENTRIES, COLD_TABLE_STRIDE\nfrom engine.state import seed_state, catalog_from_cold, validate_state\nfrom engine.structure_bulk import plan_structure_bulk, seed_structure_bulk, validate_structure_bulk\nfrom engine.registry import MaterialRegistry\nfrom engine.sources import ShaderBundle\nfrom engine.array_state import energy_ledger_array\n\n\nclass CompositionEngine:\n    """Runs the full physics pipeline per tick."""\n\n    def __init__(self, grid_width: int | None = None, grid_height: int | None = None, *, sources: ShaderBundle | None = None):\n        if (grid_width is None) != (grid_height is None):\n            raise ValueError("Provide both grid dimensions or neither")\n        if grid_width is not None:\n            validate_dimensions(grid_width, grid_height)\n        if sources is not None and not isinstance(sources, ShaderBundle):\n            raise ValueError("sources must be an immutable ShaderBundle")\n        self._sources = sources if sources is not None else ShaderBundle.load()\n        self._bitmask_defs = self._sources.shader("bitmask_defs.wgsl")\n        self._locked_1a = strip_entry_points_and_bindings(self._sources.kernel("phase_1a_winner.wgsl"))\n        self._state_io = self._sources.shader("state_io.wgsl")\n        self._enthalpy_law = self._sources.shader("enthalpy_law.wgsl")\n        self._closed = False\n        self.adapter = wgpu.gpu.request_adapter_sync(power_preference="high-performance")\n        if self.adapter is None:\n            raise RuntimeError("No GPU adapter found")\n        self.device = self.adapter.request_device_sync()\n        self.pipelines = {}\n        self.kernel_sources = {}\n        self._compiled_dims: tuple[int, int] | None = None\n\n        if grid_width is not None and grid_height is not None:\n            try:\n                self._compile_pipelines(grid_width, grid_height)\n            except Exception:\n                self.close()\n                raise\n\n    def close(self) -> None:\n        if not self._closed:\n            self._closed = True\n            self.pipelines.clear()\n            self.kernel_sources.clear()\n            self.device.destroy()\n\n    def __enter__(self):\n        self._ensure_open()\n        return self\n\n    def __exit__(self, *_exc):\n        self.close()\n\n    def _ensure_open(self) -> None:\n        if self._closed:\n            raise RuntimeError("Composition engine is closed")\n\n    def _compile_pipelines(self, grid_width: int, grid_height: int) -> None:\n        """Compile kernels specialized to the requested grid dimensions."""\n        self._ensure_open()\n        dims = validate_dimensions(grid_width, grid_height)\n        if dims[0] * dims[1] * 8 > self.device.limits["max-storage-buffer-binding-size"]:\n            raise ValueError("Grid exceeds the device storage buffer binding limit")\n        if any((dimension + 15) // 16 > self.device.limits["max-compute-workgroups-per-dimension"] for dimension in dims):\n            raise ValueError("Grid exceeds the device dispatch dimension limit")\n        if self._compiled_dims == dims:\n            return\n\n        pipelines = {}\n        kernel_sources = {}\n        constants = {"GRID_WIDTH": dims[0], "GRID_HEIGHT": dims[1]}\n\n        for spec in KERNEL_SPECS:\n            kernel_code = self._sources.kernel(spec.source_file)\n            full_code = self._bitmask_defs + "\\n\\n" + self._locked_1a + "\\n\\n" + self._state_io + "\\n" + self._enthalpy_law + "\\n" + kernel_code\n            kernel_sources[spec.id] = full_code\n\n            shader = self.device.create_shader_module(code=full_code)\n\n            # ca-v3 uses eight storage bindings, within the default WebGPU limit.\n            bgl = self.device.create_bind_group_layout(entries=[\n                {"binding": binding, "visibility": wgpu.ShaderStage.COMPUTE,\n                 "buffer": {"type": "storage" if binding in (1, 4, 6) else "read-only-storage"}}\n                for binding in range(8)])\n\n            pl = self.device.create_pipeline_layout(bind_group_layouts=[bgl])\n            pipeline_constants = {**constants, **spec.constants}\n            pipeline = self.device.create_compute_pipeline(\n                layout=pl,\n                compute={"module": shader, "entry_point": "tick", "constants": pipeline_constants},\n            )\n            pipelines[spec.id] = (pipeline, bgl)\n\n        self.pipelines, self.kernel_sources = pipelines, kernel_sources\n        self._compiled_dims = dims\n        print(f"CompositionEngine: {len(self.pipelines)} pipelines compiled for {dims[0]}x{dims[1]}")\n        print("  Tick schedule:")\n        for pid in movement_schedule_for_tick(0):\n            spec = next(s for s in KERNEL_SPECS if s.id == pid)\n            print(f"    {spec.name:32s} [{pid}]")\n\n    def run(\n        self, initial_grid: np.ndarray, cold_table: np.ndarray, grid_width: int, grid_height: int,\n        n_ticks: int = 200, snapshot_interval: int = 0, start_tick: int = 0, trace_passes: bool = False,\n        initial_energy: np.ndarray | None = None, registry: MaterialRegistry | None = None,\n        initial_structure: np.ndarray | None = None,\n    ) -> dict:\n        """Run complete ca-v3 ticks with exact three-coordinate continuation.\n\n        Structural planning is an explicit host operation; each tick reads back\n        all three coordinates for the next global support solve. Timings include\n        planning, uploads, all passes, and completion/readback.\n        """\n        self._ensure_open()\n        grid_width, grid_height = validate_dimensions(grid_width, grid_height)\n        n_ticks = checked_integer(n_ticks, 0, MAX_TICK, "n_ticks")\n        start_tick = checked_integer(start_tick, 0, MAX_TICK, "start_tick")\n        checked_integer(start_tick + n_ticks, 0, MAX_TICK, "end_tick")\n        snapshot_interval = checked_integer(snapshot_interval, 0, MAX_TICK, "snapshot_interval")\n        if type(trace_passes) is not bool:\n            raise ValueError("trace_passes must be a boolean")\n        initial_grid = validate_packed(initial_grid, grid_width * grid_height)\n        cold_table = validate_packed(cold_table, COLD_TABLE_ENTRIES * COLD_TABLE_STRIDE, "cold_table")\n        if registry is None:\n            registry = MaterialRegistry(catalog_from_cold(cold_table))\n        elif not isinstance(registry, MaterialRegistry) or not np.array_equal(cold_table, registry.cold_table()):\n            raise ValueError("Cold table must match the supplied validated registry")\n        model, structure_rules = registry._model, registry._structure\n        if start_tick and (initial_energy is None or initial_structure is None):\n            raise ValueError("Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either")\n        if initial_energy is None:\n            initial_grid, initial_energy = seed_state(initial_grid, model)\n        else:\n            initial_grid, initial_energy = validate_state(initial_grid, initial_energy, grid_width * grid_height, model)\n        if initial_structure is None:\n            initial_structure = seed_structure_bulk(initial_grid, grid_width, grid_height, structure_rules)\n        initial_grid, initial_energy, initial_structure = validate_structure_bulk(\n            initial_grid, initial_energy, initial_structure, grid_width, grid_height, structure_rules)\n        self._compile_pipelines(grid_width, grid_height)\n        count = grid_width * grid_height\n        wg_x, wg_y = (grid_width + 15) // 16, (grid_height + 15) // 16\n        with ExitStack() as resources:\n            def keep(buffer):\n                resources.callback(buffer.destroy)\n                return buffer\n            fields = []\n            for values in (initial_grid, initial_energy, initial_structure):\n                fields.append((keep(self.device.create_buffer_with_data(data=values.tobytes(),\n                                    usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_SRC)),\n                               keep(self.device.create_buffer(size=count * 4,\n                                    usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_SRC))))\n            cold_buf = keep(self.device.create_buffer_with_data(data=cold_table.tobytes(), usage=wgpu.BufferUsage.STORAGE))\n            plan_buf = keep(self.device.create_buffer(size=count * 8, usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_DST))\n            groups = {}\n            for spec in KERNEL_SPECS:\n                for current in (0, 1):\n                    ordered = [fields[0][current], fields[0][1 - current], cold_buf,\n                               fields[1][current], fields[1][1 - current], fields[2][current], fields[2][1 - current], plan_buf]\n                    groups[spec.id, current] = self.device.create_bind_group(layout=self.pipelines[spec.id][1], entries=[\n                        {"binding": binding, "resource": {"buffer": buffer}} for binding, buffer in enumerate(ordered)])\n            def read_state(current):\n                return tuple(np.frombuffer(self.device.queue.read_buffer(pair[current]), dtype=np.uint32).copy() for pair in fields)\n            state = (initial_grid, initial_energy, initial_structure)\n            current = 0\n            tick_times, planning_times = [], []\n            snapshots, energy_snapshots, structure_snapshots = [], [], []\n            pass_snapshots, pass_energy_snapshots, pass_structure_snapshots = [], [], []\n            plans = []\n            for tick in range(start_tick, start_tick + n_ticks):\n                started = time.perf_counter()\n                plan = plan_structure_bulk(*state, grid_width, grid_height, structure_rules)\n                planning_times.append((time.perf_counter() - started) * 1000)\n                self.device.queue.write_buffer(plan_buf, 0, np.column_stack((plan.sources, plan.structure)).astype(np.uint32).tobytes())\n                if trace_passes:\n                    plans.append((tick, plan))\n                for pass_id in movement_schedule_for_tick(tick):\n                    encoder = self.device.create_command_encoder()\n                    compute = encoder.begin_compute_pass()\n                    compute.set_pipeline(self.pipelines[pass_id][0])\n                    compute.set_bind_group(0, groups[pass_id, current])\n                    compute.dispatch_workgroups(wg_x, wg_y)\n                    compute.end()\n                    self.device.queue.submit([encoder.finish()])\n                    current = 1 - current\n                    if trace_passes:\n                        state = read_state(current)\n                        for collection, values in zip((pass_snapshots, pass_energy_snapshots, pass_structure_snapshots), state):\n                            collection.append((tick, pass_id, values))\n                if not trace_passes:\n                    state = read_state(current)\n                # Readback above completes all submitted work; no submit-only timings.\n                tick_times.append((time.perf_counter() - started) * 1000)\n                if snapshot_interval and (tick + 1) % snapshot_interval == 0:\n                    for collection, values in zip((snapshots, energy_snapshots, structure_snapshots), state):\n                        collection.append((tick + 1, values.copy()))\n            state = validate_structure_bulk(*state, grid_width, grid_height, structure_rules)\n            return {\n                "final_grid": state[0], "final_energy": state[1], "final_structure": state[2],\n                "initial_grid": initial_grid.copy(), "initial_energy": initial_energy.copy(), "initial_structure": initial_structure.copy(),\n                "energy_ledger": energy_ledger_array(state[0] & 255, state[1], model),\n                "tick_times_ms": tick_times, "planning_times_ms": planning_times, "total_time_ms": sum(tick_times),\n                "mean_tick_ms": float(np.mean(tick_times)) if tick_times else 0.0,\n                "snapshots": snapshots, "energy_snapshots": energy_snapshots, "structure_snapshots": structure_snapshots,\n                "start_tick": start_tick, "end_tick": start_tick + n_ticks,\n                "pass_snapshots": pass_snapshots, "pass_energy_snapshots": pass_energy_snapshots,\n                "pass_structure_snapshots": pass_structure_snapshots, "structural_plans": plans,\n            }\n' == '"""\nPhase 2e: Composition Engine\n\nDispatches the physics kernels per tick in locked order. Phase 2 movement is\nsplit into conservative swap passes before thermal/reaction work:\n  vertical0 -> vertical1 -> diagonal0 -> diagonal1 -> liquid0 -> liquid1\n  -> gas_buoyancy0 -> gas_buoyancy1 -> gas_spread0 -> gas_spread1\n  -> thermal_x0 -> thermal_x1 -> thermal_y0 -> thermal_y1 -> phase -> combustion\n\nEach kernel runs as a full double-buffer pass: reads grid_A, writes grid_B,\nthen swap.\n\nThe cold table is shared read-only across all kernels.\n"""\n\nimport time\nfrom contextlib import ExitStack\nimport numpy as np\nimport wgpu\n\nfrom engine.wgsl_fixer import strip_entry_points_and_bindings\nfrom engine.schedule import KERNEL_SPECS as KERNEL_SPECS, movement_schedule_for_tick as movement_schedule_for_tick\nfrom engine.contracts import MAX_TICK, checked_integer, validate_dimensions, validate_packed\nfrom engine.schema import COLD_TABLE_ENTRIES, COLD_TABLE_STRIDE\nfrom engine.state import seed_state, catalog_from_cold, validate_state\nfrom engine.structure_bulk import plan_structure_bulk, seed_structure_bulk, validate_structure_bulk\nfrom engine.registry import MaterialRegistry\nfrom engine.sources import ShaderBundle\nfrom engine.array_state import energy_ledger_array\n\n\nclass CompositionEngine:\n    """Runs the full physics pipeline per tick."""\n\n    def __init__(self, grid_width: int | None = None, grid_height: int | None = None, *, sources: ShaderBundle | None = None):\n        if (grid_width is None) != (grid_height is None):\n            raise ValueError("Provide both grid dimensions or neither")\n        if grid_width is not None:\n            validate_dimensions(grid_width, grid_height)\n        if sources is not None and not isinstance(sources, ShaderBundle):\n            raise ValueError("sources must be an immutable ShaderBundle")\n        self._sources = sources if sources is not None else ShaderBundle.load()\n        self._bitmask_defs = self._sources.shader("bitmask_defs.wgsl")\n        self._locked_1a = strip_entry_points_and_bindings(self._sources.kernel("phase_1a_winner.wgsl"))\n        self._state_io = self._sources.shader("state_io.wgsl")\n        self._enthalpy_law = self._sources.shader("enthalpy_law.wgsl")\n        self._closed = False\n        self.adapter = wgpu.gpu.request_adapter_sync(power_preference="high-performance")\n        if self.adapter is None:\n            raise RuntimeError("No GPU adapter found")\n        self.device = self.adapter.request_device_sync()\n        self.pipelines = {}\n        self.kernel_sources = {}\n        self._compiled_dims: tuple[int, int] | None = None\n\n        if grid_width is not None and grid_height is not None:\n            try:\n                self._compile_pipelines(grid_width, grid_height)\n            except Exception:\n                self.close()\n                raise\n\n    def close(self) -> None:\n        if not self._closed:\n            self._closed = True\n            self.pipelines.clear()\n            self.kernel_sources.clear()\n            self.device.destroy()\n\n    def __enter__(self):\n        self._ensure_open()\n        return self\n\n    def __exit__(self, *_exc):\n        self.close()\n\n    def _ensure_open(self) -> None:\n        if self._closed:\n            raise RuntimeError("Composition engine is closed")\n\n    def _compile_pipelines(self, grid_width: int, grid_height: int) -> None:\n        """Compile kernels specialized to the requested grid dimensions."""\n        self._ensure_open()\n        dims = validate_dimensions(grid_width, grid_height)\n        if dims[0] * dims[1] * 8 > self.device.limits["max-storage-buffer-binding-size"]:\n            raise ValueError("Grid exceeds the device storage buffer binding limit")\n        if any((dimension + 15) // 16 > self.device.limits["max-compute-workgroups-per-dimension"] for dimension in dims):\n            raise ValueError("Grid exceeds the device dispatch dimension limit")\n        if self._compiled_dims == dims:\n            return\n\n        pipelines = {}\n        kernel_sources = {}\n        constants = {"GRID_WIDTH": dims[0], "GRID_HEIGHT": dims[1]}\n\n        for spec in KERNEL_SPECS:\n            kernel_code = self._sources.kernel(spec.source_file)\n            full_code = self._bitmask_defs + "\\n\\n" + self._locked_1a + "\\n\\n" + self._state_io + "\\n" + self._enthalpy_law + "\\n" + kernel_code\n            kernel_sources[spec.id] = full_code\n\n            shader = self.device.create_shader_module(code=full_code)\n\n            # ca-v3 uses eight storage bindings, within the default WebGPU limit.\n            bgl = self.device.create_bind_group_layout(entries=[\n                {"binding": binding, "visibility": wgpu.ShaderStage.COMPUTE,\n                 "buffer": {"type": "storage" if binding in (1, 4, 6) else "read-only-storage"}}\n                for binding in range(8)])\n\n            pl = self.device.create_pipeline_layout(bind_group_layouts=[bgl])\n            pipeline_constants = {**constants, **spec.constants}\n            pipeline = self.device.create_compute_pipeline(\n                layout=pl,\n                compute={"module": shader, "entry_point": "tick", "constants": pipeline_constants},\n            )\n            pipelines[spec.id] = (pipeline, bgl)\n\n        self.pipelines, self.kernel_sources = pipelines, kernel_sources\n        self._compiled_dims = dims\n        print(f"CompositionEngine: {len(self.pipelines)} pipelines compiled for {dims[0]}x{dims[1]}")\n        print("  Tick schedule:")\n        for pid in movement_schedule_for_tick(0):\n            spec = next(s for s in KERNEL_SPECS if s.id == pid)\n            print(f"    {spec.name:32s} [{pid}]")\n\n    def run(\n        self, initial_grid: np.ndarray, cold_table: np.ndarray, grid_width: int, grid_height: int,\n        n_ticks: int = 200, snapshot_interval: int = 0, start_tick: int = 0, trace_passes: bool = False,\n        initial_energy: np.ndarray | None = None, registry: MaterialRegistry | None = None,\n        initial_structure: np.ndarray | None = None,\n    ) -> dict:\n        """Run complete ca-v3 ticks with exact three-coordinate continuation.\n\n        Structural planning is an explicit host operation; each tick reads back\n        all three coordinates for the next global support solve. Timings include\n        planning, uploads, all passes, and completion/readback.\n        """\n        self._ensure_open()\n        grid_width, grid_height = validate_dimensions(grid_width, grid_height)\n        n_ticks = checked_integer(n_ticks, 0, MAX_TICK, "n_ticks")\n        start_tick = checked_integer(start_tick, 0, MAX_TICK, "start_tick")\n        checked_integer(start_tick + n_ticks, 0, MAX_TICK, "end_tick")\n        snapshot_interval = checked_integer(snapshot_interval, 0, MAX_TICK, "snapshot_interval")\n        if type(trace_passes) is not bool:\n            raise ValueError("trace_passes must be a boolean")\n        initial_grid = validate_packed(initial_grid, grid_width * grid_height)\n        cold_table = validate_packed(cold_table, COLD_TABLE_ENTRIES * COLD_TABLE_STRIDE, "cold_table")\n        if registry is None:\n            registry = MaterialRegistry(catalog_from_cold(cold_table))\n        elif not isinstance(registry, MaterialRegistry) or not np.array_equal(cold_table, registry.cold_table()):\n            raise ValueError("Cold table must match the supplied validated registry")\n        model, structure_rules = registry._model, registry._structure\n        if start_tick and (initial_energy is None or initial_structure is None):\n            raise ValueError("Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either")\n        if initial_energy is None:\n            initial_grid, initial_energy = seed_state(initial_grid, model)\n        else:\n            initial_grid, initial_energy = validate_state(initial_grid, initial_energy, grid_width * grid_height, model)\n        if initial_structure is None:\n            initial_structure = seed_structure_bulk(initial_grid, grid_width, grid_height, structure_rules)\n        initial_grid, initial_energy, initial_structure = validate_structure_bulk(\n            initial_grid, initial_energy, initial_structure, grid_width, grid_height, structure_rules)\n        self._compile_pipelines(grid_width, grid_height)\n        count = grid_width * grid_height\n        wg_x, wg_y = (grid_width + 15) // 16, (grid_height + 15) // 16\n        with ExitStack() as resources:\n            def keep(buffer):\n                resources.callback(buffer.destroy)\n                return buffer\n            fields = []\n            for values in (initial_grid, initial_energy, initial_structure):\n                fields.append((keep(self.device.create_buffer_with_data(data=values.tobytes(),\n                                    usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_SRC)),\n                               keep(self.device.create_buffer(size=count * 4,\n                                    usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_SRC))))\n            cold_buf = keep(self.device.create_buffer_with_data(data=cold_table.tobytes(), usage=wgpu.BufferUsage.STORAGE))\n            plan_buf = keep(self.device.create_buffer(size=count * 8, usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_DST))\n            groups = {}\n            for spec in KERNEL_SPECS:\n                for current in (0, 1):\n                    ordered = [fields[0][current], fields[0][1 - current], cold_buf,\n                               fields[1][current], fields[1][1 - current], fields[2][current], fields[2][1 - current], plan_buf]\n                    groups[spec.id, current] = self.device.create_bind_group(layout=self.pipelines[spec.id][1], entries=[\n                        {"binding": binding, "resource": {"buffer": buffer}} for binding, buffer in enumerate(ordered)])\n            def read_state(current):\n                return tuple(np.frombuffer(self.device.queue.read_buffer(pair[current]), dtype=np.uint32).copy() for pair in fields)\n            state = (initial_grid, initial_energy, initial_structure)\n            current = 0\n            tick_times, planning_times = [], []\n            snapshots, energy_snapshots, structure_snapshots = [], [], []\n            pass_snapshots, pass_energy_snapshots, pass_structure_snapshots = [], [], []\n            plans = []\n            for tick in range(start_tick, start_tick + n_ticks):\n                started = time.perf_counter()\n                plan = plan_structure_bulk(*state, grid_width, grid_height, structure_rules)\n                planning_times.append((time.perf_counter() - started) * 1000)\n                self.device.queue.write_buffer(plan_buf, 0, np.column_stack((plan.sources, plan.structure)).astype(np.uint32).tobytes())\n                if trace_passes:\n                    plans.append((tick, plan))\n                for pass_id in movement_schedule_for_tick(tick):\n                    encoder = self.device.create_command_encoder()\n                    compute = encoder.begin_compute_pass()\n                    compute.set_pipeline(self.pipelines[pass_id][0])\n                    compute.set_bind_group(0, groups[pass_id, current])\n                    compute.dispatch_workgroups(wg_x, wg_y)\n                    compute.end()\n                    self.device.queue.submit([encoder.finish()])\n                    current = 1 - current\n                    if trace_passes:\n                        state = read_state(current)\n                        for collection, values in zip((pass_snapshots, pass_energy_snapshots, pass_structure_snapshots), state):\n                            collection.append((tick, pass_id, values))\n                if not trace_passes:\n                    state = read_state(current)\n                # Readback above completes all submitted work; no submit-only timings.\n                tick_times.append((time.perf_counter() - started) * 1000)\n                if snapshot_interval and (tick + 1) % snapshot_interval == 0:\n                    for collection, values in zip((snapshots, energy_snapshots, structure_snapshots), state):\n                        collection.append((tick + 1, values.copy()))\n            state = validate_structure_bulk(*state, grid_width, grid_height, structure_rules)\n            return {\n                "final_grid": state[0], "final_energy": state[1], "final_structure": state[2],\n                "initial_grid": initial_grid.copy(), "initial_energy": initial_energy.copy(), "initial_structure": initial_structure.copy(),\n                "energy_ledger": energy_ledger_array(state[0] & 255, state[1], model),\n                "tick_times_ms": tick_times, "planning_times_ms": planning_times, "total_time_ms": sum(tick_times),\n                "mean_tick_ms": float(np.mean(tick_times)) if tick_times else 0.0,\n                "snapshots": snapshots, "energy_snapshots": energy_snapshots, "structure_snapshots": structure_snapshots,\n                "start_tick": start_tick, "end_tick": start_tick + n_ticks,\n                "pass_snapshots": pass_snapshots, "pass_energy_snapshots": pass_energy_snapshots,\n                "pass_structure_snapshots": pass_structure_snapshots, "structural_plans": plans,\n            }\n'
+
+----------------------------------------------------------------------
+Ran 115 tests in 61.381s
+
+FAILED (failures=5, errors=12)
+Report: C:\Users\nxrob\AppData\Local\Temp\tmp2386f_1f\report.json
+CompositionEngine: 36 pipelines compiled for 1x2
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 17x19
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 2x1
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 3x3
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 1x1
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 7x5
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 1x1
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 1x1
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 3x5
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+CompositionEngine: 36 pipelines compiled for 1x1
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]

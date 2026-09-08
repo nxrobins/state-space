@@ -1,0 +1,46 @@
+{
+  "status": "Counterexamples captured before corrective changes to the C3 model",
+  "device": {
+    "vendor": "NVIDIA",
+    "architecture": "",
+    "device": "NVIDIA GeForce RTX 4090",
+    "description": "595.79",
+    "stackgroup_min_size": 4,
+    "stackgroup_max_size": 128,
+    "vendor_id": 4318,
+    "device_id": 9860,
+    "adapter_type": "DiscreteGPU",
+    "backend_type": "Vulkan"
+  },
+  "sourceHashes": {
+    "engine/enthalpy.py": "1bc6d9f65fd5716e510ab7a7daf88676047f27742f675be510f212ffcc2dd5b5",
+    "engine/shaders/enthalpy.wgsl": "5c5c3bc51998c7c2247ba8695987af5f934655ee692ce19975df049924b586c6"
+  },
+  "fractionalDeadZone": {
+    "conductivity": 1,
+    "initialEnergyQ": [
+      5120,
+      5376
+    ],
+    "ticks": 1024,
+    "finalEnergyQ": [
+      5120,
+      5376
+    ]
+  },
+  "u32OverflowMutation": {
+    "inputEnergyQ": [
+      1073741823,
+      0
+    ],
+    "correctEnergyQ": [
+      538968064,
+      534773759
+    ],
+    "mutantEnergyQ": [
+      1067450368,
+      6291455
+    ],
+    "mutation": "Replace quotient/remainder flux with difference * conductivity / 512u"
+  }
+}

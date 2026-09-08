@@ -3,9 +3,6 @@
 // Non-air gas/plasma spreads sideways through air/gas when upward buoyancy is
 // blocked. Pair ownership is disjoint and salted to avoid one-way drift.
 
-@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
-@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
-@group(0) @binding(2) var<storage, read> cold_table: array<u32>;
 
 const COLD_STRIDE: u32 = 24u;
 const COLD_DENSITY: u32 = 0u;
@@ -30,26 +27,31 @@ fn is_gas_like(ph: u32) -> bool {
     return ph == PHASE_GAS || ph == PHASE_PLASMA;
 }
 
-fn gas_rank(v: u32) -> i32 {
-    return i32(get_thermal(v)) * 2 - i32(density_of(get_material(v)));
+fn gas_rank(index: u32) -> i32 {
+    let v = grid_in[index];
+    return i32(temperature_q(io_state(index)) / 256u) * 2 - i32(density_of(get_material(v)));
 }
 
-fn can_rise_into(src: u32, dst: u32) -> bool {
+fn can_rise_into(src_idx: u32, dst_idx: u32) -> bool {
+    let src = grid_in[src_idx];
+    let dst = grid_in[dst_idx];
     if (get_material(src) == MAT_AIR || !is_gas_like(get_phase(src)) || is_structural(get_phase(dst))) {
         return false;
     }
     if (get_material(dst) != MAT_AIR && !is_gas_like(get_phase(dst))) {
         return false;
     }
-    return gas_rank(src) > gas_rank(dst) + GAS_RISE_THRESHOLD;
+    return gas_rank(src_idx) > gas_rank(dst_idx) + GAS_RISE_THRESHOLD;
 }
 
 fn upward_blocked(x: u32, y: u32, src: u32) -> bool {
     if (y == 0u) { return true; }
-    return !can_rise_into(src, grid_in[get_idx(x, y - 1u)]);
+    return !can_rise_into(get_idx(x, y), get_idx(x, y - 1u));
 }
 
-fn can_spread_into(src: u32, dst: u32) -> bool {
+fn can_spread_into(src_idx: u32, dst_idx: u32) -> bool {
+    let src = grid_in[src_idx];
+    let dst = grid_in[dst_idx];
     if (get_material(src) == MAT_AIR || !is_gas_like(get_phase(src)) || is_structural(get_phase(dst))) {
         return false;
     }
@@ -59,7 +61,7 @@ fn can_spread_into(src: u32, dst: u32) -> bool {
     if (!is_gas_like(get_phase(dst))) {
         return false;
     }
-    return gas_rank(src) > gas_rank(dst) + GAS_RISE_THRESHOLD;
+    return gas_rank(src_idx) > gas_rank(dst_idx) + GAS_RISE_THRESHOLD;
 }
 
 fn hash_pair(x: u32, y: u32, salt: u32) -> u32 {
@@ -80,13 +82,13 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     var pair_left = x;
     if (((x + MOVE_PHASE) & 1u) != 0u) {
         if (x == 0u) {
-            grid_out[idx] = voxel;
+            io_copy(idx, idx);
             return;
         }
         pair_left = x - 1u;
     }
     if (pair_left >= GRID_WIDTH - 1u) {
-        grid_out[idx] = voxel;
+        io_copy(idx, idx);
         return;
     }
 
@@ -95,16 +97,16 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
     let dst_x = select(pair_left, pair_left + 1u, source_left);
     let src = grid_in[get_idx(src_x, y)];
     let dst = grid_in[get_idx(dst_x, y)];
-    let do_swap = upward_blocked(src_x, y, src) && can_spread_into(src, dst);
+    let do_swap = upward_blocked(src_x, y, src) && can_spread_into(get_idx(src_x, y), get_idx(dst_x, y));
 
     if (do_swap && x == src_x) {
-        grid_out[idx] = dst;
+        io_copy(idx, get_idx(dst_x, y));
         return;
     }
     if (do_swap && x == dst_x) {
-        grid_out[idx] = src;
+        io_copy(idx, get_idx(src_x, y));
         return;
     }
 
-    grid_out[idx] = voxel;
+    io_copy(idx, idx);
 }

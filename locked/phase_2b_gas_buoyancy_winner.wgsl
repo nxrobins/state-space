@@ -3,9 +3,6 @@
 // Non-air gas/plasma can rise through air or other gas when its thermal
 // buoyancy rank is sufficiently higher than the upper target.
 
-@group(0) @binding(0) var<storage, read> grid_in: array<u32>;
-@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;
-@group(0) @binding(2) var<storage, read> cold_table: array<u32>;
 
 const COLD_STRIDE: u32 = 24u;
 const COLD_DENSITY: u32 = 0u;
@@ -29,11 +26,14 @@ fn is_gas_like(ph: u32) -> bool {
     return ph == PHASE_GAS || ph == PHASE_PLASMA;
 }
 
-fn gas_rank(v: u32) -> i32 {
-    return i32(get_thermal(v)) * 2 - i32(density_of(get_material(v)));
+fn gas_rank(index: u32) -> i32 {
+    let v = grid_in[index];
+    return i32(temperature_q(io_state(index)) / 256u) * 2 - i32(density_of(get_material(v)));
 }
 
-fn can_rise(src: u32, dst: u32) -> bool {
+fn can_rise(src_idx: u32, dst_idx: u32) -> bool {
+    let src = grid_in[src_idx];
+    let dst = grid_in[dst_idx];
     let src_mat = get_material(src);
     let src_phase = get_phase(src);
     let dst_phase = get_phase(dst);
@@ -43,7 +43,7 @@ fn can_rise(src: u32, dst: u32) -> bool {
     if (get_material(dst) != MAT_AIR && !is_gas_like(dst_phase)) {
         return false;
     }
-    return gas_rank(src) > gas_rank(dst) + GAS_RISE_THRESHOLD;
+    return gas_rank(src_idx) > gas_rank(dst_idx) + GAS_RISE_THRESHOLD;
 }
 
 @compute @workgroup_size(16, 16)
@@ -57,19 +57,19 @@ fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {
 
     if (y < GRID_HEIGHT - 1u && ((y & 1u) == MOVE_PHASE)) {
         let lower = grid_in[get_idx(x, y + 1u)];
-        if (can_rise(lower, voxel)) {
-            grid_out[idx] = lower;
+        if (can_rise(get_idx(x, y + 1u), idx)) {
+            io_copy(idx, get_idx(x, y + 1u));
             return;
         }
     }
 
     if (y > 0u && (((y - 1u) & 1u) == MOVE_PHASE)) {
         let upper = grid_in[get_idx(x, y - 1u)];
-        if (can_rise(voxel, upper)) {
-            grid_out[idx] = upper;
+        if (can_rise(idx, get_idx(x, y - 1u))) {
+            io_copy(idx, get_idx(x, y - 1u));
             return;
         }
     }
 
-    grid_out[idx] = voxel;
+    io_copy(idx, idx);
 }

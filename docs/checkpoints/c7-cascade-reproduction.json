@@ -1,0 +1,10 @@
+{
+  "sourceSha256": "80cb9713938f94892af204e1444923fba95d2d264e2207182b90dbadd78781e9",
+  "expression": "np.array_equal(final_grid, result2['final_grid']) and np.array_equal(result['final_energy'], result2['final_energy'])",
+  "identicalPackedAndEnergy": true,
+  "differentStructure": [
+    255,
+    0
+  ],
+  "incorrectlyAcceptedAsDeterministic": true
+}

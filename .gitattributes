@@ -1,0 +1,29 @@
+# Preserve exact source/evidence bytes across checkouts for provenance hashes.
+* whitespace=cr-at-eol
+/engine/** -text
+/eval/** -text
+/tests/** -text
+/scripts/** -text
+/examples/** -text
+/locked/** -text
+/web/** -text
+/tower-defense-rogue/** -text
+/docs/** -text
+/*.py -text
+/*.md -text
+/*.toml -text
+/*.lock -text
+/*.json -text
+/game/src/game/engineSnapshot.ts -text
+/game/src/game/engineSnapshot.test.ts -text
+/dist/packages/evidence/** -text
+
+# Keep the implementation prominent in GitHub's default review view.
+/docs/checkpoints/** linguist-generated=true
+/docs/checkpoints/*.md linguist-generated=false
+/dist/packages/evidence/** linguist-generated=true
+/engine/generated/** linguist-generated=true
+/engine/_generated_schema.py linguist-generated=true
+/engine/kernels/** linguist-generated=true
+/web/*.generated.js linguist-generated=true
+/web/shaders/** linguist-generated=true

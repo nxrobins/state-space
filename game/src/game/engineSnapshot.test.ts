@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MAT } from '../../../engine/generated/materials';
 import {
   buildCombatGridFromEngineSnapshot,
   decodeEngineMaterialId,
@@ -41,6 +42,19 @@ describe('engine material snapshot bridge', () => {
     expect(mapEngineMaterialIdToCombatMaterial(EngineMaterialId.Smoke)).toBe(MaterialType.Smoke);
   });
 
+  it('imports every declared engine material and maps new phases to their combat family', () => {
+    expect(mapEngineMaterialIdToCombatMaterial(MAT.OIL_VAPOR)).toBe(MaterialType.Oil);
+    expect(mapEngineMaterialIdToCombatMaterial(MAT.MOLTEN_METAL)).toBe(MaterialType.Metal);
+    expect(mapEngineMaterialIdToCombatMaterial(MAT.MOLTEN_GLASS)).toBe(MaterialType.Glass);
+    for (const material of Object.values(MAT)) {
+      const imported = buildCombatGridFromEngineSnapshot(snapshot(1, 1, [material]));
+      expect(imported.report.unknownMaterialCells, `declared material ${material}`).toBe(0);
+      if (material !== MAT.AIR && material !== MAT.PLAYER) {
+        expect(imported.materialGrid.every(cell => cell.material !== MaterialType.Air)).toBe(true);
+      }
+    }
+  });
+
   it('keeps engine player markers and unknown materials out of the combat arena by default', () => {
     expect(mapEngineMaterialIdToCombatMaterial(EngineMaterialId.Player)).toBe(MaterialType.Air);
     expect(mapEngineMaterialIdToCombatMaterial(219)).toBe(MaterialType.Air);
@@ -77,6 +91,17 @@ describe('engine material snapshot bridge', () => {
   it('rejects malformed engine snapshots before creating a combat grid', () => {
     expect(() => buildCombatGridFromEngineSnapshot({ width: 0, height: 1, packedCells: [] })).toThrow(/dimensions/);
     expect(() => buildCombatGridFromEngineSnapshot({ width: 2, height: 2, packedCells: Uint32Array.of(1, 2, 3) })).toThrow(/length mismatch/);
+  });
+
+  it('rejects unsupported metadata and malformed packed values instead of coercing them', () => {
+    for (const packed of [-1, 2 ** 32, 0.5, NaN]) {
+      expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [packed] })).toThrow();
+    }
+    expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], schemaVersion: 4 })).toThrow();
+    for (const schemaVersion of [1, 2, 3]) {
+      expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], schemaVersion })).not.toThrow();
+    }
+    expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], tick: -1 })).toThrow();
   });
 
   it('can seed a battle with an imported snapshot while preserving spawn safety', () => {

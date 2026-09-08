@@ -161,6 +161,9 @@ def run_deterministic(
     result_a = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=int(ticks))
     result_b = engine.run(initial, cold_table, WIDTH, HEIGHT, n_ticks=int(ticks))
     final = result_a["final_grid"]
+    assert_true(sum(int(e) for e in result_a["initial_energy"]) == sum(int(e) for e in result_a["final_energy"]), f"{label}: energy drift")
+    assert_true(np.array_equal(result_a["final_energy"], result_b["final_energy"]), f"{label}: energy replay differs")
+    assert_true(np.array_equal(result_a["final_structure"], result_b["final_structure"]), f"{label}: structural replay differs")
 
     assert_voxel_count(initial, final, label)
     assert_true(
@@ -222,7 +225,8 @@ def build_structural_targets_resist_displacement() -> np.ndarray:
         (42, MAT_GLASS),
     ]
     for x, mat in targets:
-        set_cell(grid, x, 33, voxel(MAT_STONE, 20, PHASE_SOLID))
+        # Ground the support; an unsupported bonded pair now falls coherently.
+        fill_rect(grid, x, 33, 1, HEIGHT - 33, voxel(MAT_STONE, 20, PHASE_SOLID))
         set_cell(grid, x, 32, voxel(mat, 20, PHASE_SOLID))
         set_cell(grid, x, 31, voxel(MAT_SAND, 20, PHASE_POWDER))
     return grid
@@ -760,6 +764,9 @@ def run_small_grid_fuzz_suite(cold_table: np.ndarray) -> None:
         result_a = engine.run(initial, cold_table, fuzz_width, fuzz_height, n_ticks=ticks)
         result_b = engine.run(initial, cold_table, fuzz_width, fuzz_height, n_ticks=ticks)
         final = result_a["final_grid"]
+        assert_true(sum(int(e) for e in result_a["initial_energy"]) == sum(int(e) for e in result_a["final_energy"]), f"{label}: energy drift")
+        assert_true(np.array_equal(result_a["final_energy"], result_b["final_energy"]), f"{label}: energy replay differs")
+        assert_true(np.array_equal(result_a["final_structure"], result_b["final_structure"]), f"{label}: structural replay differs")
         assert_voxel_count(initial, final, label)
         assert_true(np.array_equal(final, result_b["final_grid"]), f"{label}: deterministic replay failed")
         print(f"PASS {label:28s} ticks={ticks:3d} mean={result_a['mean_tick_ms']:.3f}ms")

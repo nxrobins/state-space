@@ -1,0 +1,8 @@
+{
+  "descendantLifetimeSeconds": 3,
+  "pipeCaptureSeconds": 3.125,
+  "fileCaptureSeconds": 0.06299999996554106,
+  "sameLauncherOutput": false,
+  "exitCode": 0,
+  "initialBrowserRun": "c7-browser-first/native.json; runner interrupted after its launcher exited with the descendant retaining output pipes"
+}

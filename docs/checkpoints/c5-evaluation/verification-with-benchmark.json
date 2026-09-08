@@ -1,0 +1,1614 @@
+{
+  "benchmark": {
+    "config": {
+      "samples": 7,
+      "seed": 8173,
+      "ticks": 4,
+      "timeout_seconds": 180,
+      "warmup": 2
+    },
+    "context": {
+      "device": {
+        "features": [
+          "bgra8unorm-storage",
+          "buffer-binding-array",
+          "conservative-rasterization",
+          "depth-clip-control",
+          "depth32float-stencil8",
+          "dual-source-blending",
+          "float32-filterable",
+          "indirect-first-instance",
+          "mappable-primary-buffers",
+          "multi-draw-indirect-count",
+          "partially-bound-binding-array",
+          "pipeline-statistics-query",
+          "polygon-mode-line",
+          "polygon-mode-point",
+          "push-constants",
+          "ray-query",
+          "rg11b10ufloat-renderable",
+          "sampled-texture-and-storage-buffer-array-non-uniform-indexing",
+          "shader-early-depth-test",
+          "shader-f16",
+          "shader-f64",
+          "shader-int64",
+          "shader-primitive-index",
+          "storage-resource-binding-array",
+          "subgroup",
+          "subgroup-barrier",
+          "subgroup-vertex",
+          "texture-adapter-specific-format-features",
+          "texture-binding-array",
+          "texture-compression-bc",
+          "texture-format-nv12",
+          "texture-format16bit-norm",
+          "timestamp-query",
+          "timestamp-query-inside-encoders",
+          "timestamp-query-inside-passes",
+          "vertex-writable-storage"
+        ],
+        "info": {
+          "adapter_type": "DiscreteGPU",
+          "architecture": "",
+          "backend_type": "Vulkan",
+          "description": "595.79",
+          "device": "NVIDIA GeForce RTX 4090",
+          "device_id": 9860,
+          "stackgroup_max_size": 128,
+          "stackgroup_min_size": 4,
+          "vendor": "NVIDIA",
+          "vendor_id": 4318
+        },
+        "limits": {
+          "max-bind-groups": 8,
+          "max-bind-groups-plus-vertex-buffers": 0,
+          "max-bindings-per-bind-group": 1000,
+          "max-buffer-size": 4503599627370496,
+          "max-color-attachment-bytes-per-sample": 128,
+          "max-color-attachments": 8,
+          "max-compute-invocations-per-workgroup": 1024,
+          "max-compute-workgroup-size-x": 1024,
+          "max-compute-workgroup-size-y": 1024,
+          "max-compute-workgroup-size-z": 64,
+          "max-compute-workgroup-storage-size": 49152,
+          "max-compute-workgroups-per-dimension": 65535,
+          "max-dynamic-storage-buffers-per-pipeline-layout": 16,
+          "max-dynamic-uniform-buffers-per-pipeline-layout": 15,
+          "max-inter-stage-shader-variables": 0,
+          "max-non-sampler-bindings": 4294967295,
+          "max-push-constant-size": 256,
+          "max-sampled-textures-per-shader-stage": 1048576,
+          "max-samplers-per-shader-stage": 1048576,
+          "max-storage-buffer-binding-size": 2147483647,
+          "max-storage-buffers-per-shader-stage": 1048576,
+          "max-storage-textures-per-shader-stage": 1048576,
+          "max-texture-array-layers": 2048,
+          "max-texture-dimension-1d": 32768,
+          "max-texture-dimension-2d": 32768,
+          "max-texture-dimension-3d": 16384,
+          "max-uniform-buffer-binding-size": 65536,
+          "max-uniform-buffers-per-shader-stage": 1048576,
+          "max-vertex-attributes": 32,
+          "max-vertex-buffer-array-stride": 2048,
+          "max-vertex-buffers": 16,
+          "min-storage-buffer-offset-alignment": 32,
+          "min-uniform-buffer-offset-alignment": 64
+        }
+      },
+      "policy": "ca-v2-evaluation-1",
+      "runtime": {
+        "hostHash": "1f12d0566288d0ca1b88194ca06ac654a8d0f574b11bc99cf0290c8395acf423",
+        "logicalCpus": 16,
+        "node": "v22.22.3",
+        "numpy": "2.2.6",
+        "platform": "Windows-10-10.0.26200-SP0",
+        "processor": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+        "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+        "typescript": "5.8.3",
+        "typescriptHash": "dd17428736a07e1db1a138d8a14295ddb2699ba780ee15038acdd2c6da5373a0",
+        "wgpu": "0.31.0"
+      },
+      "sourceHashes": {
+        "engine/__init__.py": "ada1f2399ec58602dff5c7bfdc27674f4ea71c0c01893945d875045f36f082a9",
+        "engine/_generated_schema.py": "fb3fd0c765f0175f094509ad99109e74114b867ea5723f8f1017d64964c309ae",
+        "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+        "engine/browser_state_space.ts": "1437f8858d9df570d72f0b8bbc7ba67a1d5941cee86dfb0e85652ca930f09b21",
+        "engine/catalog.py": "8399385f1206205ca6ee62526350eab7a03e475ae965eafc28ae3ef6eb8421af",
+        "engine/compositor.py": "8fd30fb0b469931b4197bbb72da447ed5508ab0f1a0fc24919137c59d875efce",
+        "engine/conformance.py": "9c542406cac9b2179ee21eeb05a04780e4b120b7d5a3eb72286f4b2b9fd2e4e3",
+        "engine/conformance.test.ts": "09fe8b802552ed44c480e09ef77b5f9ee7a4e4486869ad167a99ce140a3bb8c1",
+        "engine/contracts.py": "b413c07304b93e6066bb9cb62340bc2d95234387aa915b6badf33b083e67cec5",
+        "engine/contracts.test.ts": "34b1a5532f23b055b8f7f5f6d81d5635a5bf1f14a7fabca7ff42d139f26c8e1e",
+        "engine/contracts.ts": "79aa8a8190ff09448cfa7935c0d60f64d403103f0fb76297540bae06af8ed984",
+        "engine/cpu_physics.ts": "3eb8fdcf55fcd0d6064786defdf319c99c3d8e26f28e87ae772ce9176e2d585d",
+        "engine/enthalpy.py": "3e78c3bb38664df2a8a7e95246071017d01461b74db4cae906a84983b9012ec3",
+        "engine/enthalpy_gpu.py": "ea6a3a0ece529c0c2795b8297c8feb53838a3e00638a1d51ef269ed0039768ba",
+        "engine/fidelity.test.ts": "2f5cd0502166541b7576d70879526354305f0e76c1e0c462d1c46d1666316215",
+        "engine/field.py": "31a46b7be3242ec14f4bcdf53282e8625d2474a5d60be8ed044b6a4b27dd80f4",
+        "engine/generate.py": "a4436f668e1b7ad6385c65400f8ffac0cc750f329f1cfd689b252ca713098a55",
+        "engine/generated/materials.ts": "f3ddd72bb0072980bf74979756fda0a0d7e53245880173c86fab11294bfaa321",
+        "engine/generated/schedule.ts": "05a9469ebd84e1288f3a36f3a91cdf7d65eef31890aae50c28d306fc8039341b",
+        "engine/generated/shaders.ts": "3542b6038157d6152fd31b9807f829611ce3d5f5a9d68d4e3c1d4b32b48e3f9d",
+        "engine/index.ts": "e9fc006fdbf038d7bb04672f0c1034717510c0b58ec9e03f087f27dfda5fbf87",
+        "engine/inspection.ts": "2fe858a1886309da37bbee4beabfc38bee9b36461f499e5d3d806409940b940b",
+        "engine/kernels/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+        "engine/kernels/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+        "engine/kernels/phase_2b_diagonal_winner.wgsl": "17645cca8feaf3ad6566abb744defed1d2a2c02e2aed252b654fb4760c43ed32",
+        "engine/kernels/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+        "engine/kernels/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+        "engine/kernels/phase_2b_liquid_winner.wgsl": "7af3bbab5e32f8a81919113c42f7ff95d6b2005691b59334b5e2d3cf60663614",
+        "engine/kernels/phase_2b_winner.wgsl": "3b863b2c01a7998eac8bb9fe2333a61823192cdb1c9616ea84f1a13103b55215",
+        "engine/kernels/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+        "engine/kernels/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+        "engine/lint.py": "00295a712adbe7fd8862a238f0a85ec720ac32918b59a6357d4ca8a37d4392be",
+        "engine/lint_ts.mjs": "0f1e35743ee3896c46a6ff7a0c6f4560bd0cf67664de7594add7c2a9660ebe1e",
+        "engine/materials.json": "5b47118366fa741034ed1be37253497ed5112c193dad8fd5aaf8b66a7eb25d75",
+        "engine/mutations.test.ts": "7d32968a30b754408c09b9b7d60adf9ad593e0e928b127f49736decb63569d44",
+        "engine/registry.py": "8d88a2098a7762927e62da516f6ad249f86a927af340783e5580ce1d58a857e7",
+        "engine/registry.ts": "96bdb9b261f2557462a72a56c5e4c1541bfd6932aee2a9c0cc82214a5fbdc7e8",
+        "engine/resources.py": "669f59e39472da4981c2cbfa424aed25262402031f0557594eb16f4c2e53a965",
+        "engine/runner.py": "415eccf4b47909639933965945d1397642fb9eec1e208cf695a779534482ab26",
+        "engine/schedule.py": "462733087062356ad71497959cbf6421ddd0f5c04d01e2400e399708fade0cfb",
+        "engine/schema.py": "8fb69305c75c843cf20f98e1e68629cf00c31beb40ce57d2aefd62aff16b35f3",
+        "engine/sdk.test.ts": "c7401aa8e49e2d4ee34b87e6465fd3c6a8068e305cbfda23a43fdfdba2b7fdad",
+        "engine/shaders/bitmask_defs.wgsl": "e1962dfe3accd04346db3f71928ef30287a5adf9fe5ccf9855f19067f3047710",
+        "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+        "engine/shaders/enthalpy.wgsl": "1ce6cce6bf6289bf1fd39a2b32475ef3d5c53dab394bc62c7f07c3e3f117848e",
+        "engine/shaders/enthalpy_law.wgsl": "f7225674ab4d7f9688b123b8e9fc2f57418a6fb1cd918616c9deec08987cfb5b",
+        "engine/shaders/state_io.wgsl": "cd29758c73c12e8f87f0a4375c222c9180d2debb2d5db62d56e9ba5d982c3166",
+        "engine/sources.py": "291f8a152d4ce818d4f6b5723b22af345ad5d131cdb44bc8ea652804f0b4f5f9",
+        "engine/state.py": "3fd1260482a488f3af0577b3411bfbc57155a17916668db062f08f3f1490cc66",
+        "engine/thermal.ts": "0a3a9f70e9750fbc2bd6ab63214a99a2dd2b0ee2e40b36a4f73920309462f8fd",
+        "engine/thermal_registry.py": "88d94a92770abe3afee2edd5c379f6405d1f9a03760828b66ba9cf4a8d83d0b0",
+        "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+        "engine/tsconfig.sdk.json": "ffd752882c5c52421e1531a229878bcafcdc8167ecd39142b739440f0847fe2c",
+        "engine/validation.py": "8c1beaafb993458f28a5e535eb57f4f15ee3e660aec5f32855948c6d5e0c4cca",
+        "engine/validation.ts": "d46f2b540293ab07af7945be44e36beed708af8411090f25e7282ce03458b891",
+        "engine/verify.py": "72fcc3992d7a3139b8ea8a87508333eba6374f4d0bcf2cf804741f4d2c0e3f03",
+        "engine/version.py": "9ee248bb8f9e865db649e91739cca7c2efcbefe41b8a9abe779dfe1e0dd13c53",
+        "engine/vite.sdk.config.ts": "c8280e3d6cfb39baaa4f72c4a296069452d8d7a2e0870eff12e3b70355d69847",
+        "engine/vitest.config.ts": "2307405526250bebfb5c84fc68868d99e5a2cfd6d3bfd027113c83161f6d3eb0",
+        "engine/webgpu_field.ts": "00e256316ee214db88915e33a02da0b4d238ff092fa1a3e6b247883121c3c175",
+        "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+        "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "eval/archive.py": "49960301ac145de810ed076af740ee4810d3799401c1553d51db8ae5c6b68041",
+        "eval/benchmark.py": "02edadcec6d490a7bead6fd691ad1f877c24bf3b8161f829e60bd4e364038a6f",
+        "eval/codec.py": "8d74c689d40cdc4e93c5c19accb9ce4b83aad2f496669b3df0d1645975d31adc",
+        "eval/correctness.py": "4b527465e879d34572fd429990d68fd6694cf7350d4b143bde1ec2c39053450e",
+        "eval/evaluator.py": "491c7c9aadd6e234462bc3a9c1597d88355483c27a0cce490897149ac7227d2e",
+        "eval/policy.py": "516f2abe6e2c32e094afd9a724363f075f5b82a762896ba68ed7623e1fac7c21",
+        "eval/provenance.py": "56ec2a9d7afa73e78cba95e5ca327ed4b7da18b37c03d96d985d1e96211f2b2c",
+        "eval/reference.mjs": "a3efd2eaf38467614d96b9bebaa95251cfd822e552e53389b019e66c6ca79bbe",
+        "eval/scenes.py": "99a1e1b834c0f1d34fb89b947ddb52bdb4286d85d8ca63d53f1855926fa2c76b",
+        "eval/verify.py": "d690e49386a629a93975fafd5a66324d65d1955201782c074a1a1c1b8d9dd96b",
+        "eval/worker.py": "9af70be0ed37e080269e720f7d1e9878ff4e881cae4f10810048759fb632c9fb",
+        "evolve_ss.py": "7a9dc394e5013da84bf3660ebabb7399363c190275308412566a78bb331598db",
+        "locked/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+        "locked/phase_1b_winner.wgsl": "a7ed9a6267e94ab9bc8895cc30b670fc284d066457762d8c2af2599a83417de9",
+        "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+        "locked/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+        "locked/phase_2b_diagonal_winner.wgsl": "17645cca8feaf3ad6566abb744defed1d2a2c02e2aed252b654fb4760c43ed32",
+        "locked/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+        "locked/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+        "locked/phase_2b_liquid_winner.wgsl": "7af3bbab5e32f8a81919113c42f7ff95d6b2005691b59334b5e2d3cf60663614",
+        "locked/phase_2b_winner.wgsl": "3b863b2c01a7998eac8bb9fe2333a61823192cdb1c9616ea84f1a13103b55215",
+        "locked/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+        "locked/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+        "package-lock.json": "799634d978a5780b5e975aba43149613ea16a29c2d5a3f64294ba370524ac7a7",
+        "package.json": "86e3923b8fa51a1637db02fea5e240a2783c72d4cf495bc444bbcb03cff0ce08",
+        "pyproject.toml": "a8c9d20940643c706f5870c7ba4c41ad68cbd7579875d98dff92418e1f4cd784",
+        "uv.lock": "99326797ce941a69cf86ed19da26ca55d7db475c82ccc83d1cfc7d7d95a93ca9"
+      }
+    },
+    "measurement": "Synchronized host wall time. Compilation and registry construction excluded. End-to-end includes state validation, allocation, uploads, full readbacks; tick time includes submit and completion.",
+    "rows": [
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 16.687999945133924,
+          "mean": 15.933900007179805,
+          "median": 16.000500065274537,
+          "min": 15.101500088348985,
+          "p95": 16.687999945133924,
+          "samples": [
+            15.588099951855838,
+            16.000500065274537,
+            15.101500088348985,
+            15.863899956457317,
+            16.013600048609078,
+            16.687999945133924,
+            16.281699994578958
+          ],
+          "stdev": 0.4656464818219431
+        },
+        "energyQ": 6435840,
+        "finalHash": "4c88fe6d3a8d103b9f919be8321b48d1504103eb3edaba6eff705bd3aa7bc6af",
+        "height": 32,
+        "initialHash": "0a1834494921ba1e4eef6b2f1e876e11225dcfeaa133741b621a29827f190169",
+        "scene": "sparse-32x32",
+        "seed": 8173,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.975600044010207,
+          "mean": 2.7714750155740018,
+          "median": 2.830974990502,
+          "min": 2.5375749974045902,
+          "p95": 2.975600044010207,
+          "samples": [
+            2.5375749974045902,
+            2.861450018826872,
+            2.5797500275075436,
+            2.6963750133290887,
+            2.830974990502,
+            2.975600044010207,
+            2.9186000174377114
+          ],
+          "stdev": 0.15677838841598085
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 32
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 18.5485000256449,
+          "mean": 17.002957141292946,
+          "median": 16.55260007828474,
+          "min": 16.249799984507263,
+          "p95": 18.5485000256449,
+          "samples": [
+            16.681800014339387,
+            16.55260007828474,
+            16.458099940791726,
+            18.5485000256449,
+            18.145799986086786,
+            16.249799984507263,
+            16.384099959395826
+          ],
+          "stdev": 0.8658484891384236
+        },
+        "energyQ": 14877440,
+        "finalHash": "5053f542776cf6fb31373983f5de256542e4762d3f148dbde19ab16e3a4fbd08",
+        "height": 32,
+        "initialHash": "6202a52a70ede54cfd40f410a6da7d2d76168bf82d292c0c8db8e686365ee7eb",
+        "scene": "dense-32x32",
+        "seed": 8174,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.0335249903146178,
+          "mean": 2.685171431429418,
+          "median": 2.588025003205985,
+          "min": 2.5107000255957246,
+          "p95": 3.0335249903146178,
+          "samples": [
+            2.540274988859892,
+            2.5107000255957246,
+            2.5569999997969717,
+            2.9104000132065266,
+            3.0335249903146178,
+            2.588025003205985,
+            2.656274999026209
+          ],
+          "stdev": 0.18906299583892142
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 32
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 16.777799930423498,
+          "mean": 15.846257147911404,
+          "median": 15.673000016249716,
+          "min": 15.193900093436241,
+          "p95": 16.777799930423498,
+          "samples": [
+            15.673000016249716,
+            15.193900093436241,
+            15.29630005825311,
+            15.512499958276749,
+            16.027000034227967,
+            16.443299944512546,
+            16.777799930423498
+          ],
+          "stdev": 0.5511461395351017
+        },
+        "energyQ": 96187640,
+        "finalHash": "25a38ef125fc76b2fe0dccf57c699736a50d644b469094cbbf8db7c03743c90c",
+        "height": 32,
+        "initialHash": "99dd29d3cfa159e7b1864d9db00a506dd6e298735a812a7cc24ed04f8e377130",
+        "scene": "thermal-32x32",
+        "seed": 8175,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.9501999961212277,
+          "mean": 2.763735716663567,
+          "median": 2.7151749818585813,
+          "min": 2.6040000084321946,
+          "p95": 2.9501999961212277,
+          "samples": [
+            2.6996750093530864,
+            2.6040000084321946,
+            2.7151749818585813,
+            2.710675005801022,
+            2.804150019073859,
+            2.8622749960049987,
+            2.9501999961212277
+          ],
+          "stdev": 0.10750753304731706
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 32
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 17.56449998356402,
+          "mean": 15.236428556298572,
+          "median": 15.015800017863512,
+          "min": 13.891899958252907,
+          "p95": 17.56449998356402,
+          "samples": [
+            17.56449998356402,
+            14.975500060245395,
+            15.161399962380528,
+            14.713099924847484,
+            13.891899958252907,
+            15.332799986936152,
+            15.015800017863512
+          ],
+          "stdev": 1.044251198055464
+        },
+        "energyQ": 41866496,
+        "finalHash": "5ba59d812b0dd82644fdb96a97519aae194771d6b7078028b814703366d4ee84",
+        "height": 32,
+        "initialHash": "ae3e52a37636e823f64d8ec4e7163684a0e66a84d957b6e9fd71f3e431f191cd",
+        "scene": "reactive-32x32",
+        "seed": 8176,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.885900001274422,
+          "mean": 2.328714289303337,
+          "median": 2.2776749974582344,
+          "min": 1.9118750060442835,
+          "p95": 2.885900001274422,
+          "samples": [
+            2.885900001274422,
+            2.1203000214882195,
+            1.9740000134333968,
+            1.9118750060442835,
+            2.2776749974582344,
+            2.5805250043049455,
+            2.5507249811198562
+          ],
+          "stdev": 0.3313979099447012
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 32
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 19.32439999654889,
+          "mean": 16.761085700376757,
+          "median": 16.597899957560003,
+          "min": 14.898500056006014,
+          "p95": 19.32439999654889,
+          "samples": [
+            16.684799920767546,
+            16.597899957560003,
+            15.708699938841164,
+            14.898500056006014,
+            15.546999988146126,
+            19.32439999654889,
+            18.56630004476756
+          ],
+          "stdev": 1.507721711122228
+        },
+        "energyQ": 101349120,
+        "finalHash": "e8df3cefeac8b30bfcab43622310d018fa6e6f0ec7a844aef5babf0a218113f4",
+        "height": 128,
+        "initialHash": "aaa64b44d0950fee839f1f3d4f0fae5e750e1d3029df3650bfe9530edc53273d",
+        "scene": "sparse-128x128",
+        "seed": 8173,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.730024978518486,
+          "mean": 2.381464291829616,
+          "median": 2.414275018963963,
+          "min": 2.0307000377215445,
+          "p95": 2.730024978518486,
+          "samples": [
+            2.5363500171806663,
+            2.414275018963963,
+            2.198850008426234,
+            2.0307000377215445,
+            2.230724989203736,
+            2.529324992792681,
+            2.730024978518486
+          ],
+          "stdev": 0.22281617880023563
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 128
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 22.753399913199246,
+          "mean": 17.621157125436834,
+          "median": 17.12610002141446,
+          "min": 14.43530002143234,
+          "p95": 22.753399913199246,
+          "samples": [
+            15.791799989528954,
+            22.753399913199246,
+            18.082200083881617,
+            19.26969992928207,
+            17.12610002141446,
+            15.889599919319153,
+            14.43530002143234
+          ],
+          "stdev": 2.5637521311634184
+        },
+        "energyQ": 239467520,
+        "finalHash": "50cd5aa282fad0425adfde29b9d4784737dca7c27a4a11ef8b712175a0437619",
+        "height": 128,
+        "initialHash": "e4ab0c22e5e6632aa860742c78c15bc61ef48fb30a3d148aff7fc8e9a4b525d5",
+        "scene": "dense-128x128",
+        "seed": 8174,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.2236249826382846,
+          "mean": 2.5646214240363667,
+          "median": 2.5038500025402755,
+          "min": 1.9776500121224672,
+          "p95": 3.2236249826382846,
+          "samples": [
+            2.377850003540516,
+            2.873324992833659,
+            2.9037749918643385,
+            3.2236249826382846,
+            2.5038500025402755,
+            2.0922749827150255,
+            1.9776500121224672
+          ],
+          "stdev": 0.4227177468352754
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 128
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 17.746899975463748,
+          "mean": 16.237457149795123,
+          "median": 16.2903000600636,
+          "min": 15.16860001720488,
+          "p95": 17.746899975463748,
+          "samples": [
+            16.2903000600636,
+            15.16860001720488,
+            16.692699980922043,
+            17.746899975463748,
+            15.523500042036176,
+            15.497099957428873,
+            16.743100015446544
+          ],
+          "stdev": 0.8404462975876696
+        },
+        "energyQ": 1584461625,
+        "finalHash": "2b232e42c046d44cf68c44928ea8e22b79da93bc38af775529e2e23216dea445",
+        "height": 128,
+        "initialHash": "0c0ef3a5cfe15892c1c0c0fdbc00bf7dfc18fc8519583fe97c8f8e71cc9e7aa7",
+        "scene": "thermal-128x128",
+        "seed": 8175,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.4470499774906784,
+          "mean": 2.1960357137556588,
+          "median": 2.2659999958705157,
+          "min": 1.9462999771349132,
+          "p95": 2.4470499774906784,
+          "samples": [
+            2.3306500224862248,
+            2.2659999958705157,
+            2.4470499774906784,
+            2.354174997890368,
+            1.9462999771349132,
+            1.9869500247295946,
+            2.041125000687316
+          ],
+          "stdev": 0.18559337241718235
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 128
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 19.375500036403537,
+          "mean": 17.947200020509108,
+          "median": 18.215600051917136,
+          "min": 15.687800012528896,
+          "p95": 19.375500036403537,
+          "samples": [
+            18.150700023397803,
+            19.375500036403537,
+            18.985999980941415,
+            18.215600051917136,
+            18.899100017733872,
+            15.687800012528896,
+            16.31570002064109
+          ],
+          "stdev": 1.3041358042550932
+        },
+        "energyQ": 719123200,
+        "finalHash": "dedf4c3485c25c159117631d80ac723a855e5d51930aa3506bf7e0f205e503cd",
+        "height": 128,
+        "initialHash": "1b3df55a113c979efc49ee715d9c00388a27d5948a4655d744c4a85ca486e309",
+        "scene": "reactive-128x128",
+        "seed": 8176,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.969599998323247,
+          "mean": 2.602521429902741,
+          "median": 2.7116000128444284,
+          "min": 2.139249991159886,
+          "p95": 2.969599998323247,
+          "samples": [
+            2.4253999872598797,
+            2.7116000128444284,
+            2.856550010619685,
+            2.969599998323247,
+            2.8865500062238425,
+            2.139249991159886,
+            2.2287000028882176
+          ],
+          "stdev": 0.3111229557890048
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 128
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 20.867899991571903,
+          "mean": 19.314071429627283,
+          "median": 19.079399993643165,
+          "min": 17.70690002012998,
+          "p95": 20.867899991571903,
+          "samples": [
+            19.079399993643165,
+            20.867899991571903,
+            17.70690002012998,
+            19.007200025953352,
+            18.695499980822206,
+            20.55999997537583,
+            19.28160001989454
+          ],
+          "stdev": 1.0058860238983363
+        },
+        "energyQ": 205056000,
+        "finalHash": "f957541ba42d17d9a66a1abb8940eaa6df890d42eddcc97adeeef99fbb0dd190",
+        "height": 129,
+        "initialHash": "591383498e1639cc5b37917f86ea74c2719c048018257abf9caa05baf11548bb",
+        "scene": "sparse-257x129",
+        "seed": 8173,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.2204000162892044,
+          "mean": 2.4628071405459195,
+          "median": 2.2988750133663416,
+          "min": 2.086474996758625,
+          "p95": 3.2204000162892044,
+          "samples": [
+            2.20320001244545,
+            3.2204000162892044,
+            2.086474996758625,
+            2.2988750133663416,
+            2.729274972807616,
+            2.4467499752063304,
+            2.2546749969478697
+          ],
+          "stdev": 0.36340146601135737
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 257
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 22.469199961051345,
+          "mean": 20.409728550086065,
+          "median": 20.433699944987893,
+          "min": 17.986199934966862,
+          "p95": 22.469199961051345,
+          "samples": [
+            22.084100055508316,
+            20.433699944987893,
+            17.986199934966862,
+            19.85029992647469,
+            21.479899995028973,
+            18.56470003258437,
+            22.469199961051345
+          ],
+          "stdev": 1.5937989451850052
+        },
+        "energyQ": 487376640,
+        "finalHash": "5e591d9cec0e451339369991eaa87517afc0e12fd7b054b7d8ff46e91261884d",
+        "height": 129,
+        "initialHash": "21f39c45d8d5a6cf2e17d1573e493708c68e62d70d0a5efdbd59f478c9370127",
+        "scene": "dense-257x129",
+        "seed": 8174,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.40255000628531,
+          "mean": 2.6829142921737263,
+          "median": 2.554774982854724,
+          "min": 2.1247249969746917,
+          "p95": 3.40255000628531,
+          "samples": [
+            2.554774982854724,
+            2.887749986257404,
+            2.5137750490102917,
+            2.1247249969746917,
+            3.40255000628531,
+            2.4652749998494983,
+            2.831550023984164
+          ],
+          "stdev": 0.3752895492388494
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 257
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 21.09240007121116,
+          "mean": 20.01448572679822,
+          "median": 19.82970000244677,
+          "min": 19.49209999293089,
+          "p95": 21.09240007121116,
+          "samples": [
+            21.09240007121116,
+            19.713699934072793,
+            19.646800006739795,
+            20.162599976174533,
+            19.49209999293089,
+            20.164100104011595,
+            19.82970000244677
+          ],
+          "stdev": 0.49841450439525553
+        },
+        "energyQ": 3205019771,
+        "finalHash": "2249de44e5ae11326f0b920677846bb73fd8ab87633a7089e93eb30550ca8143",
+        "height": 129,
+        "initialHash": "4f6d053d409a98d541c8937d30c8070d3c7161f5f3c5218e7035c6657585c878",
+        "scene": "thermal-257x129",
+        "seed": 8175,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.9681499872822315,
+          "mean": 2.59131784800307,
+          "median": 2.7229749830439687,
+          "min": 2.162399992812425,
+          "p95": 2.9681499872822315,
+          "samples": [
+            2.4056249822024256,
+            2.727974992012605,
+            2.367000008234754,
+            2.785099990433082,
+            2.7229749830439687,
+            2.162399992812425,
+            2.9681499872822315
+          ],
+          "stdev": 0.2630409029256037
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 257
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 24.228299967944622,
+          "mean": 22.898114302993886,
+          "median": 22.697299951687455,
+          "min": 21.28610003273934,
+          "p95": 24.228299967944622,
+          "samples": [
+            24.082700023427606,
+            22.697299951687455,
+            24.124700110405684,
+            21.298500010743737,
+            24.228299967944622,
+            21.28610003273934,
+            22.56920002400875
+          ],
+          "stdev": 1.194213242104616
+        },
+        "energyQ": 1468669696,
+        "finalHash": "9055838fb46147dc50899dab475ed5bbd8328079ec98412a24318037b8debfc5",
+        "height": 129,
+        "initialHash": "1b92ca13206ad3ef27cd4c9a105f550b2ef2361aff9a18f0fb023f94a0700065",
+        "scene": "reactive-257x129",
+        "seed": 8176,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.6519749846775085,
+          "mean": 3.234053566952103,
+          "median": 3.2176249951589853,
+          "min": 2.920925006037578,
+          "p95": 3.6519749846775085,
+          "samples": [
+            3.323649987578392,
+            3.6519749846775085,
+            3.2176249951589853,
+            3.1624749826733023,
+            2.920925006037578,
+            3.0513000092469156,
+            3.310425003292039
+          ],
+          "stdev": 0.21559226612291757
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 257
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 78.65090004634112,
+          "mean": 73.39741429314017,
+          "median": 72.7024000370875,
+          "min": 68.02800006698817,
+          "p95": 78.65090004634112,
+          "samples": [
+            72.7024000370875,
+            69.43099992349744,
+            78.65090004634112,
+            74.42209997680038,
+            68.02800006698817,
+            72.32059992384166,
+            78.22690007742494
+          ],
+          "stdev": 3.745066322810553
+        },
+        "energyQ": 1628832000,
+        "finalHash": "c21e154c3143db5d53f82c333cd0cde7ffe6ea8b5bfed63324ee700fef750224",
+        "height": 512,
+        "initialHash": "36d5a9c5b3608136d21e57f7d360c7c81c6da82fcbfd2714a168fd85d5a4b9ba",
+        "scene": "sparse-512x512",
+        "seed": 8173,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 4.1567500156816095,
+          "mean": 3.1944714220506802,
+          "median": 3.1410249939654022,
+          "min": 2.324800007045269,
+          "p95": 4.1567500156816095,
+          "samples": [
+            3.1410249939654022,
+            2.547674986999482,
+            3.911099978722632,
+            2.324800007045269,
+            3.117974993074313,
+            3.1619749788660556,
+            4.1567500156816095
+          ],
+          "stdev": 0.6122528447826763
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 512
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 67.46769999153912,
+          "mean": 63.36141427579735,
+          "median": 63.114100019447505,
+          "min": 61.057399958372116,
+          "p95": 67.46769999153912,
+          "samples": [
+            62.46279994957149,
+            67.46769999153912,
+            61.057399958372116,
+            61.75929994788021,
+            63.114100019447505,
+            64.38060000073165,
+            63.28800006303936
+          ],
+          "stdev": 1.9511767845204055
+        },
+        "energyQ": 3871404800,
+        "finalHash": "a94d828d616fdb2abb50e71a33fc0d0158a8652982ed2755d5e574e6a6646f03",
+        "height": 512,
+        "initialHash": "44b4ba595e6573bcbfbd5ff337fc2041b8db42a2654803597ac5cd9fb60f6a12",
+        "scene": "dense-512x512",
+        "seed": 8174,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 2.8992250154260546,
+          "mean": 2.5754964278478707,
+          "median": 2.567049959907308,
+          "min": 2.1782999974675477,
+          "p95": 2.8992250154260546,
+          "samples": [
+            2.7489499771036208,
+            2.7121500170323998,
+            2.567049959907308,
+            2.1782999974675477,
+            2.5283750146627426,
+            2.3944250133354217,
+            2.8992250154260546
+          ],
+          "stdev": 0.22245518568384615
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 512
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 66.9808000093326,
+          "mean": 62.99442856106907,
+          "median": 62.77740001678467,
+          "min": 60.62170001678169,
+          "p95": 66.9808000093326,
+          "samples": [
+            60.87950000073761,
+            60.62170001678169,
+            63.52529989089817,
+            62.77740001678467,
+            63.619500026106834,
+            66.9808000093326,
+            62.556799966841936
+          ],
+          "stdev": 1.9605057570677624
+        },
+        "energyQ": 25323639781,
+        "finalHash": "8f608c53faac695b3087da6dcc71d408474ce6005c54d037eea442aa29b4ff80",
+        "height": 512,
+        "initialHash": "0d8796d929c65a850dddafc114df4e630981c273692a2398888e406431ce3de1",
+        "scene": "thermal-512x512",
+        "seed": 8175,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.2261750020552427,
+          "mean": 2.848110714694485,
+          "median": 2.918749989476055,
+          "min": 2.320500003406778,
+          "p95": 3.2261750020552427,
+          "samples": [
+            2.918749989476055,
+            2.320500003406778,
+            2.6557499950286,
+            3.2261750020552427,
+            3.033575019799173,
+            3.1420000013895333,
+            2.6400249917060137
+          ],
+          "stdev": 0.2993721551773895
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 512
+      },
+      {
+        "endToEndMs": {
+          "count": 7,
+          "max": 73.23950005229563,
+          "mean": 65.90814286443803,
+          "median": 65.20880002062768,
+          "min": 62.2698999941349,
+          "p95": 73.23950005229563,
+          "samples": [
+            65.20880002062768,
+            73.23950005229563,
+            67.31069996021688,
+            62.2698999941349,
+            67.07210000604391,
+            62.607300002127886,
+            63.6487000156194
+          ],
+          "stdev": 3.521308564310553
+        },
+        "energyQ": 11691256576,
+        "finalHash": "2a8931ec86eee21872dda4fda1e6010a1873e27b6c398e2b129df03f99c73a86",
+        "height": 512,
+        "initialHash": "7fe1db80479eec23b158417508c203ef78430e61cac71441e8f96aec1d5c9aa1",
+        "scene": "reactive-512x512",
+        "seed": 8176,
+        "startTick": 3,
+        "syncTickMs": {
+          "count": 7,
+          "max": 3.8969499873928726,
+          "mean": 2.8854214262017712,
+          "median": 2.8326249739620835,
+          "min": 2.299149986356497,
+          "p95": 3.8969499873928726,
+          "samples": [
+            2.785849996143952,
+            3.8969499873928726,
+            2.8331000357866287,
+            2.6145750016439706,
+            2.9357000021263957,
+            2.8326249739620835,
+            2.299149986356497
+          ],
+          "stdev": 0.4564192019129804
+        },
+        "ticks": 4,
+        "warmup": 2,
+        "width": 512
+      }
+    ],
+    "sourceBundleHash": "4b0535bd9cf49f6243db50ca55a5ec968e12cb6722afb19cabcbbb932590f63d"
+  },
+  "checks": [
+    {
+      "fitness": {
+        "compared_passes": 1808,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 13.316987504367717,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 4,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 2.131212502717972
+      },
+      "name": "baseline-thermal",
+      "passed": true,
+      "receipt": "39614cddf0fe8091ef80807c3c016ed005e4a294f3aefb31da50ea4b147e332c"
+    },
+    {
+      "fitness": {
+        "codec_exchange_errors": 0,
+        "codec_field_errors": 0,
+        "codec_pack_errors": 0,
+        "compared_passes": 1808,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "end_to_end_ms": 11.807675007730722,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "positive_variants": 34,
+        "restart_mismatches": 0,
+        "sync_tick_ms": 1.8431218777550384
+      },
+      "name": "baseline-codec",
+      "passed": true,
+      "receipt": "376dd40170f9622170e0a5b7505f15b62e103e2064546519e2a7adb8a4ab556a"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          3251389453,
+          17408
+        ],
+        "expected": [
+          3251389453,
+          17595
+        ],
+        "index": 0,
+        "pass": "thermal_y0",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 256,
+        "composed_mismatches": 363,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-thermal",
+      "passed": true,
+      "receipt": "287a9da7f7fc5b4f1b58aa92a0dd593baf81e6f166d57f3fd84d179aa27c04eb"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          272256779,
+          26624
+        ],
+        "expected": [
+          3257358850,
+          26880
+        ],
+        "index": 1,
+        "pass": "vertical1",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 256,
+        "composed_mismatches": 408,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-gravity",
+      "passed": true,
+      "receipt": "90d477548bb7be1d91670af19d455deb947c8c3b10b859267ce9931055db65a7"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          3775143437,
+          7743
+        ],
+        "expected": [
+          3525196034,
+          18485
+        ],
+        "index": 18,
+        "pass": "diagonal0_s1",
+        "scene": "mixed-7x5-0",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 640,
+        "composed_mismatches": 852,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-diagonal",
+      "passed": true,
+      "receipt": "6f157f90a645545ba079e0b70fd48d54ff271f84791af04d00bfb53a539d51a1"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          1387080450,
+          14990
+        ],
+        "expected": [
+          615223566,
+          37139
+        ],
+        "index": 5,
+        "pass": "liquid1_s1",
+        "scene": "mixed-7x1-0",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 448,
+        "composed_mismatches": 183,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-liquid",
+      "passed": true,
+      "receipt": "268ae39f99984c3b0c5d9dca4d46029057fa386a945258db83ac12d07b8d781c"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          345196047,
+          60135
+        ],
+        "expected": [
+          3295519759,
+          88102
+        ],
+        "index": 0,
+        "pass": "gas_buoyancy0",
+        "scene": "mixed-1x7-1",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 320,
+        "composed_mismatches": 171,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-buoyancy",
+      "passed": true,
+      "receipt": "6bac3d658d4a60fadb15e321969ec465944869487e0ece6679a6d808e03db9c8"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          3831986953,
+          45785
+        ],
+        "expected": [
+          76696334,
+          19267
+        ],
+        "index": 4,
+        "pass": "gas_spread0_s3",
+        "scene": "mixed-7x1-1",
+        "tick": 3
+      },
+      "fitness": {
+        "compared_passes": 512,
+        "composed_mismatches": 26,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-spread",
+      "passed": true,
+      "receipt": "f86bb735de479ce8a31f5f44dc92d23be1bac3ba6a3d8097e413129189ee2986"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          3084525585,
+          14771
+        ],
+        "expected": [
+          2967085067,
+          14771
+        ],
+        "index": 3,
+        "pass": "phase",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 256,
+        "composed_mismatches": 287,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-phase",
+      "passed": true,
+      "receipt": "68f1d2a41f5f64dbd02ffdedcfcdd8b15f2ec34ad8d414a01ec370648cf672a2"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          615221764,
+          35419
+        ],
+        "expected": [
+          615221774,
+          35419
+        ],
+        "index": 5,
+        "pass": "combustion",
+        "scene": "mixed-1x7-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 256,
+        "composed_mismatches": 213,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "noop-combustion",
+      "passed": true,
+      "receipt": "cf5d70352dd490184ec050f8bb68a30cd255a6e935e830e601e6f73922e81b39"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          1635425805,
+          40449
+        ],
+        "expected": [
+          1635425805,
+          40448
+        ],
+        "index": 0,
+        "pass": "thermal_x0",
+        "scene": "mixed-1x1-0",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 64,
+        "composed_mismatches": 54,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 456,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "created-energy",
+      "passed": true,
+      "receipt": "ca3bd33e9866ce92a00afd86aa9c3056223d9384355bab9d5b6f855b24ace3c1"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          1147404046,
+          93154
+        ],
+        "expected": [
+          1147404047,
+          112354
+        ],
+        "index": 51,
+        "pass": "combustion",
+        "scene": "mixed-17x19-2",
+        "tick": 0
+      },
+      "fitness": {
+        "compared_passes": 1152,
+        "composed_mismatches": 2958,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 1780480,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "shared-oxidizer",
+      "passed": true,
+      "receipt": "e2682e06c2f103e360e07388deda83f3bbe896b7848314047502efccf48c3a21"
+    },
+    {
+      "firstDifference": {
+        "actual": [
+          1149828878,
+          104720
+        ],
+        "expected": [
+          1149828878,
+          66320
+        ],
+        "index": 12,
+        "pass": "combustion",
+        "scene": "mixed-8x8-0",
+        "tick": 1
+      },
+      "fitness": {
+        "compared_passes": 832,
+        "composed_mismatches": 496,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 2534400,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "duplicate-chemical-release",
+      "passed": true,
+      "receipt": "b1a9b96f6ad1091f87b8e85aac650220deca2edcf5790abe7e045b8f29b54bc7"
+    },
+    {
+      "firstDifference": null,
+      "fitness": {
+        "codec_exchange_errors": 0,
+        "codec_field_errors": 16361,
+        "codec_pack_errors": 0,
+        "compared_passes": 0,
+        "composed_mismatches": 0,
+        "determinism_mismatches": 0,
+        "energy_drift_q": 0,
+        "material_count_errors": 0,
+        "restart_mismatches": 0
+      },
+      "name": "broken-codec-field",
+      "passed": true,
+      "receipt": "09b932c4dd9e560af1b379c0fe3c7714cdeecd7f21f449759748e93f4eca5445"
+    },
+    {
+      "name": "inconsistent-score",
+      "passed": true,
+      "rejectedReceipt": "38214cb3bdd89137671a2aca9260ccd10ba43243c7be416a580e3838bf80ad1b"
+    },
+    {
+      "name": "missing-pass-evidence",
+      "passed": true,
+      "rejectedReceipt": "1458ebfcea8a6b8afb70dce813a1a25b9782f5150207d2b729dae9c524b2b01f"
+    },
+    {
+      "name": "missing-timing-row",
+      "passed": true,
+      "rejectedReceipt": "bcb8d30000d888d5491d1ccd48b8bd182ee3705634e0f2101b30391f32c2bba7"
+    },
+    {
+      "name": "code-changed",
+      "passed": true
+    },
+    {
+      "name": "target-changed",
+      "passed": true
+    },
+    {
+      "name": "device-changed",
+      "passed": true
+    },
+    {
+      "name": "host-changed",
+      "passed": true
+    },
+    {
+      "name": "policy-changed",
+      "passed": true
+    },
+    {
+      "name": "seed-changed",
+      "passed": true
+    },
+    {
+      "name": "measurement-changed",
+      "passed": true
+    },
+    {
+      "historical": {
+        "archive_phase_1a.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_1b.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_1c.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_2a.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_2b.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_2c.json": {
+          "eligible": 0,
+          "entries": 15
+        },
+        "archive_phase_2d.json": {
+          "eligible": 0,
+          "entries": 15
+        }
+      },
+      "name": "archive-restart-eviction-tamper-history",
+      "passed": true
+    },
+    {
+      "name": "stage-revalidates",
+      "passed": true,
+      "patchEmpty": true,
+      "receipt": "4c5b42ac33f81c14bc636931cddf4cf4bb773322aa8022fb048eeaf2ed3c9103",
+      "staged": "bf4362ecc5ed3f9d58fcdac333e20d2dfc45f1c4ebd817bb4a988fadc8bd437e"
+    }
+  ],
+  "config": {
+    "samples": 3,
+    "seed": 8173,
+    "ticks": 4,
+    "timeout_seconds": 180,
+    "warmup": 1
+  },
+  "context": {
+    "device": {
+      "features": [
+        "bgra8unorm-storage",
+        "buffer-binding-array",
+        "conservative-rasterization",
+        "depth-clip-control",
+        "depth32float-stencil8",
+        "dual-source-blending",
+        "float32-filterable",
+        "indirect-first-instance",
+        "mappable-primary-buffers",
+        "multi-draw-indirect-count",
+        "partially-bound-binding-array",
+        "pipeline-statistics-query",
+        "polygon-mode-line",
+        "polygon-mode-point",
+        "push-constants",
+        "ray-query",
+        "rg11b10ufloat-renderable",
+        "sampled-texture-and-storage-buffer-array-non-uniform-indexing",
+        "shader-early-depth-test",
+        "shader-f16",
+        "shader-f64",
+        "shader-int64",
+        "shader-primitive-index",
+        "storage-resource-binding-array",
+        "subgroup",
+        "subgroup-barrier",
+        "subgroup-vertex",
+        "texture-adapter-specific-format-features",
+        "texture-binding-array",
+        "texture-compression-bc",
+        "texture-format-nv12",
+        "texture-format16bit-norm",
+        "timestamp-query",
+        "timestamp-query-inside-encoders",
+        "timestamp-query-inside-passes",
+        "vertex-writable-storage"
+      ],
+      "info": {
+        "adapter_type": "DiscreteGPU",
+        "architecture": "",
+        "backend_type": "Vulkan",
+        "description": "595.79",
+        "device": "NVIDIA GeForce RTX 4090",
+        "device_id": 9860,
+        "stackgroup_max_size": 128,
+        "stackgroup_min_size": 4,
+        "vendor": "NVIDIA",
+        "vendor_id": 4318
+      },
+      "limits": {
+        "max-bind-groups": 8,
+        "max-bind-groups-plus-vertex-buffers": 0,
+        "max-bindings-per-bind-group": 1000,
+        "max-buffer-size": 4503599627370496,
+        "max-color-attachment-bytes-per-sample": 128,
+        "max-color-attachments": 8,
+        "max-compute-invocations-per-workgroup": 1024,
+        "max-compute-workgroup-size-x": 1024,
+        "max-compute-workgroup-size-y": 1024,
+        "max-compute-workgroup-size-z": 64,
+        "max-compute-workgroup-storage-size": 49152,
+        "max-compute-workgroups-per-dimension": 65535,
+        "max-dynamic-storage-buffers-per-pipeline-layout": 16,
+        "max-dynamic-uniform-buffers-per-pipeline-layout": 15,
+        "max-inter-stage-shader-variables": 0,
+        "max-non-sampler-bindings": 4294967295,
+        "max-push-constant-size": 256,
+        "max-sampled-textures-per-shader-stage": 1048576,
+        "max-samplers-per-shader-stage": 1048576,
+        "max-storage-buffer-binding-size": 2147483647,
+        "max-storage-buffers-per-shader-stage": 1048576,
+        "max-storage-textures-per-shader-stage": 1048576,
+        "max-texture-array-layers": 2048,
+        "max-texture-dimension-1d": 32768,
+        "max-texture-dimension-2d": 32768,
+        "max-texture-dimension-3d": 16384,
+        "max-uniform-buffer-binding-size": 65536,
+        "max-uniform-buffers-per-shader-stage": 1048576,
+        "max-vertex-attributes": 32,
+        "max-vertex-buffer-array-stride": 2048,
+        "max-vertex-buffers": 16,
+        "min-storage-buffer-offset-alignment": 32,
+        "min-uniform-buffer-offset-alignment": 64
+      }
+    },
+    "policy": "ca-v2-evaluation-1",
+    "runtime": {
+      "hostHash": "1f12d0566288d0ca1b88194ca06ac654a8d0f574b11bc99cf0290c8395acf423",
+      "logicalCpus": 16,
+      "node": "v22.22.3",
+      "numpy": "2.2.6",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+      "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+      "typescript": "5.8.3",
+      "typescriptHash": "dd17428736a07e1db1a138d8a14295ddb2699ba780ee15038acdd2c6da5373a0",
+      "wgpu": "0.31.0"
+    },
+    "sourceHashes": {
+      "engine/__init__.py": "ada1f2399ec58602dff5c7bfdc27674f4ea71c0c01893945d875045f36f082a9",
+      "engine/_generated_schema.py": "fb3fd0c765f0175f094509ad99109e74114b867ea5723f8f1017d64964c309ae",
+      "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+      "engine/browser_state_space.ts": "1437f8858d9df570d72f0b8bbc7ba67a1d5941cee86dfb0e85652ca930f09b21",
+      "engine/catalog.py": "8399385f1206205ca6ee62526350eab7a03e475ae965eafc28ae3ef6eb8421af",
+      "engine/compositor.py": "8fd30fb0b469931b4197bbb72da447ed5508ab0f1a0fc24919137c59d875efce",
+      "engine/conformance.py": "9c542406cac9b2179ee21eeb05a04780e4b120b7d5a3eb72286f4b2b9fd2e4e3",
+      "engine/conformance.test.ts": "09fe8b802552ed44c480e09ef77b5f9ee7a4e4486869ad167a99ce140a3bb8c1",
+      "engine/contracts.py": "b413c07304b93e6066bb9cb62340bc2d95234387aa915b6badf33b083e67cec5",
+      "engine/contracts.test.ts": "34b1a5532f23b055b8f7f5f6d81d5635a5bf1f14a7fabca7ff42d139f26c8e1e",
+      "engine/contracts.ts": "79aa8a8190ff09448cfa7935c0d60f64d403103f0fb76297540bae06af8ed984",
+      "engine/cpu_physics.ts": "3eb8fdcf55fcd0d6064786defdf319c99c3d8e26f28e87ae772ce9176e2d585d",
+      "engine/enthalpy.py": "3e78c3bb38664df2a8a7e95246071017d01461b74db4cae906a84983b9012ec3",
+      "engine/enthalpy_gpu.py": "ea6a3a0ece529c0c2795b8297c8feb53838a3e00638a1d51ef269ed0039768ba",
+      "engine/fidelity.test.ts": "2f5cd0502166541b7576d70879526354305f0e76c1e0c462d1c46d1666316215",
+      "engine/field.py": "31a46b7be3242ec14f4bcdf53282e8625d2474a5d60be8ed044b6a4b27dd80f4",
+      "engine/generate.py": "a4436f668e1b7ad6385c65400f8ffac0cc750f329f1cfd689b252ca713098a55",
+      "engine/generated/materials.ts": "f3ddd72bb0072980bf74979756fda0a0d7e53245880173c86fab11294bfaa321",
+      "engine/generated/schedule.ts": "05a9469ebd84e1288f3a36f3a91cdf7d65eef31890aae50c28d306fc8039341b",
+      "engine/generated/shaders.ts": "3542b6038157d6152fd31b9807f829611ce3d5f5a9d68d4e3c1d4b32b48e3f9d",
+      "engine/index.ts": "e9fc006fdbf038d7bb04672f0c1034717510c0b58ec9e03f087f27dfda5fbf87",
+      "engine/inspection.ts": "2fe858a1886309da37bbee4beabfc38bee9b36461f499e5d3d806409940b940b",
+      "engine/kernels/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+      "engine/kernels/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+      "engine/kernels/phase_2b_diagonal_winner.wgsl": "17645cca8feaf3ad6566abb744defed1d2a2c02e2aed252b654fb4760c43ed32",
+      "engine/kernels/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+      "engine/kernels/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+      "engine/kernels/phase_2b_liquid_winner.wgsl": "7af3bbab5e32f8a81919113c42f7ff95d6b2005691b59334b5e2d3cf60663614",
+      "engine/kernels/phase_2b_winner.wgsl": "3b863b2c01a7998eac8bb9fe2333a61823192cdb1c9616ea84f1a13103b55215",
+      "engine/kernels/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+      "engine/kernels/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+      "engine/lint.py": "00295a712adbe7fd8862a238f0a85ec720ac32918b59a6357d4ca8a37d4392be",
+      "engine/lint_ts.mjs": "0f1e35743ee3896c46a6ff7a0c6f4560bd0cf67664de7594add7c2a9660ebe1e",
+      "engine/materials.json": "5b47118366fa741034ed1be37253497ed5112c193dad8fd5aaf8b66a7eb25d75",
+      "engine/mutations.test.ts": "7d32968a30b754408c09b9b7d60adf9ad593e0e928b127f49736decb63569d44",
+      "engine/registry.py": "8d88a2098a7762927e62da516f6ad249f86a927af340783e5580ce1d58a857e7",
+      "engine/registry.ts": "96bdb9b261f2557462a72a56c5e4c1541bfd6932aee2a9c0cc82214a5fbdc7e8",
+      "engine/resources.py": "669f59e39472da4981c2cbfa424aed25262402031f0557594eb16f4c2e53a965",
+      "engine/runner.py": "415eccf4b47909639933965945d1397642fb9eec1e208cf695a779534482ab26",
+      "engine/schedule.py": "462733087062356ad71497959cbf6421ddd0f5c04d01e2400e399708fade0cfb",
+      "engine/schema.py": "8fb69305c75c843cf20f98e1e68629cf00c31beb40ce57d2aefd62aff16b35f3",
+      "engine/sdk.test.ts": "c7401aa8e49e2d4ee34b87e6465fd3c6a8068e305cbfda23a43fdfdba2b7fdad",
+      "engine/shaders/bitmask_defs.wgsl": "e1962dfe3accd04346db3f71928ef30287a5adf9fe5ccf9855f19067f3047710",
+      "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+      "engine/shaders/enthalpy.wgsl": "1ce6cce6bf6289bf1fd39a2b32475ef3d5c53dab394bc62c7f07c3e3f117848e",
+      "engine/shaders/enthalpy_law.wgsl": "f7225674ab4d7f9688b123b8e9fc2f57418a6fb1cd918616c9deec08987cfb5b",
+      "engine/shaders/state_io.wgsl": "cd29758c73c12e8f87f0a4375c222c9180d2debb2d5db62d56e9ba5d982c3166",
+      "engine/sources.py": "291f8a152d4ce818d4f6b5723b22af345ad5d131cdb44bc8ea652804f0b4f5f9",
+      "engine/state.py": "3fd1260482a488f3af0577b3411bfbc57155a17916668db062f08f3f1490cc66",
+      "engine/thermal.ts": "0a3a9f70e9750fbc2bd6ab63214a99a2dd2b0ee2e40b36a4f73920309462f8fd",
+      "engine/thermal_registry.py": "88d94a92770abe3afee2edd5c379f6405d1f9a03760828b66ba9cf4a8d83d0b0",
+      "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+      "engine/tsconfig.sdk.json": "ffd752882c5c52421e1531a229878bcafcdc8167ecd39142b739440f0847fe2c",
+      "engine/validation.py": "8c1beaafb993458f28a5e535eb57f4f15ee3e660aec5f32855948c6d5e0c4cca",
+      "engine/validation.ts": "d46f2b540293ab07af7945be44e36beed708af8411090f25e7282ce03458b891",
+      "engine/verify.py": "72fcc3992d7a3139b8ea8a87508333eba6374f4d0bcf2cf804741f4d2c0e3f03",
+      "engine/version.py": "9ee248bb8f9e865db649e91739cca7c2efcbefe41b8a9abe779dfe1e0dd13c53",
+      "engine/vite.sdk.config.ts": "c8280e3d6cfb39baaa4f72c4a296069452d8d7a2e0870eff12e3b70355d69847",
+      "engine/vitest.config.ts": "2307405526250bebfb5c84fc68868d99e5a2cfd6d3bfd027113c83161f6d3eb0",
+      "engine/webgpu_field.ts": "00e256316ee214db88915e33a02da0b4d238ff092fa1a3e6b247883121c3c175",
+      "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+      "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "eval/archive.py": "49960301ac145de810ed076af740ee4810d3799401c1553d51db8ae5c6b68041",
+      "eval/benchmark.py": "02edadcec6d490a7bead6fd691ad1f877c24bf3b8161f829e60bd4e364038a6f",
+      "eval/codec.py": "8d74c689d40cdc4e93c5c19accb9ce4b83aad2f496669b3df0d1645975d31adc",
+      "eval/correctness.py": "4b527465e879d34572fd429990d68fd6694cf7350d4b143bde1ec2c39053450e",
+      "eval/evaluator.py": "491c7c9aadd6e234462bc3a9c1597d88355483c27a0cce490897149ac7227d2e",
+      "eval/policy.py": "516f2abe6e2c32e094afd9a724363f075f5b82a762896ba68ed7623e1fac7c21",
+      "eval/provenance.py": "56ec2a9d7afa73e78cba95e5ca327ed4b7da18b37c03d96d985d1e96211f2b2c",
+      "eval/reference.mjs": "a3efd2eaf38467614d96b9bebaa95251cfd822e552e53389b019e66c6ca79bbe",
+      "eval/scenes.py": "99a1e1b834c0f1d34fb89b947ddb52bdb4286d85d8ca63d53f1855926fa2c76b",
+      "eval/verify.py": "d690e49386a629a93975fafd5a66324d65d1955201782c074a1a1c1b8d9dd96b",
+      "eval/worker.py": "9af70be0ed37e080269e720f7d1e9878ff4e881cae4f10810048759fb632c9fb",
+      "evolve_ss.py": "7a9dc394e5013da84bf3660ebabb7399363c190275308412566a78bb331598db",
+      "locked/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+      "locked/phase_1b_winner.wgsl": "a7ed9a6267e94ab9bc8895cc30b670fc284d066457762d8c2af2599a83417de9",
+      "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+      "locked/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+      "locked/phase_2b_diagonal_winner.wgsl": "17645cca8feaf3ad6566abb744defed1d2a2c02e2aed252b654fb4760c43ed32",
+      "locked/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+      "locked/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+      "locked/phase_2b_liquid_winner.wgsl": "7af3bbab5e32f8a81919113c42f7ff95d6b2005691b59334b5e2d3cf60663614",
+      "locked/phase_2b_winner.wgsl": "3b863b2c01a7998eac8bb9fe2333a61823192cdb1c9616ea84f1a13103b55215",
+      "locked/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+      "locked/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+      "package-lock.json": "799634d978a5780b5e975aba43149613ea16a29c2d5a3f64294ba370524ac7a7",
+      "package.json": "86e3923b8fa51a1637db02fea5e240a2783c72d4cf495bc444bbcb03cff0ce08",
+      "pyproject.toml": "a8c9d20940643c706f5870c7ba4c41ad68cbd7579875d98dff92418e1f4cd784",
+      "uv.lock": "99326797ce941a69cf86ed19da26ca55d7db475c82ccc83d1cfc7d7d95a93ca9"
+    }
+  },
+  "note": "12 behavioral adversaries actually compiled and ran. Rejection was observed in output, not inferred from source.",
+  "passed": true,
+  "receipt": "20f1afd3703df0e8d351fd907ef9e0742258437e230b0c369d850b918fcdf2d8"
+}

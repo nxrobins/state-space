@@ -1,0 +1,9 @@
+{
+  "claimedDimensionsAfterFailure": [
+    1,
+    1
+  ],
+  "remainingPipelineCount": 0,
+  "previousWorldCanContinue": false,
+  "retryError": "KeyError: 'vertical0'"
+}

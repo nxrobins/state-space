@@ -1,0 +1,19 @@
+{
+  "paint": {
+    "changedCells": 29,
+    "allWood": true,
+    "allWoodEnergy": true,
+    "energyDeltaQ": "593875",
+    "expectedDeltaQ": "593875",
+    "otherEnergyUnchanged": true,
+    "invalidRestoreRejected": true,
+    "invalidRestoreAtomic": true,
+    "tick": 23
+  },
+  "clear": {
+    "tick": 0,
+    "totalEnergyQ": "335544320",
+    "allAmbient": true,
+    "stoneCells": 5120
+  }
+}

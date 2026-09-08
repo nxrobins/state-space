@@ -6,9 +6,9 @@ Run 200 ticks and validate exact conservation:
 
 1. air consumed by combustion = wood burned
 2. combustion products (ash + fire + smoke) = wood burned + air consumed
-3. total_thermal_final ~= total_thermal_initial + sum(fuel_energy of all wood consumed)
+3. exact stored energy is conserved, including fractional, latent, and chemical state
 
-If all three hold across 200 ticks of cascading combustion, the engine is real.
+The temperature byte is a display projection, not the energy ledger.
 """
 
 import sys
@@ -17,7 +17,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from engine.schema import *
+from engine.schema import (
+    MATERIAL_NAMES, MAT_AIR, MAT_STONE, MAT_WOOD, PHASE_GAS,
+    PHASE_SOLID, VoxelState, build_cold_table_buffer, pack_voxel,
+)
 from engine.compositor import CompositionEngine
 
 
@@ -152,7 +155,7 @@ def main():
     # Every wood burn consumes exactly one air voxel.
     wood_burned = initial_wood - final_wood
     air_consumed = initial_air - final_air
-    print(f"\n[1] FUEL/OXYGEN PAIRING:")
+    print("\n[1] FUEL/OXYGEN PAIRING:")
     print(f"  Wood initial:   {initial_wood}")
     print(f"  Wood remaining: {final_wood}")
     print(f"  Wood burned:    {wood_burned}")
@@ -168,7 +171,7 @@ def main():
     # Products can pass through ash, fire, and smoke during the flame lifecycle.
     products = final_ash + final_fire + final_smoke
     expected_products = wood_burned + air_consumed
-    print(f"\n[2] COMBUSTION PRODUCT ACCOUNTING:")
+    print("\n[2] COMBUSTION PRODUCT ACCOUNTING:")
     print(f"  Air initial:  {initial_air}")
     print(f"  Air remaining: {final_air}")
     print(f"  Ash final:     {final_ash}")
@@ -184,7 +187,7 @@ def main():
     # Test 3: Total voxel count (matter conservation)
     initial_total = sum(initial_mats.values())
     final_total = sum(final_mats.values())
-    print(f"\n[3] TOTAL VOXEL COUNT:")
+    print("\n[3] TOTAL VOXEL COUNT:")
     print(f"  Initial: {initial_total}")
     print(f"  Final:   {final_total}")
     if initial_total == final_total:
@@ -193,40 +196,38 @@ def main():
         print(f"  FAIL: voxel count changed ({initial_total} -> {final_total})")
         all_passed = False
 
-    # Test 4: Energy budget
-    # total_thermal_final = total_thermal_initial + sum(fuel_energy of burned wood)
-    # Wood fuel_energy = 80 per voxel
-    wood_fuel = COLD_TABLE[MAT_WOOD].fuel_energy
-    expected_thermal_gain = wood_burned * wood_fuel
-    expected_final_thermal = initial_thermal + expected_thermal_gain
-    thermal_drift = final_thermal - expected_final_thermal
-    thermal_drift_pct = abs(thermal_drift) / max(expected_final_thermal, 1) * 100
-
-    print(f"\n[4] ENERGY BUDGET:")
-    print(f"  Thermal initial:        {initial_thermal}")
-    print(f"  Wood burned:            {wood_burned} x fuel_energy={wood_fuel} = +{expected_thermal_gain}")
-    print(f"  Expected final thermal: {expected_final_thermal}")
-    print(f"  Actual final thermal:   {final_thermal}")
-    print(f"  Drift: {thermal_drift} ({thermal_drift_pct:.2f}%)")
-    if thermal_drift_pct < 1.0:
-        print(f"  PASS: thermal drift < 1% ({thermal_drift_pct:.2f}%)")
+    # Test 4: Exact full-state energy budget. Display quantization is irrelevant.
+    initial_energy_q = sum(int(e) for e in result["initial_energy"])
+    final_energy_q = sum(int(e) for e in result["final_energy"])
+    print("\n[4] ENERGY BUDGET:")
+    print(f"  Initial energy Q: {initial_energy_q}")
+    print(f"  Final energy Q:   {final_energy_q}")
+    if initial_energy_q == final_energy_q and result["energy_ledger"].total_q == initial_energy_q:
+        print("  PASS: exact energy conservation")
     else:
-        print(f"  FAIL: thermal drift >= 1% ({thermal_drift_pct:.2f}%)")
+        print("  FAIL: energy drift")
         all_passed = False
+    for tick, energy in result["energy_snapshots"]:
+        if sum(int(e) for e in energy) != initial_energy_q:
+            print(f"  FAIL: energy drift at tick {tick}")
+            all_passed = False
 
     # Test 5: Determinism (run again, compare)
-    print(f"\n[5] DETERMINISM:")
+    print("\n[5] DETERMINISM:")
     result2 = engine.run(grid, cold_table, W, H, n_ticks=N_TICKS)
-    if np.array_equal(final_grid, result2["final_grid"]):
+    if (np.array_equal(final_grid, result2["final_grid"])
+            and np.array_equal(result["final_energy"], result2["final_energy"])
+            and np.array_equal(result["final_structure"], result2["final_structure"])):
         print(f"  PASS: Two runs of {N_TICKS} ticks produce identical output")
     else:
-        diff_count = np.sum(final_grid != result2["final_grid"])
+        diff_count = np.sum((final_grid != result2["final_grid"]) | (result["final_energy"] != result2["final_energy"])
+                            | (result["final_structure"] != result2["final_structure"]))
         print(f"  FAIL: {diff_count} voxels differ between two runs")
         all_passed = False
 
     # Snapshot progression
     if result["snapshots"]:
-        print(f"\n--- Cascade Progression ---")
+        print("\n--- Cascade Progression ---")
         for tick, snap in result["snapshots"]:
             snap_mats = count_materials(snap)
             snap_thermal = total_thermal(snap)
@@ -241,7 +242,7 @@ def main():
     print("=" * 60)
     if all_passed:
         print("ALL CONSERVATION TESTS PASSED")
-        print("THE ENGINE IS REAL.")
+        print("Exact accounting and deterministic replay verified.")
     else:
         print("SOME TESTS FAILED — composition has ordering or conservation bugs")
     print("=" * 60)

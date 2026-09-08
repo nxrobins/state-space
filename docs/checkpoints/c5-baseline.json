@@ -1,0 +1,59 @@
+{
+  "sourceHashes": {
+    "evolve_ss.py": "2fd72ffdfd8ad7fb611d17ce510d899a43c3b7a8d842d987e06c32ec0a429274",
+    "engine/runner.py": "801f7a5aff06e3fae92c8eac6990f5e1e84eb8abb8377dbe242b2f81e5d96205",
+    "eval/correctness.py": "41201e1926625d1e3343e9b9b720e9bdaba392d8e714c1daddc9e52a39a6f32c",
+    "engine/compositor.py": "2a351ee848499350ca46e2bcfdf4c00844b28b8a7c6bf8f86f83cb7d7ad82e40"
+  },
+  "invalidThermalFitnessAccepted": true,
+  "emptyFitnessViable": true,
+  "legacyArchiveViableCounts": {
+    "1a": 3,
+    "1b": 12,
+    "1c": 1,
+    "2a": 4,
+    "2b": 15,
+    "2c": 10,
+    "2d": 5
+  },
+  "nativeNoop": {
+    "source": "@group(0) @binding(0) var<storage, read> grid_in: array<u32>;\n@group(0) @binding(1) var<storage, read_write> grid_out: array<u32>;\n@group(0) @binding(2) var<storage, read> cold_table: array<u32>;\n@compute @workgroup_size(16,16) fn tick(@builtin(global_invocation_id) gid: vec3<u32>) {\n if (gid.x>=GRID_WIDTH || gid.y>=GRID_HEIGHT) { return; }\n let i=gid.y*GRID_WIDTH+gid.x; grid_out[i]=grid_in[i]; }\n",
+    "result": {
+      "energy_conservation_error": 0.0,
+      "matter_conservation_error": 0.0,
+      "material_count_error": 0.0,
+      "voxel_count_error": 0.0,
+      "determinism_score": 1.0,
+      "tick_time_ms": 16.84289998956956,
+      "diverged": false
+    },
+    "phaseAcceptance": {
+      "2a": true,
+      "2b": true,
+      "2c": true,
+      "2d": true
+    }
+  },
+  "nativeBrokenHelpers": {
+    "source": "fn pack_voxel(mat:u32, t:u32, x:i32, y:i32, p:u32, f:u32)->u32 { return 0u; }\nfn unpack_voxel(p:u32)->VoxelState { return VoxelState(0u,0u,0,0,0u,0u); }\nfn exchange_thermal(a:u32,b:u32)->vec2<u32> { return vec2<u32>(0u,0u); }\n@group(0) @binding(0) var<storage,read> input:array<u32>;\n@group(0) @binding(1) var<storage,read_write> output:array<u32>;\n@compute @workgroup_size(64) fn main(@builtin(global_invocation_id) gid:vec3<u32>) { if(gid.x<arrayLength(&input)) { output[gid.x]=input[gid.x]; } }\n",
+    "result": {
+      "roundtrip_errors": 0,
+      "cycle_time_us": 393.8499915723999,
+      "total_time_ms": 1.1815499747171998,
+      "diverged": false
+    },
+    "accepted": true
+  },
+  "adapter": {
+    "vendor": "NVIDIA",
+    "architecture": "",
+    "device": "NVIDIA GeForce RTX 4090",
+    "description": "595.79",
+    "stackgroup_min_size": 4,
+    "stackgroup_max_size": 128,
+    "vendor_id": 4318,
+    "device_id": 9860,
+    "adapter_type": "DiscreteGPU",
+    "backend_type": "Vulkan"
+  }
+}

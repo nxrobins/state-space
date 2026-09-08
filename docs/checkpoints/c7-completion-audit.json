@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "completedCheckpoints": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7"
+  ],
+  "remainingRoadmapRequirements": [],
+  "currentSourceExactlyMatchesFinalVerification": true,
+  "sourceFileCount": 213,
+  "finalVerification": {
+    "path": "c7-verification.json",
+    "sha256": "766679faa4e61de857413e2469fda37689f2342481c4d054a90e4f47d8fa6d9a",
+    "gates": 16
+  },
+  "browserProof": {
+    "path": "c7-verification-browser/report.json",
+    "sha256": "f17474601d35d4bd3120be0818ec55ff9e2c9ea63e06bd1bf2a416ce5289fe2d",
+    "artifactHashesValid": true,
+    "caseCount": 31,
+    "passComparisons": 2304,
+    "liveScenes": 5
+  },
+  "packages": {
+    "path": "c7-verification-sdk.json",
+    "sha256": "6ea86169cde49f5cb7ea94e4b22b38de22840ab879ca051ed264022023207749",
+    "immutableArtifactHashesValid": true,
+    "installedBrowserPassDeltas": 54
+  },
+  "evolution": {
+    "receipt": "6975a39fc7b001c6fdbfefb404907b2ec9c4a142c361579717cc9d1f7a049163",
+    "immutableContentsValid": true,
+    "checks": 32,
+    "benchmarkRows": 16,
+    "samplesPerRow": 7,
+    "ticksPerSample": 4,
+    "perTickDistribution": "Seven sample means, each averaging four synchronized ticks"
+  },
+  "priorCheckpoints": {
+    "C1": {
+      "report": "c1-verification.json",
+      "sha256": "b2cdeca29e49e55cbaaffb184e44a46510bea3c23d72fbd9e96f97d58f635010",
+      "gates": 11,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    },
+    "C2": {
+      "report": "c2-verification.json",
+      "sha256": "56b23c7bbac89b7c4419fed800eea38895971461f03ffb0003087a1734cdb256",
+      "gates": 12,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    },
+    "C3": {
+      "report": "c3-verification.json",
+      "sha256": "24447f1cc0b355fb6649873a12cf64ebfffb36511a41fe169d3be0ac95810e58",
+      "gates": 12,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    },
+    "C4": {
+      "report": "c4-verification.json",
+      "sha256": "983650f8cf07572e35f0ea9c6a70080f984d54ab125bc88dc4134ded0d772b70",
+      "gates": 13,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    },
+    "C5": {
+      "report": "c5-verification.json",
+      "sha256": "e52547d52f134852609c681d8eca86af0a50693e2e1a84c45916d6b5fa42e616",
+      "gates": 14,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    },
+    "C6": {
+      "report": "c6-v3-final-verification.json",
+      "sha256": "f0a87c68138ed907e0d4b828a9ac851007c42de1d055ff2d96687010ba7d1ad9",
+      "gates": 14,
+      "scope": "Historical source and rules; retained properties rerun under C7"
+    }
+  },
+  "requirementAudit": "C7.md; all checkpoint and sweep/fix/prevention requirements mapped to direct evidence",
+  "futureDirectionsOutsideCompletedRoadmap": [
+    "Lower complete-tick latency",
+    "Pressure and velocity",
+    "Rotation and elasticity",
+    "Versioned rule extension interface"
+  ],
+  "limitations": [
+    "Cellular model, uncalibrated units",
+    "Host structural planning and full readback each tick",
+    "No mechanical energy or momentum ledger",
+    "Current-device bounded evidence",
+    "Private local release; no publication or commits"
+  ]
+}

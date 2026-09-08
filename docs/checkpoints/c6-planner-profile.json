@@ -1,0 +1,190 @@
+{
+  "scope": "single-sample diagnostic of C6 Python prototype planner; excludes GPU and production ticks; not a benchmark claim",
+  "samples": [
+    {
+      "dimensions": [
+        32,
+        32
+      ],
+      "kind": "sparse",
+      "plannerMs": 6.924299988895655,
+      "components": 1
+    },
+    {
+      "dimensions": [
+        32,
+        32
+      ],
+      "kind": "dense",
+      "plannerMs": 32.379799988120794,
+      "components": 1
+    },
+    {
+      "dimensions": [
+        128,
+        128
+      ],
+      "kind": "sparse",
+      "plannerMs": 83.63709994591773,
+      "components": 1
+    },
+    {
+      "dimensions": [
+        128,
+        128
+      ],
+      "kind": "dense",
+      "plannerMs": 460.7617000583559,
+      "components": 1
+    },
+    {
+      "dimensions": [
+        256,
+        256
+      ],
+      "kind": "sparse",
+      "plannerMs": 301.38419999275357,
+      "components": 1
+    },
+    {
+      "dimensions": [
+        256,
+        256
+      ],
+      "kind": "dense",
+      "plannerMs": 2140.4097999911755,
+      "components": 1
+    }
+  ],
+  "profile": [
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 201,
+      "function": "plan_structure",
+      "calls": 1,
+      "selfSeconds": 0.1174787,
+      "cumulativeSeconds": 0.6314267
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 77,
+      "function": "normalize_bonds",
+      "calls": 3,
+      "selfSeconds": 0.14849610000000002,
+      "cumulativeSeconds": 0.2449568
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 127,
+      "function": "_bond_graph",
+      "calls": 2,
+      "selfSeconds": 0.05277080000000001,
+      "cumulativeSeconds": 0.11982680000000001
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 115,
+      "function": "validate_structure",
+      "calls": 1,
+      "selfSeconds": 9.620000000000001e-05,
+      "cumulativeSeconds": 0.0817944
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 64,
+      "function": "eligible",
+      "calls": 98304,
+      "selfSeconds": 0.056568600000000004,
+      "cumulativeSeconds": 0.056568600000000004
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 130,
+      "function": "<genexpr>",
+      "calls": 162816,
+      "selfSeconds": 0.053433800000000004,
+      "cumulativeSeconds": 0.053433800000000004
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 84,
+      "function": "<listcomp>",
+      "calls": 3,
+      "selfSeconds": 0.022095,
+      "cumulativeSeconds": 0.0476789
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.sorted>",
+      "calls": 32646,
+      "selfSeconds": 0.01617,
+      "cumulativeSeconds": 0.0414903
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 135,
+      "function": "_components",
+      "calls": 1,
+      "selfSeconds": 0.0255382,
+      "cumulativeSeconds": 0.031659
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 71,
+      "function": "neighbors",
+      "calls": 81920,
+      "selfSeconds": 0.030869900000000002,
+      "cumulativeSeconds": 0.030869900000000002
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 213,
+      "function": "<dictcomp>",
+      "calls": 1,
+      "selfSeconds": 0.027123300000000003,
+      "cumulativeSeconds": 0.027123300000000003
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 246,
+      "function": "<genexpr>",
+      "calls": 32512,
+      "selfSeconds": 0.0253203,
+      "cumulativeSeconds": 0.0253203
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'add' of 'set' objects>",
+      "calls": 32768,
+      "selfSeconds": 0.0068839,
+      "cumulativeSeconds": 0.0068839
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.any>",
+      "calls": 1,
+      "selfSeconds": 0.0012821,
+      "cumulativeSeconds": 0.0062044000000000005
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 239,
+      "function": "<dictcomp>",
+      "calls": 1,
+      "selfSeconds": 0.0039961,
+      "cumulativeSeconds": 0.006145500000000001
+    },
+    {
+      "file": "D:\\state-space\\engine\\structure.py",
+      "line": 212,
+      "function": "<dictcomp>",
+      "calls": 1,
+      "selfSeconds": 0.0058014,
+      "cumulativeSeconds": 0.0058014
+    }
+  ],
+  "plannerSha256": "537a4237fe23aa091b61fa2cfb8a6af38370a3ed954307c3d35f9f7d0085df62"
+}

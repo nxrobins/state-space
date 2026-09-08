@@ -1,0 +1,25 @@
+ENGINE INVARIANT SCENARIO SUITE
+Grid: 64x64
+Scenarios: 18
+CompositionEngine: 36 pipelines compiled for 64x64
+  Tick schedule:
+    Structural support and transport [structure]
+    Vertical gravity phase 0         [vertical0]
+    Vertical gravity phase 1         [vertical1]
+    Diagonal fall phase 0 salt 0     [diagonal0_s0]
+    Diagonal fall phase 1 salt 0     [diagonal1_s0]
+    Liquid spread phase 0 salt 0     [liquid0_s0]
+    Liquid spread phase 1 salt 0     [liquid1_s0]
+    Gas buoyancy phase 0             [gas_buoyancy0]
+    Gas buoyancy phase 1             [gas_buoyancy1]
+    Gas spread phase 0 salt 0        [gas_spread0_s0]
+    Gas spread phase 1 salt 0        [gas_spread1_s0]
+    Thermal x parity 0               [thermal_x0]
+    Thermal x parity 1               [thermal_x1]
+    Thermal y parity 0               [thermal_y0]
+    Thermal y parity 1               [thermal_y1]
+    Phase transitions                [phase]
+    Combustion                       [combustion]
+    Reciprocal bond normalization    [normalize]
+PASS solid_matter_falls           ticks= 10 mean=20.671ms
+FAIL: structural target was displaced

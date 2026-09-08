@@ -1,0 +1,19 @@
+{
+  "checkpoint": "C6",
+  "passed": true,
+  "verificationReport": "c6-v3-final-verification.json",
+  "verificationSha256": "f0a87c68138ed907e0d4b828a9ac851007c42de1d055ff2d96687010ba7d1ad9",
+  "evaluationReceipt": "0aaf435d20a1e8c956ca8afcb1358694f6acfb0360e7af62cd6c834c64558e8c",
+  "browserProof": "c6-v3-browser-native.json",
+  "postVerificationDocumentation": {
+    "docs/STRUCTURES.md": {
+      "tested": "672b408977bc3070873f8bf61c625c73cc0a06b250b032a49eb5cd06d9b9b7cf",
+      "current": "45a65bb8d586d3b24a031bd2db9994b3d6d49fa55ea89f44573b61681e0fbbf4"
+    }
+  },
+  "documentationChange": "Checkpoint status sentence points to the accepted C6 report; physical contract unchanged.",
+  "runtimeAndTestSourcesUnchanged": true,
+  "roadmapRemaining": [
+    "C7"
+  ]
+}

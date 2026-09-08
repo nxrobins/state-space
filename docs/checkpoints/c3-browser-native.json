@@ -1,0 +1,45 @@
+{
+  "finalEnergyHash": "4ba33371adecb5bd1c0cae55a16c4754d20eee7c82afcfc0774880a49b076f63",
+  "finalEnergyQ": "403351168",
+  "finalGridHash": "65007a84422fedaec480086fe18fe19235764015f32ec1b3511a8ff99a3cfc48",
+  "finalTick": 23,
+  "height": 256,
+  "initialEnergyHash": "15128c71eefc15f13e5f6a6db60cd5597e4067a64974280884620a01a41d6967",
+  "initialEnergyQ": "403351168",
+  "initialGridHash": "3135e169846621aaea83c5477603195a46136346762d53065bf697775651e644",
+  "initialTick": 3,
+  "replayEqual": true,
+  "rulesVersion": "ca-v2",
+  "schemaVersion": 2,
+  "width": 256,
+  "nativeGridHash": "65007a84422fedaec480086fe18fe19235764015f32ec1b3511a8ff99a3cfc48",
+  "nativeEnergyHash": "4ba33371adecb5bd1c0cae55a16c4754d20eee7c82afcfc0774880a49b076f63",
+  "nativeMatchesBrowser": true,
+  "nativeAdapter": {
+    "vendor": "NVIDIA",
+    "architecture": "",
+    "device": "NVIDIA GeForce RTX 4090",
+    "description": "595.79",
+    "stackgroup_min_size": 4,
+    "stackgroup_max_size": 128,
+    "vendor_id": 4318,
+    "device_id": 9860,
+    "adapter_type": "DiscreteGPU",
+    "backend_type": "Vulkan"
+  },
+  "sourceHashes": {
+    "web/app.js": "a150363d3159ed4eb6e952939801c4c7d827ce99d6caf87ed3ec62e32a5b2c17",
+    "web/shaders.js": "e8aab5d5af2374992d30b5027fbccb655e0b7984a91ae1d3b7ce7773f55772d8",
+    "web/thermal.generated.js": "a26857965ffbfa18c2263633007751418e02c9269f86796d0f5499b41eced838",
+    "engine/compositor.py": "2babdc1d4743a07092d1b72f7eab2f2b7df658821c64c9728e758b98007617f8",
+    "engine/materials.json": "9a6ec2b86cc53cbe5f98e570ab8025e1c3be6ca5cf4a29a8b3c323ff52da0a57"
+  },
+  "browserAdapter": {
+    "vendor": "nvidia",
+    "architecture": "lovelace",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "browserVersion": "Chrome/152.0.7977.82"
+}

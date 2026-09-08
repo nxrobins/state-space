@@ -1,0 +1,33 @@
+{
+  "sourceHashes": {
+    "pyproject.toml": "38be86795101a335c6841efcba03dd3a755a01207eb9334c111fc24200eb2af3",
+    "engine/compositor.py": "2babdc1d4743a07092d1b72f7eab2f2b7df658821c64c9728e758b98007617f8",
+    "engine/contracts.py": "77888784aa2c3162a0aa12b701e0b46512a4b2063a6372d16a2b262198bbc827",
+    "engine/catalog.py": "040f8176c351a6f06d4bd6d03a717cf9bf487292dc1adfcd42a8ac882af96bd1",
+    "engine/browser_state_space.ts": "aaed0ed3cf73485fbaab4f85149f81e22c542fc7b1cb1dc5654dd8ff518c3e8a",
+    "engine/thermal.ts": "79ac7b7086da7fb098c537e5f2a118ddbc25cca8679fed043bfd9d8cf4e96392"
+  },
+  "wheelBuild": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "Building wheel...\nSuccessfully built C:\\Users\\nxrob\\AppData\\Local\\Temp\\state-space-c4-baseline-d_evkp7v\\dist\\state_space-0.1.0-py3-none-any.whl\n"
+  },
+  "wheelRuntimeKernels": [],
+  "install": {
+    "returncode": 0,
+    "stderr": "Using CPython 3.10.16 interpreter at: .venv\\Scripts\\python.exe\nResolved 1 package in 1ms\nPrepared 1 package in 26ms\nInstalled 1 package in 17ms\n + state-space==0.1.0 (from file:///C:/Users/nxrob/AppData/Local/Temp/state-space-c4-baseline-d_evkp7v/dist/state_space-0.1.0-py3-none-any.whl)\n"
+  },
+  "externalClient": {
+    "returncode": 1,
+    "stdout": "engine.compositor\n",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"C:\\Users\\nxrob\\AppData\\Local\\Temp\\state-space-c4-baseline-d_evkp7v\\site\\engine\\compositor.py\", line 45, in __init__\n    (WORK_DIR / \"locked\" / \"phase_1a_winner.wgsl\").read_text()\n  File \"C:\\Users\\nxrob\\AppData\\Roaming\\uv\\python\\cpython-3.10.16-windows-x86_64-none\\lib\\pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"C:\\Users\\nxrob\\AppData\\Roaming\\uv\\python\\cpython-3.10.16-windows-x86_64-none\\lib\\pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\nxrob\\\\AppData\\\\Local\\\\Temp\\\\state-space-c4-baseline-d_evkp7v\\\\site\\\\locked\\\\phase_1a_winner.wgsl'\n"
+  },
+  "reuseSchema2Id15Accepted": true,
+  "frozenSnapshotCanBeMutated": true,
+  "nonAirFillCompilerErrors": [
+    {
+      "code": 2345,
+      "message": "Argument of type '1' is not assignable to parameter of type '0'."
+    }
+  ]
+}
