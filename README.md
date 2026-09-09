@@ -40,6 +40,22 @@ pressure, momentum, elasticity or structural rotation. GPU backends currently us
 host structural planning and full-state readback each tick. The capability guide
 and checkpoint reports state the measured hardware and scale limits.
 
+## About
+
+State Space is an open-source, deterministic cellular material simulation engine.
+It combines movement, heat, phase transitions, and structural failure into a
+single, replayable tick model with backend-agnostic state contracts.
+
+The repository includes:
+
+- A runtime engine with Python and JS APIs.
+- Web and native client integrations.
+- Reference verification artifacts for browser, CPU, GPU, and end-to-end tests.
+- A public roadmap and checkpoint archive of reproducible experiments.
+
+The project is intended for researchers, game engineers, and simulation builders
+who need predictable physics at the cell level.
+
 ## License
 
 State Space is released as open source under the MIT License. See [LICENSE](LICENSE).
