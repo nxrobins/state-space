@@ -1,5 +1,11 @@
 # State Space
 
+[![License](https://img.shields.io/github/license/nxrobins/state-space)](LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/nxrobins/state-space/main)](https://github.com/nxrobins/state-space/commits/main)
+[![Open issues](https://img.shields.io/github/issues/nxrobins/state-space)](https://github.com/nxrobins/state-space/issues)
+[![GitHub stars](https://img.shields.io/github/stars/nxrobins/state-space)](https://github.com/nxrobins/state-space/stargazers)
+[![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen)](https://github.com/nxrobins/state-space)
+
 A deterministic cellular material engine with coupled movement, heat, phase
 changes, combustion and structural failure. The engine is the product; the
 included games are integration clients.
