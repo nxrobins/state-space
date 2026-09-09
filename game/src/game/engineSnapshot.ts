@@ -124,7 +124,7 @@ export function buildCombatGridFromEngineSnapshot(
       }
 
       const material = mapEngineMaterialIdToCombatMaterial(engineMaterial, options);
-      materialGrid[gridIndex(x, y)] = { material, expiresAtTick: null };
+      materialGrid[gridIndex(x, y)] = { material, expiresAtTick: null, provenance: 'snapshot' };
       report.materialCounts[material] = (report.materialCounts[material] ?? 0) + 1;
     }
   }

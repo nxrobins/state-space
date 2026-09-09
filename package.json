@@ -2,6 +2,12 @@
   "name": "state-space-engine",
   "version": "0.3.0",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/nxrobins/state-space",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nxrobins/state-space.git"
+  },
   "type": "module",
   "scripts": {
     "lint": "node engine/lint_ts.mjs",

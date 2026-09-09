@@ -12,6 +12,8 @@ import {
   RESPAWN_INVULN_TICKS,
   STARTING_STOCKS,
 } from './constants';
+import { activeMoveDamping, rectIntersectionCenter } from '../combatFeel';
+import { createBufferedInput, resolveCommandCandidate } from '../input/commandResolver';
 import { createRuntimeStats, noteMoveDenial } from '../ops';
 import { BOOST_MATERIALS, cpuOpponentFor, FIGHTER_SPECS } from './fighters';
 import {
@@ -30,12 +32,15 @@ import {
   gridIndex,
   inGrid,
 } from './grid';
-import { commandFromActions, moveForCommand } from './moves';
+import { resolveMaterialCombos } from './materialCombos';
+import { moveForCommand } from './moves';
 import { randomInt } from './rng';
 import type {
   ActionState,
   ActiveHitbox,
   BattleState,
+  BufferedInput,
+  CombatImpact,
   CpuDecisionTelemetry,
   CpuLaneTelemetry,
   FighterId,
@@ -52,6 +57,14 @@ import type {
   Rect,
 } from './types';
 
+interface DamageContext {
+  moveId?: string;
+  boosted?: boolean;
+  contactX?: number;
+  contactY?: number;
+  hitType?: 'strike' | 'grab';
+}
+
 const GRAVITY = 0.78;
 const MAX_FALL_SPEED = 17;
 const FRICTION = 0.78;
@@ -62,6 +75,12 @@ const EARTH_DAMAGE_MULTIPLIER = 0.9;
 const EARTH_KNOCKBACK_MULTIPLIER = 0.78;
 const EARTH_HITSTUN_REDUCTION = 2;
 const FIRE_BOOSTED_DAMAGE_MULTIPLIER = 1.14;
+const MAX_SHIELD_POINTS = 100;
+const SHIELD_REGEN_PER_TICK = 0.42;
+const SHIELD_HOLD_DRAIN_PER_TICK = 0.08;
+const SHIELD_BREAK_STUN_TICKS = 120;
+const SHIELD_RELEASE_TICKS = 5;
+const SHORT_HOP_RELEASE_TICKS = 7;
 const CPU_BOOST_MATCH_WEIGHT = 2;
 const CPU_LANE_FIRE_PENALTY = 2;
 const CPU_LANE_LAVA_PENALTY = 4;
@@ -125,6 +144,10 @@ export const EMPTY_ACTIONS: ActionState = {
   down: false,
   dash: false,
   block: false,
+  attack: false,
+  special: false,
+  shield: false,
+  grab: false,
   basic: false,
   special1: false,
   special2: false,
@@ -176,7 +199,7 @@ function cloneInitialMaterialGrid(grid: MaterialCell[]): MaterialCell[] {
   if (grid.length !== expectedCells) {
     throw new Error(`Initial material grid must contain ${expectedCells} cells, received ${grid.length}.`);
   }
-  return grid.map((cell) => ({ material: cell.material, expiresAtTick: null }));
+  return grid.map((cell) => ({ material: cell.material, expiresAtTick: null, provenance: cell.provenance ?? 'snapshot' }));
 }
 
 export function stepBattle(
@@ -202,7 +225,7 @@ export function stepBattle(
   moveFighter(state, state.fighters.cpu, cpuActions);
 
   processHitboxes(state);
-  resolveMaterialReactions(state);
+  resolveMaterialCombos(state);
   applyMaterialEffects(state);
   resolveStockLosses(state);
   resolveTimer(state);
@@ -220,18 +243,22 @@ export function tryStartMove(
   state: BattleState,
   fighter: FighterState,
   command: InputCommand,
+  bufferedInput?: BufferedInput,
 ): MoveActivationResult {
   const move = moveForCommand(fighter.specId, command);
-  const boosted = command !== 'basic' && fighter.boosted;
+  const boosted = move.category === 'special' && move.meterCost > 0 && fighter.boosted;
   const cost = boosted ? move.boostedMeterCost : move.meterCost;
 
   if (state.matchPhase === 'finished') return denyMove(state, 'finished', move.id, cost, boosted);
   if (fighter.activeMove) return denyMove(state, 'active-move', move.id, cost, boosted);
   if (fighter.hitstunTicks > 0) return denyMove(state, 'hitstun', move.id, cost, boosted);
+  if (fighter.shieldStunTicks > 0) return denyMove(state, 'shield-stun', move.id, cost, boosted);
+  if (fighter.landingLagTicks > 0) return denyMove(state, 'landing-lag', move.id, cost, boosted);
+  if (move.oncePerAirtime && fighter.airRecoveryUsed && !fighter.onGround) return denyMove(state, 'recovery', move.id, cost, boosted);
 
   if ((fighter.moveCooldowns[move.id] ?? 0) > 0) return denyMove(state, 'cooldown', move.id, cost, boosted);
 
-  const isSpecial = command !== 'basic';
+  const isSpecial = move.category === 'special';
   if (fighter.meter < cost) {
     if (isSpecial) pushEvent(state, 'meter-empty', `${fighter.id} lacked meter for ${move.name}`);
     return denyMove(state, 'meter', move.id, cost, boosted);
@@ -244,7 +271,12 @@ export function tryStartMove(
     startedTick: state.tick,
     boosted,
     spawned: false,
+    command,
+    direction: bufferedInput?.direction ?? move.direction,
+    facing: bufferedInput?.facing ?? fighter.facing,
+    airborne: bufferedInput?.airborne ?? !fighter.onGround,
   };
+  if (move.oncePerAirtime) fighter.airRecoveryUsed = true;
   pushEvent(state, 'move-start', `${fighter.id} started ${move.name}${fighter.activeMove.boosted ? ' boosted' : ''}`);
   return { ok: true, moveId: move.id, boosted, cost };
 }
@@ -256,17 +288,19 @@ export function applyDamage(
   knockbackX: number,
   knockbackY: number,
   sourceOwnerId: FighterId | null,
+  context: DamageContext = {},
 ): boolean {
   if (state.matchPhase === 'finished' || target.invulnTicks > 0 || amount <= 0) return false;
 
   const sourceFighter = sourceOwnerId && sourceOwnerId !== target.id ? state.fighters[sourceOwnerId] : null;
   const environmentalDamage = sourceFighter === null;
-  const blocked = target.blockTicks > 0 && target.hitstunTicks === 0;
+  const blocked = target.blockTicks > 0 && target.hitstunTicks === 0 && context.hitType !== 'grab';
+  const sourceMoveBoosted = context.boosted ?? sourceFighter?.activeMove?.boosted ?? false;
   let finalDamage = blocked ? amount * 0.25 : amount;
   let finalKnockbackX = blocked ? knockbackX * 0.45 : knockbackX;
   let finalKnockbackY = blocked ? knockbackY * 0.45 : knockbackY;
 
-  if (sourceFighter?.specId === 'fire' && (sourceFighter.boosted || sourceFighter.activeMove?.boosted)) {
+  if (sourceFighter?.specId === 'fire' && (sourceFighter.boosted || sourceMoveBoosted)) {
     finalDamage *= FIRE_BOOSTED_DAMAGE_MULTIPLIER;
   }
   if (target.specId === 'water' && environmentalDamage) {
@@ -278,29 +312,51 @@ export function applyDamage(
     finalKnockbackY *= EARTH_KNOCKBACK_MULTIPLIER;
   }
 
+  if (blocked) {
+    target.shieldPoints = clamp(target.shieldPoints - (amount + Math.abs(knockbackX) * 0.8 + Math.abs(knockbackY) * 0.5), 0, MAX_SHIELD_POINTS);
+    target.shieldStunTicks = Math.max(target.shieldStunTicks, 8);
+    target.inputBuffer = null;
+    if (target.shieldPoints <= 0) {
+      target.blockTicks = 0;
+      target.shieldStunTicks = SHIELD_BREAK_STUN_TICKS;
+      pushEvent(state, 'shield-break', `${target.id} shield broke`);
+    }
+  }
   target.health = clamp(target.health - finalDamage, 0, MAX_HEALTH);
   target.vx += finalKnockbackX;
-  target.vy = Math.min(target.vy, finalKnockbackY);
+  target.vy = finalKnockbackY < 0 ? Math.min(target.vy, finalKnockbackY) : Math.max(target.vy, finalKnockbackY);
   const baseHitstun = blocked ? 8 : 18;
   const finalHitstun = target.specId === 'earth' ? Math.max(4, baseHitstun - EARTH_HITSTUN_REDUCTION) : baseHitstun;
   target.hitstunTicks = Math.max(target.hitstunTicks, finalHitstun);
   target.lastDamageTakenTick = state.tick;
+  if (!blocked) {
+    target.activeMove = null;
+    target.inputBuffer = null;
+  }
 
   if (sourceOwnerId && sourceOwnerId !== target.id) {
     const attacker = state.fighters[sourceOwnerId];
     attacker.meter = clamp(attacker.meter + finalDamage * 0.7, 0, MAX_METER);
-    state.runtimeStats.combatImpactSeq++;
-    state.runtimeStats.lastCombatImpact = {
-      tick: state.tick,
-      sourceId: sourceOwnerId,
-      targetId: target.id,
-      damage: finalDamage,
-      blocked,
-    };
   }
+  recordCombatImpact(state, {
+    tick: state.tick,
+    sourceId: sourceOwnerId,
+    targetId: target.id,
+    moveId: context.moveId,
+    impactKind: environmentalDamage ? 'hazard' : blocked ? 'blocked' : 'hit',
+    damage: finalDamage,
+    blocked,
+    boosted: sourceMoveBoosted,
+    contactX: context.contactX ?? target.x,
+    contactY: context.contactY ?? target.y,
+  });
   target.meter = clamp(target.meter + finalDamage * 0.25, 0, MAX_METER);
 
-  pushEvent(state, 'damage', `${target.id} took ${finalDamage.toFixed(1)} damage`);
+  if (blocked && sourceOwnerId) {
+    pushEvent(state, 'blocked-hit', `${target.id} blocked ${context.moveId ?? 'hit'}`);
+  } else {
+    pushEvent(state, 'damage', `${target.id} took ${finalDamage.toFixed(1)} damage`);
+  }
 
   if (state.matchPhase === 'suddenDeath') {
     finishMatch(state, sourceOwnerId && sourceOwnerId !== target.id ? sourceOwnerId : otherFighter(target.id), 'sudden-death');
@@ -339,6 +395,13 @@ function createFighterState(
     invulnTicks: 0,
     hitstunTicks: 0,
     blockTicks: 0,
+    shieldPoints: MAX_SHIELD_POINTS,
+    shieldStunTicks: 0,
+    shieldReleaseTicks: 0,
+    landingLagTicks: 0,
+    jumpHeldTicks: 0,
+    airRecoveryUsed: false,
+    inputBuffer: null,
     slowTicks: 0,
     activeMove: null,
     moveCooldowns: {},
@@ -351,6 +414,9 @@ function decrementCounters(fighter: FighterState): void {
   fighter.invulnTicks = Math.max(0, fighter.invulnTicks - 1);
   fighter.hitstunTicks = Math.max(0, fighter.hitstunTicks - 1);
   fighter.blockTicks = Math.max(0, fighter.blockTicks - 1);
+  fighter.shieldStunTicks = Math.max(0, fighter.shieldStunTicks - 1);
+  fighter.shieldReleaseTicks = Math.max(0, fighter.shieldReleaseTicks - 1);
+  fighter.landingLagTicks = Math.max(0, fighter.landingLagTicks - 1);
   fighter.slowTicks = Math.max(0, fighter.slowTicks - 1);
   for (const key of Object.keys(fighter.moveCooldowns)) {
     fighter.moveCooldowns[key] = Math.max(0, fighter.moveCooldowns[key] - 1);
@@ -365,19 +431,53 @@ function updateBoostFlags(state: BattleState): void {
 }
 
 function applyFighterIntent(state: BattleState, fighter: FighterState, actions: ActionState): void {
-  if (actions.block && !fighter.activeMove && fighter.hitstunTicks === 0) {
+  updateShieldIntent(fighter, actions);
+  const candidate = resolveCommandCandidate(fighter, actions);
+  if (candidate) {
+    fighter.inputBuffer = createBufferedInput(candidate, state.tick);
+  }
+  if (!fighter.inputBuffer) return;
+  if (fighter.inputBuffer.expiresAtTick < state.tick) {
+    fighter.inputBuffer = null;
+    return;
+  }
+  if (isFighterActionLocked(fighter)) return;
+
+  const result = tryStartMove(state, fighter, fighter.inputBuffer.command, fighter.inputBuffer);
+  if (result.ok || result.deniedReason) fighter.inputBuffer = null;
+}
+
+function updateShieldIntent(fighter: FighterState, actions: ActionState): void {
+  const wantsShield = actions.shield || actions.block;
+  const canShield =
+    wantsShield &&
+    !fighter.activeMove &&
+    fighter.hitstunTicks === 0 &&
+    fighter.shieldStunTicks === 0 &&
+    fighter.landingLagTicks === 0 &&
+    fighter.shieldReleaseTicks === 0 &&
+    fighter.shieldPoints > 0;
+
+  if (canShield) {
     fighter.blockTicks = 3;
+    fighter.shieldPoints = clamp(fighter.shieldPoints - SHIELD_HOLD_DRAIN_PER_TICK, 0, MAX_SHIELD_POINTS);
+    if (fighter.shieldPoints <= 0) fighter.shieldStunTicks = SHIELD_BREAK_STUN_TICKS;
+    return;
   }
 
-  const command = commandFromActions({
-    basic: actions.basic,
-    special1: actions.special1,
-    special2: actions.special2,
-    special3: actions.special3,
-  });
-  if (command) {
-    tryStartMove(state, fighter, command);
-  }
+  if (fighter.blockTicks > 0 && !wantsShield) fighter.shieldReleaseTicks = SHIELD_RELEASE_TICKS;
+  fighter.shieldPoints = clamp(fighter.shieldPoints + SHIELD_REGEN_PER_TICK, 0, MAX_SHIELD_POINTS);
+}
+
+function isFighterActionLocked(fighter: FighterState): boolean {
+  return (
+    fighter.health <= 0 ||
+    fighter.stocks <= 0 ||
+    fighter.hitstunTicks > 0 ||
+    fighter.shieldStunTicks > 0 ||
+    fighter.activeMove !== null ||
+    fighter.landingLagTicks > 0
+  );
 }
 
 function updateActiveMove(state: BattleState, fighter: FighterState): void {
@@ -390,6 +490,9 @@ function updateActiveMove(state: BattleState, fighter: FighterState): void {
   }
 
   if (elapsed >= spec.startupTicks + spec.activeTicks + spec.recoveryTicks) {
+    if (!fighter.onGround && spec.landingLagTicks) {
+      fighter.landingLagTicks = Math.max(fighter.landingLagTicks, Math.ceil(spec.landingLagTicks / 2));
+    }
     fighter.activeMove = null;
   }
 }
@@ -408,28 +511,34 @@ function spawnMoveEffects(
   move: MoveSpec,
   boosted: boolean,
 ): void {
-  const hitbox = buildHitbox(fighter, move, boosted);
+  const moveFacing = fighter.activeMove?.facing ?? fighter.facing;
+  const hitbox = buildHitbox(fighter, move, boosted, moveFacing);
   state.activeHitboxes.push({
     id: state.nextHitboxId++,
     ownerId: fighter.id,
     moveId: move.id,
+    boosted,
+    hitType: move.hitType ?? 'strike',
     rect: hitbox,
     damage: move.damage,
-    knockbackX: move.knockbackX * fighter.facing * boostedKnockbackMultiplier(move, boosted),
+    knockbackX: move.knockbackX * moveFacing * boostedKnockbackMultiplier(move, boosted),
     knockbackY: move.knockbackY * boostedKnockbackMultiplier(move, boosted),
     expiresAtTick: state.tick + move.activeTicks,
     hitFighterIds: [],
   });
 
-  if (move.selfImpulseX) fighter.vx += move.selfImpulseX * fighter.facing;
-  if (move.selfImpulseY) fighter.vy += move.selfImpulseY;
+  if (move.selfImpulseX) fighter.vx += move.selfImpulseX * moveFacing;
+  if (move.selfImpulseY) {
+    fighter.vy += move.selfImpulseY;
+    if (move.selfImpulseY < 0) fighter.onGround = false;
+  }
 
   const baseCellX = worldToCell(fighter.x);
   const baseCellY = worldToCell(fighter.y);
   for (const spawn of move.materialSpawns) {
     const boostedWidth = boosted && move.boost.stat === 'size' ? spawn.widthCells + move.boost.amount : spawn.widthCells;
     const boostedLifetime = boosted && move.boost.stat === 'duration' ? spawn.lifetimeTicks + move.boost.amount : spawn.lifetimeTicks;
-    const x = fighter.facing === 1
+    const x = moveFacing === 1
       ? baseCellX + spawn.offsetCellsX
       : baseCellX - spawn.offsetCellsX - boostedWidth + 1;
     const y = settleSpawnYAbovePermanentCells(state, x, baseCellY + spawn.offsetCellsY, boostedWidth, spawn.heightCells);
@@ -462,11 +571,11 @@ function settleSpawnYAbovePermanentCells(
   return y;
 }
 
-function buildHitbox(fighter: FighterState, move: MoveSpec, boosted: boolean): Rect {
+function buildHitbox(fighter: FighterState, move: MoveSpec, boosted: boolean, facing = fighter.facing): Rect {
   const extraWidth = boosted && move.boost.stat === 'size' ? move.boost.amount * CELL_SIZE : 0;
   const width = move.hitbox.width + extraWidth;
   const height = move.hitbox.height;
-  const centerX = fighter.x + move.hitbox.offsetX * fighter.facing;
+  const centerX = fighter.x + move.hitbox.offsetX * facing;
   const centerY = fighter.y + move.hitbox.offsetY;
   return {
     x: centerX - width / 2,
@@ -485,7 +594,7 @@ function moveFighter(state: BattleState, fighter: FighterState, actions: ActionS
   fighter.previousX = fighter.x;
   fighter.previousY = fighter.y;
 
-  if (fighter.hitstunTicks === 0) {
+  if (fighter.hitstunTicks === 0 && fighter.shieldStunTicks === 0) {
     applyMovementControls(fighter, spec, actions);
   }
 
@@ -498,20 +607,21 @@ function moveFighter(state: BattleState, fighter: FighterState, actions: ActionS
 function applyMovementControls(fighter: FighterState, spec: FighterSpec, actions: ActionState): void {
   const speed = spec.moveSpeed * (fighter.slowTicks > 0 ? 0.55 : 1);
   let desired = 0;
-  if (actions.left) {
+  const movementLocked = fighter.landingLagTicks > 0 || fighter.shieldStunTicks > 0;
+  if (!movementLocked && actions.left) {
     desired -= speed;
-    fighter.facing = -1;
+    if (!fighter.activeMove) fighter.facing = -1;
   }
-  if (actions.right) {
+  if (!movementLocked && actions.right) {
     desired += speed;
-    fighter.facing = 1;
+    if (!fighter.activeMove) fighter.facing = 1;
   }
 
   if (fighter.activeMove) {
-    desired *= 0.45;
+    desired *= activeMoveDamping(fighter.activeMove.moveId);
   }
 
-  if (actions.dash && (fighter.moveCooldowns.dash ?? 0) === 0 && !fighter.activeMove) {
+  if (!movementLocked && actions.dash && (fighter.moveCooldowns.dash ?? 0) === 0 && !fighter.activeMove) {
     fighter.vx = spec.dashVelocity * fighter.facing;
     fighter.moveCooldowns.dash = 34;
   } else if (desired !== 0) {
@@ -521,18 +631,30 @@ function applyMovementControls(fighter: FighterState, spec: FighterSpec, actions
     if (Math.abs(fighter.vx) < 0.05) fighter.vx = 0;
   }
 
-  if (actions.up && fighter.onGround && !fighter.activeMove) {
+  if (!movementLocked && actions.up && fighter.onGround && !fighter.activeMove) {
     fighter.vy = spec.jumpVelocity;
     fighter.onGround = false;
+    fighter.jumpHeldTicks = 1;
+  } else if (actions.up && fighter.jumpHeldTicks > 0) {
+    fighter.jumpHeldTicks++;
+  } else if (!actions.up && fighter.jumpHeldTicks > 0) {
+    if (!fighter.onGround && fighter.jumpHeldTicks <= SHORT_HOP_RELEASE_TICKS && fighter.vy < -5) {
+      fighter.vy *= 0.58;
+    }
+    fighter.jumpHeldTicks = 0;
   }
 
   if (fighter.blockTicks > 0) {
     fighter.vx *= 0.35;
   }
+  if (!fighter.onGround && actions.down && !fighter.activeMove && fighter.vy > 0) {
+    fighter.vy = Math.max(fighter.vy, 10.5);
+  }
 }
 
 function resolveFighterCollision(state: BattleState, fighter: FighterState): void {
   const previousX = fighter.x;
+  const wasOnGround = fighter.onGround;
   fighter.x += fighter.vx;
   let blocked = false;
   if (fighterRectIntersectsSolid(state, fighter)) {
@@ -555,6 +677,18 @@ function resolveFighterCollision(state: BattleState, fighter: FighterState): voi
     }
     if (dir > 0) fighter.onGround = true;
     fighter.vy = 0;
+  }
+
+  if (!wasOnGround && fighter.onGround) {
+    fighter.airRecoveryUsed = false;
+    fighter.jumpHeldTicks = 0;
+    if (fighter.activeMove) {
+      const move = moveSpecForActiveMove(fighter);
+      if (move.landingLagTicks && (move.airborne || fighter.activeMove.airborne)) {
+        fighter.landingLagTicks = Math.max(fighter.landingLagTicks, move.landingLagTicks);
+        fighter.activeMove = null;
+      }
+    }
   }
 
   if (blocked || Math.abs(fighter.x - previousX) < 0.15 && Math.abs(fighter.vx) > 0.2) {
@@ -580,8 +714,16 @@ function processHitboxes(state: BattleState): void {
     const targetId = otherFighter(hitbox.ownerId);
     if (hitbox.hitFighterIds.includes(targetId)) continue;
     const target = state.fighters[targetId];
-    if (!rectsOverlap(hitbox.rect, fighterRect(target))) continue;
-    const didHit = applyDamage(state, target, hitbox.damage, hitbox.knockbackX, hitbox.knockbackY, hitbox.ownerId);
+    const targetRect = fighterRect(target);
+    if (!rectsOverlap(hitbox.rect, targetRect)) continue;
+    const contact = rectIntersectionCenter(hitbox.rect, targetRect);
+    const didHit = applyDamage(state, target, hitbox.damage, hitbox.knockbackX, hitbox.knockbackY, hitbox.ownerId, {
+      moveId: hitbox.moveId,
+      boosted: hitbox.boosted,
+      contactX: contact.x,
+      contactY: contact.y,
+      hitType: hitbox.hitType,
+    });
     if (didHit) hitbox.hitFighterIds.push(targetId);
   }
 }
@@ -590,9 +732,15 @@ function applyMaterialEffects(state: BattleState): void {
   for (const fighter of [state.fighters.p1, state.fighters.cpu]) {
     const materials = materialsInFighterRect(state.materialGrid, fighter);
     if (materials.has(MaterialType.Lava)) {
-      applyDamage(state, fighter, 0.65, fighter.x < ARENA_WIDTH / 2 ? -0.18 : 0.18, -0.2, null);
+      applyDamage(state, fighter, 0.65, fighter.x < ARENA_WIDTH / 2 ? -0.18 : 0.18, -0.2, null, {
+        contactX: fighter.x,
+        contactY: fighter.y,
+      });
     } else if (materials.has(MaterialType.Fire)) {
-      applyDamage(state, fighter, 0.28, fighter.x < ARENA_WIDTH / 2 ? -0.12 : 0.12, -0.1, null);
+      applyDamage(state, fighter, 0.28, fighter.x < ARENA_WIDTH / 2 ? -0.12 : 0.12, -0.1, null, {
+        contactX: fighter.x,
+        contactY: fighter.y,
+      });
     }
 
     if (materials.has(MaterialType.Ice)) {
@@ -606,70 +754,6 @@ function applyMaterialEffects(state: BattleState): void {
     if (materials.has(MaterialType.Steam)) {
       fighter.vy -= 0.42;
     }
-  }
-}
-
-function resolveMaterialReactions(state: BattleState): void {
-  const toSteam = new Set<number>();
-  const toStone = new Set<number>();
-  const toWater = new Set<number>();
-
-  for (let i = state.temporaryCellHead; i < state.temporaryCells.length; i++) {
-    const ref = state.temporaryCells[i];
-    const cell = state.materialGrid[ref.index];
-    if (cell.expiresAtTick !== ref.expiresAtTick) continue;
-
-    const x = ref.index % GRID_WIDTH;
-    const y = Math.floor(ref.index / GRID_WIDTH);
-    if (cell.material === MaterialType.Water) {
-      for (const offset of REACTION_OFFSETS) {
-        const nx = x + offset.dx;
-        const ny = y + offset.dy;
-        if (!inGrid(nx, ny)) continue;
-        const neighborIndex = gridIndex(nx, ny);
-        const neighbor = state.materialGrid[neighborIndex];
-        if (neighbor.expiresAtTick === null) continue;
-        if (neighbor.material === MaterialType.Fire) {
-          toSteam.add(ref.index);
-          toSteam.add(neighborIndex);
-        } else if (neighbor.material === MaterialType.Lava) {
-          toSteam.add(ref.index);
-          toStone.add(neighborIndex);
-        }
-      }
-    } else if (cell.material === MaterialType.Ice) {
-      for (const offset of REACTION_OFFSETS) {
-        const nx = x + offset.dx;
-        const ny = y + offset.dy;
-        if (!inGrid(nx, ny)) continue;
-        const neighbor = state.materialGrid[gridIndex(nx, ny)];
-        if (neighbor.expiresAtTick === null) continue;
-        if (neighbor.material === MaterialType.Fire || neighbor.material === MaterialType.Lava) {
-          toWater.add(ref.index);
-          break;
-        }
-      }
-    }
-  }
-
-  for (const index of toStone) {
-    const cell = state.materialGrid[index];
-    if (cell.expiresAtTick === null || cell.material !== MaterialType.Lava) continue;
-    state.materialGrid[index] = { ...cell, material: MaterialType.Stone };
-    state.dirtyMaterialIndices.add(index);
-  }
-  for (const index of toWater) {
-    const cell = state.materialGrid[index];
-    if (cell.expiresAtTick === null || cell.material !== MaterialType.Ice) continue;
-    state.materialGrid[index] = { ...cell, material: MaterialType.Water };
-    state.dirtyMaterialIndices.add(index);
-  }
-  for (const index of toSteam) {
-    const cell = state.materialGrid[index];
-    if (cell.expiresAtTick === null) continue;
-    if (cell.material !== MaterialType.Fire && cell.material !== MaterialType.Water) continue;
-    state.materialGrid[index] = { ...cell, material: MaterialType.Steam };
-    state.dirtyMaterialIndices.add(index);
   }
 }
 
@@ -723,6 +807,12 @@ function clearFighterTransientState(fighter: FighterState): void {
   fighter.blockedTicks = 0;
   fighter.hitstunTicks = 0;
   fighter.blockTicks = 0;
+  fighter.shieldStunTicks = 0;
+  fighter.shieldReleaseTicks = 0;
+  fighter.landingLagTicks = 0;
+  fighter.jumpHeldTicks = 0;
+  fighter.airRecoveryUsed = false;
+  fighter.inputBuffer = null;
   fighter.slowTicks = 0;
   fighter.activeMove = null;
   fighter.moveCooldowns = {};
@@ -793,6 +883,10 @@ function finishMatch(state: BattleState, winner: FighterId | null, reason: Match
   state.result = result;
   state.matchPhase = 'finished';
   state.activeHitboxes = [];
+  state.fighters.p1.activeMove = null;
+  state.fighters.cpu.activeMove = null;
+  state.fighters.p1.inputBuffer = null;
+  state.fighters.cpu.inputBuffer = null;
   pushEvent(state, 'match-end', `${winner ?? 'nobody'} won by ${reason}`);
 }
 
@@ -817,7 +911,7 @@ function computeCpuActions(state: BattleState): ActionState {
     const retreatDirection = cpu.x >= player.x ? 1 : -1;
     if (retreatDirection > 0) actions.right = true;
     else actions.left = true;
-    actions.block = true;
+    setShieldAction(actions);
     if (cpu.onGround) actions.up = true;
     if ((cpu.moveCooldowns.dash ?? 0) === 0 && Math.abs(cpu.x - player.x) < 240) actions.dash = true;
     setCpuDecisionTelemetry(state, {
@@ -861,7 +955,7 @@ function computeCpuActions(state: BattleState): ActionState {
     hitbox.ownerId === 'p1' && rectsOverlap(expandRect(hitbox.rect, 18), fighterRect(cpu)),
   );
   if (incoming) {
-    actions.block = true;
+    setShieldAction(actions);
     if (cpu.onGround && Math.abs(cpu.x - player.x) < 95) actions.up = true;
     setCpuDecisionTelemetry(state, {
       mode: 'incoming-block',
@@ -882,7 +976,7 @@ function computeCpuActions(state: BattleState): ActionState {
     actions.dash = true;
     if (dx > 0) actions.left = true;
     else actions.right = true;
-    if (cpu.blockedTicks > 120) actions.basic = true;
+    if (cpu.blockedTicks > 120) actions.attack = true;
     setCpuDecisionTelemetry(state, {
       mode: 'terrain-unstick',
       reason: `blocked ${cpu.blockedTicks} ticks`,
@@ -903,19 +997,19 @@ function computeCpuActions(state: BattleState): ActionState {
   } else if (!hasBoostLaneIntent && absDx < temperament.spacingDistance) {
     if (dx > 0) actions.left = true;
     else actions.right = true;
-    actions.block = state.tick % 80 < 18;
+    if (state.tick % 80 < 18) setShieldAction(actions);
     mode = 'space';
     reason = temperament.spacingReason;
   }
 
   if (absDx < temperament.basicRange && Math.abs(player.y - cpu.y) < temperament.basicVerticalRange) {
-    actions.basic = true;
+    actions.attack = true;
     mode = 'engage-basic';
     reason = `${cpu.specId} basic punish window`;
   } else if (absDx < temperament.specialRange) {
     const choice = chooseCpuSpecialCommand(state, cpu, absDx, dy);
     if (choice) {
-      actions[choice.command] = true;
+      applyCpuSpecialAction(actions, choice.command);
       mode = 'engage-special';
       reason = `special pressure: ${choice.reason}`;
     } else if (mode === 'neutral') {
@@ -939,7 +1033,7 @@ function chooseCpuSpecialCommand(
   cpu: FighterState,
   absDx: number,
   dy: number,
-): { command: 'special1' | 'special2' | 'special3'; reason: string } | null {
+): { command: InputCommand; reason: string } | null {
   const candidates = rankedCpuSpecialChoices(state, cpu, absDx, dy);
   for (const candidate of candidates) {
     if (!canActivateCpuCommand(cpu, candidate.command)) continue;
@@ -953,21 +1047,21 @@ function rankedCpuSpecialChoices(
   cpu: FighterState,
   absDx: number,
   dy: number,
-): Array<{ command: 'special1' | 'special2' | 'special3'; reason: string }> {
-  const choices: Array<{ command: 'special1' | 'special2' | 'special3'; reason: string }> = [];
-  const pushChoice = (command: 'special1' | 'special2' | 'special3', reason: string): void => {
+): Array<{ command: InputCommand; reason: string }> {
+  const choices: Array<{ command: InputCommand; reason: string }> = [];
+  const pushChoice = (command: InputCommand, reason: string): void => {
     if (choices.some((choice) => choice.command === command)) return;
     choices.push({ command, reason });
   };
 
   switch (cpu.specId) {
     case 'water': {
-      if (dy < -30) pushChoice('special3', 'water anti-air steam burst');
-      if (dy > 28 && absDx < 150) pushChoice('special2', 'water low trap ice snare');
-      if (absDx > 155) pushChoice('special1', 'water long-range lash');
-      pushChoice('special1', 'water mid-range pressure');
-      pushChoice('special2', 'water fallback ice snare');
-      pushChoice('special3', 'water fallback steam burst');
+      if (dy < -30) pushChoice('special-up', 'water anti-air steam lift');
+      if (dy > 28 && absDx < 150) pushChoice('special-down', 'water low trap ice snare');
+      if (absDx > 155) pushChoice('special-neutral', 'water long-range lash');
+      pushChoice('special-neutral', 'water mid-range pressure');
+      pushChoice('special-down', 'water fallback ice snare');
+      pushChoice('special-side', 'water fallback surf dash');
       break;
     }
     case 'earth': {
@@ -999,7 +1093,7 @@ function rankedCpuSpecialChoices(
   return choices;
 }
 
-function canActivateCpuCommand(fighter: FighterState, command: 'special1' | 'special2' | 'special3'): boolean {
+function canActivateCpuCommand(fighter: FighterState, command: InputCommand): boolean {
   const move = moveForCommand(fighter.specId, command);
   const cost = fighter.boosted ? move.boostedMeterCost : move.meterCost;
   if (fighter.meter < cost) return false;
@@ -1029,6 +1123,44 @@ function setCpuDecisionTelemetry(
   decision: Omit<CpuDecisionTelemetry, 'tick'>,
 ): void {
   state.runtimeStats.lastCpuDecision = { tick: state.tick, ...decision };
+}
+
+function setShieldAction(actions: ActionState): void {
+  actions.shield = true;
+  actions.block = true;
+}
+
+function applyCpuSpecialAction(actions: ActionState, command: InputCommand): void {
+  if (command === 'special1') {
+    actions.special1 = true;
+    return;
+  }
+  if (command === 'special2') {
+    actions.special2 = true;
+    return;
+  }
+  if (command === 'special3') {
+    actions.special3 = true;
+    return;
+  }
+
+  actions.special = true;
+  if (command === 'special-up') actions.up = true;
+  if (command === 'special-down') actions.down = true;
+  if (command === 'special-side') actions.left = true;
+}
+
+function recordCombatImpact(state: BattleState, impact: CombatImpact): void {
+  const previous = state.runtimeStats.lastCombatImpact;
+  if (
+    previous?.tick === impact.tick &&
+    previous.impactKind !== 'hazard' &&
+    impact.impactKind === 'hazard'
+  ) {
+    return;
+  }
+  state.runtimeStats.combatImpactSeq++;
+  state.runtimeStats.lastCombatImpact = impact;
 }
 
 function scoreCpuBoostLane(

@@ -135,15 +135,16 @@
           <span>W/Space</span><span>Jump</span>
           <span>S</span><span>Fast fall</span>
           <span>Shift</span><span>Dash</span>
-          <span>J</span><span>Strike</span>
-          <span>K</span><span>Block</span>
-          <span>U/I/O</span><span>Bend</span>
+          <span>J + Dir</span><span>Attack</span>
+          <span>U + Dir</span><span>Special</span>
+          <span>K</span><span>Shield</span>
+          <span>L</span><span>Grab</span>
           <span>`</span><span>Debug</span>
         </div>
       </aside>
       <div id="touch-hint" hidden>
         <span class="touch-hint__title">Touch quick start</span>
-        <span class="touch-hint__text">Hold Left or Right to move. Tap Strike to attack. Use U / I / O to bend nearby materials.</span>
+        <span class="touch-hint__text">Hold a direction with Attack or Special for platform-fighter moves. Shield blocks strikes; Grab beats shield.</span>
         <button id="touch-hint-dismiss" type="button">Hide</button>
       </div>
       <div id="touch-controls" hidden>
@@ -155,11 +156,10 @@
         </div>
         <div class="touch-cluster touch-cluster--combat" role="group" aria-label="Combat">
           <button type="button" data-touch-action="dash">Dash</button>
-          <button type="button" data-touch-action="block">Block</button>
-          <button type="button" data-touch-action="basic">Strike</button>
-          <button type="button" data-touch-action="special1">U</button>
-          <button type="button" data-touch-action="special2">I</button>
-          <button type="button" data-touch-action="special3">O</button>
+          <button type="button" data-touch-action="shield">Shield</button>
+          <button type="button" data-touch-action="attack">Attack</button>
+          <button type="button" data-touch-action="special">Special</button>
+          <button type="button" data-touch-action="grab">Grab</button>
         </div>
       </div>
       <pre id="debug-overlay" hidden></pre>

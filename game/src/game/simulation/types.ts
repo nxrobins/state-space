@@ -2,11 +2,43 @@ import type { MaterialType } from './constants';
 
 export type FighterId = 'p1' | 'cpu';
 export type FighterSpecId = 'water' | 'earth' | 'fire';
-export type InputCommand = 'basic' | 'special1' | 'special2' | 'special3';
+export type MoveDirection = 'neutral' | 'side' | 'up' | 'down' | 'forward' | 'back';
+export type MoveCategory = 'attack' | 'special' | 'grab' | 'throw';
+export type HitType = 'strike' | 'grab';
+export type InputCommand =
+  | 'basic'
+  | 'special1'
+  | 'special2'
+  | 'special3'
+  | 'attack-neutral'
+  | 'attack-side'
+  | 'attack-up'
+  | 'attack-down'
+  | 'air-neutral'
+  | 'air-forward'
+  | 'air-back'
+  | 'air-up'
+  | 'air-down'
+  | 'special-neutral'
+  | 'special-side'
+  | 'special-up'
+  | 'special-down'
+  | 'grab-neutral'
+  | 'grab-forward'
+  | 'grab-back'
+  | 'grab-up'
+  | 'grab-down';
 export type MatchPhase = 'running' | 'suddenDeath' | 'finished';
 export type MatchEndReason = 'stocks' | 'timer' | 'sudden-death';
 export type BoostStat = 'size' | 'duration' | 'knockback';
-export type MoveDenialReason = 'finished' | 'active-move' | 'hitstun' | 'cooldown' | 'meter';
+export type MoveDenialReason = 'finished' | 'active-move' | 'hitstun' | 'shield-stun' | 'landing-lag' | 'cooldown' | 'meter' | 'recovery';
+export type MaterialCellProvenance = 'temporary' | 'permanent' | 'snapshot';
+export type MaterialComboAdjacency = 'orthogonal';
+export type MaterialComboOutput = MaterialType | 'preserve' | 'refresh';
+export type CombatImpactKind = 'hit' | 'blocked' | 'hazard';
+export type MoveFeelWeight = 'light' | 'medium' | 'heavy';
+export type CombatSoundCue = 'hit-light' | 'hit-medium' | 'hit-heavy' | 'block' | 'startup-heavy' | 'ring-danger' | 'hazard';
+export type TelegraphStyle = 'light' | 'medium' | 'heavy';
 
 export interface ActionState {
   left: boolean;
@@ -15,21 +47,47 @@ export interface ActionState {
   down: boolean;
   dash: boolean;
   block: boolean;
+  attack: boolean;
+  special: boolean;
+  shield: boolean;
+  grab: boolean;
   basic: boolean;
   special1: boolean;
   special2: boolean;
   special3: boolean;
 }
 
+export interface BufferedInput {
+  command: InputCommand;
+  requestedTick: number;
+  expiresAtTick: number;
+  direction: MoveDirection;
+  facing: 1 | -1;
+  airborne: boolean;
+}
+
 export interface MaterialCell {
   material: MaterialType;
   expiresAtTick: number | null;
   ownerId?: FighterId;
+  provenance?: MaterialCellProvenance;
+  createdAtTick?: number;
 }
 
 export interface TemporaryCellRef {
   index: number;
   expiresAtTick: number;
+}
+
+export interface MaterialComboRule {
+  id: string;
+  inputs: readonly [readonly MaterialType[], readonly MaterialType[]];
+  outputs: readonly [MaterialComboOutput, MaterialComboOutput];
+  priority: number;
+  adjacency: MaterialComboAdjacency;
+  allowedProvenance: readonly MaterialCellProvenance[];
+  maxRefreshTicks?: number;
+  eventMessage?: string;
 }
 
 export interface RuntimeStats {
@@ -49,10 +107,25 @@ export interface RuntimeStats {
 
 export interface CombatImpact {
   tick: number;
-  sourceId: FighterId;
+  sourceId: FighterId | null;
   targetId: FighterId;
+  moveId?: string;
+  impactKind: CombatImpactKind;
   damage: number;
   blocked: boolean;
+  boosted: boolean;
+  contactX: number;
+  contactY: number;
+}
+
+export interface MoveFeelSpec {
+  weight: MoveFeelWeight;
+  hitstopTicks: number;
+  blockedHitstopTicks: number;
+  soundCue: CombatSoundCue;
+  telegraphStyle: TelegraphStyle;
+  shakeOnHit: boolean;
+  startupCue?: CombatSoundCue;
 }
 
 export interface CpuLaneTelemetry {
@@ -110,6 +183,14 @@ export interface MoveSpec {
   id: string;
   name: string;
   command: InputCommand;
+  category?: MoveCategory;
+  direction?: MoveDirection;
+  airborne?: boolean;
+  hitType?: HitType;
+  animationId?: string;
+  landingLagTicks?: number;
+  bufferable?: boolean;
+  oncePerAirtime?: boolean;
   meterCost: number;
   boostedMeterCost: number;
   cooldownTicks: number;
@@ -142,12 +223,18 @@ export interface ActiveMove {
   startedTick: number;
   boosted: boolean;
   spawned: boolean;
+  command?: InputCommand;
+  direction?: MoveDirection;
+  facing?: 1 | -1;
+  airborne?: boolean;
 }
 
 export interface ActiveHitbox {
   id: number;
   ownerId: FighterId;
   moveId: string;
+  boosted: boolean;
+  hitType: HitType;
   rect: Rect;
   damage: number;
   knockbackX: number;
@@ -195,6 +282,13 @@ export interface FighterState {
   invulnTicks: number;
   hitstunTicks: number;
   blockTicks: number;
+  shieldPoints: number;
+  shieldStunTicks: number;
+  shieldReleaseTicks: number;
+  landingLagTicks: number;
+  jumpHeldTicks: number;
+  airRecoveryUsed: boolean;
+  inputBuffer: BufferedInput | null;
   slowTicks: number;
   activeMove: ActiveMove | null;
   moveCooldowns: Record<string, number>;

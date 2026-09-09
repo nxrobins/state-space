@@ -40,6 +40,10 @@ pressure, momentum, elasticity or structural rotation. GPU backends currently us
 host structural planning and full-state readback each tick. The capability guide
 and checkpoint reports state the measured hardware and scale limits.
 
+## License
+
+State Space is released as open source under the MIT License. See [LICENSE](LICENSE).
+
 ## Verify the release
 
 Install the integration clients' locked dependencies:

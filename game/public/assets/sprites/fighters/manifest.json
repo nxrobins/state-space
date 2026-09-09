@@ -52,6 +52,86 @@
       "frames": 6,
       "fps": 8,
       "loop": false
+    },
+    "fall": {
+      "frames": 4,
+      "fps": 10,
+      "loop": false
+    },
+    "shield": {
+      "frames": 4,
+      "fps": 10,
+      "loop": true
+    },
+    "grab": {
+      "frames": 6,
+      "fps": 13,
+      "loop": false
+    },
+    "attack-neutral": {
+      "frames": 6,
+      "fps": 16,
+      "loop": false
+    },
+    "attack-side": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "attack-up": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "attack-down": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "air-neutral": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "air-forward": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "air-back": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "air-up": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "air-down": {
+      "frames": 6,
+      "fps": 15,
+      "loop": false
+    },
+    "special-neutral": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "special-side": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "special-up": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
+    },
+    "special-down": {
+      "frames": 8,
+      "fps": 14,
+      "loop": false
     }
   },
   "fighters": {
@@ -66,7 +146,23 @@
         "special1": "/assets/sprites/fighters/water/special1.png",
         "special2": "/assets/sprites/fighters/water/special2.png",
         "special3": "/assets/sprites/fighters/water/special3.png",
-        "ko": "/assets/sprites/fighters/water/ko.png"
+        "ko": "/assets/sprites/fighters/water/ko.png",
+        "fall": "/assets/sprites/fighters/water/fall.png",
+        "shield": "/assets/sprites/fighters/water/shield.png",
+        "grab": "/assets/sprites/fighters/water/grab.png",
+        "attack-neutral": "/assets/sprites/fighters/water/attack-neutral.png",
+        "attack-side": "/assets/sprites/fighters/water/attack-side.png",
+        "attack-up": "/assets/sprites/fighters/water/attack-up.png",
+        "attack-down": "/assets/sprites/fighters/water/attack-down.png",
+        "air-neutral": "/assets/sprites/fighters/water/air-neutral.png",
+        "air-forward": "/assets/sprites/fighters/water/air-forward.png",
+        "air-back": "/assets/sprites/fighters/water/air-back.png",
+        "air-up": "/assets/sprites/fighters/water/air-up.png",
+        "air-down": "/assets/sprites/fighters/water/air-down.png",
+        "special-neutral": "/assets/sprites/fighters/water/special-neutral.png",
+        "special-side": "/assets/sprites/fighters/water/special-side.png",
+        "special-up": "/assets/sprites/fighters/water/special-up.png",
+        "special-down": "/assets/sprites/fighters/water/special-down.png"
       }
     },
     "earth": {

@@ -3,6 +3,7 @@ import { MaterialType, RESPAWN_INVULN_TICKS } from './constants';
 import { FIGHTER_SPECS } from './fighters';
 import { clearRectAroundWorldPoint, consumeDirtyMaterialIndices, getCell, gridIndex, setTemporaryRect, tickMaterialLifetimes } from './grid';
 import { applyDamage, createBattleState, EMPTY_ACTIONS, fighterHasMaterialBoost, stepBattle, tryStartMove } from './battle';
+import { moveForCommand } from './moves';
 import { appendReplayFrame, packActions, replayBattle, unpackActions } from '../replay';
 import type { ActionState, BattleState, FighterId, InputCommand, ReplayLog } from './types';
 
@@ -126,7 +127,7 @@ describe('battle simulation contracts', () => {
     expect(state.fighters.cpu.health).toBe(1);
   });
 
-  it('applies material reaction precedence across overlapping fighter coverage', () => {
+  it('applies material combo precedence before fighter material effects', () => {
     const state = createBattleState('water');
     const fighter = state.fighters.p1;
     fighter.invulnTicks = 0;
@@ -140,7 +141,7 @@ describe('battle simulation contracts', () => {
 
     expect(fighter.health).toBe(100);
     expect(getCell(state.materialGrid, cx, cy).material).toBe(MaterialType.Stone);
-    expect(getCell(state.materialGrid, cx + 1, cy).material).toBe(MaterialType.Water);
+    expect(getCell(state.materialGrid, cx + 1, cy).material).toBe(MaterialType.Ice);
     expect(getCell(state.materialGrid, cx - 1, cy).material).toBe(MaterialType.Steam);
   });
 
@@ -228,10 +229,14 @@ describe('battle simulation contracts', () => {
 });
 
 describe('move contracts', () => {
-  const commands: InputCommand[] = ['special1', 'special2', 'special3'];
+  const commandsBySpec: Record<keyof typeof FIGHTER_SPECS, InputCommand[]> = {
+    water: ['special-neutral', 'special-side', 'special-down'],
+    earth: ['special1', 'special2', 'special3'],
+    fire: ['special1', 'special2', 'special3'],
+  };
 
   for (const specId of Object.keys(FIGHTER_SPECS) as Array<keyof typeof FIGHTER_SPECS>) {
-    for (const command of commands) {
+    for (const command of commandsBySpec[specId]) {
       it(`${specId} ${command} fails without meter and succeeds with bounded materials`, () => {
         const state = createBattleState(specId);
         const fighter = state.fighters.p1;
@@ -262,10 +267,10 @@ describe('move contracts', () => {
     boosted.fighters.p1.meter = 15;
     boosted.fighters.p1.boosted = true;
 
-    expect(tryStartMove(normal, normal.fighters.p1, 'special1').ok).toBe(true);
-    expect(tryStartMove(boosted, boosted.fighters.p1, 'special1').ok).toBe(true);
+    expect(tryStartMove(normal, normal.fighters.p1, 'special-neutral').ok).toBe(true);
+    expect(tryStartMove(boosted, boosted.fighters.p1, 'special-neutral').ok).toBe(true);
 
-    const startup = FIGHTER_SPECS.water.moves.find((move) => move.command === 'special1')!.startupTicks;
+    const startup = FIGHTER_SPECS.water.moves.find((move) => move.command === 'special-neutral')!.startupTicks;
     for (let i = 0; i <= startup; i++) {
       stepBattle(normal, actions(), actions());
       stepBattle(boosted, actions(), actions());
@@ -274,6 +279,59 @@ describe('move contracts', () => {
     expect(normal.fighters.p1.meter).toBeLessThan(1);
     expect(boosted.fighters.p1.meter).toBeLessThan(1);
     expect(boosted.temporaryCellCount).toBeGreaterThan(normal.temporaryCellCount);
+  });
+
+  it('gives Water platform commands distinct ids, timings, hitboxes, knockback, and animations', () => {
+    const commands: InputCommand[] = [
+      'attack-neutral',
+      'attack-side',
+      'attack-up',
+      'attack-down',
+      'air-neutral',
+      'air-forward',
+      'air-back',
+      'air-up',
+      'air-down',
+      'special-neutral',
+      'special-side',
+      'special-up',
+      'special-down',
+      'grab-neutral',
+      'grab-forward',
+      'grab-back',
+      'grab-up',
+      'grab-down',
+    ];
+    const moves = commands.map((command) => FIGHTER_SPECS.water.moves.find((move) => move.command === command));
+
+    expect(moves.every(Boolean)).toBe(true);
+    expect(new Set(moves.map((move) => move!.id)).size).toBe(commands.length);
+    expect(new Set(moves.map((move) => move!.animationId)).size).toBeGreaterThan(8);
+    expect(FIGHTER_SPECS.water.moves.find((move) => move.command === 'attack-side')).toMatchObject({
+      hitbox: { width: 66 },
+      knockbackX: 7.2,
+      animationId: 'attack-side',
+    });
+    expect(FIGHTER_SPECS.water.moves.find((move) => move.command === 'air-back')).toMatchObject({
+      knockbackX: -8.8,
+      airborne: true,
+      landingLagTicks: 11,
+      animationId: 'air-back',
+    });
+    expect(FIGHTER_SPECS.water.moves.find((move) => move.command === 'special-up')).toMatchObject({
+      id: 'water-steam-lift',
+      oncePerAirtime: true,
+      selfImpulseY: -12.8,
+      meterCost: 0,
+    });
+  });
+
+  it('keeps new directional special fallback stable for legacy Earth and Fire catalogs', () => {
+    expect(moveForCommand('earth', 'special-neutral').id).toBe('earth-stone-fist');
+    expect(moveForCommand('earth', 'special-down').id).toBe('earth-sand-wave');
+    expect(moveForCommand('earth', 'special-up').id).toBe('earth-wall-rise');
+    expect(moveForCommand('fire', 'special-side').id).toBe('fire-blast-dash');
+    expect(moveForCommand('fire', 'special-down').id).toBe('fire-lava-break');
   });
 });
 
@@ -367,15 +425,20 @@ describe('operations hardening contracts', () => {
     expect(tryStartMove(finished, finished.fighters.p1, 'basic').deniedReason).toBe('finished');
   });
 
-  it('records combat impact telemetry for fighter-owned hits only', () => {
+  it('records combat impact telemetry for hazards and fighter-owned hits', () => {
     const hazardOnly = createBattleState('water');
     const hazardCpu = hazardOnly.fighters.cpu;
     const hx = Math.floor(hazardCpu.x / 8);
     const hy = Math.floor(hazardCpu.y / 8);
     setTemporaryRect(hazardOnly, 'p1', hx - 1, hy - 2, 3, 3, MaterialType.Lava, 120);
     stepBattle(hazardOnly, actions(), actions());
-    expect(hazardOnly.runtimeStats.combatImpactSeq).toBe(0);
-    expect(hazardOnly.runtimeStats.lastCombatImpact).toBeNull();
+    expect(hazardOnly.runtimeStats.combatImpactSeq).toBeGreaterThan(0);
+    expect(hazardOnly.runtimeStats.lastCombatImpact).toMatchObject({
+      sourceId: null,
+      targetId: 'cpu',
+      impactKind: 'hazard',
+      blocked: false,
+    });
 
     const combat = createBattleState('earth');
     const p1 = combat.fighters.p1;
@@ -391,8 +454,12 @@ describe('operations hardening contracts', () => {
     expect(combat.runtimeStats.lastCombatImpact).toMatchObject({
       sourceId: 'p1',
       targetId: 'cpu',
+      moveId: 'earth-basic',
+      impactKind: 'hit',
       blocked: false,
     });
+    expect(combat.runtimeStats.lastCombatImpact?.contactX).toBeGreaterThan(p1.x);
+    expect(combat.runtimeStats.lastCombatImpact?.contactY).toBeGreaterThan(0);
   });
 
   it('flags blocked combat impacts in runtime telemetry', () => {
@@ -408,7 +475,155 @@ describe('operations hardening contracts', () => {
     for (let i = 0; i < 8; i++) stepBattle(state, actions(), actions());
 
     expect(state.runtimeStats.lastCombatImpact?.blocked).toBe(true);
+    expect(state.runtimeStats.lastCombatImpact?.impactKind).toBe('blocked');
     expect(state.runtimeStats.lastCombatImpact?.damage).toBeLessThan(5);
+    expect(state.eventLog.some((event) => event.type === 'blocked-hit')).toBe(true);
+  });
+
+  it('keeps hit and block feedback from being overwritten by same-tick hazards', () => {
+    const state = createBattleState('earth');
+    const p1 = state.fighters.p1;
+    const cpu = state.fighters.cpu;
+    cpu.x = p1.x + 48;
+    cpu.y = p1.y;
+    const cx = Math.floor(cpu.x / 8);
+    const cy = Math.floor(cpu.y / 8);
+    setTemporaryRect(state, 'p1', cx - 1, cy - 2, 3, 3, MaterialType.Lava, 120);
+    p1.meter = 0;
+    expect(tryStartMove(state, p1, 'basic').ok).toBe(true);
+
+    let sawHit = false;
+    for (let i = 0; i < 8; i++) {
+      stepBattle(state, actions(), actions());
+      const impact = state.runtimeStats.lastCombatImpact;
+      if (impact?.moveId === 'earth-basic') {
+        sawHit = true;
+        expect(impact.impactKind).toBe('hit');
+        break;
+      }
+    }
+
+    expect(sawHit).toBe(true);
+  });
+
+  it('keeps active moves committed against dash, jump, block, and new attack inputs', () => {
+    const state = createBattleState('fire');
+    const p1 = state.fighters.p1;
+    p1.onGround = true;
+    p1.meter = 25;
+    expect(tryStartMove(state, p1, 'special1').ok).toBe(true);
+
+    stepBattle(state, actions({ right: true, up: true, dash: true, block: true, basic: true }), actions());
+
+    expect(p1.activeMove?.moveId).toBe('fire-flame-shot');
+    expect(p1.moveCooldowns.dash ?? 0).toBe(0);
+    expect(p1.blockTicks).toBe(0);
+    expect(p1.vy).toBeGreaterThan(-1);
+  });
+
+  it('dampens special movement more than basic movement during active moves', () => {
+    const basic = createBattleState('water');
+    const special = createBattleState('water');
+    basic.fighters.p1.onGround = true;
+    special.fighters.p1.onGround = true;
+    special.fighters.p1.meter = 25;
+
+    expect(tryStartMove(basic, basic.fighters.p1, 'basic').ok).toBe(true);
+    expect(tryStartMove(special, special.fighters.p1, 'special1').ok).toBe(true);
+
+    stepBattle(basic, actions({ right: true }), actions());
+    stepBattle(special, actions({ right: true }), actions());
+
+    expect(basic.fighters.p1.vx).toBeGreaterThan(special.fighters.p1.vx);
+  });
+
+  it('lets hitstun and match finish interrupt active moves', () => {
+    const hitstun = createBattleState('water');
+    hitstun.fighters.p1.activeMove = { moveId: 'water-lash', startedTick: 0, boosted: false, spawned: false };
+    expect(applyDamage(hitstun, hitstun.fighters.p1, 4, 0, -1, 'cpu')).toBe(true);
+    expect(hitstun.fighters.p1.activeMove).toBeNull();
+
+    const finished = createBattleState('earth');
+    finished.fighters.p1.stocks = 1;
+    finished.fighters.p1.health = 0;
+    finished.fighters.p1.activeMove = { moveId: 'earth-stone-fist', startedTick: 0, boosted: false, spawned: false };
+    stepBattle(finished, actions(), actions());
+
+    expect(finished.result).not.toBeNull();
+    expect(finished.fighters.p1.activeMove).toBeNull();
+  });
+
+  it('snapshots command direction and facing at move start', () => {
+    const state = createBattleState('water');
+    const p1 = state.fighters.p1;
+    p1.onGround = true;
+    p1.facing = 1;
+
+    stepBattle(state, actions({ attack: true, basic: true, right: true }), actions());
+    expect(p1.activeMove).toMatchObject({
+      moveId: 'water-attack-side',
+      command: 'attack-side',
+      direction: 'forward',
+      facing: 1,
+    });
+
+    stepBattle(state, actions({ left: true }), actions());
+    expect(p1.activeMove?.facing).toBe(1);
+    expect(p1.facing).toBe(1);
+  });
+
+  it('makes grab bypass shield instead of producing a blocked strike', () => {
+    const state = createBattleState('water');
+    const p1 = state.fighters.p1;
+    const cpu = state.fighters.cpu;
+    cpu.x = p1.x + 34;
+    cpu.y = p1.y;
+    cpu.blockTicks = 20;
+
+    expect(tryStartMove(state, p1, 'grab-forward').ok).toBe(true);
+    for (let i = 0; i < 8; i++) stepBattle(state, actions(), actions());
+
+    expect(state.runtimeStats.lastCombatImpact).toMatchObject({
+      moveId: 'water-grab-forward',
+      impactKind: 'hit',
+      blocked: false,
+    });
+    expect(cpu.health).toBeLessThan(100);
+  });
+
+  it('applies short-hop, fast-fall, and once-per-airtime up-special recovery reset rules', () => {
+    const shortHop = createBattleState('water');
+    const fullHop = createBattleState('water');
+    shortHop.fighters.p1.onGround = true;
+    fullHop.fighters.p1.onGround = true;
+    shortHop.fighters.p1.x = 640;
+    fullHop.fighters.p1.x = 640;
+    stepBattle(shortHop, actions({ up: true }), actions());
+    stepBattle(fullHop, actions({ up: true }), actions());
+    stepBattle(shortHop, actions(), actions());
+    stepBattle(fullHop, actions({ up: true }), actions());
+
+    expect(shortHop.fighters.p1.vy).toBeGreaterThan(fullHop.fighters.p1.vy);
+
+    const fastFall = createBattleState('water');
+    fastFall.fighters.p1.onGround = false;
+    fastFall.fighters.p1.vy = 3;
+    stepBattle(fastFall, actions({ down: true }), actions());
+    expect(fastFall.fighters.p1.vy).toBeGreaterThan(10);
+
+    const recovery = createBattleState('water');
+    const p1 = recovery.fighters.p1;
+    p1.onGround = false;
+    expect(tryStartMove(recovery, p1, 'special-up').ok).toBe(true);
+    p1.activeMove = null;
+    p1.moveCooldowns['water-steam-lift'] = 0;
+    expect(tryStartMove(recovery, p1, 'special-up').deniedReason).toBe('recovery');
+
+    p1.y = 640;
+    p1.vy = 8;
+    stepBattle(recovery, actions(), actions());
+    expect(p1.onGround).toBe(true);
+    expect(p1.airRecoveryUsed).toBe(false);
   });
 });
 
@@ -571,7 +786,7 @@ describe('cpu contracts', () => {
 
     stepBattle(state, actions());
 
-    expect(cpu.activeMove?.moveId).toBe('water-steam-burst');
+    expect(cpu.activeMove?.moveId).toBe('water-steam-lift');
     expect(state.runtimeStats.lastCpuDecision?.reason).toContain('water anti-air');
   });
 
@@ -644,7 +859,7 @@ describe('cpu contracts', () => {
     const cx = Math.floor(cpu.x / 8);
     const cy = Math.floor(cpu.y / 8);
     setTemporaryRect(state, 'p1', cx - 2, cy - 1, 4, 3, MaterialType.Water, 120);
-    cpu.moveCooldowns['water-steam-burst'] = 20;
+    cpu.moveCooldowns['water-steam-lift'] = 20;
     p1.x = cpu.x - 130;
     p1.y = cpu.y - 90;
 

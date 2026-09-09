@@ -18,10 +18,14 @@ const TOUCH_ACTION_KEYS = [
   'down',
   'dash',
   'block',
+  'shield',
   'basic',
+  'attack',
   'special1',
   'special2',
   'special3',
+  'special',
+  'grab',
 ] as const;
 
 type TouchActionKey = (typeof TOUCH_ACTION_KEYS)[number];
@@ -254,7 +258,7 @@ function updateFighterHud(id: FighterId, fighter: FighterState, opponent: Fighte
   setText(`${prefix}-style`, spec.styleName);
   setImage(`${prefix}-portrait`, spec.portraitUrl);
   setText(`${prefix}-stocks`, `Stocks ${fighter.stocks}`);
-  setText(`${prefix}-boost`, fighter.boosted ? 'Boost ready' : 'No boost');
+  setText(`${prefix}-boost`, fighter.boosted ? 'Boost ready' : `Shield ${Math.ceil(fighter.shieldPoints)}`);
   setFighterState(`${prefix}-state`, fighter, opponent, tick);
   setBar(`${prefix}-health`, fighter.health, isRecentlyDamaged(fighter, tick));
   setBar(`${prefix}-meter`, fighter.meter);
@@ -343,7 +347,9 @@ export function isRecentlyDamaged(fighter: FighterState, tick: number, windowTic
 export function fighterStateSummary(fighter: FighterState, tick = 0): FighterStateSummary {
   if (fighter.invulnTicks > 0) return { label: `Invuln ${fighter.invulnTicks}`, tone: 'boost' };
   if (fighter.hitstunTicks > 0) return { label: `Hitstun ${fighter.hitstunTicks}`, tone: 'danger' };
-  if (fighter.blockTicks > 0) return { label: 'Blocking', tone: 'warning' };
+  if (fighter.shieldStunTicks > 0) return { label: `Shield break ${fighter.shieldStunTicks}`, tone: 'danger' };
+  if (fighter.landingLagTicks > 0) return { label: `Landing ${fighter.landingLagTicks}`, tone: 'warning' };
+  if (fighter.blockTicks > 0) return { label: 'Shielding', tone: 'warning' };
   const moveSummary = activeMoveSummary(fighter, tick);
   if (moveSummary) return moveSummary;
   if (fighter.slowTicks > 0) return { label: 'Slowed', tone: 'warning' };

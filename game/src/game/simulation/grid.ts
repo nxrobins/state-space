@@ -90,7 +90,7 @@ export function setPermanentRect(
   for (let cy = y; cy < y + height; cy++) {
     for (let cx = x; cx < x + width; cx++) {
       if (!inGrid(cx, cy)) continue;
-      grid[gridIndex(cx, cy)] = { material, expiresAtTick: null };
+      grid[gridIndex(cx, cy)] = { material, expiresAtTick: null, provenance: 'permanent' };
     }
   }
 }
@@ -117,6 +117,7 @@ export function setTemporaryRect(
   lifetimeTicks: number,
 ): void {
   const expiresAtTick = state.tick + lifetimeTicks;
+  let refsNeedSort = false;
   for (let cy = y; cy < y + height; cy++) {
     for (let cx = x; cx < x + width; cx++) {
       if (!inGrid(cx, cy)) continue;
@@ -126,12 +127,37 @@ export function setTemporaryRect(
       if (!isTemporaryCell(existing)) {
         state.temporaryCellCount++;
       }
-      state.materialGrid[index] = { material, expiresAtTick, ownerId };
-      state.temporaryCells.push({ index, expiresAtTick });
+      state.materialGrid[index] = { material, expiresAtTick, ownerId, provenance: 'temporary', createdAtTick: state.tick };
+      refsNeedSort = appendTemporaryRef(state, { index, expiresAtTick }) || refsNeedSort;
       markDirty(state, index);
     }
   }
+  if (refsNeedSort) sortActiveTemporaryRefs(state);
   enforceTemporaryCellCap(state);
+}
+
+export function refreshTemporaryCellLifetime(
+  state: BattleState,
+  index: number,
+  maxLifetimeTicks: number,
+): boolean {
+  const cell = state.materialGrid[index];
+  if (!isTemporaryCell(cell) || cell.expiresAtTick === null) return false;
+
+  const createdAtTick = cell.createdAtTick ?? state.tick;
+  const refreshedExpiresAtTick = Math.max(cell.expiresAtTick, createdAtTick + maxLifetimeTicks);
+  if (refreshedExpiresAtTick === cell.expiresAtTick) return false;
+
+  state.materialGrid[index] = {
+    ...cell,
+    expiresAtTick: refreshedExpiresAtTick,
+    provenance: 'temporary',
+    createdAtTick,
+  };
+  const refsNeedSort = appendTemporaryRef(state, { index, expiresAtTick: refreshedExpiresAtTick });
+  if (refsNeedSort) sortActiveTemporaryRefs(state);
+  markDirty(state, index);
+  return true;
 }
 
 export function clearRectAroundWorldPoint(
@@ -186,10 +212,25 @@ function enforceTemporaryCellCap(state: BattleState): void {
   compactTemporaryRefs(state);
 }
 
+function appendTemporaryRef(state: BattleState, ref: { index: number; expiresAtTick: number }): boolean {
+  const last = state.temporaryCells[state.temporaryCells.length - 1];
+  const refsNeedSort = state.temporaryCells.length > state.temporaryCellHead && last !== undefined && ref.expiresAtTick < last.expiresAtTick;
+  state.temporaryCells.push(ref);
+  return refsNeedSort;
+}
+
 function compactTemporaryRefs(state: BattleState): void {
   if (state.temporaryCellHead < 256 || state.temporaryCellHead < state.temporaryCells.length / 2) return;
   state.temporaryCells = state.temporaryCells.slice(state.temporaryCellHead);
   state.temporaryCellHead = 0;
+}
+
+function sortActiveTemporaryRefs(state: BattleState): void {
+  if (state.temporaryCellHead > 0) {
+    state.temporaryCells = state.temporaryCells.slice(state.temporaryCellHead);
+    state.temporaryCellHead = 0;
+  }
+  state.temporaryCells.sort((a, b) => a.expiresAtTick - b.expiresAtTick || a.index - b.index);
 }
 
 export function rectIntersectsSolid(

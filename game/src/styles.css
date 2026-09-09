@@ -10,6 +10,8 @@
   --fire: #ff7848;
   --meter: #74f3d0;
   --danger: #ff5b4a;
+  --gold: #ffd166;
+  --steel: #34404a;
   --radius: 6px;
   --hud-portrait: 46px;
 }
@@ -27,7 +29,9 @@ body,
 }
 
 body {
-  background: #080b0f;
+  background:
+    linear-gradient(90deg, rgba(84, 199, 255, 0.08), transparent 34%, rgba(255, 120, 72, 0.08)),
+    #06090d;
   color: var(--ink);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -49,15 +53,20 @@ button {
   place-items: center;
   min-width: 320px;
   background:
-    linear-gradient(180deg, rgba(84, 199, 255, 0.06), transparent 30%),
-    #080b0f;
+    linear-gradient(180deg, rgba(213, 235, 245, 0.06), transparent 18%),
+    linear-gradient(90deg, rgba(84, 199, 255, 0.1), transparent 35%, rgba(255, 120, 72, 0.11)),
+    #06090d;
 }
 
 #game-root {
   width: min(100vw, 177.78vh);
   height: min(56.25vw, 100vh);
-  background: #171a1e;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: #090c11;
+  box-shadow:
+    0 0 0 1px rgba(213, 235, 245, 0.14),
+    0 18px 70px rgba(0, 0, 0, 0.72),
+    0 0 72px rgba(84, 199, 255, 0.1),
+    0 0 82px rgba(255, 120, 72, 0.08);
 }
 
 #game-root canvas {
@@ -89,13 +98,31 @@ button {
 #debug-overlay {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--panel);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 42%),
+    var(--panel);
   backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
 .fighter-panel {
   min-width: 0;
   padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fighter-panel::before,
+.center-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(116, 243, 208, 0.11), transparent 34%, rgba(255, 209, 102, 0.08));
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .fighter-identity {
@@ -124,12 +151,18 @@ button {
 .fighter-panel--p1 {
   grid-area: p1;
   border-left-color: rgba(84, 199, 255, 0.62);
+  box-shadow:
+    inset 3px 0 0 rgba(84, 199, 255, 0.45),
+    0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
 .fighter-panel--cpu {
   grid-area: cpu;
   border-right-color: rgba(255, 120, 72, 0.62);
   text-align: right;
+  box-shadow:
+    inset -3px 0 0 rgba(255, 120, 72, 0.45),
+    0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
 .fighter-panel--cpu .row {
@@ -159,6 +192,7 @@ button {
 }
 
 .bar {
+  position: relative;
   width: 100%;
   height: 10px;
   margin: 4px 0;
@@ -172,7 +206,10 @@ button {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #2fd076, #e7cf5e);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 48%),
+    linear-gradient(90deg, #2fd076, #e7cf5e);
+  box-shadow: 0 0 12px rgba(47, 208, 118, 0.28);
 }
 
 .bar--meter {
@@ -180,7 +217,10 @@ button {
 }
 
 .bar--meter span {
-  background: linear-gradient(90deg, #3579ff, var(--meter));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 48%),
+    linear-gradient(90deg, #3579ff, var(--meter));
+  box-shadow: 0 0 12px rgba(116, 243, 208, 0.24);
 }
 
 .row {
@@ -235,6 +275,8 @@ button {
 }
 
 .center-panel {
+  position: relative;
+  overflow: hidden;
   grid-area: center;
   min-width: 260px;
   padding: 8px 10px;
@@ -275,8 +317,8 @@ button {
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 24% 38%, rgba(84, 199, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 74% 34%, rgba(255, 120, 72, 0.18), transparent 30%),
+    linear-gradient(90deg, rgba(84, 199, 255, 0.16), transparent 30%, rgba(255, 120, 72, 0.15)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 22%, rgba(0, 0, 0, 0.24)),
     rgba(4, 7, 10, 0.76);
   pointer-events: auto;
 }
@@ -342,6 +384,9 @@ button {
   cursor: pointer;
   padding: 0;
   text-align: left;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.38),
+    0 12px 32px rgba(0, 0, 0, 0.34);
 }
 
 .fighter-select-card img {
@@ -360,19 +405,48 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 18%, rgba(2, 4, 6, 0.32) 48%, rgba(2, 4, 6, 0.94) 100%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%),
+    linear-gradient(180deg, transparent 18%, rgba(2, 4, 6, 0.32) 48%, rgba(2, 4, 6, 0.94) 100%);
+}
+
+.fighter-select-card::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.24);
 }
 
 .fighter-select-card[data-element="water"] {
   border-bottom-color: rgba(84, 199, 255, 0.76);
 }
 
+.fighter-select-card[data-element="water"]::before {
+  background: var(--water);
+  box-shadow: 0 0 18px rgba(84, 199, 255, 0.42);
+}
+
 .fighter-select-card[data-element="earth"] {
   border-bottom-color: rgba(208, 173, 109, 0.76);
 }
 
+.fighter-select-card[data-element="earth"]::before {
+  background: var(--earth);
+  box-shadow: 0 0 18px rgba(208, 173, 109, 0.42);
+}
+
 .fighter-select-card[data-element="fire"] {
   border-bottom-color: rgba(255, 120, 72, 0.76);
+}
+
+.fighter-select-card[data-element="fire"]::before {
+  background: var(--fire);
+  box-shadow: 0 0 18px rgba(255, 120, 72, 0.42);
 }
 
 .fighter-select-card:hover,
@@ -380,6 +454,9 @@ button {
 .fighter-select-card--active {
   border-color: rgba(255, 255, 255, 0.54);
   outline: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 16px 42px rgba(0, 0, 0, 0.44);
 }
 
 .fighter-select-card:hover img,
@@ -441,7 +518,9 @@ button {
   grid-template-columns: minmax(0, 260px) auto minmax(0, 260px);
   justify-content: center;
   gap: 18px;
-  background: rgba(2, 4, 6, 0.68);
+  background:
+    linear-gradient(90deg, rgba(84, 199, 255, 0.18), transparent 46%, rgba(255, 120, 72, 0.18)),
+    rgba(2, 4, 6, 0.68);
 }
 
 .versus-card {
@@ -451,6 +530,7 @@ button {
   border-radius: 8px;
   background: rgba(8, 11, 15, 0.88);
   text-align: left;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
 }
 
 .versus-card--cpu {
@@ -506,6 +586,7 @@ button {
   font-size: clamp(18px, 3vw, 30px);
   font-weight: 950;
   text-align: center;
+  box-shadow: 0 0 22px rgba(116, 243, 208, 0.18);
 }
 
 .screen-overlay--result {

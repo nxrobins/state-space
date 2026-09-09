@@ -13,7 +13,7 @@ export const BOOST_RADIUS_CELLS = 6;
 export const BOOST_REQUIRED_CELLS = 12;
 export const TEMPORARY_CELL_CAP = 700;
 export const RESPAWN_INVULN_TICKS = 120;
-export const REPLAY_SCHEMA_VERSION = 1;
+export const REPLAY_SCHEMA_VERSION = 2;
 
 export enum MaterialType {
   Air = 0,
