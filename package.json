@@ -11,7 +11,8 @@
   "type": "module",
   "scripts": {
     "lint": "node engine/lint_ts.mjs",
-    "test": "vitest run --config engine/vitest.config.ts",
+    "pretest": "npm run build:sdk",
+    "test": "vitest run --config engine/vitest.config.ts && node --test web/rendering.test.mjs",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
     "build:sdk": "vite build --config engine/vite.sdk.config.ts && tsc -p engine/tsconfig.sdk.json",

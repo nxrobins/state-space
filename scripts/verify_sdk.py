@@ -81,6 +81,18 @@ def main() -> int:
                 raise RuntimeError("Installed CPU/native clients disagree on catalog, state, pass changes, or replay")
             report["clientsMatch"] = True
             report["nativeClient"] = native
+            render_client = (
+                "import sys,contextlib,json; "
+                f"sys.path.insert(0, {str(site)!r}); "
+                "from engine import MaterialRenderer,create_field\n"
+                "with contextlib.redirect_stdout(sys.stderr):\n"
+                " with create_field(4,4) as field, MaterialRenderer(4,4,output_size=(64,64)) as renderer:\n"
+                "  field.set_cell(2,2,5,20); field.set_energy(2,2,700*256)\n"
+                "  before=field.snapshot().to_dict(); renderer.render(field); pixels=renderer.read_pixels()\n"
+                "  if before!=field.snapshot().to_dict() or len(pixels)!=64*64*4: raise RuntimeError('Installed renderer failed')\n"
+                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels)}))\n"
+            )
+            report["nativeRendering"] = json.loads(run([sys.executable, "-I", "-c", render_client], temp))
             client = temp / "client.mts"
             client.write_text("import {createStateSpaceField,createGpuField,MAT,DEFAULT_REGISTRY,type PackedSnapshot} from 'state-space-engine';\n"
                               "const field=createStateSpaceField(2,1,MAT.STONE,DEFAULT_REGISTRY);\n"

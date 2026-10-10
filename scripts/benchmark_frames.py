@@ -1,0 +1,178 @@
+"""Verify A/B isolation and benchmark GPU-completed native/browser full frames."""
+import argparse
+import functools
+import hashlib
+import http.server
+import json
+import shutil
+import struct
+import sys
+import threading
+import time
+import uuid
+import zlib
+from pathlib import Path
+
+import numpy as np
+import wgpu
+
+from engine import MaterialRenderer, create_field
+from engine.verify import ROOT, source_hashes
+from scripts.verify_browser import digest, run_captured
+
+
+def distribution(samples):
+    values = sorted(samples)
+    n = len(values)
+    return {'samples': samples, 'count': n, 'min': values[0], 'max': values[-1],
+            'median': (values[(n - 1) // 2] + values[n // 2]) / 2, 'p95': values[int(np.ceil(n * .95)) - 1]}
+
+
+def state_hash(field):
+    data = b''.join(np.asarray(values, dtype='<u4').tobytes() for values in (field.grid, field.energy_q, field.structure))
+    return hashlib.sha256(data).hexdigest()
+
+
+def write_png(path, rgba, width, height):
+    def chunk(kind, data):
+        return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
+    scanlines = b''.join(b'\0' + rgba[y * width * 4:(y + 1) * width * 4] for y in range(height))
+    path.write_bytes(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>2I5B', width, height, 8, 6, 0, 0, 0))
+                     + chunk(b'IDAT', zlib.compress(scanlines)) + chunk(b'IEND', b''))
+
+
+def native_frames(output, browser, samples=120, warmup=12):
+    script = """import fs from 'node:fs';
+import { createStateSpaceField, MAT } from './dist/sdk/state-space.js';
+import { seedBridge } from './web/demo.js';
+const result={};
+for(const scene of ['bridge','emissive']) {
+ const field=createStateSpaceField(256,256);
+ if(scene==='bridge') seedBridge(field); else field.clear(MAT.LAVA);
+ result[scene]=field.packedSnapshot(); field.close();
+}
+fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
+    scene_file = output / 'initial-scenes.json'
+    code, _, error = run_captured([shutil.which('node'), '--input-type=module', '-e', script, str(scene_file)])
+    if code:
+        raise RuntimeError(error)
+    scenes = json.loads(scene_file.read_text())
+    rows = []
+    for scene, initial in scenes.items():
+        expected = next(row for row in browser['rows'] if row['scene'] == scene)
+        for mode in ('plain', 'styled', 'alternating'):
+            print(f'Native frame benchmark: {scene} / {mode}', flush=True)
+            with create_field(256, 256) as field, MaterialRenderer(256, 256) as renderer:
+                field.restore(initial)
+                before = field.snapshot().to_dict()
+                renderer.render(field, styled=False)
+                plain = renderer.read_pixels()
+                renderer.render(field)
+                styled = renderer.read_pixels()
+                if field.snapshot().to_dict() != before or plain == styled:
+                    raise ValueError('Native A/B isolation or visual distinction failed')
+                if scene == 'bridge' and mode == 'styled':
+                    write_png(output / 'native-plain.png', plain, 1920, 1080)
+                    write_png(output / 'native-styled.png', styled, 1920, 1080)
+                frames, physics, rendering = [], [], []
+                for i in range(warmup + samples):
+                    started = time.perf_counter()
+                    field.step(1)
+                    physics_done = time.perf_counter()
+                    renderer.render(field, styled=mode == 'styled' or (mode == 'alternating' and i % 2 == 0))
+                    finished = time.perf_counter()
+                    if i >= warmup:
+                        frames.append((finished - started) * 1000)
+                        physics.append((physics_done - started) * 1000)
+                        rendering.append((finished - physics_done) * 1000)
+                final_hash = state_hash(field)
+                if final_hash != expected['finalHash'] or field.tick != expected['endTick'] or field.energy_balance().drift_q != 0:
+                    raise ValueError('Native rendered state differs from CPU/browser reference')
+                rows.append({'scene': scene, 'mode': mode, 'width': 256, 'height': 256, 'output': [1920, 1080],
+                    'ticks': samples, 'warmup': warmup, 'frameMs': distribution(frames), 'physicsMs': distribution(physics),
+                    'renderingMs': distribution(rendering), 'overBudget': sum(value > 1000 / 60 for value in frames),
+                    'endTick': field.tick, 'finalHash': final_hash, 'cpuBrowserParity': True, 'renderIsolation': True,
+                    'energyDriftQ': '0', 'renderingAdapter': renderer.adapter_info})
+    return rows
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--browser-cli', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    before = source_hashes()
+    commands = []
+    prefix = [shutil.which('node'), str(args.browser_cli)] if args.browser_cli.suffix in ('.js', '.mjs') else [str(args.browser_cli)]
+    session = 'state-space-frames-' + uuid.uuid4().hex[:12]
+
+    def cli(*arguments, stdin=None):
+        command = [*prefix, '--session', session, '--json', *arguments]
+        code, stdout, stderr = run_captured(command, stdin=stdin)
+        commands.append({'command': command, 'exitCode': code, 'stderr': stderr})
+        result = json.loads(stdout) if stdout else {}
+        if code or result.get('success') is not True:
+            raise RuntimeError(f'Browser operation failed: {stdout}\n{stderr}')
+        return result['data']
+
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *_args):
+            pass
+
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Handler, directory=str(ROOT)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = f'http://127.0.0.1:{server.server_address[1]}/web/'
+    try:
+        cli('open', url + '?paused')
+        cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        cli('eval', '--stdin', stdin='(async () => { window.__initial = await window.stateSpace.snapshot(); return "saved"; })()')
+        cli('screenshot', str((args.output / 'browser-styled.png').resolve()))
+        cli('find', 'role', 'button', 'click', '--name', 'B · Material + glow')
+        cli('wait', '--fn', 'document.getElementById("view-toggle").textContent.startsWith("A")')
+        cli('screenshot', str((args.output / 'browser-plain.png').resolve()))
+        ui = cli('eval', '--stdin', stdin='(async () => JSON.stringify(window.__initial) === JSON.stringify(await window.stateSpace.snapshot()))()')['result']
+        if ui is not True:
+            raise ValueError('A/B button changed simulation state')
+        cli('find', 'role', 'button', 'click', '--name', 'A · Plain materials')
+        cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(48); return "stepped"; })()')
+        cli('screenshot', str((args.output / 'browser-burning.png').resolve()))
+        cli('open', url + 'benchmark.html')
+        deadline, seen = time.monotonic() + 240, ''
+        while True:
+            state = cli('eval', '({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById("status").textContent})')['result']
+            if state['progress'] != seen:
+                seen = state['progress']
+                print('Browser frame benchmark:', seen, flush=True)
+            if state.get('done'):
+                if state.get('error'):
+                    raise RuntimeError(state['error'])
+                browser = cli('eval', 'window.frameBenchmark.result')['result']
+                break
+            if time.monotonic() > deadline:
+                raise TimeoutError('Frame benchmark did not finish')
+            time.sleep(1)
+        errors = cli('errors').get('errors', [])
+        if errors:
+            raise RuntimeError(f'Browser errors: {errors}')
+        cli('close')
+        native = native_frames(args.output, browser)
+        if source_hashes() != before:
+            raise ValueError('Sources changed during frame measurements')
+        report = {'reportVersion': 1, 'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
+            'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
+            'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
+            'uiTogglePreservesState': ui, 'commands': commands, 'browser': browser, 'native': native,
+            'scope': 'GPU-completed full frame work, including physics and renderer copies/uploads. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
+        (args.output / 'frames.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+        print('Report:', args.output / 'frames.json', flush=True)
+    finally:
+        try:
+            cli('close')
+        finally:
+            server.shutdown()
+            server.server_close()
+
+
+if __name__ == '__main__':
+    main()

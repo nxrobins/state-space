@@ -1,9 +1,11 @@
 // Standalone renderer and input client for the supported State Space SDK.
-import { createGpuField, createPhysicsState, packVoxel, MAT, DEFAULT_REGISTRY } from '../dist/sdk/state-space.js';
+import { createGpuField, MAT } from '../dist/sdk/state-space.js';
 import { MATERIAL_NAMES as MAT_NAMES, MATERIAL_VISUALS as MAT_COLORS } from './materials.generated.js';
-import { BITMASK_DEFS, RENDER_SHADER } from './shaders.js';
+import { createMaterialRenderer, canvasCell } from './renderer.js';
+import { seedBridge } from './demo.js';
+import { FrameClock } from './frame-clock.js';
 
-const GRID_W = 256, GRID_H = 256, GRID_SIZE = GRID_W * GRID_H;
+const GRID_W = 256, GRID_H = 256;
 let selectedMat = MAT.SAND, brushSize = 3, paused = false;
 let mouseDown = false, mouseButton = 0, mouseX = 0, mouseY = 0;
 let pendingPaints = [];
@@ -12,42 +14,21 @@ async function init() {
     const stats = document.getElementById('stats');
     stats.textContent = 'Creating the WebGPU field...';
     const world = await createGpuField(GRID_W, GRID_H);
-    const cells = new Uint32Array(GRID_SIZE).fill(packVoxel(MAT.AIR));
-    for (let y = GRID_H - 20; y < GRID_H; y++) cells.fill(packVoxel(MAT.STONE), y * GRID_W, (y + 1) * GRID_W);
-    const state = createPhysicsState(cells, GRID_W, GRID_H, DEFAULT_REGISTRY);
-    const initial = { ...world.packedSnapshot(), packedCells: Array.from(state.grid), energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) };
-    world.restore(initial);
-
-    // The renderer receives committed public state and owns no simulation passes.
-    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-    if (!adapter) { world.close(); throw new Error('No rendering adapter'); }
-    const device = await adapter.requestDevice();
-    const canvas = document.getElementById('canvas'), context = canvas.getContext('webgpu');
-    const format = navigator.gpu.getPreferredCanvasFormat();
+    seedBridge(world);
+    const initial = world.packedSnapshot();
+    const canvas = document.getElementById('canvas');
+    let styled = true;
+    const clock = new FrameClock();
     function resize() {
-        canvas.width = Math.max(1, canvas.parentElement.clientWidth - 180);
-        canvas.height = Math.max(1, canvas.parentElement.clientHeight);
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
+        canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
     }
     resize(); window.addEventListener('resize', resize);
-    context.configure({ device, format, alphaMode: 'opaque' });
-    const grid = device.createBuffer({ size: GRID_SIZE * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-    const params = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-    const layout = device.createBindGroupLayout({ entries: [
-        { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
-        { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
-    ] });
-    const module = device.createShaderModule({ code: BITMASK_DEFS + '\n' + RENDER_SHADER });
-    const pipeline = await device.createRenderPipelineAsync({ layout: device.createPipelineLayout({ bindGroupLayouts: [layout] }),
-        vertex: { module, entryPoint: 'vs_main' }, fragment: { module, entryPoint: 'fs_main', targets: [{ format }] }, primitive: { topology: 'triangle-strip' } });
-    const group = device.createBindGroup({ layout, entries: [{ binding: 0, resource: { buffer: grid } }, { binding: 1, resource: { buffer: params } }] });
-    function render() {
-        device.queue.writeBuffer(grid, 0, world.grid);
-        device.queue.writeBuffer(params, 0, new Uint32Array([GRID_W, GRID_H, selectedMat, 0]));
-        const encoder = device.createCommandEncoder();
-        const pass = encoder.beginRenderPass({ colorAttachments: [{ view: context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
-        pass.setPipeline(pipeline); pass.setBindGroup(0, group); pass.draw(4); pass.end();
-        device.queue.submit([encoder.finish()]);
-    }
+    let renderer;
+    try { renderer = await createMaterialRenderer(canvas, GRID_W, GRID_H, world.registry); }
+    catch (error) { world.close(); throw error; }
+    function render() { renderer.render(world, styled); }
     function paintVoxels(gx, gy, mat, radius) { pendingPaints.push({ gx, gy, mat, radius }); }
     function flushPaints() {
         const paints = pendingPaints; pendingPaints = [];
@@ -61,22 +42,23 @@ async function init() {
         return result;
     }
     function canvasToGrid(cx, cy) {
-        const rect = canvas.getBoundingClientRect();
-        const rx = (cx - rect.left) / rect.width;
-        const ry = (cy - rect.top) / rect.height;
-        return [Math.floor(rx * GRID_W), Math.floor(ry * GRID_H)];
+        return canvasCell(canvas, cx, cy, GRID_W, GRID_H);
     }
 
     canvas.addEventListener('mousedown', (e) => {
+        const cell = canvasToGrid(e.clientX, e.clientY);
+        if (!cell) return;
         mouseDown = true;
         mouseButton = e.button;
-        [mouseX, mouseY] = canvasToGrid(e.clientX, e.clientY);
+        [mouseX, mouseY] = cell;
         paintVoxels(mouseX, mouseY, e.button === 2 ? MAT.AIR : selectedMat, brushSize);
         e.preventDefault();
     });
     canvas.addEventListener('mousemove', (e) => {
         if (!mouseDown) return;
-        const [newX, newY] = canvasToGrid(e.clientX, e.clientY);
+        const cell = canvasToGrid(e.clientX, e.clientY);
+        if (!cell) return;
+        const [newX, newY] = cell;
         if (newX !== mouseX || newY !== mouseY) {
             mouseX = newX;
             mouseY = newY;
@@ -88,8 +70,11 @@ async function init() {
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
     document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') { paused = !paused; e.preventDefault(); }
-        if (e.code === 'KeyC') void enqueue(() => { pendingPaints = []; world.restore(initial); });
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
+        if (e.code === 'Space') { paused = !paused; clock.reset(); e.preventDefault(); }
+        if (e.code === 'KeyC') void enqueue(() => { pendingPaints = []; world.clear(); clock.reset(); render(); });
+        if (e.code === 'KeyB') void setView();
+        if (e.code === 'KeyR') void resetBridge();
         const num = parseInt(e.key);
         if (num >= 1 && num <= 9) {
             const matMap = [MAT.STONE, MAT.WATER, MAT.SAND, MAT.FIRE, MAT.WOOD, MAT.OIL, MAT.ICE, MAT.METAL, MAT.LAVA];
@@ -144,12 +129,29 @@ async function init() {
     }
     updatePalette();
 
+    function setView(value) {
+        return enqueue(async () => {
+            styled = value === undefined ? !styled : value; render(); await renderer.completed();
+            document.getElementById('view-toggle').textContent = styled ? 'B · Material + glow' : 'A · Plain materials';
+            document.getElementById('view-toggle').setAttribute('aria-pressed', String(styled));
+        });
+    }
+    function resetBridge() { return enqueue(() => { pendingPaints = []; world.restore(initial); clock.reset(); render(); }); }
+    document.getElementById('view-toggle').addEventListener('click', () => { void setView(); });
+    document.getElementById('reset-demo').addEventListener('click', () => { void resetBridge(); });
+    document.getElementById('pause').addEventListener('click', () => { paused = !paused; clock.reset(); });
+
     window.stateSpace = Object.freeze({
         setPaused(value) {
             if (typeof value !== 'boolean') throw new Error('paused must be boolean');
             paused = value;
+            clock.reset();
         },
-        step(ticks = 1, options = {}) { return enqueue(async () => { flushPaints(); const reports = await world.step(ticks, options); render(); return reports; }); },
+        setView(mode) { if (!['plain', 'styled'].includes(mode)) throw new Error('Invalid view'); return setView(mode === 'styled'); },
+        resetBridge,
+        ready: true,
+        rendererInfo: renderer.backendInfo,
+        step(ticks = 1, options = {}) { return enqueue(async () => { flushPaints(); const reports = await world.step(ticks, options); render(); await renderer.completed(); return reports; }); },
         snapshot() { return enqueue(() => { flushPaints(); return world.packedSnapshot(); }); },
         restore(snapshot) { return enqueue(() => { world.restore(snapshot); pendingPaints = []; render(); }); },
         inspectStructure() { return enqueue(() => { flushPaints(); return world.inspectStructure(); }); },
@@ -157,23 +159,27 @@ async function init() {
     let stopped = false;
     window.addEventListener('pagehide', () => {
         stopped = true;
-        void enqueue(() => { world.close(); grid.destroy(); params.destroy(); device.destroy(); });
+        void enqueue(() => { world.close(); renderer.close(); });
     }, { once: true });
-    async function frame() {
+    async function frame(now) {
         const start = performance.now();
         try {
             await enqueue(async () => {
                 flushPaints();
-                if (!paused) await world.step();
+                const ticks = clock.advance(now, paused);
+                if (ticks) await world.step(ticks);
                 render();
+                await renderer.completed();
                 stats.textContent = 'Tick: ' + world.tick + '\n' + (paused ? 'PAUSED' : 'Running') + '\nGrid: ' + GRID_W + 'x' + GRID_H +
-                    '\nFrame: ' + (performance.now() - start).toFixed(1) + ' ms';
+                    '\nFrame work: ' + (performance.now() - start).toFixed(1) + ' ms' + '\nView: ' + (styled ? 'Material + glow' : 'Plain') + '\nPhysics: fixed 60 Hz';
+                document.getElementById('pause').textContent = paused ? 'Resume' : 'Pause';
             });
         } catch { stopped = true; }
-        if (!stopped) setTimeout(frame, 16);
+        if (!stopped) requestAnimationFrame(frame);
     }
     render();
-    void frame();
+    if (new URLSearchParams(location.search).has('paused')) paused = true;
+    requestAnimationFrame(frame);
 }
 
 init().catch(error => {

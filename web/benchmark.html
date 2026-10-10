@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>State Space · Full frame benchmark</title>
+<style>body{margin:0;background:#080d16;color:#d6e5ef;font:14px system-ui}header{padding:16px 24px}a{color:#ffbd82}canvas{display:block;width:100%;max-height:75vh;object-fit:contain}pre{padding:20px;white-space:pre-wrap}</style></head>
+<body><header><a href="./">← Burning bridge</a> · 256 × 256 physics / 1920 × 1080 output <span id="status">Preparing…</span></header>
+<canvas id="canvas" width="1920" height="1080"></canvas><pre id="results"></pre>
+<script type="module">
+import { benchmarkFrames } from './frame-benchmark.js';
+window.frameBenchmark = { done: false };
+try {
+    const result = await benchmarkFrames(document.getElementById('canvas'), text => { document.getElementById('status').textContent = text; });
+    window.frameBenchmark = { done: true, result };
+    document.getElementById('status').textContent = 'Complete';
+    document.getElementById('results').textContent = result.rows.map(row => `${row.scene} / ${row.mode}: median ${row.frameMs.median.toFixed(2)} ms, p95 ${row.frameMs.p95.toFixed(2)} ms, ${row.overBudget}/${row.ticks} over 16.67 ms`).join('\n') + `\nDisplay-paced bridge: ${result.paced.achievedHz.toFixed(1)} Hz\n${result.scope}`;
+} catch (error) { window.frameBenchmark = { done: true, error: String(error.stack || error) }; document.getElementById('status').textContent = String(error); }
+</script></body></html>
