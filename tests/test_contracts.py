@@ -173,10 +173,17 @@ class PreventionRules(unittest.TestCase):
                 target = root / source.relative_to(ROOT)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text(text, encoding="utf-8")
+            for name in ("structure_solver.c", "generated/structure_solver.wasm", "generated/structure_solver.ts", "generated/structure_solver.json"):
+                target = root / "engine" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((ROOT / "engine" / name).read_bytes())
             self.assertEqual(check_generated(root), [])
             path = root / "web/shaders/combustion.wgsl"
             path.write_text(path.read_text(encoding="utf-8") + "\n// altered\n", encoding="utf-8")
             self.assertIn("web\\shaders\\combustion.wgsl" if sys.platform == "win32" else "web/shaders/combustion.wgsl", check_generated(root))
+            solver = root / "engine/generated/structure_solver.wasm"
+            solver.write_bytes(solver.read_bytes() + b"changed")
+            self.assertIn("engine/generated/structure_solver.wasm", check_generated(root))
 
     def test_mutated_consumers_cannot_redeclare_material_tables(self):
         self.assertTrue(lint_consumer("const MAT = {WATER: 9};", "probe.ts"))

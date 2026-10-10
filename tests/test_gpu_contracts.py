@@ -1,6 +1,7 @@
 """Actual GPU behavior at the API boundary; no mocked dispatches."""
 
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -37,6 +38,21 @@ class GpuContractProperties(unittest.TestCase):
         np.testing.assert_array_equal(tail["final_energy"], whole["final_energy"])
         np.testing.assert_array_equal(tail["final_structure"], whole["final_structure"])
         self.assertEqual([tick for tick, _ in tail["snapshots"]], [4, 5, 6, 7])
+
+    def test_batched_readback_matches_every_tick_of_inspected_reference(self):
+        rng = np.random.default_rng(20261010)
+        mats = rng.choice([0, 1, 2, 3, 5, 7, 8, 9], size=17 * 19)
+        grid = np.array([pack_voxel(VoxelState(int(m), DEFAULT_THERMALS[m], 0, 0, DEFAULT_PHASES[m], 0)) for m in mats], dtype=np.uint32)
+        with patch.object(self.engine.device, "create_bind_group", wraps=self.engine.device.create_bind_group) as groups:
+            normal = self.engine.run(grid, self.cold, 17, 19, n_ticks=4, snapshot_interval=1)
+        self.assertEqual(groups.call_count, 2)
+        inspected = self.engine.run(grid, self.cold, 17, 19, n_ticks=4, snapshot_interval=1, trace_passes=True)
+        self.assertEqual(normal["readback_count"], 4)
+        self.assertEqual(inspected["readback_count"], 4 * 18)
+        for key in ("snapshots", "energy_snapshots", "structure_snapshots"):
+            for (tick, a), (other, b) in zip(normal[key], inspected[key]):
+                self.assertEqual(tick, other)
+                np.testing.assert_array_equal(a, b)
 
 
 if __name__ == "__main__":

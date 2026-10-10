@@ -46,7 +46,11 @@ export function validateEnergyState(cells, energies, length, cold = C.buildColdT
         const v = grid[i];
         if (!registry.has(v & 255))
             throw new Error('Undefined material in simulation state.');
-        checkedInteger(energyQ[i], prop(v, cold, C.COLD_FUEL_ENERGY) * ENERGY_SCALE, MAX_ENERGY_Q, `energyQ[${i}]`);
+        const minimum = prop(v, cold, C.COLD_FUEL_ENERGY) * ENERGY_SCALE;
+        // validatePackedCells already established unsigned integers. Format the
+        // per-cell error label only when a range violation actually occurs.
+        if (energyQ[i] < minimum || energyQ[i] > MAX_ENERGY_Q)
+            checkedInteger(energyQ[i], minimum, MAX_ENERGY_Q, `energyQ[${i}]`);
         if (thermalView(v, energyQ[i], cold) !== v)
             throw new Error('Packed thermal view disagrees with conserved energy.');
     }

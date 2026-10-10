@@ -112,10 +112,11 @@ class StructuralIntegrationProperties(unittest.TestCase):
     def test_failed_gpu_step_does_not_commit_part_of_the_structural_state(self):
         world = self.field(3, 3, 5)
         before = world.snapshot().to_dict()
-        with patch.object(self.engine.device.queue, "read_buffer", side_effect=RuntimeError("readback failed")):
-            with self.assertRaisesRegex(RuntimeError, "readback failed"):
-                world.step()
-        self.assertEqual(world.snapshot().to_dict(), before)
+        for operation in ("map_sync", "read_mapped"):
+            with patch("wgpu.backends.wgpu_native.GPUBuffer." + operation, side_effect=RuntimeError("readback failed")):
+                with self.assertRaisesRegex(RuntimeError, "readback failed"):
+                    world.step()
+            self.assertEqual(world.snapshot().to_dict(), before)
         world.step()
         self.assertEqual(world.tick, 1)
 

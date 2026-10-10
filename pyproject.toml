@@ -6,6 +6,7 @@ requires-python = ">=3.10"
 dependencies = [
     "wgpu>=0.31,<0.32",
     "numpy>=1.24.0",
+    "wasmtime>=49,<50",
 ]
 
 [project.optional-dependencies]
@@ -22,7 +23,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 target-version = "py310"
-include = ["engine/**/*.py", "eval/**/*.py", "tests/**/*.py", "scripts/verify*.py", "examples/sdk/*.py", "evolve_ss.py", "test_*.py", "verify_gpu.py"]
+include = ["engine/**/*.py", "eval/**/*.py", "tests/**/*.py", "scripts/verify*.py", "scripts/benchmark*.py", "scripts/build_structure_solver.py", "examples/sdk/*.py", "evolve_ss.py", "test_*.py", "verify_gpu.py"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]

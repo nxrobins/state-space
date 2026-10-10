@@ -7,6 +7,8 @@ import ts from 'typescript';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
 import * as S from './structure.js';
+import { compiledStructuralPlan } from './structure_compiled.js';
+import type { MaterialRegistry } from './registry.js';
 
 interface Step {
   cells: number[]; energyQ: number[]; structure: number[]; sources: number[];
@@ -18,6 +20,7 @@ interface Fixture {
   materials: S.StructuralMaterial[]; catalog: MaterialCatalog; steps: Step[];
 }
 let fixtures: Fixture[], models: S.StructuralRules[];
+let compiledRegistries: MaterialRegistry[];
 const stateOf = (value: Pick<Fixture, 'cells' | 'energyQ' | 'structure'>): S.StructuralState => ({
   grid: Uint32Array.from(value.cells), energyQ: Uint32Array.from(value.energyQ), structure: Uint32Array.from(value.structure),
 });
@@ -30,6 +33,13 @@ beforeAll(async () => {
   const report = JSON.parse(stdout);
   fixtures = report.cases;
   models = await Promise.all(fixtures.map(async fixture => new S.StructuralRules(fixture.materials, await createMaterialRegistry(fixture.catalog))));
+  compiledRegistries = await Promise.all(fixtures.map(async fixture => {
+    const catalog = structuredClone(fixture.catalog);
+    for (const row of fixture.materials) {
+      Object.assign(catalog.materials.find(record => record.id === row.id)!.properties, { density: row.density, cohesion: row.cohesion, softening: row.softening });
+    }
+    return createMaterialRegistry(catalog);
+  }));
 }, 60_000);
 
 function loadMutant(before: string, after: string): typeof S {
@@ -64,6 +74,10 @@ describe('C6 prototype independent planner/native transport conformance', () => 
         }
         expect(plan.structure, fixture.name).toEqual(expected.structure);
         const next = plan.apply(state, fixture.width, fixture.height);
+        const compiled = compiledStructuralPlan(state, fixture.width, fixture.height, compiledRegistries[index]);
+        expect([...compiled.sources], fixture.name).toEqual(expected.sources);
+        expect([...compiled.structure], fixture.name).toEqual(expected.structure);
+        expect(compiled.apply(), fixture.name).toEqual(next);
         expect(next, fixture.name).toEqual(stateOf(expected));
         expect(S.validateStructure(next, fixture.width, fixture.height, model)).toEqual(next);
         expect([...next.grid].map(cell => cell & 255).sort((a, b) => a - b)).toEqual(materialCounts);

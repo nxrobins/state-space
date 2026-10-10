@@ -143,8 +143,15 @@ def generated_outputs(root: Path = ROOT) -> dict[Path, str]:
 
 
 def check_generated(root: Path = ROOT) -> list[str]:
-    return [str(path.relative_to(root)) for path, expected in generated_outputs(root).items()
-            if not path.exists() or path.read_text(encoding="utf-8") != expected]
+    stale = [str(path.relative_to(root)) for path, expected in generated_outputs(root).items()
+             if not path.exists() or path.read_text(encoding="utf-8") != expected]
+    from scripts.build_structure_solver import check_compiled
+    try:
+        if not check_compiled(root):
+            stale.append("engine/generated/structure_solver.wasm")
+    except (OSError, ValueError, KeyError):
+        stale.append("engine/generated/structure_solver.wasm")
+    return stale
 
 
 def main() -> int:
