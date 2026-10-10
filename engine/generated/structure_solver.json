@@ -1,0 +1,6 @@
+{
+  "abiVersion": 1,
+  "sourceHash": "aa8b1c70e3c106504032a1452df5a837aa6897c7c07abff04210259a578bc052",
+  "wasmHash": "f2d064e7755e98e88a69d7ae23e20ec3acc38ff7f69ac65a13008b922e3c1ec8",
+  "compiler": "clang version 22.1.2 (https://github.com/llvm/llvm-project 1ab49a973e210e97d61e5db6557180dcb92c3e98)"
+}

@@ -7,9 +7,10 @@ import {
 } from './generated/materials.js';
 import { runCpuTick } from './cpu_physics.js';
 import { seedState, temperatureQ, thermalView, validateEnergyState, MAX_ENERGY_Q, energyLedger as inspectEnergy } from './thermal.js';
-import { ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, createPhysicsState, normalizeBonds, rulesForRegistry, validateStructure, planStructure,
+import { ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, createPhysicsState, normalizeBonds, rulesForRegistry, planStructure,
   type StructuralState, type StructuralPlan } from './structure.js';
 import { DEFAULT_REGISTRY, requireRegistry, type MaterialRegistry } from './registry.js';
+import { validateCompiledStructure } from './structure_compiled.js';
 import { inspectPass, type PassReport, type StepOptions } from './inspection.js';
 
 export type MaterialId = (typeof MAT)[keyof typeof MAT];
@@ -341,7 +342,7 @@ export class FieldState {
   }
 
   protected commitState(state: StructuralState, tick: number): void {
-    const validated = validateStructure(state, this.width, this.height, rulesForRegistry(this.registry));
+    const validated = validateCompiledStructure(state, this.width, this.height, this.registry);
     this.cells = validated.grid;
     this.energies = validated.energyQ;
     this.bonds = validated.structure;

@@ -17,7 +17,8 @@ from engine.schedule import movement_schedule_for_tick
 from engine.schema import VoxelState, pack_voxel, unpack_voxel
 from engine.state import seed_state, thermal_view
 from engine.structure import ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, StructuralPlan
-from engine.structure_bulk import seed_structure_bulk, normalize_bonds_bulk, validate_structure_bulk, plan_structure_bulk
+from engine.structure_bulk import seed_structure_bulk, normalize_bonds_bulk, plan_structure_bulk
+from engine.structure_compiled import validate_structure_compiled
 from engine.validation import MAX_TICK, checked_integer, validate_dimensions
 
 if TYPE_CHECKING:
@@ -290,7 +291,7 @@ class Field:
                 reports.append(PassReport(tick, pass_id, changes, energy_ledger_array(before_cells & 255, before_energy, model),
                                          energy_ledger_array(cells & 255, energy, model), plans[tick] if pass_id == "structure" else None))
                 before_cells, before_energy, before_structure = cells, energy, structure
-        final = validate_structure_bulk(result["final_grid"], result["final_energy"], result["final_structure"],
+        final = validate_structure_compiled(result["final_grid"], result["final_energy"], result["final_structure"],
                                         self.width, self.height, self.registry._structure)
         self._cells, self._energy, self._structure = final
         self._tick = result["end_tick"]

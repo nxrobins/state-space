@@ -18,7 +18,7 @@ def source_hashes() -> dict[str, str]:
     paths = []
     for directory in ("engine", "eval", "tests", "locked", "web", "scripts", "examples", "game/src", "tower-defense-rogue/src"):
         paths.extend(path for path in (ROOT / directory).rglob("*")
-                     if path.suffix in (".py", ".ts", ".js", ".mjs", ".json", ".wgsl", ".html", ".css")
+                     if path.suffix in (".py", ".ts", ".js", ".mjs", ".json", ".wgsl", ".html", ".css", ".c", ".wasm")
                      and not any(part in ("node_modules", "__pycache__", ".ruff_cache") for part in path.parts))
     paths.extend(ROOT / name for name in ("pyproject.toml", "package.json", "package-lock.json", "uv.lock",
                                          "evolve_ss.py", "test_invariants.py", "test_cascade.py",

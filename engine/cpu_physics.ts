@@ -2,18 +2,22 @@
 import * as C from './generated/materials.js';
 import { exchangeEnergy, phaseMaterial, rewriteMaterial, temperatureQ, thermalView, ENERGY_SCALE, MAX_ENERGY_Q } from './thermal.js';
 import { ANCHOR, INTEGRITY_MASK, cloneStructure, planStructure, normalizeBonds, rewrittenStructure, rulesForRegistry, validateStructure,
-  type StructuralState, type StructuralPlan } from './structure.js';
+  type StructuralState, type StructuralPlan, type StructuralRules } from './structure.js';
 import { checkedInteger, validateDimensions } from './validation.js';
 import { KERNEL_SPECS, movementScheduleForTick } from './generated/schedule.js';
 import { DEFAULT_REGISTRY, type MaterialRegistry } from './registry.js';
+import { compiledStructuralPlan } from './structure_compiled.js';
 
 const SPECS = new Map(KERNEL_SPECS.map(spec => [spec.id, spec]));
 const coldReferences = new WeakMap<MaterialRegistry, Uint32Array>();
-function validateCold(cold: Uint32Array, registry: MaterialRegistry): void {
+function validateCold(cold: Uint32Array, registry: MaterialRegistry): Uint32Array {
   rulesForRegistry(registry);
   let expected = coldReferences.get(registry);
   if (!expected) { expected = registry.coldTable(); coldReferences.set(registry, expected); }
   if (!cold || cold.length !== expected.length || expected.some((value, i) => cold[i] !== value)) throw new Error('Cold table must match the supplied validated registry.');
+  // Use the private registry copy after checking the caller's table. An observer
+  // can change its own table, but cannot change physics midway through a tick.
+  return expected;
 }
 const material = (v: number) => v & C.MATERIAL_MASK;
 const phase = (v: number) => (v >>> C.PHASE_SHIFT) & C.PHASE_MASK;
@@ -32,11 +36,25 @@ export type PassObserver = (passId: string, state: StructuralState, plan?: Struc
 
 export function runCpuTick(state: StructuralState, width: number, height: number, cold: Uint32Array, tick: number, observer?: PassObserver, registry: MaterialRegistry = DEFAULT_REGISTRY): StructuralState {
   checkedInteger(tick, 0, Number.MAX_SAFE_INTEGER, 'tick');
-  validateCold(cold, registry);
+  cold = validateCold(cold, registry);
+  const rules = rulesForRegistry(registry);
   let current = state;
+  let spare: StructuralState | undefined;
   for (const passId of movementScheduleForTick(tick)) {
-    const plan = passId === 'structure' ? planStructure(current, width, height, rulesForRegistry(registry)) : undefined;
-    current = plan ? plan.apply(current, width, height) : runCpuPass(current, width, height, cold, passId, registry);
+    // The first (structural) pass validates and owns the complete tick input.
+    // Later passes only consume engine-produced state, including pending FRESH
+    // bonds until normalize. Public single-pass calls still validate every input.
+    const plan = passId === 'structure' && observer ? planStructure(current, width, height, rules) : undefined;
+    if (plan) current = plan.apply(current, width, height);
+    else if (passId === 'structure') current = compiledStructuralPlan(current, width, height, registry).apply();
+    else {
+      // Both buffers are private to this tick. Each pass reads one and writes
+      // the other; observers receive copies, and no caller storage is reused.
+      spare ??= { grid: new Uint32Array(current.grid.length), energyQ: new Uint32Array(current.grid.length), structure: new Uint32Array(current.grid.length) };
+      const next = runValidatedCpuPass(current, width, height, cold, SPECS.get(passId)!, rules, spare);
+      if (passId !== 'normalize') spare = current;
+      current = next;
+    }
     observer?.(passId, cloneStructure(current), plan);
   }
   return current;
@@ -45,18 +63,24 @@ export function runCpuTick(state: StructuralState, width: number, height: number
 export function runCpuPass(state: StructuralState, width: number, height: number, cold: Uint32Array, passId: string, registry: MaterialRegistry = DEFAULT_REGISTRY): StructuralState {
   const spec = SPECS.get(passId);
   if (!spec) throw new Error(`Unknown engine pass: ${passId}`);
-  validateCold(cold, registry);
+  cold = validateCold(cold, registry);
   validateDimensions(width, height);
   const rules = rulesForRegistry(registry);
   if (passId === 'structure') return planStructure(state, width, height, rules).apply(state, width, height);
   const validated = validateStructure(state, width, height, rules, false);
-  if (passId === 'normalize') return { ...validated, structure: normalizeBonds(validated.grid, validated.structure, width, height, rules) };
-  const input = validated.grid;
-  const inputEnergy = validated.energyQ;
-  const inputStructure = validated.structure;
-  const output = input.slice();
-  const outputEnergy = inputEnergy.slice();
-  const outputStructure = inputStructure.slice();
+  return runValidatedCpuPass(validated, width, height, cold, spec, rules);
+}
+
+/** Private execution on owned, validated state; never a public input boundary. */
+function runValidatedCpuPass(state: StructuralState, width: number, height: number, cold: Uint32Array, spec: (typeof KERNEL_SPECS)[number], rules: StructuralRules, reusable?: StructuralState): StructuralState {
+  if (spec.id === 'normalize') return { ...state, structure: normalizeBonds(state.grid, state.structure, width, height, rules) };
+  const input = state.grid;
+  const inputEnergy = state.energyQ;
+  const inputStructure = state.structure;
+  const output = reusable?.grid ?? input.slice();
+  const outputEnergy = reusable?.energyQ ?? inputEnergy.slice();
+  const outputStructure = reusable?.structure ?? inputStructure.slice();
+  if (reusable) { output.set(input); outputEnergy.set(inputEnergy); outputStructure.set(inputStructure); }
   const finish = (): StructuralState => ({ grid: output, energyQ: outputEnergy, structure: outputStructure });
   const prop = (voxel: number, field: number) => cold[material(voxel) * C.COLD_STRIDE + field];
   const density = (v: number) => prop(v, C.COLD_DENSITY);
@@ -141,6 +165,9 @@ export function runCpuPass(state: StructuralState, width: number, height: number
       for (let x = axis ? 0 : parity; x < width; x += axis ? 1 : 2) {
         if ((!axis && x + 1 >= width) || (axis && y + 1 >= height)) continue;
         const a = y * width + x, b = a + (axis ? width : 1);
+        // Equal energy in the same material gives exactly equal full
+        // temperatures, including latent intervals: this pair has zero flux.
+        if (material(input[a]) === material(input[b]) && inputEnergy[a] === inputEnergy[b]) continue;
         [outputEnergy[a], outputEnergy[b]] = exchangeEnergy(input[a], input[b], inputEnergy[a], inputEnergy[b], cold);
         output[a] = thermalView(input[a], outputEnergy[a], cold);
         output[b] = thermalView(input[b], outputEnergy[b], cold);

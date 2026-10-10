@@ -14,11 +14,11 @@ from engine.wgsl_fixer import strip_entry_points_and_bindings
 from engine.schedule import KERNEL_SPECS as KERNEL_SPECS, movement_schedule_for_tick as movement_schedule_for_tick
 from engine.contracts import MAX_TICK, checked_integer, validate_dimensions, validate_packed
 from engine.schema import COLD_TABLE_ENTRIES, COLD_TABLE_STRIDE
-from engine.state import seed_state, catalog_from_cold, validate_state
-from engine.structure_bulk import plan_structure_bulk, seed_structure_bulk, validate_structure_bulk
+from engine.state import seed_state, catalog_from_cold
+from engine.structure_bulk import plan_structure_bulk, seed_structure_bulk
 from engine.registry import MaterialRegistry
 from engine.sources import ShaderBundle
-from engine.array_state import energy_ledger_array
+from engine.structure_compiled import _transport_validated, validate_structure_compiled, _ledger_validated
 
 
 class InvalidCompletedState(ValueError):
@@ -85,6 +85,8 @@ class CompositionEngine:
         dims = validate_dimensions(grid_width, grid_height)
         if dims[0] * dims[1] * 8 > self.device.limits["max-storage-buffer-binding-size"]:
             raise ValueError("Grid exceeds the device storage buffer binding limit")
+        if dims[0] * dims[1] * 12 > self.device.limits["max-buffer-size"]:
+            raise ValueError("Complete state exceeds the device readback buffer limit")
         if any((dimension + 15) // 16 > self.device.limits["max-compute-workgroups-per-dimension"] for dimension in dims):
             raise ValueError("Grid exceeds the device dispatch dimension limit")
         if self._compiled_dims == dims:
@@ -93,6 +95,13 @@ class CompositionEngine:
         pipelines = {}
         kernel_sources = {}
         constants = {"GRID_WIDTH": dims[0], "GRID_HEIGHT": dims[1]}
+        # All kernels use the same explicit eight-binding layout. Share it so a
+        # run creates two ping-pong groups instead of two groups per pipeline.
+        bgl = self.device.create_bind_group_layout(entries=[
+            {"binding": binding, "visibility": wgpu.ShaderStage.COMPUTE,
+             "buffer": {"type": "storage" if binding in (1, 4, 6) else "read-only-storage"}}
+            for binding in range(8)])
+        pl = self.device.create_pipeline_layout(bind_group_layouts=[bgl])
 
         for spec in KERNEL_SPECS:
             kernel_code = self._sources.kernel(spec.source_file)
@@ -101,13 +110,6 @@ class CompositionEngine:
 
             shader = self.device.create_shader_module(code=full_code)
 
-            # ca-v3 uses eight storage bindings, within the default WebGPU limit.
-            bgl = self.device.create_bind_group_layout(entries=[
-                {"binding": binding, "visibility": wgpu.ShaderStage.COMPUTE,
-                 "buffer": {"type": "storage" if binding in (1, 4, 6) else "read-only-storage"}}
-                for binding in range(8)])
-
-            pl = self.device.create_pipeline_layout(bind_group_layouts=[bgl])
             pipeline_constants = {**constants, **spec.constants}
             pipeline = self.device.create_compute_pipeline(
                 layout=pl,
@@ -154,11 +156,9 @@ class CompositionEngine:
             raise ValueError("Continuation requires initial_energy and initial_structure; packed state cannot reconstruct either")
         if initial_energy is None:
             initial_grid, initial_energy = seed_state(initial_grid, model)
-        else:
-            initial_grid, initial_energy = validate_state(initial_grid, initial_energy, grid_width * grid_height, model)
         if initial_structure is None:
             initial_structure = seed_structure_bulk(initial_grid, grid_width, grid_height, structure_rules)
-        initial_grid, initial_energy, initial_structure = validate_structure_bulk(
+        initial_grid, initial_energy, initial_structure = validate_structure_compiled(
             initial_grid, initial_energy, initial_structure, grid_width, grid_height, structure_rules)
         self._compile_pipelines(grid_width, grid_height)
         count = grid_width * grid_height
@@ -175,45 +175,70 @@ class CompositionEngine:
                                     usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_SRC))))
             cold_buf = keep(self.device.create_buffer_with_data(data=cold_table.tobytes(), usage=wgpu.BufferUsage.STORAGE))
             plan_buf = keep(self.device.create_buffer(size=count * 8, usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_DST))
-            groups = {}
-            for spec in KERNEL_SPECS:
-                for current in (0, 1):
-                    ordered = [fields[0][current], fields[0][1 - current], cold_buf,
-                               fields[1][current], fields[1][1 - current], fields[2][current], fields[2][1 - current], plan_buf]
-                    groups[spec.id, current] = self.device.create_bind_group(layout=self.pipelines[spec.id][1], entries=[
-                        {"binding": binding, "resource": {"buffer": buffer}} for binding, buffer in enumerate(ordered)])
-            def read_state(current):
-                return tuple(np.frombuffer(self.device.queue.read_buffer(pair[current]), dtype=np.uint32).copy() for pair in fields)
+            groups = []
+            layout = next(iter(self.pipelines.values()))[1]
+            for current in (0, 1):
+                ordered = [fields[0][current], fields[0][1 - current], cold_buf,
+                           fields[1][current], fields[1][1 - current], fields[2][current], fields[2][1 - current], plan_buf]
+                groups.append(self.device.create_bind_group(layout=layout, entries=[
+                    {"binding": binding, "resource": {"buffer": buffer}} for binding, buffer in enumerate(ordered)]))
+            staging = None
+            readback_count = 0
+            def read_state(current, encoder=None):
+                nonlocal staging, readback_count
+                if staging is None:
+                    staging = keep(self.device.create_buffer(size=count * 12,
+                        usage=wgpu.BufferUsage.COPY_DST | wgpu.BufferUsage.MAP_READ))
+                encoder = encoder if encoder is not None else self.device.create_command_encoder()
+                for coordinate, pair in enumerate(fields):
+                    encoder.copy_buffer_to_buffer(pair[current], 0, staging, coordinate * count * 4, count * 4)
+                self.device.queue.submit([encoder.finish()])
+                staging.map_sync(wgpu.MapMode.READ)
+                try:
+                    complete = np.frombuffer(staging.read_mapped(), dtype=np.uint32).reshape(3, count)
+                    return tuple(values.copy() for values in complete)
+                finally:
+                    staging.unmap()
+                    readback_count += 1
             state = (initial_grid, initial_energy, initial_structure)
             current = 0
             tick_times, planning_times = [], []
             snapshots, energy_snapshots, structure_snapshots = [], [], []
             pass_snapshots, pass_energy_snapshots, pass_structure_snapshots = [], [], []
             plans = []
+            upload = np.empty((count, 2), dtype=np.uint32)
             for tick in range(start_tick, start_tick + n_ticks):
                 started = time.perf_counter()
-                plan = plan_structure_bulk(*state, grid_width, grid_height, structure_rules)
+                if trace_passes:
+                    plan = plan_structure_bulk(*state, grid_width, grid_height, structure_rules)
+                    sources, planned_words = plan.sources, plan.structure
+                else:
+                    sources, planned_words = _transport_validated(*state, grid_width, grid_height, structure_rules)
                 planning_times.append((time.perf_counter() - started) * 1000)
-                self.device.queue.write_buffer(plan_buf, 0, np.column_stack((plan.sources, plan.structure)).astype(np.uint32).tobytes())
+                upload[:, 0], upload[:, 1] = sources, planned_words
+                self.device.queue.write_buffer(plan_buf, 0, upload)
                 if trace_passes:
                     plans.append((tick, plan))
+                encoder = self.device.create_command_encoder()
                 for pass_id in movement_schedule_for_tick(tick):
-                    encoder = self.device.create_command_encoder()
                     compute = encoder.begin_compute_pass()
                     compute.set_pipeline(self.pipelines[pass_id][0])
-                    compute.set_bind_group(0, groups[pass_id, current])
+                    compute.set_bind_group(0, groups[current])
                     compute.dispatch_workgroups(wg_x, wg_y)
                     compute.end()
-                    self.device.queue.submit([encoder.finish()])
                     current = 1 - current
                     if trace_passes:
+                        self.device.queue.submit([encoder.finish()])
                         state = read_state(current)
                         for collection, values in zip((pass_snapshots, pass_energy_snapshots, pass_structure_snapshots), state):
                             collection.append((tick, pass_id, values))
+                        encoder = self.device.create_command_encoder()
                 if not trace_passes:
-                    state = read_state(current)
+                    # One ordered command buffer and one complete-state mapping
+                    # per tick, instead of 18 submissions and three mappings.
+                    state = read_state(current, encoder)
                 try:
-                    state = validate_structure_bulk(*state, grid_width, grid_height, structure_rules)
+                    state = validate_structure_compiled(*state, grid_width, grid_height, structure_rules)
                 except ValueError as error:
                     raise InvalidCompletedState(str(error), state, tick) from error
                 # Readback above completes all submitted work; no submit-only timings.
@@ -221,15 +246,15 @@ class CompositionEngine:
                 if snapshot_interval and (tick + 1) % snapshot_interval == 0:
                     for collection, values in zip((snapshots, energy_snapshots, structure_snapshots), state):
                         collection.append((tick + 1, values.copy()))
-            state = validate_structure_bulk(*state, grid_width, grid_height, structure_rules)
             return {
                 "final_grid": state[0], "final_energy": state[1], "final_structure": state[2],
                 "initial_grid": initial_grid.copy(), "initial_energy": initial_energy.copy(), "initial_structure": initial_structure.copy(),
-                "energy_ledger": energy_ledger_array(state[0] & 255, state[1], model),
+                "energy_ledger": _ledger_validated(*state, grid_width, grid_height, structure_rules),
                 "tick_times_ms": tick_times, "planning_times_ms": planning_times, "total_time_ms": sum(tick_times),
                 "mean_tick_ms": float(np.mean(tick_times)) if tick_times else 0.0,
                 "snapshots": snapshots, "energy_snapshots": energy_snapshots, "structure_snapshots": structure_snapshots,
                 "start_tick": start_tick, "end_tick": start_tick + n_ticks,
                 "pass_snapshots": pass_snapshots, "pass_energy_snapshots": pass_energy_snapshots,
                 "pass_structure_snapshots": pass_structure_snapshots, "structural_plans": plans,
+                "readback_count": readback_count,
             }

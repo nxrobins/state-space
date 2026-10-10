@@ -1,6 +1,7 @@
 """Content-addressed evidence; scores never stand alone as admission authority."""
 
 import importlib.metadata
+import base64
 import json
 import os
 import platform
@@ -35,11 +36,13 @@ def context_sources() -> dict[str, str]:
     paths = []
     for directory in ("engine", "eval"):
         paths.extend(path for path in (ROOT / directory).rglob("*")
-                     if path.suffix in (".py", ".ts", ".mjs", ".wgsl", ".json")
+                     if path.suffix in (".py", ".ts", ".mjs", ".wgsl", ".json", ".c", ".wasm")
                      and not any(part in ("__pycache__", "node_modules") for part in path.parts))
     paths.extend((ROOT / "locked").glob("*.wgsl"))
     paths.extend(ROOT / name for name in ("evolve_ss.py", "package.json", "package-lock.json", "pyproject.toml", "uv.lock"))
-    return {str(path.relative_to(ROOT)).replace("\\", "/"): path.read_text(encoding="utf-8") for path in sorted(paths)}
+    return {str(path.relative_to(ROOT)).replace("\\", "/"):
+            base64.b64encode(path.read_bytes()).decode("ascii") if path.suffix == ".wasm" else path.read_text(encoding="utf-8")
+            for path in sorted(paths)}
 
 
 def capture_context() -> dict:
@@ -55,7 +58,7 @@ def capture_context() -> dict:
             "device": device_identity(), "runtime": {"python": sys.version, "platform": platform.platform(), "node": node_version,
               "typescript": compiler_version, "typescriptHash": compiler_hash,
               "hostHash": digest(canonical(host)), "processor": host["processor"], "logicalCpus": host["logicalCpus"],
-              **{name: importlib.metadata.version(name) for name in ("numpy", "wgpu")}}}
+              **{name: importlib.metadata.version(name) for name in ("numpy", "wgpu", "wasmtime")}}}
 
 
 def write_immutable(directory: Path, value, suffix: str = ".json") -> str:

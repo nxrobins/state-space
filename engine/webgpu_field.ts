@@ -7,6 +7,7 @@ import { COMMON_SHADER, KERNEL_SOURCES } from './generated/shaders.js';
 import { KERNEL_SPECS, movementScheduleForTick } from './generated/schedule.js';
 import { inspectPass, type PassReport, type StepOptions } from './inspection.js';
 import { planStructure, rulesForRegistry, type StructuralState } from './structure.js';
+import { compiledStructuralPlan } from './structure_compiled.js';
 
 export interface GpuStateSpaceField extends Omit<StateSpaceField, 'step'> {
   readonly backendInfo: Readonly<{ vendor: string; architecture: string; device: string; description: string; isFallbackAdapter: boolean }>;
@@ -53,9 +54,8 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#device.destroy();
   }
 
-  async #readState(current: number): Promise<StructuralState> {
+  async #readState(current: number, encoder = this.#device.createCommandEncoder()): Promise<StructuralState> {
     const bytes = this.width * this.height * 4;
-    const encoder = this.#device.createCommandEncoder();
     encoder.copyBufferToBuffer(this.#buffers[current], 0, this.#staging, 0, bytes);
     encoder.copyBufferToBuffer(this.#buffers[current + 2], 0, this.#staging, bytes, bytes);
     encoder.copyBufferToBuffer(this.#buffers[current + 4], 0, this.#staging, bytes * 2, bytes);
@@ -72,7 +72,9 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
   async step(ticks = 1, options: StepOptions = {}): Promise<readonly PassReport[]> {
     this.ensureAvailable();
     checkedInteger(ticks, 0, Number.MAX_SAFE_INTEGER - this.tickCount, 'ticks');
-    if (options.inspect !== undefined && typeof options.inspect !== 'boolean') throw new Error('inspect must be a boolean.');
+    const requestedInspect = options.inspect;
+    if (requestedInspect !== undefined && typeof requestedInspect !== 'boolean') throw new Error('inspect must be a boolean.');
+    const inspect = requestedInspect === true;
     if (this.#loss !== undefined) throw new Error(`WebGPU device lost: ${this.#loss}`);
     if (ticks === 0) return Object.freeze([]);
     this.busy = true;
@@ -87,7 +89,8 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
       let before: StructuralState = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
       const reports: PassReport[] = [];
       for (let offset = 0; offset < ticks; offset += 1) {
-        const structuralPlan = planStructure(before, this.width, this.height, rulesForRegistry(this.registry));
+        const structuralPlan = inspect ? planStructure(before, this.width, this.height, rulesForRegistry(this.registry))
+          : compiledStructuralPlan(before, this.width, this.height, this.registry);
         const upload = new Uint32Array(this.width * this.height * 2);
         for (let i = 0; i < structuralPlan.sources.length; i += 1) {
           upload[i * 2] = structuralPlan.sources[i]; upload[i * 2 + 1] = structuralPlan.structure[i];
@@ -101,16 +104,16 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
           pass.dispatchWorkgroups(Math.ceil(this.width / 16), Math.ceil(this.height / 16));
           pass.end();
           current = 1 - current;
-          if (options.inspect) {
+          if (inspect) {
             this.#device.queue.submit([encoder.finish()]);
             const after = await this.#readState(current);
-            reports.push(inspectPass(before, after, this.coldTable, this.tickCount + offset, passId, passId === 'structure' ? structuralPlan : undefined));
+            reports.push(inspectPass(before, after, this.coldTable, this.tickCount + offset, passId,
+              passId === 'structure' ? structuralPlan as ReturnType<typeof planStructure> : undefined));
             before = after;
             encoder = this.#device.createCommandEncoder();
           }
         }
-        this.#device.queue.submit([encoder.finish()]);
-        if (!options.inspect) before = await this.#readState(current);
+        if (!inspect) before = await this.#readState(current, encoder);
       }
       const state = before;
       const error = await this.#device.popErrorScope();

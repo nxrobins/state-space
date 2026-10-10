@@ -57,6 +57,37 @@ and renders it. Its displayed wall time includes that work. Larger worlds at
 60 ticks per second remain unproven. C7 reruns the benchmark and retains its own
 distributions; the numbers above remain the explicitly dated C6 baseline.
 
+### CPU complete-tick measurements (2026-10-10)
+
+The shared JavaScript CPU engine now validates complete state at the tick
+boundary, reuses private pass buffers, avoids redundant unsigned-array scans,
+and skips heat exchanges with provably zero flux. Public single-pass inputs,
+snapshot validation, observer isolation and the ca-v3 physical rules remain
+checked. All 15 benchmark trajectories retain the baseline's complete state.
+
+On Windows x64, Node 22.22.3 and one JavaScript thread of an Intel i9-11900K:
+
+| Shape | Before: workload median range | After: workload median range | Speedup range |
+| --- | ---: | ---: | ---: |
+| 72 × 48 | 6.76–8.23 ms/tick | 1.58–2.81 ms/tick | 2.73–4.27× |
+| 160 × 90 | 25.23–29.83 ms/tick | 6.87–11.46 ms/tick | 2.56–3.68× |
+| 256 × 256 | 179.50–202.79 ms/tick | 32.04–57.62 ms/tick | 3.50–5.75× |
+
+The five workloads are empty, flowing sand/water/oil/smoke, supported metal,
+coherent collapse, and coupled heat/fire/phase changes. Each uses two warmups
+and seven samples of four ticks. Timings include host planning, allocations and
+committed-state validation; setup, inspection, rendering and GPU work are
+excluded. Raw samples, bundle/benchmark hashes and reproduction instructions
+are in [the CPU performance report](checkpoints/CPU_PERFORMANCE.md).
+
+For a 60 Hz game reserving half the frame (8.33 ms) for physics, 72 × 48 fits
+the measured CPU workloads; their largest four-tick sample average was
+5.77 ms/tick. The 160 × 90 structure and coupled cases exceed that half-frame
+budget, and 256 × 256 exceeds a whole 16.67 ms frame. These are bounded local
+measurements, not guarantees for every world, individual tick, target device
+or rollback burst. GPU latency was not remeasured. Keep the client's fixed
+tick rate as a design choice; throughput improvements create more headroom.
+
 ## Run and build on the engine lab
 
 From the checkout, run `npm ci`, `npm run build:sdk`, then
@@ -125,6 +156,16 @@ evaluation evidence get a directory derived from that report name. Missing GPU,
 missing browser, incomplete evidence or changing source makes the run fail.
 
 ## Where the engine should evolve next
+
+The [GPU performance checkpoint](checkpoints/GPU_PERFORMANCE.md) measures 256×256
+public native and browser GPU ticks within the 16.67 ms simulation budget on the
+recorded i9-11900K/RTX 4090 machine. Normal stepping uses an exact compiled global
+support planner, a single complete-state readback and batched pass submission.
+Inspected stepping retains the independent detailed planners and per-pass
+readbacks. The measurements exclude rendering, setup and inspection; they cover
+seven workloads with exact native/browser state hashes and zero energy drift.
+The portable CPU backend receives the same compiled support/validation core, but
+these GPU measurements do not establish a 60 Hz CPU or low-end-device guarantee.
 
 The immediate priority is **reducing the cost of a complete tick**. Measure host
 connectivity work, full-field transfers and allocations independently. Candidate

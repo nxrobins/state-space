@@ -99,6 +99,7 @@ def corpus():
 def source_hashes():
     root = Path(__file__).resolve().parent
     names = ("structure.py", "structure.ts", "structure_gpu.py", "structure_bulk.py", "structure_conformance.py",
+             "structure_compiled.py", "structure_compiled.ts", "structure_solver.c", "generated/structure_solver.wasm",
              "shaders/structure_apply.wgsl", "state.py", "array_state.py", "enthalpy.py", "thermal.ts",
              "registry.py", "registry.ts", "materials.json")
     return {"engine/" + name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in names}

@@ -1,0 +1,368 @@
+{
+  "reportVersion": 1,
+  "recordedAt": "2026-10-10T19:32:54.067Z",
+  "environment": {
+    "node": "v22.22.3",
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalCpus": 16
+  },
+  "gitCommit": "11b3d325c26dd1aedb3ca57926f33791b9b03a4c",
+  "bundleHash": "1693ba12910cc20f49416010c1b23e8edc9728a42d8cc54406f1f71c6d9c208d",
+  "benchmarkHash": "cdd4268948f7c50c7ffdd9b5760ffd91500e56bfad8f9221d27134ba16337a77",
+  "config": {
+    "warmups": 2,
+    "samples": 7,
+    "ticks": 4,
+    "shapes": [
+      [
+        72,
+        48
+      ],
+      [
+        160,
+        90
+      ],
+      [
+        256,
+        256
+      ]
+    ],
+    "startTick": 17,
+    "inspect": false
+  },
+  "scope": "Synchronous public CPU field.step, including planning, allocations and committed-state validation; excludes setup, snapshots, inspection, rendering and GPU work.",
+  "rows": [
+    {
+      "workload": "empty",
+      "width": 72,
+      "height": 48,
+      "cells": 3456,
+      "initialHash": "b0793fdb955d1ee4386943cb7fbdb89fd6f0aff377d873dd761c764a36953c2c",
+      "finalHash": "cb47ca427687323dd54b5c000c2e8c45e95bf48929eb056c174f9340033bcbb1",
+      "samplesMsPerTick": [
+        6.769575000000003,
+        6.68365,
+        6.747700000000002,
+        6.561299999999996,
+        6.758600000000001,
+        6.963349999999991,
+        7.219875000000002
+      ],
+      "minMs": 6.561299999999996,
+      "medianMs": 6.758600000000001,
+      "p95Ms": 7.219875000000002,
+      "maxMs": 7.219875000000002,
+      "cellTicksPerSecond": 511348.50412807375
+    },
+    {
+      "workload": "flow",
+      "width": 72,
+      "height": 48,
+      "cells": 3456,
+      "initialHash": "6d2da527bc9d9b885a69368a80b4e6ced9522b2bd9d6845e936d2f4e3fa0db63",
+      "finalHash": "7263110211f4bca6fa9526fc3f7e1ab94a5962be9d5b6887875c557319b4fbff",
+      "samplesMsPerTick": [
+        7.56165,
+        7.166850000000011,
+        8.595425000000006,
+        7.2087999999999965,
+        6.797799999999995,
+        6.84842500000002,
+        7.031599999999997
+      ],
+      "minMs": 6.797799999999995,
+      "medianMs": 7.166850000000011,
+      "p95Ms": 8.595425000000006,
+      "maxMs": 8.595425000000006,
+      "cellTicksPerSecond": 482220.222273383
+    },
+    {
+      "workload": "supported",
+      "width": 72,
+      "height": 48,
+      "cells": 3456,
+      "initialHash": "7af9258a7141d86cea47ba059878e3a13718d33b5eb2c23c535fdd35ce669edd",
+      "finalHash": "465984e000a47232415a95f50e9e9f0730dba79b855e420d17479d71b2b02338",
+      "samplesMsPerTick": [
+        8.480725000000007,
+        10.375574999999998,
+        8.557674999999989,
+        7.753700000000009,
+        7.676974999999999,
+        7.747749999999996,
+        8.230850000000004
+      ],
+      "minMs": 7.676974999999999,
+      "medianMs": 8.230850000000004,
+      "p95Ms": 10.375574999999998,
+      "maxMs": 10.375574999999998,
+      "cellTicksPerSecond": 419883.7301129286
+    },
+    {
+      "workload": "collapse",
+      "width": 72,
+      "height": 48,
+      "cells": 3456,
+      "initialHash": "91bcdaa012642a937cb0f653886fa47d77cf0d4766dee6c432d7d78319cee5b9",
+      "finalHash": "9d69223241cca8f408de830a26f6c4325d5837b8245c952e69758c1dbec55252",
+      "samplesMsPerTick": [
+        7.33057500000001,
+        7.01094999999998,
+        6.942900000000009,
+        7.344600000000014,
+        7.096275000000048,
+        7.099625000000003,
+        7.138050000000021
+      ],
+      "minMs": 6.942900000000009,
+      "medianMs": 7.099625000000003,
+      "p95Ms": 7.344600000000014,
+      "maxMs": 7.344600000000014,
+      "cellTicksPerSecond": 486786.27392291825
+    },
+    {
+      "workload": "coupled",
+      "width": 72,
+      "height": 48,
+      "cells": 3456,
+      "initialHash": "714a1fff41518de2509e6173e9cde9a670d567891ef478709c6cf748cb79fe7f",
+      "finalHash": "5da56f34d41151c50acff2e6c32b3bcfcd2b7c96f9c97602f1cf405f546cc232",
+      "samplesMsPerTick": [
+        7.667100000000005,
+        7.709350000000029,
+        7.817924999999946,
+        7.668100000000038,
+        7.608524999999986,
+        7.509900000000016,
+        7.614449999999977
+      ],
+      "minMs": 7.509900000000016,
+      "medianMs": 7.667100000000005,
+      "p95Ms": 7.817924999999946,
+      "maxMs": 7.817924999999946,
+      "cellTicksPerSecond": 450757.13111867564
+    },
+    {
+      "workload": "empty",
+      "width": 160,
+      "height": 90,
+      "cells": 14400,
+      "initialHash": "59d9c8b1ee23d6f432e69b2cf892aeed01afd8c6d60b14c6f9a64e6da982fa4d",
+      "finalHash": "70fc9cf341f31ed907ca032503728103f30dc2835142392f48e8d03b4402a4ba",
+      "samplesMsPerTick": [
+        25.180499999999995,
+        25.555925000000002,
+        25.155299999999954,
+        25.37284999999997,
+        25.229325000000017,
+        25.01150000000007,
+        25.469600000000014
+      ],
+      "minMs": 25.01150000000007,
+      "medianMs": 25.229325000000017,
+      "p95Ms": 25.555925000000002,
+      "maxMs": 25.555925000000002,
+      "cellTicksPerSecond": 570764.3783573279
+    },
+    {
+      "workload": "flow",
+      "width": 160,
+      "height": 90,
+      "cells": 14400,
+      "initialHash": "40bec65ceb979bf99885936b5165f1b50b4c3781560fbf70fb1784bd212f855b",
+      "finalHash": "1a1e56c8466bcadb349e134dc7c14977a9d955960818b44ebeb7b9df6c42d5bf",
+      "samplesMsPerTick": [
+        28.363900000000058,
+        27.261675000000082,
+        28.602424999999926,
+        25.265075000000024,
+        25.197200000000066,
+        25.300674999999956,
+        25.310524999999984
+      ],
+      "minMs": 25.197200000000066,
+      "medianMs": 25.310524999999984,
+      "p95Ms": 28.602424999999926,
+      "maxMs": 28.602424999999926,
+      "cellTicksPerSecond": 568933.2797324436
+    },
+    {
+      "workload": "supported",
+      "width": 160,
+      "height": 90,
+      "cells": 14400,
+      "initialHash": "1445eca2b3b4e9a269121d1d88e2a61909c6e8da57ac6b74c05c729f906462a7",
+      "finalHash": "028e20fed850727240c75d6f2673639502daf92b71a5dd113ba7094e9fe59ddc",
+      "samplesMsPerTick": [
+        29.500499999999988,
+        32.21572500000002,
+        29.278500000000122,
+        29.800674999999956,
+        29.827524999999923,
+        29.972950000000083,
+        29.873000000000047
+      ],
+      "minMs": 29.278500000000122,
+      "medianMs": 29.827524999999923,
+      "p95Ms": 32.21572500000002,
+      "maxMs": 32.21572500000002,
+      "cellTicksPerSecond": 482775.5571405954
+    },
+    {
+      "workload": "collapse",
+      "width": 160,
+      "height": 90,
+      "cells": 14400,
+      "initialHash": "2d2290e78236c114dc199ac56c1c13e557d51908644adae65b6cbf19663d1383",
+      "finalHash": "c01e582bb2091039ad8e5a5077f39ca123ae2b1db712333839bc76a530fcac06",
+      "samplesMsPerTick": [
+        27.218250000000126,
+        25.253600000000006,
+        25.567599999999857,
+        25.541950000000043,
+        25.267025000000103,
+        25.232524999999896,
+        25.04729999999995
+      ],
+      "minMs": 25.04729999999995,
+      "medianMs": 25.267025000000103,
+      "p95Ms": 27.218250000000126,
+      "maxMs": 27.218250000000126,
+      "cellTicksPerSecond": 569912.7617913047
+    },
+    {
+      "workload": "coupled",
+      "width": 160,
+      "height": 90,
+      "cells": 14400,
+      "initialHash": "1c27af375ebc52748bfbdb7517ccf15ab08db0f24b77abc434cee8b2b6e5f099",
+      "finalHash": "06b8d4507cda29dc4ead1501b53d693dff9000f57811402505f8946b8ce6ef14",
+      "samplesMsPerTick": [
+        29.49917500000015,
+        29.225175000000036,
+        29.311674999999923,
+        31.69987500000002,
+        29.371250000000146,
+        29.2818249999998,
+        29.97417500000006
+      ],
+      "minMs": 29.225175000000036,
+      "medianMs": 29.371250000000146,
+      "p95Ms": 31.69987500000002,
+      "maxMs": 31.69987500000002,
+      "cellTicksPerSecond": 490275.3543005466
+    },
+    {
+      "workload": "empty",
+      "width": 256,
+      "height": 256,
+      "cells": 65536,
+      "initialHash": "33d840b8b3d6b16f83cb018a86e0dd74c451cb9d296c2236e63e95fb35bbb905",
+      "finalHash": "d8b10be4b8560f5d679cda9fc6f6df5ff845fe69d4d6d9cebe63032a2ff98f49",
+      "samplesMsPerTick": [
+        184.28775000000041,
+        181.32860000000028,
+        184.20910000000003,
+        189.82067499999994,
+        187.44029999999975,
+        191.90954999999985,
+        180.7746500000003
+      ],
+      "minMs": 180.7746500000003,
+      "medianMs": 184.28775000000041,
+      "p95Ms": 191.90954999999985,
+      "maxMs": 191.90954999999985,
+      "cellTicksPerSecond": 355617.7770904461
+    },
+    {
+      "workload": "flow",
+      "width": 256,
+      "height": 256,
+      "cells": 65536,
+      "initialHash": "35f7dfc6361f0d018d28f897e933d76f5d0215cf7fbf808e7bab97394ec7a335",
+      "finalHash": "abe749ba126de5a3702fc2a541a67d034eaa9ad835b1eb63dbead258fba3c845",
+      "samplesMsPerTick": [
+        178.490225,
+        183.9947000000002,
+        177.81825000000026,
+        180.66425000000072,
+        177.4653500000004,
+        179.49845000000005,
+        182.55412500000057
+      ],
+      "minMs": 177.4653500000004,
+      "medianMs": 179.49845000000005,
+      "p95Ms": 183.9947000000002,
+      "maxMs": 183.9947000000002,
+      "cellTicksPerSecond": 365106.2167946296
+    },
+    {
+      "workload": "supported",
+      "width": 256,
+      "height": 256,
+      "cells": 65536,
+      "initialHash": "ff4128e36139908210e2056912f5c2d33cc49cfa5ac80b04c877f1967d0f490b",
+      "finalHash": "d2fab1fb8d5b318fd8464146a64fef570a19301dabf727fc058dc27a0761e2a1",
+      "samplesMsPerTick": [
+        202.80045000000064,
+        202.23959999999988,
+        202.7906750000002,
+        202.31242500000008,
+        200.55075000000033,
+        205.4546250000003,
+        203.6868999999997
+      ],
+      "minMs": 200.55075000000033,
+      "medianMs": 202.7906750000002,
+      "p95Ms": 205.4546250000003,
+      "maxMs": 205.4546250000003,
+      "cellTicksPerSecond": 323170.67833617073
+    },
+    {
+      "workload": "collapse",
+      "width": 256,
+      "height": 256,
+      "cells": 65536,
+      "initialHash": "cbd68da20b32b52670cc697c27798e703d56f13a1c0a12a622c8cab6bd7194b1",
+      "finalHash": "94ebfc76aafbbbc69192aef53a982a326cc259483017822682f83ef1ed47a140",
+      "samplesMsPerTick": [
+        184.10077499999989,
+        183.00504999999976,
+        182.36352499999975,
+        183.32154999999875,
+        184.2879499999999,
+        181.35032499999943,
+        183.04952500000036
+      ],
+      "minMs": 181.35032499999943,
+      "medianMs": 183.04952500000036,
+      "p95Ms": 184.2879499999999,
+      "maxMs": 184.2879499999999,
+      "cellTicksPerSecond": 358023.3272935282
+    },
+    {
+      "workload": "coupled",
+      "width": 256,
+      "height": 256,
+      "cells": 65536,
+      "initialHash": "cac813d4262aa28851fd5803be95af0f080ba308234c68477ea23637665bd0cd",
+      "finalHash": "d6e5855fc1cb713ae7dd02246b810a8f8cc83ec5c49a0e89cb76f016e9a66802",
+      "samplesMsPerTick": [
+        202.35372500000085,
+        198.32237499999974,
+        201.2618999999995,
+        200.38714999999866,
+        204.51705000000038,
+        205.71117500000037,
+        201.780424999999
+      ],
+      "minMs": 198.32237499999974,
+      "medianMs": 201.780424999999,
+      "p95Ms": 205.71117500000037,
+      "maxMs": 205.71117500000037,
+      "cellTicksPerSecond": 324788.69047877326
+    }
+  ]
+}

@@ -42,7 +42,8 @@ class ReleaseProperties(unittest.TestCase):
             self.assertNotEqual(first, verify.source_hashes())
         hashes = verify.source_hashes()
         for path in ('examples/lab/app.js', 'examples/lab/controller.js', 'examples/lab/verify.js', 'examples/lab/index.html',
-                     'examples/lab/lab.test.mjs', 'scripts/verify_browser.py', 'docs/CAPABILITIES.md'):
+                     'examples/lab/lab.test.mjs', 'scripts/verify_browser.py', 'docs/CAPABILITIES.md',
+                     'engine/structure_solver.c', 'engine/generated/structure_solver.wasm'):
             self.assertIn(path, hashes)
         self.assertTrue(lint_lab_css('canvas{width:100%;max-height:520px;object-fit:contain;}'))
         self.assertEqual(lint_lab_css((verify.ROOT / 'examples/lab/style.css').read_text(encoding='utf-8')), [])

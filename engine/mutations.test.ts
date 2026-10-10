@@ -44,7 +44,7 @@ describe('conformance properties reject reproduced regression classes', () => {
     const mutant = mutatedBackend('Math.imul(h ^ (h >>> 13), 1274126177)', '((h ^ (h >>> 13)) * 1274126177)');
     const coordinates = [[0, 0, 1], [1000, 1000, 3], [16, 18, 2]];
     expect(coordinates.some(([x, y, salt]) => mutant.hashPair(x, y, salt) !== original.hashPair(x, y, salt))).toBe(true);
-    const noop = mutatedBackend('const output = input.slice();', 'const output = input.slice(); return { grid: output, energyQ: inputEnergy.slice() };');
+    const noop = mutatedBackend('const input = state.grid;', 'return cloneStructure(state); const input = state.grid;');
     const grid = Uint32Array.of(packVoxel(MAT.SMOKE, 200), packVoxel(MAT.AIR));
     expect([...original.runCpuPass(createPhysicsState(grid, grid.length, 1, DEFAULT_REGISTRY), 2, 1, buildColdTable(), 'gas_spread0_s0').grid]).not.toEqual([...noop.runCpuPass(createPhysicsState(grid, grid.length, 1, DEFAULT_REGISTRY), 2, 1, buildColdTable(), 'gas_spread0_s0').grid]);
   });

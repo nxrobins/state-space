@@ -13,6 +13,7 @@
     "lint": "node engine/lint_ts.mjs",
     "test": "vitest run --config engine/vitest.config.ts",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json",
+    "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
     "build:sdk": "vite build --config engine/vite.sdk.config.ts && tsc -p engine/tsconfig.sdk.json",
     "prepack": "npm run build:sdk"
   },

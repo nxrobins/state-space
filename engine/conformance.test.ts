@@ -63,6 +63,28 @@ describe('native GPU and browser CPU conformance', () => {
     }
   });
 
+  it('matches native state after every pass through the complete tick path', () => {
+    for (const fixture of cases) {
+      let state = { grid: Uint32Array.from(fixture.cells), energyQ: Uint32Array.from(fixture.energyQ), structure: Uint32Array.from(fixture.structure) };
+      const observations: { id: string; state: typeof state }[] = [];
+      for (let tick = fixture.tick; tick < fixture.tick + fixture.ticks; tick += 1) {
+        state = runCpuTick(state, fixture.width, fixture.height, buildColdTable(), tick, (id, observed) => {
+          observations.push({ id, state: observed });
+        });
+      }
+      // Retain observations until all ticks finish: rotating internal buffers
+      // must never rewrite an earlier public pass snapshot.
+      expect(observations).toHaveLength(fixture.passes.length);
+      observations.forEach(({ id, state: observed }, cursor) => {
+        const expected = fixture.passes[cursor];
+        expect(id).toBe(expected.id);
+        expect([...observed.grid], `${fixture.name} tick=${expected.tick} pass=${id}`).toEqual(expected.cells);
+        expect([...observed.energyQ], `${fixture.name} energy after ${id}`).toEqual(expected.energyQ);
+        expect([...observed.structure], `${fixture.name} structure after ${id}`).toEqual(expected.structure);
+      });
+    }
+  });
+
   it('requires coherent collapse, retained support, consumed pins, and new solidification bonds', () => {
     const fixture = (name: string) => cases.find(value => value.name === name)!;
     const indices = (cells: number[], material: number) => cells.flatMap((value, index) => (value & 255) === material ? [index] : []);
