@@ -31,7 +31,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
             cpu.step(samples + warmup - 1);
             references[scene] = { firstTickHash, finalHash: await stateHash(cpu), endTick: cpu.tick, initial };
         } finally { cpu.close(); }
-        for (const mode of ['plain', 'styled', 'alternating']) {
+        for (const mode of (scene === 'water' ? ['plain', 'styled', 'alternating', 'water-off'] : ['plain', 'styled', 'alternating'])) {
             progress(`${scene} · ${mode}`);
             const world = await createGpuField(256, 256);
             let renderer;
@@ -43,13 +43,14 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                 const initialHash = await stateHash(world);
                 renderer.render(world, false); await renderer.completed();
                 renderer.render(world, true); await renderer.completed();
+                renderer.render(world, true, { water: false }); await renderer.completed();
                 if (await stateHash(world) !== initialHash) throw new Error('A/B render mutated the complete state');
                 const frames = [], physics = [], rendering = [];
                 for (let i = 0; i < warmup + samples; i++) {
                     const started = performance.now();
                     await world.step(1);
                     const physicsDone = performance.now();
-                    renderer.render(world, mode === 'styled' || (mode === 'alternating' && i % 2 === 0));
+                    renderer.render(world, mode === 'styled' || mode === 'water-off' || (mode === 'alternating' && i % 2 === 0), { water: mode !== 'water-off' });
                     await renderer.completed();
                     const finished = performance.now();
                     if (i === 0 && await stateHash(world) !== references[scene].firstTickHash) throw new Error('Rendered first tick differs from CPU reference');
@@ -59,17 +60,19 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                 if (finalHash !== references[scene].finalHash || world.tick !== references[scene].endTick) throw new Error('Rendered continuation differs from CPU reference');
                 if (world.energyBalance().driftQ !== 0n) throw new Error('Energy drift');
                 const finalLavaCells = world.snapshot().grid.reduce((count, cell) => count + ((cell & 255) === MAT.LAVA ? 1 : 0), 0);
-                if (scene === 'lighting' && finalLavaCells < 64) throw new Error('Lighting stress sources expired before measurement ended');
+                const finalWaterCells = world.snapshot().grid.reduce((count, cell) => count + ((cell & 255) === MAT.WATER ? 1 : 0), 0);
+                if (['lighting', 'water'].includes(scene) && finalLavaCells < 64) throw new Error('Stress sources expired before measurement ended');
+                if (scene === 'water' && finalWaterCells < 1024) throw new Error('Water stress pool expired before measurement ended');
                 rows.push({ scene, mode, width: 256, height: 256, output: [canvas.width, canvas.height], warmup, ticks: samples,
                     frameMs: distribution(frames), physicsMs: distribution(physics), renderingMs: distribution(rendering),
-                    overBudget: frames.filter(value => value > 1000 / 60).length, finalHash, endTick: world.tick, finalLavaCells,
+                    overBudget: frames.filter(value => value > 1000 / 60).length, finalHash, endTick: world.tick, finalLavaCells, finalWaterCells,
                     cpuParity: true, renderIsolation: true, energyDriftQ: '0', physicsAdapter: world.backendInfo, renderingAdapter: renderer.backendInfo });
             } finally { renderer?.close(); world.close(); }
         }
     }
     // A separate display-paced run records actual callback cadence as well as work.
     const pacedScenes = [];
-    for (const scene of ['bridge', 'lighting']) {
+    for (const scene of ['bridge', 'lighting', 'water']) {
         progress(`${scene} · 60 Hz display pacing`);
         const world = await createGpuField(256, 256);
         let renderer;
@@ -101,5 +104,5 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
         } finally { renderer?.close(); world.close(); }
     }
     return { rows, paced: pacedScenes[0], pacedScenes, userAgent: navigator.userAgent,
-        scope: 'Physics + public state copies/uploads + material, area-light extraction, terrain visibility, bloom and composition + GPU completion at 1920x1080. Startup, reference hashing and OS scanout excluded.' };
+        scope: 'Physics + public state copies/uploads + material, area-light extraction, terrain visibility, water geometry/reflections/refraction, bloom and composition + GPU completion at 1920x1080. Startup, reference hashing and OS scanout excluded.' };
 }

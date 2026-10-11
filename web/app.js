@@ -14,16 +14,23 @@ async function init() {
     const stats = document.getElementById('stats');
     stats.textContent = 'Creating the WebGPU field...';
     const world = await createGpuField(GRID_W, GRID_H);
-    const scene = new URLSearchParams(location.search).get('scene') === 'lighting' ? 'lighting' : 'bridge';
+    const requestedScene = new URLSearchParams(location.search).get('scene');
+    const scene = ['lighting', 'water'].includes(requestedScene) ? requestedScene : 'bridge';
     seedScene(world, scene);
     const initial = world.packedSnapshot();
     const canvas = document.getElementById('canvas');
-    let styled = true, lighting = true;
+    let styled = true, lighting = true, water = true;
     if (scene === 'lighting') {
         canvas.setAttribute('aria-label', 'Interactive lava light and shadow gallery');
         document.querySelector('#heading h1').textContent = 'Light finds a way.';
         document.querySelector('#heading p').textContent = 'Lava lights the terrain. Pillars cast shadows. Toggle lighting to compare.';
         document.getElementById('reset-demo').textContent = 'Restart gallery';
+    }
+    if (scene === 'water') {
+        canvas.setAttribute('aria-label', 'Interactive fire and lava reflections over water');
+        document.querySelector('#heading h1').textContent = 'Fire on the water.';
+        document.querySelector('#heading p').textContent = 'Lava reflects. Ripples bend the riverbed. Toggle water effects to compare.';
+        document.getElementById('reset-demo').textContent = 'Restart lagoon';
     }
     const clock = new FrameClock();
     function resize() {
@@ -35,7 +42,7 @@ async function init() {
     let renderer;
     try { renderer = await createMaterialRenderer(canvas, GRID_W, GRID_H, world.registry); }
     catch (error) { world.close(); throw error; }
-    function render() { renderer.render(world, styled, { lighting }); }
+    function render() { renderer.render(world, styled, { lighting, water }); }
     function paintVoxels(gx, gy, mat, radius) { pendingPaints.push({ gx, gy, mat, radius }); }
     function flushPaints() {
         const paints = pendingPaints; pendingPaints = [];
@@ -82,6 +89,7 @@ async function init() {
         if (e.code === 'KeyC') void enqueue(() => { pendingPaints = []; world.clear(); clock.reset(); render(); });
         if (e.code === 'KeyB') void setView();
         if (e.code === 'KeyL') void setLighting();
+        if (e.code === 'KeyW') void setWater();
         if (e.code === 'KeyR') void resetBridge();
         const num = parseInt(e.key);
         if (num >= 1 && num <= 9) {
@@ -154,8 +162,18 @@ async function init() {
         });
     }
     function resetBridge() { return enqueue(() => { pendingPaints = []; world.restore(initial); clock.reset(); render(); }); }
+    function setWater(value) {
+        return enqueue(async () => {
+            if (value !== undefined && typeof value !== 'boolean') throw new Error('water must be boolean');
+            water = value === undefined ? !water : value;
+            render(); await renderer.completed();
+            document.getElementById('water-toggle').textContent = water ? 'Water optics: on' : 'Water optics: off';
+            document.getElementById('water-toggle').setAttribute('aria-pressed', String(water));
+        });
+    }
     document.getElementById('view-toggle').addEventListener('click', () => { void setView(); });
     document.getElementById('light-toggle').addEventListener('click', () => { void setLighting(); });
+    document.getElementById('water-toggle').addEventListener('click', () => { void setWater(); });
     document.getElementById('reset-demo').addEventListener('click', () => { void resetBridge(); });
     document.getElementById('pause').addEventListener('click', () => { paused = !paused; clock.reset(); });
 
@@ -167,6 +185,7 @@ async function init() {
         },
         setView(mode) { if (!['plain', 'styled'].includes(mode)) throw new Error('Invalid view'); return setView(mode === 'styled'); },
         setLighting,
+        setWater,
         resetBridge,
         ready: true,
         rendererInfo: renderer.backendInfo,

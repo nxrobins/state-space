@@ -36,6 +36,34 @@ struct Params { size: vec2<u32>, tick: u32, styled: u32, viewport: vec2<f32>, di
 @group(1) @binding(3) var light_positions_a: texture_2d<f32>;
 @group(1) @binding(4) var light_positions_b: texture_2d<f32>;
 @group(1) @binding(5) var illumination: texture_2d<f32>;
+@group(1) @binding(6) var water_geometry: texture_2d<u32>;
+@group(2) @binding(0) var span_output: texture_storage_2d<rgba32uint, write>;
+
+// One invocation per column: linear work, exact integer surface/floor positions.
+// Only private presentation geometry is written. Rebuilt after every state upload.
+@compute @workgroup_size(64) fn cs_water_spans(@builtin(global_invocation_id) id: vec3<u32>) {
+    let x = id.x;
+    if (x >= params.size.x) { return; }
+    var y = 0u;
+    while (y < params.size.y) {
+        if ((cells[y * params.size.x + x] & 255u) != 2u) { y++; continue; }
+        let top = y;
+        while (y < params.size.y) {
+            if ((cells[y * params.size.x + x] & 255u) != 2u) { break; }
+            y++;
+        }
+        var exposed = 0u;
+        if (top > 0u) {
+            let above = cells[(top - 1u) * params.size.x + x];
+            let material = above & 255u;
+            let phase = (above >> 24u) & 15u;
+            exposed = select(0u, 1u, material == 0u || material == 4u || phase == 4u || phase == 5u);
+        }
+        for (var row = top; row < y; row++) {
+            textureStore(span_output, vec2<i32>(i32(x), i32(row)), vec4<u32>(top, y, exposed, 0u));
+        }
+    }
+}
 @vertex fn vs_main(@builtin(vertex_index) index: u32) -> VertexOutput {
     let uv = vec2<f32>(f32((index << 1u) & 2u), f32(index & 2u));
     return VertexOutput(vec4<f32>(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0), uv);
@@ -182,7 +210,7 @@ fn transmission(p: vec2<i32>) -> f32 {
     if (phase == 4u) { return select(0.97, 0.88, material == 14u); }
     return 0.0;
 }
-fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
+fn traced_visibility(receiver: vec2<f32>, emitter: vec2<f32>, water_path: bool) -> f32 {
     // Grid traversal visits every crossed cell, including one-cell walls.
     // Ignore only the emitting and receiving cells, so exposed faces can glow.
     let delta = emitter - receiver;
@@ -193,8 +221,9 @@ fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     let destination = vec2<i32>(floor(emitter));
     var crossing = select(fract(receiver), 1.0 - fract(receiver), ray >= vec2<f32>(0.0)) * crossing_step;
     var transmittance = 1.0;
-    // The 48-cell radius needs at most 69 crossings. The bound is visual only.
-    for (var i = 0u; i < 96u; i++) {
+    // Lighting has a 48-cell radius; water images extend at most 96 cells.
+    // This bound affects presentation only, never the physical tick schedule.
+    for (var i = 0u; i < 192u; i++) {
         if (all(cell == destination)) { return transmittance; }
         if (crossing.x < crossing.y) {
             cell.x += stride.x; crossing.x += crossing_step.x;
@@ -203,10 +232,13 @@ fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
         }
         if (all(cell == destination)) { return transmittance; }
         if (any(cell < vec2<i32>(0)) || any(cell >= vec2<i32>(params.size))) { return 0.0; }
-        transmittance *= transmission(cell);
+        transmittance *= select(transmission(cell), 1.0, water_path && material_at(cell) == 2u);
         if (transmittance < 0.01) { return 0.0; }
     }
     return 0.0;
+}
+fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
+    return traced_visibility(receiver, emitter, false);
 }
 @fragment fn fs_lighting(in: VertexOutput) -> @location(0) vec4<f32> {
     let position = min(vec2<u32>(in.position.xy), params.size - 1u);
@@ -268,6 +300,66 @@ fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     }
     return vec4<f32>(color / weight_sum, 1.0);
 }
+fn lit_scene(p: vec2<f32>) -> vec3<f32> {
+    let cell = clamp(vec2<i32>(floor(p)), vec2<i32>(0), vec2<i32>(params.size) - 1);
+    let texel = clamp(vec2<i32>(p * 2.0), vec2<i32>(0), vec2<i32>(params.size * 2u) - 1);
+    var color = textureLoad(source, texel, 0).rgb;
+    if ((params.styled & 2u) != 0u) {
+        let light = textureLoad(illumination, cell, 0).rgb;
+        color += min(color + 0.025, vec3<f32>(0.7)) * light * 1.7;
+    }
+    return color;
+}
+// Screen-space water optics sample the unmodified HDR scene, never themselves.
+// Surface/floor spans, crossed-cell visibility and depth absorption keep sealed
+// pockets dark and stop refraction through submerged opaque objects. Reflection
+// mirrors the visible 2D scene; it does not infer hidden 3D geometry behind it.
+@fragment fn fs_optics(in: VertexOutput) -> MaterialOutput {
+    let f = in.uv * vec2<f32>(params.size);
+    let p = min(vec2<i32>(f), vec2<i32>(params.size) - 1);
+    var color = lit_scene(f);
+    var emission = textureLoad(glow, vec2<i32>(f * 2.0), 0).rgb;
+    if ((params.styled & 8u) == 0u || material_at(p) != 2u) {
+        return MaterialOutput(vec4<f32>(color, 1.0), vec4<f32>(emission, 1.0));
+    }
+    let span = textureLoad(water_geometry, p, 0);
+    let top = f32(span.x);
+    let bottom = f32(span.y);
+    let depth = f.y - top;
+    let time = f32(params.tick) / 60.0;
+    let ripple = sin(f.x * 0.23 + time * 1.7) + 0.5 * sin(f.x * 0.57 - time * 1.1 + depth * 0.14);
+
+    // Bend a shallow ray toward the nearest submerged floor. Opaque intervening
+    // cells stop it; water absorbs progressively, retaining the blue base at depth.
+    let refracted = vec2<f32>(f.x + ripple * min(3.0, 0.6 + depth * 0.06), bottom + 0.5);
+    if ((params.styled & 32u) != 0u && bottom < f32(params.size.y) && bottom - f.y < 64.0 &&
+        refracted.x >= 0.0 && refracted.x < f32(params.size.x)) {
+        let floor_material = material_at(vec2<i32>(floor(refracted)));
+        if (floor_material != 0u && floor_material != 2u && solid(vec2<i32>(floor(refracted))) > 0.0) {
+            let through = visibility(f, refracted);
+            let floor_color = lit_scene(refracted) * vec3<f32>(0.55, 0.82, 0.95);
+            color = mix(color, floor_color, through * 0.82);
+        }
+    }
+
+    // Mirror above this water body's actual surface. Waves displace the image;
+    // finite depth and roughness fade it without creating physical heat or light.
+    let reflected = vec2<f32>(f.x + ripple * min(2.2, 0.3 + depth * 0.06), top - depth);
+    if ((params.styled & 16u) != 0u && span.z != 0u && depth < 96.0 && reflected.y >= 0.0 &&
+        reflected.x >= 0.0 && reflected.x < f32(params.size.x)) {
+        let column = vec2<i32>(i32(floor(reflected.x)), p.y);
+        let other = textureLoad(water_geometry, column, 0);
+        if (material_at(column) == 2u && other.x == span.x && other.z != 0u) {
+            let surface = vec2<f32>(reflected.x, top + 0.001);
+            let through = traced_visibility(f, surface, true);
+            let roughness = 0.86 + 0.14 * sin(depth * 1.8 + ripple * 0.7);
+            let weight = through * 0.48 * exp(-depth * 0.018) * roughness;
+            color = mix(color, lit_scene(reflected), weight);
+            emission += textureLoad(glow, vec2<i32>(reflected * 2.0), 0).rgb * weight;
+        }
+    }
+    return MaterialOutput(vec4<f32>(color, 1.0), vec4<f32>(emission, 1.0));
+}
 fn filmic(color: vec3<f32>) -> vec3<f32> {
     return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), vec3<f32>(0.0), vec3<f32>(1.0));
 }
@@ -280,13 +372,6 @@ fn filmic(color: vec3<f32>) -> vec3<f32> {
     let texel = min(vec2<i32>(uv * vec2<f32>(textureDimensions(source))), vec2<i32>(textureDimensions(source)) - vec2<i32>(1));
     var color = textureLoad(source, texel, 0).rgb;
     if (params.styled != 0u) {
-        if ((params.styled & 2u) != 0u) {
-            let cell = min(vec2<i32>(uv * vec2<f32>(params.size)), vec2<i32>(params.size) - 1);
-            let light = textureLoad(illumination, cell, 0).rgb;
-            // Cell-aligned sampling preserves thin shadows without light leaking
-            // through opaque walls during upsampling.
-            color += min(color + 0.025, vec3<f32>(0.7)) * light * 1.7;
-        }
         if ((params.styled & 4u) != 0u) { color += textureSampleLevel(glow, linear_sampler, uv, 0.0).rgb * 0.55; }
         color = filmic(color * 1.15);
     }

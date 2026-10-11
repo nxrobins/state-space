@@ -90,7 +90,16 @@ def main() -> int:
                 "  field.set_cell(2,2,5,20); field.set_energy(2,2,700*256)\n"
                 "  before=field.snapshot().to_dict(); renderer.render(field); pixels=renderer.read_pixels()\n"
                 "  if before!=field.snapshot().to_dict() or len(pixels)!=64*64*4: raise RuntimeError('Installed renderer failed')\n"
-                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels)}))\n"
+                " with create_field(16,16) as field, MaterialRenderer(16,16,output_size=(64,64)) as renderer:\n"
+                "  for y in range(8,16):\n"
+                "   for x in range(16): field.set_cell(x,y,2,20)\n"
+                "  field.set_cell(8,5,4,255); field.set_energy(8,5,650*256)\n"
+                "  before=field.snapshot().to_dict(); renderer.render(field,lighting=False,bloom=False,water=False); dry=renderer.read_pixels()\n"
+                "  renderer.render(field,lighting=False,bloom=False,refraction=False); wet=renderer.read_pixels()\n"
+                "  if dry==wet or before!=field.snapshot().to_dict(): raise RuntimeError('Installed water optics failed')\n"
+                "  pixel=(42*64+34)*4\n"
+                "  if wet[pixel]<=dry[pixel]+30: raise RuntimeError('Installed fire reflection missing')\n"
+                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True}))\n"
             )
             report["nativeRendering"] = json.loads(run([sys.executable, "-I", "-c", render_client], temp))
             client = temp / "client.mts"

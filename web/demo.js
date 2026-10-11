@@ -71,10 +71,47 @@ export function seedLighting(field) {
         energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
 }
 
-export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting']);
+// Suspended finite lava bowls above a deep pool, with a patterned submerged bed.
+// Geometry/energy are ordinary initial state; no source is replenished during play.
+export function seedWater(field) {
+    if (field.width !== 256 || field.height !== 256) throw new Error('Water gallery is a 256 × 256 scene');
+    const cells = new Uint32Array(256 * 256).fill(packVoxel(MAT.AIR));
+    const rectangle = (x0, y0, x1, y1, material, thermal = 20) => {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) cells[y * 256 + x] = packVoxel(material, thermal);
+    };
+    rectangle(0, 242, 255, 255, MAT.STONE);
+    rectangle(0, 158, 19, 241, MAT.STONE);
+    rectangle(236, 158, 255, 241, MAT.STONE);
+    rectangle(20, 160, 235, 241, MAT.WATER, 35);
+    for (let x = 20; x < 236; x += 12) rectangle(x, 236, Math.min(235, x + 5), 241, MAT.METAL);
+    for (const x of [60, 174]) {
+        // A thick, cold stone thermal mass survives the finite hot reservoir.
+        // The inner face may melt normally; anchors sit in the cooler outer base.
+        rectangle(x - 11, 90, x - 1, 117, MAT.STONE);
+        rectangle(x + 24, 90, x + 34, 117, MAT.STONE);
+        rectangle(x - 11, 118, x + 34, 139, MAT.STONE);
+        rectangle(x, 94, x + 23, 117, MAT.LAVA, 255);
+        rectangle(x - 10, 118, x - 2, 120, MAT.WOOD, 190);
+        rectangle(x - 10, 115, x - 2, 117, MAT.FIRE, 255);
+        rectangle(x - 12, 121, x - 9, 159, MAT.STONE);
+    }
+    const state = createPhysicsState(cells, 256, 256, DEFAULT_REGISTRY);
+    for (let i = 0; i < cells.length; i++) {
+        if ((cells[i] & 255) === MAT.LAVA) state.energyQ[i] = 1250 * 256;
+        if ((cells[i] & 255) === MAT.FIRE) state.energyQ[i] = 650 * 256;
+    }
+    field.restore({ ...field.packedSnapshot(), tick: 0, packedCells: Array.from(state.grid),
+        energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
+    // Native structural anchors keep the finite basins above the reflecting pool
+    // even after the wooden side platforms burn. No edits occur during playback.
+    for (const x of [49, 94, 163, 208]) field.setAnchor(x, 139);
+}
+
+export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water']);
 export function seedScene(field, scene) {
     if (scene === 'bridge') seedBridge(field);
     else if (scene === 'lighting') seedLighting(field);
+    else if (scene === 'water') seedWater(field);
     else if (scene === 'emissive') field.clear(MAT.LAVA);
     else throw new Error('Unknown demo scene');
 }

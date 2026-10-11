@@ -12,6 +12,75 @@ class RenderingTests(unittest.TestCase):
         width, height = renderer.output_size
         return np.frombuffer(renderer.read_pixels(), dtype=np.uint8).reshape(height, width, 4)[:, :, :3].astype(np.int16)
 
+    def test_fire_and_lava_reflections_without_lighting_or_bloom(self):
+        for material in (MAT_FIRE, MAT_LAVA):
+            with self.subTest(material=material), create_field(64, 64) as world, MaterialRenderer(64, 64, output_size=(256, 256)) as renderer:
+                for y in range(32, 60):
+                    for x in range(8, 56):
+                        world.set_cell(x, y, MAT_WATER, thermal=20)
+                for y in range(20, 24):
+                    for x in range(20, 32):
+                        world.set_cell(x, y, material, thermal=255)
+                        world.set_energy(x, y, 650 * 256)
+                before = world.snapshot().to_dict()
+                renderer.render(world, lighting=False, bloom=False, water=False)
+                dry = self.image(renderer)
+                renderer.render(world, lighting=False, bloom=False, refraction=False)
+                reflected = self.image(renderer)
+                self.assertGreater(int((reflected[164:180, 84:124, 0] - dry[164:180, 84:124, 0]).max()), 50)
+                self.assertEqual(world.snapshot().to_dict(), before)
+                # A sealed water pocket has no exposed mirror surface.
+                for x in range(8, 56):
+                    world.set_cell(x, 31, MAT_STONE)
+                renderer.render(world, lighting=False, bloom=False, refraction=False)
+                sealed = self.image(renderer)
+                np.testing.assert_array_equal(sealed[164:180, 84:124], dry[164:180, 84:124])
+                # Moving the surface must rebuild the mirrored image immediately.
+                for x in range(8, 56):
+                    world.set_cell(x, 31, MAT_AIR)
+                for y in range(32, 36):
+                    for x in range(8, 56):
+                        world.set_cell(x, y, MAT_AIR)
+                changed = world.snapshot().to_dict()
+                renderer.render(world, lighting=False, bloom=False, refraction=False)
+                moved = self.image(renderer)
+                self.assertGreater(int(moved[196:212, 84:124, 0].max()), 50)
+                self.assertLess(int(moved[164:176, 84:124, 0].max()), int(reflected[164:176, 84:124, 0].max()) - 50)
+                self.assertEqual(world.snapshot().to_dict(), changed)
+                for y in range(20, 24):
+                    for x in range(20, 32):
+                        world.set_cell(x, y, MAT_AIR)
+                renderer.render(world, lighting=False, bloom=False, refraction=False)
+                removed = self.image(renderer)
+                self.assertLess(int(removed[196:212, 84:124, 0].max()), int(moved[196:212, 84:124, 0].max()) - 50)
+                self.assertEqual(world.energy_balance().drift_q, 0)
+
+    def test_refraction_reveals_nearest_floor_and_blocks_hidden_terrain(self):
+        with create_field(32, 32) as world, MaterialRenderer(32, 32, output_size=(128, 128)) as renderer:
+            for y in range(12, 28):
+                for x in range(4, 28):
+                    world.set_cell(x, y, MAT_WATER, thermal=20)
+            for x in range(4, 28):
+                world.set_cell(x, 28, MAT_METAL if x % 4 < 2 else MAT_STONE)
+            before = world.snapshot().to_dict()
+            renderer.render(world, lighting=False, bloom=False, water=False)
+            opaque = self.image(renderer)
+            renderer.render(world, lighting=False, bloom=False, reflections=False)
+            refracted = self.image(renderer)
+            self.assertGreater(int(np.abs(refracted[80:108, 24:104] - opaque[80:108, 24:104]).max()), 10)
+            self.assertEqual(world.snapshot().to_dict(), before)
+            # A nearer solid shelf hides the lower patterned floor completely.
+            for x in range(4, 28):
+                world.set_cell(x, 22, MAT_STONE)
+            renderer.render(world, lighting=False, bloom=False, reflections=False)
+            shelf = self.image(renderer)
+            for x in range(4, 28):
+                world.set_cell(x, 28, MAT_FIRE, thermal=255)
+                world.set_energy(x, 28, 650 * 256)
+            renderer.render(world, lighting=False, bloom=False, reflections=False)
+            np.testing.assert_array_equal(self.image(renderer)[56:80, 28:100], shelf[56:80, 28:100])
+            self.assertEqual(world.energy_balance().drift_q, 0)
+
     def test_fire_and_lava_light_cool_terrain_and_single_cell_wall_blocks(self):
         for source in (MAT_FIRE, MAT_LAVA):
             with self.subTest(source=source), create_field(32, 32) as world, MaterialRenderer(32, 32, output_size=(128, 128)) as renderer:

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedBridge, seedLighting } from './demo.js';
+import { seedBridge, seedLighting, seedWater } from './demo.js';
 import { FrameClock } from './frame-clock.js';
 import { canvasCell } from './renderer.js';
 
@@ -31,6 +31,21 @@ test('lighting gallery retains finite lava sources through a measured trajectory
         world.step(132);
         assert(world.packedSnapshot().packedCells.filter(cell => (cell & 255) === MAT.LAVA).length >= 64);
         assert.equal(world.energyBalance().driftQ, 0n);
+    } finally { world.close(); }
+});
+
+test('water lagoon retains finite emitters and water through a measured trajectory', () => {
+    const world = createStateSpaceField(256, 256);
+    try {
+        seedWater(world);
+        const initial = world.packedSnapshot();
+        world.step(132);
+        const final = world.packedSnapshot();
+        assert(final.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length >= 64);
+        assert(final.packedCells.filter(cell => (cell & 255) === MAT.WATER).length >= 1024);
+        assert.equal(world.energyBalance().driftQ, 0n);
+        world.restore(initial); world.step(132);
+        assert.deepEqual(world.packedSnapshot(), final);
     } finally { world.close(); }
 });
 

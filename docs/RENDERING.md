@@ -21,13 +21,30 @@ walls. No temporal accumulation or extra simulation state is required.
 Two blur passes add bloom before filmic tone mapping. Material targets have two
 pixels per simulation cell; bloom uses half a pixel per cell. The output preserves
 square cells and letterboxes other aspect ratios. A/B mode uses the same field,
-with plain catalog colors or material shading, dynamic lighting, shadows, and bloom.
+with plain catalog colors or material shading, dynamic lighting, shadows, water
+optics, and bloom.
+
+Water mirrors the visible HDR scene above each exposed surface, including fire,
+lava, and their emission. Reflected emission participates in bloom. A private GPU
+compute pass walks each column once to locate contiguous water surfaces and floors;
+integer geometry stays exact on wide fields. Tick-driven ripples displace the image,
+and roughness/depth fade it. Sealed pockets have no exposed reflecting surface.
+
+Refraction bends a shallow ray toward the nearest submerged floor, tinting and
+attenuating its color through water. Crossed-cell visibility prevents seeing through
+an intervening opaque shelf. Geometry is rebuilt from each completed state, so moved
+water and removed emitters immediately replace the image. The reflection image has
+a 96-cell depth limit; refraction reaches at most 64 cells below the receiver.
+These are artistic screen-space effects for a 2D field: reflections mirror already
+visible scene pixels, without reconstructing hidden 3D geometry or ray-tracing
+the above-water scene. Their limits do not change any physical process.
 
 Rendering binds physical coordinates read-only and owns separate GPU resources.
 It consumes committed public copies, schedules no physics passes, and performs no
 additional physics readback. The current separate rendering device requires an
 upload of the three host coordinates each frame. All such copies/uploads are
 included in full-frame measurements. Lighting does not transport model energy.
+Water optics write only private textures and perform no additional state readback.
 
 ## Burning bridge demo
 
@@ -58,14 +75,21 @@ pillars. Resume to watch heat and material changes under the normal physics. Its
 larger reservoirs retain lava through the complete benchmark trajectory; playback
 never replenishes their energy. **R** restarts the selected scene.
 
+The [fire and water lagoon](http://127.0.0.1:8765/web/?scene=water&paused) starts
+paused with finite lava basins, burning wooden platforms, a deep pool, and a
+patterned riverbed. Ordinary structural anchors hold the stone basins above the
+water; the wood still burns under normal physics. Use **Water optics** or press
+**W** to compare reflections/refraction while keeping the same complete field.
+
 The client uses a fixed 60-tick clock with `requestAnimationFrame`. Slow displays
 retain simulation backlog rather than skipping physical ticks. Visual animation
 uses the completed absolute tick, so pausing also freezes cosmetic flicker.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,
-styled, and alternating views on the bridge, a fully emissive lava field, and the
-distributed lighting gallery at 256 × 256. Output is 1920 × 1080. It also runs the
-styled bridge and gallery at a requested 60 Hz display cadence. Local results
+styled, and alternating views on the bridge, a fully emissive lava field, the
+distributed lighting gallery, and the lagoon at 256 × 256. The lagoon adds a
+water-disabled comparison. Output is 1920 × 1080. It also runs the styled bridge,
+lighting gallery, and lagoon at a requested 60 Hz display cadence. Local results
 depend on the device, browser, and host load.
 
 ## Native Python rendering
@@ -84,6 +108,9 @@ with create_field(256, 256) as world, MaterialRenderer(256, 256) as renderer:
     renderer.render(world, styled=False)   # Same physical state, plain palette.
     renderer.render(world, lighting=False) # Keep shading, heat glow, and bloom.
     renderer.render(world, bloom=False)    # Inspect direct light and shadows.
+    renderer.render(world, water=False)    # Compare with opaque water shading.
+    # Inspect reflections independently.
+    renderer.render(world, lighting=False, bloom=False, refraction=False)
 ```
 
 Set `registry` and `output_size` when constructing the renderer. The field's
@@ -96,7 +123,9 @@ JavaScript field API. The shared source is `web/render.wgsl`; `engine.generate`
 bundles it into browser assets and `engine/shaders/material_render.wgsl` for the
 installed Python package. No external effects package is required.
 The browser API accepts the same independent switches as an options object:
-`renderer.render(field, true, { lighting: false, bloom: false })`.
+`renderer.render(field, true, { lighting: false, bloom: false, water: true })`.
+Both APIs also accept independent boolean `reflections` and `refraction` switches;
+`water: false` disables both. All switches default to true in the styled view.
 
 ## Reproduce the complete frame measurements
 
@@ -107,13 +136,14 @@ uv run python -m scripts.benchmark_frames --browser-cli <agent-browser-launcher>
 The harness captures the real A/B button, checks unchanged complete state, and
 measures 120 frames after 12 warmup ticks for each scene/view/backend. The timing
 includes physics, public coordinate copies, uploads, shading, light extraction,
-terrain visibility, bloom/composition,
+terrain visibility, water geometry/reflection/refraction, bloom/composition,
 and completed GPU work. Initialization, reference hashing, screenshot readbacks,
 and operating-system scanout are excluded. Native output is offscreen. Browser
 results additionally record display cadence. Complete trajectories must match the
 JavaScript CPU reference and native backend, with zero energy drift.
 
-See the [lighting frame report](checkpoints/LIGHTING_PERFORMANCE.md) for hardware,
+See the [water frame report](checkpoints/WATER_PERFORMANCE.md) for hardware,
 distributions, screenshots, and current measured limits. The earlier
-[material-rendering report](checkpoints/RENDERING_PERFORMANCE.md) retains the
-baseline before dynamic lighting was added.
+[lighting frame report](checkpoints/LIGHTING_PERFORMANCE.md) and
+[material-rendering report](checkpoints/RENDERING_PERFORMANCE.md) retain the
+baselines before water optics and dynamic lighting were added.

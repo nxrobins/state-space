@@ -18,7 +18,7 @@ import numpy as np
 import wgpu
 
 from engine import MaterialRenderer, create_field
-from engine.schema import MAT_LAVA
+from engine.schema import MAT_LAVA, MAT_WATER
 from engine.verify import ROOT, source_hashes
 from scripts.verify_browser import digest, run_captured
 
@@ -62,7 +62,7 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
     rows = []
     for scene, initial in scenes.items():
         expected = next(row for row in browser['rows'] if row['scene'] == scene)
-        for mode in ('plain', 'styled', 'alternating'):
+        for mode in (('plain', 'styled', 'alternating', 'water-off') if scene == 'water' else ('plain', 'styled', 'alternating')):
             print(f'Native frame benchmark: {scene} / {mode}', flush=True)
             with create_field(256, 256) as field, MaterialRenderer(256, 256) as renderer:
                 field.restore(initial)
@@ -73,8 +73,12 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 styled = renderer.read_pixels()
                 renderer.render(field, lighting=False)
                 unlit = renderer.read_pixels()
+                renderer.render(field, water=False)
+                opaque_water = renderer.read_pixels()
                 if field.snapshot().to_dict() != before or plain == styled or (scene != 'emissive' and styled == unlit):
                     raise ValueError('Native A/B isolation or visual distinction failed')
+                if scene == 'water' and styled == opaque_water:
+                    raise ValueError('Water optics produced no image difference')
                 if scene == 'bridge' and mode == 'styled':
                     write_png(output / 'native-plain.png', plain, 1920, 1080)
                     write_png(output / 'native-styled.png', styled, 1920, 1080)
@@ -82,12 +86,15 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 if scene == 'lighting' and mode == 'styled':
                     write_png(output / 'native-gallery.png', styled, 1920, 1080)
                     write_png(output / 'native-gallery-unlit.png', unlit, 1920, 1080)
+                if scene == 'water' and mode == 'styled':
+                    write_png(output / 'native-water.png', styled, 1920, 1080)
+                    write_png(output / 'native-water-off.png', opaque_water, 1920, 1080)
                 frames, physics, rendering = [], [], []
                 for i in range(warmup + samples):
                     started = time.perf_counter()
                     field.step(1)
                     physics_done = time.perf_counter()
-                    renderer.render(field, styled=mode == 'styled' or (mode == 'alternating' and i % 2 == 0))
+                    renderer.render(field, styled=mode in ('styled', 'water-off') or (mode == 'alternating' and i % 2 == 0), water=mode != 'water-off')
                     finished = time.perf_counter()
                     if i >= warmup:
                         frames.append((finished - started) * 1000)
@@ -97,13 +104,38 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 if final_hash != expected['finalHash'] or field.tick != expected['endTick'] or field.energy_balance().drift_q != 0:
                     raise ValueError('Native rendered state differs from CPU/browser reference')
                 final_lava_cells = int(np.count_nonzero((field.grid & 255) == MAT_LAVA))
-                if final_lava_cells != expected['finalLavaCells'] or (scene == 'lighting' and final_lava_cells < 64):
+                final_water_cells = int(np.count_nonzero((field.grid & 255) == MAT_WATER))
+                if final_lava_cells != expected['finalLavaCells'] or (scene in ('lighting', 'water') and final_lava_cells < 64):
                     raise ValueError('Lighting source continuation differs')
+                if final_water_cells != expected['finalWaterCells'] or (scene == 'water' and final_water_cells < 1024):
+                    raise ValueError('Water continuation differs')
+                water_proof = {}
+                if scene == 'water' and mode == 'styled':
+                    renderer.render(field, lighting=False, bloom=False, refraction=False)
+                    wet = renderer.read_pixels()
+                    renderer.render(field, lighting=False, bloom=False, water=False)
+                    dry = renderer.read_pixels()
+                    a = np.frombuffer(wet, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
+                    b = np.frombuffer(dry, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
+                    centers = ((np.arange(256) + .5) * 1080 / 256).astype(int)
+                    delta = a[centers[:, None], centers[None, :] + 420, :3] - b[centers[:, None], centers[None, :] + 420, :3]
+                    water_mask = (field.grid.reshape(256, 256) & 255) == MAT_WATER
+                    changed = int(np.count_nonzero(water_mask & (np.max(np.abs(delta), axis=2) > 3)))
+                    reflected = int(np.count_nonzero(water_mask & (delta[:, :, 0] > 20)))
+                    if changed < 1024 or reflected < 64 or field.snapshot().to_dict()['tick'] != expected['endTick']:
+                        raise ValueError('Water optics expired before measurement ended')
+                    water_proof = {'changedWaterCells': changed, 'reflectedRedWaterCells': reflected,
+                                   'lighting': False, 'bloom': False, 'refraction': False}
+                    write_png(output / 'native-water-final-isolated.png', wet, 1920, 1080)
+                    write_png(output / 'native-water-final-off.png', dry, 1920, 1080)
+                    if state_hash(field) != final_hash or field.energy_balance().drift_q != 0:
+                        raise ValueError('Water proof mutated physics')
                 rows.append({'scene': scene, 'mode': mode, 'width': 256, 'height': 256, 'output': [1920, 1080],
                     'ticks': samples, 'warmup': warmup, 'frameMs': distribution(frames), 'physicsMs': distribution(physics),
                     'renderingMs': distribution(rendering), 'overBudget': sum(value > 1000 / 60 for value in frames),
-                    'endTick': field.tick, 'finalHash': final_hash, 'finalLavaCells': final_lava_cells, 'cpuBrowserParity': True, 'renderIsolation': True,
-                    'energyDriftQ': '0', 'lightingTogglePreservesState': True, 'renderingAdapter': renderer.adapter_info})
+                    'endTick': field.tick, 'finalHash': final_hash, 'finalLavaCells': final_lava_cells, 'finalWaterCells': final_water_cells,
+                    'waterProof': water_proof, 'cpuBrowserParity': True, 'renderIsolation': True,
+                    'energyDriftQ': '0', 'lightingTogglePreservesState': True, 'waterTogglePreservesState': True, 'renderingAdapter': renderer.adapter_info})
     return rows
 
 
@@ -162,6 +194,19 @@ def main():
         cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: on')
         cli('wait', '--fn', 'document.getElementById("light-toggle").getAttribute("aria-pressed") === "false"')
         cli('screenshot', str((args.output / 'browser-gallery-unlit.png').resolve()))
+        cli('open', url + '?scene=water&paused')
+        cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        cli('eval', '--stdin', stdin='(async () => { window.__initial = await window.stateSpace.snapshot(); return "saved"; })()')
+        cli('screenshot', str((args.output / 'browser-water.png').resolve()))
+        cli('find', 'role', 'button', 'click', '--name', 'Water optics: on')
+        cli('wait', '--fn', 'document.getElementById("water-toggle").getAttribute("aria-pressed") === "false"')
+        cli('screenshot', str((args.output / 'browser-water-off.png').resolve()))
+        water_ui = cli('eval', '--stdin', stdin='(async () => JSON.stringify(window.__initial) === JSON.stringify(await window.stateSpace.snapshot()))()')['result']
+        if water_ui is not True:
+            raise ValueError('Water button changed simulation state')
+        cli('find', 'role', 'button', 'click', '--name', 'Water optics: off')
+        cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(132); return "stepped"; })()')
+        cli('screenshot', str((args.output / 'browser-water-final.png').resolve()))
         cli('open', url + 'benchmark.html')
         deadline, seen = time.monotonic() + 240, ''
         while True:
@@ -184,11 +229,12 @@ def main():
         native = native_frames(args.output, browser)
         if source_hashes() != before:
             raise ValueError('Sources changed during frame measurements')
-        report = {'reportVersion': 2, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+        report = {'reportVersion': 3, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
             'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
-            'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'commands': commands, 'browser': browser, 'native': native,
+            'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'waterTogglePreservesState': water_ui,
+            'commands': commands, 'browser': browser, 'native': native,
             'scope': 'GPU-completed full frame work, including physics and renderer copies/uploads. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
         (args.output / 'frames.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         print('Report:', args.output / 'frames.json', flush=True)
