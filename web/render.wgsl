@@ -149,8 +149,19 @@ struct MaterialOutput { @location(0) color: vec4<f32>, @location(1) emission: ve
         if (solid(p) > 0.0 && integrity < 1.0) { color *= 0.5 + integrity * 0.5; }
         let heat = temperature(material, energies[index]);
         let hot = max(0.0, (heat - 85.0) / 260.0);
-        let incandescent = mix(vec3<f32>(1.0, 0.12, 0.015), vec3<f32>(1.0, 0.78, 0.32), clamp(hot / 2.0, 0.0, 1.0));
+        // Artistic glow ramp: deep red, then orange, then amber at lava heat. It
+        // stays saturated; the tone curve below keeps that hue when it is bright.
+        let glow_t = clamp(hot / 4.0, 0.0, 1.0);
+        var incandescent = mix(vec3<f32>(1.0, 0.1, 0.012), vec3<f32>(1.0, 0.36, 0.05), smoothstep(0.0, 0.35, glow_t));
+        incandescent = mix(incandescent, vec3<f32>(1.0, 0.6, 0.17), smoothstep(0.3, 1.0, glow_t));
         emission = incandescent * min(hot * hot * 0.65, 6.0);
+        if (material == 10u || material == 16u || material == 17u) {
+            // Molten surfaces churn and form darker crust, so a hot pool reads as
+            // liquid rock instead of a flat lamp. Cosmetic only; mean stays near 1.
+            let churn = volume_noise(vec3<f32>(f * 0.18, time * 0.25));
+            let crust = smoothstep(0.62, 0.86, volume_noise(vec3<f32>(f * 0.42 + vec2<f32>(17.0, 3.0), time * 0.12)));
+            emission *= (0.72 + 0.56 * churn) * (1.0 - 0.5 * crust);
+        }
         if (material == 4u || phase == 8u) {
             let flicker = 0.82 + hash(position + vec2<u32>(params.tick / 3u, 0u)) * 0.36;
             emission += vec3<f32>(1.0, 0.22, 0.015) * flicker * clamp(heat / 200.0, 0.0, 2.0);
@@ -432,7 +443,10 @@ fn lit_scene(p: vec2<f32>) -> vec3<f32> {
         if (floor_material != 0u && floor_material != 2u && solid(vec2<i32>(floor(refracted))) > 0.0) {
             let through = visibility(f, refracted);
             let floor_color = lit_scene(refracted) * vec3<f32>(0.55, 0.82, 0.95);
-            color = mix(color, floor_color, through * 0.82);
+            // The floor shows through near the bottom and fades with height, so its
+            // pattern does not repeat up every water column as vertical streaks.
+            let reach = exp(-(bottom - f.y) * 0.14);
+            color = mix(color, floor_color, through * 0.82 * reach);
         }
     }
 
@@ -456,6 +470,18 @@ fn lit_scene(p: vec2<f32>) -> vec3<f32> {
 }
 fn filmic(color: vec3<f32>) -> vec3<f32> {
     return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), vec3<f32>(0.0), vec3<f32>(1.0));
+}
+// Ordinary values use the per-channel curve unchanged. Bright values map their
+// strongest channel and keep the channel ratios, so hot orange light stays
+// orange instead of every channel saturating to white. Only extreme
+// overexposure still whitens a little.
+fn tonemap(color: vec3<f32>) -> vec3<f32> {
+    let peak = max(color.r, max(color.g, color.b));
+    let channel = filmic(color);
+    if (peak <= 0.8) { return channel; }
+    let mapped = filmic(vec3<f32>(peak)).r;
+    let preserved = mix(color * (mapped / peak), vec3<f32>(mapped), clamp((peak - 6.0) / 24.0, 0.0, 0.25));
+    return mix(channel, preserved, smoothstep(0.8, 2.5, peak));
 }
 fn shimmer_uv(uv: vec2<f32>) -> vec2<f32> {
     let f = uv * vec2<f32>(params.size);
@@ -495,7 +521,7 @@ fn shimmer_uv(uv: vec2<f32>) -> vec2<f32> {
     if (any(sample_uv != uv)) { color = textureSampleLevel(source, linear_sampler, sample_uv, 0.0).rgb; }
     if (params.styled != 0u) {
         if ((params.styled & 4u) != 0u) { color += textureSampleLevel(glow, linear_sampler, sample_uv, 0.0).rgb * 0.55; }
-        color = filmic(color * 1.15);
+        color = tonemap(color * 1.15);
     }
     return vec4<f32>(pow(max(color, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.2)), 1.0);
 }

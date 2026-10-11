@@ -4,7 +4,9 @@ State Space has a built-in WGSL presentation pipeline shared by native Python/wg
 and browser WebGPU. Material grain, wood patterns, metal highlights, liquid surface
 shading, and integrity darkening are cosmetic. Incandescence uses the conserved
 energy coordinate and registry phase/chemical stores, including temperatures above
-the packed display byte's 255 limit. These are artistic curves in model units.
+the packed display byte's 255 limit. These are artistic curves in model units:
+glow moves from deep red through orange to amber, and molten lava, metal and glass
+add a slow churn with darker crust instead of a flat fill.
 
 The renderer writes HDR material color and emission into separate textures. Fire,
 lava, and incandescent materials become dynamic area lights. A GPU pass groups
@@ -18,7 +20,10 @@ the eight-sample area approximation affect presentation only. The light map has
 one texel per simulation cell and uses cell-aligned sampling to preserve thin
 walls. No temporal accumulation or extra simulation state is required.
 
-Two blur passes add bloom before filmic tone mapping. Material targets have two
+Two blur passes add bloom before filmic tone mapping. Ordinary values use the
+per-channel curve. Bright values map their strongest channel and keep the channel
+ratios, so hot orange light stays orange instead of clipping to white; only extreme
+overexposure whitens a little. Material targets have two
 pixels per simulation cell; bloom uses half a pixel per cell. The output preserves
 square cells and letterboxes other aspect ratios. A/B mode uses the same field,
 with plain catalog colors or material shading, dynamic lighting, shadows, water
@@ -31,7 +36,8 @@ integer geometry stays exact on wide fields. Tick-driven ripples displace the im
 and roughness/depth fade it. Sealed pockets have no exposed reflecting surface.
 
 Refraction bends a shallow ray toward the nearest submerged floor, tinting and
-attenuating its color through water. Crossed-cell visibility prevents seeing through
+attenuating its color through water. It fades with height above the floor, so the
+floor pattern does not repeat up each water column. Crossed-cell visibility prevents seeing through
 an intervening opaque shelf. Geometry is rebuilt from each completed state, so moved
 water and removed emitters immediately replace the image. The reflection image has
 a 96-cell depth limit; refraction reaches at most 64 cells below the receiver.

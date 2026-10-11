@@ -46,6 +46,12 @@ async function init() {
     }
     const clock = new FrameClock();
     function resize() {
+        // Overlay the heading only where the letterboxed square field leaves room
+        // for it; otherwise stack it above the field. Measure in overlay layout.
+        const stage = document.getElementById('stage'), heading = document.getElementById('heading');
+        stage.classList.remove('stacked');
+        const gutter = (stage.clientWidth - Math.min(stage.clientWidth, stage.clientHeight)) / 2;
+        stage.classList.toggle('stacked', gutter < heading.offsetLeft + heading.offsetWidth + 16);
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
         canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
