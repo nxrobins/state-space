@@ -17,15 +17,16 @@ let solver: SolverExports | undefined;
 let unavailable = false;
 const tables = new WeakMap<MaterialRegistry, Uint32Array>();
 
-function registryTables(registry: MaterialRegistry): Uint32Array {
+/** Private solver rows: an exact cold-table copy, then derived thermal rows. */
+export function solverTables(registry: MaterialRegistry): Uint32Array {
   let table = tables.get(registry);
   if (table) return table;
   table = new Uint32Array(TABLE_WORDS);
   table.set(registry.coldTable());
   for (const id of registry.materialIds) {
     const offset = id * C.COLD_STRIDE, target = 256 * C.COLD_STRIDE + id * 12;
-    // Private presence markers; these slots are unused by support/temperature.
-    table[offset + 1] = 1;
+    // Thermal slot 0 is a private presence marker; the cold rows stay an exact
+    // copy of the registry table, so no physical property has a second meaning.
     table[target] = 1;
     table[target + 1] = table[offset + C.COLD_PHASE_ENERGY] * 256;
     table[target + 2] = table[offset + C.COLD_FUEL_ENERGY] * 256;
@@ -69,7 +70,7 @@ function validatedWorkspace(input: StructuralStateInput, width: number, height: 
   if (needed > 0xffffffff) throw new Error('World exceeds compiled planner linear memory limit.');
   if (engine.memory.buffer.byteLength < needed) engine.memory.grow(Math.ceil((needed - engine.memory.buffer.byteLength) / 65536));
   const storage = new Uint32Array(engine.memory.buffer, base, TABLE_WORDS + FIELD_COUNT * count);
-  storage.set(registryTables(registry));
+  storage.set(solverTables(registry));
   storage.set(state.grid, TABLE_WORDS); storage.set(state.energyQ, TABLE_WORDS + count); storage.set(state.structure, TABLE_WORDS + count * 2);
   if (engine.validate(width, height, base)) {
     validateStructure(state, width, height, rulesForRegistry(registry));

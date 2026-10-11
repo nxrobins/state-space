@@ -27,3 +27,14 @@ it('preserves exact CPU physics when CSP disables Wasm compilation', async () =>
   expect(field.energyBalance().driftQ).toBe(0n);
   field.close();
 });
+
+it('keeps the private cold rows an exact copy of the registry table', async () => {
+  const { solverTables } = await import('./structure_compiled.js');
+  const { DEFAULT_REGISTRY } = await import('./registry.js');
+  const C = await import('./generated/materials.js');
+  const table = solverTables(DEFAULT_REGISTRY), cold = DEFAULT_REGISTRY.coldTable();
+  // No physical column carries a second meaning, including conductivity.
+  expect([...table.subarray(0, cold.length)]).toEqual([...cold]);
+  const thermal = table.subarray(256 * C.COLD_STRIDE);
+  for (let id = 0; id < 256; id += 1) expect(thermal[id * 12]).toBe(DEFAULT_REGISTRY.materialIds.includes(id) ? 1 : 0);
+});
