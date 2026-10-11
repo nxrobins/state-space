@@ -382,7 +382,8 @@ class CpuStateSpaceField extends FieldState implements StateSpaceField {
         reports.push(inspectPass(before, after, this.coldTable, this.tickCount + index, passId, plan));
         before = after;
       } : undefined;
-      state = runCpuTick(state, this.width, this.height, this.coldTable, this.tickCount + index, observer, this.registry);
+      // Tick 0 reads the committed state; later ticks read unvalidated engine output.
+      state = runCpuTick(state, this.width, this.height, this.coldTable, this.tickCount + index, observer, this.registry, index === 0);
     }
     this.commitState(state, this.tickCount + ticks);
     return Object.freeze(reports);

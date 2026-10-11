@@ -18,7 +18,6 @@ from engine.schema import VoxelState, pack_voxel, unpack_voxel
 from engine.state import seed_state, thermal_view
 from engine.structure import ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, StructuralPlan
 from engine.structure_bulk import seed_structure_bulk, normalize_bonds_bulk, plan_structure_bulk
-from engine.structure_compiled import validate_structure_compiled
 from engine.validation import MAX_TICK, checked_integer, validate_dimensions
 
 if TYPE_CHECKING:
@@ -268,9 +267,10 @@ class Field:
             raise ValueError("inspect must be a boolean")
         if ticks == 0:
             return ()
-        result = self._engine.run(self._cells, self.registry.cold_table(), self.width, self.height, ticks,
-                                  start_tick=self.tick, initial_energy=self._energy, registry=self.registry, trace_passes=inspect,
-                                  initial_structure=self._structure)
+        # The committed state was validated at commit; the compositor validates
+        # each readback once, including the final state adopted below.
+        result = self._engine._run_validated(self._cells, self._energy, self._structure, self.registry.cold_table(),
+                                             self.registry, self.width, self.height, ticks, 0, self.tick, inspect)
         reports = []
         if inspect:
             before_cells, before_energy, before_structure = self._cells, self._energy, self._structure
@@ -291,9 +291,7 @@ class Field:
                 reports.append(PassReport(tick, pass_id, changes, energy_ledger_array(before_cells & 255, before_energy, model),
                                          energy_ledger_array(cells & 255, energy, model), plans[tick] if pass_id == "structure" else None))
                 before_cells, before_energy, before_structure = cells, energy, structure
-        final = validate_structure_compiled(result["final_grid"], result["final_energy"], result["final_structure"],
-                                        self.width, self.height, self.registry._structure)
-        self._cells, self._energy, self._structure = final
+        self._cells, self._energy, self._structure = result["final_grid"], result["final_energy"], result["final_structure"]
         self._tick = result["end_tick"]
         return tuple(reports)
 

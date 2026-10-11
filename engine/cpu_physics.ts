@@ -34,7 +34,9 @@ export function hashPair(x: number, y: number, salt: number): number {
 
 export type PassObserver = (passId: string, state: StructuralState, plan?: StructuralPlan) => void;
 
-export function runCpuTick(state: StructuralState, width: number, height: number, cold: Uint32Array, tick: number, observer?: PassObserver, registry: MaterialRegistry = DEFAULT_REGISTRY): StructuralState {
+/** `committed` is only for a field's own committed state, which was validated at
+ * commit. Every other input is validated by the first (structural) pass. */
+export function runCpuTick(state: StructuralState, width: number, height: number, cold: Uint32Array, tick: number, observer?: PassObserver, registry: MaterialRegistry = DEFAULT_REGISTRY, committed = false): StructuralState {
   checkedInteger(tick, 0, Number.MAX_SAFE_INTEGER, 'tick');
   cold = validateCold(cold, registry);
   const rules = rulesForRegistry(registry);
@@ -46,7 +48,7 @@ export function runCpuTick(state: StructuralState, width: number, height: number
     // bonds until normalize. Public single-pass calls still validate every input.
     const plan = passId === 'structure' && observer ? planStructure(current, width, height, rules) : undefined;
     if (plan) current = plan.apply(current, width, height);
-    else if (passId === 'structure') current = compiledStructuralPlan(current, width, height, registry).apply();
+    else if (passId === 'structure') current = compiledStructuralPlan(current, width, height, registry, committed).apply();
     else {
       // Both buffers are private to this tick. Each pass reads one and writes
       // the other; observers receive copies, and no caller storage is reused.

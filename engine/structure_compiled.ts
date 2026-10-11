@@ -57,14 +57,17 @@ function getSolver(): SolverExports | undefined {
   return solver;
 }
 
-function validatedWorkspace(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry): {
+function validatedWorkspace(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry, committed = false): {
   state: StructuralState; engine?: SolverExports; storage?: Uint32Array;
 } {
   const count = validateDimensions(width, height);
   requireRegistry(registry);
   const engine = getSolver();
   if (!engine) return { state: validateStructure(input, width, height, rulesForRegistry(registry)) };
-  const state = { grid: validatePackedCells(input.grid, count), energyQ: validatePackedCells(input.energyQ, count), structure: validatePackedCells(input.structure, count) };
+  // A field's committed state was validated when it was committed, and every
+  // edit preserves validity. Copying it into the workspace is still required.
+  const state = committed ? input as StructuralState
+    : { grid: validatePackedCells(input.grid, count), energyQ: validatePackedCells(input.energyQ, count), structure: validatePackedCells(input.structure, count) };
   const base = Number(engine.__heap_base.value);
   const needed = base + (TABLE_WORDS + FIELD_COUNT * count) * 4;
   if (needed > 0xffffffff) throw new Error('World exceeds compiled planner linear memory limit.');
@@ -72,7 +75,7 @@ function validatedWorkspace(input: StructuralStateInput, width: number, height: 
   const storage = new Uint32Array(engine.memory.buffer, base, TABLE_WORDS + FIELD_COUNT * count);
   storage.set(solverTables(registry));
   storage.set(state.grid, TABLE_WORDS); storage.set(state.energyQ, TABLE_WORDS + count); storage.set(state.structure, TABLE_WORDS + count * 2);
-  if (engine.validate(width, height, base)) {
+  if (!committed && engine.validate(width, height, base)) {
     validateStructure(state, width, height, rulesForRegistry(registry));
     throw new Error('Compiled complete-state validator disagrees with the reference.');
   }
@@ -84,11 +87,13 @@ export function validateCompiledStructure(input: StructuralStateInput, width: nu
   return validatedWorkspace(input, width, height, registry).state;
 }
 
-/** Takes ownership through validation, then returns independent output storage. */
-export function compiledStructuralPlan(input: StructuralState, width: number, height: number, registry: MaterialRegistry): {
+/** Takes ownership through validation, then returns independent output storage.
+ * `committed` is only for a field's own committed state, which was validated
+ * once at commit; any other input, including GPU readbacks, is validated here. */
+export function compiledStructuralPlan(input: StructuralState, width: number, height: number, registry: MaterialRegistry, committed = false): {
   sources: Uint32Array; structure: Uint32Array; apply(): StructuralState;
 } {
-  const { state, engine, storage } = validatedWorkspace(input, width, height, registry);
+  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, committed);
   if (!engine || !storage) {
     const plan = planStructure(state, width, height, rulesForRegistry(registry));
     return { sources: Uint32Array.from(plan.sources), structure: Uint32Array.from(plan.structure), apply: () => plan.apply(state, width, height) };

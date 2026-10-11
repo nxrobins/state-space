@@ -160,6 +160,18 @@ class CompositionEngine:
             initial_structure = seed_structure_bulk(initial_grid, grid_width, grid_height, structure_rules)
         initial_grid, initial_energy, initial_structure = validate_structure_compiled(
             initial_grid, initial_energy, initial_structure, grid_width, grid_height, structure_rules)
+        return self._run_validated(initial_grid, initial_energy, initial_structure, cold_table, registry,
+                                   grid_width, grid_height, n_ticks, snapshot_interval, start_tick, trace_passes)
+
+    def _run_validated(self, initial_grid, initial_energy, initial_structure, cold_table, registry,
+                       grid_width, grid_height, n_ticks, snapshot_interval, start_tick, trace_passes) -> dict:
+        """Private continuation of an already validated complete state and arguments.
+
+        `run` validates public input. A field passes its own committed state,
+        which was validated at commit; every readback below is validated once.
+        """
+        self._ensure_open()
+        structure_rules = registry._structure
         self._compile_pipelines(grid_width, grid_height)
         count = grid_width * grid_height
         wg_x, wg_y = (grid_width + 15) // 16, (grid_height + 15) // 16

@@ -29,6 +29,23 @@ class StructuralIntegrationProperties(unittest.TestCase):
         self.addCleanup(world.close)
         return world
 
+    def test_field_steps_validate_each_completed_state_once(self):
+        import engine.compositor as compositor
+        world = self.field(6, 5)
+        for x in range(1, 5):
+            world.set_cell(x, 1, 5)
+        world.set_cell(2, 0, 3)
+        real = compositor.validate_structure_compiled
+        with patch.object(compositor, "validate_structure_compiled", side_effect=real) as validator:
+            world.step(3)
+        # One validation per readback; the committed start is not checked again.
+        self.assertEqual(validator.call_count, 3)
+        with patch.object(compositor, "validate_structure_compiled", side_effect=real) as validator:
+            self.engine.run(world.grid, DEFAULT_REGISTRY.cold_table(), 6, 5, 2, start_tick=world.tick,
+                            initial_energy=world.energy_q, initial_structure=world.structure)
+        # The public compositor boundary still validates its input.
+        self.assertEqual(validator.call_count, 3)
+
     def test_break_repair_weld_pin_and_cooling_preserve_explicit_history(self):
         world = self.field(3, 1, 5)
         world.set_anchor(1, 0)
