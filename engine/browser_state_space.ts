@@ -6,6 +6,7 @@ import {
   SCHEMA_VERSION, RULES_VERSION,
 } from './generated/materials.js';
 import { runCpuTick } from './cpu_physics.js';
+import { stateCopyTargets } from './validation.js';
 import { seedState, temperatureQ, thermalView, validateEnergyState, MAX_ENERGY_Q, energyLedger as inspectEnergy } from './thermal.js';
 import { ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, createPhysicsState, normalizeBonds, rulesForRegistry, planStructure,
   type StructuralState, type StructuralPlan } from './structure.js';
@@ -56,6 +57,7 @@ export interface StateSpaceField {
   readonly grid: Uint32Array;
   readonly energyQ: Uint32Array;
   readonly structure: Uint32Array;
+  copyStateInto(target: StructuralState): number;
   energyLedger(): ReturnType<typeof inspectEnergy>;
   energyBalance(): { initialQ: bigint; externalQ: bigint; currentQ: bigint; driftQ: bigint };
   step(ticks?: number, options?: StepOptions): readonly PassReport[];
@@ -165,6 +167,18 @@ export class FieldState {
   get grid(): Uint32Array { this.ensureAvailable(false); return this.cells.slice(); }
   get energyQ(): Uint32Array { this.ensureAvailable(false); return this.energies.slice(); }
   get structure(): Uint32Array { this.ensureAvailable(false); return this.bonds.slice(); }
+
+  /** Copy the committed coordinates into independent caller-owned storage. */
+  copyStateInto(target: StructuralState): number {
+    this.ensureAvailable(false);
+    const [grid, energyQ, structure] = stateCopyTargets(target, this.width * this.height);
+    // A Proxy descriptor trap can start a GPU step during output validation.
+    this.ensureAvailable(false);
+    Uint32Array.prototype.set.call(grid, this.cells);
+    Uint32Array.prototype.set.call(energyQ, this.energies);
+    Uint32Array.prototype.set.call(structure, this.bonds);
+    return this.tickCount;
+  }
 
   energyLedger(): ReturnType<typeof inspectEnergy> {
     this.ensureAvailable(false);
@@ -343,9 +357,14 @@ export class FieldState {
 
   protected commitState(state: StructuralState, tick: number): void {
     const validated = validateCompiledStructure(state, this.width, this.height, this.registry);
-    this.cells = validated.grid;
-    this.energies = validated.energyQ;
-    this.bonds = validated.structure;
+    this.adoptState(validated, tick);
+  }
+
+  /** Private continuation: take ownership only after complete-state validation. */
+  protected adoptState(state: StructuralState, tick: number): void {
+    this.cells = state.grid;
+    this.energies = state.energyQ;
+    this.bonds = state.structure;
     this.tickCount = tick;
   }
 

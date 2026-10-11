@@ -65,5 +65,47 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
       progress({ completed: rows.length, total: cases.length, name: fixture.name });
     } finally { cpu.close(); gpu.close(); }
   }
-  return { passed: true, backendInfo, caseCount: rows.length, passComparisons: rows.reduce((sum, row) => sum + row.passComparisons, 0), rows };
+  // A pooled readback may contain a failed intermediate tick. It must never
+  // overwrite the committed start state, even after the first mapping succeeds.
+  const gpu = await createGpuField(9, 7), cpu = createStateSpaceField(9, 7);
+  try {
+    gpu.setCell(4, 0, 3); gpu.setCell(4, 5, 2); gpu.setCell(3, 2, 5);
+    const initial = gpu.packedSnapshot(); cpu.restore(initial); cpu.step(3);
+    const expected = cpu.packedSnapshot();
+    for (const fault of ['mapAsync', 'getMappedRange']) {
+      gpu.restore(initial);
+      const original = GPUBuffer.prototype[fault]; let calls = 0;
+      GPUBuffer.prototype[fault] = function (...args) {
+        if (fault === 'mapAsync' && ++calls === 2) return Promise.reject(new Error('injected readback failure'));
+        const result = original.apply(this, args);
+        if (fault === 'getMappedRange' && ++calls === 2) new Uint32Array(result)[9 * 7 * 2 + 3] |= 8192;
+        return result;
+      };
+      let rejected = false;
+      try { await gpu.step(3); } catch { rejected = true; }
+      finally { GPUBuffer.prototype[fault] = original; }
+      if (!rejected || calls !== 2) throw new Error('Pooled readback fault was not exercised');
+      same(gpu.packedSnapshot(), initial, 'failed pooled step remains atomic');
+      await gpu.step(3); same(gpu.packedSnapshot(), expected, 'pooled retry matches CPU');
+    }
+    const target = { grid: new Uint32Array(63), energyQ: new Uint32Array(63), structure: new Uint32Array(63) };
+    const pending = gpu.step(); let rejected = false;
+    try { gpu.copyStateInto(target); } catch { rejected = true; }
+    if (!rejected) throw new Error('Copy during a GPU step must fail');
+    await pending;
+    if (gpu.copyStateInto(target) !== gpu.tick) throw new Error('Copy tick differs');
+    for (const key of ['grid', 'energyQ', 'structure']) same([...target[key]], [...gpu.snapshot()[key]], 'reusable public copy');
+    const saved = gpu.packedSnapshot(); target.grid.fill(0);
+    same(gpu.packedSnapshot(), saved, 'caller-owned copy does not alias GPU state');
+    let nested;
+    const reentrant = new Proxy(target, { getOwnPropertyDescriptor(object, key) {
+      nested ??= gpu.step(); return Reflect.getOwnPropertyDescriptor(object, key);
+    } });
+    rejected = false;
+    try { gpu.copyStateInto(reentrant); } catch { rejected = true; }
+    await nested;
+    if (!rejected) throw new Error('Reentrant copy during a GPU step must fail');
+  } finally { gpu.close(); cpu.close(); }
+  return { passed: true, backendInfo, ownedReadbackRollback: true, reusableCopyIsolation: true,
+    caseCount: rows.length, passComparisons: rows.reduce((sum, row) => sum + row.passComparisons, 0), rows };
 }

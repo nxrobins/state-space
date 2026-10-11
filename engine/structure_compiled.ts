@@ -57,7 +57,7 @@ function getSolver(): SolverExports | undefined {
   return solver;
 }
 
-function validatedWorkspace(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry, committed = false): {
+function validatedWorkspace(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry, ownership: 'public' | 'committed' | 'owned' = 'public'): {
   state: StructuralState; engine?: SolverExports; storage?: Uint32Array;
 } {
   const count = validateDimensions(width, height);
@@ -66,7 +66,7 @@ function validatedWorkspace(input: StructuralStateInput, width: number, height: 
   if (!engine) return { state: validateStructure(input, width, height, rulesForRegistry(registry)) };
   // A field's committed state was validated when it was committed, and every
   // edit preserves validity. Copying it into the workspace is still required.
-  const state = committed ? input as StructuralState
+  const state = ownership !== 'public' ? input as StructuralState
     : { grid: validatePackedCells(input.grid, count), energyQ: validatePackedCells(input.energyQ, count), structure: validatePackedCells(input.structure, count) };
   const base = Number(engine.__heap_base.value);
   const needed = base + (TABLE_WORDS + FIELD_COUNT * count) * 4;
@@ -75,7 +75,7 @@ function validatedWorkspace(input: StructuralStateInput, width: number, height: 
   const storage = new Uint32Array(engine.memory.buffer, base, TABLE_WORDS + FIELD_COUNT * count);
   storage.set(solverTables(registry));
   storage.set(state.grid, TABLE_WORDS); storage.set(state.energyQ, TABLE_WORDS + count); storage.set(state.structure, TABLE_WORDS + count * 2);
-  if (!committed && engine.validate(width, height, base)) {
+  if (ownership !== 'committed' && engine.validate(width, height, base)) {
     validateStructure(state, width, height, rulesForRegistry(registry));
     throw new Error('Compiled complete-state validator disagrees with the reference.');
   }
@@ -87,13 +87,36 @@ export function validateCompiledStructure(input: StructuralStateInput, width: nu
   return validatedWorkspace(input, width, height, registry).state;
 }
 
+/** Internal GPU readback boundary. These Uint32Arrays are owned by the field;
+ * validate every completed state without allocating another three copies.
+ * Public inputs must go through validateCompiledStructure instead. */
+export function validateOwnedStructure(input: StructuralState, width: number, height: number, registry: MaterialRegistry): StructuralState {
+  return validatedWorkspace(input, width, height, registry, 'owned').state;
+}
+
+/** Internal transport into a field's reusable plan storage. Inputs have already
+ * passed completed-state validation; diagnostic/public plans keep owning copies. */
+export function compiledTransportInto(input: StructuralState, width: number, height: number, registry: MaterialRegistry,
+  sources: Uint32Array, structure: Uint32Array): void {
+  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, 'committed');
+  if (!engine || !storage) {
+    const plan = planStructure(state, width, height, rulesForRegistry(registry));
+    sources.set(plan.sources); structure.set(plan.structure); return;
+  }
+  const status = engine.solve(width, height, Number(engine.__heap_base.value));
+  if (status) throw new Error(`Global structural solver invariant failed: ${status}`);
+  const count = width * height;
+  sources.set(storage.subarray(TABLE_WORDS + count * 3, TABLE_WORDS + count * 4));
+  structure.set(storage.subarray(TABLE_WORDS + count * 4, TABLE_WORDS + count * 5));
+}
+
 /** Takes ownership through validation, then returns independent output storage.
  * `committed` is only for a field's own committed state, which was validated
  * once at commit; any other input, including GPU readbacks, is validated here. */
 export function compiledStructuralPlan(input: StructuralState, width: number, height: number, registry: MaterialRegistry, committed = false): {
   sources: Uint32Array; structure: Uint32Array; apply(): StructuralState;
 } {
-  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, committed);
+  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, committed ? 'committed' : 'public');
   if (!engine || !storage) {
     const plan = planStructure(state, width, height, rulesForRegistry(registry));
     return { sources: Uint32Array.from(plan.sources), structure: Uint32Array.from(plan.structure), apply: () => plan.apply(state, width, height) };

@@ -167,3 +167,11 @@ The live reference client is `examples/lab/`. Its controller serializes steps,
 edits, backend changes and imports; its renderer consumes committed public-field
 samples. [CAPABILITIES.md](CAPABILITIES.md) explains the scenarios, known physical
 and scale limits, material versus rule extensions, and the full verification command.
+
+Browser/Node fields also support `field.copyStateInto({ grid, energyQ, structure })`
+for renderers that reuse storage. Supply three non-overlapping `Uint32Array`s of
+`width * height` elements. The method copies every committed coordinate and returns
+its absolute tick, without allocating new coordinate arrays or exposing field storage.
+Invalid storage is rejected before any destination is written; calls during a GPU
+step fail until that step is awaited. Ordinary getters and snapshots still return
+independent copies. Both CPU and WebGPU fields support this optional copy path.

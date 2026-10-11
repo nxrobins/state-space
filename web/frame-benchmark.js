@@ -1,6 +1,8 @@
 import { createGpuField, createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
 import { seedScene, FRAME_SCENES } from './demo.js';
 import { createMaterialRenderer } from './renderer.js';
+import { FrameClock } from './frame-clock.js';
+import { createFramePump } from './frame-pump.js';
 
 export function distribution(values) {
     const sorted = [...values].sort((a, b) => a - b), n = values.length;
@@ -18,18 +20,24 @@ export async function stateHash(field) {
     return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
 }
 
-export async function benchmarkFrames(canvas, progress = () => {}, { samples = 120, warmup = 12 } = {}) {
+export async function benchmarkFrames(canvas, progress = () => {}, { samples = 120, warmup = 12, pacedSamples = 600, pacedWarmup = 60 } = {}) {
     if (!Number.isInteger(samples) || samples < 60 || !Number.isInteger(warmup) || warmup < 4) throw new Error('Insufficient frame samples');
+    if (!Number.isInteger(pacedSamples) || pacedSamples < 600 || !Number.isInteger(pacedWarmup) || pacedWarmup < 60) throw new Error('Pacing requires at least ten seconds after one second of warmup');
     canvas.width = 1920; canvas.height = 1080;
     const rows = [], references = {};
     for (const scene of FRAME_SCENES) {
+        progress(`${scene} · CPU reference`);
         const cpu = createStateSpaceField(256, 256);
         try {
             seedScene(cpu, scene);
             const initial = cpu.packedSnapshot();
             cpu.step(1); const firstTickHash = await stateHash(cpu);
-            cpu.step(samples + warmup - 1);
+            await referenceSteps(cpu, samples + warmup - 1);
             references[scene] = { firstTickHash, finalHash: await stateHash(cpu), endTick: cpu.tick, initial };
+            if (scene !== 'emissive') {
+                await referenceSteps(cpu, pacedSamples + pacedWarmup - cpu.tick);
+                references[scene].pacedFinalHash = await stateHash(cpu);
+            }
         } finally { cpu.close(); }
         const modes = ['plain', 'styled', 'alternating'];
         if (scene === 'water') modes.push('water-off');
@@ -86,32 +94,83 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
         const world = await createGpuField(256, 256);
         let renderer;
         try {
-            seedScene(world, scene);
+            world.restore(references[scene].initial);
             renderer = await createMaterialRenderer(canvas, 256, 256, world.registry);
             if (world.backendInfo.isFallbackAdapter || renderer.backendInfo.isFallbackAdapter) throw new Error('Hardware WebGPU required');
-            const intervals = [], work = [];
-            let previous, first, last, nextAt;
-            for (let i = 0; i < warmup + samples; i++) {
-                let now = await new Promise(requestAnimationFrame);
-                nextAt ??= now;
-                // Cap the requested rate at 60 Hz even on a 120/144 Hz display.
-                while (now + 0.1 < nextAt) now = await new Promise(requestAnimationFrame);
-                nextAt += 1000 / 60;
-                const started = performance.now();
-                await world.step(1); renderer.render(world, true); await renderer.completed();
-                const finished = performance.now();
-                if (i >= warmup) {
-                    if (previous !== undefined) intervals.push(now - previous);
-                    first ??= now; last = now; previous = now; work.push(finished - started);
-                }
-            }
+            const measured = await measurePacing(world, renderer, pacedSamples, pacedWarmup);
             const finalHash = await stateHash(world);
-            if (finalHash !== references[scene].finalHash || world.tick !== references[scene].endTick || world.energyBalance().driftQ !== 0n) throw new Error('Paced replay differs');
-            pacedScenes.push({ scene, ticks: samples, frameMs: distribution(work), displayIntervalMs: distribution(intervals),
-                overBudget: work.filter(value => value > 1000 / 60).length, endTick: world.tick, energyDriftQ: '0',
-                achievedHz: (samples - 1) * 1000 / (last - first), finalHash, cpuParity: true });
+            let expected = references[scene].pacedFinalHash;
+            if (world.tick !== pacedSamples + pacedWarmup) {
+                const cpu = createStateSpaceField(256, 256);
+                try { cpu.restore(references[scene].initial); await referenceSteps(cpu, world.tick); expected = await stateHash(cpu); }
+                finally { cpu.close(); }
+            }
+            if (finalHash !== expected || world.energyBalance().driftQ !== 0n) throw new Error('Paced replay differs');
+            const counts = world.grid.reduce((counts, cell) => { counts[cell & 255]++; return counts; }, new Uint32Array(256));
+            if (scene !== 'bridge' && counts[MAT.LAVA] < 64) throw new Error('Paced lava sources expired');
+            if (scene === 'water' && counts[MAT.WATER] < 1024) throw new Error('Paced water expired');
+            if (['haze', 'heat'].includes(scene) && (counts[MAT.SMOKE] < 1024 || counts[MAT.STEAM] < 1024)) throw new Error('Paced haze expired');
+            pacedScenes.push({ scene, width: 256, height: 256, output: [canvas.width, canvas.height], allEffects: true,
+                ...measured, endTick: world.tick, energyDriftQ: '0', finalHash, cpuParity: true,
+                finalLavaCells: counts[MAT.LAVA], finalWaterCells: counts[MAT.WATER], finalSmokeCells: counts[MAT.SMOKE], finalSteamCells: counts[MAT.STEAM] });
         } finally { renderer?.close(); world.close(); }
     }
-    return { rows, paced: pacedScenes[0], pacedScenes, userAgent: navigator.userAgent,
+    return { rows, paced: pacedScenes[0], pacedScenes, locked60: pacedScenes.every(row => row.locked60), userAgent: navigator.userAgent,
         scope: 'Physics + public state copies/uploads + material, gas density reconstruction, area-light extraction, terrain visibility, volumetric extinction/scattering, water geometry/reflections/refraction, bloom, heat plume reconstruction/distortion and composition + GPU completion at 1920x1080. Startup, reference hashing and OS scanout excluded.' };
+}
+
+// Use the production clock and bounded callback pump. Record completion relative
+// to each actual display callback, not just average throughput or submit time.
+async function measurePacing(world, renderer, samples, warmup) {
+    const clock = new FrameClock(), rows = [];
+    let frames = 0, previous, pump, startStatistics;
+    try {
+        await new Promise((resolve, reject) => {
+            pump = createFramePump(async (now, displayInterval) => {
+                if (frames === 0) clock.advance(now - 1000 / 60);
+                const ticks = clock.advance(now, false, displayInterval);
+                if (!ticks) return;
+                const started = performance.now();
+                await world.step(ticks);
+                const physicsDone = performance.now();
+                renderer.render(world, true); await renderer.completed();
+                const finished = performance.now();
+                if (frames >= warmup) {
+                    startStatistics ??= pump.statistics();
+                    rows.push({ callback: now, started, completed: finished, ticks, workMs: finished - started,
+                        physicsMs: physicsDone - started, renderingMs: finished - physicsDone,
+                        startDelayMs: started - now, completionDelayMs: finished - now, intervalMs: previous === undefined ? null : now - previous });
+                    previous = now;
+                }
+                if (++frames === warmup + samples) { pump.stop(); resolve(); }
+            }, { onError: reject });
+        });
+        const coalescedCallbacks = pump.statistics().coalesced - startStatistics.coalesced;
+        return { ticks: rows.reduce((sum, row) => sum + row.ticks, 0), frames: samples, warmupFrames: warmup, rawFrames: rows,
+            frameMs: distribution(rows.map(row => row.workMs)), physicsMs: distribution(rows.map(row => row.physicsMs)), renderingMs: distribution(rows.map(row => row.renderingMs)),
+            displayIntervalMs: distribution(rows.slice(1).map(row => row.intervalMs)), completionDelayMs: distribution(rows.map(row => row.completionDelayMs)),
+            overBudget: rows.filter(row => row.workMs > 1000 / 60).length, ...pacingMetrics(rows, coalescedCallbacks),
+            definition: 'At least 600 all-effects frames after 60 warmup frames; 59.9-60.1 Hz callback/completion/physics cadence, every GPU-completed frame within 16.67 ms of its callback, no missed display slots or coalesced callbacks. OS scanout is not measured.' };
+    } finally { pump?.stop(); }
+}
+
+async function referenceSteps(field, ticks) {
+    // Reference work is outside all frame clocks. Yield between exact batches so
+    // the UI and browser-control connection remain responsive during long replay.
+    for (let remaining = ticks; remaining > 0; remaining -= Math.min(remaining, 16)) {
+        field.step(Math.min(remaining, 16));
+        await new Promise(resolve => setTimeout(resolve, 0));
+    }
+}
+
+export function pacingMetrics(rows, coalescedCallbacks) {
+    const first = rows[0], last = rows.at(-1), intervals = rows.length - 1;
+    const achievedHz = intervals * 1000 / (last.callback - first.callback);
+    const completedHz = intervals * 1000 / (last.completed - first.completed);
+    const physicsHz = rows.slice(1).reduce((sum, row) => sum + row.ticks, 0) * 1000 / (last.callback - first.callback);
+    const deadlineMisses = rows.filter(row => row.completionDelayMs > 1000 / 60).length;
+    const missedDisplaySlots = rows.reduce((sum, row) => sum + (row.intervalMs === null ? 0 : Math.max(0, Math.round(row.intervalMs / (1000 / 60)) - 1)), 0);
+    return { achievedHz, completedHz, physicsHz, deadlineMisses, missedDisplaySlots, coalescedCallbacks,
+        locked60: rows.length >= 600 && [achievedHz, completedHz, physicsHz].every(hz => hz >= 59.9 && hz <= 60.1) &&
+            deadlineMisses === 0 && missedDisplaySlots === 0 && coalescedCallbacks === 0 };
 }

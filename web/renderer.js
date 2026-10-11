@@ -56,6 +56,7 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
             owned.push(result); return result;
         };
         const coordinates = [buffer(width * height * 4), buffer(width * height * 4), buffer(width * height * 4)];
+        const stateCopy = { grid: new Uint32Array(width * height), energyQ: new Uint32Array(width * height), structure: new Uint32Array(width * height) };
         const cold = buffer(registry.coldTable().byteLength), palette = buffer(256 * 16);
         device.queue.writeBuffer(cold, 0, registry.coldTable());
         const colors = new Float32Array(256 * 4);
@@ -67,6 +68,10 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         device.queue.writeBuffer(palette, 0, colors);
         // Separate uniforms prevent later writes from changing earlier passes.
         const uniforms = Array.from({ length: 3 }, () => buffer(32, true));
+        const uniformData = uniforms.map(() => {
+            const data = new ArrayBuffer(32);
+            return { data, ints: new Uint32Array(data), floats: new Float32Array(data) };
+        });
         const groups = uniforms.map(uniform => device.createBindGroup({ layout: stateLayout,
             entries: [...coordinates, cold, palette, uniform].map((buffer, binding) => ({ binding, resource: { buffer } })) }));
         const texture = (w, h, format = 'rgba16float') => {
@@ -99,7 +104,11 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         const waterBloom = textures(waterEmission, waterEmission), composite = textures(waterScene, blurB, dummy, dummy, dummy, { heat: heatHaze }), plainComposite = textures(scene, blurB);
         const lightingSources = textures(lightTiles, emission, positionsA, positionsB, dummy, { density: hazeDensity });
         const hazeSources = textures(dummy, dummy, dummy, dummy, illumination, { density: hazeDensity });
-        const view = texture => ({ view: texture.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] });
+        const attachments = new Map();
+        const view = texture => {
+            if (!attachments.has(texture)) attachments.set(texture, { view: texture.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] });
+            return attachments.get(texture);
+        };
         let closed = false, lost, validation;
         void device.lost.then(info => { lost = info.message || info.reason; });
         device.addEventListener('uncapturederror', event => { validation = event.error.message; });
@@ -111,9 +120,11 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
                 if (![styled, lighting, bloom, water, reflections, refraction, haze, distortion].every(value => typeof value === 'boolean')) throw new Error('Render switches must be boolean');
                 if (field.width !== width || field.height !== height || field.registry.hash !== registry.hash) throw new Error('Renderer field contract differs');
                 // Public copies, with no extra GPU readback or JSON conversion.
-                [field.grid, field.energyQ, field.structure].forEach((values, i) => device.queue.writeBuffer(coordinates[i], 0, values));
+                if (typeof field.copyStateInto === 'function') field.copyStateInto(stateCopy);
+                else { stateCopy.grid.set(field.grid); stateCopy.energyQ.set(field.energyQ); stateCopy.structure.set(field.structure); }
+                [stateCopy.grid, stateCopy.energyQ, stateCopy.structure].forEach((values, i) => device.queue.writeBuffer(coordinates[i], 0, values));
                 uniforms.forEach((uniform, i) => {
-                    const data = new ArrayBuffer(32), ints = new Uint32Array(data), floats = new Float32Array(data);
+                    const { data, ints, floats } = uniformData[i];
                     ints.set([width, height, field.tick % 65536, styled ? 1 | (lighting ? 2 : 0) | (bloom ? 4 : 0) |
                         (water ? 8 : 0) | (reflections ? 16 : 0) | (refraction ? 32 : 0) | (haze ? 64 : 0) | (distortion ? 128 : 0) : 0]);
                     floats.set([canvas.width, canvas.height, i === 1 ? 4 : 0, i === 2 ? 1 : 0], 4);

@@ -216,6 +216,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-cli', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--require-locked', action='store_true', help='Fail after retaining results if any sustained browser scene misses the 60 Hz deadline gate')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     started_at = datetime.now(timezone.utc).isoformat()
@@ -311,7 +312,7 @@ def main():
         cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(132); return "stepped"; })()')
         cli('screenshot', str((args.output / 'browser-heat-final.png').resolve()))
         cli('open', url + 'benchmark.html')
-        deadline, seen = time.monotonic() + 240, ''
+        deadline, seen = time.monotonic() + 600, ''
         while True:
             state = cli('eval', '({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById("status").textContent})')['result']
             if state['progress'] != seen:
@@ -324,25 +325,45 @@ def main():
                 break
             if time.monotonic() > deadline:
                 raise TimeoutError('Frame benchmark did not finish')
-            time.sleep(1)
+            time.sleep(5)
         errors = cli('errors').get('errors', [])
         if errors:
             raise RuntimeError(f'Browser errors: {errors}')
         cli('close')
         native = native_frames(args.output, browser)
+        native_paced = []
+        initial_scenes = json.loads((args.output / 'initial-scenes.json').read_text())
+        for row in browser['pacedScenes']:
+            print('Native long replay:', row['scene'], row['endTick'], flush=True)
+            with create_field(256, 256) as field:
+                field.restore(initial_scenes[row['scene']])
+                field.step(row['endTick'])
+                if state_hash(field) != row['finalHash'] or field.energy_balance().drift_q != 0:
+                    raise ValueError('Long browser/native/CPU replay differs')
+                native_paced.append({'scene': row['scene'], 'endTick': field.tick, 'finalHash': state_hash(field),
+                                     'cpuBrowserParity': True, 'energyDriftQ': '0'})
         if source_hashes() != before:
             raise ValueError('Sources changed during frame measurements')
-        report = {'reportVersion': 5, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+        report = {'reportVersion': 6, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
             'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
             'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'waterTogglePreservesState': water_ui,
             'hazeTogglePreservesState': haze_ui,
             'distortionTogglePreservesState': distortion_ui,
-            'commands': commands, 'browser': browser, 'native': native,
+            'commands': commands, 'browser': browser, 'native': native, 'nativePacedReplays': native_paced,
+            'locked60': browser['locked60'],
             'scope': 'GPU-completed full frame work, including physics, renderer copies/uploads, gas density reconstruction, volumetric extinction/scattering and heat plume reconstruction/distortion. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
         (args.output / 'frames.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         print('Report:', args.output / 'frames.json', flush=True)
+        print('All sustained browser scenes meet the 60 Hz gate:', browser['locked60'], flush=True)
+        return int(args.require_locked and not browser['locked60'])
+    except Exception as error:
+        failure = {'startedAt': started_at, 'failedAt': datetime.now(timezone.utc).isoformat(),
+                   'sourceHashes': before, 'sourceUnchangedDuringBenchmark': source_hashes() == before,
+                   'error': str(error), 'commands': commands}
+        (args.output / 'failure.json').write_text(json.dumps(failure, indent=2) + '\n', encoding='utf-8')
+        raise
     finally:
         try:
             cli('close')
@@ -352,4 +373,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
