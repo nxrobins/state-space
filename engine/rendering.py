@@ -44,6 +44,7 @@ class MaterialRenderer:
             {'binding': 0, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {}},
             {'binding': 1, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {}},
             {'binding': 2, 'visibility': wgpu.ShaderStage.FRAGMENT, 'sampler': {}},
+            *[{'binding': i, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {}} for i in (3, 4, 5)],
         ])
         layout = device.create_pipeline_layout(bind_group_layouts=[state_layout, texture_layout])
 
@@ -56,6 +57,8 @@ class MaterialRenderer:
         self._material = pipeline('fs_material', ['rgba16float', 'rgba16float'])
         self._bloom = pipeline('fs_bloom', ['rgba16float'])
         self._present = pipeline('fs_present', ['rgba8unorm'])
+        self._sources = pipeline('fs_sources', ['rgba16float'] * 3)
+        self._lighting = pipeline('fs_lighting', ['rgba16float'])
 
         def buffer(size, uniform=False):
             resource = device.create_buffer(size=size, usage=wgpu.BufferUsage.COPY_DST |
@@ -87,30 +90,40 @@ class MaterialRenderer:
         self._emission = texture(self.width * 2, self.height * 2)
         self._blur_a = texture((self.width + 1) // 2, (self.height + 1) // 2)
         self._blur_b = texture((self.width + 1) // 2, (self.height + 1) // 2)
+        tiles = ((self.width + 15) // 16, (self.height + 15) // 16)
+        self._light_tiles = texture(*tiles)
+        self._positions_a = texture(*tiles)
+        self._positions_b = texture(*tiles)
+        self._illumination = texture(self.width, self.height)
+        dummy = texture(1, 1)
         self._output = texture(*self.output_size, format='rgba8unorm', copy=True)
         sampler = device.create_sampler(min_filter='linear', mag_filter='linear')
 
-        def textures(source, glow):
+        def textures(source, glow, a=dummy, b=dummy, light=dummy):
             return device.create_bind_group(layout=texture_layout, entries=[
                 {'binding': 0, 'resource': source.create_view()}, {'binding': 1, 'resource': glow.create_view()},
                 {'binding': 2, 'resource': sampler},
+                {'binding': 3, 'resource': a.create_view()}, {'binding': 4, 'resource': b.create_view()},
+                {'binding': 5, 'resource': light.create_view()},
             ])
 
-        self._texture_groups = [textures(self._blur_b, self._blur_b), textures(self._emission, self._emission),
-                               textures(self._blur_a, self._blur_a), textures(self._scene, self._blur_b)]
+        self._texture_groups = [textures(dummy, dummy), textures(self._emission, self._emission),
+                               textures(self._blur_a, self._blur_a), textures(self._scene, self._blur_b, light=self._illumination),
+                               textures(self._light_tiles, self._emission, self._positions_a, self._positions_b)]
 
-    def render(self, field, *, styled=True):
+    def render(self, field, *, styled=True, lighting=True, bloom=True):
         if self._closed:
             raise RuntimeError('Renderer is closed')
-        if not isinstance(styled, bool):
-            raise ValueError('styled must be boolean')
+        if not all(isinstance(value, bool) for value in (styled, lighting, bloom)):
+            raise ValueError('Render switches must be boolean')
         if (field.width, field.height, field.registry.hash) != (self.width, self.height, self.registry.hash):
             raise ValueError('Renderer field contract differs')
         for buffer, values in zip(self._coordinates, (field.grid, field.energy_q, field.structure)):
             self.device.queue.write_buffer(buffer, 0, values)
         for i, buffer in enumerate(self._uniforms):
             self.device.queue.write_buffer(buffer, 0, struct.pack('<4I4f', self.width, self.height, field.tick % 65536,
-                int(styled), *self.output_size, 4 if i == 1 else 0, 1 if i == 2 else 0))
+                (1 | (2 if lighting else 0) | (4 if bloom else 0)) if styled else 0,
+                *self.output_size, 4 if i == 1 else 0, 1 if i == 2 else 0))
         encoder = self.device.create_command_encoder()
 
         def draw(pipeline, targets, group, textures):
@@ -124,7 +137,10 @@ class MaterialRenderer:
             render_pass.end()
 
         draw(self._material, [self._scene, self._emission], self._groups[0], self._texture_groups[0])
-        if styled:
+        if styled and lighting:
+            draw(self._sources, [self._light_tiles, self._positions_a, self._positions_b], self._groups[0], self._texture_groups[1])
+            draw(self._lighting, [self._illumination], self._groups[0], self._texture_groups[4])
+        if styled and bloom:
             draw(self._bloom, [self._blur_a], self._groups[1], self._texture_groups[1])
             draw(self._bloom, [self._blur_b], self._groups[2], self._texture_groups[2])
         draw(self._present, [self._output], self._groups[0], self._texture_groups[3])

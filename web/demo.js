@@ -43,3 +43,38 @@ export function seedBridge(field) {
     // Attach the ends to the stone abutments through supported public edits.
     for (const x of [36, 219]) field.setAnchor(x, 134);
 }
+
+// Distributed, finite sources keep the lighting benchmark active beyond warmup.
+// Narrow receivers and separate pillars expose shadow edges and penumbrae.
+export function seedLighting(field) {
+    if (field.width !== 256 || field.height !== 256) throw new Error('Lighting gallery is a 256 × 256 scene');
+    const cells = new Uint32Array(256 * 256).fill(packVoxel(MAT.AIR));
+    const emitters = [];
+    const rectangle = (x0, y0, x1, y1, material, thermal = 20) => {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) cells[y * 256 + x] = packVoxel(material, thermal);
+    };
+    for (let y = 0; y < 256; y += 32) {
+        rectangle(0, y + 29, 255, y + 31, MAT.STONE);
+        for (let x = 0; x < 256; x += 32) {
+            rectangle(x + 29, y, x + 30, y + 28, MAT.METAL);
+            rectangle(x + 20, y + 13, x + 20, y + 28, MAT.STONE);
+            rectangle(x + 5, y + 28, x + 14, y + 28, MAT.STONE);
+            rectangle(x + 5, y + 20, x + 5, y + 27, MAT.STONE);
+            rectangle(x + 14, y + 20, x + 14, y + 27, MAT.STONE);
+            rectangle(x + 6, y + 20, x + 13, y + 27, MAT.LAVA, 255);
+            for (let dy = 20; dy <= 27; dy++) for (let dx = 6; dx <= 13; dx++) emitters.push((y + dy) * 256 + x + dx);
+        }
+    }
+    const state = createPhysicsState(cells, 256, 256, DEFAULT_REGISTRY);
+    for (const index of emitters) state.energyQ[index] = 1250 * 256;
+    field.restore({ ...field.packedSnapshot(), tick: 0, packedCells: Array.from(state.grid),
+        energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
+}
+
+export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting']);
+export function seedScene(field, scene) {
+    if (scene === 'bridge') seedBridge(field);
+    else if (scene === 'lighting') seedLighting(field);
+    else if (scene === 'emissive') field.clear(MAT.LAVA);
+    else throw new Error('Unknown demo scene');
+}

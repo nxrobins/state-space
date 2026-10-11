@@ -1,4 +1,4 @@
-// Built-in WebGPU presentation. No compute dispatches or writable physics bindings.
+// Built-in WebGPU presentation. Physical coordinates are always read-only.
 import { RENDER_SHADER } from './shaders.js';
 
 export function canvasCell(canvas, clientX, clientY, width, height) {
@@ -28,13 +28,15 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
             { binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {} },
             { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {} },
             { binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
+            ...[3, 4, 5].map(binding => ({ binding, visibility: GPUShaderStage.FRAGMENT, texture: {} })),
         ] });
         const layout = device.createPipelineLayout({ bindGroupLayouts: [stateLayout, textureLayout] });
         const pipeline = (entryPoint, targets) => device.createRenderPipelineAsync({ layout,
             vertex: { module, entryPoint: 'vs_main' }, fragment: { module, entryPoint, targets: targets.map(format => ({ format })) },
             primitive: { topology: 'triangle-list' } });
-        const [materialPipeline, bloomPipeline, presentPipeline] = await Promise.all([
+        const [materialPipeline, bloomPipeline, presentPipeline, sourcesPipeline, lightingPipeline] = await Promise.all([
             pipeline('fs_material', ['rgba16float', 'rgba16float']), pipeline('fs_bloom', ['rgba16float']), pipeline('fs_present', [format]),
+            pipeline('fs_sources', ['rgba16float', 'rgba16float', 'rgba16float']), pipeline('fs_lighting', ['rgba16float']),
         ]);
         const buffer = (size, uniform = false) => {
             const result = device.createBuffer({ size, usage: GPUBufferUsage.COPY_DST | (uniform ? GPUBufferUsage.UNIFORM : GPUBufferUsage.STORAGE) });
@@ -61,12 +63,17 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         // Two pixels per cell for materials; bloom at half a pixel per cell.
         const scene = texture(width * 2, height * 2), emission = texture(width * 2, height * 2);
         const blurA = texture(Math.ceil(width / 2), Math.ceil(height / 2)), blurB = texture(Math.ceil(width / 2), Math.ceil(height / 2));
+        const lightTiles = texture(Math.ceil(width / 16), Math.ceil(height / 16));
+        const positionsA = texture(Math.ceil(width / 16), Math.ceil(height / 16)), positionsB = texture(Math.ceil(width / 16), Math.ceil(height / 16));
+        const illumination = texture(width, height), dummy = texture(1, 1);
         const sampler = device.createSampler({ minFilter: 'linear', magFilter: 'linear' });
-        const textures = (source, glow) => device.createBindGroup({ layout: textureLayout, entries: [
+        const textures = (source, glow, a = dummy, b = dummy, light = dummy) => device.createBindGroup({ layout: textureLayout, entries: [
             { binding: 0, resource: source.createView() }, { binding: 1, resource: glow.createView() }, { binding: 2, resource: sampler },
+            { binding: 3, resource: a.createView() }, { binding: 4, resource: b.createView() }, { binding: 5, resource: light.createView() },
         ] });
-        const materialTextures = textures(blurB, blurB);
-        const bloomSource = textures(emission, emission), bloomIntermediate = textures(blurA, blurA), composite = textures(scene, blurB);
+        const materialTextures = textures(dummy, dummy);
+        const bloomSource = textures(emission, emission), bloomIntermediate = textures(blurA, blurA), composite = textures(scene, blurB, dummy, dummy, illumination);
+        const lightingSources = textures(lightTiles, emission, positionsA, positionsB);
         const view = texture => ({ view: texture.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] });
         let closed = false, lost, validation;
         void device.lost.then(info => { lost = info.message || info.reason; });
@@ -74,14 +81,15 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         return {
             backendInfo: Object.freeze({ vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device,
                 description: adapter.info.description, isFallbackAdapter: adapter.info.isFallbackAdapter }),
-            render(field, styled = true) {
+            render(field, styled = true, { lighting = true, bloom = true } = {}) {
                 if (closed || lost || validation) throw new Error(validation || lost || 'Renderer is closed');
+                if (![styled, lighting, bloom].every(value => typeof value === 'boolean')) throw new Error('Render switches must be boolean');
                 if (field.width !== width || field.height !== height || field.registry.hash !== registry.hash) throw new Error('Renderer field contract differs');
                 // Public copies, with no extra GPU readback or JSON conversion.
                 [field.grid, field.energyQ, field.structure].forEach((values, i) => device.queue.writeBuffer(coordinates[i], 0, values));
                 uniforms.forEach((uniform, i) => {
                     const data = new ArrayBuffer(32), ints = new Uint32Array(data), floats = new Float32Array(data);
-                    ints.set([width, height, field.tick % 65536, styled ? 1 : 0]);
+                    ints.set([width, height, field.tick % 65536, styled ? 1 | (lighting ? 2 : 0) | (bloom ? 4 : 0) : 0]);
                     floats.set([canvas.width, canvas.height, i === 1 ? 4 : 0, i === 2 ? 1 : 0], 4);
                     device.queue.writeBuffer(uniform, 0, data);
                 });
@@ -91,7 +99,11 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
                     pass.setPipeline(pipeline); pass.setBindGroup(0, state); pass.setBindGroup(1, textureGroup); pass.draw(3); pass.end();
                 };
                 draw(materialPipeline, [view(scene), view(emission)], groups[0], materialTextures);
-                if (styled) {
+                if (styled && lighting) {
+                    draw(sourcesPipeline, [view(lightTiles), view(positionsA), view(positionsB)], groups[0], bloomSource);
+                    draw(lightingPipeline, [view(illumination)], groups[0], lightingSources);
+                }
+                if (styled && bloom) {
                     draw(bloomPipeline, [view(blurA)], groups[1], bloomSource);
                     draw(bloomPipeline, [view(blurB)], groups[2], bloomIntermediate);
                 }

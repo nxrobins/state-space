@@ -11,12 +11,14 @@ import threading
 import time
 import uuid
 import zlib
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
 import wgpu
 
 from engine import MaterialRenderer, create_field
+from engine.schema import MAT_LAVA
 from engine.verify import ROOT, source_hashes
 from scripts.verify_browser import digest, run_captured
 
@@ -43,12 +45,12 @@ def write_png(path, rgba, width, height):
 
 def native_frames(output, browser, samples=120, warmup=12):
     script = """import fs from 'node:fs';
-import { createStateSpaceField, MAT } from './dist/sdk/state-space.js';
-import { seedBridge } from './web/demo.js';
+import { createStateSpaceField } from './dist/sdk/state-space.js';
+import { seedScene, FRAME_SCENES } from './web/demo.js';
 const result={};
-for(const scene of ['bridge','emissive']) {
+for(const scene of FRAME_SCENES) {
  const field=createStateSpaceField(256,256);
- if(scene==='bridge') seedBridge(field); else field.clear(MAT.LAVA);
+ seedScene(field,scene);
  result[scene]=field.packedSnapshot(); field.close();
 }
 fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
@@ -69,11 +71,17 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 plain = renderer.read_pixels()
                 renderer.render(field)
                 styled = renderer.read_pixels()
-                if field.snapshot().to_dict() != before or plain == styled:
+                renderer.render(field, lighting=False)
+                unlit = renderer.read_pixels()
+                if field.snapshot().to_dict() != before or plain == styled or (scene != 'emissive' and styled == unlit):
                     raise ValueError('Native A/B isolation or visual distinction failed')
                 if scene == 'bridge' and mode == 'styled':
                     write_png(output / 'native-plain.png', plain, 1920, 1080)
                     write_png(output / 'native-styled.png', styled, 1920, 1080)
+                    write_png(output / 'native-unlit.png', unlit, 1920, 1080)
+                if scene == 'lighting' and mode == 'styled':
+                    write_png(output / 'native-gallery.png', styled, 1920, 1080)
+                    write_png(output / 'native-gallery-unlit.png', unlit, 1920, 1080)
                 frames, physics, rendering = [], [], []
                 for i in range(warmup + samples):
                     started = time.perf_counter()
@@ -88,11 +96,14 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 final_hash = state_hash(field)
                 if final_hash != expected['finalHash'] or field.tick != expected['endTick'] or field.energy_balance().drift_q != 0:
                     raise ValueError('Native rendered state differs from CPU/browser reference')
+                final_lava_cells = int(np.count_nonzero((field.grid & 255) == MAT_LAVA))
+                if final_lava_cells != expected['finalLavaCells'] or (scene == 'lighting' and final_lava_cells < 64):
+                    raise ValueError('Lighting source continuation differs')
                 rows.append({'scene': scene, 'mode': mode, 'width': 256, 'height': 256, 'output': [1920, 1080],
                     'ticks': samples, 'warmup': warmup, 'frameMs': distribution(frames), 'physicsMs': distribution(physics),
                     'renderingMs': distribution(rendering), 'overBudget': sum(value > 1000 / 60 for value in frames),
-                    'endTick': field.tick, 'finalHash': final_hash, 'cpuBrowserParity': True, 'renderIsolation': True,
-                    'energyDriftQ': '0', 'renderingAdapter': renderer.adapter_info})
+                    'endTick': field.tick, 'finalHash': final_hash, 'finalLavaCells': final_lava_cells, 'cpuBrowserParity': True, 'renderIsolation': True,
+                    'energyDriftQ': '0', 'lightingTogglePreservesState': True, 'renderingAdapter': renderer.adapter_info})
     return rows
 
 
@@ -102,6 +113,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    started_at = datetime.now(timezone.utc).isoformat()
     before = source_hashes()
     commands = []
     prefix = [shutil.which('node'), str(args.browser_cli)] if args.browser_cli.suffix in ('.js', '.mjs') else [str(args.browser_cli)]
@@ -128,7 +140,14 @@ def main():
         cli('wait', '--fn', 'Boolean(window.stateSpace)')
         cli('eval', '--stdin', stdin='(async () => { window.__initial = await window.stateSpace.snapshot(); return "saved"; })()')
         cli('screenshot', str((args.output / 'browser-styled.png').resolve()))
-        cli('find', 'role', 'button', 'click', '--name', 'B · Material + glow')
+        cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: on')
+        cli('wait', '--fn', 'document.getElementById("light-toggle").getAttribute("aria-pressed") === "false"')
+        cli('screenshot', str((args.output / 'browser-unlit.png').resolve()))
+        lights_ui = cli('eval', '--stdin', stdin='(async () => JSON.stringify(window.__initial) === JSON.stringify(await window.stateSpace.snapshot()))()')['result']
+        if lights_ui is not True:
+            raise ValueError('Lighting button changed simulation state')
+        cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: off')
+        cli('find', 'role', 'button', 'click', '--name', 'B · Material + light')
         cli('wait', '--fn', 'document.getElementById("view-toggle").textContent.startsWith("A")')
         cli('screenshot', str((args.output / 'browser-plain.png').resolve()))
         ui = cli('eval', '--stdin', stdin='(async () => JSON.stringify(window.__initial) === JSON.stringify(await window.stateSpace.snapshot()))()')['result']
@@ -137,6 +156,12 @@ def main():
         cli('find', 'role', 'button', 'click', '--name', 'A · Plain materials')
         cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(48); return "stepped"; })()')
         cli('screenshot', str((args.output / 'browser-burning.png').resolve()))
+        cli('open', url + '?scene=lighting&paused')
+        cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        cli('screenshot', str((args.output / 'browser-gallery.png').resolve()))
+        cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: on')
+        cli('wait', '--fn', 'document.getElementById("light-toggle").getAttribute("aria-pressed") === "false"')
+        cli('screenshot', str((args.output / 'browser-gallery-unlit.png').resolve()))
         cli('open', url + 'benchmark.html')
         deadline, seen = time.monotonic() + 240, ''
         while True:
@@ -159,10 +184,11 @@ def main():
         native = native_frames(args.output, browser)
         if source_hashes() != before:
             raise ValueError('Sources changed during frame measurements')
-        report = {'reportVersion': 1, 'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
+        report = {'reportVersion': 2, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+            'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
-            'uiTogglePreservesState': ui, 'commands': commands, 'browser': browser, 'native': native,
+            'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'commands': commands, 'browser': browser, 'native': native,
             'scope': 'GPU-completed full frame work, including physics and renderer copies/uploads. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
         (args.output / 'frames.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         print('Report:', args.output / 'frames.json', flush=True)

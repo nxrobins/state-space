@@ -47,8 +47,10 @@ WebGPU requires a secure browser context, including localhost. The lab's small
 interactive scenes are separate from the performance workloads below.
 
 For the visual showcase, open the [burning bridge](http://127.0.0.1:8765/web/):
-built-in material shading, energy-derived heat glow, and bloom, with an A/B toggle
-over the same deterministic field. [Rendering guide and native Python API](docs/RENDERING.md).
+built-in material shading, energy-derived heat glow, dynamic fire/lava lighting,
+soft terrain shadows, and bloom. A/B and lighting toggles use the same deterministic
+field. [Rendering guide and native Python API](docs/RENDERING.md) ·
+[Full-frame lighting measurements](docs/checkpoints/LIGHTING_PERFORMANCE.md).
 
 ## 256 × 256 at 60 Hz
 

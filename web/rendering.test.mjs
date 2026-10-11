@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedBridge } from './demo.js';
+import { seedBridge, seedLighting } from './demo.js';
 import { FrameClock } from './frame-clock.js';
 import { canvasCell } from './renderer.js';
 
@@ -19,6 +19,19 @@ test('display scheduling preserves fixed ticks across refresh rates and backlog'
     assert.equal(ticks, 60, 'No backlog ticks may be discarded');
     assert.equal(clock.advance(2000, true), 0);
     assert.equal(clock.advance(2000 + 1000 / 60), 1);
+});
+
+test('lighting gallery retains finite lava sources through a measured trajectory', () => {
+    const world = createStateSpaceField(256, 256);
+    try {
+        seedLighting(world);
+        const initial = world.packedSnapshot();
+        assert.equal(initial.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length, 4096);
+        assert(initial.energyQ.some(energy => energy > 255 * 256));
+        world.step(132);
+        assert(world.packedSnapshot().packedCells.filter(cell => (cell & 255) === MAT.LAVA).length >= 64);
+        assert.equal(world.energyBalance().driftQ, 0n);
+    } finally { world.close(); }
 });
 
 test('picking matches square letterboxing, including high DPI CSS coordinates', () => {

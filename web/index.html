@@ -53,9 +53,11 @@ button, .action { background: #192a38; border: 1px solid #334958; border-radius:
     </div>
     <div id="sidebar">
         <h3>PRESENTATION</h3>
-        <button id="view-toggle" aria-pressed="true">B · Material + glow</button>
+        <button id="view-toggle" aria-pressed="true">B · Material + light</button>
+        <button id="light-toggle" aria-pressed="true">Lighting + shadows: on</button>
         <button id="reset-demo">Restart bridge</button>
         <button id="pause">Pause</button>
+        <a class="action" href="?scene=lighting&paused">Light &amp; shadow gallery</a>
         <a class="action" href="benchmark.html">Benchmark full frame</a>
         <h3>MATERIALS</h3>
         <div id="palette"></div>
@@ -72,7 +74,8 @@ button, .action { background: #192a38; border: 1px solid #334958; border-radius:
             Right click: erase<br>
             Space: pause/play<br>
             B: toggle A/B view<br>
-            R: restart bridge<br>
+            L: lighting + shadows<br>
+            R: restart scene<br>
             C: clear grid<br>
             1-9: select material
         </div>

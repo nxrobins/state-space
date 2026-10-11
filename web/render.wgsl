@@ -10,6 +10,9 @@ struct Params { size: vec2<u32>, tick: u32, styled: u32, viewport: vec2<f32>, di
 @group(1) @binding(0) var source: texture_2d<f32>;
 @group(1) @binding(1) var glow: texture_2d<f32>;
 @group(1) @binding(2) var linear_sampler: sampler;
+@group(1) @binding(3) var light_positions_a: texture_2d<f32>;
+@group(1) @binding(4) var light_positions_b: texture_2d<f32>;
+@group(1) @binding(5) var illumination: texture_2d<f32>;
 @vertex fn vs_main(@builtin(vertex_index) index: u32) -> VertexOutput {
     let uv = vec2<f32>(f32((index << 1u) & 2u), f32(index & 2u));
     return VertexOutput(vec4<f32>(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0), uv);
@@ -107,6 +110,130 @@ struct MaterialOutput { @location(0) color: vec4<f32>, @location(1) emission: ve
     }
     return MaterialOutput(vec4<f32>(max(color, vec3<f32>(0.0)), 1.0), vec4<f32>(emission, 1.0));
 }
+// One 16-cell tile stores integrated radiance and four actual emitting cells
+// on its luminous boundary. Area sampling gives a penumbra without inventing sources
+// inside terrain. These private render targets never feed back into physics.
+struct LightOutput {
+    @location(0) radiance: vec4<f32>,
+    @location(1) positions_a: vec4<f32>,
+    @location(2) positions_b: vec4<f32>,
+}
+@fragment fn fs_sources(in: VertexOutput) -> LightOutput {
+    let base = vec2<u32>(in.position.xy) * 16u;
+    var sum = vec3<f32>(0.0);
+    var positions = array<vec2<f32>, 4>(vec2<f32>(-1.0), vec2<f32>(-1.0), vec2<f32>(-1.0), vec2<f32>(-1.0));
+    var scores = array<f32, 4>(-1000.0, -1000.0, -1000.0, -1000.0);
+    let directions = array<vec2<f32>, 4>(vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0));
+    var count = 0.0;
+    for (var y = 0u; y < 16u; y++) {
+        for (var x = 0u; x < 16u; x++) {
+            let p = base + vec2<u32>(x, y);
+            if (any(p >= params.size)) { continue; }
+            let emission = textureLoad(source, vec2<i32>(p * 2u + 1u), 0).rgb;
+            let brightness = max(emission.r, max(emission.g, emission.b));
+            if (brightness < 0.02) { continue; }
+            sum += emission;
+            let offset = vec2<f32>(f32(x), f32(y)) - 7.5;
+            for (var i = 0u; i < 4u; i++) {
+                let score = dot(offset, directions[i]) + brightness * 0.01;
+                if (score > scores[i]) {
+                    scores[i] = score;
+                    // Tile-local centers stay exact in rgba16float even when
+                    // absolute grid coordinates exceed half-float precision.
+                    positions[i] = vec2<f32>(f32(x), f32(y)) + 0.5;
+                }
+            }
+            count = 4.0;
+        }
+    }
+    return LightOutput(vec4<f32>(sum * 0.32, count), vec4<f32>(positions[0], positions[1]), vec4<f32>(positions[2], positions[3]));
+}
+fn transmission(p: vec2<i32>) -> f32 {
+    let index = u32(p.y) * params.size.x + u32(p.x);
+    let cell = cells[index];
+    let material = cell & 255u;
+    let phase = (cell >> 24u) & 15u;
+    if (material == 0u || material == 4u || phase == 5u) { return 1.0; }
+    if (material == 2u) { return 0.96; }
+    if (material == 8u || material == 11u) { return 0.88; }
+    if (phase == 4u) { return select(0.97, 0.88, material == 14u); }
+    return 0.0;
+}
+fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
+    // Grid traversal visits every crossed cell, including one-cell walls.
+    // Ignore only the emitting and receiving cells, so exposed faces can glow.
+    let delta = emitter - receiver;
+    let ray = delta / max(length(delta), 0.001);
+    let stride = select(vec2<i32>(-1), vec2<i32>(1), ray >= vec2<f32>(0.0));
+    let crossing_step = 1.0 / max(abs(ray), vec2<f32>(0.00001));
+    var cell = vec2<i32>(floor(receiver));
+    let destination = vec2<i32>(floor(emitter));
+    var crossing = select(fract(receiver), 1.0 - fract(receiver), ray >= vec2<f32>(0.0)) * crossing_step;
+    var transmittance = 1.0;
+    // The 48-cell radius needs at most 69 crossings. The bound is visual only.
+    for (var i = 0u; i < 96u; i++) {
+        if (all(cell == destination)) { return transmittance; }
+        if (crossing.x < crossing.y) {
+            cell.x += stride.x; crossing.x += crossing_step.x;
+        } else {
+            cell.y += stride.y; crossing.y += crossing_step.y;
+        }
+        if (all(cell == destination)) { return transmittance; }
+        if (any(cell < vec2<i32>(0)) || any(cell >= vec2<i32>(params.size))) { return 0.0; }
+        transmittance *= transmission(cell);
+        if (transmittance < 0.01) { return 0.0; }
+    }
+    return 0.0;
+}
+@fragment fn fs_lighting(in: VertexOutput) -> @location(0) vec4<f32> {
+    let position = min(vec2<u32>(in.position.xy), params.size - 1u);
+    let index = position.y * params.size.x + position.x;
+    let material = cells[index] & 255u;
+    if (material == 0u || temperature(material, energies[index]) > 85.0) { return vec4<f32>(0.0); }
+    let receiver = vec2<f32>(position) + 0.5;
+    let tile = vec2<i32>(position / 16u);
+    let dimensions = vec2<i32>(textureDimensions(source));
+    var light = vec3<f32>(0.0);
+    for (var y = -3; y <= 3; y++) {
+        for (var x = -3; x <= 3; x++) {
+            let q = tile + vec2<i32>(x, y);
+            if (any(q < vec2<i32>(0)) || any(q >= dimensions)) { continue; }
+            let radiance = textureLoad(source, q, 0);
+            if (radiance.a == 0.0) { continue; }
+            let tile_origin = vec4<f32>(vec2<f32>(q * 16), vec2<f32>(q * 16));
+            let a = textureLoad(light_positions_a, q, 0) + tile_origin;
+            let b = textureLoad(light_positions_b, q, 0) + tile_origin;
+            // Four boundary probes plus four edge midpoints, accepted only if
+            // they are genuinely emitting cells. Deduplicate small sources.
+            let emitters = array<vec2<f32>, 8>(a.xy, a.zw, b.xy, b.zw,
+                floor((a.xy + a.zw) * 0.5) + 0.5, floor((b.xy + b.zw) * 0.5) + 0.5,
+                floor((a.xy + b.xy) * 0.5) + 0.5, floor((a.zw + b.zw) * 0.5) + 0.5);
+            var attenuation = 0.0;
+            var sample_count = 0.0;
+            for (var i = 0u; i < 8u; i++) {
+                let emitter = emitters[i];
+                if (emitter.x < 0.0) { continue; }
+                var duplicate = false;
+                for (var j = 0u; j < i; j++) {
+                    duplicate = duplicate || all(emitter == emitters[j]);
+                }
+                if (duplicate) { continue; }
+                if (i >= 4u) {
+                    let emitted = textureLoad(glow, vec2<i32>(floor(emitter)) * 2 + 1, 0).rgb;
+                    if (max(emitted.r, max(emitted.g, emitted.b)) < 0.02) { continue; }
+                }
+                sample_count += 1.0;
+                let delta = emitter - receiver;
+                let distance_sq = dot(delta, delta);
+                if (distance_sq >= 2304.0) { continue; }
+                let falloff = 1.0 - distance_sq / 2304.0;
+                attenuation += visibility(receiver, emitter) * falloff * falloff / (1.0 + distance_sq / 100.0);
+            }
+            light += radiance.rgb * attenuation / max(sample_count, 1.0);
+        }
+    }
+    return vec4<f32>(min(light, vec3<f32>(8.0)), 1.0);
+}
 @fragment fn fs_bloom(in: VertexOutput) -> @location(0) vec4<f32> {
     let delta = params.direction / vec2<f32>(textureDimensions(source));
     var color = vec3<f32>(0.0);
@@ -130,7 +257,14 @@ fn filmic(color: vec3<f32>) -> vec3<f32> {
     let texel = min(vec2<i32>(uv * vec2<f32>(textureDimensions(source))), vec2<i32>(textureDimensions(source)) - vec2<i32>(1));
     var color = textureLoad(source, texel, 0).rgb;
     if (params.styled != 0u) {
-        color += textureSampleLevel(glow, linear_sampler, uv, 0.0).rgb * 0.55;
+        if ((params.styled & 2u) != 0u) {
+            let cell = min(vec2<i32>(uv * vec2<f32>(params.size)), vec2<i32>(params.size) - 1);
+            let light = textureLoad(illumination, cell, 0).rgb;
+            // Cell-aligned sampling preserves thin shadows without light leaking
+            // through opaque walls during upsampling.
+            color += min(color + 0.025, vec3<f32>(0.7)) * light * 1.7;
+        }
+        if ((params.styled & 4u) != 0u) { color += textureSampleLevel(glow, linear_sampler, uv, 0.0).rgb * 0.55; }
         color = filmic(color * 1.15);
     }
     return vec4<f32>(pow(max(color, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.2)), 1.0);

@@ -11,6 +11,6 @@ try {
     const result = await benchmarkFrames(document.getElementById('canvas'), text => { document.getElementById('status').textContent = text; });
     window.frameBenchmark = { done: true, result };
     document.getElementById('status').textContent = 'Complete';
-    document.getElementById('results').textContent = result.rows.map(row => `${row.scene} / ${row.mode}: median ${row.frameMs.median.toFixed(2)} ms, p95 ${row.frameMs.p95.toFixed(2)} ms, ${row.overBudget}/${row.ticks} over 16.67 ms`).join('\n') + `\nDisplay-paced bridge: ${result.paced.achievedHz.toFixed(1)} Hz\n${result.scope}`;
+    document.getElementById('results').textContent = result.rows.map(row => `${row.scene} / ${row.mode}: median ${row.frameMs.median.toFixed(2)} ms, p95 ${row.frameMs.p95.toFixed(2)} ms, ${row.overBudget}/${row.ticks} over 16.67 ms`).join('\n') + '\n' + result.pacedScenes.map(row => `Display-paced ${row.scene}: ${row.achievedHz.toFixed(1)} Hz, ${row.overBudget}/${row.ticks} over budget`).join('\n') + `\n${result.scope}`;
 } catch (error) { window.frameBenchmark = { done: true, error: String(error.stack || error) }; document.getElementById('status').textContent = String(error); }
 </script></body></html>
