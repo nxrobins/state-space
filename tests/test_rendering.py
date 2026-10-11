@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from engine import MaterialRenderer, create_field
-from engine.schema import MAT_AIR, MAT_FIRE, MAT_GLASS, MAT_LAVA, MAT_METAL, MAT_SMOKE, MAT_STONE, MAT_WATER
+from engine.schema import MAT_AIR, MAT_FIRE, MAT_GLASS, MAT_LAVA, MAT_METAL, MAT_SMOKE, MAT_STEAM, MAT_STONE, MAT_WATER
 
 
 class RenderingTests(unittest.TestCase):
@@ -11,6 +11,60 @@ class RenderingTests(unittest.TestCase):
     def image(renderer):
         width, height = renderer.output_size
         return np.frombuffer(renderer.read_pixels(), dtype=np.uint8).reshape(height, width, 4)[:, :, :3].astype(np.int16)
+
+    def test_fire_and_lava_scatter_in_smoke_and_hot_steam_without_bloom(self):
+        for material in (MAT_SMOKE, MAT_STEAM):
+            for emitter in (MAT_FIRE, MAT_LAVA):
+                with self.subTest(material=material, emitter=emitter), create_field(32, 32) as world, MaterialRenderer(32, 32, output_size=(128, 128)) as renderer:
+                    for y in range(12, 28):
+                        for x in range(14, 24):
+                            world.set_cell(x, y, material, thermal=180 if material == MAT_STEAM else 40)
+                    for y in range(18, 23):
+                        world.set_cell(6, y, emitter, thermal=255)
+                        world.set_energy(6, y, 650 * 256)
+                    before = world.snapshot().to_dict()
+                    renderer.render(world, lighting=False, bloom=False, water=False)
+                    unlit = self.image(renderer)
+                    renderer.render(world, bloom=False, water=False)
+                    lit = self.image(renderer)
+                    self.assertGreater(int(lit[82, 74, 0] - unlit[82, 74, 0]), 20)
+                    self.assertEqual(world.snapshot().to_dict(), before)
+                    renderer.render(world, bloom=False, water=False)
+                    np.testing.assert_array_equal(self.image(renderer), lit)
+                    # A single-cell opaque divider stops illumination of the volume.
+                    for y in range(32):
+                        world.set_cell(12, y, MAT_STONE)
+                    renderer.render(world, bloom=False, water=False)
+                    np.testing.assert_array_equal(self.image(renderer)[82, 74], unlit[82, 74])
+                    for y in range(32):
+                        world.set_cell(12, y, MAT_AIR)
+                    for y in range(18, 23):
+                        world.set_cell(6, y, MAT_AIR)
+                    renderer.render(world, bloom=False, water=False)
+                    np.testing.assert_array_equal(self.image(renderer)[82, 74], unlit[82, 74])
+                    self.assertEqual(world.energy_balance().drift_q, 0)
+
+    def test_haze_reconstruction_clips_walls_and_disappears_with_gas(self):
+        with create_field(32, 32) as world, MaterialRenderer(32, 32, output_size=(128, 128)) as renderer:
+            for y in range(32):
+                world.set_cell(12, y, MAT_STONE)
+            renderer.render(world, lighting=False, bloom=False)
+            clear = self.image(renderer)
+            for y in range(10, 25):
+                for x in range(13, 22):
+                    world.set_cell(x, y, MAT_STEAM, thermal=180)
+            before = world.snapshot().to_dict()
+            renderer.render(world, lighting=False, bloom=False)
+            volume = self.image(renderer)
+            np.testing.assert_array_equal(volume[40:100, 44:52], clear[40:100, 44:52])
+            self.assertGreater(int(np.abs(volume[48:88, 56:80] - clear[48:88, 56:80]).max()), 10)
+            self.assertEqual(world.snapshot().to_dict(), before)
+            for y in range(10, 25):
+                for x in range(13, 22):
+                    world.set_cell(x, y, MAT_AIR)
+            renderer.render(world, lighting=False, bloom=False)
+            np.testing.assert_array_equal(self.image(renderer), clear)
+            self.assertEqual(world.energy_balance().drift_q, 0)
 
     def test_fire_and_lava_reflections_without_lighting_or_bloom(self):
         for material in (MAT_FIRE, MAT_LAVA):

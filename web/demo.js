@@ -107,11 +107,44 @@ export function seedWater(field) {
     for (const x of [49, 94, 163, 208]) field.setAnchor(x, 139);
 }
 
-export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water']);
+// Closed chambers keep finite real gas and lava in view throughout measurement.
+// Steam may condense and basin faces may melt; nothing is replenished afterward.
+export function seedHaze(field) {
+    if (field.width !== 256 || field.height !== 256) throw new Error('Haze gallery is a 256 × 256 scene');
+    const cells = new Uint32Array(256 * 256).fill(packVoxel(MAT.AIR));
+    const rectangle = (x0, y0, x1, y1, material, thermal = 20) => {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) cells[y * 256 + x] = packVoxel(material, thermal);
+    };
+    for (let y = 0; y < 256; y += 128) for (let x = 0; x < 256; x += 128) {
+        rectangle(x, y, x + 127, y + 3, MAT.STONE);
+        rectangle(x, y + 124, x + 127, y + 127, MAT.STONE);
+        rectangle(x, y + 4, x + 3, y + 123, MAT.STONE);
+        rectangle(x + 124, y + 4, x + 127, y + 123, MAT.STONE);
+        rectangle(x + 4, y + 4, x + 59, y + 123, MAT.SMOKE, 40);
+        rectangle(x + 60, y + 4, x + 123, y + 123, MAT.STEAM, 180);
+        rectangle(x + 30, y + 80, x + 39, y + 107, MAT.STONE);
+        rectangle(x + 64, y + 80, x + 75, y + 107, MAT.STONE);
+        rectangle(x + 30, y + 108, x + 75, y + 123, MAT.STONE);
+        rectangle(x + 40, y + 84, x + 63, y + 107, MAT.LAVA, 255);
+        rectangle(x + 91, y + 60, x + 93, y + 123, MAT.STONE);
+        rectangle(x + 83, y + 118, x + 90, y + 123, MAT.WOOD, 190);
+        rectangle(x + 83, y + 115, x + 90, y + 117, MAT.FIRE, 255);
+    }
+    const state = createPhysicsState(cells, 256, 256, DEFAULT_REGISTRY);
+    for (let i = 0; i < cells.length; i++) {
+        if ((cells[i] & 255) === MAT.LAVA) state.energyQ[i] = 1250 * 256;
+        if ((cells[i] & 255) === MAT.FIRE) state.energyQ[i] = 650 * 256;
+    }
+    field.restore({ ...field.packedSnapshot(), tick: 0, packedCells: Array.from(state.grid),
+        energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
+}
+
+export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water', 'haze']);
 export function seedScene(field, scene) {
     if (scene === 'bridge') seedBridge(field);
     else if (scene === 'lighting') seedLighting(field);
     else if (scene === 'water') seedWater(field);
+    else if (scene === 'haze') seedHaze(field);
     else if (scene === 'emissive') field.clear(MAT.LAVA);
     else throw new Error('Unknown demo scene');
 }

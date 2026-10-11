@@ -99,7 +99,17 @@ def main() -> int:
                 "  if dry==wet or before!=field.snapshot().to_dict(): raise RuntimeError('Installed water optics failed')\n"
                 "  pixel=(42*64+34)*4\n"
                 "  if wet[pixel]<=dry[pixel]+30: raise RuntimeError('Installed fire reflection missing')\n"
-                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True}))\n"
+                " for gas,thermal in ((14,40),(9,180)):\n"
+                "  with create_field(32,32) as field, MaterialRenderer(32,32,output_size=(128,128)) as renderer:\n"
+                "   for y in range(12,28):\n"
+                "    for x in range(14,24): field.set_cell(x,y,gas,thermal)\n"
+                "   for y in range(18,23): field.set_cell(6,y,4,255); field.set_energy(6,y,650*256)\n"
+                "   before=field.snapshot().to_dict(); renderer.render(field,lighting=False,bloom=False,water=False); unlit=renderer.read_pixels()\n"
+                "   renderer.render(field,bloom=False,water=False); lit=renderer.read_pixels(); pixel=(82*128+74)*4\n"
+                "   if lit[pixel]<=unlit[pixel]+20 or before!=field.snapshot().to_dict(): raise RuntimeError('Installed haze scattering failed')\n"
+                "   renderer.render(field,haze=False)\n"
+                "   if before!=field.snapshot().to_dict(): raise RuntimeError('Installed haze toggle mutated state')\n"
+                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True,'litSmokeAndSteam':True}))\n"
             )
             report["nativeRendering"] = json.loads(run([sys.executable, "-I", "-c", render_client], temp))
             client = temp / "client.mts"

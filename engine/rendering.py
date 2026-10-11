@@ -46,6 +46,7 @@ class MaterialRenderer:
             {'binding': 2, 'visibility': wgpu.ShaderStage.FRAGMENT, 'sampler': {}},
             *[{'binding': i, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {}} for i in (3, 4, 5)],
             {'binding': 6, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {'sample_type': 'uint'}},
+            *[{'binding': i, 'visibility': wgpu.ShaderStage.FRAGMENT, 'texture': {}} for i in (7, 8)],
         ])
         empty_layout = device.create_bind_group_layout(entries=[])
         span_layout = device.create_bind_group_layout(entries=[{'binding': 0, 'visibility': wgpu.ShaderStage.COMPUTE,
@@ -68,6 +69,8 @@ class MaterialRenderer:
         self._sources = pipeline('fs_sources', ['rgba16float'] * 3)
         self._lighting = pipeline('fs_lighting', ['rgba16float'])
         self._optics = pipeline('fs_optics', ['rgba16float'] * 2)
+        self._density = pipeline('fs_density', ['rgba16float'])
+        self._haze = pipeline('fs_haze', ['rgba16float'])
 
         def buffer(size, uniform=False):
             resource = device.create_buffer(size=size, usage=wgpu.BufferUsage.COPY_DST |
@@ -109,29 +112,33 @@ class MaterialRenderer:
         self._positions_a = texture(*tiles)
         self._positions_b = texture(*tiles)
         self._illumination = texture(self.width, self.height)
+        self._haze_density = texture(self.width, self.height)
+        self._haze_volume = texture(self.width * 2, self.height * 2)
         dummy = texture(1, 1)
         self._output = texture(*self.output_size, format='rgba8unorm', copy=True)
         sampler = device.create_sampler(min_filter='linear', mag_filter='linear')
 
-        def textures(source, glow, a=dummy, b=dummy, light=dummy):
+        def textures(source, glow, a=dummy, b=dummy, light=dummy, density=dummy, volume=dummy):
             return device.create_bind_group(layout=texture_layout, entries=[
                 {'binding': 0, 'resource': source.create_view()}, {'binding': 1, 'resource': glow.create_view()},
                 {'binding': 2, 'resource': sampler},
                 {'binding': 3, 'resource': a.create_view()}, {'binding': 4, 'resource': b.create_view()},
                 {'binding': 5, 'resource': light.create_view()},
                 {'binding': 6, 'resource': geometry.create_view()},
+                {'binding': 7, 'resource': density.create_view()}, {'binding': 8, 'resource': volume.create_view()},
             ])
 
         self._texture_groups = [textures(dummy, dummy), textures(self._emission, self._emission),
                                textures(self._blur_a, self._blur_a), textures(self._water_scene, self._blur_b),
-                               textures(self._light_tiles, self._emission, self._positions_a, self._positions_b),
-                               textures(self._scene, self._emission, light=self._illumination),
-                               textures(self._water_emission, self._water_emission), textures(self._scene, self._blur_b)]
+                               textures(self._light_tiles, self._emission, self._positions_a, self._positions_b, density=self._haze_density),
+                               textures(self._scene, self._emission, light=self._illumination, volume=self._haze_volume),
+                               textures(self._water_emission, self._water_emission), textures(self._scene, self._blur_b),
+                               textures(dummy, dummy, light=self._illumination, density=self._haze_density)]
 
-    def render(self, field, *, styled=True, lighting=True, bloom=True, water=True, reflections=True, refraction=True):
+    def render(self, field, *, styled=True, lighting=True, bloom=True, water=True, reflections=True, refraction=True, haze=True):
         if self._closed:
             raise RuntimeError('Renderer is closed')
-        if not all(isinstance(value, bool) for value in (styled, lighting, bloom, water, reflections, refraction)):
+        if not all(isinstance(value, bool) for value in (styled, lighting, bloom, water, reflections, refraction, haze)):
             raise ValueError('Render switches must be boolean')
         if (field.width, field.height, field.registry.hash) != (self.width, self.height, self.registry.hash):
             raise ValueError('Renderer field contract differs')
@@ -140,7 +147,7 @@ class MaterialRenderer:
         for i, buffer in enumerate(self._uniforms):
             self.device.queue.write_buffer(buffer, 0, struct.pack('<4I4f', self.width, self.height, field.tick % 65536,
                 (1 | (2 if lighting else 0) | (4 if bloom else 0) | (8 if water else 0) |
-                 (16 if reflections else 0) | (32 if refraction else 0)) if styled else 0,
+                 (16 if reflections else 0) | (32 if refraction else 0) | (64 if haze else 0)) if styled else 0,
                 *self.output_size, 4 if i == 1 else 0, 1 if i == 2 else 0))
         encoder = self.device.create_command_encoder()
 
@@ -155,9 +162,13 @@ class MaterialRenderer:
             render_pass.end()
 
         draw(self._material, [self._scene, self._emission], self._groups[0], self._texture_groups[0])
+        if styled and haze:
+            draw(self._density, [self._haze_density], self._groups[0], self._texture_groups[0])
         if styled and lighting:
             draw(self._sources, [self._light_tiles, self._positions_a, self._positions_b], self._groups[0], self._texture_groups[1])
             draw(self._lighting, [self._illumination], self._groups[0], self._texture_groups[4])
+        if styled and haze:
+            draw(self._haze, [self._haze_volume], self._groups[0], self._texture_groups[8])
         if styled and water:
             compute_pass = encoder.begin_compute_pass()
             compute_pass.set_pipeline(self._spans)

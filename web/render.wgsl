@@ -14,6 +14,8 @@ struct Params { size: vec2<u32>, tick: u32, styled: u32, viewport: vec2<f32>, di
 @group(1) @binding(4) var light_positions_b: texture_2d<f32>;
 @group(1) @binding(5) var illumination: texture_2d<f32>;
 @group(1) @binding(6) var water_geometry: texture_2d<u32>;
+@group(1) @binding(7) var haze_density: texture_2d<f32>;
+@group(1) @binding(8) var haze_volume: texture_2d<f32>;
 @group(2) @binding(0) var span_output: texture_storage_2d<rgba32uint, write>;
 
 // One invocation per column: linear work, exact integer surface/floor positions.
@@ -78,6 +80,13 @@ fn solid(p: vec2<i32>) -> f32 {
     let m = material_at(p);
     return select(1.0, 0.0, m == 0u || m == 2u || m == 4u || m == 9u || m == 14u || m == 15u);
 }
+fn haze_open(p: vec2<i32>) -> bool {
+    let m = material_at(p);
+    return m == 0u || m == 4u || m == 9u || m == 14u || m == 15u;
+}
+fn sky_color(uv: vec2<f32>, grain: f32) -> vec3<f32> {
+    return mix(vec3<f32>(0.003, 0.008, 0.019), vec3<f32>(0.012, 0.024, 0.031), uv.y) + (grain - 0.5) * 0.001;
+}
 struct MaterialOutput { @location(0) color: vec4<f32>, @location(1) emission: vec4<f32> }
 @fragment fn fs_material(in: VertexOutput) -> MaterialOutput {
     let position = min(vec2<u32>(in.uv * vec2<f32>(params.size)), params.size - vec2<u32>(1));
@@ -94,9 +103,13 @@ struct MaterialOutput { @location(0) color: vec4<f32>, @location(1) emission: ve
         if (material == 0u) { color = vec3<f32>(0.003, 0.005, 0.009); }
         return MaterialOutput(vec4<f32>(color, 1.0), vec4<f32>(0.0));
     }
+    if ((params.styled & 64u) != 0u && (material == 9u || material == 14u)) {
+        // Steam/smoke scatter incident light in the volume pass, without becoming
+        // incandescent light sources merely because their model temperature is hot.
+        return MaterialOutput(vec4<f32>(sky_color(in.uv, grain), 1.0), vec4<f32>(0.0));
+    }
     if (material == 0u) {
-        let sky = mix(vec3<f32>(0.003, 0.008, 0.019), vec3<f32>(0.012, 0.024, 0.031), in.uv.y);
-        color = sky + vec3<f32>((grain - 0.5) * 0.001);
+        color = sky_color(in.uv, grain);
     } else {
         color *= 0.78 + grain * 0.44;
         let normal = normalize(vec3<f32>(solid(p + vec2<i32>(-1, 0)) - solid(p + vec2<i32>(1, 0)),
@@ -217,11 +230,35 @@ fn traced_visibility(receiver: vec2<f32>, emitter: vec2<f32>, water_path: bool) 
 fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     return traced_visibility(receiver, emitter, false);
 }
+@fragment fn fs_density(in: VertexOutput) -> @location(0) vec4<f32> {
+    let p = min(vec2<i32>(in.position.xy), vec2<i32>(params.size) - 1);
+    if (!haze_open(p)) { return vec4<f32>(0.0); }
+    var density = vec2<f32>(0.0);
+    // Compact reconstruction of actual gas cells. Every crossed cell is checked,
+    // so smoothing cannot carry a plume through a one-cell opaque divider.
+    for (var y = -2; y <= 2; y++) {
+        for (var x = -2; x <= 2; x++) {
+            let q = p + vec2<i32>(x, y);
+            if (any(q < vec2<i32>(0)) || any(q >= vec2<i32>(params.size))) { continue; }
+            let material = material_at(q);
+            if (material != 9u && material != 14u) { continue; }
+            let weight = exp(-f32(x * x + y * y) / 2.0) / 6.169;
+            let through = traced_visibility(vec2<f32>(p) + 0.5, vec2<f32>(q) + 0.5, true);
+            density += select(vec2<f32>(1.0, 0.0), vec2<f32>(0.0, 1.0), material == 9u) * weight * through;
+        }
+    }
+    return vec4<f32>(density, 0.0, 1.0);
+}
 @fragment fn fs_lighting(in: VertexOutput) -> @location(0) vec4<f32> {
     let position = min(vec2<u32>(in.position.xy), params.size - 1u);
     let index = position.y * params.size.x + position.x;
     let material = cells[index] & 255u;
-    if (material == 0u || temperature(material, energies[index]) > 85.0) { return vec4<f32>(0.0); }
+    var has_haze = false;
+    if ((params.styled & 64u) != 0u) {
+        let density = textureLoad(haze_density, vec2<i32>(position), 0).rg;
+        has_haze = density.x + density.y > 0.001;
+    }
+    if (!has_haze && (material == 0u || temperature(material, energies[index]) > 85.0)) { return vec4<f32>(0.0); }
     let receiver = vec2<f32>(position) + 0.5;
     let tile = vec2<i32>(position / 16u);
     let dimensions = vec2<i32>(textureDimensions(source));
@@ -266,6 +303,51 @@ fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     }
     return vec4<f32>(min(light, vec3<f32>(8.0)), 1.0);
 }
+fn lattice_noise(p: vec3<i32>) -> f32 {
+    return hash(vec2<u32>(p.xy) + u32(p.z) * vec2<u32>(1597334677u, 3812015801u));
+}
+fn volume_noise(p: vec3<f32>) -> f32 {
+    let base = vec3<i32>(floor(p));
+    let f = fract(p);
+    let t = f * f * (3.0 - 2.0 * f);
+    let a = mix(mix(lattice_noise(base), lattice_noise(base + vec3<i32>(1, 0, 0)), t.x),
+        mix(lattice_noise(base + vec3<i32>(0, 1, 0)), lattice_noise(base + vec3<i32>(1, 1, 0)), t.x), t.y);
+    let b = mix(mix(lattice_noise(base + vec3<i32>(0, 0, 1)), lattice_noise(base + vec3<i32>(1, 0, 1)), t.x),
+        mix(lattice_noise(base + vec3<i32>(0, 1, 1)), lattice_noise(base + vec3<i32>(1, 1, 1)), t.x), t.y);
+    return mix(a, b, t.z);
+}
+@fragment fn fs_haze(in: VertexOutput) -> @location(0) vec4<f32> {
+    let f = in.uv * vec2<f32>(params.size);
+    let p = min(vec2<i32>(f), vec2<i32>(params.size) - 1);
+    let gas = textureLoad(haze_density, p, 0).rg;
+    if (!haze_open(p) || gas.x + gas.y < 0.001) { return vec4<f32>(0.0, 0.0, 0.0, 1.0); }
+    var incident = vec3<f32>(0.0);
+    if ((params.styled & 2u) != 0u) { incident = textureLoad(illumination, p, 0).rgb; }
+    let time = f32(params.tick) / 60.0;
+    var transmittance = 1.0;
+    var scattering = vec3<f32>(0.0);
+    // Extrude the 2D concentration into an eight-unit cosmetic slab. Eight
+    // front-to-back samples integrate Beer-Lambert extinction and single scatter.
+    // Depth/noise are derived afresh, with no particles or temporal history.
+    for (var i = 0u; i < 8u; i++) {
+        let z = f32(i) + 0.5;
+        let uv = (f + vec2<f32>(sin(z * 0.9 + time) * 0.3, 0.0)) / vec2<f32>(params.size);
+        let concentration = textureSampleLevel(haze_density, linear_sampler, uv, 0.0).rg;
+        let noise = volume_noise(vec3<f32>(f * 0.12 + vec2<f32>(time * 0.25, time * 0.7), z * 0.27));
+        let detail = volume_noise(vec3<f32>(f * 0.37 - vec2<f32>(0.0, time * 0.3), z * 0.61));
+        let envelope = sin(z * 3.14159265 / 8.0);
+        let densities = concentration * (0.35 + noise * 0.9 + detail * 0.25) * envelope;
+        let extinction = densities.x * 0.23 + densities.y * 0.14;
+        let step_transmittance = exp(-extinction);
+        let steam_fraction = densities.y / max(densities.x + densities.y, 0.0001);
+        let albedo = mix(vec3<f32>(0.48, 0.44, 0.40), vec3<f32>(0.92, 0.96, 1.0), steam_fraction);
+        let depth_light = 1.0 / (1.0 + (z - 4.0) * (z - 4.0) * 0.06);
+        let radiance = albedo * (vec3<f32>(0.035, 0.045, 0.06) + incident * depth_light * 0.45);
+        scattering += transmittance * (1.0 - step_transmittance) * radiance;
+        transmittance *= step_transmittance;
+    }
+    return vec4<f32>(scattering, transmittance);
+}
 @fragment fn fs_bloom(in: VertexOutput) -> @location(0) vec4<f32> {
     let delta = params.direction / vec2<f32>(textureDimensions(source));
     var color = vec3<f32>(0.0);
@@ -277,15 +359,21 @@ fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     }
     return vec4<f32>(color / weight_sum, 1.0);
 }
+fn haze_at(p: vec2<f32>) -> vec4<f32> {
+    if ((params.styled & 64u) == 0u) { return vec4<f32>(0.0, 0.0, 0.0, 1.0); }
+    let texel = clamp(vec2<i32>(p * 2.0), vec2<i32>(0), vec2<i32>(params.size * 2u) - 1);
+    return textureLoad(haze_volume, texel, 0);
+}
 fn lit_scene(p: vec2<f32>) -> vec3<f32> {
     let cell = clamp(vec2<i32>(floor(p)), vec2<i32>(0), vec2<i32>(params.size) - 1);
     let texel = clamp(vec2<i32>(p * 2.0), vec2<i32>(0), vec2<i32>(params.size * 2u) - 1);
     var color = textureLoad(source, texel, 0).rgb;
-    if ((params.styled & 2u) != 0u) {
+    if ((params.styled & 2u) != 0u && !((params.styled & 64u) != 0u && haze_open(cell))) {
         let light = textureLoad(illumination, cell, 0).rgb;
         color += min(color + 0.025, vec3<f32>(0.7)) * light * 1.7;
     }
-    return color;
+    let volume = haze_at(p);
+    return color * volume.a + volume.rgb;
 }
 // Screen-space water optics sample the unmodified HDR scene, never themselves.
 // Surface/floor spans, crossed-cell visibility and depth absorption keep sealed
@@ -295,7 +383,7 @@ fn lit_scene(p: vec2<f32>) -> vec3<f32> {
     let f = in.uv * vec2<f32>(params.size);
     let p = min(vec2<i32>(f), vec2<i32>(params.size) - 1);
     var color = lit_scene(f);
-    var emission = textureLoad(glow, vec2<i32>(f * 2.0), 0).rgb;
+    var emission = textureLoad(glow, vec2<i32>(f * 2.0), 0).rgb * haze_at(f).a;
     if ((params.styled & 8u) == 0u || material_at(p) != 2u) {
         return MaterialOutput(vec4<f32>(color, 1.0), vec4<f32>(emission, 1.0));
     }
@@ -332,7 +420,7 @@ fn lit_scene(p: vec2<f32>) -> vec3<f32> {
             let roughness = 0.86 + 0.14 * sin(depth * 1.8 + ripple * 0.7);
             let weight = through * 0.48 * exp(-depth * 0.018) * roughness;
             color = mix(color, lit_scene(reflected), weight);
-            emission += textureLoad(glow, vec2<i32>(reflected * 2.0), 0).rgb * weight;
+            emission += textureLoad(glow, vec2<i32>(reflected * 2.0), 0).rgb * haze_at(reflected).a * weight;
         }
     }
     return MaterialOutput(vec4<f32>(color, 1.0), vec4<f32>(emission, 1.0));

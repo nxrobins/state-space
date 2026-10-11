@@ -22,7 +22,7 @@ Two blur passes add bloom before filmic tone mapping. Material targets have two
 pixels per simulation cell; bloom uses half a pixel per cell. The output preserves
 square cells and letterboxes other aspect ratios. A/B mode uses the same field,
 with plain catalog colors or material shading, dynamic lighting, shadows, water
-optics, and bloom.
+optics, volumetric smoke/steam, and bloom.
 
 Water mirrors the visible HDR scene above each exposed surface, including fire,
 lava, and their emission. Reflected emission participates in bloom. A private GPU
@@ -45,6 +45,21 @@ additional physics readback. The current separate rendering device requires an
 upload of the three host coordinates each frame. All such copies/uploads are
 included in full-frame measurements. Lighting does not transport model energy.
 Water optics write only private textures and perform no additional state readback.
+
+Smoke and steam cells seed a compact, wall-aware concentration map at one texel
+per cell. An eight-sample front-to-back volume pass integrates absorption and
+single-scattered fire/lava light into a two-pixel-per-cell HDR target. Smoke has
+stronger extinction and darker scattering than steam. Coherent 3D noise and a
+small tick-driven drift add depth without maintaining particles or history.
+Opaque terrain clips the volume, and the existing crossed-cell light visibility
+keeps one-cell walls from leaking illumination. Water can mirror the lit haze.
+
+This is an artistic extrusion of a 2D gas field into a shallow cosmetic volume;
+the engine does not simulate 3D gas density or multiple scattering. Gas movement,
+temperature, condensation, and combustion still follow the exact integer physics.
+With haze enabled, hot steam uses scattered incident light instead of emitting
+its own incandescent glow. Haze adds no energy transport, physical coordinate,
+or state readback. Each completed snapshot reconstructs it afresh.
 
 ## Burning bridge demo
 
@@ -81,15 +96,23 @@ patterned riverbed. Ordinary structural anchors hold the stone basins above the
 water; the wood still burns under normal physics. Use **Water optics** or press
 **W** to compare reflections/refraction while keeping the same complete field.
 
+The [smoke and steam chambers](http://127.0.0.1:8765/web/?scene=haze&paused)
+start paused with finite gas, lava reservoirs, burning wood, and thin stone
+dividers. Use **Volumetric haze** or press **H** to compare against the earlier
+gas shading. Use **L** to inspect scattered illumination. The chambers retain
+both gas species and active lava through the entire measured trajectory, with
+no replenishment during playback.
+
 The client uses a fixed 60-tick clock with `requestAnimationFrame`. Slow displays
 retain simulation backlog rather than skipping physical ticks. Visual animation
 uses the completed absolute tick, so pausing also freezes cosmetic flicker.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,
 styled, and alternating views on the bridge, a fully emissive lava field, the
-distributed lighting gallery, and the lagoon at 256 × 256. The lagoon adds a
-water-disabled comparison. Output is 1920 × 1080. It also runs the styled bridge,
-lighting gallery, and lagoon at a requested 60 Hz display cadence. Local results
+distributed lighting gallery, lagoon, and haze chambers at 256 × 256. The lagoon
+adds a water-disabled comparison; the chambers add a haze-disabled comparison.
+Output is 1920 × 1080. It also runs the styled bridge, lighting gallery, lagoon,
+and chambers at a requested 60 Hz display cadence. Local results
 depend on the device, browser, and host load.
 
 ## Native Python rendering
@@ -109,6 +132,7 @@ with create_field(256, 256) as world, MaterialRenderer(256, 256) as renderer:
     renderer.render(world, lighting=False) # Keep shading, heat glow, and bloom.
     renderer.render(world, bloom=False)    # Inspect direct light and shadows.
     renderer.render(world, water=False)    # Compare with opaque water shading.
+    renderer.render(world, haze=False)     # Compare with the earlier gas shading.
     # Inspect reflections independently.
     renderer.render(world, lighting=False, bloom=False, refraction=False)
 ```
@@ -123,7 +147,7 @@ JavaScript field API. The shared source is `web/render.wgsl`; `engine.generate`
 bundles it into browser assets and `engine/shaders/material_render.wgsl` for the
 installed Python package. No external effects package is required.
 The browser API accepts the same independent switches as an options object:
-`renderer.render(field, true, { lighting: false, bloom: false, water: true })`.
+`renderer.render(field, true, { lighting: false, bloom: false, water: true, haze: true })`.
 Both APIs also accept independent boolean `reflections` and `refraction` switches;
 `water: false` disables both. All switches default to true in the styled view.
 
@@ -136,14 +160,16 @@ uv run python -m scripts.benchmark_frames --browser-cli <agent-browser-launcher>
 The harness captures the real A/B button, checks unchanged complete state, and
 measures 120 frames after 12 warmup ticks for each scene/view/backend. The timing
 includes physics, public coordinate copies, uploads, shading, light extraction,
-terrain visibility, water geometry/reflection/refraction, bloom/composition,
+terrain visibility, gas density reconstruction, volumetric extinction/scattering,
+water geometry/reflection/refraction, bloom/composition,
 and completed GPU work. Initialization, reference hashing, screenshot readbacks,
 and operating-system scanout are excluded. Native output is offscreen. Browser
 results additionally record display cadence. Complete trajectories must match the
 JavaScript CPU reference and native backend, with zero energy drift.
 
-See the [water frame report](checkpoints/WATER_PERFORMANCE.md) for hardware,
+See the [haze frame report](checkpoints/HAZE_PERFORMANCE.md) for hardware,
 distributions, screenshots, and current measured limits. The earlier
+[water frame report](checkpoints/WATER_PERFORMANCE.md),
 [lighting frame report](checkpoints/LIGHTING_PERFORMANCE.md) and
 [material-rendering report](checkpoints/RENDERING_PERFORMANCE.md) retain the
-baselines before water optics and dynamic lighting were added.
+baselines before each respective rendering addition.
