@@ -5,20 +5,36 @@ import { seedBridge, seedLighting, seedWater, seedHaze, seedHeat } from './demo.
 import { FrameClock } from './frame-clock.js';
 import { canvasCell } from './renderer.js';
 
-test('display scheduling preserves fixed ticks across refresh rates and backlog', () => {
+test('display scheduling keeps 60 ticks per second without an unbounded backlog', () => {
     for (const hz of [30, 60, 144]) {
         const clock = new FrameClock();
         let ticks = 0;
         for (let i = 0; i <= hz; i++) ticks += clock.advance(i * 1000 / hz);
         assert.equal(ticks, 60);
     }
+    // Ordinary frame jitter loses no simulated time.
+    const jitter = new FrameClock();
+    let now = 0, jittered = jitter.advance(now);
+    for (let i = 0; i < 60; i++) { now += i % 2 ? 1000 / 30 - 10 : 10; jittered += jitter.advance(now); }
+    assert.equal(jittered, 60);
+    // A stall (for example a hidden tab) runs at most one catch-up frame, then
+    // returns to real time instead of fast-forwarding through the backlog.
     const clock = new FrameClock();
     clock.advance(0);
-    let ticks = clock.advance(1000);
-    for (let i = 0; i < 14; i++) ticks += clock.advance(1000);
-    assert.equal(ticks, 60, 'No backlog ticks may be discarded');
-    assert.equal(clock.advance(2000, true), 0);
-    assert.equal(clock.advance(2000 + 1000 / 60), 1);
+    assert.equal(clock.advance(60000), 4);
+    let after = 0;
+    for (let i = 1; i <= 60; i++) after += clock.advance(60000 + i * 1000 / 60);
+    assert(after >= 60 && after <= 61, `expected real-time ticks after a stall, got ${after}`);
+    // A device that needs 20 ms per tick runs slower than real time. When it becomes
+    // fast again, the world continues at real time instead of repaying ~50 s of debt.
+    const slow = new FrameClock();
+    let t = 0, resumed = 0;
+    slow.advance(t);
+    for (let i = 0; i < 600; i++) t += Math.max(1000 / 60, slow.advance(t) * 20 + 3);
+    for (let i = 0; i < 60; i++) { resumed += slow.advance(t); t += 1000 / 60; }
+    assert(resumed <= 66, `slow device repaid a backlog: ${resumed} ticks in one second`);
+    assert.equal(clock.advance(70000, true), 0);
+    assert.equal(clock.advance(70000 + 1000 / 60), 1);
 });
 
 test('lighting gallery retains finite lava sources through a measured trajectory', () => {

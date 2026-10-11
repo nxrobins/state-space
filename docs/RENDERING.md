@@ -123,8 +123,10 @@ same finite reservoirs with cold smoke bands above them. Press **D** or use
 watch the shimmer rise while smoke moves, steam condenses, and basin faces melt
 under the ordinary physics. The D toggle is independent of H, L, W, and A/B.
 
-The client uses a fixed 60-tick clock with `requestAnimationFrame`. Slow displays
-retain simulation backlog rather than skipping physical ticks. Visual animation
+The client uses a fixed 60-tick clock with `requestAnimationFrame`, at most four
+ticks per frame. Time that a slow device or a hidden tab could not simulate is
+dropped, not repaid later: ticks are never skipped or changed, so the world runs
+slower than real time instead of fast-forwarding afterward. Visual animation
 uses the completed absolute tick, so pausing also freezes cosmetic flicker.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,

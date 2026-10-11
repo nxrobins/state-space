@@ -51,6 +51,8 @@ async function init() {
         canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
     }
     resize(); window.addEventListener('resize', resize);
+    // A hidden tab receives no animation frames; resume from the current time.
+    document.addEventListener('visibilitychange', () => clock.reset());
     let renderer;
     try { renderer = await createMaterialRenderer(canvas, GRID_W, GRID_H, world.registry); }
     catch (error) { world.close(); throw error; }
