@@ -139,12 +139,31 @@ export function seedHaze(field) {
         energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
 }
 
-export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water', 'haze']);
+// The same finite chambers, with cold smoke bands making refraction visible in
+// the open medium. This changes only initial placement, never playback physics.
+export function seedHeat(field) {
+    seedHaze(field);
+    const initial = field.packedSnapshot();
+    const cells = Uint32Array.from(initial.packedCells);
+    for (let y = 4; y < 256; y += 128) for (let x = 4; x < 256; x += 128) {
+        for (let dy = 0; dy < 72; dy++) for (let dx = 0; dx < 116; dx++) {
+            cells[(y + dy) * 256 + x + dx] = packVoxel(dx % 8 < 4 ? MAT.SMOKE : MAT.AIR, 40);
+        }
+    }
+    const state = createPhysicsState(cells, 256, 256, DEFAULT_REGISTRY);
+    for (let i = 0; i < cells.length; i++) {
+        if ((cells[i] & 255) === MAT.LAVA || (cells[i] & 255) === MAT.FIRE) state.energyQ[i] = initial.energyQ[i];
+    }
+    field.restore({ ...initial, packedCells: Array.from(state.grid), energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
+}
+
+export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water', 'haze', 'heat']);
 export function seedScene(field, scene) {
     if (scene === 'bridge') seedBridge(field);
     else if (scene === 'lighting') seedLighting(field);
     else if (scene === 'water') seedWater(field);
     else if (scene === 'haze') seedHaze(field);
+    else if (scene === 'heat') seedHeat(field);
     else if (scene === 'emissive') field.clear(MAT.LAVA);
     else throw new Error('Unknown demo scene');
 }

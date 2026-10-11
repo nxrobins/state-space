@@ -49,11 +49,13 @@ interactive scenes are separate from the performance workloads below.
 For the visual showcase, open the [burning bridge](http://127.0.0.1:8765/web/):
 built-in material shading, energy-derived heat glow, dynamic fire/lava lighting,
 soft terrain shadows, lit volumetric smoke/steam, water reflections/refraction,
-and bloom. A/B, lighting, water, and haze toggles use the same deterministic field.
+heat distortion, and bloom. All presentation toggles use the same deterministic field.
 Try the [smoke and steam chambers](http://127.0.0.1:8765/web/?scene=haze&paused)
 and press **H** to compare the volume effect.
+Try the [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused)
+and press **D** to compare distortion.
 [Rendering guide and native Python API](docs/RENDERING.md) ·
-[Full-frame haze measurements](docs/checkpoints/HAZE_PERFORMANCE.md).
+[Full-frame heat measurements](docs/checkpoints/HEAT_PERFORMANCE.md).
 
 ## 256 × 256 at 60 Hz
 
@@ -85,12 +87,13 @@ commands, adapter details, and the [native](docs/checkpoints/gpu-tick-optimized.
 and [browser](docs/checkpoints/gpu-browser-ticks.json) timing receipts.
 
 Complete rendered frames have a separate benchmark at 1920 × 1080 output. The
-latest smoke/steam scene measured **8.02 ms median / 8.84 ms p95** natively and
-**9.30 / 11.50 ms** in WebGPU on the same hardware, including physics, uploads,
+latest heat-distortion scene measured **10.37 ms median / 12.78 ms p95** natively and
+**11.10 / 14.00 ms** in WebGPU on the same hardware, including physics, uploads,
 all effects, and GPU completion. A requested 60 Hz browser run achieved
-**59.45 Hz**, with one 16.90 ms work overrun among 120 frames. All 38 rendered
+**58.00 Hz**, with four work overruns among 120 frames; it did not sustain a locked
+60 Hz in that run. All 47 rendered
 trajectories matched the CPU reference with zero energy drift. See the
-[full-frame report](docs/checkpoints/HAZE_PERFORMANCE.md) for raw samples and
+[full-frame report](docs/checkpoints/HEAT_PERFORMANCE.md) for raw samples and
 the limits of these measurements.
 
 ## Use the SDK

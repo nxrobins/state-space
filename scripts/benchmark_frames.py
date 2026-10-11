@@ -67,6 +67,8 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
             modes.append('water-off')
         if scene == 'haze':
             modes.append('haze-off')
+        if scene == 'heat':
+            modes.append('distortion-off')
         for mode in modes:
             print(f'Native frame benchmark: {scene} / {mode}', flush=True)
             with create_field(256, 256) as field, MaterialRenderer(256, 256) as renderer:
@@ -82,12 +84,16 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 opaque_water = renderer.read_pixels()
                 renderer.render(field, haze=False)
                 flat_gas = renderer.read_pixels()
+                renderer.render(field, distortion=False)
+                still_air = renderer.read_pixels()
                 if field.snapshot().to_dict() != before or plain == styled or (scene != 'emissive' and styled == unlit):
                     raise ValueError('Native A/B isolation or visual distinction failed')
                 if scene == 'water' and styled == opaque_water:
                     raise ValueError('Water optics produced no image difference')
                 if scene == 'haze' and styled == flat_gas:
                     raise ValueError('Volumetric haze produced no image difference')
+                if scene == 'heat' and styled == still_air:
+                    raise ValueError('Heat distortion produced no image difference')
                 if scene == 'bridge' and mode == 'styled':
                     write_png(output / 'native-plain.png', plain, 1920, 1080)
                     write_png(output / 'native-styled.png', styled, 1920, 1080)
@@ -102,12 +108,15 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                     write_png(output / 'native-haze.png', styled, 1920, 1080)
                     write_png(output / 'native-haze-unlit.png', unlit, 1920, 1080)
                     write_png(output / 'native-haze-off.png', flat_gas, 1920, 1080)
+                if scene == 'heat' and mode == 'styled':
+                    write_png(output / 'native-heat.png', styled, 1920, 1080)
+                    write_png(output / 'native-heat-off.png', still_air, 1920, 1080)
                 frames, physics, rendering = [], [], []
                 for i in range(warmup + samples):
                     started = time.perf_counter()
                     field.step(1)
                     physics_done = time.perf_counter()
-                    renderer.render(field, styled=mode in ('styled', 'water-off', 'haze-off') or (mode == 'alternating' and i % 2 == 0), water=mode != 'water-off', haze=mode != 'haze-off')
+                    renderer.render(field, styled=mode in ('styled', 'water-off', 'haze-off', 'distortion-off') or (mode == 'alternating' and i % 2 == 0), water=mode != 'water-off', haze=mode != 'haze-off', distortion=mode != 'distortion-off')
                     finished = time.perf_counter()
                     if i >= warmup:
                         frames.append((finished - started) * 1000)
@@ -120,19 +129,19 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 final_water_cells = int(np.count_nonzero((field.grid & 255) == MAT_WATER))
                 final_smoke_cells = int(np.count_nonzero((field.grid & 255) == MAT_SMOKE))
                 final_steam_cells = int(np.count_nonzero((field.grid & 255) == MAT_STEAM))
-                if final_lava_cells != expected['finalLavaCells'] or (scene in ('lighting', 'water', 'haze') and final_lava_cells < 64):
+                if final_lava_cells != expected['finalLavaCells'] or (scene in ('lighting', 'water', 'haze', 'heat') and final_lava_cells < 64):
                     raise ValueError('Lighting source continuation differs')
                 if final_water_cells != expected['finalWaterCells'] or (scene == 'water' and final_water_cells < 1024):
                     raise ValueError('Water continuation differs')
                 if final_smoke_cells != expected['finalSmokeCells'] or final_steam_cells != expected['finalSteamCells']:
                     raise ValueError('Gas continuation differs')
-                if scene == 'haze' and (final_smoke_cells < 1024 or final_steam_cells < 1024):
+                if scene in ('haze', 'heat') and (final_smoke_cells < 1024 or final_steam_cells < 1024):
                     raise ValueError('Haze expired before measurement ended')
                 water_proof = {}
                 if scene == 'water' and mode == 'styled':
-                    renderer.render(field, lighting=False, bloom=False, refraction=False, haze=False)
+                    renderer.render(field, lighting=False, bloom=False, refraction=False, haze=False, distortion=False)
                     wet = renderer.read_pixels()
-                    renderer.render(field, lighting=False, bloom=False, water=False, haze=False)
+                    renderer.render(field, lighting=False, bloom=False, water=False, haze=False, distortion=False)
                     dry = renderer.read_pixels()
                     a = np.frombuffer(wet, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
                     b = np.frombuffer(dry, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
@@ -144,16 +153,16 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                     if changed < 1024 or reflected < 64 or field.snapshot().to_dict()['tick'] != expected['endTick']:
                         raise ValueError('Water optics expired before measurement ended')
                     water_proof = {'changedWaterCells': changed, 'reflectedRedWaterCells': reflected,
-                                   'lighting': False, 'bloom': False, 'refraction': False, 'haze': False}
+                                   'lighting': False, 'bloom': False, 'refraction': False, 'haze': False, 'distortion': False}
                     write_png(output / 'native-water-final-isolated.png', wet, 1920, 1080)
                     write_png(output / 'native-water-final-off.png', dry, 1920, 1080)
                     if state_hash(field) != final_hash or field.energy_balance().drift_q != 0:
                         raise ValueError('Water proof mutated physics')
                 haze_proof = {}
                 if scene == 'haze' and mode == 'styled':
-                    renderer.render(field, bloom=False, water=False)
+                    renderer.render(field, bloom=False, water=False, distortion=False)
                     lit = renderer.read_pixels()
-                    renderer.render(field, lighting=False, bloom=False, water=False)
+                    renderer.render(field, lighting=False, bloom=False, water=False, distortion=False)
                     dark = renderer.read_pixels()
                     a = np.frombuffer(lit, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
                     b = np.frombuffer(dark, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
@@ -165,19 +174,41 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                     if smoke_lit < 64 or steam_lit < 64:
                         raise ValueError('Lit haze expired before measurement ended')
                     haze_proof = {'litSmokeCells': smoke_lit, 'litSteamCells': steam_lit, 'redGainThreshold': 20,
-                                  'bloom': False, 'water': False, 'lightingComparison': [True, False]}
+                                  'bloom': False, 'water': False, 'distortion': False, 'lightingComparison': [True, False]}
                     write_png(output / 'native-haze-final-isolated.png', lit, 1920, 1080)
                     write_png(output / 'native-haze-final-unlit.png', dark, 1920, 1080)
                     if state_hash(field) != final_hash or field.energy_balance().drift_q != 0:
                         raise ValueError('Haze proof mutated physics')
+                heat_proof = {}
+                if scene == 'heat' and mode == 'styled':
+                    renderer.render(field, bloom=False, water=False)
+                    shimmer = renderer.read_pixels()
+                    renderer.render(field, bloom=False, water=False, distortion=False)
+                    steady = renderer.read_pixels()
+                    a = np.frombuffer(shimmer, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
+                    b = np.frombuffer(steady, dtype=np.uint8).reshape(1080, 1920, 4).astype(np.int16)
+                    centers = ((np.arange(256) + .5) * 1080 / 256).astype(int)
+                    delta = np.max(np.abs(a[centers[:, None], centers[None, :] + 420, :3] - b[centers[:, None], centers[None, :] + 420, :3]), axis=2)
+                    materials = field.grid.reshape(256, 256) & 255
+                    open_mask = np.isin(materials, [0, 4, 9, 14, 15])
+                    changed = int(np.count_nonzero(open_mask & (delta > 2)))
+                    solid_changed = int(np.count_nonzero(~open_mask & (delta != 0)))
+                    if changed < 64 or solid_changed:
+                        raise ValueError('Heat shimmer expired or distorted opaque terrain')
+                    heat_proof = {'changedOpenCells': changed, 'changedOpaqueCells': solid_changed,
+                                  'rgbThreshold': 2, 'lighting': True, 'bloom': False, 'water': False}
+                    write_png(output / 'native-heat-final-isolated.png', shimmer, 1920, 1080)
+                    write_png(output / 'native-heat-final-off.png', steady, 1920, 1080)
+                    if state_hash(field) != final_hash or field.energy_balance().drift_q != 0:
+                        raise ValueError('Heat proof mutated physics')
                 rows.append({'scene': scene, 'mode': mode, 'width': 256, 'height': 256, 'output': [1920, 1080],
                     'ticks': samples, 'warmup': warmup, 'frameMs': distribution(frames), 'physicsMs': distribution(physics),
                     'renderingMs': distribution(rendering), 'overBudget': sum(value > 1000 / 60 for value in frames),
                     'endTick': field.tick, 'finalHash': final_hash, 'finalLavaCells': final_lava_cells, 'finalWaterCells': final_water_cells,
                     'finalSmokeCells': final_smoke_cells, 'finalSteamCells': final_steam_cells,
-                    'waterProof': water_proof, 'hazeProof': haze_proof, 'cpuBrowserParity': True, 'renderIsolation': True,
+                    'waterProof': water_proof, 'hazeProof': haze_proof, 'heatProof': heat_proof, 'cpuBrowserParity': True, 'renderIsolation': True,
                     'energyDriftQ': '0', 'lightingTogglePreservesState': True, 'waterTogglePreservesState': True,
-                    'hazeTogglePreservesState': True, 'renderingAdapter': renderer.adapter_info})
+                    'hazeTogglePreservesState': True, 'distortionTogglePreservesState': True, 'renderingAdapter': renderer.adapter_info})
     return rows
 
 
@@ -266,6 +297,19 @@ def main():
         cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: off')
         cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(132); return "stepped"; })()')
         cli('screenshot', str((args.output / 'browser-haze-final.png').resolve()))
+        cli('open', url + '?scene=heat&paused')
+        cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        cli('eval', '--stdin', stdin='(async () => { window.__initial = await window.stateSpace.snapshot(); return "saved"; })()')
+        cli('screenshot', str((args.output / 'browser-heat.png').resolve()))
+        cli('find', 'role', 'button', 'click', '--name', 'Heat shimmer: on')
+        cli('wait', '--fn', 'document.getElementById("distortion-toggle").getAttribute("aria-pressed") === "false"')
+        cli('screenshot', str((args.output / 'browser-heat-off.png').resolve()))
+        distortion_ui = cli('eval', '--stdin', stdin='(async () => JSON.stringify(window.__initial) === JSON.stringify(await window.stateSpace.snapshot()))()')['result']
+        if distortion_ui is not True:
+            raise ValueError('Heat shimmer button changed simulation state')
+        cli('find', 'role', 'button', 'click', '--name', 'Heat shimmer: off')
+        cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(132); return "stepped"; })()')
+        cli('screenshot', str((args.output / 'browser-heat-final.png').resolve()))
         cli('open', url + 'benchmark.html')
         deadline, seen = time.monotonic() + 240, ''
         while True:
@@ -288,14 +332,15 @@ def main():
         native = native_frames(args.output, browser)
         if source_hashes() != before:
             raise ValueError('Sources changed during frame measurements')
-        report = {'reportVersion': 4, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+        report = {'reportVersion': 5, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
             'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
             'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'waterTogglePreservesState': water_ui,
             'hazeTogglePreservesState': haze_ui,
+            'distortionTogglePreservesState': distortion_ui,
             'commands': commands, 'browser': browser, 'native': native,
-            'scope': 'GPU-completed full frame work, including physics, renderer copies/uploads, gas density reconstruction and volumetric extinction/scattering. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
+            'scope': 'GPU-completed full frame work, including physics, renderer copies/uploads, gas density reconstruction, volumetric extinction/scattering and heat plume reconstruction/distortion. Native is offscreen; browser includes a separate display-paced run. OS scanout, startup and capture readbacks excluded.'}
         (args.output / 'frames.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         print('Report:', args.output / 'frames.json', flush=True)
     finally:

@@ -30,7 +30,7 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
             { binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
             ...[3, 4, 5].map(binding => ({ binding, visibility: GPUShaderStage.FRAGMENT, texture: {} })),
             { binding: 6, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'uint' } },
-            ...[7, 8].map(binding => ({ binding, visibility: GPUShaderStage.FRAGMENT, texture: {} })),
+            ...[7, 8, 9].map(binding => ({ binding, visibility: GPUShaderStage.FRAGMENT, texture: {} })),
         ] });
         const emptyLayout = device.createBindGroupLayout({ entries: [] });
         const spanLayout = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE,
@@ -44,11 +44,12 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         const pipeline = (entryPoint, targets) => device.createRenderPipelineAsync({ layout,
             vertex: { module, entryPoint: 'vs_main' }, fragment: { module, entryPoint, targets: targets.map(format => ({ format })) },
             primitive: { topology: 'triangle-list' } });
-        const [materialPipeline, bloomPipeline, presentPipeline, sourcesPipeline, lightingPipeline, opticsPipeline, densityPipeline, hazePipeline] = await Promise.all([
+        const [materialPipeline, bloomPipeline, presentPipeline, sourcesPipeline, lightingPipeline, opticsPipeline, densityPipeline, hazePipeline, heatPipeline] = await Promise.all([
             pipeline('fs_material', ['rgba16float', 'rgba16float']), pipeline('fs_bloom', ['rgba16float']), pipeline('fs_present', [format]),
             pipeline('fs_sources', ['rgba16float', 'rgba16float', 'rgba16float']), pipeline('fs_lighting', ['rgba16float']),
             pipeline('fs_optics', ['rgba16float', 'rgba16float']),
             pipeline('fs_density', ['rgba16float']), pipeline('fs_haze', ['rgba16float']),
+            pipeline('fs_heat', ['rgba16float']),
         ]);
         const buffer = (size, uniform = false) => {
             const result = device.createBuffer({ size, usage: GPUBufferUsage.COPY_DST | (uniform ? GPUBufferUsage.UNIFORM : GPUBufferUsage.STORAGE) });
@@ -83,17 +84,19 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         const positionsA = texture(Math.ceil(width / 16), Math.ceil(height / 16)), positionsB = texture(Math.ceil(width / 16), Math.ceil(height / 16));
         const illumination = texture(width, height), dummy = texture(1, 1);
         const hazeDensity = texture(width, height), hazeVolume = texture(width * 2, height * 2);
+        const heatHaze = texture(width, height);
         const sampler = device.createSampler({ minFilter: 'linear', magFilter: 'linear' });
-        const textures = (source, glow, a = dummy, b = dummy, light = dummy, { density = dummy, volume = dummy } = {}) => device.createBindGroup({ layout: textureLayout, entries: [
+        const textures = (source, glow, a = dummy, b = dummy, light = dummy, { density = dummy, volume = dummy, heat = dummy } = {}) => device.createBindGroup({ layout: textureLayout, entries: [
             { binding: 0, resource: source.createView() }, { binding: 1, resource: glow.createView() }, { binding: 2, resource: sampler },
             { binding: 3, resource: a.createView() }, { binding: 4, resource: b.createView() }, { binding: 5, resource: light.createView() },
             { binding: 6, resource: geometry.createView() },
             { binding: 7, resource: density.createView() }, { binding: 8, resource: volume.createView() },
+            { binding: 9, resource: heat.createView() },
         ] });
         const materialTextures = textures(dummy, dummy);
         const bloomSource = textures(emission, emission), bloomIntermediate = textures(blurA, blurA);
         const opticsSource = textures(scene, emission, dummy, dummy, illumination, { volume: hazeVolume });
-        const waterBloom = textures(waterEmission, waterEmission), composite = textures(waterScene, blurB), plainComposite = textures(scene, blurB);
+        const waterBloom = textures(waterEmission, waterEmission), composite = textures(waterScene, blurB, dummy, dummy, dummy, { heat: heatHaze }), plainComposite = textures(scene, blurB);
         const lightingSources = textures(lightTiles, emission, positionsA, positionsB, dummy, { density: hazeDensity });
         const hazeSources = textures(dummy, dummy, dummy, dummy, illumination, { density: hazeDensity });
         const view = texture => ({ view: texture.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] });
@@ -103,16 +106,16 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
         return {
             backendInfo: Object.freeze({ vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device,
                 description: adapter.info.description, isFallbackAdapter: adapter.info.isFallbackAdapter }),
-            render(field, styled = true, { lighting = true, bloom = true, water = true, reflections = true, refraction = true, haze = true } = {}) {
+            render(field, styled = true, { lighting = true, bloom = true, water = true, reflections = true, refraction = true, haze = true, distortion = true } = {}) {
                 if (closed || lost || validation) throw new Error(validation || lost || 'Renderer is closed');
-                if (![styled, lighting, bloom, water, reflections, refraction, haze].every(value => typeof value === 'boolean')) throw new Error('Render switches must be boolean');
+                if (![styled, lighting, bloom, water, reflections, refraction, haze, distortion].every(value => typeof value === 'boolean')) throw new Error('Render switches must be boolean');
                 if (field.width !== width || field.height !== height || field.registry.hash !== registry.hash) throw new Error('Renderer field contract differs');
                 // Public copies, with no extra GPU readback or JSON conversion.
                 [field.grid, field.energyQ, field.structure].forEach((values, i) => device.queue.writeBuffer(coordinates[i], 0, values));
                 uniforms.forEach((uniform, i) => {
                     const data = new ArrayBuffer(32), ints = new Uint32Array(data), floats = new Float32Array(data);
                     ints.set([width, height, field.tick % 65536, styled ? 1 | (lighting ? 2 : 0) | (bloom ? 4 : 0) |
-                        (water ? 8 : 0) | (reflections ? 16 : 0) | (refraction ? 32 : 0) | (haze ? 64 : 0) : 0]);
+                        (water ? 8 : 0) | (reflections ? 16 : 0) | (refraction ? 32 : 0) | (haze ? 64 : 0) | (distortion ? 128 : 0) : 0]);
                     floats.set([canvas.width, canvas.height, i === 1 ? 4 : 0, i === 2 ? 1 : 0], 4);
                     device.queue.writeBuffer(uniform, 0, data);
                 });
@@ -138,6 +141,7 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
                     draw(bloomPipeline, [view(blurA)], groups[1], waterBloom);
                     draw(bloomPipeline, [view(blurB)], groups[2], bloomIntermediate);
                 }
+                if (styled && distortion) draw(heatPipeline, [view(heatHaze)], groups[0], materialTextures);
                 draw(presentPipeline, [{ view: context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }], groups[0], styled ? composite : plainComposite);
                 device.queue.submit([encoder.finish()]);
             },

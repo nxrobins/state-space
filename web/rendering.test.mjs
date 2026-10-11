@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedBridge, seedLighting, seedWater, seedHaze } from './demo.js';
+import { seedBridge, seedLighting, seedWater, seedHaze, seedHeat } from './demo.js';
 import { FrameClock } from './frame-clock.js';
 import { canvasCell } from './renderer.js';
 
@@ -49,20 +49,22 @@ test('water lagoon retains finite emitters and water through a measured trajecto
     } finally { world.close(); }
 });
 
-test('haze chambers retain finite smoke, steam, and lava through measurement', () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedHaze(world);
-        const initial = world.packedSnapshot();
-        world.step(132);
-        const final = world.packedSnapshot();
-        for (const [material, minimum] of [[MAT.SMOKE, 1024], [MAT.STEAM, 1024], [MAT.LAVA, 64]]) {
-            assert(final.packedCells.filter(cell => (cell & 255) === material).length >= minimum);
-        }
-        assert.equal(world.energyBalance().driftQ, 0n);
-        world.restore(initial); world.step(132);
-        assert.deepEqual(world.packedSnapshot(), final);
-    } finally { world.close(); }
+test('haze and heat chambers retain finite smoke, steam, and lava through measurement', () => {
+    for (const seed of [seedHaze, seedHeat]) {
+        const world = createStateSpaceField(256, 256);
+        try {
+            seed(world);
+            const initial = world.packedSnapshot();
+            world.step(132);
+            const final = world.packedSnapshot();
+            for (const [material, minimum] of [[MAT.SMOKE, 1024], [MAT.STEAM, 1024], [MAT.LAVA, 64]]) {
+                assert(final.packedCells.filter(cell => (cell & 255) === material).length >= minimum);
+            }
+            assert.equal(world.energyBalance().driftQ, 0n);
+            world.restore(initial); world.step(132);
+            assert.deepEqual(world.packedSnapshot(), final);
+        } finally { world.close(); }
+    }
 });
 
 test('picking matches square letterboxing, including high DPI CSS coordinates', () => {

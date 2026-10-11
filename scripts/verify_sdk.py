@@ -109,7 +109,17 @@ def main() -> int:
                 "   if lit[pixel]<=unlit[pixel]+20 or before!=field.snapshot().to_dict(): raise RuntimeError('Installed haze scattering failed')\n"
                 "   renderer.render(field,haze=False)\n"
                 "   if before!=field.snapshot().to_dict(): raise RuntimeError('Installed haze toggle mutated state')\n"
-                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True,'litSmokeAndSteam':True}))\n"
+                " with create_field(32,32) as field, MaterialRenderer(32,32,output_size=(128,128)) as renderer:\n"
+                "  for y in range(4,27):\n"
+                "   for x in range(8,24):\n"
+                "    if x%3: field.set_cell(x,y,14,40)\n"
+                "  for y in range(27,31):\n"
+                "   for x in range(10,22): field.set_cell(x,y,4,255); field.set_energy(x,y,1000*256)\n"
+                "  before=field.snapshot().to_dict(); options=dict(lighting=False,bloom=False,water=False,haze=False)\n"
+                "  renderer.render(field,distortion=False,**options); steady=renderer.read_pixels()\n"
+                "  renderer.render(field,**options); shimmer=renderer.read_pixels()\n"
+                "  if sum(abs(a-b)>2 for a,b in zip(steady[:104*128*4],shimmer[:104*128*4]))<64 or before!=field.snapshot().to_dict(): raise RuntimeError('Installed heat shimmer failed')\n"
+                "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True,'litSmokeAndSteam':True,'heatDistortion':True}))\n"
             )
             report["nativeRendering"] = json.loads(run([sys.executable, "-I", "-c", render_client], temp))
             client = temp / "client.mts"

@@ -12,6 +12,67 @@ class RenderingTests(unittest.TestCase):
         width, height = renderer.output_size
         return np.frombuffer(renderer.read_pixels(), dtype=np.uint8).reshape(height, width, 4)[:, :, :3].astype(np.int16)
 
+    def test_heat_distortion_uses_full_energy_and_preserves_complete_state(self):
+        for emitter in (MAT_FIRE, MAT_LAVA):
+            with self.subTest(emitter=emitter), create_field(32, 32) as world, MaterialRenderer(32, 32, output_size=(128, 128)) as renderer:
+                for y in range(4, 27):
+                    for x in range(8, 24):
+                        if x % 3:
+                            world.set_cell(x, y, MAT_SMOKE, thermal=40)
+                for y in range(27, 31):
+                    for x in range(10, 22):
+                        world.set_cell(x, y, emitter, thermal=255)
+                        world.set_energy(x, y, 400 * 256)
+                options = {'lighting': False, 'bloom': False, 'water': False, 'haze': False}
+                renderer.render(world, distortion=False, **options)
+                still = self.image(renderer)
+                before = world.snapshot().to_dict()
+                if emitter == MAT_FIRE:
+                    self.assertEqual((int(world.grid[27 * 32 + 10]) >> 8) & 255, 255)
+                renderer.render(world, **options)
+                warm = self.image(renderer)
+                self.assertEqual(world.snapshot().to_dict(), before)
+                self.assertGreater(np.count_nonzero(np.max(np.abs(warm[:104] - still[:104]), axis=2) > 2), 64)
+                renderer.render(world, **options)
+                np.testing.assert_array_equal(self.image(renderer), warm)
+                for y in range(27, 31):
+                    for x in range(10, 22):
+                        world.set_energy(x, y, 1000 * 256)
+                renderer.render(world, distortion=False, **options)
+                hotter_still = self.image(renderer)
+                renderer.render(world, **options)
+                hotter = self.image(renderer)
+                if emitter == MAT_FIRE:
+                    self.assertEqual((int(world.grid[27 * 32 + 10]) >> 8) & 255, 255)
+                self.assertGreater(np.abs(hotter[:104] - hotter_still[:104]).sum(), np.abs(warm[:104] - still[:104]).sum())
+                saved = world.snapshot().to_dict()
+                world.restore({**saved, 'tick': 60})
+                renderer.render(world, distortion=False, **options)
+                later_still = self.image(renderer)
+                renderer.render(world, **options)
+                later = self.image(renderer)
+                self.assertFalse(np.array_equal((later - later_still)[:104], (hotter - hotter_still)[:104]))
+                # Fire temperatures exceed the saturated byte; full energy drives strength.
+                for x in range(32):
+                    world.set_cell(x, 18, MAT_STONE)
+                renderer.render(world, distortion=False, **options)
+                blocked_still = self.image(renderer)
+                renderer.render(world, **options)
+                np.testing.assert_array_equal(self.image(renderer)[:68], blocked_still[:68])
+                np.testing.assert_array_equal(self.image(renderer)[72:76], blocked_still[72:76])
+                for y in range(27, 31):
+                    for x in range(10, 22):
+                        world.set_cell(x, y, MAT_AIR)
+                renderer.render(world, distortion=False, **options)
+                clear = self.image(renderer)
+                renderer.render(world, **options)
+                np.testing.assert_array_equal(self.image(renderer), clear)
+                renderer.render(world, styled=False)
+                plain = self.image(renderer)
+                renderer.render(world, styled=False, distortion=False)
+                np.testing.assert_array_equal(self.image(renderer), plain)
+                self.assertEqual(world.energy_balance().drift_q, 0)
+
     def test_fire_and_lava_scatter_in_smoke_and_hot_steam_without_bloom(self):
         for material in (MAT_SMOKE, MAT_STEAM):
             for emitter in (MAT_FIRE, MAT_LAVA):

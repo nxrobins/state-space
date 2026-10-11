@@ -22,7 +22,7 @@ Two blur passes add bloom before filmic tone mapping. Material targets have two
 pixels per simulation cell; bloom uses half a pixel per cell. The output preserves
 square cells and letterboxes other aspect ratios. A/B mode uses the same field,
 with plain catalog colors or material shading, dynamic lighting, shadows, water
-optics, volumetric smoke/steam, and bloom.
+optics, volumetric smoke/steam, heat distortion, and bloom.
 
 Water mirrors the visible HDR scene above each exposed surface, including fire,
 lava, and their emission. Reflected emission participates in bloom. A private GPU
@@ -60,6 +60,20 @@ temperature, condensation, and combustion still follow the exact integer physics
 With haze enabled, hot steam uses scattered incident light instead of emitting
 its own incandescent glow. Haze adds no energy transport, physical coordinate,
 or state readback. Each completed snapshot reconstructs it afresh.
+
+Heat distortion reconstructs a short rising optical plume from full energy-derived
+temperatures above 120 model units. A private one-texel-per-cell heat map gathers
+up to 20 cells below and two cells sideways, with crossed-cell visibility keeping
+walls from leaking the effect. Coherent tick-driven noise shifts the already
+composed HDR image by at most 1.6 cells sideways and 0.325 cells vertically.
+Terrain and water receivers stay fixed; the displaced position and all four
+filtered HDR taps must remain in the open medium. This avoids smearing terrain
+silhouettes or changing cell picking. Distortion freezes when the field is paused.
+
+This is a bounded screen-space optical approximation, with no simulated air
+velocity or calibrated refractive index. It reconstructs no hidden background
+geometry. Flat, dark sky has little contrast to refract; the effect is clearest
+in lit haze and flame detail. It changes no gas movement or physical heat flow.
 
 ## Burning bridge demo
 
@@ -103,16 +117,23 @@ gas shading. Use **L** to inspect scattered illumination. The chambers retain
 both gas species and active lava through the entire measured trajectory, with
 no replenishment during playback.
 
+The [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused) use the
+same finite reservoirs with cold smoke bands above them. Press **D** or use
+**Heat shimmer** to compare distortion at the same complete state. Resume to
+watch the shimmer rise while smoke moves, steam condenses, and basin faces melt
+under the ordinary physics. The D toggle is independent of H, L, W, and A/B.
+
 The client uses a fixed 60-tick clock with `requestAnimationFrame`. Slow displays
 retain simulation backlog rather than skipping physical ticks. Visual animation
 uses the completed absolute tick, so pausing also freezes cosmetic flicker.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,
 styled, and alternating views on the bridge, a fully emissive lava field, the
-distributed lighting gallery, lagoon, and haze chambers at 256 × 256. The lagoon
+distributed lighting gallery, lagoon, haze, and heat chambers at 256 × 256. The lagoon
 adds a water-disabled comparison; the chambers add a haze-disabled comparison.
-Output is 1920 × 1080. It also runs the styled bridge, lighting gallery, lagoon,
-and chambers at a requested 60 Hz display cadence. Local results
+The heat chambers add a distortion-disabled comparison. Output is 1920 × 1080.
+It also runs the styled bridge, lighting gallery, lagoon, haze, and heat chambers
+at a requested 60 Hz display cadence. Local results
 depend on the device, browser, and host load.
 
 ## Native Python rendering
@@ -133,6 +154,7 @@ with create_field(256, 256) as world, MaterialRenderer(256, 256) as renderer:
     renderer.render(world, bloom=False)    # Inspect direct light and shadows.
     renderer.render(world, water=False)    # Compare with opaque water shading.
     renderer.render(world, haze=False)     # Compare with the earlier gas shading.
+    renderer.render(world, distortion=False) # Compare with steady optics.
     # Inspect reflections independently.
     renderer.render(world, lighting=False, bloom=False, refraction=False)
 ```
@@ -147,7 +169,7 @@ JavaScript field API. The shared source is `web/render.wgsl`; `engine.generate`
 bundles it into browser assets and `engine/shaders/material_render.wgsl` for the
 installed Python package. No external effects package is required.
 The browser API accepts the same independent switches as an options object:
-`renderer.render(field, true, { lighting: false, bloom: false, water: true, haze: true })`.
+`renderer.render(field, true, { lighting: false, bloom: false, distortion: false })`.
 Both APIs also accept independent boolean `reflections` and `refraction` switches;
 `water: false` disables both. All switches default to true in the styled view.
 
@@ -161,14 +183,15 @@ The harness captures the real A/B button, checks unchanged complete state, and
 measures 120 frames after 12 warmup ticks for each scene/view/backend. The timing
 includes physics, public coordinate copies, uploads, shading, light extraction,
 terrain visibility, gas density reconstruction, volumetric extinction/scattering,
-water geometry/reflection/refraction, bloom/composition,
+water geometry/reflection/refraction, bloom, heat reconstruction/distortion, composition,
 and completed GPU work. Initialization, reference hashing, screenshot readbacks,
 and operating-system scanout are excluded. Native output is offscreen. Browser
 results additionally record display cadence. Complete trajectories must match the
 JavaScript CPU reference and native backend, with zero energy drift.
 
-See the [haze frame report](checkpoints/HAZE_PERFORMANCE.md) for hardware,
+See the [heat distortion report](checkpoints/HEAT_PERFORMANCE.md) for hardware,
 distributions, screenshots, and current measured limits. The earlier
+[haze frame report](checkpoints/HAZE_PERFORMANCE.md),
 [water frame report](checkpoints/WATER_PERFORMANCE.md),
 [lighting frame report](checkpoints/LIGHTING_PERFORMANCE.md) and
 [material-rendering report](checkpoints/RENDERING_PERFORMANCE.md) retain the

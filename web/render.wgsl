@@ -16,6 +16,7 @@ struct Params { size: vec2<u32>, tick: u32, styled: u32, viewport: vec2<f32>, di
 @group(1) @binding(6) var water_geometry: texture_2d<u32>;
 @group(1) @binding(7) var haze_density: texture_2d<f32>;
 @group(1) @binding(8) var haze_volume: texture_2d<f32>;
+@group(1) @binding(9) var heat_haze: texture_2d<f32>;
 @group(2) @binding(0) var span_output: texture_storage_2d<rgba32uint, write>;
 
 // One invocation per column: linear work, exact integer surface/floor positions.
@@ -83,6 +84,13 @@ fn solid(p: vec2<i32>) -> f32 {
 fn haze_open(p: vec2<i32>) -> bool {
     let m = material_at(p);
     return m == 0u || m == 4u || m == 9u || m == 14u || m == 15u;
+}
+fn heat_strength(p: vec2<i32>) -> f32 {
+    let index = u32(p.y) * params.size.x + u32(p.x);
+    // Cheap rejection before consulting the phase/chemical stores. A temperature
+    // above this threshold requires at least this much total conserved energy.
+    if (energies[index] <= 120u * 256u) { return 0.0; }
+    return clamp((temperature(cells[index] & 255u, energies[index]) - 120.0) / 650.0, 0.0, 1.0);
 }
 fn sky_color(uv: vec2<f32>, grain: f32) -> vec3<f32> {
     return mix(vec3<f32>(0.003, 0.008, 0.019), vec3<f32>(0.012, 0.024, 0.031), uv.y) + (grain - 0.5) * 0.001;
@@ -229,6 +237,27 @@ fn traced_visibility(receiver: vec2<f32>, emitter: vec2<f32>, water_path: bool) 
 }
 fn visibility(receiver: vec2<f32>, emitter: vec2<f32>) -> f32 {
     return traced_visibility(receiver, emitter, false);
+}
+@fragment fn fs_heat(in: VertexOutput) -> @location(0) vec4<f32> {
+    let p = min(vec2<i32>(in.position.xy), vec2<i32>(params.size) - 1);
+    if (!haze_open(p)) { return vec4<f32>(0.0); }
+    var strength = heat_strength(p);
+    // Reconstruct a short rising optical plume from this committed state.
+    // This transports no model energy and keeps no history or particle state.
+    for (var y = 0; y <= 20; y++) {
+        for (var x = -2; x <= 2; x++) {
+            let q = p + vec2<i32>(x, y);
+            if (any(q < vec2<i32>(0)) || any(q >= vec2<i32>(params.size))) { continue; }
+            let hot = heat_strength(q);
+            if (hot == 0.0) { continue; }
+            let width = 1.0 + f32(y) * 0.08;
+            let weight = exp(-f32(y) / 9.0 - f32(x * x) / (2.0 * width * width));
+            if (hot * weight <= strength) { continue; }
+            let through = traced_visibility(vec2<f32>(p) + 0.5, vec2<f32>(q) + 0.5, true);
+            strength = max(strength, hot * weight * through);
+        }
+    }
+    return vec4<f32>(strength, 0.0, 0.0, 1.0);
 }
 @fragment fn fs_density(in: VertexOutput) -> @location(0) vec4<f32> {
     let p = min(vec2<i32>(in.position.xy), vec2<i32>(params.size) - 1);
@@ -428,16 +457,44 @@ fn lit_scene(p: vec2<f32>) -> vec3<f32> {
 fn filmic(color: vec3<f32>) -> vec3<f32> {
     return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), vec3<f32>(0.0), vec3<f32>(1.0));
 }
+fn shimmer_uv(uv: vec2<f32>) -> vec2<f32> {
+    let f = uv * vec2<f32>(params.size);
+    let p = min(vec2<i32>(f), vec2<i32>(params.size) - 1);
+    if (!haze_open(p)) { return uv; }
+    let strength = textureLoad(heat_haze, p, 0).r;
+    if (strength < 0.001) { return uv; }
+    let time = f32(params.tick) / 60.0;
+    let a = volume_noise(vec3<f32>(f * 0.38 + vec2<f32>(0.0, time * 3.5), 0.4));
+    let b = volume_noise(vec3<f32>(f * 0.83 + vec2<f32>(0.0, time * 5.0), 0.91));
+    let offset = vec2<f32>((a - 0.5) * 3.2, (b - 0.5) * 0.65) * strength;
+    let q = f + offset;
+    if (any(q < vec2<f32>(0.0)) || any(q >= vec2<f32>(params.size))) { return uv; }
+    if (!haze_open(vec2<i32>(floor(q))) || traced_visibility(f, q, true) == 0.0) { return uv; }
+    // The four bilinear HDR taps must also stay in the open medium. This keeps
+    // terrain silhouettes/cell picking fixed and avoids pulling solid colors
+    // across a wall merely because a filtered tap straddles its boundary.
+    let base = vec2<i32>(floor(q * 2.0 - 0.5));
+    for (var y = 0; y < 2; y++) {
+        for (var x = 0; x < 2; x++) {
+            let tap = clamp(base + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(params.size * 2u) - 1);
+            if (!haze_open(tap / 2)) { return uv; }
+        }
+    }
+    return q / vec2<f32>(params.size);
+}
 @fragment fn fs_present(in: VertexOutput) -> @location(0) vec4<f32> {
     // Keep cells square and letterbox wide outputs; picking uses the same mapping.
     let scale = min(params.viewport.x / f32(params.size.x), params.viewport.y / f32(params.size.y));
     let extent = vec2<f32>(params.size) * scale;
     let uv = (in.uv * params.viewport - (params.viewport - extent) * 0.5) / extent;
     if (any(uv < vec2<f32>(0.0)) || any(uv >= vec2<f32>(1.0))) { return vec4<f32>(0.012, 0.018, 0.027, 1.0); }
+    var sample_uv = uv;
+    if ((params.styled & 128u) != 0u) { sample_uv = shimmer_uv(uv); }
     let texel = min(vec2<i32>(uv * vec2<f32>(textureDimensions(source))), vec2<i32>(textureDimensions(source)) - vec2<i32>(1));
     var color = textureLoad(source, texel, 0).rgb;
+    if (any(sample_uv != uv)) { color = textureSampleLevel(source, linear_sampler, sample_uv, 0.0).rgb; }
     if (params.styled != 0u) {
-        if ((params.styled & 4u) != 0u) { color += textureSampleLevel(glow, linear_sampler, uv, 0.0).rgb * 0.55; }
+        if ((params.styled & 4u) != 0u) { color += textureSampleLevel(glow, linear_sampler, sample_uv, 0.0).rgb * 0.55; }
         color = filmic(color * 1.15);
     }
     return vec4<f32>(pow(max(color, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.2)), 1.0);

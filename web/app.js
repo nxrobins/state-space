@@ -15,11 +15,11 @@ async function init() {
     stats.textContent = 'Creating the WebGPU field...';
     const world = await createGpuField(GRID_W, GRID_H);
     const requestedScene = new URLSearchParams(location.search).get('scene');
-    const scene = ['lighting', 'water', 'haze'].includes(requestedScene) ? requestedScene : 'bridge';
+    const scene = ['lighting', 'water', 'haze', 'heat'].includes(requestedScene) ? requestedScene : 'bridge';
     seedScene(world, scene);
     const initial = world.packedSnapshot();
     const canvas = document.getElementById('canvas');
-    let styled = true, lighting = true, water = true, haze = true;
+    let styled = true, lighting = true, water = true, haze = true, distortion = true;
     if (scene === 'lighting') {
         canvas.setAttribute('aria-label', 'Interactive lava light and shadow gallery');
         document.querySelector('#heading h1').textContent = 'Light finds a way.';
@@ -38,6 +38,12 @@ async function init() {
         document.querySelector('#heading p').textContent = 'Fire lights the smoke. Steam catches the glow. Toggle haze to compare.';
         document.getElementById('reset-demo').textContent = 'Restart chambers';
     }
+    if (scene === 'heat') {
+        canvas.setAttribute('aria-label', 'Interactive lava and fire heat shimmer chambers');
+        document.querySelector('#heading h1').textContent = 'The air starts to shimmer.';
+        document.querySelector('#heading p').textContent = 'Heat bends the glow and wisps above lava. Toggle shimmer to compare.';
+        document.getElementById('reset-demo').textContent = 'Restart heat chambers';
+    }
     const clock = new FrameClock();
     function resize() {
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -48,7 +54,7 @@ async function init() {
     let renderer;
     try { renderer = await createMaterialRenderer(canvas, GRID_W, GRID_H, world.registry); }
     catch (error) { world.close(); throw error; }
-    function render() { renderer.render(world, styled, { lighting, water, haze }); }
+    function render() { renderer.render(world, styled, { lighting, water, haze, distortion }); }
     function paintVoxels(gx, gy, mat, radius) { pendingPaints.push({ gx, gy, mat, radius }); }
     function flushPaints() {
         const paints = pendingPaints; pendingPaints = [];
@@ -97,6 +103,7 @@ async function init() {
         if (e.code === 'KeyL') void setLighting();
         if (e.code === 'KeyW') void setWater();
         if (e.code === 'KeyH') void setHaze();
+        if (e.code === 'KeyD') void setDistortion();
         if (e.code === 'KeyR') void resetBridge();
         const num = parseInt(e.key);
         if (num >= 1 && num <= 9) {
@@ -187,10 +194,20 @@ async function init() {
             document.getElementById('haze-toggle').setAttribute('aria-pressed', String(haze));
         });
     }
+    function setDistortion(value) {
+        return enqueue(async () => {
+            if (value !== undefined && typeof value !== 'boolean') throw new Error('distortion must be boolean');
+            distortion = value === undefined ? !distortion : value;
+            render(); await renderer.completed();
+            document.getElementById('distortion-toggle').textContent = distortion ? 'Heat shimmer: on' : 'Heat shimmer: off';
+            document.getElementById('distortion-toggle').setAttribute('aria-pressed', String(distortion));
+        });
+    }
     document.getElementById('view-toggle').addEventListener('click', () => { void setView(); });
     document.getElementById('light-toggle').addEventListener('click', () => { void setLighting(); });
     document.getElementById('water-toggle').addEventListener('click', () => { void setWater(); });
     document.getElementById('haze-toggle').addEventListener('click', () => { void setHaze(); });
+    document.getElementById('distortion-toggle').addEventListener('click', () => { void setDistortion(); });
     document.getElementById('reset-demo').addEventListener('click', () => { void resetBridge(); });
     document.getElementById('pause').addEventListener('click', () => { paused = !paused; clock.reset(); });
 
@@ -204,6 +221,7 @@ async function init() {
         setLighting,
         setWater,
         setHaze,
+        setDistortion,
         resetBridge,
         ready: true,
         rendererInfo: renderer.backendInfo,

@@ -34,6 +34,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
         const modes = ['plain', 'styled', 'alternating'];
         if (scene === 'water') modes.push('water-off');
         if (scene === 'haze') modes.push('haze-off');
+        if (scene === 'heat') modes.push('distortion-off');
         for (const mode of modes) {
             progress(`${scene} · ${mode}`);
             const world = await createGpuField(256, 256);
@@ -48,13 +49,14 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                 renderer.render(world, true); await renderer.completed();
                 renderer.render(world, true, { water: false }); await renderer.completed();
                 renderer.render(world, true, { haze: false }); await renderer.completed();
+                renderer.render(world, true, { distortion: false }); await renderer.completed();
                 if (await stateHash(world) !== initialHash) throw new Error('A/B render mutated the complete state');
                 const frames = [], physics = [], rendering = [];
                 for (let i = 0; i < warmup + samples; i++) {
                     const started = performance.now();
                     await world.step(1);
                     const physicsDone = performance.now();
-                    renderer.render(world, ['styled', 'water-off', 'haze-off'].includes(mode) || (mode === 'alternating' && i % 2 === 0), { water: mode !== 'water-off', haze: mode !== 'haze-off' });
+                    renderer.render(world, ['styled', 'water-off', 'haze-off', 'distortion-off'].includes(mode) || (mode === 'alternating' && i % 2 === 0), { water: mode !== 'water-off', haze: mode !== 'haze-off', distortion: mode !== 'distortion-off' });
                     await renderer.completed();
                     const finished = performance.now();
                     if (i === 0 && await stateHash(world) !== references[scene].firstTickHash) throw new Error('Rendered first tick differs from CPU reference');
@@ -67,9 +69,9 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                 const finalWaterCells = world.snapshot().grid.reduce((count, cell) => count + ((cell & 255) === MAT.WATER ? 1 : 0), 0);
                 const finalSmokeCells = world.snapshot().grid.reduce((count, cell) => count + ((cell & 255) === MAT.SMOKE ? 1 : 0), 0);
                 const finalSteamCells = world.snapshot().grid.reduce((count, cell) => count + ((cell & 255) === MAT.STEAM ? 1 : 0), 0);
-                if (['lighting', 'water', 'haze'].includes(scene) && finalLavaCells < 64) throw new Error('Stress sources expired before measurement ended');
+                if (['lighting', 'water', 'haze', 'heat'].includes(scene) && finalLavaCells < 64) throw new Error('Stress sources expired before measurement ended');
                 if (scene === 'water' && finalWaterCells < 1024) throw new Error('Water stress pool expired before measurement ended');
-                if (scene === 'haze' && (finalSmokeCells < 1024 || finalSteamCells < 1024)) throw new Error('Haze expired before measurement ended');
+                if (['haze', 'heat'].includes(scene) && (finalSmokeCells < 1024 || finalSteamCells < 1024)) throw new Error('Haze expired before measurement ended');
                 rows.push({ scene, mode, width: 256, height: 256, output: [canvas.width, canvas.height], warmup, ticks: samples,
                     frameMs: distribution(frames), physicsMs: distribution(physics), renderingMs: distribution(rendering),
                     overBudget: frames.filter(value => value > 1000 / 60).length, finalHash, endTick: world.tick, finalLavaCells, finalWaterCells, finalSmokeCells, finalSteamCells,
@@ -79,7 +81,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
     }
     // A separate display-paced run records actual callback cadence as well as work.
     const pacedScenes = [];
-    for (const scene of ['bridge', 'lighting', 'water', 'haze']) {
+    for (const scene of ['bridge', 'lighting', 'water', 'haze', 'heat']) {
         progress(`${scene} · 60 Hz display pacing`);
         const world = await createGpuField(256, 256);
         let renderer;
@@ -111,5 +113,5 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
         } finally { renderer?.close(); world.close(); }
     }
     return { rows, paced: pacedScenes[0], pacedScenes, userAgent: navigator.userAgent,
-        scope: 'Physics + public state copies/uploads + material, gas density reconstruction, area-light extraction, terrain visibility, volumetric extinction/scattering, water geometry/reflections/refraction, bloom and composition + GPU completion at 1920x1080. Startup, reference hashing and OS scanout excluded.' };
+        scope: 'Physics + public state copies/uploads + material, gas density reconstruction, area-light extraction, terrain visibility, volumetric extinction/scattering, water geometry/reflections/refraction, bloom, heat plume reconstruction/distortion and composition + GPU completion at 1920x1080. Startup, reference hashing and OS scanout excluded.' };
 }
