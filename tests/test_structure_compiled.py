@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from engine.structure import plan_structure
-from engine.structure_compiled import plan_structure_compiled, validate_structure_compiled, _ledger_validated
+from engine.structure_compiled import plan_structure_compiled, validate_structure_compiled, _ledger_validated, _solver
 from engine.structure_bulk import validate_structure_bulk, seed_structure_bulk
 from engine.registry import DEFAULT_REGISTRY
 from engine.state import thermal_view
@@ -110,6 +110,20 @@ class CompiledStructureProperties(unittest.TestCase):
                 except ValueError:
                     outcomes.append(False)
             self.assertEqual(outcomes[0], outcomes[1])
+
+    def test_private_tables_do_not_reuse_a_physical_column(self):
+        rules = DEFAULT_REGISTRY._structure
+        cells = thermal_view(np.array([5, 1, 0], dtype=np.uint32), np.full(3, 20 * 256, dtype=np.uint32), DEFAULT_REGISTRY._model)
+        words = seed_structure_bulk(cells, 3, 1, rules)
+        validate_structure_compiled(cells, np.full(3, 20 * 256, dtype=np.uint32), words, 3, 1, rules)
+        tables = _solver().tables
+        cold = tables[:256 * 24].reshape(256, 24)
+        expected = DEFAULT_REGISTRY.cold_table().reshape(256, 24)
+        # Only density, cohesion and softening are copied; no column is a marker.
+        self.assertTrue(np.array_equal(cold[:, [0, 22, 23]], expected[:, [0, 22, 23]]))
+        self.assertFalse(np.any(np.delete(cold, [0, 22, 23], axis=1)))
+        marker = tables[256 * 24:].reshape(256, 12)[:, 0]
+        self.assertEqual(set(np.flatnonzero(marker).tolist()), set(DEFAULT_REGISTRY.material_ids))
 
 
 if __name__ == "__main__":

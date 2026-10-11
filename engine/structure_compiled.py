@@ -56,9 +56,11 @@ class _Solver:
         words = np.frombuffer(backing, dtype="<u4")
         arrays = words[TABLE_WORDS:].reshape(FIELD_COUNT, count)
         if self.rules is not rules:
+            # Only the cold columns the solver reads. Presence is marked in the
+            # private thermal slot 0, so no property column has a second meaning.
             table = np.zeros(256 * 24, dtype=np.uint32).reshape(256, 24)
             for row in rules.materials.values():
-                table[row.id, [0, 1, 22, 23]] = row.density, 1, row.cohesion, row.softening
+                table[row.id, [0, 22, 23]] = row.density, row.cohesion, row.softening
             thermal = np.asarray(rules.thermal.gpu_table(), dtype=np.uint32).reshape(256, 12)
             thermal[:, 0] = 0
             thermal[list(rules.thermal.materials), 0] = 1

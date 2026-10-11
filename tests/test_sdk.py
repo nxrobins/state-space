@@ -203,7 +203,8 @@ class NativeFieldProperties(unittest.TestCase):
             saved = world.snapshot().to_dict()
             result = self.engine.run(world.grid, DEFAULT_REGISTRY.cold_table(), 1, 1, 1, initial_energy=world.energy_q, trace_passes=True)
             result["pass_energy_snapshots"].pop()
-            with patch.object(self.engine, "run", return_value=result):
+            # Fields continue their validated state through the private run entry.
+            with patch.object(self.engine, "_run_validated", return_value=result):
                 with self.assertRaisesRegex(RuntimeError, "Incomplete"):
                     world.step(inspect=True)
             self.assertEqual(world.snapshot().to_dict(), saved)

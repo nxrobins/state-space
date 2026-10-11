@@ -89,8 +89,10 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
       let before: StructuralState = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
       const reports: PassReport[] = [];
       for (let offset = 0; offset < ticks; offset += 1) {
+        // The first tick starts from the committed state, validated at commit.
+        // Each later tick starts from a readback, which the plan validates once.
         const structuralPlan = inspect ? planStructure(before, this.width, this.height, rulesForRegistry(this.registry))
-          : compiledStructuralPlan(before, this.width, this.height, this.registry);
+          : compiledStructuralPlan(before, this.width, this.height, this.registry, offset === 0);
         const upload = new Uint32Array(this.width * this.height * 2);
         for (let i = 0; i < structuralPlan.sources.length; i += 1) {
           upload[i * 2] = structuralPlan.sources[i]; upload[i * 2 + 1] = structuralPlan.structure[i];

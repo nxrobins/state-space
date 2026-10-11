@@ -36,8 +36,8 @@ static uint32_t temperature(const uint32_t *table, uint32_t voxel, uint32_t ener
 }
 
 /* Native public boundaries copy/check integer arrays before this complete-state
- * validator. Private table slot 1 and thermal slot 0 mark defined materials;
- * neither slot participates in support or temperature arithmetic. */
+ * validator. Private thermal slot 0 marks defined materials and has no other
+ * meaning; the cold rows are the registry's own values, with no reused slot. */
 uint32_t validate(uint32_t width, uint32_t height, const uint32_t *base) {
     uint32_t n = width * height;
     const uint32_t *thermal = base + 256 * COLD_STRIDE;
@@ -47,7 +47,7 @@ uint32_t validate(uint32_t width, uint32_t height, const uint32_t *base) {
     const uint32_t reverse[4] = {BOND_DOWN, BOND_RIGHT, BOND_LEFT, BOND_UP};
     for (uint32_t i = 0; i < n; ++i) {
         uint32_t id = grid[i] & 255, word = words[i], x = i % width;
-        if (!base[id * COLD_STRIDE + 1] || !thermal[id * 12]) return 1;
+        if (!thermal[id * 12]) return 1;
         if (energy[i] > 0x3fffffffu || energy[i] < thermal[id * 12 + 2]) return 2;
         uint32_t byte = temperature(thermal, grid[i], energy[i]) / 256;
         if (byte > 255) byte = 255;
