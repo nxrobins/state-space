@@ -60,4 +60,17 @@ describe('ca-v2 public energy state', () => {
     legacy.energyQ.fill(0);
     expect(field.packedSnapshot()).toEqual(before);
   });
+
+  it('keeps default water liquid in a default world', () => {
+    // Air and stone start at 20, above water's freeze point. Nothing here is colder.
+    const field = createStateSpaceField(16, 10);
+    for (let x = 0; x < 16; x++) for (const y of [8, 9]) field.setCell(x, y, MAT.STONE);
+    for (let y = 2; y < 8; y++) for (const x of [0, 15]) field.setCell(x, y, MAT.STONE);
+    for (let y = 5; y < 8; y++) for (let x = 1; x < 15; x++) field.setCell(x, y, MAT.WATER);
+    const count = (material: number) => field.grid.filter(cell => (cell & 255) === material).length;
+    field.step(2000);
+    expect(count(MAT.WATER)).toBe(42);
+    expect(count(MAT.ICE)).toBe(0);
+    expect(field.energyBalance().driftQ).toBe(0n);
+  });
 });
