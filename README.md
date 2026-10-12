@@ -55,7 +55,7 @@ and press **H** to compare the volume effect.
 Try the [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused)
 and press **D** to compare distortion.
 [Rendering guide and native Python API](docs/RENDERING.md) ·
-[Full-frame heat measurements](docs/checkpoints/HEAT_PERFORMANCE.md).
+[Full-frame pacing measurements](docs/checkpoints/PACING_PERFORMANCE.md).
 
 ## 256 × 256 at 60 Hz
 
@@ -87,14 +87,18 @@ commands, adapter details, and the [native](docs/checkpoints/gpu-tick-optimized.
 and [browser](docs/checkpoints/gpu-browser-ticks.json) timing receipts.
 
 Complete rendered frames have a separate benchmark at 1920 × 1080 output. The
-latest heat-distortion scene measured **10.37 ms median / 12.78 ms p95** natively and
-**11.10 / 14.00 ms** in WebGPU on the same hardware, including physics, uploads,
-all effects, and GPU completion. A requested 60 Hz browser run achieved
-**58.00 Hz**, with four work overruns among 120 frames; it did not sustain a locked
-60 Hz in that run. All 47 rendered
-trajectories matched the CPU reference with zero energy drift. See the
-[full-frame report](docs/checkpoints/HEAT_PERFORMANCE.md) for raw samples and
-the limits of these measurements.
+browser now pre-arms display callbacks, bounds pending work, and reuses readback,
+planner, and rendering storage. The latest all-effects run measured five scenes
+for 600 frames each after warmup, including complete physics and GPU completion.
+On a quiet RTX 4090, all five scenes passed the measured **60 Hz gate**:
+**zero deadline misses, missed display slots, or coalesced callbacks across
+3,000 frames**. Full-frame p95 was **10.0–11.0 ms**; the worst callback-to-GPU
+completion was **13.2 ms**, within the 16.67 ms deadline. All 47 rendered
+trajectories and five longer native continuations matched the CPU reference with
+zero energy drift. See the [pacing report](docs/checkpoints/PACING_PERFORMANCE.md)
+for raw timestamps, retained earlier failures, hardware load, and reproduction,
+and the earlier
+[heat report](docs/checkpoints/HEAT_PERFORMANCE.md) for the rendering baseline.
 
 ## Use the SDK
 

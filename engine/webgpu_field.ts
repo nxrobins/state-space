@@ -7,7 +7,7 @@ import { COMMON_SHADER, KERNEL_SOURCES } from './generated/shaders.js';
 import { KERNEL_SPECS, movementScheduleForTick } from './generated/schedule.js';
 import { inspectPass, type PassReport, type StepOptions } from './inspection.js';
 import { planStructure, rulesForRegistry, type StructuralState } from './structure.js';
-import { compiledStructuralPlan } from './structure_compiled.js';
+import { compiledTransportInto, validateOwnedStructure } from './structure_compiled.js';
 
 export interface GpuStateSpaceField extends Omit<StateSpaceField, 'step'> {
   readonly backendInfo: Readonly<{ vendor: string; architecture: string; device: string; description: string; isFallbackAdapter: boolean }>;
@@ -22,7 +22,16 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
   #buffers: GPUBuffer[];
   #groups: [GPUBindGroup, GPUBindGroup];
   #staging: GPUBuffer;
+  #readback: StructuralState;
+  #planUpload: Uint32Array;
+  #transport: { sources: Uint32Array; structure: Uint32Array };
   #loss: string | undefined;
+  #resident = 0;
+  // A regular property is safe to invalidate from FieldState's constructor,
+  // before this class's private fields have been initialized.
+  private uploadState = true;
+
+  protected override stateChanged(): void { this.uploadState = true; }
 
   constructor(width: number, height: number, fill: number, registry: MaterialRegistry, device: GPUDevice,
               layout: GPUBindGroupLayout, pipelines: Map<string, GPUComputePipeline>, info: GpuStateSpaceField['backendInfo']) {
@@ -31,6 +40,9 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#pipelines = pipelines;
     this.backendInfo = Object.freeze(info);
     const bytes = width * height * 4;
+    this.#readback = { grid: new Uint32Array(width * height), energyQ: new Uint32Array(width * height), structure: new Uint32Array(width * height) };
+    this.#planUpload = new Uint32Array(width * height * 2);
+    this.#transport = { sources: new Uint32Array(width * height), structure: new Uint32Array(width * height) };
     const usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
     this.#buffers = Array.from({ length: 6 }, () => device.createBuffer({ size: bytes, usage }));
     const cold = device.createBuffer({ size: this.coldTable.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
@@ -54,7 +66,7 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#device.destroy();
   }
 
-  async #readState(current: number, encoder = this.#device.createCommandEncoder()): Promise<StructuralState> {
+  async #readState(current: number, encoder = this.#device.createCommandEncoder(), owned?: StructuralState): Promise<StructuralState> {
     const bytes = this.width * this.height * 4;
     encoder.copyBufferToBuffer(this.#buffers[current], 0, this.#staging, 0, bytes);
     encoder.copyBufferToBuffer(this.#buffers[current + 2], 0, this.#staging, bytes, bytes);
@@ -63,6 +75,12 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     await this.#staging.mapAsync(GPUMapMode.READ);
     try {
       const range = this.#staging.getMappedRange();
+      if (owned) {
+        owned.grid.set(new Uint32Array(range, 0, bytes / 4));
+        owned.energyQ.set(new Uint32Array(range, bytes, bytes / 4));
+        owned.structure.set(new Uint32Array(range, bytes * 2, bytes / 4));
+        return owned;
+      }
       return { grid: new Uint32Array(range.slice(0, bytes)), energyQ: new Uint32Array(range.slice(bytes, bytes * 2)), structure: new Uint32Array(range.slice(bytes * 2, bytes * 3)) };
     } finally {
       this.#staging.unmap();
@@ -81,30 +99,38 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#device.pushErrorScope('validation');
     let scopeOpen = true;
     try {
-      // Upload the last committed state. Failed steps can retry from that exact state.
-      this.#device.queue.writeBuffer(this.#buffers[0], 0, this.cells.buffer as ArrayBuffer);
-      this.#device.queue.writeBuffer(this.#buffers[2], 0, this.energies.buffer as ArrayBuffer);
-      this.#device.queue.writeBuffer(this.#buffers[4], 0, this.bonds.buffer as ArrayBuffer);
-      let current = 0;
+      // Unedited successful continuations already reside on the GPU. Edits,
+      // restores and failed steps require uploading the complete committed state.
+      let current = this.#resident;
+      if (this.uploadState) {
+        this.#device.queue.writeBuffer(this.#buffers[current], 0, this.cells.buffer as ArrayBuffer);
+        this.#device.queue.writeBuffer(this.#buffers[current + 2], 0, this.energies.buffer as ArrayBuffer);
+        this.#device.queue.writeBuffer(this.#buffers[current + 4], 0, this.bonds.buffer as ArrayBuffer);
+      }
+      // Any failure may have overwritten both ping-pong slots. Retry must upload.
+      this.uploadState = true;
       let before: StructuralState = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
       const reports: PassReport[] = [];
       for (let offset = 0; offset < ticks; offset += 1) {
         // The first tick starts from the committed state, validated at commit.
-        // Each later tick starts from a readback, which the plan validates once.
-        const structuralPlan = inspect ? planStructure(before, this.width, this.height, rulesForRegistry(this.registry))
-          : compiledStructuralPlan(before, this.width, this.height, this.registry, offset === 0);
-        const upload = new Uint32Array(this.width * this.height * 2);
+        // Every readback below is validated before the next plan can use it.
+        if (!inspect) compiledTransportInto(before, this.width, this.height, this.registry, this.#transport.sources, this.#transport.structure);
+        const structuralPlan = inspect ? planStructure(before, this.width, this.height, rulesForRegistry(this.registry)) : this.#transport;
+        const upload = this.#planUpload;
         for (let i = 0; i < structuralPlan.sources.length; i += 1) {
           upload[i * 2] = structuralPlan.sources[i]; upload[i * 2 + 1] = structuralPlan.structure[i];
         }
         this.#device.queue.writeBuffer(this.#buffers[7], 0, upload);
         let encoder = this.#device.createCommandEncoder();
+        // Dispatch scopes preserve the ordered ping-pong dependencies within one
+        // compute pass. Inspection retains a separate submission per kernel.
+        const batch = inspect ? undefined : encoder.beginComputePass();
         for (const passId of movementScheduleForTick(this.tickCount + offset)) {
-          const pass = encoder.beginComputePass();
+          const pass = batch ?? encoder.beginComputePass();
           pass.setPipeline(this.#pipelines.get(passId)!);
           pass.setBindGroup(0, this.#groups[current]);
           pass.dispatchWorkgroups(Math.ceil(this.width / 16), Math.ceil(this.height / 16));
-          pass.end();
+          if (inspect) pass.end();
           current = 1 - current;
           if (inspect) {
             this.#device.queue.submit([encoder.finish()]);
@@ -115,13 +141,25 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
             encoder = this.#device.createCommandEncoder();
           }
         }
-        if (!inspect) before = await this.#readState(current, encoder);
+        if (!inspect) {
+          batch!.end();
+          before = await this.#readState(current, encoder, this.#readback);
+          before = validateOwnedStructure(before, this.width, this.height, this.registry);
+        }
       }
       const state = before;
       const error = await this.#device.popErrorScope();
       scopeOpen = false;
       if (error) throw new Error(error.message);
-      this.commitState(state, this.tickCount + ticks);
+      if (inspect) this.commitState(state, this.tickCount + ticks);
+      else {
+        // The readback never aliases committed storage during a step. Swap only
+        // after validation and the error scope succeed, preserving atomic retry.
+        this.#readback = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
+        this.adoptState(state, this.tickCount + ticks);
+      }
+      this.#resident = current;
+      this.uploadState = false;
       return Object.freeze(reports);
     } finally {
       try { if (scopeOpen) await this.#device.popErrorScope(); }

@@ -11,6 +11,25 @@ const extensions = JSON.parse(readFileSync('examples/sdk/materials.json', 'utf8'
 const python = process.env.STATE_SPACE_PYTHON ?? resolve('.venv/Scripts/python.exe');
 
 describe('portable registries and field APIs', () => {
+  it('copies complete state into reusable caller storage without exposing field arrays', () => {
+    const field = createStateSpaceField(3, 2, MAT.WATER);
+    const storage = new Uint32Array(18);
+    const target = { grid: storage.subarray(0, 6), energyQ: storage.subarray(6, 12), structure: storage.subarray(12) };
+    field.step(3);
+    expect(field.copyStateInto(target)).toBe(3);
+    const saved = field.snapshot();
+    for (const key of ['grid', 'energyQ', 'structure'] as const) expect(target[key]).toEqual(saved[key]);
+    storage.fill(0); expect(field.snapshot()).toEqual(saved);
+    const unchanged = target.grid.slice();
+    expect(() => field.copyStateInto({ ...target, structure: new Uint32Array(5) })).toThrow();
+    expect(target.grid).toEqual(unchanged);
+    expect(() => field.copyStateInto({ ...target, energyQ: target.grid })).toThrow(/overlap/);
+    const accessor = { ...target };
+    Object.defineProperty(accessor, 'grid', { get: () => { throw new Error('must not invoke caller getter'); } });
+    expect(() => field.copyStateInto(accessor)).toThrow(/Uint32Arrays/);
+    field.close(); expect(field.copyStateInto(target)).toBe(3);
+  });
+
   it('matches Python catalog acceptance and SHA-256 identity', async () => {
     const { stdout } = await promisify(execFile)(python, ['-m', 'tests.sdk_catalog_cases'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, timeout: 30_000 });
     const cases = JSON.parse(stdout);

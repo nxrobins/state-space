@@ -4,6 +4,7 @@ import { MATERIAL_NAMES as MAT_NAMES, MATERIAL_VISUALS as MAT_COLORS } from './m
 import { createMaterialRenderer, canvasCell } from './renderer.js';
 import { seedScene } from './demo.js';
 import { FrameClock } from './frame-clock.js';
+import { createFramePump } from './frame-pump.js';
 
 const GRID_W = 256, GRID_H = 256;
 let selectedMat = MAT.SAND, brushSize = 3, paused = false;
@@ -45,6 +46,7 @@ async function init() {
         document.getElementById('reset-demo').textContent = 'Restart heat chambers';
     }
     const clock = new FrameClock();
+    let renderRequested = true;
     function resize() {
         // Overlay the heading only where the letterboxed square field leaves room
         // for it; otherwise stack it above the field. Measure in overlay layout.
@@ -55,18 +57,20 @@ async function init() {
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
         canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
+        renderRequested = true;
     }
     resize(); window.addEventListener('resize', resize);
     // A hidden tab receives no animation frames; resume from the current time.
-    document.addEventListener('visibilitychange', () => clock.reset());
+    document.addEventListener('visibilitychange', () => { clock.reset(); renderRequested = true; });
     let renderer;
     try { renderer = await createMaterialRenderer(canvas, GRID_W, GRID_H, world.registry); }
     catch (error) { world.close(); throw error; }
-    function render() { renderer.render(world, styled, { lighting, water, haze, distortion }); }
+    function render() { renderer.render(world, styled, { lighting, water, haze, distortion }); renderRequested = false; }
     function paintVoxels(gx, gy, mat, radius) { pendingPaints.push({ gx, gy, mat, radius }); }
     function flushPaints() {
         const paints = pendingPaints; pendingPaints = [];
         for (const { gx, gy, mat, radius } of paints) world.paintCircle(gx, gy, radius, mat);
+        if (paints.length) renderRequested = true;
     }
     // Serialize frame work, edits and inspection across awaited GPU steps.
     let queue = Promise.resolve();
@@ -106,7 +110,7 @@ async function init() {
     document.addEventListener('keydown', (e) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
         if (e.code === 'Space') { paused = !paused; clock.reset(); e.preventDefault(); }
-        if (e.code === 'KeyC') void enqueue(() => { pendingPaints = []; world.clear(); clock.reset(); render(); });
+        if (e.code === 'KeyC') void enqueue(async () => { pendingPaints = []; world.clear(); clock.reset(); render(); await renderer.completed(); });
         if (e.code === 'KeyB') void setView();
         if (e.code === 'KeyL') void setLighting();
         if (e.code === 'KeyW') void setWater();
@@ -183,7 +187,7 @@ async function init() {
             document.getElementById('light-toggle').setAttribute('aria-pressed', String(lighting));
         });
     }
-    function resetBridge() { return enqueue(() => { pendingPaints = []; world.restore(initial); clock.reset(); render(); }); }
+    function resetBridge() { return enqueue(async () => { pendingPaints = []; world.restore(initial); clock.reset(); render(); await renderer.completed(); }); }
     function setWater(value) {
         return enqueue(async () => {
             if (value !== undefined && typeof value !== 'boolean') throw new Error('water must be boolean');
@@ -235,33 +239,37 @@ async function init() {
         rendererInfo: renderer.backendInfo,
         step(ticks = 1, options = {}) { return enqueue(async () => { flushPaints(); const reports = await world.step(ticks, options); render(); await renderer.completed(); return reports; }); },
         snapshot() { return enqueue(() => { flushPaints(); return world.packedSnapshot(); }); },
-        restore(snapshot) { return enqueue(() => { world.restore(snapshot); pendingPaints = []; render(); }); },
+        restore(snapshot) { return enqueue(async () => { world.restore(snapshot); pendingPaints = []; render(); await renderer.completed(); }); },
         inspectStructure() { return enqueue(() => { flushPaints(); return world.inspectStructure(); }); },
     });
-    let stopped = false;
+    let pump, lastStats = -Infinity;
     window.addEventListener('pagehide', () => {
-        stopped = true;
+        pump?.stop();
         void enqueue(() => { world.close(); renderer.close(); });
     }, { once: true });
-    async function frame(now) {
+    async function frame(now, displayInterval) {
         const start = performance.now();
-        try {
-            await enqueue(async () => {
-                flushPaints();
-                const ticks = clock.advance(now, paused);
-                if (ticks) await world.step(ticks);
+        await enqueue(async () => {
+            flushPaints();
+            const ticks = clock.advance(now, paused, displayInterval);
+            if (ticks) await world.step(ticks);
+            if (ticks || renderRequested) {
                 render();
                 await renderer.completed();
+            }
+            if (now - lastStats >= 250) {
+                lastStats = now;
                 stats.textContent = 'Tick: ' + world.tick + '\n' + (paused ? 'PAUSED' : 'Running') + '\nGrid: ' + GRID_W + 'x' + GRID_H +
-                    '\nFrame work: ' + (performance.now() - start).toFixed(1) + ' ms' + '\nView: ' + (styled ? 'Material + light' : 'Plain') + '\nPhysics: fixed 60 Hz';
-                document.getElementById('pause').textContent = paused ? 'Resume' : 'Pause';
-            });
-        } catch { stopped = true; }
-        if (!stopped) requestAnimationFrame(frame);
+                '\nFrame work: ' + (performance.now() - start).toFixed(1) + ' ms' + '\nView: ' + (styled ? 'Material + light' : 'Plain') + '\nPhysics: fixed 60 Hz';
+            }
+            const pauseButton = document.getElementById('pause'), label = paused ? 'Resume' : 'Pause';
+            if (pauseButton.textContent !== label) pauseButton.textContent = label;
+        });
     }
     render();
+    await renderer.completed();
     if (new URLSearchParams(location.search).has('paused')) paused = true;
-    requestAnimationFrame(frame);
+    pump = createFramePump(frame);
 }
 
 init().catch(error => {

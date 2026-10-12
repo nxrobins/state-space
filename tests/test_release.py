@@ -66,7 +66,8 @@ class ReleaseProperties(unittest.TestCase):
         rows = [{'name': case['name'], 'passComparisons': 1, 'completeReportsMatch': True, 'uninspectedMatch': True,
                  'restartMatch': True, 'final': {'packedCells': [5], 'energyQ': [5120], 'structure': [255]}} for case in corpus]
         sdk = {'nativeClient': {'catalogHash': 'test', 'initial': {}, 'final': {}, 'energyQ': '5120', 'replayEqual': True, 'passes': []}}
-        results = {'conformance': {'passed': True, 'rows': rows, 'caseCount': 31, 'passComparisons': 31, 'backendInfo': adapter},
+        results = {'conformance': {'passed': True, 'rows': rows, 'caseCount': 31, 'passComparisons': 31, 'backendInfo': adapter,
+                                   'ownedReadbackRollback': True, 'reusableCopyIsolation': True, 'residentStateUploadIsolation': True},
                    'lab': {'passed': True, 'sceneCount': 5, 'rows': [{'scene': name, 'backendInfo': adapter, 'reportsMatch': True,
                            'restartMatch': True, 'invalidImportRejected': True, 'concurrentStepsSerialized': True} for name in ('span', 'fragment', 'fire', 'phase', 'extension')]},
                    'ui': {'passed': True, 'snapshotControls': True, 'customFileImport': True, 'playback': True, 'inspectedPasses': 18},
@@ -74,6 +75,12 @@ class ReleaseProperties(unittest.TestCase):
                            'concurrentAccessRejected': True, 'backendInfo': adapter}}
         validate_browser_evidence(results, corpus, sdk)
         mutants = []
+        bad = copy.deepcopy(results)
+        bad['conformance']['ownedReadbackRollback'] = False
+        mutants.append(bad)
+        bad = copy.deepcopy(results)
+        bad['conformance']['residentStateUploadIsolation'] = False
+        mutants.append(bad)
         bad = copy.deepcopy(results)
         bad['conformance']['rows'][0]['final']['structure'] = [0]
         mutants.append(bad)

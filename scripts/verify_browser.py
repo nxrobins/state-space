@@ -47,6 +47,8 @@ def validate_browser_evidence(results, corpus, sdk):
         raise ValueError('Browser pass count is incomplete')
     if conformance['backendInfo']['isFallbackAdapter'] is not False:
         raise ValueError('Hardware WebGPU evidence is required')
+    if not all(conformance.get(flag) is True for flag in ('ownedReadbackRollback', 'reusableCopyIsolation', 'residentStateUploadIsolation')):
+        raise ValueError('Pooled readback, reusable-copy and resident-state isolation evidence is required')
     for row, native in zip(conformance['rows'], corpus):
         for flag in ('completeReportsMatch', 'uninspectedMatch', 'restartMatch'):
             if row[flag] is not True:

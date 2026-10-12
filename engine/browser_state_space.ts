@@ -6,6 +6,7 @@ import {
   SCHEMA_VERSION, RULES_VERSION,
 } from './generated/materials.js';
 import { runCpuTick } from './cpu_physics.js';
+import { stateCopyTargets } from './validation.js';
 import { seedState, temperatureQ, thermalView, validateEnergyState, MAX_ENERGY_Q, energyLedger as inspectEnergy } from './thermal.js';
 import { ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, createPhysicsState, normalizeBonds, rulesForRegistry, planStructure,
   type StructuralState, type StructuralPlan } from './structure.js';
@@ -56,6 +57,7 @@ export interface StateSpaceField {
   readonly grid: Uint32Array;
   readonly energyQ: Uint32Array;
   readonly structure: Uint32Array;
+  copyStateInto(target: StructuralState): number;
   energyLedger(): ReturnType<typeof inspectEnergy>;
   energyBalance(): { initialQ: bigint; externalQ: bigint; currentQ: bigint; driftQ: bigint };
   step(ticks?: number, options?: StepOptions): readonly PassReport[];
@@ -156,6 +158,9 @@ export class FieldState {
     if (mutation && this.closed) throw new Error('Field is closed.');
   }
 
+  /** Invalidate backend copies before any committed coordinates are changed. */
+  protected stateChanged(): void {}
+
   close(): void {
     if (this.closed) return;
     this.ensureAvailable();
@@ -165,6 +170,18 @@ export class FieldState {
   get grid(): Uint32Array { this.ensureAvailable(false); return this.cells.slice(); }
   get energyQ(): Uint32Array { this.ensureAvailable(false); return this.energies.slice(); }
   get structure(): Uint32Array { this.ensureAvailable(false); return this.bonds.slice(); }
+
+  /** Copy the committed coordinates into independent caller-owned storage. */
+  copyStateInto(target: StructuralState): number {
+    this.ensureAvailable(false);
+    const [grid, energyQ, structure] = stateCopyTargets(target, this.width * this.height);
+    // A Proxy descriptor trap can start a GPU step during output validation.
+    this.ensureAvailable(false);
+    Uint32Array.prototype.set.call(grid, this.cells);
+    Uint32Array.prototype.set.call(energyQ, this.energies);
+    Uint32Array.prototype.set.call(structure, this.bonds);
+    return this.tickCount;
+  }
 
   energyLedger(): ReturnType<typeof inspectEnergy> {
     this.ensureAvailable(false);
@@ -186,6 +203,7 @@ export class FieldState {
     this.ensureAvailable();
     const record = this.registry.material(material);
     const state = createPhysicsState(new Uint32Array(this.width * this.height).fill(packVoxel(material, record.default_thermal, 0, 0, record.properties.default_phase)), this.width, this.height, this.registry);
+    this.stateChanged();
     this.cells = state.grid;
     this.energies = state.energyQ;
     this.bonds = state.structure;
@@ -205,6 +223,7 @@ export class FieldState {
     if (!this.inside(x, y)) return;
     const state = seedState(Uint32Array.of(packVoxel(material, dose, 0, 0, record.properties.default_phase, flags)), this.coldTable, this.registry);
     const index = this.index(x, y);
+    this.stateChanged();
     this.editEnergyQ += BigInt(state.energyQ[0]) - BigInt(this.energies[index]);
     this.cells[index] = state.grid[0];
     this.energies[index] = state.energyQ[0];
@@ -221,6 +240,7 @@ export class FieldState {
     const index = this.index(x, y);
     const value = thermalView(this.cells[index], energyQ, this.coldTable);
     validateEnergyState([value], [energyQ], 1, this.coldTable, this.registry);
+    this.stateChanged();
     this.editEnergyQ += BigInt(energyQ) - BigInt(this.energies[index]);
     this.cells[index] = value;
     this.energies[index] = energyQ;
@@ -238,6 +258,7 @@ export class FieldState {
     if (!this.inside(x, y)) return;
     const index = this.index(x, y);
     if (!rulesForRegistry(this.registry).eligible(this.cells[index])) throw new Error('Only cohesive solid/frozen cells can be anchored.');
+    this.stateChanged();
     this.bonds[index] = (this.bonds[index] & ~ANCHOR) | (anchored ? ANCHOR : 0);
   }
 
@@ -250,6 +271,7 @@ export class FieldState {
     if (!this.inside(x, y)) return;
     const index = this.index(x, y);
     if (!rulesForRegistry(this.registry).eligible(this.cells[index])) throw new Error('Only cohesive solid/frozen cells can have integrity.');
+    this.stateChanged();
     this.bonds[index] = (this.bonds[index] & ~INTEGRITY_MASK) | integrity | (options.weld && integrity ? FRESH : 0);
     this.normalizeStructure();
   }
@@ -268,6 +290,7 @@ export class FieldState {
     const record = this.registry.material(material);
     const state = seedState(Uint32Array.of(packVoxel(material, thermal === undefined ? record.default_thermal : thermal, 0, 0, record.properties.default_phase, flags)), this.coldTable, this.registry);
     const r2 = radius * radius;
+    this.stateChanged();
     for (let py = Math.max(0, Math.floor(y - radius)); py <= Math.min(this.height - 1, Math.ceil(y + radius)); py += 1) {
       for (let px = Math.max(0, Math.floor(x - radius)); px <= Math.min(this.width - 1, Math.ceil(x + radius)); px += 1) {
         const dx = px - x;
@@ -333,6 +356,7 @@ export class FieldState {
     this.ensureAvailable();
     const state = validateSnapshot(snapshot, this.registry);
     if (snapshot.width !== this.width || snapshot.height !== this.height) throw new Error('Snapshot dimensions differ from the field.');
+    this.stateChanged();
     this.cells = state.grid;
     this.energies = state.energyQ;
     this.bonds = state.structure;
@@ -343,9 +367,15 @@ export class FieldState {
 
   protected commitState(state: StructuralState, tick: number): void {
     const validated = validateCompiledStructure(state, this.width, this.height, this.registry);
-    this.cells = validated.grid;
-    this.energies = validated.energyQ;
-    this.bonds = validated.structure;
+    this.adoptState(validated, tick);
+  }
+
+  /** Private continuation: take ownership only after complete-state validation. */
+  protected adoptState(state: StructuralState, tick: number): void {
+    this.stateChanged();
+    this.cells = state.grid;
+    this.energies = state.energyQ;
+    this.bonds = state.structure;
     this.tickCount = tick;
   }
 

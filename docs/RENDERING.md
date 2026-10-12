@@ -129,11 +129,19 @@ same finite reservoirs with cold smoke bands above them. Press **D** or use
 watch the shimmer rise while smoke moves, steam condenses, and basin faces melt
 under the ordinary physics. The D toggle is independent of H, L, W, and A/B.
 
-The client uses a fixed 60-tick clock with `requestAnimationFrame`, at most four
+The client pre-arms `requestAnimationFrame` before asynchronous GPU work and retains
+at most one pending display timestamp. Work and edits remain serialized. Rounded
+display timestamps have a 0.5 ms tolerance, with any early phase carried forward,
+so ordinary callback jitter does not alternate zero and double ticks. The client
+uses the interval between raw display callbacks to drop time from callbacks it
+could not serve, avoiding a continuing multi-tick catch-up loop after a slow frame. It
+uses a fixed 60-tick clock, at most four
 ticks per frame. Time that a slow device or a hidden tab could not simulate is
 dropped, not repaid later: ticks are never skipped or changed, so the world runs
 slower than real time instead of fast-forwarding afterward. Visual animation
 uses the completed absolute tick, so pausing also freezes cosmetic flicker.
+Paused and unchanged displays keep their image; resizing, edits, and toggles
+request a fresh render. Status text updates four times per second.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,
 styled, and alternating views on the bridge, a fully emissive lava field, the
@@ -141,7 +149,12 @@ distributed lighting gallery, lagoon, haze, and heat chambers at 256 × 256. The
 adds a water-disabled comparison; the chambers add a haze-disabled comparison.
 The heat chambers add a distortion-disabled comparison. Output is 1920 × 1080.
 It also runs the styled bridge, lighting gallery, lagoon, haze, and heat chambers
-at a requested 60 Hz display cadence. Local results
+for 600 frames after 60 warmup frames at a requested 60 Hz display cadence, using
+the production clock and callback pump. The 60 Hz gate requires every completed
+frame to meet its 16.67 ms callback deadline, no missed display slots or coalesced
+callbacks, and 59.9-60.1 Hz callback/completion/physics cadence. Raw timestamps, physics and
+rendering work, completion delays, and failures are retained. This measures completed
+application frames; operating-system scanout is outside the measurement. Local results
 depend on the device, browser, and host load.
 
 ## Native Python rendering
@@ -173,7 +186,19 @@ readback; ordinary rendering does not read image pixels back. Close the renderer
 or use its context manager. It owns its device independently of the field.
 
 The browser implementation lives in `web/renderer.js` and consumes the public
-JavaScript field API. The shared source is `web/render.wgsl`; `engine.generate`
+JavaScript field API. It reuses caller-owned coordinate copies, uniform storage,
+and texture views. The browser field separately reuses private readback and
+structural-plan buffers. Every completed readback is still validated; committed
+storage is swapped only after the full step and GPU error scope succeed, so a
+failed multi-tick step can retry from the same state. Ordinary browser ticks put
+the 18 ordered physics dispatches in one compute pass, using WebGPU's
+[per-dispatch usage scopes](https://www.w3.org/TR/webgpu/#usage-scopes).
+Inspection retains its separate per-kernel submissions and independent reports.
+Successful browser continuations retain the validated state in its GPU slot,
+avoiding three redundant coordinate uploads (0.75 MiB per 256 × 256 tick).
+Every public edit, clear, restore, or failed step invalidates that residency.
+Retries upload all three committed coordinates before executing the same ticks.
+The shared source is `web/render.wgsl`; `engine.generate`
 bundles it into browser assets and `engine/shaders/material_render.wgsl` for the
 installed Python package. No external effects package is required.
 The browser API accepts the same independent switches as an options object:
@@ -184,7 +209,7 @@ Both APIs also accept independent boolean `reflections` and `refraction` switche
 ## Reproduce the complete frame measurements
 
 ```powershell
-uv run python -m scripts.benchmark_frames --browser-cli <agent-browser-launcher> --output dist/performance/frames
+uv run python -m scripts.benchmark_frames --browser-cli <agent-browser-launcher> --output dist/performance/frames --require-locked
 ```
 
 The harness captures the real A/B button, checks unchanged complete state, and
@@ -197,8 +222,9 @@ and operating-system scanout are excluded. Native output is offscreen. Browser
 results additionally record display cadence. Complete trajectories must match the
 JavaScript CPU reference and native backend, with zero energy drift.
 
-See the [heat distortion report](checkpoints/HEAT_PERFORMANCE.md) for hardware,
-distributions, screenshots, and current measured limits. The earlier
+See the [browser pacing report](checkpoints/PACING_PERFORMANCE.md) for sustained
+deadline measurements, exact-state evidence, and current measured limits. The earlier
+[heat distortion report](checkpoints/HEAT_PERFORMANCE.md),
 [haze frame report](checkpoints/HAZE_PERFORMANCE.md),
 [water frame report](checkpoints/WATER_PERFORMANCE.md),
 [lighting frame report](checkpoints/LIGHTING_PERFORMANCE.md) and

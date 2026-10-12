@@ -1,6 +1,6 @@
 // Run from a local browser against the built public SDK and retained native corpus.
 // Uses only exported APIs. Every pass must reconstruct the native complete state.
-import { createStateSpaceField, createGpuField } from '../dist/sdk/state-space.js';
+import { createStateSpaceField, createGpuField, MAT } from '../dist/sdk/state-space.js';
 
 function same(actual, expected, label) {
   const encode = value => JSON.stringify(value, (_key, item) => typeof item === 'bigint' ? item.toString() : item);
@@ -65,5 +65,88 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
       progress({ completed: rows.length, total: cases.length, name: fixture.name });
     } finally { cpu.close(); gpu.close(); }
   }
-  return { passed: true, backendInfo, caseCount: rows.length, passComparisons: rows.reduce((sum, row) => sum + row.passComparisons, 0), rows };
+  // A pooled readback may contain a failed intermediate tick. It must never
+  // overwrite the committed start state, even after the first mapping succeeds.
+  const gpu = await createGpuField(9, 7), cpu = createStateSpaceField(9, 7);
+  try {
+    gpu.setCell(4, 0, 3); gpu.setCell(4, 5, 2); gpu.setCell(3, 2, 5);
+    const initial = gpu.packedSnapshot();
+    for (const fault of ['mapAsync', 'getMappedRange']) {
+      gpu.restore(initial);
+      await gpu.step();
+      const committed = gpu.packedSnapshot(); cpu.restore(committed); cpu.step(3);
+      const expected = cpu.packedSnapshot();
+      const original = GPUBuffer.prototype[fault]; let calls = 0;
+      GPUBuffer.prototype[fault] = function (...args) {
+        if (fault === 'mapAsync' && ++calls === 2) return Promise.reject(new Error('injected readback failure'));
+        const result = original.apply(this, args);
+        if (fault === 'getMappedRange' && ++calls === 2) new Uint32Array(result)[9 * 7 * 2 + 3] |= 8192;
+        return result;
+      };
+      let rejected = false;
+      try { await gpu.step(3); } catch { rejected = true; }
+      finally { GPUBuffer.prototype[fault] = original; }
+      if (!rejected || calls !== 2) throw new Error('Pooled readback fault was not exercised');
+      same(gpu.packedSnapshot(), committed, 'failed resident pooled step remains atomic');
+      await gpu.step(3); same(gpu.packedSnapshot(), expected, 'pooled retry matches CPU');
+    }
+    const target = { grid: new Uint32Array(63), energyQ: new Uint32Array(63), structure: new Uint32Array(63) };
+    const pending = gpu.step(); let rejected = false;
+    try { gpu.copyStateInto(target); } catch { rejected = true; }
+    if (!rejected) throw new Error('Copy during a GPU step must fail');
+    await pending;
+    if (gpu.copyStateInto(target) !== gpu.tick) throw new Error('Copy tick differs');
+    for (const key of ['grid', 'energyQ', 'structure']) same([...target[key]], [...gpu.snapshot()[key]], 'reusable public copy');
+    const saved = gpu.packedSnapshot(); target.grid.fill(0);
+    same(gpu.packedSnapshot(), saved, 'caller-owned copy does not alias GPU state');
+    let nested;
+    const reentrant = new Proxy(target, { getOwnPropertyDescriptor(object, key) {
+      nested ??= gpu.step(); return Reflect.getOwnPropertyDescriptor(object, key);
+    } });
+    rejected = false;
+    try { gpu.copyStateInto(reentrant); } catch { rejected = true; }
+    await nested;
+    if (!rejected) throw new Error('Reentrant copy during a GPU step must fail');
+  } finally { gpu.close(); cpu.close(); }
+
+  // Resident state must save uploads without hiding any public edits. Size the
+  // write counter to coordinate buffers; the interleaved plan has twice the size.
+  const resident = await createGpuField(9, 7), reference = createStateSpaceField(9, 7);
+  const originalWrite = GPUQueue.prototype.writeBuffer; let uploads = 0;
+  try {
+    resident.setCell(0, 6, MAT.STONE); resident.setAnchor(0, 6);
+    resident.setCell(4, 0, MAT.SAND);
+    const initial = resident.packedSnapshot(); reference.restore(initial);
+    GPUQueue.prototype.writeBuffer = function (...args) {
+      if (args[2].byteLength === 63 * 4) uploads++;
+      return originalWrite.apply(this, args);
+    };
+    const advance = async (label, expectedUploads, inspect = false) => {
+      const before = uploads;
+      await resident.step(2, { inspect }); reference.step(2);
+      same(resident.packedSnapshot(), reference.packedSnapshot(), `resident ${label}`);
+      same(uploads - before, expectedUploads, `resident ${label} coordinate uploads`);
+      same(resident.energyBalance().driftQ.toString(), '0', `resident ${label} accounting`);
+    };
+    await advance('initial', 3);
+    await advance('unchanged continuation', 0);
+    await advance('inspection', 0, true);
+    await advance('post inspection', 0);
+    const edits = [
+      ['cell', field => field.setCell(4, 0, MAT.LAVA)],
+      ['energy', field => field.setEnergy(4, 0, 256 * 100)],
+      ['anchor', field => field.setAnchor(0, 6, false)],
+      ['integrity', field => field.setIntegrity(0, 6, 128, { weld: true })],
+      ['paint', field => field.paintCircle(5, 0, 1, MAT.SAND)],
+      ['clear', field => field.clear(MAT.STONE)],
+      ['restore', field => field.restore(initial)],
+    ];
+    for (const [name, edit] of edits) {
+      edit(resident); edit(reference);
+      await advance(name, 3);
+      await advance(`${name} continuation`, 0);
+    }
+  } finally { GPUQueue.prototype.writeBuffer = originalWrite; resident.close(); reference.close(); }
+  return { passed: true, backendInfo, ownedReadbackRollback: true, reusableCopyIsolation: true, residentStateUploadIsolation: true,
+    caseCount: rows.length, passComparisons: rows.reduce((sum, row) => sum + row.passComparisons, 0), rows };
 }
