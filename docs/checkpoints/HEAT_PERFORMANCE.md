@@ -90,8 +90,11 @@ The heat scene has substantial median work headroom, but this browser run achiev
 intervals. Results depend on device, browser, and host load. Earlier checkpoints
 ran at different times; their measurements do not isolate the incremental cost
 of this effect. Callback cadence is separate from completed GPU work and excludes
-OS scanout. The interactive client retains physical tick backlog rather than
-skipping ticks on a slow display.
+OS scanout. These paced runs step one tick per callback; they do not use the
+interactive client's clock. When this report was written, that clock kept all
+unsimulated time as backlog. It now runs at most four ticks per frame and drops
+time that it cannot simulate. It never skips or changes a tick, so a slow display
+runs the world slower than real time (see [the rendering guide](../RENDERING.md)).
 
 ## Exactness and active distortion evidence
 
