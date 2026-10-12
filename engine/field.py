@@ -236,6 +236,7 @@ class Field:
                 "thermal": state.thermal, "energy_q": int(self._energy[index]),
                 "temperature_q": self.registry._model.temperature_q(state.material, int(self._energy[index])),
                 "phase": state.phase, "flags": state.flags, "kinetic_x": state.kinetic_x, "kinetic_y": state.kinetic_y,
+                "pressure_q": int(self._structure[index]) >> 16, "velocity_x": state.kinetic_x, "velocity_y": state.kinetic_y,
                 "structure": int(self._structure[index]), "integrity": int(self._structure[index]) & INTEGRITY_MASK,
                 "anchored": bool(int(self._structure[index]) & ANCHOR), "bonds": int(self._structure[index]) & sum(BOND_BITS)}
 

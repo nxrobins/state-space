@@ -68,7 +68,9 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                     await renderer.completed();
                     const finished = performance.now();
                     if (i === 0 && await stateHash(world) !== references[scene].firstTickHash) throw new Error('Rendered first tick differs from CPU reference');
-                    if (i >= warmup) { frames.push(finished - started); physics.push(physicsDone - started); rendering.push(finished - physicsDone); }
+                    // Include the pressure gallery's initial rupture, which can
+                    // occur during the usual warmup. Pipelines are already built.
+                    if (i >= warmup || scene === 'pressure') { frames.push(finished - started); physics.push(physicsDone - started); rendering.push(finished - physicsDone); }
                 }
                 const finalHash = await stateHash(world);
                 if (finalHash !== references[scene].finalHash || world.tick !== references[scene].endTick) throw new Error('Rendered continuation differs from CPU reference');
@@ -80,7 +82,8 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
                 if (['lighting', 'water', 'haze', 'heat'].includes(scene) && finalLavaCells < 64) throw new Error('Stress sources expired before measurement ended');
                 if (scene === 'water' && finalWaterCells < 1024) throw new Error('Water stress pool expired before measurement ended');
                 if (['haze', 'heat'].includes(scene) && (finalSmokeCells < 1024 || finalSteamCells < 1024)) throw new Error('Haze expired before measurement ended');
-                rows.push({ scene, mode, width: 256, height: 256, output: [canvas.width, canvas.height], warmup, ticks: samples,
+                rows.push({ scene, mode, width: 256, height: 256, output: [canvas.width, canvas.height],
+                    warmup: scene === 'pressure' ? 0 : warmup, ticks: scene === 'pressure' ? warmup + samples : samples,
                     frameMs: distribution(frames), physicsMs: distribution(physics), renderingMs: distribution(rendering),
                     overBudget: frames.filter(value => value > 1000 / 60).length, finalHash, endTick: world.tick, finalLavaCells, finalWaterCells, finalSmokeCells, finalSteamCells,
                     cpuParity: true, renderIsolation: true, energyDriftQ: '0', physicsAdapter: world.backendInfo, renderingAdapter: renderer.backendInfo });
@@ -89,7 +92,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
     }
     // A separate display-paced run records actual callback cadence as well as work.
     const pacedScenes = [];
-    for (const scene of ['bridge', 'lighting', 'water', 'haze', 'heat']) {
+    for (const scene of FRAME_SCENES.filter(scene => scene !== 'emissive')) {
         progress(`${scene} · 60 Hz display pacing`);
         const world = await createGpuField(256, 256);
         let renderer;

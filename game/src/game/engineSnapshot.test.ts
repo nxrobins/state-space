@@ -97,8 +97,8 @@ describe('engine material snapshot bridge', () => {
     for (const packed of [-1, 2 ** 32, 0.5, NaN]) {
       expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [packed] })).toThrow();
     }
-    expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], schemaVersion: 4 })).toThrow();
-    for (const schemaVersion of [1, 2, 3]) {
+    expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], schemaVersion: 5 })).toThrow();
+    for (const schemaVersion of [1, 2, 3, 4]) {
       expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], schemaVersion })).not.toThrow();
     }
     expect(() => buildCombatGridFromEngineSnapshot({ width: 1, height: 1, packedCells: [0], tick: -1 })).toThrow();

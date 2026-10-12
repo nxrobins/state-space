@@ -1,0 +1,1757 @@
+{
+  "startedAt": "2026-10-12T04:55:45.570201+00:00",
+  "failedAt": "2026-10-12T05:00:20.321736+00:00",
+  "sourceHashes": {
+    "docs/CAPABILITIES.md": "6199f33618ce7017c10be9dafa7cb81ff66f83768286826a6bea0e6383e449a0",
+    "docs/EVOLUTION.md": "27fbcf9c4a5736ce84f42a1c0699cdef893a231adbc11ac3c8eb4bf1502376fa",
+    "docs/PRESSURE.md": "e22630a9bf9b171c6ba864f1da5ce01b8f68a6ca0bcf2cbffd76a57a41db2781",
+    "docs/SDK.md": "59e926326312b1fa2769eafd911fb6765b764578d87fcf26c843df5ea94b7ab2",
+    "docs/STRUCTURES.md": "7cf49a54a44ebd964733564391e70372f73ba5ef89bea900c960f477376ff836",
+    "engine/__init__.py": "c450016c3298779e7b7d62a75302e7cbe08aa3bdf732e3fc03eeb4f586e7e2ea",
+    "engine/_generated_schema.py": "8e9be1fdc9a67636b692935b54b6a58c2fdcdff514614b87927d99e870070ff2",
+    "engine/array_state.py": "0e4a84843d57e74ed2a77555cca78b88fa81e3cbd532f7443cfc079fa5cfcba4",
+    "engine/browser_state_space.ts": "1409c05ab032eeeef4a03b210699d670c765f6ef8a2bbaacf89b9981a839f45a",
+    "engine/catalog.py": "978b1ad14e2fe8c4508115abad7f12f324adaa0a45f9c1e4891dabafd8bbcff1",
+    "engine/compositor.py": "470cb36a6a630805e927bc50d96515634d62fe45a8e11cb308c799e5c1d7069a",
+    "engine/conformance.py": "92b2ee50db5fc686b30d98d0bea2698f84f80bc9dd69e1495ed7b197d7fa37cd",
+    "engine/conformance.test.ts": "8691d136dfefe8062e7bf6e9dba366c00b0a08a742f16ff9d8d7fdf71cc9bff1",
+    "engine/contracts.py": "f25d7ee9ab750787a94230260c7f33c08b9700d6c142cf0b42df19035183fac8",
+    "engine/contracts.test.ts": "24399ff2ea1c6f54705edf46ef132032ae04ff4432301abd38d692f67c1656ec",
+    "engine/contracts.ts": "a0fead06fcce0aaa3ae7287ef34672661c20be93bbdccaaa172d6ad444b6fca5",
+    "engine/cpu_physics.test.ts": "e2667e4b0458c4be1a14fd3111712486070cb6390b0f0ed9eebd6ca5441a3ee1",
+    "engine/cpu_physics.ts": "d5c914951a6d3a68854f9b3bd3b65f3d40f86597c649414e4f722fe7ea695520",
+    "engine/enthalpy.py": "a9ad8fdb476a0b788c9076e47c28c7d13f74196b377247d5652ff2af18cb675f",
+    "engine/enthalpy_gpu.py": "af76e0037457a49978017aae4b914de330f8f9ae1f7e83cbfeb7e8014dea1349",
+    "engine/fidelity.test.ts": "2f5cd0502166541b7576d70879526354305f0e76c1e0c462d1c46d1666316215",
+    "engine/field.py": "efd93384fd044da28db6eb7290feb7735d82f68e383f758702b0cb65f70a60ea",
+    "engine/generate.py": "56dba55f81d33a24b0dbf7a609ca83fc13fda346e3071f7b58473d255fa56aeb",
+    "engine/generated/materials.ts": "a4a5506033a962e51d2394bc1ef2e6ab1e75483fd01c56524d6c575b4108073f",
+    "engine/generated/schedule.ts": "bfc053366cccf3f4eb305beb25f1baf106016e75445c43c22ca39fc14c8455ab",
+    "engine/generated/shaders.ts": "03d8439af9ad09ab1163b035ce794a2221a73ba9216e072dd1e6f6faf6ada11a",
+    "engine/generated/structure_solver.json": "90a926c8bac8f688bc5867c3d987da9182c8683a2e39b91610a991c117f17c82",
+    "engine/generated/structure_solver.ts": "5a4bbfd6b52bf4a260d7dd928f09278fb7f2f05a15ee2b4cf87488af7703add6",
+    "engine/generated/structure_solver.wasm": "0234c22aa8d5a450b48dc3beda9d0e7bfe203487f0da10d2f867db02236e723f",
+    "engine/index.ts": "5a85d8279eec3f62b6e9db702d7e62eac2c06e8d9b0dcb7ec11f79b929bd6e65",
+    "engine/inspection.ts": "bee27a61f14dc28e9776739a45f9de5aa9aab2804bc1b899acca3623f0a213cb",
+    "engine/kernels/phase_1a_winner.wgsl": "61801ef28811cb381f3d2b985c2a18e9d8053318baa95ae5732475bb52e540ea",
+    "engine/kernels/phase_2a_winner.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+    "engine/kernels/phase_2b_diagonal_winner.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+    "engine/kernels/phase_2b_gas_buoyancy_winner.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+    "engine/kernels/phase_2b_gas_spread_winner.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+    "engine/kernels/phase_2b_liquid_winner.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+    "engine/kernels/phase_2b_winner.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+    "engine/kernels/phase_2c_winner.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+    "engine/kernels/phase_2d_winner.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+    "engine/kernels/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+    "engine/kernels/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+    "engine/kernels/phase_2f_impulse.wgsl": "d0f2483e62743d64fe6feb29501af5cb49a90a6f2bf57d417eeab903b7051b3b",
+    "engine/kernels/phase_2f_velocity.wgsl": "11a0d6864cc9a0214442279ae7403ba013d545f70a0d3d60162bf7a9fe3c8f38",
+    "engine/lint.py": "3917d24f38a55ebd4754076a1b9114b0b1d91628272f626469a463a8a55dc9ef",
+    "engine/lint_ts.mjs": "861907ed710fd6a032873a57acee90b12210214810a051ef5f89281629be3785",
+    "engine/materials.json": "0c56b9592ff775e66fe771bffae814ca882c4735b3db2dbb8a93cda106546223",
+    "engine/mutations.test.ts": "85820f4ae8b931e71aec4ea35b4a893fef7e7cbc90fd6e3486af95fa9abee202",
+    "engine/pressure.py": "13a76f7978b3162d5957955fe22657c6e02e39c7c4987843f827dd486981d629",
+    "engine/pressure.test.ts": "40fcf2627a4d4143f549bf898a2e3a5a1f931dd7c9fff661dc71fbab7a5bb923",
+    "engine/pressure.ts": "96f597a21a95bb9996bc5c6eaed4ba93953a53d9778392367a593ec63d83f218",
+    "engine/pressure_scenes.py": "fc07431c126ba8d72a15644c035ca679dea0ce48a034a9b8a17a8846313bf526",
+    "engine/registry.py": "a88dd4fe6a9bce0172aa1891ce90885bf98959b9c505c38642be11118b1d3a59",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/rendering.py": "01f0d07303bc5ef7e2e504793253262bd29bda9388d1b34ea7071d206fe6154c",
+    "engine/resources.py": "669f59e39472da4981c2cbfa424aed25262402031f0557594eb16f4c2e53a965",
+    "engine/runner.py": "f180e3c8e0927c48b219a94c04eb5974d6c1dfb47af2d31fc34a140d0f97f375",
+    "engine/schedule.py": "90046d5aa6cab669f5ccc1bb75ee7a39adb90283086361e5665994c03ca92d05",
+    "engine/schema.py": "9c5d35bbc2c3e4046ce06e5961ee76cdec5ffc42094dd9ad8f2e0f3d057d6c99",
+    "engine/sdk.test.ts": "0030712ba77874b3389ec753211b91389c136466a6e969701520862a31f54ac9",
+    "engine/shaders/bitmask_defs.wgsl": "ee7b4eca0a46b23f1e60c455bf24eb10ec7a9d775e7384b1cc4412bfa7a4ff61",
+    "engine/shaders/cold_table.wgsl": "bf4a2f1268a2704d0b56e561a68ca94799529ec86c02f1e44c669bc82ba4e715",
+    "engine/shaders/enthalpy.wgsl": "ea211af6d30655735df510856470bb2ba9161167922b1165fd204177c9517894",
+    "engine/shaders/enthalpy_law.wgsl": "e6c319c639754e9ecf0726f3c1d88694c43fa63c70a1e4c94dca8cb54af45fae",
+    "engine/shaders/material_render.wgsl": "388edf7a92470d97b906f91853097375af81f25047723ba01edc91f9fd31821e",
+    "engine/shaders/state_io.wgsl": "0fb76b481d663e281552c388829e8c565c2395a9c81a03cf829e53591d554319",
+    "engine/shaders/structure_apply.wgsl": "53f626556498f6a15bffd3ecff9451ee72d96ab896e9a0e9e26d87cf25a3fe4c",
+    "engine/sources.py": "291f8a152d4ce818d4f6b5723b22af345ad5d131cdb44bc8ea652804f0b4f5f9",
+    "engine/state.py": "935ab1ef507d21ecc3fb465db0e4662b312922d137a51a8e8937c2bb2ec74b7f",
+    "engine/structure.py": "2c5c41371ec21e46ef890af87d81b3165e58e86189e7b450cc67008b3a360637",
+    "engine/structure.test.ts": "61c7d82125a613f83b34047cf27a75c91af2166a354a91efa3e27836fe63d41a",
+    "engine/structure.ts": "d96933cd14add786d5f7309b176e16041ccdf952a9393b24a9f67e22d37d6b87",
+    "engine/structure_benchmark.py": "5a39ba715ae974f5bac0c8db26d997b344d788d4c68cf5e144988ded30d8d083",
+    "engine/structure_bulk.py": "cb058282dfc948e9fe4622cd1a8b6d41b6d290d59d9d745c0dc5b4bea5bd7062",
+    "engine/structure_compiled.py": "a18c87b41902bec3633f658722a75ca9e233a340c6c39c0a219a6cf3fc9aa804",
+    "engine/structure_compiled.test.ts": "d1db73ae17900c6221aeebbfdd2c45db5e8d8e7b17b16401002e229c42b90398",
+    "engine/structure_compiled.ts": "47af35c3b5d34eae3367da1cce8b8cefdf370d6a0cf166ce4d6db2b55b32b263",
+    "engine/structure_conformance.py": "d8c5ca8e67ed2171f579f599096e53c74f25f15209a59ae651e662d9032f28e6",
+    "engine/structure_gpu.py": "482081f3976ae6084d1418c854717b9500dbcf82bb45051a27963fbd1837109d",
+    "engine/structure_public.test.ts": "2a6dee0ab765e36ad741cbe051d4928618d3ecf0b54d6e5151fde3808cbef7f7",
+    "engine/structure_solver.c": "773f35844447d0d287d4a1503c36dc065b3a6ab20d2b5b6f4feea43d754f29d5",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/thermal_registry.py": "88d94a92770abe3afee2edd5c379f6405d1f9a03760828b66ba9cf4a8d83d0b0",
+    "engine/tsconfig.json": "5234374ce11d4ab08a2a76998d1f2008b7304c73b7dd6b2704fa5cd926dd1c52",
+    "engine/tsconfig.sdk.json": "ffd752882c5c52421e1531a229878bcafcdc8167ecd39142b739440f0847fe2c",
+    "engine/validation.py": "44161782a7f81bcb38f3e443e79e7cd22b3a07e6d471d068a4301bd4b2fcef64",
+    "engine/validation.test.ts": "dbcb20a2997c26c57e282899240ff08e1d93924f6837391ac342d45f46a34490",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/verify.py": "1bb2c8e2a97ac239cd3c5f71f0b7d9ca07c1d1eed35f84bcc0d567f15cf326eb",
+    "engine/version.py": "3adf95c5814f68ee2151af81a1170c4078b76765618d9a8445d4b25ec9295052",
+    "engine/vite.sdk.config.ts": "b7868ceb2bf6227b0024e9ae71d0ae1ac8597ed8bb102ddf08f698dd0daa1edc",
+    "engine/vitest.config.ts": "fb634ccdd17bafcf676560e600d5a38e552762bebe0c3c4e4475c58ee7b5688e",
+    "engine/webgpu_field.ts": "af21d26802c7eb9050d54a85581fef3b94f7e1998c0d58f29ed049b047ccbafe",
+    "engine/wgsl_fixer.py": "76df918da191cedff02f3497d4374e9ebe7bd6a5358464a23b6f66d099a33b18",
+    "ENGINE_CONTRACT.md": "d23c7f8a745d945827031cc48e6b53efb7d3dfb14b4f632d1d1325dcbc27f74b",
+    "ENGINE_INVARIANTS.md": "6ea40e76b8672306b7adf9eb76be8f8f6e4a942c74251846d1d87e785347f022",
+    "eval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eval/archive.py": "49960301ac145de810ed076af740ee4810d3799401c1553d51db8ae5c6b68041",
+    "eval/benchmark.py": "546680fac1b3903d09af836b8a20a84827e23f807abe6f23466f4fee8bd4450d",
+    "eval/codec.py": "8d74c689d40cdc4e93c5c19accb9ce4b83aad2f496669b3df0d1645975d31adc",
+    "eval/correctness.py": "c55f66e59363ce3cda6a286fae3f44d42f6f482bc518a0183ee4ef5ba2ce31b1",
+    "eval/evaluator.py": "921cf57da2d67350f4734ac07016ebca33218fec723142f43798cb1922546682",
+    "eval/policy.py": "477d5bb031149987731d8a7fff22184b4e034d97c79139fb225b033f06ef8d12",
+    "eval/provenance.py": "d9fe4a56cd9fba617f9e6eee019fdf95b782070671a0249f5fad4d302bccf8d6",
+    "eval/reference.mjs": "5b5388ed55a2e4936ead9a94fea81e743cc46271ca46eff3fa3c317c84c11206",
+    "eval/scenes.py": "2927803da7a59c647de2b8a4f0f7dfebf0ba026daf456e275f5cd200d0ee049a",
+    "eval/verify.py": "cc43dbef7c9c71c0def01ea88053d409bc81003c334a90882b094c9dd7b245f7",
+    "eval/worker.py": "9af70be0ed37e080269e720f7d1e9878ff4e881cae4f10810048759fb632c9fb",
+    "evolve_ss.py": "64e1e139bb966c7cfc48307723dcdb946b10e78e271db9e194eaa1b535ff932b",
+    "examples/lab/app.js": "3f15bd2244a362bbeff2eb0d4bac19e757e1509e68a1af104b2932ac97a04d4d",
+    "examples/lab/controller.js": "ed89d50ab61dddfc760f3a3862e0c73b13a1ade3b6fad76ca90cc5ba9722224a",
+    "examples/lab/index.html": "09ba59101a4e1687c500feafe6b7f1440aca3ea16a000510f1ff8edd686a453e",
+    "examples/lab/lab.test.mjs": "be75d13cd954889d3af6e7ed617a3f587610bb08fbb74c81bba21d6763b7f62c",
+    "examples/lab/scenarios.js": "a71ed4196eb5a510f23495aff5149a7f4a936ceb9cec9ddb60c2c822156154b3",
+    "examples/lab/style.css": "0f8ce98355a9dada43fb24a4198331c2ed6e1ae1c1d6951c246e73634973495e",
+    "examples/lab/verify.js": "82fe2df9bffedc44d56b9d94f4129801bfd2bd54b9713456a286f22b37c6fe90",
+    "examples/lab/view.js": "a41e9193ffeedb30e504dd9e936f6fa1a9ae4c48539998eb2a495a43055d768b",
+    "examples/sdk/browser.html": "0c61604e84b3f7d17bfc85244a1d7e56ef14d38260c4a37eccd165cf7512a49b",
+    "examples/sdk/browser.js": "81b6b2f0a26759bc2b3678ec8cf29aa9c24d8ed23b9549093fdf702ee57d3940",
+    "examples/sdk/materials.json": "6ac819a4e502a5846505dc330d93f2a4814da9c653f92cbf8f67b897734a73bb",
+    "examples/sdk/native.py": "f2807bad40372a61df731e47db4b738157b6224233de6d631505f6e13e53c28a",
+    "examples/sdk/node.mjs": "36dbb1ef6bf989105757434de023f0af47e1e7776b2952a83dc2470b71c38cb0",
+    "game/src/bootstrap.test.ts": "e4dd654d62b6131112aa71494e442e8423fb335b35bc2dc2a74c60ada7a1a060",
+    "game/src/bootstrap.ts": "46cc0d674b640739094cafaa2e94caa95ca2cfae6a05dba991d633e2becdf660",
+    "game/src/game/combatFeel.test.ts": "db55be99b1a9a6a456a54c711a7b75ee5ad623ee5741ae25ae12335f88ca9fa6",
+    "game/src/game/combatFeel.ts": "a2c7a28164d9cf7c3d12a8899311311b294d845f2cf6cfe30719f7ccc3f418e5",
+    "game/src/game/engineSnapshot.test.ts": "823f5f53ce49a106b442e193cc6ca369d0aa95ba1d50b2d035430ed43580a3e3",
+    "game/src/game/engineSnapshot.ts": "6e151373254aa4d8fffe1d38f67a1869483a33a71d332f45f68b7483d8ef46e6",
+    "game/src/game/input/actions.ts": "a2fa8796759c44e04b10bf77cd30697de91c8e195548b8c730463ee38271e9de",
+    "game/src/game/input/bindings.ts": "d6b82fb45da407bdae9249ac13be98789d44fa4335c37c1d1489eaf3a21ea7f8",
+    "game/src/game/input/commandResolver.test.ts": "96ee387b1bc3bab28614c82487b61b4a81b91cd9e97172d6747d11827383b2dd",
+    "game/src/game/input/commandResolver.ts": "9c16ec8b2b0dedeadd891f6545fd9dd15a8c3b24307edf05a4b79414653cbc3a",
+    "game/src/game/ops.ts": "5a99bd2945526b0d022e77e45b398ac890bd736809a32633a081ec8543a4c2cd",
+    "game/src/game/replay.ts": "fa2c7352fd565503ddf89e344d0f9c3a225d9679eab38e5bebf3e3a4d9fe61fa",
+    "game/src/game/replayStorage.ts": "19216eac651a2f853f0368756755ec8c66df6e45278ba11dea0b311bba838100",
+    "game/src/game/simulation/battle.test.ts": "0f2aff15d290f278eed8853e1258b7251354c7787203550e2a74c8b56bba12b4",
+    "game/src/game/simulation/battle.ts": "22ea71f145d73b59a880191238b332996fb8b36880787d71ad032e95ecab0575",
+    "game/src/game/simulation/constants.ts": "c60a3cb078e2348d30ef0056cdbc8faab15fdf2d8aa2e077b78c5679819407c8",
+    "game/src/game/simulation/fighters.ts": "5945fff6601e5851441cfa26ab2bd52c77d38b9f1f10cae99b95a03643127319",
+    "game/src/game/simulation/grid.ts": "4cb80e6b362c08dd214f58c46955c75fa0bb5c92cbd01454ff2764e07e325dff",
+    "game/src/game/simulation/materialCombos.test.ts": "2c33f62ff3922b26bd51072a75cb4839c35e46731a512b47ec4fe2b6a5082a49",
+    "game/src/game/simulation/materialCombos.ts": "ad07868b70d143eb8df80ec041654005463c74938a01180e112c250ad98abfae",
+    "game/src/game/simulation/moves.ts": "38f0fad6684eab3f8b33d468c427a66ff430e136808cfadfb58b736bd356698a",
+    "game/src/game/simulation/rng.ts": "edcc0fe6baeb72f9c3bc5eaff73bd12f3025c6fcb7a825760f924faa902d35c8",
+    "game/src/game/simulation/types.ts": "c1f1796f1723024861ce1c909957f01a67079feeed87bcee9b1ada5e4c27fdfd",
+    "game/src/game/sprites.test.ts": "d141e22dea0b2d2eeb73413463b1c9f98ab09957d3eea6f29220b60961ed4354",
+    "game/src/game/sprites.ts": "bdaf110ddfbad592726036e5d7de53617ab2a5d833c16988b174a6a024b2be27",
+    "game/src/main.ts": "93c0031dc57bc69e977e666df5b233f755c04d4a34ae4c24749d24e85e1e0fc8",
+    "game/src/phaser/combatAudio.test.ts": "0bf9e516baab51e65149b20121efd2e812e43d21287a7ab3a1cb41235ae571f9",
+    "game/src/phaser/combatAudio.ts": "4279eb84190be4cfa764653640332fc393906e0c5440819641a65c8ee3c22c59",
+    "game/src/phaser/scenes/BattleScene.ts": "d225f4c06a76f6d67327f5743d1b81e211add4dd832397729324c1d9e7329d87",
+    "game/src/styles.css": "a58f20bc7b9e8f3316964e802db88a522a40771251efa69645e3090a41911cc3",
+    "game/src/ui/debugOverlay.ts": "9bb79bd268513581eccee1ae3d3e4e47ff723284f33f8e02cdbd698a9355db83",
+    "game/src/ui/hud.test.ts": "59e1505e928cbfe214c4ff9fc6e22dadb00eb3c48c0b6eb0b9cb2742f77d8d5d",
+    "game/src/ui/hud.ts": "968606f515283fd46f1c3290cffe284ed5402c09a240d8981786ef7576108b65",
+    "locked/phase_1a_winner.wgsl": "023411305d81845d727793f863ac984d72a97c0f7904e048c7dcb352306a3546",
+    "locked/phase_1b_winner.wgsl": "1eaa09eff078f1a2b9cf935d84c74ae2e4abc73b71643068ff2badbc9f3dca8b",
+    "locked/phase_1c_winner.wgsl": "4246d1b8a14912d90b6860428302897fe642f03a0eb3072ba88c1b082a03d4d7",
+    "locked/phase_2a_winner.wgsl": "8c62460bce587f09fdb5730ef2191b0bc6291be3491aca69a91538161b788c33",
+    "locked/phase_2b_diagonal_winner.wgsl": "4e4b76ef32102e66e8ca8a3d4601b358f1f349823f2c6ebc25cafe29c02ca147",
+    "locked/phase_2b_gas_buoyancy_winner.wgsl": "0b7994c29b95029f394c084b79cf991315393a7cbeb2f88e4d612c7db55c1729",
+    "locked/phase_2b_gas_spread_winner.wgsl": "688acd1acc91922a842d9b3088b1e67af2d8598fedb0ae4f227d6bd4c3d1d08d",
+    "locked/phase_2b_liquid_winner.wgsl": "0deb3d4c6f60249df84bf8806878a7d3c93f04b58e8ce7863d3ddeb8aabd7c21",
+    "locked/phase_2b_winner.wgsl": "fdd575ec56a74f87b65e5683973c68a90de2b5c1c3fb6caca0b2a7441d9c8678",
+    "locked/phase_2c_winner.wgsl": "234526dddec671b59e08a00341ae46f389e0c0353879b907b98448d0bca3f782",
+    "locked/phase_2d_winner.wgsl": "9a3e092be92ca7a8e1353111a19030d4b632036b94060fcefbd7a880eddd6821",
+    "locked/phase_2e_normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+    "locked/phase_2e_structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+    "locked/phase_2f_impulse.wgsl": "d0f2483e62743d64fe6feb29501af5cb49a90a6f2bf57d417eeab903b7051b3b",
+    "locked/phase_2f_velocity.wgsl": "11a0d6864cc9a0214442279ae7403ba013d545f70a0d3d60162bf7a9fe3c8f38",
+    "package-lock.json": "1b962dacf517b8500e522bd164d62ec567b899a358824c911b59c461f9b940ac",
+    "package.json": "9bd4615bae7c4bb134b246439c87733094ab60301a8a57e22a08f0f2741b2c5b",
+    "pyproject.toml": "eb14c6f5a12f9287bef2c02b7323e5e5d307a472764b8906ce9bd4394bdba232",
+    "scripts/benchmark_browser.py": "5b443e67427de250f4303ab40dfb595d18e9f3c759793f0fc91e4c4783d15c41",
+    "scripts/benchmark_cpu.mjs": "cdd4268948f7c50c7ffdd9b5760ffd91500e56bfad8f9221d27134ba16337a77",
+    "scripts/benchmark_frames.py": "56c298662f5913ae325be55e30bc06c72ee12d2257be95088fed2ee4fe5a101c",
+    "scripts/benchmark_gpu.py": "48508e551bc32290e2205435113ae8a2adc276c73199729ff3b3f1cffcb32e5f",
+    "scripts/browser_benchmark.js": "73cd190113729ea9261d9bf39e2e6a7397f488ea9d956e1cbcee72e183853c99",
+    "scripts/browser_conformance.js": "b3f56477d444f30fe1eb5ebbbdb3209928e6b93d2c7d522c69a8b1f3321d1bdb",
+    "scripts/build_structure_solver.py": "566f6b647aa8f201daf0efc57a9d06bde28002b06177bbe6422efe445c846cbb",
+    "scripts/verify_browser.py": "16f01397fb84a79cac708f30269f230a032c60b647b2b96850af0104a5c4174f",
+    "scripts/verify_sdk.py": "35c72b26562b47fac3d574dda550eb109a5f2433fd6562b0c66406fdf8fdcec1",
+    "test_cascade.py": "d2e2fc0c431ca0d92953079ee2286ce30b808fd542d2d0b4cd841312df26b231",
+    "test_invariants.py": "474239e3f31a54473232a1b2e24d6ae1043ce38f05e428a4fb71f580bb4639fa",
+    "tests/enthalpy_cases.py": "c74f8f5fb4f7893b645fcdd5b241ad73cff2d227060531608f04a6cb584f91a3",
+    "tests/sdk_catalog_cases.py": "ea5bf89980d0362c2df58bb7c02412008b9f70b2634357477c7113f28a990c23",
+    "tests/test_array_state.py": "fb05444d9319c0148f68f33e13d0e6a45eae9c47e47afddc9c2ed4b3f6c70574",
+    "tests/test_contracts.py": "d13921c36b975b9878a48622f146a822b4d5123ec9a32542a50fedbb5f5f104b",
+    "tests/test_enthalpy.py": "4a3ec15ba37213d7847041d012fa381c2746d6773a5f36db75776b8e2df1a06f",
+    "tests/test_enthalpy_gpu.py": "4ff6bf7eeb41a192d193ae1d8e5d23a398347b09e8100c7f42d7a8140c446b13",
+    "tests/test_evolution.py": "edf6e78d9a17d56cffbd0f947009951fe43f2cf5a800b2734d691a2cbadc60ca",
+    "tests/test_fidelity.py": "8ee6acd77dc4c78b2e28f7c8bc0b6c0ba81c5e4d8620fca16a1f57b852f2df89",
+    "tests/test_gpu_contracts.py": "b98bb9cbbd4b09bf0f5d3f4c70f055f0d304f2fe52a83dd3216e638056a5ebe3",
+    "tests/test_pressure.py": "193bd75714b2838b90c2b2e1f30849209b740100b0f74f1bfbe3153b02e96ce6",
+    "tests/test_release.py": "42d0cdfce6e551a2b5a81177bfac10a6bbdf17558b29f39b4c29c6dd73e93736",
+    "tests/test_rendering.py": "82cc312d13808a984ef5e91055b87e7e2c7bc8027f6f311940025c8c64011300",
+    "tests/test_sdk.py": "fa0724573ef458afed36ba9364c411373f36fde5a2a7ced4c76b4c24caabd439",
+    "tests/test_structure.py": "92169e2a63773ee57e2f5f94a85eb37e25bd56c585c450ca5480bb86f23fa309",
+    "tests/test_structure_bulk.py": "2f262da7a5a2e3453871f7297402aefc722e3298874e45b28ab5c193a936e4bc",
+    "tests/test_structure_compiled.py": "d09a79ee8c00be499eead7bb8e12518da909685831172a1075b19fe1cd71f310",
+    "tests/test_structure_gpu.py": "0816eaea86c028c4854bf85efea2ee4a68e5e3600b06c0d268f73773bf80ecd1",
+    "tests/test_structure_integration.py": "9bfc51466d804d6332c9fa10e94c77a66e4a9544b28f3ea8c9ae5c47ff338b72",
+    "tower-defense-rogue/src/game/content.ts": "16d1aaf6c5e26f44a388ba3ae2597fc29058391b40874c4625402444c2e45542",
+    "tower-defense-rogue/src/game/profile.test.ts": "d22c0745199ea2c688a7fb01ee5fb11b7a5cda6475d8fac4335e78e9334bf214",
+    "tower-defense-rogue/src/game/profile.ts": "adf5d8355bad21e91985e743429e75ad1f3c183a3f85970a7c86ee51cd1634cd",
+    "tower-defense-rogue/src/game/rng.ts": "f09525601410433d340daeccf4fdddb5314eaa0684de9801a369f060f3262d0e",
+    "tower-defense-rogue/src/game/simulation.test.ts": "8133e375b9a28922c2f038a0b1bd1fe375b45f34d92e8da5fdcc6b757fdb0a02",
+    "tower-defense-rogue/src/game/simulation.ts": "22f3795348b19ee4aea312fcdcca0913fdbbc44c60d7a0839a43772269a63364",
+    "tower-defense-rogue/src/game/stateSpaceBridge.test.ts": "42dba4ad80b42a9155f889afddaaf17ade44874da2e7a3c4090296e87884fada",
+    "tower-defense-rogue/src/game/terrainContract.test.ts": "8822b4f5bab29cbd5ea0dfbc12716a01105a5d6e47b1f0e7dfae67977dc82219",
+    "tower-defense-rogue/src/main.ts": "5ee6631dd68f5298c34b230f397dc3bfa74971c20417a14b975636aee0e9c8ce",
+    "tower-defense-rogue/src/phaser/DefenseScene.ts": "dbbd675258bc1dbccad2f3a81920daf1254db194d444167eef27f95835562ee4",
+    "tower-defense-rogue/src/styles.css": "c3c48059f79abd25a54cd0ec70f7907b7d1ee61e0158545abefebe990661d337",
+    "tower-defense-rogue/src/ui/hud.ts": "2fc1717cbd913faf8213fb535e9682a37694d69c7ecab0e95a99d4e291ae6c92",
+    "uv.lock": "a8ccb7e8e6b9334a847d5048b9cbb3e832f1f50e5e62b42b9808cbf2a5b2deaa",
+    "web/app.js": "84ef23586be9982a2aaeb292178e77fab824dfbdaee12e2d15567fb5993b2657",
+    "web/benchmark.html": "f99846dd79c8ec8b4220b6e5dba4d1948c12505ffb651f0e1fc5fc95a88cf4d2",
+    "web/contracts.generated.js": "d5f63240f06f62f361b9c2ec83b9fe308db500b2075ee100872ce39c776ea2e2",
+    "web/demo.js": "80e778b4ac8bb7524886704f92e9580a13e0f6825fdb8f420aaa56b89d4040e4",
+    "web/frame-benchmark.js": "09067351d4fca2b0f189a006d5204c02d652e0e939053da83c464de7ef0cc729",
+    "web/frame-clock.js": "50d398668dc373502b8311c2fdb6709fcc8876ec3243dda7c00deab4af38783f",
+    "web/frame-pump.js": "11239949d7e9a613f3af20bb92bdcb92d432a3bce2fdd4cded6bf96ed517f8e1",
+    "web/index.html": "2e2f4d70a90b3a4cfd8868a44ba09f8fc7a813e37607c9223132b927af00ad38",
+    "web/materials.generated.js": "d4e2339976677df24138ddfc8d5b103f3f987a9776af0f6a312b952a634c87be",
+    "web/pressure.generated.js": "6b250741310a59dd2049f36d2c8e27437d86f97edb7a2d5030da9a5da5cb9f3e",
+    "web/registry.generated.js": "926fd7b5baeaa5fbfe2020ab20d9f028d7331eb53b846202262048fc9828406a",
+    "web/render.wgsl": "b6562ad6c9ea089a9ed17b39e440cdf2a40c4558f94378bca216e548521be8f1",
+    "web/renderer.js": "10a2349605dda6d0bf67f64480c48af79eb792b189255fc47d3ce08b696f0711",
+    "web/rendering.test.mjs": "51b6618ffc6e460e4f1b3b0d93ef5c7ba0a9fb715a1621a66c5a89f28db4adbb",
+    "web/schedule.generated.js": "d0e499a1772da8b5b910e20fad313284dcd59f7775d55f91c8b23f039194a3d4",
+    "web/shaders/bitmask_defs.wgsl": "ee7b4eca0a46b23f1e60c455bf24eb10ec7a9d775e7384b1cc4412bfa7a4ff61",
+    "web/shaders/combustion.wgsl": "48d361fb9c6052ec8a78165bd13b7e4992d80cd653f5cacf2b9f3edd83698529",
+    "web/shaders/diagonal.wgsl": "0b926e59637e3654a291581726b9a6fa4f5e8d1cfa64e3a6f3964b7be0fdf710",
+    "web/shaders/enthalpy_law.wgsl": "f7225674ab4d7f9688b123b8e9fc2f57418a6fb1cd918616c9deec08987cfb5b",
+    "web/shaders/gas_buoyancy.wgsl": "4019ceb7ab52e67cf931994f52902299eabf74d19ec6997d21aafbd871d0cbfc",
+    "web/shaders/gas_spread.wgsl": "238d5001dfe1440cbce028e9c39904930a57891792a71ba8fb7825fb4c0f7d63",
+    "web/shaders/gravity.wgsl": "56a1eafaf25eb6ecd1c7fb57043c84add8baab935439a9656a72b179b0b3852a",
+    "web/shaders/impulse.wgsl": "d0f2483e62743d64fe6feb29501af5cb49a90a6f2bf57d417eeab903b7051b3b",
+    "web/shaders/liquid.wgsl": "6c06d29562d5176e6c00309e2ea234873ec35c1e4b8b512dc652f49b83f0862a",
+    "web/shaders/locked_1a.wgsl": "934595495f6e7310fd24aed843155d2d10a4162c5562e1561c829d2694c18949",
+    "web/shaders/normalize.wgsl": "74362597c3cf5b691b1ec64544a134307da17b82a098081e3cb6077f7556212e",
+    "web/shaders/phase.wgsl": "e2ed2f6047e87b5ce70c327fdd1826b3572e6d6c107a29372dd84cb1bcc54c23",
+    "web/shaders/state_io.wgsl": "0fb76b481d663e281552c388829e8c565c2395a9c81a03cf829e53591d554319",
+    "web/shaders/structure.wgsl": "eba84b88eb72c364110b9a74eb01f954391e102ca37652a57b65f661ed35655c",
+    "web/shaders/thermal.wgsl": "6fb97e6a00c68fd0366f03d9f44d46560a02b643d83a7dc72cd3e4f719d87b79",
+    "web/shaders/velocity.wgsl": "11a0d6864cc9a0214442279ae7403ba013d545f70a0d3d60162bf7a9fe3c8f38",
+    "web/shaders.js": "1de449def7e74001245f62d7bf766368d3e957e2b7859e0590afbea7d87d151d",
+    "web/structure.generated.js": "2b6011b8ba5b1abf773df6220744d4a4276757cf43610b1a54fbd92e014726f9",
+    "web/test_bare.html": "2cede87ea2618c95cdc25851c48639519c2d67a44e019784144d498995654a00",
+    "web/test_minimal.html": "28f19c560921a692eaacf396e1cad6e8fbf5b054577577642d09605bf2e4de64",
+    "web/thermal.generated.js": "2839a4b9967177a1dc2d82e1dfd1ce29c9055207e80f45f46d2c6c27d6db7fde",
+    "web/validation.generated.js": "7d63a6e6cfed44c544a173ddb3dbc3f4bbc9866d929f917cf6063bf86803a5d9"
+  },
+  "sourceUnchangedDuringBenchmark": true,
+  "error": "Error: Paced lava sources expired\n    at benchmarkFrames (http://127.0.0.1:54574/web/frame-benchmark.js:110:68)\n    at async http://127.0.0.1:54574/web/benchmark.html:11:20",
+  "commands": [
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-styled.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Lighting + shadows: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"light-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-unlit.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Lighting + shadows: off"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "B \u00b7 Material + light"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"view-toggle\").textContent.startsWith(\"A\")"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-plain.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "A \u00b7 Plain materials"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-burning.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?scene=lighting&paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-gallery.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Lighting + shadows: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"light-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-gallery-unlit.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?scene=water&paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-water.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Water optics: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"water-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-water-off.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Water optics: off"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-water-final.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?scene=haze&paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-haze.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Volumetric haze: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"haze-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-haze-off.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Volumetric haze: off"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Lighting + shadows: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"light-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-haze-unlit.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Lighting + shadows: off"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-haze-final.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?scene=heat&paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-heat.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Heat shimmer: on"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "document.getElementById(\"distortion-toggle\").getAttribute(\"aria-pressed\") === \"false\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-heat-off.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "find",
+        "role",
+        "button",
+        "click",
+        "--name",
+        "Heat shimmer: off"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-heat-final.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/?scene=pressure&paused"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "wait",
+        "--fn",
+        "Boolean(window.stateSpace)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-pressure.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\pressure-frames\\browser-pressure-final.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "open",
+        "http://127.0.0.1:54574/web/benchmark.html"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+        "--session",
+        "state-space-frames-362b516795b2",
+        "--json",
+        "eval",
+        "({done:window.frameBenchmark?.done,error:window.frameBenchmark?.error,progress:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ]
+}

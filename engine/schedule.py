@@ -1,4 +1,4 @@
-"""Authoritative ca-v3 pass schedule, shared by every backend."""
+"""Authoritative ca-v4 pass schedule, shared by every backend."""
 
 from dataclasses import dataclass
 
@@ -20,6 +20,14 @@ def _build_kernel_specs() -> tuple[KernelSpec, ...]:
         KernelSpec("vertical0", "Vertical gravity phase 0", "phase_2b_winner.wgsl", {"GRAVITY_PHASE": 0}),
         KernelSpec("vertical1", "Vertical gravity phase 1", "phase_2b_winner.wgsl", {"GRAVITY_PHASE": 1}),
     ]
+
+    specs.append(KernelSpec("impulse", "Pressure impulse and damping", "phase_2f_impulse.wgsl", {}))
+    for salt in range(MOVEMENT_SALT_COUNT):
+        for axis in (0, 1):
+            for phase in (0, 1):
+                specs.append(KernelSpec(f"velocity_{'y' if axis else 'x'}{phase}_s{salt}",
+                    "Conservative velocity transport", "phase_2f_velocity.wgsl",
+                    {"MOVE_AXIS": axis, "MOVE_PHASE": phase, "MOVE_SALT": salt}))
 
     for salt in range(MOVEMENT_SALT_COUNT):
         for phase in (0, 1):
@@ -71,6 +79,11 @@ def movement_schedule_for_tick(tick: int) -> list[str]:
     salt = int(tick) % MOVEMENT_SALT_COUNT
     return [
         "structure",
+        "impulse",
+        f"velocity_x0_s{salt}",
+        f"velocity_x1_s{salt}",
+        f"velocity_y0_s{salt}",
+        f"velocity_y1_s{salt}",
         "vertical0",
         "vertical1",
         f"diagonal0_s{salt}",

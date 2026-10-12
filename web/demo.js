@@ -100,6 +100,12 @@ export function seedWater(field) {
         if ((cells[i] & 255) === MAT.LAVA) state.energyQ[i] = 1250 * 256;
         if ((cells[i] & 255) === MAT.FIRE) state.energyQ[i] = 650 * 256;
     }
+    // The cool outer shell stays supported after pressure fractures the hot
+    // inner face. Anchors remain ordinary state and can still melt away.
+    for (const x of [60, 174]) {
+        for (let y = 90; y <= 139; y++) for (const dx of [-11, 34]) state.structure[y * 256 + x + dx] |= 4096;
+        for (let dx = -11; dx <= 34; dx++) state.structure[139 * 256 + x + dx] |= 4096;
+    }
     field.restore({ ...field.packedSnapshot(), tick: 0, packedCells: Array.from(state.grid),
         energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
     // Native structural anchors keep the finite basins above the reflecting pool
@@ -157,13 +163,58 @@ export function seedHeat(field) {
     field.restore({ ...initial, packedCells: Array.from(state.grid), energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
 }
 
-export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water', 'haze', 'heat']);
+// Weak and strong dams above a receiving pool; sealed and vented glass vessels.
+// All heat, pressure buildup and wall failures come from ordinary finite state.
+export function seedPressure(field) {
+    if (field.width !== 256 || field.height !== 256) throw new Error('Pressure gallery is a 256 × 256 scene');
+    const cells = new Uint32Array(256 * 256).fill(packVoxel(MAT.AIR));
+    const rect = (x0, y0, x1, y1, material, thermal = 20) => {
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) cells[y * 256 + x] = packVoxel(material, thermal);
+    };
+    rect(0, 245, 255, 255, MAT.STONE);
+    rect(0, 205, 255, 244, MAT.WATER, 35);
+    for (const [x, dam] of [[8, MAT.WOOD], [78, MAT.METAL]]) {
+        rect(x, 25, x + 3, 143, MAT.STONE);
+        rect(x, 144, x + 53, 148, MAT.STONE);
+        rect(x + 4, 74, x + 45, 143, MAT.WATER, 35);
+        rect(x + 46, 25, x + 46, 143, dam);
+        rect(x + 2, 149, x + 8, 244, MAT.STONE);
+    }
+    for (const [x, vented] of [[154, false], [208, true]]) {
+        rect(x, 70, x + 29, 70, MAT.GLASS);
+        rect(x, 71, x, 110, MAT.GLASS);
+        rect(x + 29, 71, x + 29, 110, MAT.GLASS);
+        rect(x, 111, x + 29, 111, MAT.GLASS);
+        rect(x + 1, 71, x + 28, 110, MAT.STEAM, 160);
+        if (vented) rect(x + 4, 70, x + 25, 70, MAT.AIR);
+        rect(x - 2, 112, x + 31, 115, MAT.STONE);
+        rect(x + 12, 116, x + 17, 244, MAT.STONE);
+    }
+    rect(145, 167, 250, 198, MAT.STONE);
+    rect(145, 137, 155, 166, MAT.STONE);
+    rect(240, 137, 250, 166, MAT.STONE);
+    rect(156, 155, 239, 166, MAT.LAVA, 255);
+    rect(178, 162, 185, 166, MAT.WOOD, 190);
+    rect(178, 159, 185, 161, MAT.FIRE, 255);
+    const state = createPhysicsState(cells, 256, 256, DEFAULT_REGISTRY);
+    for (let i = 0; i < cells.length; i++) {
+        if ((cells[i] & 255) === MAT.LAVA) state.energyQ[i] = 1250 * 256;
+        if ((cells[i] & 255) === MAT.FIRE) state.energyQ[i] = 650 * 256;
+    }
+    for (let y = 137; y <= 198; y++) for (const x of [145, 250]) state.structure[y * 256 + x] |= 4096;
+    for (let x = 145; x <= 250; x++) state.structure[198 * 256 + x] |= 4096;
+    field.restore({ ...field.packedSnapshot(), tick: 0, packedCells: Array.from(state.grid),
+        energyQ: Array.from(state.energyQ), structure: Array.from(state.structure) });
+}
+
+export const FRAME_SCENES = Object.freeze(['bridge', 'emissive', 'lighting', 'water', 'haze', 'heat', 'pressure']);
 export function seedScene(field, scene) {
     if (scene === 'bridge') seedBridge(field);
     else if (scene === 'lighting') seedLighting(field);
     else if (scene === 'water') seedWater(field);
     else if (scene === 'haze') seedHaze(field);
     else if (scene === 'heat') seedHeat(field);
+    else if (scene === 'pressure') seedPressure(field);
     else if (scene === 'emissive') field.clear(MAT.LAVA);
     else throw new Error('Unknown demo scene');
 }

@@ -34,7 +34,7 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Cannot read native evidence: ${response.status}`);
   const cases = await response.json();
-  if (!Array.isArray(cases) || cases.length < 31 || new Set(cases.map(value => value.name)).size !== cases.length) throw new Error('Incomplete or ambiguous corpus');
+  if (!Array.isArray(cases) || cases.length < 35 || new Set(cases.map(value => value.name)).size !== cases.length) throw new Error('Incomplete or ambiguous corpus');
   const rows = [];
   let backendInfo;
   for (const fixture of cases) {

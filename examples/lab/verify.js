@@ -49,7 +49,7 @@ export async function verifyLabUI() {
   await select('scenario', 'fragment'); await select('backend', 'webgpu');
   byId('inspect').checked = true; byId('step').click(); await settled();
   require(lab.view.snapshot.tick === 1 && byId('passes').textContent.includes('structure'), 'Inspected step did not render');
-  require(lab.view.reports.length === 18, 'UI must retain all last-step pass diagnostics');
+  require(lab.view.reports.length === 23, 'UI must retain all last-step pass diagnostics');
   const canvas = byId('world'), box = canvas.getBoundingClientRect(), x = 13, y = 4;
   require(Math.abs(box.width / box.height - canvas.width / canvas.height) < 0.005, 'Canvas letterboxing breaks cell picking');
   canvas.dispatchEvent(new PointerEvent('pointermove', { clientX: box.left + (x + .5) / 40 * box.width, clientY: box.top + (y + .5) / 28 * box.height }));
@@ -79,6 +79,6 @@ export async function verifyLabUI() {
   same(lab.view.snapshot.tick, stopped, 'Paused simulation stays paused');
   require(byId('status').textContent.startsWith('Paused'), 'Paused status must agree with playback');
   same(byId('scenario').value, 'imported', 'Restored session must have a meaningful selection');
-  return { passed: true, inspectedPasses: 18, pickedCell: { x, y }, externalHeatQ: 200 * 256,
+  return { passed: true, inspectedPasses: 23, pickedCell: { x, y }, externalHeatQ: 200 * 256,
     snapshotControls: true, customFileImport: true, playback: true, canvasAspectRatio: box.width / box.height, finalTick: stopped };
 }

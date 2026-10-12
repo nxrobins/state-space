@@ -1,6 +1,6 @@
 # State Space SDK
 
-Version 0.3 exposes the ca-v3 material engine in Python, browser WebGPU, and
+Version 0.4 exposes the ca-v4 material engine in Python, browser WebGPU, and
 browser/Node CPU. These backends use the same catalog identity, complete snapshot
 format, and pass schedule. The GPU backends require a usable GPU adapter.
 
@@ -175,3 +175,5 @@ its absolute tick, without allocating new coordinate arrays or exposing field st
 Invalid storage is rejected before any destination is written; calls during a GPU
 step fail until that step is awaited. Ordinary getters and snapshots still return
 independent copies. Both CPU and WebGPU fields support this optional copy path.
+
+Pressure and velocity sampling, version compatibility and model limits are in [PRESSURE.md](PRESSURE.md). Schema 3 snapshots must not be resumed as schema 4.

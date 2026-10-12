@@ -21,7 +21,7 @@ test('all lab scenes exhibit their named behavior while retaining exact energy a
       await lab.step(scene.ticks, true);
       const final = lab.view.snapshot;
       assert.equal(lab.view.balance.driftQ, '0');
-      assert.equal(lab.view.reports.length, scene.ticks * 18);
+      assert.equal(lab.view.reports.length, scene.ticks * 23);
       assert.ok(lab.view.reports.every(report => report.deltaQ === '0'));
       const positions = material => final.packedCells.flatMap((cell, index) => (cell & 255) === material ? [index] : []);
       if (scene.id === 'span') assert.deepEqual(final.packedCells, initial.snapshot.packedCells);

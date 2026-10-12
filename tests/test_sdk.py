@@ -109,7 +109,7 @@ class NativeFieldProperties(unittest.TestCase):
             report = field.step(3, inspect=True)
             self.assertEqual(field.sample(0, 0)["material"], 19)
             self.assertEqual(field.energy_q[0], 120 * 256 + 17)
-            self.assertEqual(len(report), 54)
+            self.assertEqual(len(report), 69)
             self.assertTrue(any(change.before_packed & 255 == 18 and change.after_packed & 255 == 19 for item in report for change in item.changes))
             self.assertTrue(all(item.before.total_q == item.after.total_q for item in report))
             saved = field.snapshot()

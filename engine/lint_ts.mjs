@@ -69,7 +69,7 @@ export function lintSource(source, name = 'cpu_physics.ts') {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const errors = ['cpu_physics.ts', 'thermal.ts', 'structure.ts', 'structure_compiled.ts', 'browser_state_space.ts', 'registry.ts', 'contracts.ts', 'inspection.ts', 'webgpu_field.ts', 'index.ts', 'conformance.test.ts', 'structure.test.ts', 'sdk.test.ts',
+  const errors = ['cpu_physics.ts', 'thermal.ts', 'pressure.ts', 'structure.ts', 'structure_compiled.ts', 'browser_state_space.ts', 'registry.ts', 'contracts.ts', 'inspection.ts', 'webgpu_field.ts', 'index.ts', 'conformance.test.ts', 'structure.test.ts', 'sdk.test.ts',
     '../examples/lab/app.js', '../examples/lab/controller.js', '../examples/lab/scenarios.js', '../examples/lab/view.js', '../examples/lab/verify.js'].flatMap(name => lintSource(readFileSync(new URL(`./${name}`, import.meta.url), 'utf8'), name));
   for (const error of errors) process.stderr.write(`${error}\n`);
   if (errors.length) process.exitCode = 1;

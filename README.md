@@ -10,7 +10,7 @@ tools. Movement, heat, phase changes, combustion, and structural failure share o
 replayable state: water freezes into bonded ice, fuel releases stored energy, and
 burning supports can break and drop the fragments they were holding.
 
-Version **0.3** provides native Python GPU, browser WebGPU, and browser/Node.js CPU
+Version **0.4** provides native Python GPU, browser WebGPU, and browser/Node.js CPU
 backends with a shared state contract. The engine is the core product; the lab and
 game prototypes demonstrate how clients can build on it.
 
@@ -20,6 +20,9 @@ game prototypes demonstrate how clients can build on it.
 - **Persistent structures.** Bonds, integrity, and anchors govern support,
   damage, breakage, and coherent fragment movement. Global support paths are
   solved to completion.
+- **Pressure and velocity.** Water loads dams; trapped hot gas can break walls.
+  Persistent integer pressure and quantized velocity drive flow after a breach.
+  [The cellular model](docs/PRESSURE.md) defines its units and limits.
 - **Portable continuation.** Complete snapshots carry cells, energy, structure,
   the absolute tick, and material-registry identity. Restore across backends with
   the same registry and continue the same simulation.
@@ -54,51 +57,35 @@ Try the [smoke and steam chambers](http://127.0.0.1:8765/web/?scene=haze&paused)
 and press **H** to compare the volume effect.
 Try the [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused)
 and press **D** to compare distortion.
+Try the [dams and pressure vessels](http://127.0.0.1:8765/web/?scene=pressure&paused)
+to compare wooden/metal dams and sealed/vented steam containers.
 [Rendering guide and native Python API](docs/RENDERING.md) ·
-[Full-frame pacing measurements](docs/checkpoints/PACING_PERFORMANCE.md).
+[Current full-frame measurements](docs/checkpoints/PRESSURE_PERFORMANCE.md).
 
 ## 256 × 256 at 60 Hz
 
-On an **Intel i9-11900K / NVIDIA RTX 4090**, both GPU APIs completed seven
-256 × 256 workloads within the **16.67 ms** budget for a 60 Hz simulation. The
-workloads cover sparse and dense movement, heat, combustion, supported metal,
-a falling bonded plate, and a long support path.
+The current **ca-v4** benchmark measures complete 1920 × 1080 rendered frames on
+an **Intel i9-11900K / NVIDIA RTX 4090**, with every effect enabled and a 256 × 256
+physics grid. Six scenes each run 600 measured display-paced frames after warmup.
 
-Rounded timings for complete public `step(1)` calls:
+The **pressure gallery passed**: 10.0 ms median work, 11.7 ms p95, and a maximum
+14.4 ms from display callback to GPU completion. Bridge, water, haze and heat
+also passed. The **overall strict lock remains open**: both complete runs had
+one 24–25 ms lighting frame that delayed the next frame, causing **two deadline
+misses out of 3,600 frames**. All scenes sustained approximately 59.95 Hz;
+none missed a display slot or coalesced a callback.
 
-| Backend | Median across workloads | Highest p95 | Slowest recorded tick |
-| --- | ---: | ---: | ---: |
-| Native Python GPU | 4.9–7.0 ms | 8.5 ms | 9.3 ms |
-| Browser WebGPU | 5.2–6.8 ms | 9.2 ms | 11.5 ms |
+Timing includes all 23 physics passes, global support/pressure planning,
+validation, state transfers, every rendering pass and GPU completion. Startup,
+reference hashing and OS scanout are excluded. The initial pressure ruptures are
+also timed separately from tick zero; browser p95 was 11.3 ms with all effects on.
 
-Each workload measured 60 successive calls after four warmup ticks. Timing
-includes global support planning, validation, transfers, all 18 physics passes,
-and complete state readback. Startup, rendering, and optional pass inspection
-have additional costs. These results describe the measured hardware and scenes;
-they do not establish the same budget for every device or the CPU backend.
-
-Native and browser complete-state hashes matched on all seven workloads, with
-zero energy drift. The GPU path batches each ordinary tick into one command
-submission and one contiguous readback; an exact compiled host solver handles
-global support without truncating the graph or changing the physics.
-
-See the [performance report](docs/checkpoints/GPU_PERFORMANCE.md) for reproduction
-commands, adapter details, and the [native](docs/checkpoints/gpu-tick-optimized.json)
-and [browser](docs/checkpoints/gpu-browser-ticks.json) timing receipts.
-
-Complete rendered frames have a separate benchmark at 1920 × 1080 output. The
-browser now pre-arms display callbacks, bounds pending work, and reuses readback,
-planner, and rendering storage. The latest all-effects run measured five scenes
-for 600 frames each after warmup, including complete physics and GPU completion.
-On a quiet RTX 4090, all five scenes passed the measured **60 Hz gate**:
-**zero deadline misses, missed display slots, or coalesced callbacks across
-3,000 frames**. Full-frame p95 was **10.0–11.0 ms**; the worst callback-to-GPU
-completion was **13.2 ms**, within the 16.67 ms deadline. All 47 rendered
-trajectories and five longer native continuations matched the CPU reference with
-zero energy drift. See the [pacing report](docs/checkpoints/PACING_PERFORMANCE.md)
-for raw timestamps, retained earlier failures, hardware load, and reproduction,
-and the earlier
-[heat report](docs/checkpoints/HEAT_PERFORMANCE.md) for the rendering baseline.
+All 60 rendered/replayed trajectories per complete run matched the CPU reference,
+including pressure and velocity, with zero thermal/latent/chemical energy drift.
+See the [pressure performance report](docs/checkpoints/PRESSURE_PERFORMANCE.md)
+for raw results, native measurements, retained failures and reproduction.
+The earlier [GPU tick](docs/checkpoints/GPU_PERFORMANCE.md) and
+[browser pacing](docs/checkpoints/PACING_PERFORMANCE.md) reports describe ca-v3.
 
 ## Use the SDK
 
@@ -156,9 +143,16 @@ Continuum fluid pressure, momentum, elasticity, and structural rotation are not
 implemented. Material extensions configure existing rules; new physical laws
 require engine changes.
 
+Pressure in 0.4 is a cellular approximation: connected gas temperature and liquid
+depth set a bounded target; persistent pressure loads walls and drives quantized
+flow. Thermal/latent/chemical energy remains exact. Mechanical energy and momentum
+are outside that conservation guarantee. Schema 4 / `ca-v4` snapshots reject older
+versions rather than silently applying new physics to old saves.
+
 - [Capabilities and limitations](docs/CAPABILITIES.md)
 - [State, energy, and snapshot contract](ENGINE_CONTRACT.md)
 - [Structural model and diagnostics](docs/STRUCTURES.md)
+- [Pressure, velocity, and failure model](docs/PRESSURE.md)
 - [Evolution acceptance and benchmark protocol](docs/EVOLUTION.md)
 - [Roadmap and checkpoint history](ENGINE_ROADMAP.md)
 
@@ -187,8 +181,8 @@ WebGPU. It checks lint, properties, long scenarios, native/CPU/browser
 conformance, installed SDK clients, the live lab, game regressions, adversarial
 evolution checks, and benchmarks. Reports retain failures and source hashes.
 
-The [GPU release verification](docs/checkpoints/gpu-verification.json) passed all
-16 gates, including 31 conformance scenes and 2,304 per-pass comparisons.
+The [pressure release verification](docs/checkpoints/pressure-release-verification.json)
+covers 16 gates, including 35 conformance scenes and 4,416 per-pass comparisons.
 Checkpoint evidence and content-addressed package artifacts are retained in Git;
 generated evidence is collapsed by default in GitHub review.
 

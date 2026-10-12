@@ -23,6 +23,172 @@ export const KERNEL_SPECS = [
     }
   },
   {
+    "id": "impulse",
+    "name": "Pressure impulse and damping",
+    "source_file": "phase_2f_impulse.wgsl",
+    "constants": {}
+  },
+  {
+    "id": "velocity_x0_s0",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 0
+    }
+  },
+  {
+    "id": "velocity_x1_s0",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 0
+    }
+  },
+  {
+    "id": "velocity_y0_s0",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 0
+    }
+  },
+  {
+    "id": "velocity_y1_s0",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 0
+    }
+  },
+  {
+    "id": "velocity_x0_s1",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 1
+    }
+  },
+  {
+    "id": "velocity_x1_s1",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 1
+    }
+  },
+  {
+    "id": "velocity_y0_s1",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 1
+    }
+  },
+  {
+    "id": "velocity_y1_s1",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 1
+    }
+  },
+  {
+    "id": "velocity_x0_s2",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 2
+    }
+  },
+  {
+    "id": "velocity_x1_s2",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 2
+    }
+  },
+  {
+    "id": "velocity_y0_s2",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 2
+    }
+  },
+  {
+    "id": "velocity_y1_s2",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 2
+    }
+  },
+  {
+    "id": "velocity_x0_s3",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 3
+    }
+  },
+  {
+    "id": "velocity_x1_s3",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 0,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 3
+    }
+  },
+  {
+    "id": "velocity_y0_s3",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 0,
+      "MOVE_SALT": 3
+    }
+  },
+  {
+    "id": "velocity_y1_s3",
+    "name": "Conservative velocity transport",
+    "source_file": "phase_2f_velocity.wgsl",
+    "constants": {
+      "MOVE_AXIS": 1,
+      "MOVE_PHASE": 1,
+      "MOVE_SALT": 3
+    }
+  },
+  {
     "id": "diagonal0_s0",
     "name": "Diagonal fall phase 0 salt 0",
     "source_file": "phase_2b_diagonal_winner.wgsl",
@@ -309,7 +475,7 @@ export const KERNEL_SPECS = [
     "constants": {}
   }
 ];
-const SCHEDULES = [["structure", "vertical0", "vertical1", "diagonal0_s0", "diagonal1_s0", "liquid0_s0", "liquid1_s0", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s0", "gas_spread1_s0", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "vertical0", "vertical1", "diagonal0_s1", "diagonal1_s1", "liquid0_s1", "liquid1_s1", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s1", "gas_spread1_s1", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "vertical0", "vertical1", "diagonal0_s2", "diagonal1_s2", "liquid0_s2", "liquid1_s2", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s2", "gas_spread1_s2", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "vertical0", "vertical1", "diagonal0_s3", "diagonal1_s3", "liquid0_s3", "liquid1_s3", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s3", "gas_spread1_s3", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"]];
+const SCHEDULES = [["structure", "impulse", "velocity_x0_s0", "velocity_x1_s0", "velocity_y0_s0", "velocity_y1_s0", "vertical0", "vertical1", "diagonal0_s0", "diagonal1_s0", "liquid0_s0", "liquid1_s0", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s0", "gas_spread1_s0", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "impulse", "velocity_x0_s1", "velocity_x1_s1", "velocity_y0_s1", "velocity_y1_s1", "vertical0", "vertical1", "diagonal0_s1", "diagonal1_s1", "liquid0_s1", "liquid1_s1", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s1", "gas_spread1_s1", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "impulse", "velocity_x0_s2", "velocity_x1_s2", "velocity_y0_s2", "velocity_y1_s2", "vertical0", "vertical1", "diagonal0_s2", "diagonal1_s2", "liquid0_s2", "liquid1_s2", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s2", "gas_spread1_s2", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"], ["structure", "impulse", "velocity_x0_s3", "velocity_x1_s3", "velocity_y0_s3", "velocity_y1_s3", "vertical0", "vertical1", "diagonal0_s3", "diagonal1_s3", "liquid0_s3", "liquid1_s3", "gas_buoyancy0", "gas_buoyancy1", "gas_spread0_s3", "gas_spread1_s3", "thermal_x0", "thermal_x1", "thermal_y0", "thermal_y1", "phase", "combustion", "normalize"]];
 export function movementScheduleForTick(tick: number): string[] {
   return SCHEDULES[tick % 4];
 }

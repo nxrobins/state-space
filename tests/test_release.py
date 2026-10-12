@@ -61,16 +61,16 @@ class ReleaseProperties(unittest.TestCase):
         self.assertEqual(lint_release_boundary((verify.ROOT / 'scripts/verify_browser.py').read_text(encoding='utf-8'), 'verify_browser.py'), [])
 
     def test_browser_release_requires_complete_hardware_behavior_evidence(self):
-        corpus = [{'name': str(i), 'passes': [{'cells': [5], 'energyQ': [5120], 'structure': [255]}]} for i in range(31)]
+        corpus = [{'name': str(i), 'passes': [{'cells': [5], 'energyQ': [5120], 'structure': [255]}]} for i in range(35)]
         adapter = {'isFallbackAdapter': False}
         rows = [{'name': case['name'], 'passComparisons': 1, 'completeReportsMatch': True, 'uninspectedMatch': True,
                  'restartMatch': True, 'final': {'packedCells': [5], 'energyQ': [5120], 'structure': [255]}} for case in corpus]
         sdk = {'nativeClient': {'catalogHash': 'test', 'initial': {}, 'final': {}, 'energyQ': '5120', 'replayEqual': True, 'passes': []}}
-        results = {'conformance': {'passed': True, 'rows': rows, 'caseCount': 31, 'passComparisons': 31, 'backendInfo': adapter,
+        results = {'conformance': {'passed': True, 'rows': rows, 'caseCount': 35, 'passComparisons': 35, 'backendInfo': adapter,
                                    'ownedReadbackRollback': True, 'reusableCopyIsolation': True, 'residentStateUploadIsolation': True},
                    'lab': {'passed': True, 'sceneCount': 5, 'rows': [{'scene': name, 'backendInfo': adapter, 'reportsMatch': True,
                            'restartMatch': True, 'invalidImportRejected': True, 'concurrentStepsSerialized': True} for name in ('span', 'fragment', 'fire', 'phase', 'extension')]},
-                   'ui': {'passed': True, 'snapshotControls': True, 'customFileImport': True, 'playback': True, 'inspectedPasses': 18},
+                   'ui': {'passed': True, 'snapshotControls': True, 'customFileImport': True, 'playback': True, 'inspectedPasses': 23},
                    'sdk': {**sdk['nativeClient'], 'passDeltasMatch': True, 'invalidRestoreRejected': True,
                            'concurrentAccessRejected': True, 'backendInfo': adapter}}
         validate_browser_evidence(results, corpus, sdk)

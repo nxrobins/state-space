@@ -1,0 +1,36 @@
+{
+  "before": {
+    "at": "2026-10-12T04:55:45.287327+00:00",
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=name,driver_version,utilization.gpu,temperature.gpu,power.draw",
+      "--format=csv,noheader,nounits"
+    ],
+    "values": [
+      [
+        "NVIDIA GeForce RTX 4090",
+        " 595.79",
+        " 2",
+        " 38",
+        " 59.76"
+      ]
+    ]
+  },
+  "after": {
+    "at": "2026-10-12T05:00:21.115236+00:00",
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=name,driver_version,utilization.gpu,temperature.gpu,power.draw",
+      "--format=csv,noheader,nounits"
+    ],
+    "values": [
+      [
+        "NVIDIA GeForce RTX 4090",
+        " 595.79",
+        " 6",
+        " 38",
+        " 60.77"
+      ]
+    ]
+  }
+}

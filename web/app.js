@@ -16,7 +16,7 @@ async function init() {
     stats.textContent = 'Creating the WebGPU field...';
     const world = await createGpuField(GRID_W, GRID_H);
     const requestedScene = new URLSearchParams(location.search).get('scene');
-    const scene = ['lighting', 'water', 'haze', 'heat'].includes(requestedScene) ? requestedScene : 'bridge';
+    const scene = ['lighting', 'water', 'haze', 'heat', 'pressure'].includes(requestedScene) ? requestedScene : 'bridge';
     seedScene(world, scene);
     const initial = world.packedSnapshot();
     const canvas = document.getElementById('canvas');
@@ -44,6 +44,12 @@ async function init() {
         document.querySelector('#heading h1').textContent = 'The air starts to shimmer.';
         document.querySelector('#heading p').textContent = 'Heat bends the glow and wisps above lava. Toggle shimmer to compare.';
         document.getElementById('reset-demo').textContent = 'Restart heat chambers';
+    }
+    if (scene === 'pressure') {
+        canvas.setAttribute('aria-label', 'Water dams and sealed versus vented steam vessels');
+        document.querySelector('#heading h1').textContent = 'Something has to give.';
+        document.querySelector('#heading p').textContent = 'Water loads the dams. Trapped steam breaks glass. Compare wood with metal, sealed with vented.';
+        document.getElementById('reset-demo').textContent = 'Restart pressure gallery';
     }
     const clock = new FrameClock();
     let renderRequested = true;

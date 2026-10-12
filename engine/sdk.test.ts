@@ -73,7 +73,7 @@ describe('portable registries and field APIs', () => {
     field.setEnergy(0, 0, 120 * 256 + 17);
     const reports = field.step(3, { inspect: true });
     expect(field.sample(0, 0)).toMatchObject({ material: 19, materialName: 'molten_copper', energyQ: 120 * 256 + 17 });
-    expect(reports).toHaveLength(54);
+    expect(reports).toHaveLength(69);
     expect(reports.every(report => report.before.totalQ === report.after.totalQ)).toBe(true);
     const transition = reports.flatMap(report => report.changes).find(change => (change.afterPacked & 255) === 19)!;
     expect(transition).toBeDefined();

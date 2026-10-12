@@ -1,6 +1,6 @@
 {
   "name": "state-space-engine",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "license": "MIT",
   "homepage": "https://github.com/nxrobins/state-space",
@@ -36,6 +36,7 @@
     "ENGINE_CONTRACT.md",
     "docs/SDK.md",
     "docs/STRUCTURES.md",
+    "docs/PRESSURE.md",
     "docs/CAPABILITIES.md",
     "docs/EVOLUTION.md"
   ]

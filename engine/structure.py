@@ -11,6 +11,8 @@ from types import MappingProxyType
 
 import numpy as np
 
+from engine.pressure import PRESSURE_MASK, fluid_kind, update_pressure, pressure_loads
+
 from engine.enthalpy import ENERGY_SCALE, Thermodynamics
 from engine.array_state import temperature_q_array
 from engine.state import validate_state
@@ -81,13 +83,14 @@ def normalize_bonds(cells, words, width: int, height: int, rules: StructuralRule
     width, height = validate_dimensions(width, height)
     cells = validate_packed(cells, width * height)
     words = validate_packed(words, len(cells), "structure")
-    if np.any(words > INTERNAL_MASK):
+    if np.any(words & np.uint32(0xffffffff ^ INTERNAL_MASK)):
         raise ValueError("Reserved structural bits must be zero")
     active = [rules.eligible(cell) and bool(int(word) & INTEGRITY_MASK) for cell, word in zip(cells, words)]
     output = np.zeros(len(cells), dtype=np.uint32)
     for index, value in enumerate(words):
         word = int(value)
         if not rules.eligible(cells[index]):
+            output[index] = word & PRESSURE_MASK if fluid_kind(cells[index]) else 0
             continue
         result = word & (INTEGRITY_MASK | ANCHOR)
         if active[index]:
@@ -118,7 +121,7 @@ def validate_structure(cells, energy, words, width: int, height: int, rules: Str
     width, height = validate_dimensions(width, height)
     cells, energy = validate_state(cells, energy, width * height, rules.thermal)
     words = validate_packed(words, len(cells), "structure")
-    if np.any(words > COMPLETE_MASK):
+    if np.any(words & np.uint32(0xffffffff ^ COMPLETE_MASK)):
         raise ValueError("Completed structural state cannot contain reserved or pending bits")
     normalized = normalize_bonds(cells, words, width, height, rules)
     if not np.array_equal(words, normalized):
@@ -257,7 +260,8 @@ def plan_structure(cells, energy, words, width: int, height: int, rules: Structu
 
     capacities = np.zeros(count, dtype=np.int64)
     temperatures = temperature_q_array(cells & 255, energy, rules.thermal)
-    damaged = words.copy()
+    damaged = update_pressure(cells, energy, words, width, height, rules)
+    demand = loads + pressure_loads(damaged, width, height)
     for index in sorted(active):
         row = material[index]
         integrity = int(words[index]) & INTEGRITY_MASK
@@ -270,9 +274,9 @@ def plan_structure(cells, energy, words, width: int, height: int, rules: Structu
         loss = 0
         if capacity == 0:
             loss = integrity
-        elif loads[index] > capacity:
-            loss = min(integrity, max(1, (int(loads[index]) - capacity) * 255 // nominal))
-        damaged[index] = (int(words[index]) & ~INTEGRITY_MASK) | (integrity - loss)
+        elif demand[index] > capacity:
+            loss = min(integrity, max(1, (int(demand[index]) - capacity) * 255 // nominal))
+        damaged[index] = (int(damaged[index]) & ~INTEGRITY_MASK) | (integrity - loss)
     damaged = normalize_bonds(cells, damaged, width, height, rules)
     active_after = set(int(i) for i in np.flatnonzero(damaged & INTEGRITY_MASK))
     groups, labels = _components(_bond_graph(damaged, active_after, width, height))

@@ -56,7 +56,8 @@ def main() -> int:
             report["immutableArtifacts"][str(preserved.relative_to(ROOT))] = key
         with zipfile.ZipFile(wheel) as archive:
             report["wheelKernels"] = [name for name in archive.namelist() if name.startswith("engine/kernels/")]
-            if len(report["wheelKernels"]) != 11:
+            from engine.sources import KERNEL_FILES
+            if set(report["wheelKernels"]) != {f"engine/kernels/{name}" for name in KERNEL_FILES}:
                 raise RuntimeError("Wheel is missing the complete runtime kernel set")
         with tarfile.open(tarball, "r:gz") as archive:
             bundle = archive.extractfile("package/dist/sdk/state-space.js").read()

@@ -1,7 +1,7 @@
 # C6 structural model and integration contract
 
-Status: schema/rules v3 is integrated into native, CPU and WebGPU public fields.
-Current checkpoint status and acceptance evidence are in `checkpoints/C6.md`.
+The original schema/rules v3 model was verified in `checkpoints/C6.md`.
+Schema/rules v4 adds pressure and velocity; see [PRESSURE.md](PRESSURE.md).
 
 ## Physical model
 
@@ -10,7 +10,9 @@ solidification can create bonds; later contact does not weld separate fragments.
 An additional u32 cell coordinate stores integrity (bits 0-7), left/right/up/down
 bond flags (bits 8-11), and anchoring (bit 12). Bit 13 is an internal solidification
 request consumed by bond normalization; completed snapshots cannot contain it.
-The remaining bits are zero. Existing packed flags and kinetics keep their meaning.
+In v4, bit 14 is an internal velocity-transport marker and bits 16–31 hold fluid
+pressure. Bit 15 is reserved. Completed snapshots reject both internal markers.
+Packed kinetic nibbles now hold quantized velocity; packed flags remain metadata.
 
 Material cohesion and softening temperature occupy the last two cold-table
 properties under schema/rules version 3. Zero cohesion disables bonding. A cell
@@ -63,7 +65,8 @@ the array implementation uses monotone root hooking and pointer compression;
 TypeScript uses union/find. All propagate support and blocking to completion,
 with no fixed local iteration horizon. The common corpus compares complete
 plans, component reports, all three transported coordinates, and native GPU
-results. Public fields use schema 3 and ca-v3 rules.
+results. Public fields use schema 4 and ca-v4 rules. Pressure adds opposing-face traction
+to damage demand while gravity reactions retain their existing meaning; see [PRESSURE.md](PRESSURE.md).
 
 A plan is bound to its input geometry and all three input arrays. Application
 requires the original width and height even if a different rectangle has the
@@ -81,8 +84,9 @@ These are standalone host-planner measurements, excluding GPU work and complete
 production ticks. The result still leaves substantial work for large real-time
 worlds; C6 integration must retain a measured scale limit and C7 must state it.
 
-The tick order is structural planning/application, existing granular/fluid/gas
-movement, heat, phase transitions, combustion, then reciprocal bond normalization.
+The ca-v4 tick order is structural/pressure planning and fragment application,
+pressure impulse and velocity transport, existing granular/fluid/gas movement,
+heat, phase transitions, combustion, then reciprocal bond normalization.
 All movement transports all three state coordinates. Cohesive cells are excluded
 from independent granular gravity. Heat/reaction changes affect the following
 tick's support solve, while normalization closes each tick with valid bonds.

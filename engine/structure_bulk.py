@@ -6,6 +6,8 @@ neither uses a local iteration horizon. The scalar planner remains independent.
 
 import numpy as np
 
+from engine.pressure import PRESSURE_MASK, update_pressure, pressure_loads
+
 from engine.array_state import temperature_q_array
 from engine.enthalpy import ENERGY_SCALE
 from engine.state import validate_state
@@ -26,13 +28,13 @@ def _normalize(cells, words, width, height, table):
     material = cells & 255
     if np.any(table[material, 0] == 0):
         raise ValueError("Undefined structural material")
-    if np.any(words > INTERNAL_MASK):
+    if np.any(words & np.uint32(0xffffffff ^ INTERNAL_MASK)):
         raise ValueError("Reserved structural bits must be zero")
     phase = (cells >> 24) & 15
     eligible = ((phase == PHASE_SOLID) | (phase == PHASE_FROZEN)) & (table[material, 2] > 0)
     active = (eligible & ((words & INTEGRITY_MASK) != 0)).reshape(height, width)
     source = words.reshape(height, width)
-    output = np.where(eligible, words & (INTEGRITY_MASK | ANCHOR), 0).astype(np.uint32).reshape(height, width)
+    output = np.where(eligible, words & (INTEGRITY_MASK | ANCHOR), np.where(np.isin(phase, (2, 3, 4, 5, 7)), words & PRESSURE_MASK, 0)).astype(np.uint32).reshape(height, width)
     for first, second, forward, backward in (
         ((slice(None), slice(None, -1)), (slice(None), slice(1, None)), BOND_BITS[1], BOND_BITS[0]),
         ((slice(None, -1), slice(None)), (slice(1, None), slice(None)), BOND_BITS[3], BOND_BITS[2]),
@@ -66,7 +68,7 @@ def validate_structure_bulk(cells, energy, words, width, height, rules):
     width, height = validate_dimensions(width, height)
     cells, energy = validate_state(cells, energy, width * height, rules.thermal)
     words = validate_packed(words, len(cells), "structure")
-    if np.any(words > COMPLETE_MASK):
+    if np.any(words & np.uint32(0xffffffff ^ COMPLETE_MASK)):
         raise ValueError("Completed structural state cannot contain reserved or pending bits")
     if not np.array_equal(words, _normalize(cells, words, width, height, _coefficients(rules))):
         raise ValueError("Structural bonds must be reciprocal, in bounds, and between intact cohesive cells")
@@ -119,7 +121,7 @@ def plan_structure_bulk(cells, energy, words, width: int, height: int, rules: St
     cells, energy = validate_state(cells, energy, count, rules.thermal)
     words = validate_packed(words, count, "structure")
     table = _coefficients(rules)
-    if np.any(words > COMPLETE_MASK):
+    if np.any(words & np.uint32(0xffffffff ^ COMPLETE_MASK)):
         raise ValueError("Completed structural state cannot contain reserved or pending bits")
     if not np.array_equal(words, _normalize(cells, words, width, height, table)):
         raise ValueError("Structural bonds must be reciprocal, in bounds, and between intact cohesive cells")
@@ -179,10 +181,11 @@ def plan_structure_bulk(cells, energy, words, width: int, height: int, rules: St
     capacities = np.zeros(count, dtype=np.int64)
     capacity = nominal * integrity * remaining // (255 * 64 * ENERGY_SCALE)
     capacities[active_indices] = capacity
-    overload = np.minimum(integrity, np.maximum(1, (loads[active_indices] - capacity) * 255 // nominal))
-    loss = np.where(capacity == 0, integrity, np.where(loads[active_indices] > capacity, overload, 0))
-    damaged = words.copy()
-    damaged[active_indices] = (words[active_indices] & np.uint32(0xffffffff ^ INTEGRITY_MASK)) | (integrity - loss).astype(np.uint32)
+    damaged = update_pressure(cells, energy, words, width, height, rules)
+    demand = loads + pressure_loads(damaged, width, height)
+    overload = np.minimum(integrity, np.maximum(1, (demand[active_indices] - capacity) * 255 // nominal))
+    loss = np.where(capacity == 0, integrity, np.where(demand[active_indices] > capacity, overload, 0))
+    damaged[active_indices] = (damaged[active_indices] & np.uint32(0xffffffff ^ INTEGRITY_MASK)) | (integrity - loss).astype(np.uint32)
     damaged = _normalize(cells, damaged, width, height, table)
     parents, intact, groups = _components(damaged, width)
     active_after = (damaged & INTEGRITY_MASK) != 0

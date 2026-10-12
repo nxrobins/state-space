@@ -13,3 +13,4 @@ export type { StructuralPlan, ComponentReport, StructuralState } from './structu
 export { createPhysicsState } from './structure.js';
 export { MAT, PHASE, FLAG, SCHEMA_VERSION, RULES_VERSION } from './generated/materials.js';
 export { STRUCTURE_BOND_LEFT_MASK, STRUCTURE_BOND_RIGHT_MASK, STRUCTURE_BOND_UP_MASK, STRUCTURE_BOND_DOWN_MASK } from './generated/materials.js';
+export { STRUCTURE_PRESSURE_MASK } from './generated/materials.js';

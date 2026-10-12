@@ -65,6 +65,14 @@ def conformance_cases() -> list[dict]:
     structural_scene("consumed-pinned-support", 5, 7,
                      [(x, 6, 1, 20) for x in range(5)] + [(x, 2, 5, 20) for x in range(1, 4)] + [(2, 3, 7, 255)], 5,
                      structure_overrides={17: 4096})
+    from engine.pressure_scenes import pressure_scene
+    for kind in ('dam', 'boiler'):
+        for control in (False, True):
+            grid, energy, words = pressure_scene(kind, control)
+            cases.append({'name': f'pressure-{kind}-{"control" if control else "loaded"}', 'width': 24, 'height': 24,
+                          'tick': 0, 'ticks': 16, 'cells': grid.tolist(),
+                          'energyOverrides': {str(i): v for i, v in enumerate(energy.tolist())},
+                          'structureOverrides': {str(i): v for i, v in enumerate(words.tolist())}})
     return cases
 
 

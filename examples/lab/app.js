@@ -26,7 +26,7 @@ function render() {
   byId('title').textContent = scene?.title ?? 'Your restored world';
   byId('category').textContent = scene?.category ?? 'COMPLETE SNAPSHOT';
   byId('description').textContent = scene?.description ?? 'This field and its catalog were restored from a portable session. Continue stepping or make an edit.';
-  byId('limit').textContent = scene?.limit ?? 'The same ca-v3 cellular approximations apply. See the capability matrix for model limits.';
+  byId('limit').textContent = scene?.limit ?? 'The same ca-v4 cellular approximations apply. See the capability matrix for model limits.';
   byId('device').textContent = view.backendInfo ? `${view.backendInfo.vendor} ${view.backendInfo.architecture} · ${view.backendInfo.isFallbackAdapter ? 'fallback adapter' : 'WebGPU adapter'}` : 'Deterministic JavaScript reference';
   byId('tick').textContent = tick; byId('drift').textContent = `${view.balance.driftQ} Q`;
   if (paletteHash !== view.snapshot.materialCatalogHash) {

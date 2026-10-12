@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "cold_stride": 24,
   "capacity": 256,
   "bit_fields": {
@@ -686,6 +686,14 @@
     "fresh": {
       "shift": 13,
       "bits": 1
+    },
+    "moved": {
+      "shift": 14,
+      "bits": 1
+    },
+    "pressure": {
+      "shift": 16,
+      "bits": 16
     }
   }
 }
