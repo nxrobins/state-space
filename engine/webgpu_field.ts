@@ -26,6 +26,12 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
   #planUpload: Uint32Array;
   #transport: { sources: Uint32Array; structure: Uint32Array };
   #loss: string | undefined;
+  #resident = 0;
+  // A regular property is safe to invalidate from FieldState's constructor,
+  // before this class's private fields have been initialized.
+  private uploadState = true;
+
+  protected override stateChanged(): void { this.uploadState = true; }
 
   constructor(width: number, height: number, fill: number, registry: MaterialRegistry, device: GPUDevice,
               layout: GPUBindGroupLayout, pipelines: Map<string, GPUComputePipeline>, info: GpuStateSpaceField['backendInfo']) {
@@ -93,11 +99,16 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#device.pushErrorScope('validation');
     let scopeOpen = true;
     try {
-      // Upload the last committed state. Failed steps can retry from that exact state.
-      this.#device.queue.writeBuffer(this.#buffers[0], 0, this.cells.buffer as ArrayBuffer);
-      this.#device.queue.writeBuffer(this.#buffers[2], 0, this.energies.buffer as ArrayBuffer);
-      this.#device.queue.writeBuffer(this.#buffers[4], 0, this.bonds.buffer as ArrayBuffer);
-      let current = 0;
+      // Unedited successful continuations already reside on the GPU. Edits,
+      // restores and failed steps require uploading the complete committed state.
+      let current = this.#resident;
+      if (this.uploadState) {
+        this.#device.queue.writeBuffer(this.#buffers[current], 0, this.cells.buffer as ArrayBuffer);
+        this.#device.queue.writeBuffer(this.#buffers[current + 2], 0, this.energies.buffer as ArrayBuffer);
+        this.#device.queue.writeBuffer(this.#buffers[current + 4], 0, this.bonds.buffer as ArrayBuffer);
+      }
+      // Any failure may have overwritten both ping-pong slots. Retry must upload.
+      this.uploadState = true;
       let before: StructuralState = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
       const reports: PassReport[] = [];
       for (let offset = 0; offset < ticks; offset += 1) {
@@ -147,6 +158,8 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
         this.#readback = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
         this.adoptState(state, this.tickCount + ticks);
       }
+      this.#resident = current;
+      this.uploadState = false;
       return Object.freeze(reports);
     } finally {
       try { if (scopeOpen) await this.#device.popErrorScope(); }

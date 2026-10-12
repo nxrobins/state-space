@@ -194,6 +194,10 @@ failed multi-tick step can retry from the same state. Ordinary browser ticks put
 the 18 ordered physics dispatches in one compute pass, using WebGPU's
 [per-dispatch usage scopes](https://www.w3.org/TR/webgpu/#usage-scopes).
 Inspection retains its separate per-kernel submissions and independent reports.
+Successful browser continuations retain the validated state in its GPU slot,
+avoiding three redundant coordinate uploads (0.75 MiB per 256 × 256 tick).
+Every public edit, clear, restore, or failed step invalidates that residency.
+Retries upload all three committed coordinates before executing the same ticks.
 The shared source is `web/render.wgsl`; `engine.generate`
 bundles it into browser assets and `engine/shaders/material_render.wgsl` for the
 installed Python package. No external effects package is required.
