@@ -1,23 +1,17 @@
-import { createGpuField, createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedScene, FRAME_SCENES } from './demo.js';
+import { createGpuField, MAT } from '../dist/sdk/state-space.js';
+import { FRAME_SCENES } from './demo.js';
 import { createMaterialRenderer } from './renderer.js';
 import { FrameClock } from './frame-clock.js';
 import { createFramePump } from './frame-pump.js';
+import { frameReference } from './frame-reference.js';
+import { stateHash } from './state-hash.js';
+export { stateHash } from './state-hash.js';
 
 export function distribution(values) {
     const sorted = [...values].sort((a, b) => a - b), n = values.length;
     return { count: n, samples: values, min: sorted[0], max: sorted[n - 1],
         median: (sorted[Math.floor((n - 1) / 2)] + sorted[Math.floor(n / 2)]) / 2,
         p95: sorted[Math.ceil(n * .95) - 1] };
-}
-export async function stateHash(field) {
-    const state = field.snapshot(), count = field.width * field.height;
-    const bytes = new Uint8Array(count * 12), view = new DataView(bytes.buffer);
-    [state.grid, state.energyQ, state.structure].forEach((values, coordinate) => {
-        values.forEach((value, i) => view.setUint32((coordinate * count + i) * 4, value, true));
-    });
-    const digest = await crypto.subtle.digest('SHA-256', bytes);
-    return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
 }
 
 export async function benchmarkFrames(canvas, progress = () => {}, { samples = 120, warmup = 12, pacedSamples = 600, pacedWarmup = 60 } = {}) {
@@ -27,18 +21,10 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
     const rows = [], references = {};
     for (const scene of FRAME_SCENES) {
         progress(`${scene} · CPU reference`);
-        const cpu = createStateSpaceField(256, 256);
-        try {
-            seedScene(cpu, scene);
-            const initial = cpu.packedSnapshot();
-            cpu.step(1); const firstTickHash = await stateHash(cpu);
-            await referenceSteps(cpu, samples + warmup - 1);
-            references[scene] = { firstTickHash, finalHash: await stateHash(cpu), endTick: cpu.tick, initial };
-            if (scene !== 'emissive') {
-                await referenceSteps(cpu, pacedSamples + pacedWarmup - cpu.tick);
-                references[scene].pacedFinalHash = await stateHash(cpu);
-            }
-        } finally { cpu.close(); }
+        const endTick = samples + warmup;
+        const { initial, hashes } = await frameReference(scene, [1, endTick, pacedSamples + pacedWarmup]);
+        references[scene] = { initial, firstTickHash: hashes[1], finalHash: hashes[endTick], endTick,
+            pacedFinalHash: hashes[pacedSamples + pacedWarmup] };
         const modes = ['plain', 'styled', 'alternating'];
         if (scene === 'water') modes.push('water-off');
         if (scene === 'haze') modes.push('haze-off');
@@ -92,7 +78,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
     }
     // A separate display-paced run records actual callback cadence as well as work.
     const pacedScenes = [];
-    for (const scene of FRAME_SCENES.filter(scene => scene !== 'emissive')) {
+    for (const scene of FRAME_SCENES) {
         progress(`${scene} · 60 Hz display pacing`);
         const world = await createGpuField(256, 256);
         let renderer;
@@ -104,9 +90,7 @@ export async function benchmarkFrames(canvas, progress = () => {}, { samples = 1
             const finalHash = await stateHash(world);
             let expected = references[scene].pacedFinalHash;
             if (world.tick !== pacedSamples + pacedWarmup) {
-                const cpu = createStateSpaceField(256, 256);
-                try { cpu.restore(references[scene].initial); await referenceSteps(cpu, world.tick); expected = await stateHash(cpu); }
-                finally { cpu.close(); }
+                expected = (await frameReference(scene, [world.tick])).hashes[world.tick];
             }
             if (finalHash !== expected || world.energyBalance().driftQ !== 0n) throw new Error('Paced replay differs');
             const counts = world.grid.reduce((counts, cell) => { counts[cell & 255]++; return counts; }, new Uint32Array(256));
@@ -155,15 +139,6 @@ async function measurePacing(world, renderer, samples, warmup) {
             overBudget: rows.filter(row => row.workMs > 1000 / 60).length, ...pacingMetrics(rows, coalescedCallbacks),
             definition: 'At least 600 all-effects frames after 60 warmup frames; 59.9-60.1 Hz callback/completion/physics cadence, every GPU-completed frame within 16.67 ms of its callback, no missed display slots or coalesced callbacks. OS scanout is not measured.' };
     } finally { pump?.stop(); }
-}
-
-async function referenceSteps(field, ticks) {
-    // Reference work is outside all frame clocks. Yield between exact batches so
-    // the UI and browser-control connection remain responsive during long replay.
-    for (let remaining = ticks; remaining > 0; remaining -= Math.min(remaining, 16)) {
-        field.step(Math.min(remaining, 16));
-        await new Promise(resolve => setTimeout(resolve, 0));
-    }
 }
 
 export function pacingMetrics(rows, coalescedCallbacks) {

@@ -66,23 +66,26 @@ to compare wooden/metal dams and sealed/vented steam containers.
 
 The current **ca-v4** benchmark measures complete 1920 × 1080 rendered frames on
 an **Intel i9-11900K / NVIDIA RTX 4090**, with every effect enabled and a 256 × 256
-physics grid. Six scenes each run 600 measured display-paced frames after warmup.
+physics grid. Seven scenes each run 600 measured display-paced frames after 60
+warmup frames, including the dense emissive stress scene.
 
-The latest run includes the corrected water-freezing catalog. The **pressure
-gallery passed**: 10.2 ms median work, 11.9 ms p95, and a maximum 13.6 ms from
-display callback to GPU completion. Water, haze and heat also passed. The
-**overall strict lock remains open**: lighting missed two completion deadlines
-and bridge missed one, for **three misses out of 3,600 frames**. All scenes
-sustained approximately 59.95 Hz; none missed a display slot or coalesced a
-callback. Separate unpaced emissive measurements also exceeded the frame budget.
+The latest run **passes the strict 60 Hz gate**: zero deadline misses across
+**4,200 frames**, with a worst callback-to-GPU-completion time of **16.5 ms**.
+Callback, completion and physics cadence all stayed within 59.9–60.1 Hz; no
+display slots or callbacks were lost or coalesced. The separate browser and native
+throughput runs also recorded zero work overruns across 2,916 samples each.
 
 Timing includes all 23 physics passes, global support/pressure planning,
 validation, state transfers, every rendering pass and GPU completion. Startup,
-reference hashing and OS scanout are excluded. The initial pressure ruptures are
-also timed separately from tick zero; browser p95 was 11.0 ms with all effects on.
+reference hashing and OS scanout are excluded. CPU reference replay finishes in
+a separate worker before measurement, keeping its allocations off the timed
+presentation thread. Production GPU readback and validation waits overlap;
+native scratch buffers and render attachments are reused with explicit cleanup.
 
-All 60 rendered/replayed trajectories per complete run matched the CPU reference,
-including pressure and velocity, with zero thermal/latent/chemical energy drift.
+The initial pressure ruptures are also timed from tick zero: browser styled p95
+was 12.2 ms and native styled p95 was 10.17 ms. All **62 rendered/replayed
+trajectories** matched the CPU reference, including pressure and velocity, with
+zero thermal/latent/chemical energy drift.
 See the [pressure performance report](docs/checkpoints/PRESSURE_PERFORMANCE.md)
 for raw results, native measurements, retained failures and reproduction.
 The earlier [GPU tick](docs/checkpoints/GPU_PERFORMANCE.md) and

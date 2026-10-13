@@ -1,0 +1,21 @@
+{
+  "scope": "Diagnostic only. Instrumentation adds overhead; these are not acceptance runs.",
+  "traceSha256": "d9276022bf0c28304091b231ac36268f23642df9466dc073f218e92daf9b84e8",
+  "files": {
+    "build-profile.mjs": "e6587738081013f75fe87a2a4a1821fbff836a14eef800bde4f914ce66419c3d",
+    "native-stages-before.json": "c45386b8eb7189841bd6a9b53f1d89b8bd06b0b4d2a1c86871dda3410195c479",
+    "native-stages.json": "c6e5d59cdfb609b5feb4d5225bd0750a7c7b84e566c8ed1d27b3735b5226f43a",
+    "passes-before.json": "f559558e4de401f29543313dfecdaef05ceedf01b243c52fb63548283b510ff2",
+    "profile-renderer.js": "9580f781b1c0abc9c1abc9e01db346d1fc80b096c30da334df3b941749dd70aa",
+    "profile_native.py": "4ec787edde3c604d9dfe98e9496f979d099e5e024d7423ada3f02eb00b14a8b3",
+    "profile_passes.py": "c882319a93af58ccd058c40e5ffd0a0e823ad0d61a7faddb23aec1d53c96adb7",
+    "profile_stages.py": "ff45a86038155a5e89754ad5db20339fdb0610975ca7c0f4ad61b2dde0ec3f28",
+    "README.md": "0b442c1a147387d967b6862807cfd1222d3ef304f46ab7fe4708ae3687c963de",
+    "sdk/state-space.js": "2d64e39ffd526f7dc842a4b9d37031ce9e6774910ac1c54dd2ecc32790ba86f8",
+    "stages-benchmark.js": "5a5023d29d8e31879b9ec8b9df4c22265fa7f1186a975d7b3cf6ad120a3a64d9",
+    "stages-trace.json.gz": "7c5de3538740ec33b5e79841a86c789d564273ebab2e1d3bcc206907eca39bb5",
+    "stages-traced.json": "a7359bed02bed1854d167b0b84bacfc7dd61eef161d709d6d9bc10c52659dea4",
+    "stages.html": "13934360a4a14fd5f028d5d97e1a7e08413ad574c9b9b5c4dcc7a6202d2b29bc",
+    "stall-windows.json": "b3226a9a513b09bc77c014a95a1180b1b2fc06079b6772359d22a208cddb804d"
+  }
+}

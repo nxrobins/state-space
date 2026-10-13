@@ -6,7 +6,96 @@ now contains 23 passes. See [the physical law](../PRESSURE.md) for its exact
 arithmetic and limits: this is a cellular model with exact thermal/latent/chemical
 energy accounting, not a continuum or momentum-conserving solver.
 
-## Current result: merged catalog still fails the strict lock
+## Current result: all seven scenes pass
+
+The [full qualification run](pressure-pacing-isolated-frames/frames.json), recorded
+October 12, 2026 PDT, reports **`locked60: true`**. It uses the merged water-freezing
+catalog `f5e8af40e58281e2e8b5d343fddbc849c1daecfa54d4a51ea10d4b3bf9ce5ce7`.
+The physical laws, all 23 passes, finite fixtures and visual effects are unchanged.
+
+At 256 × 256 physics and 1920 × 1080 output, all seven scenes complete 600 measured
+all-effects frames after 60 warmups. There are **zero deadline misses in 4,200
+frames**, zero missed display slots and zero coalesced callbacks. Callback,
+completion and physics rates each satisfy 59.9–60.1 Hz. The strict limit remains
+16.67 ms from display callback to GPU completion; no samples are removed.
+
+| Scene | Callback Hz | Median work ms | p95 work ms | Max work ms | Max callback-to-completion ms | Deadline misses / 600 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bridge | 59.950 | 10.90 | 12.70 | 13.90 | 14.10 | 0 |
+| emissive | 59.950 | 10.30 | 12.20 | 15.10 | 15.40 | 0 |
+| lighting | 59.950 | 12.00 | 13.60 | 15.80 | 16.10 | 0 |
+| water | 59.950 | 10.80 | 12.50 | 13.60 | 13.90 | 0 |
+| haze | 59.949 | 11.30 | 13.30 | 15.80 | 16.10 | 0 |
+| heat | 59.950 | 11.25 | 12.90 | 14.30 | 14.60 | 0 |
+| pressure | 59.950 | 10.90 | 12.60 | 16.20 | 16.50 | 0 |
+
+Separate unpaced runs retain 2,916 samples per backend, with **zero work overruns
+in both browser and native**. Pressure includes all 132 frames from tick zero,
+including initial ruptures. Other cases use 120 measured frames after 12 warmups.
+Native offscreen styled measurements are:
+
+| Scene | Median ms | p95 ms | Max ms | Work overruns |
+| --- | ---: | ---: | ---: | ---: |
+| bridge | 7.09 | 8.64 | 10.41 | 0 |
+| emissive | 6.23 | 7.55 | 8.26 | 0 |
+| lighting | 8.86 | 10.29 | 11.53 | 0 |
+| water | 7.36 | 8.94 | 10.82 | 0 |
+| haze | 8.41 | 9.51 | 11.27 | 0 |
+| heat | 8.37 | 10.03 | 11.10 | 0 |
+| pressure | 8.59 | 10.17 | 12.43 | 0 |
+
+Browser emissive styled work is 9.65 ms median, 11.70 ms p95 and 12.40 ms maximum.
+All **62 trajectories** match the independent CPU reference across cells, energy
+and structure: 24 browser, 24 native, seven paced browser and seven longer native
+replays. All energy-ledger drift is zero; all five live UI isolation checks pass.
+Every paced scene ends at tick 660. No scene is reseeded or refilled.
+
+### Changes and evidence
+
+- Native fields reuse buffers, bind groups, plan uploads and mapped-readback
+  staging. Every invocation uploads its full initial state and cold table, so
+  shared engines, registry changes, edits and restores remain exact. A failure
+  discards scratch; retry starts from the untouched committed state.
+- Native render uniforms and attachment views are reused. Closed owners release
+  their device references and collect device/queue cycles at that explicit
+  boundary. Collection remains enabled during normal ticks.
+- Browser final readback and error-scope completion proceed concurrently. Both
+  must succeed, and the complete output must validate, before state is committed.
+- The compiled pressure traversal caches phase classification and identical gas
+  temperature evaluations. Integer arithmetic, connectivity, traversal order,
+  pressure laws and the independent reference planners remain unchanged.
+- The dense emissive scene now participates in the strict display-paced gate.
+  CPU reference replay runs in a separate worker and finishes before measurement.
+  This isolates the benchmark's reference allocations from its presentation heap;
+  it does not change the measured frame or force/disable browser collection.
+
+The [instrumented diagnostics](pressure-pacing-profile/README.md) retain native
+GC stalls and a browser trace with a 10.91 ms major collection overlapping an
+emissive frame's completion wait. GPU timestamp diagnostics show inexpensive
+emissive shader execution. The [first post-optimization full run](pressure-pacing-frames/frames.json)
+retains its two bridge deadline misses and two native work overruns. Its CPU
+references still ran on the presentation thread. The successful qualification
+above uses the isolated reference workflow; earlier failures remain below.
+
+The measured SDK bundle is
+`a287960647bea48ebd90fbccd02b5787df73edc4abf6268a25547ae5b75683bc`.
+Sources remained unchanged throughout measurement. [GPU boundary readings](pressure-pacing-isolated-frames/gpu-load.json)
+record load before and after, not continuous utilization. This is observed
+GPU-completed pacing on the stated hardware; it does not measure OS scanout.
+
+Release verification: [all gates](pressure-pacing-verification.json),
+[installed packages](pressure-pacing-verification-sdk.json), and
+[hardware conformance](pressure-pacing-verification-browser/conformance.json).
+All 16 gates pass with unchanged sources: 157 Python tests, 60 SDK tests,
+11 browser scheduling/rendering tests, both game suites/builds, five live-lab
+tests, installed clients, 35 hardware scenes / 4,416 pass comparisons /
+53 pipeline variants, and 32 adversarial evaluation checks. Mapping and final
+validation-scope failures both preserve committed state and allow exact retries.
+The verification, hardware and frame source manifests match exactly. The
+immutable wheel/npm hashes and packaged README/runtime bytes were also checked
+against the tested checkout.
+
+## Earlier merged-catalog run before pacing fixes
 
 PR #14 now incorporates main through `8aed26dcf5e23e0ca40698adb0284a8031f9db3d`,
 including PR #15's water-freezing correction. Generated catalogs retain schema 4

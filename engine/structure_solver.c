@@ -46,17 +46,25 @@ static uint32_t fluid_kind(uint32_t voxel) {
 static void pressure_update(uint32_t width, uint32_t n, const uint32_t *cold,
     const uint32_t *thermal, const uint32_t *grid, const uint32_t *energy,
     const uint32_t *words, uint32_t *damaged, uint32_t *seen, uint32_t *queue) {
-    for (uint32_t i = 0; i < n; ++i) { seen[i] = 0; damaged[i] = words[i]; }
+    /* Low bits cache the immutable phase class; bit 2 marks a queued cell.
+     * Traversal order and component membership stay identical to the reference. */
+    for (uint32_t i = 0; i < n; ++i) { seen[i] = fluid_kind(grid[i]); damaged[i] = words[i]; }
+    uint32_t last_material = 256, last_energy = 0, last_absolute = 0;
     for (uint32_t kind = 1; kind <= 2; ++kind) for (uint32_t r = 0; r < n; ++r) {
-        if (seen[r] || fluid_kind(grid[r]) != kind) continue;
+        if (seen[r] != kind) continue;
         uint32_t tail = 1, top = n / width, head_pressure = 0;
         uint64_t sum = 0;
-        queue[0] = r; seen[r] = 1;
+        queue[0] = r; seen[r] |= 4;
         for (uint32_t head = 0; head < tail; ++head) {
             uint32_t i = queue[head], x = i % width;
             if (kind == 1) {
-                uint64_t absolute = ((uint64_t)(temperature(thermal, grid[i], energy[i]) / 256) + 64) * 1024 / 84;
-                sum += absolute > 66559 ? 66559 : absolute;
+                uint32_t material = grid[i] & 255;
+                if (material != last_material || energy[i] != last_energy) {
+                    uint64_t absolute = ((uint64_t)(temperature(thermal, grid[i], energy[i]) / 256) + 64) * 1024 / 84;
+                    last_absolute = absolute > 66559 ? 66559 : (uint32_t)absolute;
+                    last_material = material; last_energy = energy[i];
+                }
+                sum += last_absolute;
             } else if (i / width < top) top = i / width;
             int32_t adjacent[4] = {i >= width ? (int32_t)(i - width) : -1,
                 x ? (int32_t)(i - 1) : -1, x + 1 < width ? (int32_t)(i + 1) : -1,
@@ -64,9 +72,9 @@ static void pressure_update(uint32_t width, uint32_t n, const uint32_t *cold,
             for (uint32_t d = 0; d < 4; ++d) {
                 int32_t j = adjacent[d];
                 if (j < 0) continue;
-                uint32_t other = fluid_kind(grid[j]);
+                uint32_t other = seen[j] & 3;
                 if (kind == 2 && other == 1 && (damaged[j] >> 16) > head_pressure) head_pressure = damaged[j] >> 16;
-                if (other == kind && !seen[j]) { seen[j] = 1; queue[tail++] = (uint32_t)j; }
+                if (seen[j] == kind) { seen[j] |= 4; queue[tail++] = (uint32_t)j; }
             }
         }
         uint32_t gas_target = sum / tail > 1024 ? (uint32_t)(sum / tail - 1024) : 0;

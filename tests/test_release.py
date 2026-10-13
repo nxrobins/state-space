@@ -67,7 +67,7 @@ class ReleaseProperties(unittest.TestCase):
                  'restartMatch': True, 'final': {'packedCells': [5], 'energyQ': [5120], 'structure': [255]}} for case in corpus]
         sdk = {'nativeClient': {'catalogHash': 'test', 'initial': {}, 'final': {}, 'energyQ': '5120', 'replayEqual': True, 'passes': []}}
         results = {'conformance': {'passed': True, 'rows': rows, 'caseCount': 35, 'passComparisons': 35, 'backendInfo': adapter,
-                                   'ownedReadbackRollback': True, 'reusableCopyIsolation': True, 'residentStateUploadIsolation': True},
+                                   'ownedReadbackRollback': True, 'reusableCopyIsolation': True, 'residentStateUploadIsolation': True, 'scopeCompletionRollback': True},
                    'lab': {'passed': True, 'sceneCount': 5, 'rows': [{'scene': name, 'backendInfo': adapter, 'reportsMatch': True,
                            'restartMatch': True, 'invalidImportRejected': True, 'concurrentStepsSerialized': True} for name in ('span', 'fragment', 'fire', 'phase', 'extension')]},
                    'ui': {'passed': True, 'snapshotControls': True, 'customFileImport': True, 'playback': True, 'inspectedPasses': 23},
@@ -80,6 +80,12 @@ class ReleaseProperties(unittest.TestCase):
         mutants.append(bad)
         bad = copy.deepcopy(results)
         bad['conformance']['residentStateUploadIsolation'] = False
+        mutants.append(bad)
+        bad = copy.deepcopy(results)
+        bad['conformance']['scopeCompletionRollback'] = False
+        mutants.append(bad)
+        bad = copy.deepcopy(results)
+        del bad['conformance']['scopeCompletionRollback']
         mutants.append(bad)
         bad = copy.deepcopy(results)
         bad['conformance']['rows'][0]['final']['structure'] = [0]
