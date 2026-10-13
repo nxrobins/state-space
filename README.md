@@ -40,6 +40,15 @@ npm run build:sdk
 uv run python -m http.server 8765 --bind 127.0.0.1
 ```
 
+For a playable developer reference, open [Spillway](http://127.0.0.1:8765/examples/spillway/).
+Move a character across shared-engine terrain, cut a barricade, heat the bridge
+support, swim through the aftermath, and reach the relay. The example includes
+integer character collision, gameplay events, complete input recording, exact
+replay/import/export, and a full-frame benchmark with independent CPU replay.
+All visual effects and game sprites share the renderer's GPU completion boundary.
+See the [integration guide](examples/spillway/README.md) for the client/engine
+boundary and how to reuse it.
+
 Open the [engine lab](http://127.0.0.1:8765/examples/lab/). Five experiments cover
 support, coherent fragments, burning supports, phase changes, and custom
 materials. Inspect cells and bonds, change the scene, switch backends, and export

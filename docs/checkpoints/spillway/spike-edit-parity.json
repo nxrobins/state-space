@@ -1,0 +1,24 @@
+{
+  "scope": "Direct comparison with the pre-optimization SDK: all built-in replacement materials at corners, edges and center of fractured, pinned, thin and pressurized fields; compare complete state and energy accounting before and after one tick.",
+  "cases": 432,
+  "exact": true,
+  "nonzeroPressureCells": 13,
+  "fixtures": [
+    {
+      "name": "fractured-7x7",
+      "cases": 162
+    },
+    {
+      "name": "fractured-1x7",
+      "cases": 54
+    },
+    {
+      "name": "fractured-7x1",
+      "cases": 54
+    },
+    {
+      "name": "pressurized-tank",
+      "cases": 162
+    }
+  ]
+}

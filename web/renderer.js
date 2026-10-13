@@ -1,5 +1,6 @@
 // Built-in WebGPU presentation. Physical coordinates are always read-only.
 import { RENDER_SHADER } from './shaders.js';
+import { createSpriteLayer } from './sprite-layer.js';
 
 export function canvasCell(canvas, clientX, clientY, width, height) {
     const box = canvas.getBoundingClientRect();
@@ -109,13 +110,15 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
             if (!attachments.has(texture)) attachments.set(texture, { view: texture.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] });
             return attachments.get(texture);
         };
+        const spriteLayer = createSpriteLayer(device, format);
+        owned.push({ destroy: () => spriteLayer.close() });
         let closed = false, lost, validation;
         void device.lost.then(info => { lost = info.message || info.reason; });
         device.addEventListener('uncapturederror', event => { validation = event.error.message; });
         return {
             backendInfo: Object.freeze({ vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device,
                 description: adapter.info.description, isFallbackAdapter: adapter.info.isFallbackAdapter }),
-            render(field, styled = true, { lighting = true, bloom = true, water = true, reflections = true, refraction = true, haze = true, distortion = true } = {}) {
+            render(field, styled = true, { lighting = true, bloom = true, water = true, reflections = true, refraction = true, haze = true, distortion = true, sprites = [] } = {}) {
                 if (closed || lost || validation) throw new Error(validation || lost || 'Renderer is closed');
                 if (![styled, lighting, bloom, water, reflections, refraction, haze, distortion].every(value => typeof value === 'boolean')) throw new Error('Render switches must be boolean');
                 if (field.width !== width || field.height !== height || field.registry.hash !== registry.hash) throw new Error('Renderer field contract differs');
@@ -153,7 +156,9 @@ export async function createMaterialRenderer(canvas, width, height, registry) {
                     draw(bloomPipeline, [view(blurB)], groups[2], bloomIntermediate);
                 }
                 if (styled && distortion) draw(heatPipeline, [view(heatHaze)], groups[0], materialTextures);
-                draw(presentPipeline, [{ view: context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }], groups[0], styled ? composite : plainComposite);
+                const output = context.getCurrentTexture().createView();
+                draw(presentPipeline, [{ view: output, loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }], groups[0], styled ? composite : plainComposite);
+                spriteLayer.draw(encoder, output, sprites, width, height, canvas.width, canvas.height);
                 device.queue.submit([encoder.finish()]);
             },
             async completed() { await device.queue.onSubmittedWorkDone(); if (lost || validation) throw new Error(validation || lost); },

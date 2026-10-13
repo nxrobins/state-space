@@ -1,0 +1,6958 @@
+{
+  "scope": "CPU edit/copy attribution; CPU tick duration is not browser full-frame timing.",
+  "route": "collapse",
+  "sdkSha256": "a287960647bea48ebd90fbccd02b5787df73edc4abf6268a25547ae5b75683bc",
+  "exactReplay": true,
+  "expected": "7e00532281a9b3b81a1c92c528ae9998d6f8a3d7d4d1d15ea846c37fdf5dbc72",
+  "actual": "7e00532281a9b3b81a1c92c528ae9998d6f8a3d7d4d1d15ea846c37fdf5dbc72",
+  "ticks": 660,
+  "energyDriftQ": "0",
+  "rows": [
+    {
+      "tick": 1,
+      "toolMs": 0.5947999999999922,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 104.54599999999999,
+      "copyMs": 0.04570000000001073,
+      "totalMs": 105.73950000000002,
+      "events": [
+        {
+          "tick": 1,
+          "type": "terrain-cut",
+          "cells": 0,
+          "x": 34,
+          "y": 171
+        }
+      ]
+    },
+    {
+      "tick": 2,
+      "toolMs": 0.0016999999999995907,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 71.04340000000002,
+      "copyMs": 0.05259999999998399,
+      "totalMs": 71.34630000000001,
+      "events": []
+    },
+    {
+      "tick": 3,
+      "toolMs": 0.001099999999951251,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.89349999999996,
+      "copyMs": 0.04519999999996571,
+      "totalMs": 40.03800000000001,
+      "events": []
+    },
+    {
+      "tick": 4,
+      "toolMs": 0.001599999999996271,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.914300000000026,
+      "copyMs": 0.04419999999998936,
+      "totalMs": 50.045600000000036,
+      "events": []
+    },
+    {
+      "tick": 5,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.287999999999954,
+      "copyMs": 0.043400000000019645,
+      "totalMs": 34.402499999999975,
+      "events": []
+    },
+    {
+      "tick": 6,
+      "toolMs": 0.0006999999999948159,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.304899999999975,
+      "copyMs": 0.04149999999998499,
+      "totalMs": 34.45939999999996,
+      "events": []
+    },
+    {
+      "tick": 7,
+      "toolMs": 0.0006999999999948159,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 33.82040000000001,
+      "copyMs": 0.03829999999993561,
+      "totalMs": 33.91379999999998,
+      "events": []
+    },
+    {
+      "tick": 8,
+      "toolMs": 0.0008000000000265572,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.20119999999997,
+      "copyMs": 0.12329999999997199,
+      "totalMs": 34.37979999999993,
+      "events": []
+    },
+    {
+      "tick": 9,
+      "toolMs": 0.0006999999999379725,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.74400000000003,
+      "copyMs": 0.052500000000009095,
+      "totalMs": 34.85329999999999,
+      "events": []
+    },
+    {
+      "tick": 10,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 47.34379999999999,
+      "copyMs": 0.04250000000001819,
+      "totalMs": 47.443700000000035,
+      "events": []
+    },
+    {
+      "tick": 11,
+      "toolMs": 0.0004999999999881766,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.44530000000009,
+      "copyMs": 0.0364999999999327,
+      "totalMs": 39.56299999999999,
+      "events": []
+    },
+    {
+      "tick": 12,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.67529999999999,
+      "copyMs": 0.03390000000001692,
+      "totalMs": 34.74980000000005,
+      "events": []
+    },
+    {
+      "tick": 13,
+      "toolMs": 8.498499999999922,
+      "setCellMs": 8.326700000000073,
+      "setCellCalls": 5,
+      "cpuPhysicsMs": 38.12530000000004,
+      "copyMs": 0.03370000000006712,
+      "totalMs": 46.717199999999934,
+      "events": [
+        {
+          "tick": 13,
+          "type": "terrain-cut",
+          "cells": 5,
+          "x": 48,
+          "y": 171
+        }
+      ]
+    },
+    {
+      "tick": 14,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.63689999999997,
+      "copyMs": 0.06099999999992178,
+      "totalMs": 34.77920000000006,
+      "events": []
+    },
+    {
+      "tick": 15,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.96760000000006,
+      "copyMs": 0.03690000000005966,
+      "totalMs": 35.04920000000004,
+      "events": []
+    },
+    {
+      "tick": 16,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 47.56949999999995,
+      "copyMs": 0.03340000000002874,
+      "totalMs": 47.63869999999997,
+      "events": []
+    },
+    {
+      "tick": 17,
+      "toolMs": 0.0004999999999881766,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.75540000000001,
+      "copyMs": 0.034300000000030195,
+      "totalMs": 35.829399999999964,
+      "events": []
+    },
+    {
+      "tick": 18,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.572,
+      "copyMs": 0.036500000000046384,
+      "totalMs": 35.65129999999999,
+      "events": []
+    },
+    {
+      "tick": 19,
+      "toolMs": 0.0005999999999630745,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 34.731700000000046,
+      "copyMs": 0.039700000000038926,
+      "totalMs": 34.81050000000005,
+      "events": []
+    },
+    {
+      "tick": 20,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 51.22199999999998,
+      "copyMs": 0.038499999999885404,
+      "totalMs": 51.32349999999997,
+      "events": []
+    },
+    {
+      "tick": 21,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.32190000000014,
+      "copyMs": 0.03689999999983229,
+      "totalMs": 35.4041000000002,
+      "events": []
+    },
+    {
+      "tick": 22,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.07490000000007,
+      "copyMs": 0.03440000000000509,
+      "totalMs": 35.15080000000012,
+      "events": []
+    },
+    {
+      "tick": 23,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.67230000000018,
+      "copyMs": 0.03689999999983229,
+      "totalMs": 35.74839999999995,
+      "events": []
+    },
+    {
+      "tick": 24,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.61239999999998,
+      "copyMs": 0.03780000000006112,
+      "totalMs": 45.690000000000055,
+      "events": []
+    },
+    {
+      "tick": 25,
+      "toolMs": 1.7934999999999945,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.83510000000001,
+      "copyMs": 0.03770000000008622,
+      "totalMs": 37.729500000000144,
+      "events": [
+        {
+          "tick": 25,
+          "type": "terrain-cut",
+          "cells": 18,
+          "x": 61,
+          "y": 169
+        }
+      ]
+    },
+    {
+      "tick": 26,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.31060000000002,
+      "copyMs": 0.034300000000030195,
+      "totalMs": 35.384000000000015,
+      "events": []
+    },
+    {
+      "tick": 27,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.049400000000105,
+      "copyMs": 0.03880000000003747,
+      "totalMs": 36.12869999999998,
+      "events": []
+    },
+    {
+      "tick": 28,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.57079999999996,
+      "copyMs": 0.03949999999986176,
+      "totalMs": 36.650699999999915,
+      "events": []
+    },
+    {
+      "tick": 29,
+      "toolMs": 0.001099999999951251,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.11810000000014,
+      "copyMs": 0.03739999999993415,
+      "totalMs": 37.19829999999979,
+      "events": []
+    },
+    {
+      "tick": 30,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.74940000000015,
+      "copyMs": 0.03469999999992979,
+      "totalMs": 36.82600000000002,
+      "events": []
+    },
+    {
+      "tick": 31,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.31510000000003,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 36.418100000000095,
+      "events": [
+        {
+          "tick": 31,
+          "type": "blocked"
+        }
+      ]
+    },
+    {
+      "tick": 32,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.83159999999998,
+      "copyMs": 0.03540000000020882,
+      "totalMs": 35.934299999999894,
+      "events": [
+        {
+          "tick": 32,
+          "type": "jumped"
+        }
+      ]
+    },
+    {
+      "tick": 33,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.750299999999925,
+      "copyMs": 0.03449999999997999,
+      "totalMs": 35.82420000000002,
+      "events": []
+    },
+    {
+      "tick": 34,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.52999999999997,
+      "copyMs": 0.034799999999904685,
+      "totalMs": 35.603200000000015,
+      "events": []
+    },
+    {
+      "tick": 35,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.65249999999992,
+      "copyMs": 0.03960000000006403,
+      "totalMs": 49.73620000000005,
+      "events": []
+    },
+    {
+      "tick": 36,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.09210000000007,
+      "copyMs": 0.037900000000036016,
+      "totalMs": 36.17610000000013,
+      "events": []
+    },
+    {
+      "tick": 37,
+      "toolMs": 1.7011999999999716,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.208900000000085,
+      "copyMs": 0.035399999999981446,
+      "totalMs": 37.015100000000075,
+      "events": [
+        {
+          "tick": 37,
+          "type": "terrain-cut",
+          "cells": 2,
+          "x": 68,
+          "y": 154
+        }
+      ]
+    },
+    {
+      "tick": 38,
+      "toolMs": 0.0004999999998744897,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.44479999999999,
+      "copyMs": 0.03459999999995489,
+      "totalMs": 35.515300000000025,
+      "events": []
+    },
+    {
+      "tick": 39,
+      "toolMs": 0.0004999999998744897,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.97809999999981,
+      "copyMs": 0.03530000000000655,
+      "totalMs": 36.050700000000006,
+      "events": []
+    },
+    {
+      "tick": 40,
+      "toolMs": 0.0004999999998744897,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.960000000000036,
+      "copyMs": 0.0364999999999327,
+      "totalMs": 36.034400000000005,
+      "events": []
+    },
+    {
+      "tick": 41,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.95069999999987,
+      "copyMs": 0.04419999999981883,
+      "totalMs": 36.03929999999991,
+      "events": []
+    },
+    {
+      "tick": 42,
+      "toolMs": 0.0009999999999763531,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.33739999999989,
+      "copyMs": 0.03520000000003165,
+      "totalMs": 35.44309999999996,
+      "events": []
+    },
+    {
+      "tick": 43,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.91789999999992,
+      "copyMs": 0.0386999999998352,
+      "totalMs": 48.9864,
+      "events": []
+    },
+    {
+      "tick": 44,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.74440000000004,
+      "copyMs": 0.03279999999995198,
+      "totalMs": 36.808899999999994,
+      "events": []
+    },
+    {
+      "tick": 45,
+      "toolMs": 0.0006000000000767614,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.44769999999994,
+      "copyMs": 0.036200000000008004,
+      "totalMs": 35.51520000000005,
+      "events": []
+    },
+    {
+      "tick": 46,
+      "toolMs": 0.0004999999998744897,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.403499999999894,
+      "copyMs": 0.03850000000011278,
+      "totalMs": 35.47460000000001,
+      "events": []
+    },
+    {
+      "tick": 47,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.43299999999999,
+      "copyMs": 0.03510000000005675,
+      "totalMs": 35.500299999999925,
+      "events": []
+    },
+    {
+      "tick": 48,
+      "toolMs": 0.0004999999998744897,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.26559999999995,
+      "copyMs": 0.04000000000041837,
+      "totalMs": 35.336500000000115,
+      "events": []
+    },
+    {
+      "tick": 49,
+      "toolMs": 0.057999999999992724,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.49810000000025,
+      "copyMs": 0.03449999999975262,
+      "totalMs": 35.648499999999785,
+      "events": [
+        {
+          "tick": 49,
+          "type": "terrain-cut",
+          "cells": 0,
+          "x": 80,
+          "y": 144
+        }
+      ]
+    },
+    {
+      "tick": 50,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.752100000000155,
+      "copyMs": 0.038000000000010914,
+      "totalMs": 35.82459999999992,
+      "events": []
+    },
+    {
+      "tick": 51,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.58709999999974,
+      "copyMs": 0.03510000000005675,
+      "totalMs": 35.65470000000005,
+      "events": []
+    },
+    {
+      "tick": 52,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.87119999999959,
+      "copyMs": 0.0363999999999578,
+      "totalMs": 48.935599999999795,
+      "events": []
+    },
+    {
+      "tick": 53,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.34609999999975,
+      "copyMs": 0.037300000000414,
+      "totalMs": 36.41370000000006,
+      "events": []
+    },
+    {
+      "tick": 54,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.04330000000027,
+      "copyMs": 0.04379999999991924,
+      "totalMs": 37.11889999999994,
+      "events": []
+    },
+    {
+      "tick": 55,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 35.83730000000014,
+      "copyMs": 0.03580000000010841,
+      "totalMs": 35.9072000000001,
+      "events": []
+    },
+    {
+      "tick": 56,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.721100000000206,
+      "copyMs": 0.033699999999953434,
+      "totalMs": 36.78710000000001,
+      "events": []
+    },
+    {
+      "tick": 57,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.42399999999998,
+      "copyMs": 0.05709999999999127,
+      "totalMs": 37.52379999999994,
+      "events": []
+    },
+    {
+      "tick": 58,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.302400000000034,
+      "copyMs": 0.035899999999855936,
+      "totalMs": 36.373099999999795,
+      "events": []
+    },
+    {
+      "tick": 59,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.32400000000007,
+      "copyMs": 0.0385999999998603,
+      "totalMs": 37.39790000000039,
+      "events": []
+    },
+    {
+      "tick": 60,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.1556999999998,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 49.25059999999985,
+      "events": [
+        {
+          "tick": 60,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 61,
+      "toolMs": 1.6181000000001404,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.750600000000304,
+      "copyMs": 0.032999999999901775,
+      "totalMs": 39.46180000000004,
+      "events": [
+        {
+          "tick": 61,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 94,
+          "y": 169
+        }
+      ]
+    },
+    {
+      "tick": 62,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.13220000000001,
+      "copyMs": 0.03469999999970241,
+      "totalMs": 36.19889999999987,
+      "events": []
+    },
+    {
+      "tick": 63,
+      "toolMs": 0.0004999999996471161,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.57119999999986,
+      "copyMs": 0.03690000000005966,
+      "totalMs": 36.64300000000003,
+      "events": []
+    },
+    {
+      "tick": 64,
+      "toolMs": 0.0004999999996471161,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.697400000000016,
+      "copyMs": 0.03870000000006257,
+      "totalMs": 36.772699999999986,
+      "events": []
+    },
+    {
+      "tick": 65,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.922399999999925,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 36.99110000000019,
+      "events": []
+    },
+    {
+      "tick": 66,
+      "toolMs": 0.0012000000001535227,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.33779999999979,
+      "copyMs": 0.03760000000011132,
+      "totalMs": 36.41040000000021,
+      "events": []
+    },
+    {
+      "tick": 67,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.22530000000006,
+      "copyMs": 0.034799999999904685,
+      "totalMs": 37.29600000000028,
+      "events": []
+    },
+    {
+      "tick": 68,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.3411000000001,
+      "copyMs": 0.03249999999979991,
+      "totalMs": 37.4092999999998,
+      "events": []
+    },
+    {
+      "tick": 69,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.80570000000034,
+      "copyMs": 0.03749999999990905,
+      "totalMs": 46.87609999999995,
+      "events": []
+    },
+    {
+      "tick": 70,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.1871000000001,
+      "copyMs": 0.03440000000000509,
+      "totalMs": 37.25540000000001,
+      "events": []
+    },
+    {
+      "tick": 71,
+      "toolMs": 0.0004999999996471161,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.0931999999998,
+      "copyMs": 0.032999999999901775,
+      "totalMs": 36.158800000000156,
+      "events": []
+    },
+    {
+      "tick": 72,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 36.85030000000006,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 36.92020000000002,
+      "events": []
+    },
+    {
+      "tick": 73,
+      "toolMs": 1.7248999999997068,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.54300000000012,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 39.3738000000003,
+      "events": [
+        {
+          "tick": 73,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 107,
+          "y": 169
+        }
+      ]
+    },
+    {
+      "tick": 74,
+      "toolMs": 0.0008000000002539309,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.771200000000135,
+      "copyMs": 0.035200000000259024,
+      "totalMs": 37.849199999999655,
+      "events": []
+    },
+    {
+      "tick": 75,
+      "toolMs": 0.0004999999996471161,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.233600000000024,
+      "copyMs": 0.04280000000017026,
+      "totalMs": 37.30670000000009,
+      "events": []
+    },
+    {
+      "tick": 76,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.03089999999975,
+      "copyMs": 0.040899999999965075,
+      "totalMs": 38.09940000000006,
+      "events": []
+    },
+    {
+      "tick": 77,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.49490000000014,
+      "copyMs": 0.037400000000161526,
+      "totalMs": 37.559099999999944,
+      "events": []
+    },
+    {
+      "tick": 78,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 55.33090000000038,
+      "copyMs": 0.035899999999855936,
+      "totalMs": 55.39429999999993,
+      "events": []
+    },
+    {
+      "tick": 79,
+      "toolMs": 0.001099999999951251,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.85620000000017,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 38.91910000000007,
+      "events": []
+    },
+    {
+      "tick": 80,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.948399999999765,
+      "copyMs": 0.04109999999991487,
+      "totalMs": 38.01720000000023,
+      "events": []
+    },
+    {
+      "tick": 81,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.524999999999636,
+      "copyMs": 0.03690000000005966,
+      "totalMs": 38.588900000000194,
+      "events": []
+    },
+    {
+      "tick": 82,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.847499999999854,
+      "copyMs": 0.0397000000002663,
+      "totalMs": 37.913800000000265,
+      "events": []
+    },
+    {
+      "tick": 83,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.490499999999884,
+      "copyMs": 0.04149999999981446,
+      "totalMs": 39.56140000000005,
+      "events": []
+    },
+    {
+      "tick": 84,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.889300000000276,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 37.95249999999987,
+      "events": []
+    },
+    {
+      "tick": 85,
+      "toolMs": 1.77350000000024,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.51359999999977,
+      "copyMs": 0.0363999999999578,
+      "totalMs": 46.37660000000005,
+      "events": [
+        {
+          "tick": 85,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 121,
+          "y": 169
+        }
+      ]
+    },
+    {
+      "tick": 86,
+      "toolMs": 0.0007000000000516593,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.882100000000264,
+      "copyMs": 0.03530000000000655,
+      "totalMs": 37.94450000000006,
+      "events": []
+    },
+    {
+      "tick": 87,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 55.17300000000023,
+      "copyMs": 0.03489999999965221,
+      "totalMs": 55.235499999999774,
+      "events": []
+    },
+    {
+      "tick": 88,
+      "toolMs": 0.0003999999998995918,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.96149999999989,
+      "copyMs": 0.03530000000000655,
+      "totalMs": 39.02469999999994,
+      "events": []
+    },
+    {
+      "tick": 89,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.42170000000033,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 38.48590000000013,
+      "events": []
+    },
+    {
+      "tick": 90,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.245200000000295,
+      "copyMs": 0.037400000000161526,
+      "totalMs": 38.3117000000002,
+      "events": []
+    },
+    {
+      "tick": 91,
+      "toolMs": 0.0009999999997489795,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.687900000000354,
+      "copyMs": 0.033999999999650754,
+      "totalMs": 37.75070000000005,
+      "events": []
+    },
+    {
+      "tick": 92,
+      "toolMs": 0.0005999999998493877,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.8732,
+      "copyMs": 0.04860000000007858,
+      "totalMs": 37.95250000000033,
+      "events": []
+    },
+    {
+      "tick": 93,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.70069999999987,
+      "copyMs": 0.03360000000020591,
+      "totalMs": 37.764100000000326,
+      "events": []
+    },
+    {
+      "tick": 94,
+      "toolMs": 0.0008000000002539309,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.07849999999962,
+      "copyMs": 0.03660000000036234,
+      "totalMs": 38.14249999999993,
+      "events": []
+    },
+    {
+      "tick": 95,
+      "toolMs": 0.0008000000002539309,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.28989999999976,
+      "copyMs": 0.03490000000010696,
+      "totalMs": 39.35390000000007,
+      "events": []
+    },
+    {
+      "tick": 96,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.74409999999989,
+      "copyMs": 0.03690000000005966,
+      "totalMs": 53.80709999999999,
+      "events": []
+    },
+    {
+      "tick": 97,
+      "toolMs": 1.7566000000001623,
+      "setCellMs": 1.6147000000000844,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 42.03200000000015,
+      "copyMs": 0.04059999999981301,
+      "totalMs": 43.88830000000007,
+      "events": [
+        {
+          "tick": 97,
+          "type": "heat-applied",
+          "cells": 6,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 98,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 65.26690000000008,
+      "copyMs": 0.0466999999998734,
+      "totalMs": 65.35379999999986,
+      "events": []
+    },
+    {
+      "tick": 99,
+      "toolMs": 0.001099999999951251,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 67.72699999999986,
+      "copyMs": 0.05889999999999418,
+      "totalMs": 67.83269999999948,
+      "events": []
+    },
+    {
+      "tick": 100,
+      "toolMs": 0.001299999999901047,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.293399999999565,
+      "copyMs": 0.03279999999995198,
+      "totalMs": 38.35939999999937,
+      "events": []
+    },
+    {
+      "tick": 101,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.150800000000345,
+      "copyMs": 0.033500000000458385,
+      "totalMs": 38.21320000000014,
+      "events": []
+    },
+    {
+      "tick": 102,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.42700000000059,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 38.49379999999928,
+      "events": []
+    },
+    {
+      "tick": 103,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.22569999999996,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 38.29060000000027,
+      "events": []
+    },
+    {
+      "tick": 104,
+      "toolMs": 0.0009000000000014552,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 37.96810000000005,
+      "copyMs": 0.03580000000056316,
+      "totalMs": 38.03150000000005,
+      "events": []
+    },
+    {
+      "tick": 105,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 54.70330000000013,
+      "copyMs": 0.035600000000158616,
+      "totalMs": 54.76680000000033,
+      "events": []
+    },
+    {
+      "tick": 106,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.36070000000018,
+      "copyMs": 0.033699999999953434,
+      "totalMs": 40.42320000000018,
+      "events": []
+    },
+    {
+      "tick": 107,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.77509999999984,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 38.83979999999974,
+      "events": []
+    },
+    {
+      "tick": 108,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.28259999999955,
+      "copyMs": 0.035300000000461296,
+      "totalMs": 39.345799999999144,
+      "events": []
+    },
+    {
+      "tick": 109,
+      "toolMs": 1.5774000000001251,
+      "setCellMs": 1.5002000000004045,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 37.72109999999975,
+      "copyMs": 0.038900000000467116,
+      "totalMs": 39.38100000000031,
+      "events": [
+        {
+          "tick": 109,
+          "type": "heat-applied",
+          "cells": 6,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 110,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.074499999999716,
+      "copyMs": 0.033400000000256114,
+      "totalMs": 39.13619999999992,
+      "events": []
+    },
+    {
+      "tick": 111,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.004799999999705,
+      "copyMs": 0.037699999999858846,
+      "totalMs": 39.07139999999981,
+      "events": []
+    },
+    {
+      "tick": 112,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.22929999999997,
+      "copyMs": 0.03790000000026339,
+      "totalMs": 38.29780000000028,
+      "events": []
+    },
+    {
+      "tick": 113,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.07380000000012,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 38.138700000000426,
+      "events": []
+    },
+    {
+      "tick": 114,
+      "toolMs": 0.0004999999991923687,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 52.57549999999992,
+      "copyMs": 0.09040000000004511,
+      "totalMs": 52.71479999999974,
+      "events": []
+    },
+    {
+      "tick": 115,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.79060000000027,
+      "copyMs": 0.03440000000045984,
+      "totalMs": 38.858000000000175,
+      "events": []
+    },
+    {
+      "tick": 116,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.64480000000003,
+      "copyMs": 0.0510999999996784,
+      "totalMs": 42.75880000000052,
+      "events": [
+        {
+          "tick": 116,
+          "type": "bridge-collapsed",
+          "remainingDeckCells": 84
+        }
+      ]
+    },
+    {
+      "tick": 117,
+      "toolMs": 0.0015000000003055902,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.67690000000039,
+      "copyMs": 0.03819999999996071,
+      "totalMs": 66.74110000000019,
+      "events": []
+    },
+    {
+      "tick": 118,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.1942999999992,
+      "copyMs": 0.03539999999975407,
+      "totalMs": 39.26090000000022,
+      "events": [
+        {
+          "tick": 118,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 119,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.6858000000002,
+      "copyMs": 0.03539999999975407,
+      "totalMs": 38.74300000000039,
+      "events": []
+    },
+    {
+      "tick": 120,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.22369999999955,
+      "copyMs": 0.04069999999956053,
+      "totalMs": 38.28600000000006,
+      "events": []
+    },
+    {
+      "tick": 121,
+      "toolMs": 1.5695000000005166,
+      "setCellMs": 1.525499999999738,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 38.14139999999952,
+      "copyMs": 0.035200000000259024,
+      "totalMs": 39.79789999999957,
+      "events": [
+        {
+          "tick": 121,
+          "type": "heat-applied",
+          "cells": 6,
+          "x": 128,
+          "y": 180
+        },
+        {
+          "tick": 121,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 122,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.774099999999635,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 38.83420000000024,
+      "events": []
+    },
+    {
+      "tick": 123,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.64500000000044,
+      "copyMs": 0.033400000000256114,
+      "totalMs": 38.70309999999972,
+      "events": []
+    },
+    {
+      "tick": 124,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 58.29020000000037,
+      "copyMs": 0.0374999999994543,
+      "totalMs": 58.35159999999996,
+      "events": []
+    },
+    {
+      "tick": 125,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.94959999999992,
+      "copyMs": 0.037000000000261934,
+      "totalMs": 41.012399999999616,
+      "events": []
+    },
+    {
+      "tick": 126,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.217099999999846,
+      "copyMs": 0.037899999999353895,
+      "totalMs": 39.282100000000355,
+      "events": []
+    },
+    {
+      "tick": 127,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.20390000000043,
+      "copyMs": 0.037100000000464206,
+      "totalMs": 38.26630000000023,
+      "events": []
+    },
+    {
+      "tick": 128,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.106300000000374,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 39.167199999999866,
+      "events": []
+    },
+    {
+      "tick": 129,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.239700000000084,
+      "copyMs": 0.032000000000152795,
+      "totalMs": 38.296299999999974,
+      "events": []
+    },
+    {
+      "tick": 130,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.844599999999446,
+      "copyMs": 0.05169999999998254,
+      "totalMs": 38.92860000000019,
+      "events": []
+    },
+    {
+      "tick": 131,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.15779999999995,
+      "copyMs": 0.04429999999956635,
+      "totalMs": 39.22950000000037,
+      "events": []
+    },
+    {
+      "tick": 132,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.210299999999734,
+      "copyMs": 0.041199999999662396,
+      "totalMs": 38.27729999999974,
+      "events": []
+    },
+    {
+      "tick": 133,
+      "toolMs": 1.5636999999996988,
+      "setCellMs": 1.5205000000005384,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 38.51289999999972,
+      "copyMs": 0.042699999999967986,
+      "totalMs": 40.16770000000088,
+      "events": [
+        {
+          "tick": 133,
+          "type": "heat-applied",
+          "cells": 6,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 134,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.314400000000205,
+      "copyMs": 0.03719999999975698,
+      "totalMs": 40.3760999999995,
+      "events": []
+    },
+    {
+      "tick": 135,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.22860000000037,
+      "copyMs": 0.04579999999987194,
+      "totalMs": 44.30370000000039,
+      "events": []
+    },
+    {
+      "tick": 136,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.71429999999964,
+      "copyMs": 0.03839999999945576,
+      "totalMs": 44.77800000000025,
+      "events": []
+    },
+    {
+      "tick": 137,
+      "toolMs": 0.0004999999991923687,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.180199999999786,
+      "copyMs": 0.03430000000025757,
+      "totalMs": 42.23729999999978,
+      "events": []
+    },
+    {
+      "tick": 138,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.53650000000016,
+      "copyMs": 0.052700000000186265,
+      "totalMs": 39.6212000000005,
+      "events": []
+    },
+    {
+      "tick": 139,
+      "toolMs": 0.000699999999596912,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.6873999999998,
+      "copyMs": 0.040899999999965075,
+      "totalMs": 38.761899999999514,
+      "events": [
+        {
+          "tick": 139,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 140,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.406299999999646,
+      "copyMs": 0.037699999999858846,
+      "totalMs": 38.46950000000015,
+      "events": []
+    },
+    {
+      "tick": 141,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.136999999999716,
+      "copyMs": 0.03660000000036234,
+      "totalMs": 40.19670000000042,
+      "events": []
+    },
+    {
+      "tick": 142,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.525800000000345,
+      "copyMs": 0.04899999999997817,
+      "totalMs": 57.606400000000576,
+      "events": []
+    },
+    {
+      "tick": 143,
+      "toolMs": 0.001299999999901047,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.35180000000037,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 41.42290000000048,
+      "events": [
+        {
+          "tick": 143,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 144,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.316899999999805,
+      "copyMs": 0.03510000000005675,
+      "totalMs": 39.37800000000061,
+      "events": []
+    },
+    {
+      "tick": 145,
+      "toolMs": 1.5420999999996639,
+      "setCellMs": 1.4993999999996959,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 38.83460000000014,
+      "copyMs": 0.08470000000033906,
+      "totalMs": 40.54389999999967,
+      "events": [
+        {
+          "tick": 145,
+          "type": "heat-applied",
+          "cells": 12,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 146,
+      "toolMs": 0.001900000000205182,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.806800000000294,
+      "copyMs": 0.06300000000010186,
+      "totalMs": 41.91010000000006,
+      "events": []
+    },
+    {
+      "tick": 147,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.20229999999992,
+      "copyMs": 0.0408000000006723,
+      "totalMs": 39.27070000000003,
+      "events": []
+    },
+    {
+      "tick": 148,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.28389999999945,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 39.34490000000005,
+      "events": []
+    },
+    {
+      "tick": 149,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.906200000000354,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 39.96720000000005,
+      "events": []
+    },
+    {
+      "tick": 150,
+      "toolMs": 0.000699999999596912,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.88199999999961,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 38.948599999999715,
+      "events": [
+        {
+          "tick": 150,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 151,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.777100000000246,
+      "copyMs": 0.06890000000021246,
+      "totalMs": 39.876500000000306,
+      "events": []
+    },
+    {
+      "tick": 152,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.08690000000024,
+      "copyMs": 0.03220000000055734,
+      "totalMs": 39.14629999999943,
+      "events": []
+    },
+    {
+      "tick": 153,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 38.9337000000005,
+      "copyMs": 0.04709999999977299,
+      "totalMs": 39.009000000000015,
+      "events": []
+    },
+    {
+      "tick": 154,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.63549999999941,
+      "copyMs": 0.03840000000036525,
+      "totalMs": 39.70079999999962,
+      "events": []
+    },
+    {
+      "tick": 155,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.65190000000075,
+      "copyMs": 0.03780000000006112,
+      "totalMs": 39.71399999999994,
+      "events": []
+    },
+    {
+      "tick": 156,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.855900000000474,
+      "copyMs": 0.034099999999853026,
+      "totalMs": 39.91479999999956,
+      "events": []
+    },
+    {
+      "tick": 157,
+      "toolMs": 1.6123999999999796,
+      "setCellMs": 1.5830999999998312,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 39.38370000000032,
+      "copyMs": 0.03999999999996362,
+      "totalMs": 41.06909999999971,
+      "events": [
+        {
+          "tick": 157,
+          "type": "heat-applied",
+          "cells": 1,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 158,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.43119999999999,
+      "copyMs": 0.04039999999986321,
+      "totalMs": 40.496000000000095,
+      "events": []
+    },
+    {
+      "tick": 159,
+      "toolMs": 0.0003999999998995918,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.638199999999415,
+      "copyMs": 0.03610000000026048,
+      "totalMs": 39.70010000000002,
+      "events": []
+    },
+    {
+      "tick": 160,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.937699999999495,
+      "copyMs": 0.035799999999653664,
+      "totalMs": 39.9997000000003,
+      "events": []
+    },
+    {
+      "tick": 161,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 58.45250000000033,
+      "copyMs": 0.03870000000006257,
+      "totalMs": 58.51550000000043,
+      "events": []
+    },
+    {
+      "tick": 162,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.65720000000056,
+      "copyMs": 0.03659999999945285,
+      "totalMs": 39.71820000000025,
+      "events": []
+    },
+    {
+      "tick": 163,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.10649999999987,
+      "copyMs": 0.03489999999965221,
+      "totalMs": 39.16780000000017,
+      "events": []
+    },
+    {
+      "tick": 164,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.52379999999994,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 39.58730000000014,
+      "events": []
+    },
+    {
+      "tick": 165,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.34439999999995,
+      "copyMs": 0.03440000000045984,
+      "totalMs": 39.40099999999984,
+      "events": []
+    },
+    {
+      "tick": 166,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.55199999999968,
+      "copyMs": 0.03659999999945285,
+      "totalMs": 39.61149999999998,
+      "events": []
+    },
+    {
+      "tick": 167,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.10440000000017,
+      "copyMs": 0.039299999999457214,
+      "totalMs": 40.17439999999988,
+      "events": [
+        {
+          "tick": 167,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 168,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.4353000000001,
+      "copyMs": 0.035799999999653664,
+      "totalMs": 39.49549999999999,
+      "events": []
+    },
+    {
+      "tick": 169,
+      "toolMs": 1.757499999999709,
+      "setCellMs": 1.7210000000004584,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 38.88289999999961,
+      "copyMs": 0.03449999999975262,
+      "totalMs": 40.714500000000044,
+      "events": [
+        {
+          "tick": 169,
+          "type": "heat-applied",
+          "cells": 1,
+          "x": 128,
+          "y": 180
+        }
+      ]
+    },
+    {
+      "tick": 170,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.120200000000295,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 40.18029999999999,
+      "events": []
+    },
+    {
+      "tick": 171,
+      "toolMs": 0.0004999999991923687,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.628099999999904,
+      "copyMs": 0.033800000000155705,
+      "totalMs": 39.6853000000001,
+      "events": []
+    },
+    {
+      "tick": 172,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.06720000000041,
+      "copyMs": 0.03690000000005966,
+      "totalMs": 40.129399999999805,
+      "events": []
+    },
+    {
+      "tick": 173,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.58770000000004,
+      "copyMs": 0.04359999999996944,
+      "totalMs": 39.655799999999545,
+      "events": []
+    },
+    {
+      "tick": 174,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.01929999999993,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 39.081200000000536,
+      "events": []
+    },
+    {
+      "tick": 175,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.120600000000195,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 40.1840000000002,
+      "events": []
+    },
+    {
+      "tick": 176,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.390300000000025,
+      "copyMs": 0.035600000000158616,
+      "totalMs": 39.453199999999924,
+      "events": []
+    },
+    {
+      "tick": 177,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.28099999999995,
+      "copyMs": 0.03900000000066939,
+      "totalMs": 41.34729999999945,
+      "events": []
+    },
+    {
+      "tick": 178,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.22200000000066,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 39.28279999999995,
+      "events": []
+    },
+    {
+      "tick": 179,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 56.11689999999999,
+      "copyMs": 0.03430000000025757,
+      "totalMs": 56.17610000000059,
+      "events": []
+    },
+    {
+      "tick": 180,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.12149999999929,
+      "copyMs": 0.03430000000025757,
+      "totalMs": 41.18069999999989,
+      "events": []
+    },
+    {
+      "tick": 181,
+      "toolMs": 2.080399999999827,
+      "setCellMs": 1.8824000000004162,
+      "setCellCalls": 1,
+      "cpuPhysicsMs": 39.24159999999938,
+      "copyMs": 0.03449999999975262,
+      "totalMs": 41.39990000000034,
+      "events": [
+        {
+          "tick": 181,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 124,
+          "y": 179
+        }
+      ]
+    },
+    {
+      "tick": 182,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.583700000000135,
+      "copyMs": 0.035499999999956344,
+      "totalMs": 39.66870000000017,
+      "events": []
+    },
+    {
+      "tick": 183,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.219600000000355,
+      "copyMs": 0.0327000000006592,
+      "totalMs": 40.28520000000026,
+      "events": []
+    },
+    {
+      "tick": 184,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.119299999999384,
+      "copyMs": 0.03809999999975844,
+      "totalMs": 40.1900999999998,
+      "events": []
+    },
+    {
+      "tick": 185,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.34149999999954,
+      "copyMs": 0.035499999999956344,
+      "totalMs": 39.41679999999997,
+      "events": []
+    },
+    {
+      "tick": 186,
+      "toolMs": 0.000699999999596912,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.22650000000067,
+      "copyMs": 0.03620000000046275,
+      "totalMs": 39.29189999999926,
+      "events": []
+    },
+    {
+      "tick": 187,
+      "toolMs": 0.0004999999991923687,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.64639999999963,
+      "copyMs": 0.0330999999996493,
+      "totalMs": 39.70920000000024,
+      "events": []
+    },
+    {
+      "tick": 188,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.1255000000001,
+      "copyMs": 0.03510000000005675,
+      "totalMs": 41.1911999999993,
+      "events": []
+    },
+    {
+      "tick": 189,
+      "toolMs": 0.000699999999596912,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 58.373999999999796,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 58.44060000000081,
+      "events": []
+    },
+    {
+      "tick": 190,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.28870000000006,
+      "copyMs": 0.036800000000766886,
+      "totalMs": 41.35739999999987,
+      "events": []
+    },
+    {
+      "tick": 191,
+      "toolMs": 0.000600000000304135,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.86909999999989,
+      "copyMs": 0.03900000000066939,
+      "totalMs": 39.9399999999996,
+      "events": []
+    },
+    {
+      "tick": 192,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.84339999999975,
+      "copyMs": 0.035899999999855936,
+      "totalMs": 43.911299999999756,
+      "events": []
+    },
+    {
+      "tick": 193,
+      "toolMs": 1.545100000000275,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.26969999999983,
+      "copyMs": 0.03660000000036234,
+      "totalMs": 40.90169999999944,
+      "events": [
+        {
+          "tick": 193,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 138,
+          "y": 179
+        }
+      ]
+    },
+    {
+      "tick": 194,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.57600000000002,
+      "copyMs": 0.03839999999945576,
+      "totalMs": 39.64570000000003,
+      "events": []
+    },
+    {
+      "tick": 195,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.404599999999846,
+      "copyMs": 0.036700000000564614,
+      "totalMs": 40.47280000000046,
+      "events": []
+    },
+    {
+      "tick": 196,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.57560000000012,
+      "copyMs": 0.039099999999962165,
+      "totalMs": 40.64639999999963,
+      "events": []
+    },
+    {
+      "tick": 197,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.81280000000061,
+      "copyMs": 0.04170000000158325,
+      "totalMs": 39.885699999998906,
+      "events": []
+    },
+    {
+      "tick": 198,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.5666999999994,
+      "copyMs": 0.036700000000564614,
+      "totalMs": 57.63349999999991,
+      "events": []
+    },
+    {
+      "tick": 199,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.61239999999998,
+      "copyMs": 0.04219999999986612,
+      "totalMs": 40.688899999999194,
+      "events": []
+    },
+    {
+      "tick": 200,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.88620000000083,
+      "copyMs": 0.03590000000076543,
+      "totalMs": 40.95470000000023,
+      "events": []
+    },
+    {
+      "tick": 201,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.2494999999999,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 40.31760000000031,
+      "events": []
+    },
+    {
+      "tick": 202,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.283800000001065,
+      "copyMs": 0.04110000000036962,
+      "totalMs": 39.35579999999936,
+      "events": []
+    },
+    {
+      "tick": 203,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.482599999999366,
+      "copyMs": 0.040300000000570435,
+      "totalMs": 41.556800000000294,
+      "events": []
+    },
+    {
+      "tick": 204,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.73120000000017,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 40.79960000000028,
+      "events": []
+    },
+    {
+      "tick": 205,
+      "toolMs": 15.497099999998682,
+      "setCellMs": 15.266300000001138,
+      "setCellCalls": 10,
+      "cpuPhysicsMs": 65.20370000000003,
+      "copyMs": 0.04159999999865249,
+      "totalMs": 80.79420000000027,
+      "events": [
+        {
+          "tick": 205,
+          "type": "terrain-cut",
+          "cells": 10,
+          "x": 151,
+          "y": 179
+        }
+      ]
+    },
+    {
+      "tick": 206,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.14110000000073,
+      "copyMs": 0.038800000000264845,
+      "totalMs": 41.212499999999636,
+      "events": []
+    },
+    {
+      "tick": 207,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.044199999998455,
+      "copyMs": 0.0342000000000553,
+      "totalMs": 42.11039999999957,
+      "events": []
+    },
+    {
+      "tick": 208,
+      "toolMs": 0.0006999999986874172,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.09230000000025,
+      "copyMs": 0.036399999999048305,
+      "totalMs": 41.15979999999945,
+      "events": []
+    },
+    {
+      "tick": 209,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.077799999999115,
+      "copyMs": 0.03770000000076834,
+      "totalMs": 40.14780000000064,
+      "events": []
+    },
+    {
+      "tick": 210,
+      "toolMs": 0.0010999999994965037,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.17550000000119,
+      "copyMs": 0.039400000001478475,
+      "totalMs": 40.2466000000004,
+      "events": []
+    },
+    {
+      "tick": 211,
+      "toolMs": 0.00120000000060827,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.02839999999924,
+      "copyMs": 0.03779999999824213,
+      "totalMs": 40.09969999999885,
+      "events": [
+        {
+          "tick": 211,
+          "type": "blocked"
+        }
+      ]
+    },
+    {
+      "tick": 212,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.02429999999913,
+      "copyMs": 0.03960000000006403,
+      "totalMs": 40.093800000000556,
+      "events": []
+    },
+    {
+      "tick": 213,
+      "toolMs": 0.000499999998282874,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.036699999998746,
+      "copyMs": 0.04470000000037544,
+      "totalMs": 59.121900000000096,
+      "events": []
+    },
+    {
+      "tick": 214,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.77629999999954,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 41.84350000000086,
+      "events": []
+    },
+    {
+      "tick": 215,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.46139999999832,
+      "copyMs": 0.038800000000264845,
+      "totalMs": 42.53110000000015,
+      "events": []
+    },
+    {
+      "tick": 216,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.01789999999892,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 40.082800000000134,
+      "events": []
+    },
+    {
+      "tick": 217,
+      "toolMs": 1.5511999999998807,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.464899999999034,
+      "copyMs": 0.036399999999048305,
+      "totalMs": 41.10200000000077,
+      "events": [
+        {
+          "tick": 217,
+          "type": "terrain-cut",
+          "cells": 8,
+          "x": 162,
+          "y": 184
+        }
+      ]
+    },
+    {
+      "tick": 218,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.22220000000016,
+      "copyMs": 0.03809999999975844,
+      "totalMs": 40.28859999999986,
+      "events": []
+    },
+    {
+      "tick": 219,
+      "toolMs": 0.000499999998282874,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.42410000000018,
+      "copyMs": 0.03620000000046275,
+      "totalMs": 40.492599999999584,
+      "events": []
+    },
+    {
+      "tick": 220,
+      "toolMs": 0.0009000000009109499,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.361299999998664,
+      "copyMs": 0.038199999999051215,
+      "totalMs": 41.43029999999999,
+      "events": []
+    },
+    {
+      "tick": 221,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 50.53560000000107,
+      "copyMs": 0.08420000000114669,
+      "totalMs": 50.68029999999999,
+      "events": []
+    },
+    {
+      "tick": 222,
+      "toolMs": 0.0015999999995983671,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.95979999999872,
+      "copyMs": 0.04010000000016589,
+      "totalMs": 67.03620000000046,
+      "events": []
+    },
+    {
+      "tick": 223,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.467099999999846,
+      "copyMs": 0.037000000000261934,
+      "totalMs": 41.54149999999936,
+      "events": [
+        {
+          "tick": 223,
+          "type": "blocked"
+        }
+      ]
+    },
+    {
+      "tick": 224,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.89509999999973,
+      "copyMs": 0.037599999999656575,
+      "totalMs": 40.99579999999878,
+      "events": []
+    },
+    {
+      "tick": 225,
+      "toolMs": 0.000800000001618173,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.72680000000037,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 45.80450000000019,
+      "events": [
+        {
+          "tick": 225,
+          "type": "water-entered"
+        }
+      ]
+    },
+    {
+      "tick": 226,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.3192999999992,
+      "copyMs": 0.0408000000006723,
+      "totalMs": 40.39420000000064,
+      "events": [
+        {
+          "tick": 226,
+          "type": "swam"
+        }
+      ]
+    },
+    {
+      "tick": 227,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.67979999999989,
+      "copyMs": 0.03539999999884458,
+      "totalMs": 43.7447000000011,
+      "events": [
+        {
+          "tick": 227,
+          "type": "water-left"
+        }
+      ]
+    },
+    {
+      "tick": 228,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.739800000001196,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 39.80419999999867,
+      "events": []
+    },
+    {
+      "tick": 229,
+      "toolMs": 1.7114999999994325,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.90970000000016,
+      "copyMs": 0.038799999998445855,
+      "totalMs": 43.70859999999993,
+      "events": [
+        {
+          "tick": 229,
+          "type": "terrain-cut",
+          "cells": 79,
+          "x": 170,
+          "y": 201
+        }
+      ]
+    },
+    {
+      "tick": 230,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 62.70399999999972,
+      "copyMs": 0.0827000000008411,
+      "totalMs": 62.81210000000101,
+      "events": []
+    },
+    {
+      "tick": 231,
+      "toolMs": 0.0011999999987892807,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.56770000000142,
+      "copyMs": 0.03869999999915308,
+      "totalMs": 40.63140000000021,
+      "events": []
+    },
+    {
+      "tick": 232,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.54469999999856,
+      "copyMs": 0.046000000000276486,
+      "totalMs": 40.61779999999999,
+      "events": []
+    },
+    {
+      "tick": 233,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.977499999999054,
+      "copyMs": 0.03930000000036671,
+      "totalMs": 40.045500000000175,
+      "events": []
+    },
+    {
+      "tick": 234,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.134000000000015,
+      "copyMs": 0.039399999999659485,
+      "totalMs": 40.20520000000033,
+      "events": []
+    },
+    {
+      "tick": 235,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.4979000000003,
+      "copyMs": 0.03770000000076834,
+      "totalMs": 40.560600000000704,
+      "events": []
+    },
+    {
+      "tick": 236,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.22519999999895,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 40.28759999999966,
+      "events": []
+    },
+    {
+      "tick": 237,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.971300000001065,
+      "copyMs": 0.03780000000006112,
+      "totalMs": 44.03530000000137,
+      "events": []
+    },
+    {
+      "tick": 238,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.244200000001,
+      "copyMs": 0.04280000000107975,
+      "totalMs": 57.31129999999939,
+      "events": []
+    },
+    {
+      "tick": 239,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.307300000000396,
+      "copyMs": 0.03839999999945576,
+      "totalMs": 42.36779999999999,
+      "events": []
+    },
+    {
+      "tick": 240,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.097600000000966,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 40.15719999999965,
+      "events": []
+    },
+    {
+      "tick": 241,
+      "toolMs": 1.8720000000012078,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.031300000000556,
+      "copyMs": 0.04310000000077707,
+      "totalMs": 46.006500000001324,
+      "events": [
+        {
+          "tick": 241,
+          "type": "terrain-cut",
+          "cells": 72,
+          "x": 170,
+          "y": 185
+        }
+      ]
+    },
+    {
+      "tick": 242,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.15049999999974,
+      "copyMs": 0.038800000000264845,
+      "totalMs": 45.22479999999996,
+      "events": []
+    },
+    {
+      "tick": 243,
+      "toolMs": 0.0008999999990919605,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.969599999998536,
+      "copyMs": 0.04659999999967113,
+      "totalMs": 42.048899999999776,
+      "events": []
+    },
+    {
+      "tick": 244,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.641200000000026,
+      "copyMs": 0.03919999999925494,
+      "totalMs": 41.71430000000146,
+      "events": []
+    },
+    {
+      "tick": 245,
+      "toolMs": 0.0008999999990919605,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.6296999999995,
+      "copyMs": 0.038500000000567525,
+      "totalMs": 40.700700000001234,
+      "events": []
+    },
+    {
+      "tick": 246,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.103399999999965,
+      "copyMs": 0.04289999999855354,
+      "totalMs": 41.18000000000029,
+      "events": []
+    },
+    {
+      "tick": 247,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.795900000000984,
+      "copyMs": 0.04010000000016589,
+      "totalMs": 39.86290000000008,
+      "events": []
+    },
+    {
+      "tick": 248,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.643999999998414,
+      "copyMs": 0.036999999998442945,
+      "totalMs": 41.705700000000434,
+      "events": []
+    },
+    {
+      "tick": 249,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 63.84850000000006,
+      "copyMs": 0.036700000000564614,
+      "totalMs": 63.91359999999986,
+      "events": [
+        {
+          "tick": 249,
+          "type": "water-entered"
+        }
+      ]
+    },
+    {
+      "tick": 250,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.05840000000171,
+      "copyMs": 0.04169999999976426,
+      "totalMs": 40.132299999999304,
+      "events": [
+        {
+          "tick": 250,
+          "type": "water-left"
+        }
+      ]
+    },
+    {
+      "tick": 251,
+      "toolMs": 0.0008999999990919605,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.618099999999686,
+      "copyMs": 0.03930000000036671,
+      "totalMs": 40.681800000000294,
+      "events": []
+    },
+    {
+      "tick": 252,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.98749999999927,
+      "copyMs": 0.035199999998440035,
+      "totalMs": 43.04749999999876,
+      "events": []
+    },
+    {
+      "tick": 253,
+      "toolMs": 1.540500000000975,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.05419999999867,
+      "copyMs": 0.0511000000005879,
+      "totalMs": 43.71910000000025,
+      "events": [
+        {
+          "tick": 253,
+          "type": "terrain-cut",
+          "cells": 53,
+          "x": 170,
+          "y": 198
+        }
+      ]
+    },
+    {
+      "tick": 254,
+      "toolMs": 0.001399999999193824,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.38659999999982,
+      "copyMs": 0.040299999998751446,
+      "totalMs": 40.45509999999922,
+      "events": []
+    },
+    {
+      "tick": 255,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.137800000000425,
+      "copyMs": 0.0371000000013737,
+      "totalMs": 40.20099999999911,
+      "events": []
+    },
+    {
+      "tick": 256,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.522399999999834,
+      "copyMs": 0.038800000000264845,
+      "totalMs": 40.58690000000024,
+      "events": []
+    },
+    {
+      "tick": 257,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.696500000000015,
+      "copyMs": 0.03900000000066939,
+      "totalMs": 57.7586999999985,
+      "events": []
+    },
+    {
+      "tick": 258,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.15719999999965,
+      "copyMs": 0.03799999999864667,
+      "totalMs": 42.21770000000106,
+      "events": []
+    },
+    {
+      "tick": 259,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.98520000000099,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 41.04469999999856,
+      "events": []
+    },
+    {
+      "tick": 260,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.585000000000946,
+      "copyMs": 0.05349999999998545,
+      "totalMs": 40.669200000000274,
+      "events": []
+    },
+    {
+      "tick": 261,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.08599999999933,
+      "copyMs": 0.03620000000046275,
+      "totalMs": 41.14840000000004,
+      "events": []
+    },
+    {
+      "tick": 262,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.967100000001665,
+      "copyMs": 0.03619999999864376,
+      "totalMs": 40.02679999999964,
+      "events": []
+    },
+    {
+      "tick": 263,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.88230000000112,
+      "copyMs": 0.039099999999962165,
+      "totalMs": 40.945700000000215,
+      "events": []
+    },
+    {
+      "tick": 264,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.27689999999893,
+      "copyMs": 0.037000000000261934,
+      "totalMs": 39.338199999998324,
+      "events": []
+    },
+    {
+      "tick": 265,
+      "toolMs": 1.6396000000004278,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.36830000000009,
+      "copyMs": 0.038800000000264845,
+      "totalMs": 41.091599999999744,
+      "events": [
+        {
+          "tick": 265,
+          "type": "terrain-cut",
+          "cells": 1,
+          "x": 176,
+          "y": 185
+        }
+      ]
+    },
+    {
+      "tick": 266,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.01749999999993,
+      "copyMs": 0.039700000001175795,
+      "totalMs": 59.089500000000044,
+      "events": [
+        {
+          "tick": 266,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 267,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.36700000000019,
+      "copyMs": 0.037000000000261934,
+      "totalMs": 41.43159999999989,
+      "events": [
+        {
+          "tick": 267,
+          "type": "jumped"
+        }
+      ]
+    },
+    {
+      "tick": 268,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.13510000000133,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 42.19620000000032,
+      "events": []
+    },
+    {
+      "tick": 269,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.84569999999985,
+      "copyMs": 0.03509999999914726,
+      "totalMs": 40.90610000000015,
+      "events": []
+    },
+    {
+      "tick": 270,
+      "toolMs": 0.0004000000008090865,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.3791999999994,
+      "copyMs": 0.038200000000870205,
+      "totalMs": 40.44290000000001,
+      "events": []
+    },
+    {
+      "tick": 271,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.68319999999949,
+      "copyMs": 0.04730000000017753,
+      "totalMs": 41.75849999999991,
+      "events": []
+    },
+    {
+      "tick": 272,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.250200000000405,
+      "copyMs": 0.0375000000003638,
+      "totalMs": 41.311799999999494,
+      "events": []
+    },
+    {
+      "tick": 273,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.17309999999998,
+      "copyMs": 0.0731999999989057,
+      "totalMs": 42.28560000000107,
+      "events": []
+    },
+    {
+      "tick": 274,
+      "toolMs": 0.0009000000009109499,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.40380000000005,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 42.470400000000154,
+      "events": []
+    },
+    {
+      "tick": 275,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.6184000000012,
+      "copyMs": 0.061400000000503496,
+      "totalMs": 41.73790000000008,
+      "events": [
+        {
+          "tick": 275,
+          "type": "blocked"
+        }
+      ]
+    },
+    {
+      "tick": 276,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.66909999999916,
+      "copyMs": 0.04039999999986321,
+      "totalMs": 42.744800000000396,
+      "events": []
+    },
+    {
+      "tick": 277,
+      "toolMs": 1.6442999999999302,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 52.29619999999886,
+      "copyMs": 0.04429999999956635,
+      "totalMs": 54.04780000000028,
+      "events": [
+        {
+          "tick": 277,
+          "type": "terrain-cut",
+          "cells": 27,
+          "x": 188,
+          "y": 177
+        }
+      ]
+    },
+    {
+      "tick": 278,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.20859999999993,
+      "copyMs": 0.05469999999877473,
+      "totalMs": 46.311799999999494,
+      "events": [
+        {
+          "tick": 278,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 279,
+      "toolMs": 0.0009000000009109499,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.91190000000097,
+      "copyMs": 0.04379999999946449,
+      "totalMs": 43,
+      "events": [
+        {
+          "tick": 279,
+          "type": "jumped"
+        }
+      ]
+    },
+    {
+      "tick": 280,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 62.675899999998364,
+      "copyMs": 0.039099999999962165,
+      "totalMs": 62.74879999999939,
+      "events": []
+    },
+    {
+      "tick": 281,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.53679999999986,
+      "copyMs": 0.034599999999045394,
+      "totalMs": 40.60599999999977,
+      "events": []
+    },
+    {
+      "tick": 282,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.37970000000132,
+      "copyMs": 0.0375000000003638,
+      "totalMs": 41.4408999999996,
+      "events": []
+    },
+    {
+      "tick": 283,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.82999999999993,
+      "copyMs": 0.03889999999955762,
+      "totalMs": 39.892900000000736,
+      "events": []
+    },
+    {
+      "tick": 284,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.27549999999974,
+      "copyMs": 0.038200000000870205,
+      "totalMs": 41.34779999999955,
+      "events": [
+        {
+          "tick": 284,
+          "type": "blocked"
+        }
+      ]
+    },
+    {
+      "tick": 285,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.214500000000044,
+      "copyMs": 0.04470000000037544,
+      "totalMs": 41.29079999999885,
+      "events": []
+    },
+    {
+      "tick": 286,
+      "toolMs": 0.0010000000002037268,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.8132999999998,
+      "copyMs": 0.042400000000270666,
+      "totalMs": 40.888199999999415,
+      "events": []
+    },
+    {
+      "tick": 287,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.20479999999952,
+      "copyMs": 0.04160000000047148,
+      "totalMs": 41.27059999999983,
+      "events": []
+    },
+    {
+      "tick": 288,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.96899999999914,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 40.02800000000025,
+      "events": []
+    },
+    {
+      "tick": 289,
+      "toolMs": 0.11059999999997672,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.66189999999915,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.85020000000077,
+      "events": [
+        {
+          "tick": 289,
+          "type": "terrain-cut",
+          "cells": 0,
+          "x": 199,
+          "y": 165
+        }
+      ]
+    },
+    {
+      "tick": 290,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.24669999999969,
+      "copyMs": 0.04219999999986612,
+      "totalMs": 40.31160000000091,
+      "events": []
+    },
+    {
+      "tick": 291,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.42959999999948,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 40.488900000000285,
+      "events": []
+    },
+    {
+      "tick": 292,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.369400000001406,
+      "copyMs": 0.03950000000077125,
+      "totalMs": 41.43449999999939,
+      "events": []
+    },
+    {
+      "tick": 293,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.41640000000007,
+      "copyMs": 0.04140000000006694,
+      "totalMs": 41.481799999999566,
+      "events": []
+    },
+    {
+      "tick": 294,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.5562000000009,
+      "copyMs": 0.03869999999915308,
+      "totalMs": 42.61750000000029,
+      "events": []
+    },
+    {
+      "tick": 295,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.63580000000002,
+      "copyMs": 0.03870000000097207,
+      "totalMs": 41.697299999999814,
+      "events": []
+    },
+    {
+      "tick": 296,
+      "toolMs": 0.0011000000013154931,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.344999999999345,
+      "copyMs": 0.03440000000045984,
+      "totalMs": 42.40340000000106,
+      "events": []
+    },
+    {
+      "tick": 297,
+      "toolMs": 0.000800000001618173,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.75250000000051,
+      "copyMs": 0.04739999999947031,
+      "totalMs": 40.82960000000094,
+      "events": []
+    },
+    {
+      "tick": 298,
+      "toolMs": 0.001399999999193824,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 69.47159999999894,
+      "copyMs": 0.04199999999946158,
+      "totalMs": 69.54140000000007,
+      "events": []
+    },
+    {
+      "tick": 299,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.16699999999946,
+      "copyMs": 0.035799999999653664,
+      "totalMs": 42.22639999999956,
+      "events": []
+    },
+    {
+      "tick": 300,
+      "toolMs": 0.0006000000012136297,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.86959999999999,
+      "copyMs": 0.03600000000005821,
+      "totalMs": 42.937700000000405,
+      "events": [
+        {
+          "tick": 300,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 301,
+      "toolMs": 0.0591999999996915,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.31889999999839,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 43.455299999999625,
+      "events": [
+        {
+          "tick": 301,
+          "type": "terrain-cut",
+          "cells": 0,
+          "x": 213,
+          "y": 169
+        }
+      ]
+    },
+    {
+      "tick": 302,
+      "toolMs": 0.0007999999997991836,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.84399999999914,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 42.90530000000035,
+      "events": []
+    },
+    {
+      "tick": 303,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.035400000000664,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 41.09410000000025,
+      "events": []
+    },
+    {
+      "tick": 304,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.22229999999945,
+      "copyMs": 0.03619999999864376,
+      "totalMs": 40.28099999999904,
+      "events": []
+    },
+    {
+      "tick": 305,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.045100000001185,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.113500000001295,
+      "events": [
+        {
+          "tick": 305,
+          "type": "landed"
+        }
+      ]
+    },
+    {
+      "tick": 306,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.60579999999936,
+      "copyMs": 0.03720000000066648,
+      "totalMs": 39.667599999998856,
+      "events": []
+    },
+    {
+      "tick": 307,
+      "toolMs": 0.000800000001618173,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 60.35639999999876,
+      "copyMs": 0.03620000000046275,
+      "totalMs": 60.41820000000007,
+      "events": []
+    },
+    {
+      "tick": 308,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.37930000000051,
+      "copyMs": 0.03479999999944994,
+      "totalMs": 41.438100000001214,
+      "events": []
+    },
+    {
+      "tick": 309,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.84519999999975,
+      "copyMs": 0.040600000000267755,
+      "totalMs": 40.91009999999915,
+      "events": []
+    },
+    {
+      "tick": 310,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.73949999999968,
+      "copyMs": 0.03719999999884749,
+      "totalMs": 40.80619999999908,
+      "events": []
+    },
+    {
+      "tick": 311,
+      "toolMs": 0.0007000000005064066,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.95759999999973,
+      "copyMs": 0.03440000000045984,
+      "totalMs": 40.016899999998714,
+      "events": []
+    },
+    {
+      "tick": 312,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.726700000001074,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 39.78900000000067,
+      "events": []
+    },
+    {
+      "tick": 313,
+      "toolMs": 0.17810000000099535,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.977100000000064,
+      "copyMs": 0.03319999999985157,
+      "totalMs": 40.232599999999366,
+      "events": [
+        {
+          "tick": 313,
+          "type": "terrain-cut",
+          "cells": 0,
+          "x": 226,
+          "y": 171
+        }
+      ]
+    },
+    {
+      "tick": 314,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.5666999999994,
+      "copyMs": 0.08410000000003492,
+      "totalMs": 39.69390000000021,
+      "events": []
+    },
+    {
+      "tick": 315,
+      "toolMs": 0.0018000000000029104,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 54.114299999999275,
+      "copyMs": 0.035799999999653664,
+      "totalMs": 54.1822000000011,
+      "events": []
+    },
+    {
+      "tick": 316,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.563099999999395,
+      "copyMs": 0.03690000000096916,
+      "totalMs": 42.62540000000081,
+      "events": []
+    },
+    {
+      "tick": 317,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.09430000000066,
+      "copyMs": 0.034899999998742715,
+      "totalMs": 41.15380000000005,
+      "events": []
+    },
+    {
+      "tick": 318,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.09259999999995,
+      "copyMs": 0.039699999999356805,
+      "totalMs": 40.15890000000036,
+      "events": []
+    },
+    {
+      "tick": 319,
+      "toolMs": 0.0005999999993946403,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.3140999999996,
+      "copyMs": 0.03770000000076834,
+      "totalMs": 41.378099999999904,
+      "events": []
+    },
+    {
+      "tick": 320,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.81029999999919,
+      "copyMs": 0.0389999999988504,
+      "totalMs": 39.87409999999909,
+      "events": []
+    },
+    {
+      "tick": 321,
+      "toolMs": 0.0005000000001018634,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.66330000000016,
+      "copyMs": 0.0404000000016822,
+      "totalMs": 45.747299999999086,
+      "events": [
+        {
+          "tick": 321,
+          "type": "relay-recovered"
+        }
+      ]
+    },
+    {
+      "tick": 322,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.06700000000092,
+      "copyMs": 0.0385999999998603,
+      "totalMs": 42.11880000000019,
+      "events": []
+    },
+    {
+      "tick": 323,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.47870000000148,
+      "copyMs": 0.03739999999925203,
+      "totalMs": 40.52989999999954,
+      "events": []
+    },
+    {
+      "tick": 324,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.84529999999904,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 39.89709999999832,
+      "events": []
+    },
+    {
+      "tick": 325,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.411299999999756,
+      "copyMs": 0.03560000000106811,
+      "totalMs": 39.45969999999943,
+      "events": []
+    },
+    {
+      "tick": 326,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.13040000000001,
+      "copyMs": 0.043600000000878936,
+      "totalMs": 40.18870000000061,
+      "events": []
+    },
+    {
+      "tick": 327,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.89339999999902,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 39.944500000001426,
+      "events": []
+    },
+    {
+      "tick": 328,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.44909999999982,
+      "copyMs": 0.04019999999945867,
+      "totalMs": 40.504000000000815,
+      "events": []
+    },
+    {
+      "tick": 329,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.749799999999595,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 39.80169999999998,
+      "events": []
+    },
+    {
+      "tick": 330,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.06600000000071,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 40.114299999999275,
+      "events": []
+    },
+    {
+      "tick": 331,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.79700000000048,
+      "copyMs": 0.042100000000573345,
+      "totalMs": 40.85310000000027,
+      "events": []
+    },
+    {
+      "tick": 332,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.96349999999984,
+      "copyMs": 0.03950000000077125,
+      "totalMs": 41.019099999999526,
+      "events": []
+    },
+    {
+      "tick": 333,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.08649999999943,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.13699999999881,
+      "events": []
+    },
+    {
+      "tick": 334,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 61.651200000000244,
+      "copyMs": 0.052100000000791624,
+      "totalMs": 61.72069999999985,
+      "events": []
+    },
+    {
+      "tick": 335,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.38409999999931,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 44.432199999999284,
+      "events": []
+    },
+    {
+      "tick": 336,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.30709999999999,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 41.35900000000038,
+      "events": []
+    },
+    {
+      "tick": 337,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.236399999999776,
+      "copyMs": 0.03840000000127475,
+      "totalMs": 40.28980000000047,
+      "events": []
+    },
+    {
+      "tick": 338,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.8104000000003,
+      "copyMs": 0.04219999999986612,
+      "totalMs": 39.866900000000896,
+      "events": []
+    },
+    {
+      "tick": 339,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.839600000001155,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 39.88839999999982,
+      "events": []
+    },
+    {
+      "tick": 340,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.17199999999866,
+      "copyMs": 0.03539999999884458,
+      "totalMs": 40.22220000000016,
+      "events": []
+    },
+    {
+      "tick": 341,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.18789999999899,
+      "copyMs": 0.03600000000005821,
+      "totalMs": 40.23689999999988,
+      "events": []
+    },
+    {
+      "tick": 342,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.19369999999981,
+      "copyMs": 0.03829999999834399,
+      "totalMs": 40.24489999999969,
+      "events": []
+    },
+    {
+      "tick": 343,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.40910000000076,
+      "copyMs": 0.04289999999855354,
+      "totalMs": 40.464599999999336,
+      "events": []
+    },
+    {
+      "tick": 344,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.91699999999946,
+      "copyMs": 0.0352999999995518,
+      "totalMs": 39.96609999999964,
+      "events": []
+    },
+    {
+      "tick": 345,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 61.88080000000082,
+      "copyMs": 0.03870000000097207,
+      "totalMs": 61.933100000000195,
+      "events": []
+    },
+    {
+      "tick": 346,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.77000000000044,
+      "copyMs": 0.0422999999991589,
+      "totalMs": 41.82690000000002,
+      "events": []
+    },
+    {
+      "tick": 347,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.3742000000002,
+      "copyMs": 0.05019999999967695,
+      "totalMs": 43.4413999999997,
+      "events": []
+    },
+    {
+      "tick": 348,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.621799999998984,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 41.673399999999674,
+      "events": []
+    },
+    {
+      "tick": 349,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.77599999999984,
+      "copyMs": 0.03650000000016007,
+      "totalMs": 40.82690000000002,
+      "events": []
+    },
+    {
+      "tick": 350,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.597099999999045,
+      "copyMs": 0.03980000000046857,
+      "totalMs": 40.65010000000075,
+      "events": []
+    },
+    {
+      "tick": 351,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.17699999999968,
+      "copyMs": 0.0525999999990745,
+      "totalMs": 40.24759999999878,
+      "events": []
+    },
+    {
+      "tick": 352,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.94290000000001,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 40.995999999999185,
+      "events": []
+    },
+    {
+      "tick": 353,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.59389999999985,
+      "copyMs": 0.03479999999944994,
+      "totalMs": 40.64269999999851,
+      "events": []
+    },
+    {
+      "tick": 354,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 61.709899999999834,
+      "copyMs": 0.040299999998751446,
+      "totalMs": 61.76379999999881,
+      "events": []
+    },
+    {
+      "tick": 355,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.149600000000646,
+      "copyMs": 0.03540000000066357,
+      "totalMs": 41.19919999999911,
+      "events": []
+    },
+    {
+      "tick": 356,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.82719999999972,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 42.8781999999992,
+      "events": []
+    },
+    {
+      "tick": 357,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.826499999999214,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 39.87929999999869,
+      "events": []
+    },
+    {
+      "tick": 358,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.380300000000716,
+      "copyMs": 0.03980000000046857,
+      "totalMs": 40.43449999999939,
+      "events": []
+    },
+    {
+      "tick": 359,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.94080000000031,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 39.997700000001714,
+      "events": []
+    },
+    {
+      "tick": 360,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.86989999999969,
+      "copyMs": 0.037900000001172884,
+      "totalMs": 41.92239999999947,
+      "events": []
+    },
+    {
+      "tick": 361,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.413000000000466,
+      "copyMs": 0.04079999999885331,
+      "totalMs": 40.46870000000126,
+      "events": []
+    },
+    {
+      "tick": 362,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.0036999999993,
+      "copyMs": 0.034599999999045394,
+      "totalMs": 59.052999999999884,
+      "events": []
+    },
+    {
+      "tick": 363,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.89190000000053,
+      "copyMs": 0.039700000001175795,
+      "totalMs": 42.94499999999971,
+      "events": []
+    },
+    {
+      "tick": 364,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.71140000000014,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 40.76000000000022,
+      "events": []
+    },
+    {
+      "tick": 365,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.203700000000026,
+      "copyMs": 0.05320000000028813,
+      "totalMs": 40.27490000000034,
+      "events": []
+    },
+    {
+      "tick": 366,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.4953000000005,
+      "copyMs": 0.03510000000096625,
+      "totalMs": 40.54449999999997,
+      "events": []
+    },
+    {
+      "tick": 367,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.44449999999961,
+      "copyMs": 0.0385999999998603,
+      "totalMs": 41.49759999999878,
+      "events": []
+    },
+    {
+      "tick": 368,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.934299999998984,
+      "copyMs": 0.037899999999353895,
+      "totalMs": 40.98660000000018,
+      "events": []
+    },
+    {
+      "tick": 369,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.52019999999902,
+      "copyMs": 0.038799999998445855,
+      "totalMs": 42.573599999999715,
+      "events": []
+    },
+    {
+      "tick": 370,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.46650000000045,
+      "copyMs": 0.03769999999894935,
+      "totalMs": 41.518999999998414,
+      "events": []
+    },
+    {
+      "tick": 371,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.181900000001406,
+      "copyMs": 0.03709999999955471,
+      "totalMs": 40.23480000000018,
+      "events": []
+    },
+    {
+      "tick": 372,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.47559999999976,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.527399999999034,
+      "events": []
+    },
+    {
+      "tick": 373,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.361800000000585,
+      "copyMs": 0.03980000000046857,
+      "totalMs": 41.416300000000774,
+      "events": []
+    },
+    {
+      "tick": 374,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.77059999999983,
+      "copyMs": 0.03660000000127184,
+      "totalMs": 40.81999999999971,
+      "events": []
+    },
+    {
+      "tick": 375,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 64.39389999999912,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 64.44340000000011,
+      "events": []
+    },
+    {
+      "tick": 376,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.558899999999994,
+      "copyMs": 0.04629999999997381,
+      "totalMs": 40.620199999999386,
+      "events": []
+    },
+    {
+      "tick": 377,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.1895999999997,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 40.240600000000995,
+      "events": []
+    },
+    {
+      "tick": 378,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.29199999999946,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 41.34549999999945,
+      "events": []
+    },
+    {
+      "tick": 379,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.29709999999977,
+      "copyMs": 0.03870000000097207,
+      "totalMs": 40.349599999999555,
+      "events": []
+    },
+    {
+      "tick": 380,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.05959999999868,
+      "copyMs": 0.0385999999998603,
+      "totalMs": 40.110899999999674,
+      "events": []
+    },
+    {
+      "tick": 381,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.94290000000001,
+      "copyMs": 0.039999999999054126,
+      "totalMs": 40.9961000000003,
+      "events": []
+    },
+    {
+      "tick": 382,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.077400000000125,
+      "copyMs": 0.03679999999985739,
+      "totalMs": 40.128200000001016,
+      "events": []
+    },
+    {
+      "tick": 383,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.5052999999989,
+      "copyMs": 0.03960000000006403,
+      "totalMs": 57.5588000000007,
+      "events": []
+    },
+    {
+      "tick": 384,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.822799999999916,
+      "copyMs": 0.039999999999054126,
+      "totalMs": 41.8770999999997,
+      "events": []
+    },
+    {
+      "tick": 385,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.36650000000009,
+      "copyMs": 0.03949999999895226,
+      "totalMs": 42.41859999999906,
+      "events": []
+    },
+    {
+      "tick": 386,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.97400000000016,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 40.02459999999883,
+      "events": []
+    },
+    {
+      "tick": 387,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.23090000000229,
+      "copyMs": 0.035500000001775334,
+      "totalMs": 40.28269999999975,
+      "events": []
+    },
+    {
+      "tick": 388,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.72940000000017,
+      "copyMs": 0.03709999999773572,
+      "totalMs": 41.78729999999996,
+      "events": []
+    },
+    {
+      "tick": 389,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.93829999999798,
+      "copyMs": 0.04130000000077416,
+      "totalMs": 40.99170000000231,
+      "events": []
+    },
+    {
+      "tick": 390,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.63929999999891,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 40.69000000000233,
+      "events": []
+    },
+    {
+      "tick": 391,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.13400000000183,
+      "copyMs": 0.040600000000267755,
+      "totalMs": 40.1877999999997,
+      "events": []
+    },
+    {
+      "tick": 392,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.7445000000007,
+      "copyMs": 0.04100000000107684,
+      "totalMs": 66.79850000000079,
+      "events": []
+    },
+    {
+      "tick": 393,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.442699999999604,
+      "copyMs": 0.04070000000137952,
+      "totalMs": 41.496399999999994,
+      "events": []
+    },
+    {
+      "tick": 394,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.69410000000062,
+      "copyMs": 0.033999999999650754,
+      "totalMs": 41.741299999997864,
+      "events": []
+    },
+    {
+      "tick": 395,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.420900000000984,
+      "copyMs": 0.03780000000188011,
+      "totalMs": 40.47160000000076,
+      "events": []
+    },
+    {
+      "tick": 396,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.63849999999729,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 40.6875,
+      "events": []
+    },
+    {
+      "tick": 397,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.06370000000243,
+      "copyMs": 0.03900000000066939,
+      "totalMs": 42.11590000000069,
+      "events": []
+    },
+    {
+      "tick": 398,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.92199999999866,
+      "copyMs": 0.038500000002386514,
+      "totalMs": 40.974700000002485,
+      "events": []
+    },
+    {
+      "tick": 399,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.36779999999999,
+      "copyMs": 0.0525999999990745,
+      "totalMs": 40.43670000000202,
+      "events": []
+    },
+    {
+      "tick": 400,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.70400000000154,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 40.752700000000914,
+      "events": []
+    },
+    {
+      "tick": 401,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 61.88170000000173,
+      "copyMs": 0.04139999999824795,
+      "totalMs": 61.935199999999895,
+      "events": []
+    },
+    {
+      "tick": 402,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.51630000000296,
+      "copyMs": 0.03649999999834108,
+      "totalMs": 42.565300000002026,
+      "events": []
+    },
+    {
+      "tick": 403,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.46440000000075,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 43.51310000000012,
+      "events": []
+    },
+    {
+      "tick": 404,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.964599999999336,
+      "copyMs": 0.03589999999894644,
+      "totalMs": 42.01460000000225,
+      "events": []
+    },
+    {
+      "tick": 405,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.31659999999829,
+      "copyMs": 0.03979999999864958,
+      "totalMs": 41.369000000002416,
+      "events": []
+    },
+    {
+      "tick": 406,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.12960000000021,
+      "copyMs": 0.03930000000036671,
+      "totalMs": 41.18090000000302,
+      "events": []
+    },
+    {
+      "tick": 407,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.38630000000194,
+      "copyMs": 0.03480000000126893,
+      "totalMs": 41.43419999999969,
+      "events": []
+    },
+    {
+      "tick": 408,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.06910000000062,
+      "copyMs": 0.038799999998445855,
+      "totalMs": 41.1218000000008,
+      "events": []
+    },
+    {
+      "tick": 409,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 54.212500000001455,
+      "copyMs": 0.04320000000006985,
+      "totalMs": 54.26940000000104,
+      "events": []
+    },
+    {
+      "tick": 410,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.21350000000166,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 44.2657999999974,
+      "events": []
+    },
+    {
+      "tick": 411,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.35109999999986,
+      "copyMs": 0.04039999999804422,
+      "totalMs": 44.40490000000136,
+      "events": []
+    },
+    {
+      "tick": 412,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.292600000000675,
+      "copyMs": 0.04860000000189757,
+      "totalMs": 41.35750000000189,
+      "events": []
+    },
+    {
+      "tick": 413,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.20550000000003,
+      "copyMs": 0.04049999999915599,
+      "totalMs": 42.26090000000113,
+      "events": []
+    },
+    {
+      "tick": 414,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.09280000000217,
+      "copyMs": 0.04049999999915599,
+      "totalMs": 41.14549999999872,
+      "events": []
+    },
+    {
+      "tick": 415,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.95040000000154,
+      "copyMs": 0.042399999998451676,
+      "totalMs": 46.00670000000173,
+      "events": []
+    },
+    {
+      "tick": 416,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.50669999999809,
+      "copyMs": 0.0371000000013737,
+      "totalMs": 41.557199999999284,
+      "events": []
+    },
+    {
+      "tick": 417,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.56550000000061,
+      "copyMs": 0.040600000000267755,
+      "totalMs": 40.619299999998475,
+      "events": []
+    },
+    {
+      "tick": 418,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.2303000000029,
+      "copyMs": 0.03919999999925494,
+      "totalMs": 59.282100000000355,
+      "events": []
+    },
+    {
+      "tick": 419,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.30610000000161,
+      "copyMs": 0.04100000000107684,
+      "totalMs": 43.360899999999674,
+      "events": []
+    },
+    {
+      "tick": 420,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.64210000000094,
+      "copyMs": 0.044299999997747364,
+      "totalMs": 40.70089999999982,
+      "events": []
+    },
+    {
+      "tick": 421,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.45750000000044,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.51009999999951,
+      "events": []
+    },
+    {
+      "tick": 422,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.76929999999993,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 40.818200000001525,
+      "events": []
+    },
+    {
+      "tick": 423,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.113900000000285,
+      "copyMs": 0.039100000001781154,
+      "totalMs": 41.165399999998044,
+      "events": []
+    },
+    {
+      "tick": 424,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.04119999999966,
+      "copyMs": 0.035799999997834675,
+      "totalMs": 40.09010000000126,
+      "events": []
+    },
+    {
+      "tick": 425,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.80189999999857,
+      "copyMs": 0.03649999999834108,
+      "totalMs": 40.85099999999875,
+      "events": []
+    },
+    {
+      "tick": 426,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 56.34350000000268,
+      "copyMs": 0.033999999999650754,
+      "totalMs": 56.39140000000043,
+      "events": []
+    },
+    {
+      "tick": 427,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.450700000001234,
+      "copyMs": 0.04200000000128057,
+      "totalMs": 44.505700000001525,
+      "events": []
+    },
+    {
+      "tick": 428,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.63720000000103,
+      "copyMs": 0.03839999999763677,
+      "totalMs": 40.688500000000204,
+      "events": []
+    },
+    {
+      "tick": 429,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.95669999999882,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 41.00699999999779,
+      "events": []
+    },
+    {
+      "tick": 430,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.679400000000896,
+      "copyMs": 0.038799999998445855,
+      "totalMs": 40.73139999999694,
+      "events": []
+    },
+    {
+      "tick": 431,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.48369999999704,
+      "copyMs": 0.04259999999703723,
+      "totalMs": 40.53989999999976,
+      "events": []
+    },
+    {
+      "tick": 432,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.683899999999994,
+      "copyMs": 0.03889999999955762,
+      "totalMs": 40.73620000000301,
+      "events": []
+    },
+    {
+      "tick": 433,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.810700000001816,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 40.859300000000076,
+      "events": []
+    },
+    {
+      "tick": 434,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.72869999999966,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.77729999999792,
+      "events": []
+    },
+    {
+      "tick": 435,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 64.66440000000148,
+      "copyMs": 0.040600000000267755,
+      "totalMs": 64.71749999999884,
+      "events": []
+    },
+    {
+      "tick": 436,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.04869999999937,
+      "copyMs": 0.039700000001175795,
+      "totalMs": 42.102100000000064,
+      "events": []
+    },
+    {
+      "tick": 437,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.82610000000204,
+      "copyMs": 0.05489999999917927,
+      "totalMs": 43.89969999999812,
+      "events": []
+    },
+    {
+      "tick": 438,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.31550000000061,
+      "copyMs": 0.04170000000158325,
+      "totalMs": 46.37250000000131,
+      "events": []
+    },
+    {
+      "tick": 439,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.443200000001525,
+      "copyMs": 0.03660000000309083,
+      "totalMs": 41.4929000000011,
+      "events": []
+    },
+    {
+      "tick": 440,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.96649999999863,
+      "copyMs": 0.036100000001169974,
+      "totalMs": 41.01610000000073,
+      "events": []
+    },
+    {
+      "tick": 441,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.01759999999922,
+      "copyMs": 0.04049999999915599,
+      "totalMs": 41.07270000000062,
+      "events": []
+    },
+    {
+      "tick": 442,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.96270000000004,
+      "copyMs": 0.037900000002991874,
+      "totalMs": 41.01269999999931,
+      "events": []
+    },
+    {
+      "tick": 443,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 57.310600000000704,
+      "copyMs": 0.03680000000167638,
+      "totalMs": 57.36069999999745,
+      "events": []
+    },
+    {
+      "tick": 444,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.81999999999971,
+      "copyMs": 0.03780000000188011,
+      "totalMs": 41.87189999999828,
+      "events": []
+    },
+    {
+      "tick": 445,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.25340000000142,
+      "copyMs": 0.039099999998143176,
+      "totalMs": 40.305499999998574,
+      "events": []
+    },
+    {
+      "tick": 446,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.234199999998964,
+      "copyMs": 0.05099999999947613,
+      "totalMs": 41.30370000000039,
+      "events": []
+    },
+    {
+      "tick": 447,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.06199999999808,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 42.1147000000019,
+      "events": []
+    },
+    {
+      "tick": 448,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.993900000001304,
+      "copyMs": 0.04710000000341097,
+      "totalMs": 41.05879999999888,
+      "events": []
+    },
+    {
+      "tick": 449,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.79060000000027,
+      "copyMs": 0.03650000000197906,
+      "totalMs": 41.84309999999823,
+      "events": []
+    },
+    {
+      "tick": 450,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.81490000000122,
+      "copyMs": 0.040899999999965075,
+      "totalMs": 42.869699999999284,
+      "events": []
+    },
+    {
+      "tick": 451,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.30680000000211,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 41.354599999998754,
+      "events": []
+    },
+    {
+      "tick": 452,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.15650000000096,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 59.20669999999882,
+      "events": []
+    },
+    {
+      "tick": 453,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.79309999999896,
+      "copyMs": 0.03740000000107102,
+      "totalMs": 41.84370000000126,
+      "events": []
+    },
+    {
+      "tick": 454,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.84479999999894,
+      "copyMs": 0.06290000000080909,
+      "totalMs": 41.926000000003114,
+      "events": []
+    },
+    {
+      "tick": 455,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.8156999999992,
+      "copyMs": 0.038799999998445855,
+      "totalMs": 42.87040000000343,
+      "events": []
+    },
+    {
+      "tick": 456,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.44659999999931,
+      "copyMs": 0.05430000000342261,
+      "totalMs": 40.519100000001345,
+      "events": []
+    },
+    {
+      "tick": 457,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.00560000000041,
+      "copyMs": 0.03949999999895226,
+      "totalMs": 45.06229999999778,
+      "events": []
+    },
+    {
+      "tick": 458,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.57589999999982,
+      "copyMs": 0.04109999999855063,
+      "totalMs": 42.63140000000203,
+      "events": []
+    },
+    {
+      "tick": 459,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.08169999999882,
+      "copyMs": 0.035499999998137355,
+      "totalMs": 42.13129999999728,
+      "events": []
+    },
+    {
+      "tick": 460,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 70.01890000000276,
+      "copyMs": 0.06039999999848078,
+      "totalMs": 70.09890000000087,
+      "events": []
+    },
+    {
+      "tick": 461,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.19029999999839,
+      "copyMs": 0.056300000000192085,
+      "totalMs": 53.27140000000145,
+      "events": []
+    },
+    {
+      "tick": 462,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.350399999999354,
+      "copyMs": 0.04320000000006985,
+      "totalMs": 45.41310000000158,
+      "events": []
+    },
+    {
+      "tick": 463,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.82340000000113,
+      "copyMs": 0.04890000000159489,
+      "totalMs": 49.88829999999871,
+      "events": []
+    },
+    {
+      "tick": 464,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.105100000000675,
+      "copyMs": 0.04670000000260188,
+      "totalMs": 53.172200000000885,
+      "events": []
+    },
+    {
+      "tick": 465,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.59360000000015,
+      "copyMs": 0.10469999999986612,
+      "totalMs": 48.72820000000138,
+      "events": []
+    },
+    {
+      "tick": 466,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.29449999999997,
+      "copyMs": 0.03480000000126893,
+      "totalMs": 42.349600000001374,
+      "events": []
+    },
+    {
+      "tick": 467,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.60410000000047,
+      "copyMs": 0.038499999998748535,
+      "totalMs": 42.65690000000177,
+      "events": []
+    },
+    {
+      "tick": 468,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.05199999999968,
+      "copyMs": 0.03650000000197906,
+      "totalMs": 41.10199999999895,
+      "events": []
+    },
+    {
+      "tick": 469,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 61.57259999999951,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 61.62260000000242,
+      "events": []
+    },
+    {
+      "tick": 470,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.2432000000008,
+      "copyMs": 0.043600000000878936,
+      "totalMs": 45.30739999999787,
+      "events": []
+    },
+    {
+      "tick": 471,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.5583000000006,
+      "copyMs": 0.03799999999682768,
+      "totalMs": 44.612199999999575,
+      "events": []
+    },
+    {
+      "tick": 472,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 50.19350000000122,
+      "copyMs": 0.04569999999876018,
+      "totalMs": 50.2538999999997,
+      "events": []
+    },
+    {
+      "tick": 473,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.8737000000001,
+      "copyMs": 0.0433999999986554,
+      "totalMs": 44.934799999999086,
+      "events": []
+    },
+    {
+      "tick": 474,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.90370000000257,
+      "copyMs": 0.036399999997229315,
+      "totalMs": 41.95550000000003,
+      "events": []
+    },
+    {
+      "tick": 475,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.942800000000716,
+      "copyMs": 0.04139999999824795,
+      "totalMs": 40.99750000000131,
+      "events": []
+    },
+    {
+      "tick": 476,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.52779999999984,
+      "copyMs": 0.040300000000570435,
+      "totalMs": 41.58300000000236,
+      "events": []
+    },
+    {
+      "tick": 477,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.276300000001356,
+      "copyMs": 0.056599999999889405,
+      "totalMs": 42.349200000000565,
+      "events": []
+    },
+    {
+      "tick": 478,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.73739999999816,
+      "copyMs": 0.06229999999777647,
+      "totalMs": 44.82289999999921,
+      "events": []
+    },
+    {
+      "tick": 479,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.19380000000092,
+      "copyMs": 0.07159999999930733,
+      "totalMs": 66.29339999999866,
+      "events": []
+    },
+    {
+      "tick": 480,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.52220000000307,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 44.577799999999115,
+      "events": []
+    },
+    {
+      "tick": 481,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.69640000000072,
+      "copyMs": 0.03919999999925494,
+      "totalMs": 42.74989999999889,
+      "events": []
+    },
+    {
+      "tick": 482,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.5593000000008,
+      "copyMs": 0.04299999999784632,
+      "totalMs": 46.61699999999837,
+      "events": []
+    },
+    {
+      "tick": 483,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.51350000000093,
+      "copyMs": 0.052999999999883585,
+      "totalMs": 42.58740000000034,
+      "events": []
+    },
+    {
+      "tick": 484,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.696200000002136,
+      "copyMs": 0.03719999999884749,
+      "totalMs": 41.749400000000605,
+      "events": []
+    },
+    {
+      "tick": 485,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.67020000000048,
+      "copyMs": 0.04279999999926076,
+      "totalMs": 41.727100000000064,
+      "events": []
+    },
+    {
+      "tick": 486,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.900400000002264,
+      "copyMs": 0.04719999999724678,
+      "totalMs": 43.96439999999711,
+      "events": []
+    },
+    {
+      "tick": 487,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 63.987700000001496,
+      "copyMs": 0.052999999999883585,
+      "totalMs": 64.06219999999666,
+      "events": []
+    },
+    {
+      "tick": 488,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.99780000000101,
+      "copyMs": 0.046600000001490116,
+      "totalMs": 49.06469999999899,
+      "events": []
+    },
+    {
+      "tick": 489,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.689400000002934,
+      "copyMs": 0.04080000000249129,
+      "totalMs": 42.745599999998376,
+      "events": []
+    },
+    {
+      "tick": 490,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.49329999999827,
+      "copyMs": 0.04230000000097789,
+      "totalMs": 42.54980000000069,
+      "events": []
+    },
+    {
+      "tick": 491,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.58299999999872,
+      "copyMs": 0.040000000000873115,
+      "totalMs": 42.637000000002445,
+      "events": []
+    },
+    {
+      "tick": 492,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.43000000000029,
+      "copyMs": 0.03779999999824213,
+      "totalMs": 42.480600000002596,
+      "events": []
+    },
+    {
+      "tick": 493,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.546299999998155,
+      "copyMs": 0.05219999999826541,
+      "totalMs": 43.615099999999074,
+      "events": []
+    },
+    {
+      "tick": 494,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.19159999999829,
+      "copyMs": 0.0367999999980384,
+      "totalMs": 43.242700000002515,
+      "events": []
+    },
+    {
+      "tick": 495,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 60.324399999997695,
+      "copyMs": 0.04160000000047148,
+      "totalMs": 60.38160000000062,
+      "events": []
+    },
+    {
+      "tick": 496,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.09820000000036,
+      "copyMs": 0.03739999999743304,
+      "totalMs": 43.14819999999963,
+      "events": []
+    },
+    {
+      "tick": 497,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.992700000002515,
+      "copyMs": 0.039099999998143176,
+      "totalMs": 44.04460000000108,
+      "events": []
+    },
+    {
+      "tick": 498,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.16619999999966,
+      "copyMs": 0.03889999999955762,
+      "totalMs": 43.21860000000015,
+      "events": []
+    },
+    {
+      "tick": 499,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.24330000000191,
+      "copyMs": 0.04320000000006985,
+      "totalMs": 42.29999999999927,
+      "events": []
+    },
+    {
+      "tick": 500,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.37489999999889,
+      "copyMs": 0.040600000000267755,
+      "totalMs": 43.43000000000029,
+      "events": []
+    },
+    {
+      "tick": 501,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.83179999999993,
+      "copyMs": 0.03650000000197906,
+      "totalMs": 41.88270000000193,
+      "events": []
+    },
+    {
+      "tick": 502,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.03179999999702,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 42.08269999999902,
+      "events": []
+    },
+    {
+      "tick": 503,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.7696999999971,
+      "copyMs": 0.03749999999854481,
+      "totalMs": 44.820700000000215,
+      "events": []
+    },
+    {
+      "tick": 504,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 62.63420000000042,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 62.684799999999086,
+      "events": []
+    },
+    {
+      "tick": 505,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.421800000000076,
+      "copyMs": 0.04019999999945867,
+      "totalMs": 46.47530000000188,
+      "events": []
+    },
+    {
+      "tick": 506,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.929700000000594,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.97990000000209,
+      "events": []
+    },
+    {
+      "tick": 507,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.10290000000168,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 43.156599999998434,
+      "events": []
+    },
+    {
+      "tick": 508,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.733500000002095,
+      "copyMs": 0.11990000000150758,
+      "totalMs": 40.8718000000008,
+      "events": []
+    },
+    {
+      "tick": 509,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.08150000000023,
+      "copyMs": 0.033699999999953434,
+      "totalMs": 43.130199999999604,
+      "events": []
+    },
+    {
+      "tick": 510,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.5557000000008,
+      "copyMs": 0.037000000000261934,
+      "totalMs": 42.60619999999835,
+      "events": []
+    },
+    {
+      "tick": 511,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.78889999999956,
+      "copyMs": 0.038199999999051215,
+      "totalMs": 42.84059999999954,
+      "events": []
+    },
+    {
+      "tick": 512,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 59.313200000000506,
+      "copyMs": 0.04809999999997672,
+      "totalMs": 59.376000000000204,
+      "events": []
+    },
+    {
+      "tick": 513,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.48660000000018,
+      "copyMs": 0.08849999999802094,
+      "totalMs": 42.59549999999945,
+      "events": []
+    },
+    {
+      "tick": 514,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.10570000000007,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 43.159599999999045,
+      "events": []
+    },
+    {
+      "tick": 515,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.54259999999704,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 41.59310000000187,
+      "events": []
+    },
+    {
+      "tick": 516,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.235100000001694,
+      "copyMs": 0.044499999999970896,
+      "totalMs": 42.293399999998655,
+      "events": []
+    },
+    {
+      "tick": 517,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.09200000000055,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 42.142900000002555,
+      "events": []
+    },
+    {
+      "tick": 518,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.35440000000017,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 42.40660000000207,
+      "events": []
+    },
+    {
+      "tick": 519,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.46650000000227,
+      "copyMs": 0.03980000000228756,
+      "totalMs": 41.51849999999831,
+      "events": []
+    },
+    {
+      "tick": 520,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.914600000000064,
+      "copyMs": 0.03840000000127475,
+      "totalMs": 41.96630000000005,
+      "events": []
+    },
+    {
+      "tick": 521,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 62.66949999999997,
+      "copyMs": 0.04070000000137952,
+      "totalMs": 62.72490000000107,
+      "events": []
+    },
+    {
+      "tick": 522,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.90090000000055,
+      "copyMs": 0.03780000000188011,
+      "totalMs": 41.95179999999891,
+      "events": []
+    },
+    {
+      "tick": 523,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.52400000000125,
+      "copyMs": 0.035200000002078013,
+      "totalMs": 41.5724999999984,
+      "events": []
+    },
+    {
+      "tick": 524,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.73979999999938,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.790899999999965,
+      "events": []
+    },
+    {
+      "tick": 525,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.368099999999686,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 43.418000000001484,
+      "events": []
+    },
+    {
+      "tick": 526,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 47.11409999999887,
+      "copyMs": 0.03659999999945285,
+      "totalMs": 47.16430000000037,
+      "events": []
+    },
+    {
+      "tick": 527,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.79649999999674,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 44.84440000000177,
+      "events": []
+    },
+    {
+      "tick": 528,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.88669999999911,
+      "copyMs": 0.03870000000097207,
+      "totalMs": 46.93950000000041,
+      "events": []
+    },
+    {
+      "tick": 529,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.58539999999994,
+      "copyMs": 0.045400000002700835,
+      "totalMs": 66.64760000000024,
+      "events": []
+    },
+    {
+      "tick": 530,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 66.85469999999987,
+      "copyMs": 0.11390000000028522,
+      "totalMs": 66.99789999999848,
+      "events": []
+    },
+    {
+      "tick": 531,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 55.46939999999813,
+      "copyMs": 0.05700000000069849,
+      "totalMs": 55.5512000000017,
+      "events": []
+    },
+    {
+      "tick": 532,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.641899999998714,
+      "copyMs": 0.05849999999918509,
+      "totalMs": 49.721699999998236,
+      "events": []
+    },
+    {
+      "tick": 533,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 47.23090000000229,
+      "copyMs": 0.041199999999662396,
+      "totalMs": 47.29070000000138,
+      "events": []
+    },
+    {
+      "tick": 534,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.23149999999805,
+      "copyMs": 0.042700000001786975,
+      "totalMs": 45.28889999999956,
+      "events": []
+    },
+    {
+      "tick": 535,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.81709999999657,
+      "copyMs": 0.045199999996839324,
+      "totalMs": 45.877700000000914,
+      "events": []
+    },
+    {
+      "tick": 536,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.07589999999982,
+      "copyMs": 0.03619999999864376,
+      "totalMs": 44.12580000000162,
+      "events": []
+    },
+    {
+      "tick": 537,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.465699999997014,
+      "copyMs": 0.046999999998661224,
+      "totalMs": 44.528300000001764,
+      "events": []
+    },
+    {
+      "tick": 538,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 64.18189999999959,
+      "copyMs": 0.03950000000259024,
+      "totalMs": 64.2416000000012,
+      "events": []
+    },
+    {
+      "tick": 539,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.74059999999736,
+      "copyMs": 0.0511000000005879,
+      "totalMs": 44.80689999999959,
+      "events": []
+    },
+    {
+      "tick": 540,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.40910000000076,
+      "copyMs": 0.03950000000259024,
+      "totalMs": 43.46299999999974,
+      "events": []
+    },
+    {
+      "tick": 541,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.05400000000009,
+      "copyMs": 0.06420000000071013,
+      "totalMs": 43.13669999999911,
+      "events": []
+    },
+    {
+      "tick": 542,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.54320000000007,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 45.59830000000147,
+      "events": []
+    },
+    {
+      "tick": 543,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.978399999999965,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 43.02890000000116,
+      "events": []
+    },
+    {
+      "tick": 544,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.10699999999997,
+      "copyMs": 0.07749999999941792,
+      "totalMs": 43.20789999999761,
+      "events": []
+    },
+    {
+      "tick": 545,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.60620000000199,
+      "copyMs": 0.037899999999353895,
+      "totalMs": 53.66200000000026,
+      "events": []
+    },
+    {
+      "tick": 546,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 50.11319999999978,
+      "copyMs": 0.05050000000119326,
+      "totalMs": 50.17900000000009,
+      "events": []
+    },
+    {
+      "tick": 547,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 72.66309999999794,
+      "copyMs": 0.037599999999656575,
+      "totalMs": 72.71700000000055,
+      "events": []
+    },
+    {
+      "tick": 548,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.00830000000133,
+      "copyMs": 0.0367999999980384,
+      "totalMs": 48.059000000001106,
+      "events": []
+    },
+    {
+      "tick": 549,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.1977999999981,
+      "copyMs": 0.03619999999864376,
+      "totalMs": 46.24799999999959,
+      "events": []
+    },
+    {
+      "tick": 550,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.76039999999921,
+      "copyMs": 0.03950000000259024,
+      "totalMs": 42.814000000002125,
+      "events": []
+    },
+    {
+      "tick": 551,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.16200000000026,
+      "copyMs": 0.046699999998963904,
+      "totalMs": 43.22259999999733,
+      "events": []
+    },
+    {
+      "tick": 552,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.23270000000048,
+      "copyMs": 0.03740000000107102,
+      "totalMs": 42.28389999999854,
+      "events": []
+    },
+    {
+      "tick": 553,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.349999999998545,
+      "copyMs": 0.03840000000127475,
+      "totalMs": 43.40169999999853,
+      "events": []
+    },
+    {
+      "tick": 554,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.38639999999941,
+      "copyMs": 0.043900000000576256,
+      "totalMs": 43.443999999999505,
+      "events": []
+    },
+    {
+      "tick": 555,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 62.5593000000008,
+      "copyMs": 0.04460000000108266,
+      "totalMs": 62.6205000000009,
+      "events": []
+    },
+    {
+      "tick": 556,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.75300000000061,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 45.804800000001705,
+      "events": []
+    },
+    {
+      "tick": 557,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.69369999999981,
+      "copyMs": 0.04070000000137952,
+      "totalMs": 43.748099999997066,
+      "events": []
+    },
+    {
+      "tick": 558,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.05589999999938,
+      "copyMs": 0.039100000001781154,
+      "totalMs": 43.10849999999846,
+      "events": []
+    },
+    {
+      "tick": 559,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.22360000000117,
+      "copyMs": 0.06469999999899301,
+      "totalMs": 44.30909999999858,
+      "events": []
+    },
+    {
+      "tick": 560,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 45.3150999999998,
+      "copyMs": 0.0404000000016822,
+      "totalMs": 45.37489999999889,
+      "events": []
+    },
+    {
+      "tick": 561,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.512299999998504,
+      "copyMs": 0.04130000000077416,
+      "totalMs": 42.567800000000716,
+      "events": []
+    },
+    {
+      "tick": 562,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.33629999999903,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 41.38720000000103,
+      "events": []
+    },
+    {
+      "tick": 563,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.26559999999881,
+      "copyMs": 0.035200000002078013,
+      "totalMs": 40.31430000000182,
+      "events": []
+    },
+    {
+      "tick": 564,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.09830000000147,
+      "copyMs": 0.043300000001181616,
+      "totalMs": 53.155900000001566,
+      "events": []
+    },
+    {
+      "tick": 565,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.4968000000008,
+      "copyMs": 0.03450000000157161,
+      "totalMs": 40.54579999999987,
+      "events": []
+    },
+    {
+      "tick": 566,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.7016999999978,
+      "copyMs": 0.035800000001472654,
+      "totalMs": 39.75089999999909,
+      "events": []
+    },
+    {
+      "tick": 567,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.3907999999974,
+      "copyMs": 0.0507999999972526,
+      "totalMs": 41.45720000000074,
+      "events": []
+    },
+    {
+      "tick": 568,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.71340000000055,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 40.762400000003254,
+      "events": []
+    },
+    {
+      "tick": 569,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 42.838800000001356,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 42.88920000000144,
+      "events": []
+    },
+    {
+      "tick": 570,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.73960000000079,
+      "copyMs": 0.035799999997834675,
+      "totalMs": 39.78889999999956,
+      "events": []
+    },
+    {
+      "tick": 571,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.01900000000023,
+      "copyMs": 0.04530000000158907,
+      "totalMs": 40.0795999999973,
+      "events": []
+    },
+    {
+      "tick": 572,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.08629999999903,
+      "copyMs": 0.037599999999656575,
+      "totalMs": 40.13799999999901,
+      "events": []
+    },
+    {
+      "tick": 573,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 51.467100000001665,
+      "copyMs": 0.037899999999353895,
+      "totalMs": 51.51610000000073,
+      "events": []
+    },
+    {
+      "tick": 574,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.926800000001094,
+      "copyMs": 0.03719999999884749,
+      "totalMs": 40.97580000000016,
+      "events": []
+    },
+    {
+      "tick": 575,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.10080000000016,
+      "copyMs": 0.039100000001781154,
+      "totalMs": 40.15309999999954,
+      "events": []
+    },
+    {
+      "tick": 576,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.077400000001944,
+      "copyMs": 0.035800000001472654,
+      "totalMs": 40.12419999999838,
+      "events": []
+    },
+    {
+      "tick": 577,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.032499999997526,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.08289999999761,
+      "events": []
+    },
+    {
+      "tick": 578,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.77419999999984,
+      "copyMs": 0.03509999999732827,
+      "totalMs": 39.82270000000062,
+      "events": []
+    },
+    {
+      "tick": 579,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.747199999997974,
+      "copyMs": 0.04279999999926076,
+      "totalMs": 40.80460000000312,
+      "events": []
+    },
+    {
+      "tick": 580,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.86019999999917,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 39.91389999999956,
+      "events": []
+    },
+    {
+      "tick": 581,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.64170000000013,
+      "copyMs": 0.03709999999773572,
+      "totalMs": 39.69260000000213,
+      "events": []
+    },
+    {
+      "tick": 582,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.73879999999917,
+      "copyMs": 0.035199999998440035,
+      "totalMs": 49.78600000000006,
+      "events": []
+    },
+    {
+      "tick": 583,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.4390999999996,
+      "copyMs": 0.03919999999925494,
+      "totalMs": 40.4900000000016,
+      "events": []
+    },
+    {
+      "tick": 584,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.38940000000002,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 39.43969999999899,
+      "events": []
+    },
+    {
+      "tick": 585,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.79719999999725,
+      "copyMs": 0.035499999998137355,
+      "totalMs": 39.84660000000076,
+      "events": []
+    },
+    {
+      "tick": 586,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.795900000000984,
+      "copyMs": 0.03769999999713036,
+      "totalMs": 39.84640000000218,
+      "events": []
+    },
+    {
+      "tick": 587,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.46320000000196,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 39.51499999999942,
+      "events": []
+    },
+    {
+      "tick": 588,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.959500000000844,
+      "copyMs": 0.04230000000097789,
+      "totalMs": 40.014799999997194,
+      "events": []
+    },
+    {
+      "tick": 589,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.17619999999806,
+      "copyMs": 0.03770000000076834,
+      "totalMs": 39.227200000001176,
+      "events": []
+    },
+    {
+      "tick": 590,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 49.92789999999877,
+      "copyMs": 0.03719999999884749,
+      "totalMs": 49.97759999999835,
+      "events": []
+    },
+    {
+      "tick": 591,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.29479999999967,
+      "copyMs": 0.03799999999682768,
+      "totalMs": 40.346599999997125,
+      "events": []
+    },
+    {
+      "tick": 592,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.731700000000274,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 40.78120000000126,
+      "events": []
+    },
+    {
+      "tick": 593,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 48.433100000002014,
+      "copyMs": 0.0511000000005879,
+      "totalMs": 48.4971000000005,
+      "events": []
+    },
+    {
+      "tick": 594,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.29249999999956,
+      "copyMs": 0.03510000000096625,
+      "totalMs": 39.340400000000955,
+      "events": []
+    },
+    {
+      "tick": 595,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.17519999999786,
+      "copyMs": 0.041799999999057036,
+      "totalMs": 39.228399999999965,
+      "events": []
+    },
+    {
+      "tick": 596,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.05370000000039,
+      "copyMs": 0.0385999999998603,
+      "totalMs": 40.1153000000013,
+      "events": []
+    },
+    {
+      "tick": 597,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.347099999999045,
+      "copyMs": 0.03689999999915017,
+      "totalMs": 39.39650000000256,
+      "events": []
+    },
+    {
+      "tick": 598,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.313600000001315,
+      "copyMs": 0.04550000000017462,
+      "totalMs": 41.3711000000003,
+      "events": []
+    },
+    {
+      "tick": 599,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 52.138200000001234,
+      "copyMs": 0.03629999999975553,
+      "totalMs": 52.186799999999494,
+      "events": []
+    },
+    {
+      "tick": 600,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.40139999999883,
+      "copyMs": 0.0367999999980384,
+      "totalMs": 40.450700000001234,
+      "events": []
+    },
+    {
+      "tick": 601,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.93950000000041,
+      "copyMs": 0.035800000001472654,
+      "totalMs": 39.988900000000285,
+      "events": []
+    },
+    {
+      "tick": 602,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.9390999999996,
+      "copyMs": 0.03740000000107102,
+      "totalMs": 39.98879999999917,
+      "events": []
+    },
+    {
+      "tick": 603,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.91280000000188,
+      "copyMs": 0.03869999999733409,
+      "totalMs": 39.965000000000146,
+      "events": []
+    },
+    {
+      "tick": 604,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.50989999999729,
+      "copyMs": 0.03720000000248547,
+      "totalMs": 40.56109999999899,
+      "events": []
+    },
+    {
+      "tick": 605,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.371399999999994,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.42069999999876,
+      "events": []
+    },
+    {
+      "tick": 606,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.27399999999761,
+      "copyMs": 0.036100000001169974,
+      "totalMs": 40.32350000000224,
+      "events": []
+    },
+    {
+      "tick": 607,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.75089999999909,
+      "copyMs": 0.03930000000036671,
+      "totalMs": 53.80329999999958,
+      "events": []
+    },
+    {
+      "tick": 608,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 43.95850000000064,
+      "copyMs": 0.04569999999876018,
+      "totalMs": 44.01979999999821,
+      "events": []
+    },
+    {
+      "tick": 609,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 46.301400000000285,
+      "copyMs": 0.04080000000249129,
+      "totalMs": 46.356800000001385,
+      "events": []
+    },
+    {
+      "tick": 610,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.723799999999756,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 40.77269999999771,
+      "events": []
+    },
+    {
+      "tick": 611,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.90690000000177,
+      "copyMs": 0.038200000002689194,
+      "totalMs": 39.95650000000023,
+      "events": []
+    },
+    {
+      "tick": 612,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.89979999999923,
+      "copyMs": 0.05609999999796855,
+      "totalMs": 40.96940000000177,
+      "events": []
+    },
+    {
+      "tick": 613,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.33849999999802,
+      "copyMs": 0.03540000000066357,
+      "totalMs": 40.38799999999901,
+      "events": []
+    },
+    {
+      "tick": 614,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.821899999999005,
+      "copyMs": 0.036999999996623956,
+      "totalMs": 39.87069999999949,
+      "events": []
+    },
+    {
+      "tick": 615,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.22680000000037,
+      "copyMs": 0.040300000000570435,
+      "totalMs": 41.27890000000116,
+      "events": []
+    },
+    {
+      "tick": 616,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.94789999999921,
+      "copyMs": 0.04199999999764259,
+      "totalMs": 54.00310000000172,
+      "events": []
+    },
+    {
+      "tick": 617,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 44.7999000000018,
+      "copyMs": 0.03769999999713036,
+      "totalMs": 44.85109999999986,
+      "events": []
+    },
+    {
+      "tick": 618,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.487999999997555,
+      "copyMs": 0.04100000000107684,
+      "totalMs": 41.54490000000078,
+      "events": []
+    },
+    {
+      "tick": 619,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.68710000000283,
+      "copyMs": 0.04049999999915599,
+      "totalMs": 41.740499999999884,
+      "events": []
+    },
+    {
+      "tick": 620,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.32300000000032,
+      "copyMs": 0.03749999999854481,
+      "totalMs": 40.37280000000101,
+      "events": []
+    },
+    {
+      "tick": 621,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.66769999999815,
+      "copyMs": 0.036700000000564614,
+      "totalMs": 40.718699999997625,
+      "events": []
+    },
+    {
+      "tick": 622,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.33519999999771,
+      "copyMs": 0.033400000000256114,
+      "totalMs": 40.3823999999986,
+      "events": []
+    },
+    {
+      "tick": 623,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.13810000000012,
+      "copyMs": 0.04959999999846332,
+      "totalMs": 40.20479999999952,
+      "events": []
+    },
+    {
+      "tick": 624,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 54.75210000000152,
+      "copyMs": 0.03720000000248547,
+      "totalMs": 54.806700000001,
+      "events": []
+    },
+    {
+      "tick": 625,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.579900000000634,
+      "copyMs": 0.03559999999924912,
+      "totalMs": 40.62810000000172,
+      "events": []
+    },
+    {
+      "tick": 626,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.4571999999971,
+      "copyMs": 0.03379999999742722,
+      "totalMs": 41.50619999999981,
+      "events": []
+    },
+    {
+      "tick": 627,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.20019999999931,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 41.24850000000151,
+      "events": []
+    },
+    {
+      "tick": 628,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.57449999999881,
+      "copyMs": 0.038499999998748535,
+      "totalMs": 40.627700000000914,
+      "events": []
+    },
+    {
+      "tick": 629,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.20969999999943,
+      "copyMs": 0.03499999999985448,
+      "totalMs": 40.25759999999718,
+      "events": []
+    },
+    {
+      "tick": 630,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.78570000000036,
+      "copyMs": 0.03570000000036089,
+      "totalMs": 40.84440000000177,
+      "events": []
+    },
+    {
+      "tick": 631,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.65279999999984,
+      "copyMs": 0.036699999996926636,
+      "totalMs": 40.70230000000083,
+      "events": []
+    },
+    {
+      "tick": 632,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 50.17629999999917,
+      "copyMs": 0.03929999999672873,
+      "totalMs": 50.22699999999895,
+      "events": []
+    },
+    {
+      "tick": 633,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.65279999999984,
+      "copyMs": 0.03680000000167638,
+      "totalMs": 40.701099999998405,
+      "events": []
+    },
+    {
+      "tick": 634,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.64190000000235,
+      "copyMs": 0.03680000000167638,
+      "totalMs": 40.69230000000243,
+      "events": []
+    },
+    {
+      "tick": 635,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.22699999999895,
+      "copyMs": 0.03719999999884749,
+      "totalMs": 40.27549999999974,
+      "events": []
+    },
+    {
+      "tick": 636,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.977999999999156,
+      "copyMs": 0.04019999999945867,
+      "totalMs": 41.03180000000066,
+      "events": []
+    },
+    {
+      "tick": 637,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.99850000000151,
+      "copyMs": 0.034299999999348074,
+      "totalMs": 40.04559999999765,
+      "events": []
+    },
+    {
+      "tick": 638,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.259399999999005,
+      "copyMs": 0.036400000000867294,
+      "totalMs": 41.30840000000171,
+      "events": []
+    },
+    {
+      "tick": 639,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.45709999999963,
+      "copyMs": 0.03800000000046566,
+      "totalMs": 40.508200000000215,
+      "events": []
+    },
+    {
+      "tick": 640,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.67840000000069,
+      "copyMs": 0.03419999999823631,
+      "totalMs": 40.72560000000158,
+      "events": []
+    },
+    {
+      "tick": 641,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 54.10939999999755,
+      "copyMs": 0.04020000000309665,
+      "totalMs": 54.161700000000565,
+      "events": []
+    },
+    {
+      "tick": 642,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.28719999999885,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.33810000000085,
+      "events": []
+    },
+    {
+      "tick": 643,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.7345000000023,
+      "copyMs": 0.037299999999959255,
+      "totalMs": 40.784599999999045,
+      "events": []
+    },
+    {
+      "tick": 644,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.694500000001426,
+      "copyMs": 0.037899999999353895,
+      "totalMs": 40.744699999999284,
+      "events": []
+    },
+    {
+      "tick": 645,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.43689999999697,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 40.48949999999968,
+      "events": []
+    },
+    {
+      "tick": 646,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.24199999999837,
+      "copyMs": 0.034599999999045394,
+      "totalMs": 40.288400000001275,
+      "events": []
+    },
+    {
+      "tick": 647,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.102899999998044,
+      "copyMs": 0.03470000000015716,
+      "totalMs": 40.14970000000176,
+      "events": []
+    },
+    {
+      "tick": 648,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.517500000001746,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.56759999999849,
+      "events": []
+    },
+    {
+      "tick": 649,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 51.29769999999917,
+      "copyMs": 0.037900000002991874,
+      "totalMs": 51.34900000000198,
+      "events": []
+    },
+    {
+      "tick": 650,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.84939999999915,
+      "copyMs": 0.036400000000867294,
+      "totalMs": 41.90020000000004,
+      "events": []
+    },
+    {
+      "tick": 651,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.38000000000102,
+      "copyMs": 0.03949999999895226,
+      "totalMs": 40.43419999999969,
+      "events": []
+    },
+    {
+      "tick": 652,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.915499999999156,
+      "copyMs": 0.0404000000016822,
+      "totalMs": 40.96839999999793,
+      "events": []
+    },
+    {
+      "tick": 653,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.31049999999959,
+      "copyMs": 0.04610000000320724,
+      "totalMs": 40.373200000001816,
+      "events": []
+    },
+    {
+      "tick": 654,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.539600000000064,
+      "copyMs": 0.03810000000157743,
+      "totalMs": 40.59230000000025,
+      "events": []
+    },
+    {
+      "tick": 655,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 41.103800000000774,
+      "copyMs": 0.03680000000167638,
+      "totalMs": 41.15430000000197,
+      "events": []
+    },
+    {
+      "tick": 656,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.56199999999808,
+      "copyMs": 0.03830000000016298,
+      "totalMs": 40.613100000002305,
+      "events": []
+    },
+    {
+      "tick": 657,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.94289999999819,
+      "copyMs": 0.035500000001775334,
+      "totalMs": 39.99090000000069,
+      "events": []
+    },
+    {
+      "tick": 658,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 53.55199999999968,
+      "copyMs": 0.04529999999795109,
+      "totalMs": 53.610899999999674,
+      "events": []
+    },
+    {
+      "tick": 659,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 40.72409999999945,
+      "copyMs": 0.03989999999976135,
+      "totalMs": 40.777099999999336,
+      "events": []
+    },
+    {
+      "tick": 660,
+      "toolMs": 0,
+      "setCellMs": 0,
+      "setCellCalls": 0,
+      "cpuPhysicsMs": 39.725399999999354,
+      "copyMs": 0.039700000001175795,
+      "totalMs": 39.77669999999853,
+      "events": []
+    }
+  ]
+}

@@ -230,8 +230,19 @@ export class FieldState {
     this.editEnergyQ += BigInt(state.energyQ[0]) - BigInt(this.energies[index]);
     this.cells[index] = state.grid[0];
     this.energies[index] = state.energyQ[0];
-    this.bonds[index] = rulesForRegistry(this.registry).eligible(this.cells[index]) ? INTEGRITY_MASK | FRESH : 0;
-    this.normalizeStructure();
+    if (rulesForRegistry(this.registry).eligible(this.cells[index])) {
+      this.bonds[index] = INTEGRITY_MASK | FRESH;
+      this.normalizeStructure();
+    } else {
+      // Committed structure has reciprocal edges and no pending welds. A
+      // noncohesive replacement only removes the four links into this cell;
+      // distant edges, pins, integrity and fluid pressure stay exactly equal.
+      this.bonds[index] = 0;
+      if (x > 0) this.bonds[index - 1] &= ~BOND_BITS[1];
+      if (x + 1 < this.width) this.bonds[index + 1] &= ~BOND_BITS[0];
+      if (y > 0) this.bonds[index - this.width] &= ~BOND_BITS[3];
+      if (y + 1 < this.height) this.bonds[index + this.width] &= ~BOND_BITS[2];
+    }
   }
 
   setEnergy(x: number, y: number, energyQ: number): void {
