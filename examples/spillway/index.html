@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Spillway · State Space</title><link rel="stylesheet" href="./style.css"></head>
+<body>
+<header><a class="brand" href="../../web/">STATE SPACE <span>/ REFERENCE GAME 01</span></a><a href="./README.md">Integration guide ↗</a></header>
+<main>
+<section class="intro"><div><p class="eyebrow">A SMALL WORLD. REAL CONSEQUENCES.</p><h1>Spillway<span>.</span></h1><p>Reach the relay across the basin. The bridge is yours to break.</p></div><div class="chip"><i></i> SHARED ENGINE · 256 × 256</div></section>
+<div class="layout">
+<section class="playfield" aria-label="Game viewport">
+<div class="scene-label"><span>01 / THE CROSSING</span><span id="mode">READY</span></div>
+<canvas id="canvas" width="1920" height="1080" tabindex="0" aria-label="Spillway. Move with A and D, jump with Space, cut with E, heat with F. Aim with the pointer."></canvas>
+<div id="outcome" class="outcome" hidden></div>
+<div class="bottom-hud"><span id="health">SUIT 100</span><span id="tick">TICK 0000</span><span id="frame">ALL EFFECTS ON</span></div>
+</section>
+<aside>
+<section class="mission"><p class="eyebrow">YOUR OBJECTIVE</p><h2>Get to the other side.</h2><p>Cut through the wooden barricade or jump it. Cross the bridge to the green relay.</p><p class="hint">Curious? Aim at the bridge’s thin central support and hold F. Water below is swimmable; hold Space to rise.</p><button id="play" class="primary" disabled>Loading engine…</button></section>
+<section><p class="eyebrow">CONTROLS</p><dl><div><dt><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd></dt><dd>Move</dd></div><div><dt><kbd>Space</kbd></dt><dd>Jump / swim</dd></div><div><dt><kbd>E</kbd> / <kbd>F</kbd></dt><dd>Cut / heat</dd></div><div><dt>Pointer</dt><dd>Aim within reach</dd></div><div><dt><kbd>P</kbd> / <kbd>.</kbd></dt><dd>Pause / single tick</dd></div></dl><div class="touch"><button data-hold="KeyA" aria-label="Move left">←</button><button data-hold="Space">Jump</button><button data-hold="KeyD" aria-label="Move right">→</button><button data-hold="KeyE">Cut</button></div></section>
+<section><p class="eyebrow">EXACT REPLAY</p><p class="small">Every control is recorded against a simulation tick. Replay compares the complete world, character and event history.</p><div class="buttons"><button id="restart" disabled>Restart</button><button id="step" disabled>Step</button><button id="replay" disabled>Replay run</button><button id="export" disabled>Export replay</button></div><label class="import">Open replay file<input id="import" type="file" accept=".json,application/json" disabled></label><p id="replay-status" class="small" role="status">Your run starts when you press Play.</p></section>
+<section><p class="eyebrow">GAMEPLAY EVENTS</p><ol id="events"><li>Waiting for your first move.</li></ol></section>
+</aside>
+</div>
+<footer><span id="status" role="status">Creating the shared WebGPU engine…</span><button id="benchmark" disabled>Benchmark full frame</button><a id="receipt" hidden>Download benchmark</a></footer>
+</main><script type="module" src="./app.js"></script>
+</body></html>

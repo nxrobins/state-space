@@ -1,0 +1,58 @@
+{
+  "schema": "state-space-benchmark-interruption-1",
+  "collectedAt": "2026-10-13T07:51:37.6217658Z",
+  "outcome": "interrupted",
+  "cause": "undetermined",
+  "userReport": "Computer froze during the benchmark",
+  "command": "uv run python -m scripts.benchmark_spillway --browser-cli C:/Users/nxrob/AppData/Local/npm-cache/_npx/ba0727cbf2d10686/node_modules/agent-browser/bin/agent-browser.js --output docs/checkpoints/spillway/frames-quiet --require-locked",
+  "lastObservedStatus": "crossing: 60 warmup + 600 measured display-paced frames, all effects on.",
+  "benchmarkProcessPresentAfterReboot": false,
+  "completedReceiptPresent": false,
+  "retainedArtifacts": [
+    "ready.png"
+  ],
+  "systemEvents": [
+    {
+      "timeCreated": "2026-10-13T00:10:08.5425397-07:00",
+      "id": 41,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+      "data": {
+        "LidReliability": "false",
+        "CsEntryScenarioInstanceId": "0",
+        "SleepInProgress": "0",
+        "Checkpoint": "0",
+        "InputSuppressionState": "0",
+        "SystemSleepTransitionsToOn": "0",
+        "CheckpointStatus": "0",
+        "PowerButtonSuppressionState": "0",
+        "LongPowerButtonPressDetected": "false",
+        "BugcheckParameter1": "0x0",
+        "WHEABootErrorCount": "0",
+        "BugcheckInfoFromEFI": "false",
+        "BootAppStatus": "0",
+        "ConnectedStandbyInProgress": "false",
+        "BugcheckParameter2": "0x0",
+        "BugcheckCode": "0",
+        "PowerButtonTimestamp": "0",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter3": "0x0",
+        "LidState": "3"
+      }
+    },
+    {
+      "timeCreated": "2026-10-13T00:10:13.7516401-07:00",
+      "id": 6008,
+      "provider": "EventLog",
+      "message": "The previous system shutdown at 12:07:33 AM on ‎10/‎13/‎2026 was unexpected.",
+      "data": {}
+    }
+  ],
+  "diagnosticNotes": [
+    "System log contains Kernel-Power 41 with BugcheckCode 0 and EventLog 6008.",
+    "No Display 4101, nvlddmkm, WHEA-Logger or resource-exhaustion 2004 event was returned in the examined three-hour window.",
+    "These observations do not establish the cause of the freeze.",
+    "No benchmark was restarted after the user reported the freeze."
+  ]
+}

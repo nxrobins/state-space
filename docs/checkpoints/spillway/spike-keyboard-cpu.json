@@ -1,0 +1,53 @@
+{
+  "exact": true,
+  "expected": "e5c0e62db3044f6ea83746590bdb3ce9148d5ee2cc1ac768c72b863845124c49",
+  "actual": "e5c0e62db3044f6ea83746590bdb3ce9148d5ee2cc1ac768c72b863845124c49",
+  "ticks": 98,
+  "driftQ": "0",
+  "events": [
+    {
+      "tick": 31,
+      "type": "blocked"
+    },
+    {
+      "tick": 43,
+      "type": "terrain-cut",
+      "cells": 26,
+      "x": 68,
+      "y": 169
+    },
+    {
+      "tick": 55,
+      "type": "terrain-cut",
+      "cells": 21,
+      "x": 68,
+      "y": 169
+    },
+    {
+      "tick": 67,
+      "type": "terrain-cut",
+      "cells": 4,
+      "x": 68,
+      "y": 169
+    },
+    {
+      "tick": 76,
+      "type": "landed"
+    }
+  ],
+  "player": {
+    "x": 23456,
+    "y": 42240,
+    "vx": 0,
+    "vy": 0,
+    "facing": 1,
+    "grounded": true,
+    "wet": false,
+    "health": 100,
+    "cooldown": 0,
+    "hurtCooldown": 0,
+    "jumpHeld": false,
+    "blocked": false
+  },
+  "status": "playing"
+}

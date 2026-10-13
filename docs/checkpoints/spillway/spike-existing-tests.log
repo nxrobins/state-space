@@ -1,0 +1,146 @@
+
+> state-space-engine@0.4.0 pretest
+> npm run build:sdk
+
+
+> state-space-engine@0.4.0 build:sdk
+> vite build --config engine/vite.sdk.config.ts && tsc -p engine/tsconfig.sdk.json
+
+vite v6.4.3 building for production...
+transforming...
+✓ 16 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/sdk/state-space.js  159.09 kB │ gzip: 37.21 kB
+✓ built in 195ms
+
+> state-space-engine@0.4.0 test
+> vitest run --config engine/vitest.config.ts && node --test web/rendering.test.mjs
+
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/validation.test.ts (4 tests) 6ms
+ ✓ engine/pressure.test.ts (4 tests) 25ms
+ ✓ engine/cpu_physics.test.ts (3 tests) 33ms
+ ✓ engine/structure_public.test.ts (5 tests) 26ms
+ ✓ engine/structure_compiled.test.ts (4 tests) 226ms
+ ✓ engine/contracts.test.ts (7 tests) 491ms
+   ✓ portable engine contracts > matches every Python cold-table slot, including optical and reserved data  356ms
+ ✓ engine/mutations.test.ts (5 tests) 621ms
+ ✓ engine/fidelity.test.ts (5 tests) 1107ms
+   ✓ ca-v2 public energy state > keeps default water liquid in a default world  1058ms
+ ✓ engine/sdk.test.ts (8 tests) 3138ms
+   ✓ portable registries and field APIs > matches Python catalog acceptance and SHA-256 identity  934ms
+   ✓ portable registries and field APIs > matches the native public API, including every custom-scene pass delta and restart  1897ms
+stdout | engine/structure.test.ts > C6 prototype independent planner/native transport conformance > compares every state coordinate, support diagnostic, component and source permutation
+C6 prototype: 25 scenes, 101 complete planner/native GPU comparisons; movement and damage observed.
+
+ ✓ engine/structure.test.ts (9 tests) 3884ms
+   ✓ C6 prototype independent planner/native transport conformance > executes negative controls for no motion, lost energy, automatic welding and missing load remainder  498ms
+stdout | engine/conformance.test.ts > native GPU and browser CPU conformance > matches the entire packed state after every pass, across shapes and salts
+Conformance: 35 scenes, 4416 pass comparisons, 53 pipeline variants.
+
+ ✓ engine/conformance.test.ts (6 tests) 8976ms
+   ✓ native GPU and browser CPU conformance > matches the entire packed state after every pass, across shapes and salts  1362ms
+   ✓ native GPU and browser CPU conformance > matches native state after every pass through the complete tick path  658ms
+
+ Test Files  11 passed (11)
+      Tests  60 passed (60)
+   Start at  12:09:41
+   Duration  10.02s (transform 747ms, setup 0ms, collect 3.44s, tests 18.53s, environment 2ms, prepare 4.72s)
+
+TAP version 13
+# Subtest: display scheduling keeps 60 ticks per second without an unbounded backlog
+ok 1 - display scheduling keeps 60 ticks per second without an unbounded backlog
+  ---
+  duration_ms: 1.2885
+  type: 'test'
+  ...
+# Subtest: rounded display timestamps do not alternate zero and double physics ticks
+ok 2 - rounded display timestamps do not alternate zero and double physics ticks
+  ---
+  duration_ms: 0.295
+  type: 'test'
+  ...
+# Subtest: missed callbacks do not start a continuing multi-tick catch-up loop
+ok 3 - missed callbacks do not start a continuing multi-tick catch-up loop
+  ---
+  duration_ms: 0.6854
+  type: 'test'
+  ...
+# Subtest: display callbacks stay armed across GPU waits with one bounded pending frame
+ok 4 - display callbacks stay armed across GPU waits with one bounded pending frame
+  ---
+  duration_ms: 3.5229
+  type: 'test'
+  ...
+# Subtest: a failed GPU frame cancels future callbacks and reports the error once
+ok 5 - a failed GPU frame cancels future callbacks and reports the error once
+  ---
+  duration_ms: 0.472
+  type: 'test'
+  ...
+# Subtest: 60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physics despite average cadence
+ok 6 - 60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physics despite average cadence
+  ---
+  duration_ms: 1.252
+  type: 'test'
+  ...
+# Subtest: lighting gallery keeps its receivers, baffles and finite lava in each exhibit
+ok 7 - lighting gallery keeps its receivers, baffles and finite lava in each exhibit
+  ---
+  duration_ms: 5149.2487
+  type: 'test'
+  ...
+# Subtest: water lagoon retains finite emitters and water through a measured trajectory
+ok 8 - water lagoon retains finite emitters and water through a measured trajectory
+  ---
+  duration_ms: 11323.3696
+  type: 'test'
+  ...
+# Subtest: haze and heat chambers retain finite smoke, steam, and lava through measurement
+ok 9 - haze and heat chambers retain finite smoke, steam, and lava through measurement
+  ---
+  duration_ms: 26914.3417
+  type: 'test'
+  ...
+# Subtest: picking matches square letterboxing, including high DPI CSS coordinates
+ok 10 - picking matches square letterboxing, including high DPI CSS coordinates
+  ---
+  duration_ms: 0.6245
+  type: 'test'
+  ...
+# Subtest: bridge is finite, burns real wood, and resumes the complete deterministic state
+ok 11 - bridge is finite, burns real wood, and resumes the complete deterministic state
+  ---
+  duration_ms: 1419.8404
+  type: 'test'
+  ...
+# Subtest: the unlit bridge carries its load without collapse
+ok 12 - the unlit bridge carries its load without collapse
+  ---
+  duration_ms: 5032.3653
+  type: 'test'
+  ...
+# Subtest: pressure gallery distinguishes wood from metal and sealed from vented steam
+ok 13 - pressure gallery distinguishes wood from metal and sealed from vented steam
+  ---
+  duration_ms: 2636.8021
+  type: 'test'
+  ...
+# Subtest: slow viewing schedules fewer exact ticks without skipping or accumulating time debt
+ok 14 - slow viewing schedules fewer exact ticks without skipping or accumulating time debt
+  ---
+  duration_ms: 1.0444
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 52571.9226
