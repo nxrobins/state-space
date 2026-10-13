@@ -38,12 +38,16 @@ body { background: #080d16; color: #c6d3dd; font-family: system-ui, sans-serif; 
 #heading p { margin-top: 10px; color: #79909e; max-width: 380px; font-size: 13px; line-height: 1.6; }
 #sidebar { width: 224px; flex-shrink: 0; padding: 20px 16px; background: #101923; border-color: #24313e; gap: 10px; }
 h3 { color: #748b9d; letter-spacing: .12em; font-size: 10px; }
-button, .action { background: #192a38; border: 1px solid #334958; border-radius: 6px; color: #dbe9ee; padding: 10px; font: inherit; cursor: pointer; text-align: center; text-decoration: none; }
+button, select, .action { background: #192a38; border: 1px solid #334958; border-radius: 6px; color: #dbe9ee; padding: 10px; font: inherit; cursor: pointer; text-align: center; text-decoration: none; }
 #view-toggle { border-color: #b27943; color: #ffd1a0; }
 .mat-btn { padding: 5px 7px; background: #15212c; border-color: #263747; }
 .mat-btn.selected { border-color: #d8a675; background: #243341; }
 #stats { background: #0b121b; white-space: pre-line; font-family: ui-monospace, monospace; }
 #controls { color: #8397a7; }
+#watch-guide { font-size: 12px; line-height: 1.6; color: #9bb1c0; }
+#scene-select, #playback-rate { width: 100%; text-align: left; }
+.control-row { display: flex; gap: 6px; }
+.control-row > button { flex: 1; }
 @media (max-width: 700px) { #sidebar { width: 160px; padding: 12px; } #heading { left: 18px; top: 18px; } #heading p { max-width: 200px; } }
 </style>
 </head>
@@ -54,19 +58,19 @@ button, .action { background: #192a38; border: 1px solid #334958; border-radius:
         <div id="heading"><span>State Space · 256 × 256</span><h1>A bridge under fire.</h1><p>Heat travels. Supports burn.<br>Watch the same world through two lenses.</p></div>
     </div>
     <div id="sidebar">
+        <h3><label for="scene-select">DEMO</label></h3>
+        <select id="scene-select" aria-label="Demo scene"></select>
+        <p id="watch-guide"></p>
+        <button id="reset-demo">Restart scene</button>
+        <div class="control-row"><button id="pause">Resume</button><button id="step">Step 1 tick</button></div>
+        <label for="playback-rate">Playback speed</label>
+        <select id="playback-rate"><option value="1">1× · 60 ticks / sec</option><option value="0.25">0.25× · 15 ticks / sec</option><option value="0.1">0.1× · 6 ticks / sec</option></select>
         <h3>PRESENTATION</h3>
         <button id="view-toggle" aria-pressed="true">B · Material + light</button>
         <button id="light-toggle" aria-pressed="true">Lighting + shadows: on</button>
         <button id="water-toggle" aria-pressed="true">Water optics: on</button>
         <button id="haze-toggle" aria-pressed="true">Volumetric haze: on</button>
         <button id="distortion-toggle" aria-pressed="true">Heat shimmer: on</button>
-        <button id="reset-demo">Restart bridge</button>
-        <button id="pause">Pause</button>
-        <a class="action" href="?scene=lighting&paused">Light &amp; shadow gallery</a>
-        <a class="action" href="?scene=water&paused">Fire &amp; water lagoon</a>
-        <a class="action" href="?scene=haze&paused">Smoke &amp; steam chambers</a>
-        <a class="action" href="?scene=heat&paused">Heat shimmer chambers</a>
-        <a class="action" href="?scene=pressure&paused">Dams &amp; pressure vessels</a>
         <a class="action" href="benchmark.html">Benchmark full frame</a>
         <h3>MATERIALS</h3>
         <div id="palette"></div>
@@ -82,6 +86,7 @@ button, .action { background: #192a38; border: 1px solid #334958; border-radius:
             Left click: place<br>
             Right click: erase<br>
             Space: pause/play<br>
+            . : step one tick<br>
             B: toggle A/B view<br>
             L: lighting + shadows<br>
             W: water optics<br>

@@ -92,42 +92,55 @@ npm run build:sdk
 uv run python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Open [the burning bridge](http://127.0.0.1:8765/web/). Click the A/B button or press
-**B** to change presentation, **Space** to pause, and **R** to restart the bridge.
-The hot wooden supports and deck burn through existing engine rules; fragments
-fall into the water. Initial heat/fuel is finite. Playback adds no energy or fire.
-Plain mode is a palette reference, not a second simulation.
+Open [the burning bridge](http://127.0.0.1:8765/web/). All demos open paused so
+short events are visible from their first tick. **Step 1 tick** (or **.**) advances
+one exact tick. **Playback speed** selects 1×, 0.25×, or 0.1×; it changes only how
+often ticks are requested. **Space** resumes or pauses; **R** restores the complete
+initial state and pauses. The scene selector includes a route back to the bridge.
+Use `?play` to opt into immediate playback.
 
-Use **Lighting + shadows** or press **L** to compare direct illumination while
-retaining material shading, heat glow, and bloom. Bloom is a lens effect and can
-spread over silhouettes; the direct-light visibility pass still blocks opaque
-terrain. The native and browser render APIs can disable bloom independently for
-shadow inspection.
+The bridge's masonry carries the cold structure. A narrow hot wooden pin burns,
+and expansion joints allow the central span to drop independently. An otherwise
+identical unlit control remains standing. Watch the first 12 ticks at 0.1×: the
+finite initial fire burns out quickly, and the fallen span eventually lands on
+the pier. Playback adds no energy or fuel. **B** switches presentation of the same
+complete field; it does not start another simulation.
 
 The [light and shadow gallery](http://127.0.0.1:8765/web/?scene=lighting&paused)
-starts paused with 64 finite lava reservoirs, metal receivers, and narrow stone
-pillars. Resume to watch heat and material changes under the normal physics. Its
-larger reservoirs retain lava through the complete benchmark trajectory; playback
-never replenishes their energy. **R** restarts the selected scene.
+uses four supported lava basins. A metal receiver above each open basin stays
+within lighting range. From top left to bottom right, compare a clear path,
+a narrow stone baffle, a wide stone baffle, and transparent glass. **L** toggles
+direct illumination and shadows. The basins have shallow reservoirs and thick,
+cool outer shells; their inner faces still melt under the normal physics.
+The receivers and baffles use explicit structural anchors.
 
-The [fire and water lagoon](http://127.0.0.1:8765/web/?scene=water&paused) starts
-paused with finite lava basins, burning wooden platforms, a deep pool, and a
-patterned riverbed. Ordinary structural anchors hold the stone basins above the
-water; the wood still burns under normal physics. Use **Water optics** or press
-**W** to compare reflections/refraction while keeping the same complete field.
+The [fire and water lagoon](http://127.0.0.1:8765/web/?scene=water&paused) uses
+the same supported basin geometry above a deep pool and striped riverbed.
+The small wooden fires are brief; finite lava provides the longer reflection.
+**W** compares reflections and refraction at the same state. The cold supports
+keep the basins above the water as their inner surfaces change.
 
-The [smoke and steam chambers](http://127.0.0.1:8765/web/?scene=haze&paused)
-start paused with finite gas, lava reservoirs, burning wood, and thin stone
-dividers. Use **Volumetric haze** or press **H** to compare against the earlier
-gas shading. Use **L** to inspect scattered illumination. The chambers retain
-both gas species and active lava through the entire measured trajectory, with
-no replenishment during playback.
+The [smoke and steam bays](http://127.0.0.1:8765/web/?scene=haze&paused) have
+open tops and air between the gas regions, plus supported lava basins. They
+show illuminated haze without making the viewing fixtures into sealed pressure
+vessels. **H** compares volume shading and **L** compares scattered light. Gas
+moves and mixes, steam may condense, and the initial heat is finite.
 
-The [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused) use the
-same finite reservoirs with cold smoke bands above them. Press **D** or use
-**Heat shimmer** to compare distortion at the same complete state. Resume to
-watch the shimmer rise while smoke moves, steam condenses, and basin faces melt
-under the ordinary physics. The D toggle is independent of H, L, W, and A/B.
+The [heat shimmer bays](http://127.0.0.1:8765/web/?scene=heat&paused) add contrasting
+smoke bands above the hot reservoirs. Step a few ticks, then press **D** to compare
+distortion at exactly the same state. The bands naturally mix; restart for the
+clearest initial comparison. Shimmer leaves opaque terrain unchanged.
+
+The [pressure gallery](http://127.0.0.1:8765/web/?scene=pressure&paused) places a
+wood dam, metal dam, sealed glass vessel, and vented glass vessel from left to
+right. Compare the first 30 ticks at 0.1×: equal water heads breach the wood dam
+while the metal holds; identical hot steam doses rupture the sealed vessel while
+the vented walls remain. Later condensation and heating can change either vessel,
+so their comparison is intentionally about the early pressure response.
+
+All effects can be compared while paused. Bloom spreads over silhouettes as a
+lens effect; direct-light visibility still blocks opaque terrain. Native and
+browser render APIs can disable bloom independently for shadow inspection.
 
 The client pre-arms `requestAnimationFrame` before asynchronous GPU work and retains
 at most one pending display timestamp. Work and edits remain serialized. Rounded
@@ -135,7 +148,7 @@ display timestamps have a 0.5 ms tolerance, with any early phase carried forward
 so ordinary callback jitter does not alternate zero and double ticks. The client
 uses the interval between raw display callbacks to drop time from callbacks it
 could not serve, avoiding a continuing multi-tick catch-up loop after a slow frame. It
-uses a fixed 60-tick clock, at most four
+uses a fixed 60-tick clock (with the selected viewing speed applied to display time), at most four
 ticks per frame. Time that a slow device or a hidden tab could not simulate is
 dropped, not repaid later: ticks are never skipped or changed, so the world runs
 slower than real time instead of fast-forwarding afterward. Visual animation
@@ -145,10 +158,10 @@ request a fresh render. Status text updates four times per second.
 
 The [full-frame benchmark](http://127.0.0.1:8765/web/benchmark.html) compares plain,
 styled, and alternating views on the bridge, a fully emissive lava field, the
-distributed lighting gallery, lagoon, haze, and heat chambers at 256 × 256. The lagoon
+lighting gallery, lagoon, haze, heat, and pressure scenes at 256 × 256. The lagoon
 adds a water-disabled comparison; the chambers add a haze-disabled comparison.
 The heat chambers add a distortion-disabled comparison. Output is 1920 × 1080.
-It also runs the styled bridge, lighting gallery, lagoon, haze, and heat chambers
+It also runs the all seven scenes with every effect enabled
 for 600 frames after 60 warmup frames at a requested 60 Hz display cadence, using
 the production clock and callback pump. The 60 Hz gate requires every completed
 frame to meet its 16.67 ms callback deadline, no missed display slots or coalesced

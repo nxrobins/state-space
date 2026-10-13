@@ -53,14 +53,17 @@ For the visual showcase, open the [burning bridge](http://127.0.0.1:8765/web/):
 built-in material shading, energy-derived heat glow, dynamic fire/lava lighting,
 soft terrain shadows, lit volumetric smoke/steam, water reflections/refraction,
 heat distortion, and bloom. All presentation toggles use the same deterministic field.
-Try the [smoke and steam chambers](http://127.0.0.1:8765/web/?scene=haze&paused)
+Demos open paused: use **Step 1 tick**, **0.1× playback**, and the scene-specific
+viewing notes to catch brief burns and pressure ruptures. The scene selector
+returns to any of the six showcases.
+Try the [smoke and steam bays](http://127.0.0.1:8765/web/?scene=haze&paused)
 and press **H** to compare the volume effect.
-Try the [heat shimmer chambers](http://127.0.0.1:8765/web/?scene=heat&paused)
+Try the [heat shimmer bays](http://127.0.0.1:8765/web/?scene=heat&paused)
 and press **D** to compare distortion.
 Try the [dams and pressure vessels](http://127.0.0.1:8765/web/?scene=pressure&paused)
 to compare wooden/metal dams and sealed/vented steam containers.
 [Rendering guide and native Python API](docs/RENDERING.md) ·
-[Current full-frame measurements](docs/checkpoints/PRESSURE_PERFORMANCE.md).
+[Demo refresh and full-frame measurements](docs/checkpoints/DEMO_REFRESH.md).
 
 ## 256 × 256 at 60 Hz
 
@@ -70,7 +73,7 @@ physics grid. Seven scenes each run 600 measured display-paced frames after 60
 warmup frames, including the dense emissive stress scene.
 
 The latest run **passes the strict 60 Hz gate**: zero deadline misses across
-**4,200 frames**, with a worst callback-to-GPU-completion time of **16.5 ms**.
+**4,200 frames**, with a worst callback-to-GPU-completion time of **14.4 ms**.
 Callback, completion and physics cadence all stayed within 59.9–60.1 Hz; no
 display slots or callbacks were lost or coalesced. The separate browser and native
 throughput runs also recorded zero work overruns across 2,916 samples each.
@@ -83,11 +86,13 @@ presentation thread. Production GPU readback and validation waits overlap;
 native scratch buffers and render attachments are reused with explicit cleanup.
 
 The initial pressure ruptures are also timed from tick zero: browser styled p95
-was 12.2 ms and native styled p95 was 10.17 ms. All **62 rendered/replayed
+was 11.6 ms and native styled p95 was 9.38 ms. All **62 rendered/replayed
 trajectories** matched the CPU reference, including pressure and velocity, with
 zero thermal/latent/chemical energy drift.
-See the [pressure performance report](docs/checkpoints/PRESSURE_PERFORMANCE.md)
-for raw results, native measurements, retained failures and reproduction.
+See the [demo refresh report](docs/checkpoints/DEMO_REFRESH.md) for the revised
+fixtures, raw results, and reproduction. The [earlier pressure performance
+report](docs/checkpoints/PRESSURE_PERFORMANCE.md) retains the pre-refresh workloads
+and pacing diagnostics; the demo changes alter those workloads.
 The earlier [GPU tick](docs/checkpoints/GPU_PERFORMANCE.md) and
 [browser pacing](docs/checkpoints/PACING_PERFORMANCE.md) reports describe ca-v3.
 

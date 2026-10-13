@@ -247,6 +247,7 @@ def main():
     try:
         cli('open', url + '?paused')
         cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        demo_controls = cli('eval', '--stdin', stdin='(async () => (await import("./demo-controls.verify.js")).verifyDemoControls())()')['result']
         cli('eval', '--stdin', stdin='(async () => { window.__initial = await window.stateSpace.snapshot(); return "saved"; })()')
         cli('screenshot', str((args.output / 'browser-styled.png').resolve()))
         cli('find', 'role', 'button', 'click', '--name', 'Lighting + shadows: on')
@@ -356,6 +357,7 @@ def main():
             'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),
+            'demoControls': demo_controls,
             'uiTogglePreservesState': ui, 'lightingTogglePreservesState': lights_ui, 'waterTogglePreservesState': water_ui,
             'hazeTogglePreservesState': haze_ui,
             'distortionTogglePreservesState': distortion_ui,

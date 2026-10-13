@@ -1,0 +1,21 @@
+// Viewing guidance, kept separate from the finite physical initial conditions.
+export const DEMO_GUIDES = Object.freeze({
+    bridge: { name: 'Burning bridge', title: 'A bridge under fire.',
+        description: 'The central wooden support burns. Cold stone piers carry the sides. Watch the deck lose its middle support.',
+        watch: 'Start at 0.1× or step one tick. The first burn lasts only a few ticks; restart to compare it with the falling fragments.' },
+    lighting: { name: 'Light & shadow', title: 'Light finds a way.',
+        description: 'Lava lights metal bars above four basins. Top: clear path and narrow stone baffle. Bottom: wide stone baffle and glass.',
+        watch: 'Press L while paused. Compare the bright receiver with the stone shadows and light transmitted through glass. The fixtures are anchored; their hot inner faces can still melt.' },
+    water: { name: 'Fire & water', title: 'Fire on the water.',
+        description: 'Two finite lava basins sit above a deep pool. Reflections follow the sources; refraction reveals the striped bed.',
+        watch: 'Press W while paused. The small fires are brief; lava provides the longer reflection. Resume to watch the water move.' },
+    haze: { name: 'Smoke & steam', title: 'Light through the haze.',
+        description: 'Lava lights smoke and steam in open viewing bays. Gas moves, mixes, and may condense.',
+        watch: 'Press H for volume shading, then L for scattered light. The open tops relieve pressure; the separate pressure demo shows sealed vessels.' },
+    heat: { name: 'Heat shimmer', title: 'The air starts to shimmer.',
+        description: 'Smoke bands above finite lava reservoirs give the heat distortion a visible edge to bend.',
+        watch: 'Step a few ticks, then press D at the same state. The bands naturally mix during playback; restart for the clearest comparison.' },
+    pressure: { name: 'Dams & pressure vessels', title: 'Something has to give.',
+        description: 'From left: wood dam, metal dam, sealed steam vessel, vented steam vessel.',
+        watch: 'Use 0.1× or single-step through the first 30 ticks. Equal water heads load both dams; identical hot steam doses test the sealed and open glass vessels.' },
+});
