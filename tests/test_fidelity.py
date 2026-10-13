@@ -60,7 +60,7 @@ class ProductionFidelity(unittest.TestCase):
         self.check_budget(result)
 
     def test_phase_families_and_latent_energy_survive_native_roundtrips(self):
-        for original, target, hot_energy, cold_energy in ((MAT_ICE, MAT_WATER, 45 * Q, 25 * Q),
+        for original, target, hot_energy, cold_energy in ((MAT_ICE, MAT_WATER, 45 * Q, 15 * Q),
                 (MAT_WATER, MAT_STEAM, 155 * Q, 105 * Q),
                 (MAT_OIL, MAT_OIL_VAPOR, 260 * Q, 220 * Q),
                 (MAT_METAL, MAT_MOLTEN_METAL, 265 * Q, 220 * Q)):
@@ -73,6 +73,24 @@ class ProductionFidelity(unittest.TestCase):
             self.assertEqual(int(cold["final_grid"][0]) & 255, original)
             self.assertEqual(int(cold["final_grid"][0]) & 0xf0ff0000, int(grid[0]) & 0xf0ff0000)
             self.check_budget(cold)
+
+    def test_default_water_and_ice_rest_at_the_reference_temperature(self):
+        # Default worlds start at the air temperature. Water must cool below its freeze
+        # point before it starts to release latent heat, so ambient water stays liquid.
+        materials = {row["name"]: row for row in load_catalog()["materials"]}
+        ambient = materials["air"]["default_thermal"]
+        water = materials["water"]["properties"]
+        ambient_water = (ambient + water["phase_energy"]) * Q
+        self.assertEqual(self.model.phase(MAT_WATER, ambient_water), MAT_WATER)
+        self.assertEqual(self.model.temperature_q(MAT_WATER, ambient_water), ambient * Q)
+        self.assertEqual(self.model.phase(MAT_ICE, ambient * Q), MAT_ICE)
+        self.assertEqual(self.model.temperature_q(MAT_ICE, ambient * Q), ambient * Q)
+        # The reverse-transition fixture must start on the freezing plateau without freezing.
+        from engine.conformance import conformance_cases
+        case = next(case for case in conformance_cases() if case["name"] == "freeze-local-index")
+        energy = int(seed_state(np.asarray(case["cells"], dtype=np.uint32), self.model)[1][0])
+        self.assertEqual(self.model.temperature_q(MAT_WATER, energy), water["freeze_point"] * Q)
+        self.assertEqual(self.model.phase(MAT_WATER, energy), MAT_WATER)
 
     def test_fire_contact_heats_existing_water_without_creating_more_water(self):
         result = self.engine.run([packed(MAT_FIRE, 255), packed(MAT_WATER, 25)], self.cold, 1, 2, 512, snapshot_interval=32)
