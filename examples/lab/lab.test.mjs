@@ -27,7 +27,9 @@ test('all lab scenes exhibit their named behavior while retaining exact energy a
       if (scene.id === 'span') assert.deepEqual(final.packedCells, initial.snapshot.packedCells);
       if (scene.id === 'fragment') {
         assert.equal(positions(MAT.METAL).length, 27);
-        assert.equal(Math.min(...positions(MAT.METAL)), 15 * scene.width + 12);
+        assert.equal(Math.min(...positions(MAT.METAL)), 23 * scene.width + 12);
+        assert.equal(positions(MAT.WATER).length, 152, 'Impact must retain the finite water');
+        assert.ok(positions(MAT.WATER).some(index => index < 22 * scene.width), 'The plate must displace water above the original pool');
         assert.equal(lab.view.plan.components.filter(component => component.cells.some(i => (final.packedCells[i] & 255) === MAT.METAL)).length, 1);
       }
       if (scene.id === 'fire') {

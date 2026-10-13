@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedBridge, seedLighting, seedWater, seedHaze, seedHeat } from './demo.js';
+import { seedBridge, seedLighting, seedWater, seedHaze, seedHeat, seedPressure } from './demo.js';
 import { FrameClock } from './frame-clock.js';
 import { createFramePump } from './frame-pump.js';
 import { pacingMetrics } from './frame-benchmark.js';
@@ -103,15 +103,20 @@ test('60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physi
     }
 });
 
-test('lighting gallery retains finite lava sources through a measured trajectory', () => {
+test('lighting gallery keeps its receivers, baffles and finite lava in each exhibit', () => {
     const world = createStateSpaceField(256, 256);
     try {
         seedLighting(world);
         const initial = world.packedSnapshot();
-        assert.equal(initial.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length, 4096);
+        assert.equal(initial.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length, 1536);
         assert(initial.energyQ.some(energy => energy > 255 * 256));
         world.step(132);
-        assert(world.packedSnapshot().packedCells.filter(cell => (cell & 255) === MAT.LAVA).length >= 64);
+        for (const y of [0, 128]) for (const x of [0, 128]) {
+            assert.equal(countRect(world, MAT.METAL, x + 28, y + 48, x + 99, y + 51), 288);
+            assert(countRect(world, MAT.LAVA, x + 36, y + 72, x + 91, y + 115) >= 64);
+            assert(world.sample(x + 36, y + 115).anchored);
+            if (x || y) assert.equal(world.materialAt(x + 64, y + 63), x && y ? MAT.GLASS : MAT.STONE);
+        }
         assert.equal(world.energyBalance().driftQ, 0n);
     } finally { world.close(); }
 });
@@ -163,10 +168,10 @@ test('bridge is finite, burns real wood, and resumes the complete deterministic 
         seedBridge(world);
         const initial = world.packedSnapshot();
         assert.equal(world.materialAt(100, 220), MAT.WATER);
-        assert.equal(world.materialAt(124, 160), MAT.WOOD);
-        assert(world.sample(36, 134).anchored);
+        assert.equal(world.materialAt(126, 170), MAT.WOOD);
+        assert(world.sample(72, 135).anchored);
         world.step(12);
-        assert.notEqual(world.materialAt(124, 160), MAT.WOOD, 'Exposed hot support must be consumed');
+        assert.equal(countRect(world, MAT.WOOD, 106, 132, 146, 134), 0, 'Central span must drop after the pin burns');
         const saved = world.packedSnapshot();
         world.step(4);
         const continued = world.packedSnapshot();
@@ -178,4 +183,48 @@ test('bridge is finite, burns real wood, and resumes the complete deterministic 
         world.step(16);
         assert.deepEqual(world.packedSnapshot(), continued);
     } finally { world.close(); }
+});
+
+function countRect(world, material, x0, y0, x1, y1) {
+    let count = 0;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (world.materialAt(x, y) === material) count++;
+    return count;
+}
+
+test('the unlit bridge carries its load without collapse', () => {
+    const world = createStateSpaceField(256, 256);
+    try {
+        seedBridge(world, { ignited: false });
+        world.step(132);
+        assert.equal(countRect(world, MAT.WOOD, 36, 132, 219, 134), 546);
+        assert.equal(countRect(world, MAT.WOOD, 126, 135, 126, 179), 45);
+        assert.equal(world.energyBalance().driftQ, 0n);
+    } finally { world.close(); }
+});
+
+test('pressure gallery distinguishes wood from metal and sealed from vented steam', () => {
+    const world = createStateSpaceField(256, 256);
+    try {
+        seedPressure(world);
+        const initial = world.packedSnapshot();
+        world.step(30);
+        assert(countRect(world, MAT.WOOD, 54, 74, 54, 143) < 70, 'Weak dam must breach');
+        assert.equal(countRect(world, MAT.METAL, 124, 25, 124, 143), 119, 'Metal dam must hold');
+        assert(countRect(world, MAT.WATER, 55, 74, 74, 204) > 0, 'Water must flow downstream');
+        assert(countRect(world, MAT.GLASS, 154, 70, 183, 111) < 140, 'Sealed vessel must rupture');
+        assert.equal(countRect(world, MAT.GLASS, 208, 70, 237, 111), 118, 'Vented vessel must retain its walls');
+        assert.equal(world.energyBalance().driftQ, 0n);
+        const final = world.packedSnapshot(); world.restore(initial); world.step(30);
+        assert.deepEqual(world.packedSnapshot(), final);
+    } finally { world.close(); }
+});
+
+test('slow viewing schedules fewer exact ticks without skipping or accumulating time debt', () => {
+    for (const rate of [0.1, 0.25, 1]) {
+        const clock = new FrameClock(); clock.advance(0);
+        let ticks = 0;
+        for (let i = 1; i <= 600; i++) ticks += clock.advance(i * 1000 / 60 * rate, false, 1000 / 60 * rate);
+        assert.equal(ticks, 600 * rate);
+        clock.reset(); assert.equal(clock.advance(10000), 0);
+    }
 });

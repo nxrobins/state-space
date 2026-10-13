@@ -3,11 +3,12 @@ import { createGpuField, MAT } from '../dist/sdk/state-space.js';
 import { MATERIAL_NAMES as MAT_NAMES, MATERIAL_VISUALS as MAT_COLORS } from './materials.generated.js';
 import { createMaterialRenderer, canvasCell } from './renderer.js';
 import { seedScene } from './demo.js';
+import { DEMO_GUIDES } from './demo-guide.js';
 import { FrameClock } from './frame-clock.js';
 import { createFramePump } from './frame-pump.js';
 
 const GRID_W = 256, GRID_H = 256;
-let selectedMat = MAT.SAND, brushSize = 3, paused = false;
+let selectedMat = MAT.SAND, brushSize = 3, paused = true;
 let mouseDown = false, mouseButton = 0, mouseX = 0, mouseY = 0;
 let pendingPaints = [];
 
@@ -15,42 +16,28 @@ async function init() {
     const stats = document.getElementById('stats');
     stats.textContent = 'Creating the WebGPU field...';
     const world = await createGpuField(GRID_W, GRID_H);
-    const requestedScene = new URLSearchParams(location.search).get('scene');
-    const scene = ['lighting', 'water', 'haze', 'heat', 'pressure'].includes(requestedScene) ? requestedScene : 'bridge';
+    const params = new URLSearchParams(location.search);
+    const requestedScene = params.get('scene');
+    const scene = Object.hasOwn(DEMO_GUIDES, requestedScene) ? requestedScene : 'bridge';
+    const guide = DEMO_GUIDES[scene];
+    let playbackRate = 1;
     seedScene(world, scene);
     const initial = world.packedSnapshot();
     const canvas = document.getElementById('canvas');
     let styled = true, lighting = true, water = true, haze = true, distortion = true;
-    if (scene === 'lighting') {
-        canvas.setAttribute('aria-label', 'Interactive lava light and shadow gallery');
-        document.querySelector('#heading h1').textContent = 'Light finds a way.';
-        document.querySelector('#heading p').textContent = 'Lava lights the terrain. Pillars cast shadows. Toggle lighting to compare.';
-        document.getElementById('reset-demo').textContent = 'Restart gallery';
+    canvas.setAttribute('aria-label', guide.name + ' interactive demo');
+    document.title = 'State Space · ' + guide.name;
+    document.querySelector('#heading h1').textContent = guide.title;
+    document.querySelector('#heading p').textContent = guide.description;
+    document.getElementById('watch-guide').textContent = guide.watch;
+    document.getElementById('reset-demo').textContent = 'Restart scene';
+    const sceneSelect = document.getElementById('scene-select');
+    for (const [id, item] of Object.entries(DEMO_GUIDES)) {
+        const option = document.createElement('option'); option.value = id; option.textContent = item.name;
+        sceneSelect.appendChild(option);
     }
-    if (scene === 'water') {
-        canvas.setAttribute('aria-label', 'Interactive fire and lava reflections over water');
-        document.querySelector('#heading h1').textContent = 'Fire on the water.';
-        document.querySelector('#heading p').textContent = 'Lava reflects. Ripples bend the riverbed. Toggle water effects to compare.';
-        document.getElementById('reset-demo').textContent = 'Restart lagoon';
-    }
-    if (scene === 'haze') {
-        canvas.setAttribute('aria-label', 'Interactive fire-lit smoke and steam chambers');
-        document.querySelector('#heading h1').textContent = 'Light through the haze.';
-        document.querySelector('#heading p').textContent = 'Fire lights the smoke. Steam catches the glow. Toggle haze to compare.';
-        document.getElementById('reset-demo').textContent = 'Restart chambers';
-    }
-    if (scene === 'heat') {
-        canvas.setAttribute('aria-label', 'Interactive lava and fire heat shimmer chambers');
-        document.querySelector('#heading h1').textContent = 'The air starts to shimmer.';
-        document.querySelector('#heading p').textContent = 'Heat bends the glow and wisps above lava. Toggle shimmer to compare.';
-        document.getElementById('reset-demo').textContent = 'Restart heat chambers';
-    }
-    if (scene === 'pressure') {
-        canvas.setAttribute('aria-label', 'Water dams and sealed versus vented steam vessels');
-        document.querySelector('#heading h1').textContent = 'Something has to give.';
-        document.querySelector('#heading p').textContent = 'Water loads the dams. Trapped steam breaks glass. Compare wood with metal, sealed with vented.';
-        document.getElementById('reset-demo').textContent = 'Restart pressure gallery';
-    }
+    sceneSelect.value = scene;
+    sceneSelect.addEventListener('change', () => { location.search = '?scene=' + sceneSelect.value + '&paused'; });
     const clock = new FrameClock();
     let renderRequested = true;
     function resize() {
@@ -114,7 +101,7 @@ async function init() {
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
     document.addEventListener('keydown', (e) => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement || e.target instanceof HTMLSelectElement) return;
         if (e.code === 'Space') { paused = !paused; clock.reset(); e.preventDefault(); }
         if (e.code === 'KeyC') void enqueue(async () => { pendingPaints = []; world.clear(); clock.reset(); render(); await renderer.completed(); });
         if (e.code === 'KeyB') void setView();
@@ -123,6 +110,7 @@ async function init() {
         if (e.code === 'KeyH') void setHaze();
         if (e.code === 'KeyD') void setDistortion();
         if (e.code === 'KeyR') void resetBridge();
+        if (e.code === 'Period') { e.preventDefault(); void singleStep(); }
         const num = parseInt(e.key);
         if (num >= 1 && num <= 9) {
             const matMap = [MAT.STONE, MAT.WATER, MAT.SAND, MAT.FIRE, MAT.WOOD, MAT.OIL, MAT.ICE, MAT.METAL, MAT.LAVA];
@@ -193,7 +181,7 @@ async function init() {
             document.getElementById('light-toggle').setAttribute('aria-pressed', String(lighting));
         });
     }
-    function resetBridge() { return enqueue(async () => { pendingPaints = []; world.restore(initial); clock.reset(); render(); await renderer.completed(); }); }
+    function resetBridge() { paused = true; return enqueue(async () => { pendingPaints = []; world.restore(initial); clock.reset(); render(); await renderer.completed(); }); }
     function setWater(value) {
         return enqueue(async () => {
             if (value !== undefined && typeof value !== 'boolean') throw new Error('water must be boolean');
@@ -221,6 +209,17 @@ async function init() {
             document.getElementById('distortion-toggle').setAttribute('aria-pressed', String(distortion));
         });
     }
+    function setPlaybackRate(value) {
+        if (![0.1, 0.25, 1].includes(value)) throw new Error('Invalid playback rate');
+        playbackRate = value; clock.reset();
+        document.getElementById('playback-rate').value = String(value);
+    }
+    function singleStep() {
+        paused = true; clock.reset();
+        return enqueue(async () => { flushPaints(); await world.step(1); render(); await renderer.completed(); });
+    }
+    document.getElementById('step').addEventListener('click', () => { void singleStep(); });
+    document.getElementById('playback-rate').addEventListener('change', event => { setPlaybackRate(Number(event.target.value)); });
     document.getElementById('view-toggle').addEventListener('click', () => { void setView(); });
     document.getElementById('light-toggle').addEventListener('click', () => { void setLighting(); });
     document.getElementById('water-toggle').addEventListener('click', () => { void setWater(); });
@@ -236,6 +235,8 @@ async function init() {
             clock.reset();
         },
         setView(mode) { if (!['plain', 'styled'].includes(mode)) throw new Error('Invalid view'); return setView(mode === 'styled'); },
+        setPlaybackRate,
+        singleStep,
         setLighting,
         setWater,
         setHaze,
@@ -257,7 +258,7 @@ async function init() {
         const start = performance.now();
         await enqueue(async () => {
             flushPaints();
-            const ticks = clock.advance(now, paused, displayInterval);
+            const ticks = clock.advance(now * playbackRate, paused, displayInterval === undefined ? undefined : displayInterval * playbackRate);
             if (ticks) await world.step(ticks);
             if (ticks || renderRequested) {
                 render();
@@ -266,7 +267,7 @@ async function init() {
             if (now - lastStats >= 250) {
                 lastStats = now;
                 stats.textContent = 'Tick: ' + world.tick + '\n' + (paused ? 'PAUSED' : 'Running') + '\nGrid: ' + GRID_W + 'x' + GRID_H +
-                '\nFrame work: ' + (performance.now() - start).toFixed(1) + ' ms' + '\nView: ' + (styled ? 'Material + light' : 'Plain') + '\nPhysics: fixed 60 Hz';
+                '\nFrame work: ' + (performance.now() - start).toFixed(1) + ' ms' + '\nView: ' + (styled ? 'Material + light' : 'Plain') + '\nPlayback: ' + playbackRate + '×\nPhysics: exact fixed ticks';
             }
             const pauseButton = document.getElementById('pause'), label = paused ? 'Resume' : 'Pause';
             if (pauseButton.textContent !== label) pauseButton.textContent = label;
@@ -274,7 +275,7 @@ async function init() {
     }
     render();
     await renderer.completed();
-    if (new URLSearchParams(location.search).has('paused')) paused = true;
+    paused = !params.has('play') || params.has('paused');
     pump = createFramePump(frame);
 }
 

@@ -1,0 +1,16 @@
+TAP version 13
+# Subtest: haze and heat chambers retain finite smoke, steam, and lava through measurement
+ok 1 - haze and heat chambers retain finite smoke, steam, and lava through measurement
+  ---
+  duration_ms: 31202.2053
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 31313.5878
