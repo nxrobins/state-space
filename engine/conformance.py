@@ -41,9 +41,10 @@ def conformance_cases() -> list[dict]:
             mat = MAT_SMOKE if (x + y) % 2 else MAT_STEAM
             baffles[y * 17 + x] = pack_voxel(VoxelState(mat, 180, 0, 0, DEFAULT_PHASES[mat], 0))
     cases.append({"name": "baffled-hot-gas", "width": 17, "height": 19, "tick": 0, "ticks": 12, "cells": baffles})
-    for mat, name in ((MAT_WATER, "freeze-local-index"), (MAT_STEAM, "condense-local-index")):
+    # Water starts on its freezing plateau without freezing; steam condenses.
+    for mat, name, temperature in ((MAT_WATER, "freeze-local-index", 10), (MAT_STEAM, "condense-local-index", 20)):
         cases.append({"name": name, "width": 1, "height": 1, "tick": 0, "ticks": 1,
-                      "cells": [pack_voxel(VoxelState(mat, 20, -8, 7, DEFAULT_PHASES[mat], 15))]})
+                      "cells": [pack_voxel(VoxelState(mat, temperature, -8, 7, DEFAULT_PHASES[mat], 15))]})
     def structural_scene(name, width, height, placements, ticks, energy_overrides=None, structure_overrides=None):
         cells = [air] * (width * height)
         for x, y, material, temperature in placements:

@@ -29,7 +29,9 @@ and [evolution protocol](EVOLUTION.md) for exact definitions. A tick is a discre
 velocity; global cellular pressure loads structures. See [PRESSURE.md](PRESSURE.md)
 for exact rules and limits. There is no electrical law or full momentum budget.
 One model energy unit is 256 Q. Temperature labels in the lab are model units,
-not degrees Celsius. Exact conservation applies to thermal + latent + chemical
+not degrees Celsius. Air and stone start at 20. Water starts to freeze at 15 and
+ice starts to melt at 30, so both stay unchanged at 20; water freezes only near
+something colder. Exact conservation applies to thermal + latent + chemical
 energy, with edits accounted externally; gravity is outside that ledger.
 
 ## Backend and scale scope

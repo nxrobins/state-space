@@ -159,7 +159,7 @@
         "reactivity": 0,
         "porosity": 0,
         "optical": 2151677982,
-        "freeze_point": 25,
+        "freeze_point": 15,
         "condense_point": 90,
         "latent_heat_melt": 0,
         "latent_heat_boil": 40,

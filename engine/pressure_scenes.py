@@ -34,4 +34,3 @@ def pressure_scene(kind, control=False, width=24, height=24):
     grid, energy = seed_state(cells, DEFAULT_REGISTRY._model)
     words = seed_structure_bulk(grid, width, height, DEFAULT_REGISTRY._structure)
     return grid, energy, words
-

@@ -68,17 +68,18 @@ The current **ca-v4** benchmark measures complete 1920 × 1080 rendered frames o
 an **Intel i9-11900K / NVIDIA RTX 4090**, with every effect enabled and a 256 × 256
 physics grid. Six scenes each run 600 measured display-paced frames after warmup.
 
-The **pressure gallery passed**: 10.0 ms median work, 11.7 ms p95, and a maximum
-14.4 ms from display callback to GPU completion. Bridge, water, haze and heat
-also passed. The **overall strict lock remains open**: both complete runs had
-one 24–25 ms lighting frame that delayed the next frame, causing **two deadline
-misses out of 3,600 frames**. All scenes sustained approximately 59.95 Hz;
-none missed a display slot or coalesced a callback.
+The latest run includes the corrected water-freezing catalog. The **pressure
+gallery passed**: 10.2 ms median work, 11.9 ms p95, and a maximum 13.6 ms from
+display callback to GPU completion. Water, haze and heat also passed. The
+**overall strict lock remains open**: lighting missed two completion deadlines
+and bridge missed one, for **three misses out of 3,600 frames**. All scenes
+sustained approximately 59.95 Hz; none missed a display slot or coalesced a
+callback. Separate unpaced emissive measurements also exceeded the frame budget.
 
 Timing includes all 23 physics passes, global support/pressure planning,
 validation, state transfers, every rendering pass and GPU completion. Startup,
 reference hashing and OS scanout are excluded. The initial pressure ruptures are
-also timed separately from tick zero; browser p95 was 11.3 ms with all effects on.
+also timed separately from tick zero; browser p95 was 11.0 ms with all effects on.
 
 All 60 rendered/replayed trajectories per complete run matched the CPU reference,
 including pressure and velocity, with zero thermal/latent/chemical energy drift.
@@ -181,8 +182,8 @@ WebGPU. It checks lint, properties, long scenarios, native/CPU/browser
 conformance, installed SDK clients, the live lab, game regressions, adversarial
 evolution checks, and benchmarks. Reports retain failures and source hashes.
 
-The [pressure release verification](docs/checkpoints/pressure-release-verification.json)
-covers 16 gates, including 35 conformance scenes and 4,416 per-pass comparisons.
+The [merged-catalog verification](docs/checkpoints/pressure-merged-verification.json)
+records the 16 release gates, including 35 conformance scenes and 4,416 per-pass comparisons.
 Checkpoint evidence and content-addressed package artifacts are retained in Git;
 generated evidence is collapsed by default in GitHub review.
 
