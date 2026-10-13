@@ -35,6 +35,68 @@ static uint32_t temperature(const uint32_t *table, uint32_t voxel, uint32_t ener
     return result;
 }
 
+static uint32_t fluid_kind(uint32_t voxel) {
+    uint32_t phase = (voxel >> 24) & 15;
+    return phase == PHASE_GAS || phase == PHASE_PLASMA ? 1 :
+        phase == PHASE_LIQUID || phase == PHASE_VISCOUS || phase == PHASE_MOLTEN ? 2 : 0;
+}
+
+/* Reuse planner scratch before support traversal. Each cell enters one queue
+ * once; no per-frame allocation, radius limit, floats or order-dependent sums. */
+static void pressure_update(uint32_t width, uint32_t n, const uint32_t *cold,
+    const uint32_t *thermal, const uint32_t *grid, const uint32_t *energy,
+    const uint32_t *words, uint32_t *damaged, uint32_t *seen, uint32_t *queue) {
+    /* Low bits cache the immutable phase class; bit 2 marks a queued cell.
+     * Traversal order and component membership stay identical to the reference. */
+    for (uint32_t i = 0; i < n; ++i) { seen[i] = fluid_kind(grid[i]); damaged[i] = words[i]; }
+    uint32_t last_material = 256, last_energy = 0, last_absolute = 0;
+    for (uint32_t kind = 1; kind <= 2; ++kind) for (uint32_t r = 0; r < n; ++r) {
+        if (seen[r] != kind) continue;
+        uint32_t tail = 1, top = n / width, head_pressure = 0;
+        uint64_t sum = 0;
+        queue[0] = r; seen[r] |= 4;
+        for (uint32_t head = 0; head < tail; ++head) {
+            uint32_t i = queue[head], x = i % width;
+            if (kind == 1) {
+                uint32_t material = grid[i] & 255;
+                if (material != last_material || energy[i] != last_energy) {
+                    uint64_t absolute = ((uint64_t)(temperature(thermal, grid[i], energy[i]) / 256) + 64) * 1024 / 84;
+                    last_absolute = absolute > 66559 ? 66559 : (uint32_t)absolute;
+                    last_material = material; last_energy = energy[i];
+                }
+                sum += last_absolute;
+            } else if (i / width < top) top = i / width;
+            int32_t adjacent[4] = {i >= width ? (int32_t)(i - width) : -1,
+                x ? (int32_t)(i - 1) : -1, x + 1 < width ? (int32_t)(i + 1) : -1,
+                i + width < n ? (int32_t)(i + width) : -1};
+            for (uint32_t d = 0; d < 4; ++d) {
+                int32_t j = adjacent[d];
+                if (j < 0) continue;
+                uint32_t other = seen[j] & 3;
+                if (kind == 2 && other == 1 && (damaged[j] >> 16) > head_pressure) head_pressure = damaged[j] >> 16;
+                if (seen[j] == kind) { seen[j] |= 4; queue[tail++] = (uint32_t)j; }
+            }
+        }
+        uint32_t gas_target = sum / tail > 1024 ? (uint32_t)(sum / tail - 1024) : 0;
+        for (uint32_t head = 0; head < tail; ++head) {
+            uint32_t i = queue[head], weight = (prop(cold, grid[i], COLD_DENSITY) + 63) / 64;
+            uint64_t target = kind == 1 ? gas_target : head_pressure + (uint64_t)(i / width - top + 1) * (weight ? weight : 1) * 16;
+            if (target > 65535) target = 65535;
+            int32_t old = (int32_t)(words[i] >> 16), delta = (int32_t)target - old;
+            int32_t step = delta >= 0 ? (delta + 3) / 4 : -((-delta + 3) / 4);
+            damaged[i] = (uint32_t)(old + step) << 16;
+        }
+    }
+}
+
+static uint32_t pressure_load(const uint32_t *words, uint32_t i, uint32_t width, uint32_t n) {
+    int32_t x = (i % width ? (int32_t)(words[i - 1] >> 16) : 0)
+        - (i % width + 1 < width ? (int32_t)(words[i + 1] >> 16) : 0);
+    int32_t y = (i >= width ? (int32_t)(words[i - width] >> 16) : 0)
+        - (i + width < n ? (int32_t)(words[i + width] >> 16) : 0);
+    return (uint32_t)(x < 0 ? -x : x) + (uint32_t)(y < 0 ? -y : y);
+}
+
 /* Native public boundaries copy/check integer arrays before this complete-state
  * validator. Private thermal slot 0 marks defined materials and has no other
  * meaning; the cold rows are the registry's own values, with no reused slot. */
@@ -52,9 +114,10 @@ uint32_t validate(uint32_t width, uint32_t height, const uint32_t *base) {
         uint32_t byte = temperature(thermal, grid[i], energy[i]) / 256;
         if (byte > 255) byte = 255;
         if (((grid[i] >> 8) & 255) != byte) return 3;
-        if (word > (INTEGRITY | ANCHOR | BOND_UP | BOND_LEFT | BOND_RIGHT | BOND_DOWN)) return 4;
+        if (word & ~(INTEGRITY | ANCHOR | BOND_UP | BOND_LEFT | BOND_RIGHT | BOND_DOWN | PRESSURE)) return 4;
         uint32_t phase = (grid[i] >> 24) & 15;
-        if (word && ((phase != PHASE_SOLID && phase != PHASE_FROZEN) || !prop(base, grid[i], COLD_COHESION))) return 5;
+        if ((word & ~PRESSURE) && ((phase != PHASE_SOLID && phase != PHASE_FROZEN) || !prop(base, grid[i], COLD_COHESION))) return 5;
+        if ((word & PRESSURE) && !fluid_kind(grid[i])) return 5;
         int32_t adjacent[4] = {i >= width ? (int32_t)(i - width) : -1,
             x ? (int32_t)(i - 1) : -1, x + 1 < width ? (int32_t)(i + 1) : -1,
             i + width < n ? (int32_t)(i + width) : -1};
@@ -108,9 +171,10 @@ uint32_t solve(uint32_t width, uint32_t height, uint32_t *base) {
     const uint32_t bits[4] = {BOND_UP, BOND_LEFT, BOND_RIGHT, BOND_DOWN};
     uint32_t tail = 0;
     supported_weight = 0;
+    pressure_update(width, n, cold, thermal, grid, energy, words, damaged, a[DISTANCES], queue);
     for (uint32_t i = 0; i < n; ++i) {
         distance[i] = -1; loads[i] = capacity[i] = reactions[i] = blocked[i] = 0;
-        heads[i] = next[i] = -1; sources[i] = i; damaged[i] = words[i];
+        heads[i] = next[i] = -1; sources[i] = i;
         if (!(words[i] & INTEGRITY)) continue;
         if ((words[i] & ANCHOR) || i + width >= n ||
             (!(words[i + width] & INTEGRITY) && grain_blocked(cold, grid, words, i, i + width))) {
@@ -166,17 +230,18 @@ uint32_t solve(uint32_t width, uint32_t height, uint32_t *base) {
         /* The numerator exceeds u32; preserve exact integer capacity/damage. */
         capacity[i] = (uint32_t)((uint64_t)nominal * integrity * remaining / (255 * 64 * 256));
         uint32_t loss = 0;
+        uint64_t demand = (uint64_t)loads[i] + pressure_load(damaged, i, width, n);
         if (!capacity[i]) loss = integrity;
-        else if (loads[i] > capacity[i]) {
-            uint64_t excess = (uint64_t)(loads[i] - capacity[i]) * 255 / nominal;
+        else if (demand > capacity[i]) {
+            uint64_t excess = (demand - capacity[i]) * 255 / nominal;
             loss = excess > integrity ? integrity : (excess ? (uint32_t)excess : 1);
         }
-        damaged[i] = (words[i] & ~INTEGRITY) | (integrity - loss);
+        damaged[i] = (damaged[i] & ~INTEGRITY) | (integrity - loss);
     }
     if (reaction_sum != supported_weight) return 3;
     for (uint32_t i = 0; i < n; ++i) {
         uint32_t x = i % width;
-        if (!(damaged[i] & INTEGRITY)) { damaged[i] &= ANCHOR; parents[i] = -1; continue; }
+        if (!(damaged[i] & INTEGRITY)) { damaged[i] &= ANCHOR | PRESSURE; parents[i] = -1; continue; }
         parents[i] = (int32_t)i;
         if (!x || !(damaged[i - 1] & INTEGRITY)) damaged[i] &= ~BOND_LEFT;
         if (x + 1 >= width || !(damaged[i + 1] & INTEGRITY)) damaged[i] &= ~BOND_RIGHT;

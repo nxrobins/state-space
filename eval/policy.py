@@ -10,7 +10,7 @@ from engine.contracts import checked_integer
 from engine.schedule import KERNEL_SPECS
 
 
-POLICY_VERSION = "ca-v3-evaluation-1"
+POLICY_VERSION = "ca-v4-evaluation-1"
 TARGETS = {
     "codec": "phase_1a_winner.wgsl", "thermal": "phase_2a_winner.wgsl",
     "gravity": "phase_2b_winner.wgsl", "diagonal": "phase_2b_diagonal_winner.wgsl",

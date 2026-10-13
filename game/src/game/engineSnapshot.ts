@@ -137,7 +137,7 @@ function sampleSourceCoordinate(targetCoordinate: number, targetSize: number, so
 }
 
 function validateSnapshot(snapshot: EngineMaterialSnapshot): void {
-  if (snapshot.schemaVersion !== undefined && ![1, 2, SCHEMA_VERSION].includes(snapshot.schemaVersion)) {
+  if (snapshot.schemaVersion !== undefined && ![1, 2, 3, SCHEMA_VERSION].includes(snapshot.schemaVersion)) {
     throw new Error('Unsupported engine snapshot schema version.');
   }
   if (snapshot.tick !== undefined) checkedInteger(snapshot.tick, 0, Number.MAX_SAFE_INTEGER, 'tick');

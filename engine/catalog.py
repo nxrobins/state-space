@@ -56,7 +56,7 @@ def _validate_catalog(catalog: dict) -> None:
     required = {"schema_version", "cold_stride", "capacity", "bit_fields", "structure_fields", "phases", "flags", "cold_fields", "materials"}
     if set(catalog) != required:
         raise ValueError(f"Catalog keys must be {sorted(required)}")
-    integer(catalog["schema_version"], 3, 3, "schema_version")
+    integer(catalog["schema_version"], 4, 4, "schema_version")
     integer(catalog["capacity"], 256, 256, "capacity")
     integer(catalog["cold_stride"], 24, 24, "cold_stride")
     expected_layout = {"material": (0, 8, False), "thermal": (8, 8, False),
@@ -73,7 +73,8 @@ def _validate_catalog(catalog: dict) -> None:
         if type(field["signed"]) is not bool or (field["shift"], field["bits"], field["signed"]) != expected:
             raise ValueError(f"Changing {name} encoding requires a new schema version")
     structure_layout = {"integrity": {"shift": 0, "bits": 8}, **{name: {"shift": shift, "bits": 1}
-                        for name, shift in zip(("bond_left", "bond_right", "bond_up", "bond_down", "anchor", "fresh"), range(8, 14))}}
+                        for name, shift in zip(("bond_left", "bond_right", "bond_up", "bond_down", "anchor", "fresh", "moved"), range(8, 15))},
+                        "pressure": {"shift": 16, "bits": 16}}
     if catalog["structure_fields"] != structure_layout:
         raise ValueError("Structural bit layout requires a new schema version")
     for name, field in catalog["structure_fields"].items():

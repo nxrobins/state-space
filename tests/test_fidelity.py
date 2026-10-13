@@ -55,7 +55,7 @@ class ProductionFidelity(unittest.TestCase):
         result = self.engine.run(grid, self.cold, 1, 2, 1, initial_energy=energy, trace_passes=True)
         trace = {name: state for _, name, state in result["pass_snapshots"]}
         energies = {name: values for _, name, values in result["pass_energy_snapshots"]}
-        np.testing.assert_array_equal(trace["gas_buoyancy0"], grid[::-1])
+        np.testing.assert_array_equal(trace["gas_buoyancy0"] & 0xff00ffff, grid[::-1] & 0xff00ffff)
         np.testing.assert_array_equal(energies["gas_buoyancy0"], energy[::-1])
         self.check_budget(result)
 
@@ -71,7 +71,7 @@ class ProductionFidelity(unittest.TestCase):
             cooled = thermal_view(hot["final_grid"], [cold_energy], self.model)
             cold = self.engine.run(cooled, self.cold, 1, 1, 8, initial_energy=[cold_energy], initial_structure=hot["final_structure"], start_tick=8)
             self.assertEqual(int(cold["final_grid"][0]) & 255, original)
-            self.assertEqual(int(cold["final_grid"][0]) & 0xf0ff0000, int(grid[0]) & 0xf0ff0000)
+            self.assertEqual(int(cold["final_grid"][0]) & 0xf0000000, int(grid[0]) & 0xf0000000)
             self.check_budget(cold)
 
     def test_default_water_and_ice_rest_at_the_reference_temperature(self):

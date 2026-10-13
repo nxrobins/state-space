@@ -48,7 +48,7 @@ class GpuContractProperties(unittest.TestCase):
         self.assertEqual(groups.call_count, 2)
         inspected = self.engine.run(grid, self.cold, 17, 19, n_ticks=4, snapshot_interval=1, trace_passes=True)
         self.assertEqual(normal["readback_count"], 4)
-        self.assertEqual(inspected["readback_count"], 4 * 18)
+        self.assertEqual(inspected["readback_count"], 4 * 23)
         for key in ("snapshots", "energy_snapshots", "structure_snapshots"):
             for (tick, a), (other, b) in zip(normal[key], inspected[key]):
                 self.assertEqual(tick, other)

@@ -42,6 +42,7 @@ class _Solver:
             raise RuntimeError("Unsupported structural solver ABI")
         self.rules = None
         self.tables = None
+        self.view_count = None
 
     def prepare(self, state, width, height, rules):
         count = width * height
@@ -50,11 +51,16 @@ class _Solver:
             raise ValueError("World exceeds the compiled planner's linear memory limit")
         if needed > self.memory.data_len(self.store):
             self.memory.grow(self.store, (needed - self.memory.data_len(self.store) + 65535) // 65536)
-        # Recreate views after growth; results are copied before another call.
-        backing = (ctypes.c_ubyte * (needed - self.base)).from_address(
-            ctypes.addressof(self.memory.data_ptr(self.store).contents) + self.base)
-        words = np.frombuffer(backing, dtype="<u4")
-        arrays = words[TABLE_WORDS:].reshape(FIELD_COUNT, count)
+            self.view_count = None
+        # Keep the ctypes owner and NumPy views while the layout is unchanged.
+        # Growth or a different cell count replaces them; public results own copies.
+        if self.view_count != count:
+            backing = (ctypes.c_ubyte * (needed - self.base)).from_address(
+                ctypes.addressof(self.memory.data_ptr(self.store).contents) + self.base)
+            self.words = np.frombuffer(backing, dtype="<u4")
+            self.arrays = self.words[TABLE_WORDS:].reshape(FIELD_COUNT, count)
+            self.view_count = count
+        words, arrays = self.words, self.arrays
         if self.rules is not rules:
             # Only the cold columns the solver reads. Presence is marked in the
             # private thermal slot 0, so no property column has a second meaning.

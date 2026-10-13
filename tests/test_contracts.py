@@ -164,7 +164,7 @@ class PreventionRules(unittest.TestCase):
         outputs = generated_outputs()
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            for source in [ROOT / "engine/materials.json", ROOT / "web/render.wgsl", ROOT / "engine/thermal.ts", ROOT / "engine/structure.ts", ROOT / "engine/validation.ts", ROOT / "engine/contracts.ts", ROOT / "engine/registry.ts",
+            for source in [ROOT / "engine/materials.json", ROOT / "web/render.wgsl", ROOT / "engine/thermal.ts", ROOT / "engine/structure.ts", ROOT / "engine/pressure.ts", ROOT / "engine/validation.ts", ROOT / "engine/contracts.ts", ROOT / "engine/registry.ts",
                            ROOT / "engine/shaders/state_io.wgsl", ROOT / "engine/shaders/enthalpy_law.wgsl", *(ROOT / "locked").glob("*.wgsl")]:
                 target = root / source.relative_to(ROOT)
                 target.parent.mkdir(parents=True, exist_ok=True)

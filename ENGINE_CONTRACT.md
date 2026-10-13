@@ -1,16 +1,17 @@
 # State Space engine contract
 
-## Version 3
+## Version 4
 
 `engine/materials.json` defines the packed layout, stable material IDs, phase and
 flag values, cold-table offsets, placement state, and material properties.
-`engine/version.py` identifies the physical rules as `ca-v3`. Validate and
+`engine/version.py` identifies the physical rules as `ca-v4`. Validate and
 regenerate with `python -m engine.generate`; verify generated assets with
 `python -m engine.generate --check`. Generation requires Node.js and the root
 npm development dependencies. Runtime use does not invoke the generator.
 
 A cell has three u32 coordinates: its packed view, conserved `energyQ`, and
-persistent `structure`. The packed
+persistent mechanical state in `structure` (integrity/bonds/anchor in bits 0–12,
+pressure in bits 16–31). See `docs/PRESSURE.md` for phase validity and internal markers. The packed
 layout remains material 8 bits, thermal 8 bits, signed kinetic X/Y 4 bits each,
 phase 4 bits, and flags 4 bits. The cold table has 256 entries of 24 u32 slots.
 Its 24 defined properties include phase energy, default phase, oxidizer
@@ -54,8 +55,8 @@ are required, including odd and non-square shapes. The format allows at most
 validation rejects invalid dimensions, lengths, numeric coercion, undefined
 materials, invalid cold properties, and inconsistent energy before dispatch.
 
-A tick is the 18-pass schedule in `engine/schedule.py`: structural support and
-fragment transport, ten granular/fluid/gas movement passes, four cardinal heat
+A tick is the 23-pass schedule in `engine/schedule.py`: structural support and
+fragment transport, pressure impulse and four velocity passes, ten granular/fluid/gas movement passes, four cardinal heat
 passes, phase transitions, combustion, and reciprocal bond normalization. Movement salt depends
 on the absolute tick. Boundaries are closed: outside cells supply no matter,
 energy, or oxidizer. Movement transports all three state coordinates together. Intact or pinned
@@ -69,8 +70,8 @@ Python `Snapshot` requires all three arrays and exposes copied, read-only storag
 CPU `packedSnapshot()` and sandbox snapshots return JSON-serializable arrays.
 Binary array transport uses little-endian u32 values.
 
-Version 1/2 snapshots cannot resume version 3 physics. The fighter's explicitly
-lossy material-only import can read the unchanged ID layout from versions 1, 2, or 3;
+Version 1/2/3 snapshots cannot resume version 4 physics. The fighter's explicitly
+lossy material-only import can read the unchanged ID layout from versions 1, 2, 3, or 4;
 it discards energy and other physical state and is not an exact continuation.
 
 Native `CompositionEngine.run` accepts `initial_energy` and `initial_structure`;
@@ -94,7 +95,8 @@ same material catalog used by the simulation.
 ## Verified scope and remaining approximations
 
 Native GPU, browser CPU and actual browser WebGPU compare all three state
-coordinates after 2,304 passes across 31 scenes and all 36 pipeline variants.
+coordinates across mixed-material, pressure, venting and structural scenes,
+covering all 53 pipeline variants. Current verification records exact counts.
 The C6 browser corpus also checks structural diagnostics, public pass deltas,
 stepping without inspection, and serialized restart. Earlier C3 evidence records
 ca-v2 behavior and is historical. Exact resume, external edit
@@ -106,14 +108,15 @@ continuum fluid solver. Cells have unit heat capacity; the energy coordinate,
 conductivity, and tick duration are not calibrated SI quantities. Combustion is
 an abstract two-cell fuel/oxidizer conversion, not molecular stoichiometry.
 Phase fractions reside in the energy interval, not an explicitly resolved mixture.
-Kinetic fields are transported but do not yet implement momentum. Reserved phase
-codes and flags do not imply electrical or pressure dynamics. Structural support,
+Kinetic fields hold bounded quantized velocity. The pressure and wall-loading
+law is defined in `docs/PRESSURE.md`; it is not a continuum or momentum-conserving
+solver. Reserved phase codes and flags do not imply electrical dynamics. Structural support,
 bonding, breakage and coherent downward translation use the quasistatic model in
 `docs/STRUCTURES.md`; rotation, elastic strain and mechanical energy are absent.
 
 ## Embedding and material extensions
 
-The 0.3 SDK exposes native `create_field` and browser/Node `createStateSpaceField`,
+The 0.4 SDK exposes native `create_field` and browser/Node `createStateSpaceField`,
 plus asynchronous browser `createGpuField`. All support explicit cell/energy
 edits, sampling, exact snapshot restore, external energy balance, and opt-in pass
 reports. See `docs/SDK.md` and `examples/sdk/` for supported public clients.

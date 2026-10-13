@@ -1,6 +1,6 @@
 {
   "abiVersion": 1,
-  "sourceHash": "908fc2bf8e8793d2ded8c44a7fcb5b3e2c2d1a351aa04fe561e74cca5e35e374",
-  "wasmHash": "f67375f42f56f9cfa25456c66db6d0d5054ee366437ab229ce52262061515780",
-  "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+  "sourceHash": "649abdde97bc214605a69d0400658f6bf58610e417c1f2b98c47eed5c90a9ce8",
+  "wasmHash": "e10c1b8476675cf88fea4dd1b0c544e9e98a5d6c245e1cc9b19dfe27f0e2250a",
+  "compiler": "clang version 22.1.2 (https://github.com/llvm/llvm-project 1ab49a973e210e97d61e5db6557180dcb92c3e98)"
 }

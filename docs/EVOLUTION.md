@@ -137,3 +137,11 @@ its three raw coordinates and failed tick, so an actual malformed result can be
 distinguished from a compilation error. Such a result is never committed.
 Benchmark rows report host planning separately, while total/tick timings include
 planning and all three transfers. ca-v2 receipts cannot authorize ca-v3 work.
+
+## ca-v4 compatibility
+
+Pressure and velocity change the physical contract. The current evaluation policy
+is `ca-v4-evaluation-1`; earlier receipts cannot authorize these rules. The new
+pressure/velocity kernels are fixed production dependencies, not mutation targets.
+Reference trajectories include these passes and source identity includes their
+implementation. See [PRESSURE.md](PRESSURE.md) for causal acceptance properties.

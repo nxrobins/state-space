@@ -14,8 +14,7 @@
 /*.toml -text
 /*.lock -text
 /*.json -text
-/game/src/game/engineSnapshot.ts -text
-/game/src/game/engineSnapshot.test.ts -text
+/game/src/** -text
 /dist/packages/evidence/** -text
 
 # Keep the implementation prominent in GitHub's default review view.

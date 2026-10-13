@@ -22,7 +22,7 @@ def source_hashes() -> dict[str, str]:
                      and not any(part in ("node_modules", "__pycache__", ".ruff_cache") for part in path.parts))
     paths.extend(ROOT / name for name in ("pyproject.toml", "package.json", "package-lock.json", "uv.lock",
                                          "evolve_ss.py", "test_invariants.py", "test_cascade.py",
-                                         "ENGINE_CONTRACT.md", "ENGINE_INVARIANTS.md", "docs/SDK.md", "docs/EVOLUTION.md", "docs/STRUCTURES.md", "docs/CAPABILITIES.md"))
+                                         "ENGINE_CONTRACT.md", "ENGINE_INVARIANTS.md", "docs/SDK.md", "docs/EVOLUTION.md", "docs/STRUCTURES.md", "docs/PRESSURE.md", "docs/CAPABILITIES.md"))
     return {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in sorted(paths) if path.is_file()}
 

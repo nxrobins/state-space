@@ -53,7 +53,7 @@ describe('CPU tick input boundary', () => {
       observed.grid.fill(0); observed.energyQ.fill(0); observed.structure.fill(0);
     });
     expect(actual).toEqual(expected);
-    expect(observedStates).toHaveLength(18);
+    expect(observedStates).toHaveLength(23);
     expect(() => runCpuTick(state(), 3, 3, cold, 18)).toThrow(/Cold table/);
   });
 });

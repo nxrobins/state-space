@@ -20,7 +20,7 @@ let cases: Case[] = [];
 beforeAll(async () => {
   const python = process.env.STATE_SPACE_PYTHON ?? (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
   const { stdout } = await promisify(execFile)(python, ['-m', 'engine.conformance'], {
-    encoding: 'utf8', timeout: 120_000, maxBuffer: 20 * 1024 * 1024,
+    encoding: 'utf8', timeout: 120_000, maxBuffer: 64 * 1024 * 1024,
   });
   cases = JSON.parse(stdout);
 }, 120_000);

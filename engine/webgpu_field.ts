@@ -66,14 +66,22 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.#device.destroy();
   }
 
-  async #readState(current: number, encoder = this.#device.createCommandEncoder(), owned?: StructuralState): Promise<StructuralState> {
+  async #readState(current: number, encoder = this.#device.createCommandEncoder(), owned?: StructuralState,
+                   finishScope?: () => Promise<GPUError | null>): Promise<StructuralState> {
     const bytes = this.width * this.height * 4;
     encoder.copyBufferToBuffer(this.#buffers[current], 0, this.#staging, 0, bytes);
     encoder.copyBufferToBuffer(this.#buffers[current + 2], 0, this.#staging, bytes, bytes);
     encoder.copyBufferToBuffer(this.#buffers[current + 4], 0, this.#staging, bytes * 2, bytes);
     this.#device.queue.submit([encoder.finish()]);
-    await this.#staging.mapAsync(GPUMapMode.READ);
+    const mapping = this.#staging.mapAsync(GPUMapMode.READ);
+    // Close the final validation scope immediately after submitting/mapping.
+    // Both completion promises can then progress together; neither is skipped.
+    const validation = finishScope?.();
     try {
+      const [mapped, checked] = await Promise.allSettled([mapping, validation]);
+      if (mapped.status === 'rejected') throw mapped.reason;
+      if (checked.status === 'rejected') throw checked.reason;
+      if (checked.value) throw new Error(checked.value.message);
       const range = this.#staging.getMappedRange();
       if (owned) {
         owned.grid.set(new Uint32Array(range, 0, bytes / 4));
@@ -83,7 +91,7 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
       }
       return { grid: new Uint32Array(range.slice(0, bytes)), energyQ: new Uint32Array(range.slice(bytes, bytes * 2)), structure: new Uint32Array(range.slice(bytes * 2, bytes * 3)) };
     } finally {
-      this.#staging.unmap();
+      if (this.#staging.mapState === 'mapped') this.#staging.unmap();
     }
   }
 
@@ -98,6 +106,7 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
     this.busy = true;
     this.#device.pushErrorScope('validation');
     let scopeOpen = true;
+    const finishScope = () => { const result = this.#device.popErrorScope(); scopeOpen = false; return result; };
     try {
       // Unedited successful continuations already reside on the GPU. Edits,
       // restores and failed steps require uploading the complete committed state.
@@ -125,7 +134,9 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
         // Dispatch scopes preserve the ordered ping-pong dependencies within one
         // compute pass. Inspection retains a separate submission per kernel.
         const batch = inspect ? undefined : encoder.beginComputePass();
-        for (const passId of movementScheduleForTick(this.tickCount + offset)) {
+        const schedule = movementScheduleForTick(this.tickCount + offset);
+        for (let passIndex = 0; passIndex < schedule.length; passIndex += 1) {
+          const passId = schedule[passIndex];
           const pass = batch ?? encoder.beginComputePass();
           pass.setPipeline(this.#pipelines.get(passId)!);
           pass.setBindGroup(0, this.#groups[current]);
@@ -134,7 +145,8 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
           current = 1 - current;
           if (inspect) {
             this.#device.queue.submit([encoder.finish()]);
-            const after = await this.#readState(current);
+            const after = await this.#readState(current, undefined, undefined,
+              offset === ticks - 1 && passIndex === schedule.length - 1 ? finishScope : undefined);
             reports.push(inspectPass(before, after, this.coldTable, this.tickCount + offset, passId,
               passId === 'structure' ? structuralPlan as ReturnType<typeof planStructure> : undefined));
             before = after;
@@ -143,14 +155,11 @@ class WebGpuField extends FieldState implements GpuStateSpaceField {
         }
         if (!inspect) {
           batch!.end();
-          before = await this.#readState(current, encoder, this.#readback);
+          before = await this.#readState(current, encoder, this.#readback, offset === ticks - 1 ? finishScope : undefined);
           before = validateOwnedStructure(before, this.width, this.height, this.registry);
         }
       }
       const state = before;
-      const error = await this.#device.popErrorScope();
-      scopeOpen = false;
-      if (error) throw new Error(error.message);
       if (inspect) this.commitState(state, this.tickCount + ticks);
       else {
         // The readback never aliases committed storage during a step. Swap only

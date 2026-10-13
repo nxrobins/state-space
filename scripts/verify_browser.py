@@ -37,7 +37,7 @@ def run_captured(command, *, stdin=None, timeout=60):
 def validate_browser_evidence(results, corpus, sdk):
     """Missing, software-only or partial browser results cannot close a release."""
     conformance = results['conformance']
-    if len(corpus) < 31 or len({scene['name'] for scene in corpus}) != len(corpus):
+    if len(corpus) < 35 or len({scene['name'] for scene in corpus}) != len(corpus):
         raise ValueError('Fresh native corpus is incomplete or ambiguous')
     expected = [(scene['name'], len(scene['passes'])) for scene in corpus]
     observed = [(scene['name'], scene['passComparisons']) for scene in conformance['rows']]
@@ -47,8 +47,8 @@ def validate_browser_evidence(results, corpus, sdk):
         raise ValueError('Browser pass count is incomplete')
     if conformance['backendInfo']['isFallbackAdapter'] is not False:
         raise ValueError('Hardware WebGPU evidence is required')
-    if not all(conformance.get(flag) is True for flag in ('ownedReadbackRollback', 'reusableCopyIsolation', 'residentStateUploadIsolation')):
-        raise ValueError('Pooled readback, reusable-copy and resident-state isolation evidence is required')
+    if not all(conformance.get(flag) is True for flag in ('ownedReadbackRollback', 'reusableCopyIsolation', 'residentStateUploadIsolation', 'scopeCompletionRollback')):
+        raise ValueError('Pooled readback, reusable-copy, resident-state isolation and validation-scope rollback evidence is required')
     for row, native in zip(conformance['rows'], corpus):
         for flag in ('completeReportsMatch', 'uninspectedMatch', 'restartMatch'):
             if row[flag] is not True:
@@ -64,7 +64,7 @@ def validate_browser_evidence(results, corpus, sdk):
         if row['backendInfo']['isFallbackAdapter'] is not False or any(row[flag] is not True for flag in ('reportsMatch', 'restartMatch', 'invalidImportRejected', 'concurrentStepsSerialized')):
             raise ValueError('Live showcase behavior proof is incomplete')
     ui = results['ui']
-    if ui['passed'] is not True or any(ui[flag] is not True for flag in ('snapshotControls', 'customFileImport', 'playback')) or ui['inspectedPasses'] != 18:
+    if ui['passed'] is not True or any(ui[flag] is not True for flag in ('snapshotControls', 'customFileImport', 'playback')) or ui['inspectedPasses'] != 23:
         raise ValueError('Live UI proof is incomplete')
     browser = results['sdk']
     for key in ('catalogHash', 'initial', 'final', 'energyQ', 'replayEqual', 'passes'):

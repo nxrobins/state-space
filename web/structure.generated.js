@@ -3,6 +3,7 @@
  * See docs/STRUCTURES.md for the approximation and diagnostic coordinates.
  */
 import { PHASE_SOLID, PHASE_FROZEN, STRUCTURE_INTEGRITY_MASK, STRUCTURE_BOND_LEFT_MASK, STRUCTURE_BOND_RIGHT_MASK, STRUCTURE_BOND_UP_MASK, STRUCTURE_BOND_DOWN_MASK, STRUCTURE_ANCHOR_MASK, STRUCTURE_FRESH_MASK, STRUCTURE_COMPLETE_MASK, STRUCTURE_INTERNAL_MASK } from './materials.generated.js';
+import { PRESSURE_MASK, MOVED, fluidKind, updatePressure, pressureLoad } from './pressure.generated.js';
 import { requireRegistry } from './registry.generated.js';
 import { ENERGY_SCALE, temperatureQ, validateEnergyState, seedState } from './thermal.generated.js';
 import { checkedInteger, validateDimensions, validatePackedCells } from './validation.generated.js';
@@ -37,7 +38,7 @@ export function seedStructureState(state, width, height, registry) {
 }
 export function rewrittenStructure(before, after, word, rules) {
     if (!rules.eligible(after))
-        return 0;
+        return fluidKind(after) ? (word & PRESSURE_MASK) >>> 0 : 0;
     return !rules.eligible(before) || (before & 255) !== (after & 255) ? INTEGRITY_MASK | FRESH : word;
 }
 export function cloneStructure(state) {
@@ -95,13 +96,15 @@ export function normalizeBonds(cells, words, width, height, rules) {
     const grid = validatePackedCells(cells, count), structure = validatePackedCells(words, count);
     const output = new Uint32Array(count), active = new Uint8Array(count);
     for (let i = 0; i < count; i += 1) {
-        if (structure[i] > INTERNAL_MASK)
+        if ((structure[i] & ~INTERNAL_MASK) !== 0)
             throw new Error('Reserved structural bits must be zero.');
         if (rules.eligible(grid[i])) {
             output[i] = structure[i] & (INTEGRITY_MASK | ANCHOR);
             if (structure[i] & INTEGRITY_MASK)
                 active[i] = 1;
         }
+        else if (fluidKind(grid[i]))
+            output[i] = structure[i] & PRESSURE_MASK;
     }
     // Visit every undirected edge once; both reciprocal flags are written together.
     for (let i = 0; i < count; i += 1) {
@@ -136,15 +139,15 @@ export function validateStructure(state, width, height, rules, completed = true)
     const count = validateDimensions(width, height);
     const result = rules.validate(state.grid, state.energyQ, count);
     const words = validatePackedCells(state.structure, count);
-    if (words.some(word => word > (completed ? COMPLETE_MASK : INTERNAL_MASK)))
+    if (words.some(word => (word & ~(completed ? COMPLETE_MASK : INTERNAL_MASK)) !== 0))
         throw new Error('Structural state contains reserved or pending bits.');
     if (completed) {
         const normalized = normalizeBonds(result.grid, words, width, height, rules);
         if (normalized.some((word, index) => word !== words[index]))
             throw new Error('Structural bonds must be reciprocal, in bounds, and between intact cohesive cells.');
     }
-    else if (words.some((word, i) => word !== 0 && !rules.eligible(result.grid[i])))
-        throw new Error('Noncohesive cells cannot carry structural state.');
+    else if (words.some((word, i) => ((word & ~(PRESSURE_MASK | MOVED)) !== 0 && !rules.eligible(result.grid[i])) || ((word & PRESSURE_MASK) !== 0 && !fluidKind(result.grid[i]))))
+        throw new Error('Invalid mechanical state for material phase.');
     return { ...result, structure: words };
 }
 /** Integer loads fit exactly in Number: <= 4 * MAX_CELLS < 2^32.
@@ -202,15 +205,16 @@ export function planStructure(input, width, height, rules) {
     }
     if (reactions.reduce((total, value) => total + value, 0) !== supportedWeight)
         throw new Error('Support reactions must balance the supported weight exactly.');
-    const capacities = Array(count).fill(0), damaged = structure.slice();
+    const capacities = Array(count).fill(0), damaged = updatePressure(grid, energyQ, structure, width, height, rules);
     for (let i = 0; i < count; i += 1) {
         if (!active(i))
             continue;
         const row = rules.material(grid[i]), integrity = structure[i] & INTEGRITY_MASK, nominal = row.cohesion * 16;
         const remaining = row.softening ? Math.max(0, Math.min(64 * ENERGY_SCALE, (row.softening + 64) * ENERGY_SCALE - rules.temperature(grid[i], energyQ[i]))) : 64 * ENERGY_SCALE;
         capacities[i] = Math.floor(nominal * integrity * remaining / (255 * 64 * ENERGY_SCALE));
-        const loss = capacities[i] === 0 ? integrity : loads[i] > capacities[i] ? Math.min(integrity, Math.max(1, Math.floor((loads[i] - capacities[i]) * 255 / nominal))) : 0;
-        damaged[i] = (structure[i] & ~INTEGRITY_MASK) | (integrity - loss);
+        const demand = loads[i] + pressureLoad(damaged, i, width);
+        const loss = capacities[i] === 0 ? integrity : demand > capacities[i] ? Math.min(integrity, Math.max(1, Math.floor((demand - capacities[i]) * 255 / nominal))) : 0;
+        damaged[i] = (damaged[i] & ~INTEGRITY_MASK) | (integrity - loss);
     }
     const repairedEdges = normalizeBonds(grid, damaged, width, height, rules);
     // Union/find constructs post-damage components; the canonical root is the

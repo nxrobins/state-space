@@ -111,6 +111,8 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                 if scene == 'heat' and mode == 'styled':
                     write_png(output / 'native-heat.png', styled, 1920, 1080)
                     write_png(output / 'native-heat-off.png', still_air, 1920, 1080)
+                if scene == 'pressure' and mode == 'styled':
+                    write_png(output / 'native-pressure.png', styled, 1920, 1080)
                 frames, physics, rendering = [], [], []
                 for i in range(warmup + samples):
                     started = time.perf_counter()
@@ -118,7 +120,7 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                     physics_done = time.perf_counter()
                     renderer.render(field, styled=mode in ('styled', 'water-off', 'haze-off', 'distortion-off') or (mode == 'alternating' and i % 2 == 0), water=mode != 'water-off', haze=mode != 'haze-off', distortion=mode != 'distortion-off')
                     finished = time.perf_counter()
-                    if i >= warmup:
+                    if i >= warmup or scene == 'pressure':
                         frames.append((finished - started) * 1000)
                         physics.append((physics_done - started) * 1000)
                         rendering.append((finished - physics_done) * 1000)
@@ -202,7 +204,8 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
                     if state_hash(field) != final_hash or field.energy_balance().drift_q != 0:
                         raise ValueError('Heat proof mutated physics')
                 rows.append({'scene': scene, 'mode': mode, 'width': 256, 'height': 256, 'output': [1920, 1080],
-                    'ticks': samples, 'warmup': warmup, 'frameMs': distribution(frames), 'physicsMs': distribution(physics),
+                    'ticks': warmup + samples if scene == 'pressure' else samples, 'warmup': 0 if scene == 'pressure' else warmup,
+                    'frameMs': distribution(frames), 'physicsMs': distribution(physics),
                     'renderingMs': distribution(rendering), 'overBudget': sum(value > 1000 / 60 for value in frames),
                     'endTick': field.tick, 'finalHash': final_hash, 'finalLavaCells': final_lava_cells, 'finalWaterCells': final_water_cells,
                     'finalSmokeCells': final_smoke_cells, 'finalSteamCells': final_steam_cells,
@@ -311,6 +314,11 @@ def main():
         cli('find', 'role', 'button', 'click', '--name', 'Heat shimmer: off')
         cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(132); return "stepped"; })()')
         cli('screenshot', str((args.output / 'browser-heat-final.png').resolve()))
+        cli('open', url + '?scene=pressure&paused')
+        cli('wait', '--fn', 'Boolean(window.stateSpace)')
+        cli('screenshot', str((args.output / 'browser-pressure.png').resolve()))
+        cli('eval', '--stdin', stdin='(async () => { await window.stateSpace.step(60); return "stepped"; })()')
+        cli('screenshot', str((args.output / 'browser-pressure-final.png').resolve()))
         cli('open', url + 'benchmark.html')
         deadline, seen = time.monotonic() + 600, ''
         while True:
@@ -344,7 +352,7 @@ def main():
                                      'cpuBrowserParity': True, 'energyDriftQ': '0'})
         if source_hashes() != before:
             raise ValueError('Sources changed during frame measurements')
-        report = {'reportVersion': 6, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+        report = {'reportVersion': 7, 'startedAt': started_at, 'finishedAt': datetime.now(timezone.utc).isoformat(),
             'sourceHashes': before, 'sourceUnchangedDuringBenchmark': True,
             'runtime': {'python': sys.version, 'wgpu': wgpu.__version__},
             'browserBundleHash': digest(ROOT / 'dist/sdk/state-space.js'), 'browserCliHash': digest(args.browser_cli),

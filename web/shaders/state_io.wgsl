@@ -66,6 +66,7 @@ fn io_write(index: u32, packed: u32, energy: u32) {
     grid_out[index] = (packed & 0xffff00ffu) | (temperature << THERMAL_SHIFT);
     energy_out[index] = energy;
     var word = 0u;
+    if (io_fluid(packed)) { word = structure_in[index] & STRUCTURE_PRESSURE_MASK; }
     if (io_cohesive(packed)) {
         word = structure_in[index];
         if (!io_cohesive(grid_in[index]) || (packed & MATERIAL_MASK) != (grid_in[index] & MATERIAL_MASK)) {
@@ -88,6 +89,16 @@ fn io_bound(index: u32) -> bool {
     return io_cohesive(grid_in[index]) && (structure_in[index] & (STRUCTURE_INTEGRITY_MASK | STRUCTURE_ANCHOR_MASK)) != 0u;
 }
 
+fn io_fluid(packed: u32) -> bool {
+    let phase = (packed >> PHASE_SHIFT) & PHASE_MASK;
+    return phase == PHASE_GAS || phase == PHASE_PLASMA || phase == PHASE_LIQUID || phase == PHASE_VISCOUS || phase == PHASE_MOLTEN;
+}
+
+fn io_velocity(packed: u32, axis: u32) -> i32 {
+    let nibble = (packed >> (16u + axis * 4u)) & 15u;
+    return i32(nibble ^ 8u) - 8;
+}
+
 fn io_can_fall(source: u32, destination: u32) -> bool {
     let phase = (grid_in[source] >> PHASE_SHIFT) & PHASE_MASK;
     let matter = phase == PHASE_SOLID || phase == PHASE_FROZEN || phase == PHASE_POWDER || phase == PHASE_LIQUID || phase == PHASE_VISCOUS || phase == PHASE_MOLTEN;
@@ -105,6 +116,7 @@ fn io_normalize_structure(index: u32) {
     grid_out[index] = grid_in[index];
     energy_out[index] = energy_in[index];
     var result = 0u;
+    if (io_fluid(grid_in[index])) { result = structure_in[index] & STRUCTURE_PRESSURE_MASK; }
     if (io_cohesive(grid_in[index])) {
         let word = structure_in[index];
         result = word & (STRUCTURE_INTEGRITY_MASK | STRUCTURE_ANCHOR_MASK);

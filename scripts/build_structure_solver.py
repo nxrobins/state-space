@@ -17,6 +17,7 @@ def source_inputs(root=ROOT):
     constants.update({"COLD_" + name.upper(): i for i, name in enumerate(catalog["cold_fields"])})
     constants.update({"PHASE_" + name.upper(): value for name, value in catalog["phases"].items()})
     constants.update({"INTEGRITY": 255, "ANCHOR": 4096, "BOND_LEFT": 256, "BOND_RIGHT": 512, "BOND_UP": 1024, "BOND_DOWN": 2048})
+    constants.update({name.upper(): ((1 << field["bits"]) - 1) << field["shift"] for name, field in catalog["structure_fields"].items()})
     header = "\n".join(f"#define {name} {value}u" for name, value in constants.items()) + "\n"
     source = (root / "engine/structure_solver.c").read_text(encoding="utf-8").encode("utf-8")
     return source, header

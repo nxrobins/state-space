@@ -7,6 +7,7 @@ import { checkedInteger, validateDimensions } from './validation.js';
 import { KERNEL_SPECS, movementScheduleForTick } from './generated/schedule.js';
 import { DEFAULT_REGISTRY, type MaterialRegistry } from './registry.js';
 import { compiledStructuralPlan } from './structure_compiled.js';
+import { fluidKind, MOVED } from './pressure.js';
 
 const SPECS = new Map(KERNEL_SPECS.map(spec => [spec.id, spec]));
 const coldReferences = new WeakMap<MaterialRegistry, Uint32Array>();
@@ -106,6 +107,40 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
   };
   const pairPhase = spec.constants.MOVE_PHASE ?? spec.constants.GRAVITY_PHASE ?? 0;
   const salt = spec.constants.MOVE_SALT ?? 0;
+
+  const velocity = (index: number, axis: number) => (((input[index] >>> (16 + axis * 4)) & 15) ^ 8) - 8;
+  if (spec.source_file === 'phase_2f_impulse.wgsl') {
+    for (let i = 0; i < input.length; i += 1) {
+      let vx = 0, vy = 0;
+      if (!bound(i)) {
+        const own = inputStructure[i] >>> 16;
+        const head = fluidKind(input[i]) === 2 ? Math.max(1, Math.ceil(density(input[i]) / 64)) * 16 : 0;
+        const p = (j: number, correction: number) => j < 0 || !fluidKind(input[j]) ? own : (inputStructure[j] >>> 16) + correction;
+        const fx = p(i % width ? i - 1 : -1, 0) - p(i % width + 1 < width ? i + 1 : -1, 0);
+        const fy = p(i >= width ? i - width : -1, head) - p(i + width < input.length ? i + width : -1, -head);
+        const impulse = (old: number, force: number) => Math.max(-4, Math.min(4, old - Math.sign(old) + Math.max(-4, Math.min(4, Math.trunc(force / 64)))));
+        vx = impulse(velocity(i, 0), fx); vy = impulse(velocity(i, 1), fy);
+      }
+      output[i] = (input[i] & 0xff00ffff) | ((vx & 15) << 16) | ((vy & 15) << 20);
+    }
+    return finish();
+  }
+  if (spec.source_file === 'phase_2f_velocity.wgsl') {
+    const axis = spec.constants.MOVE_AXIS ?? 0, stride = axis ? width : 1;
+    for (let y = axis ? pairPhase : 0; y < height; y += axis ? 2 : 1) {
+      for (let x = axis ? 0 : pairPhase; x < width; x += axis ? 1 : 2) {
+        if (axis ? y + 1 >= height : x + 1 >= width) continue;
+        const a = y * width + x, b = a + stride;
+        const request = (s: number, t: number, sign: number) => !bound(s) && !bound(t) && fluidKind(input[t]) !== 0 && velocity(s, axis) * sign > salt;
+        if (((inputStructure[a] | inputStructure[b]) & MOVED) === 0 && (request(a, b, 1) || request(b, a, -1))) {
+          swap(a, b);
+          if (!pairPhase) { outputStructure[a] |= MOVED; outputStructure[b] |= MOVED; }
+        }
+      }
+    }
+    if (pairPhase) for (let i = 0; i < input.length; i += 1) outputStructure[i] &= ~MOVED;
+    return finish();
+  }
 
   if (spec.source_file === 'phase_2b_winner.wgsl' || spec.source_file === 'phase_2b_gas_buoyancy_winner.wgsl') {
     for (let y = pairPhase; y < height - 1; y += 2) {

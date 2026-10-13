@@ -1,4 +1,4 @@
-# Engine invariants: schema 3 / ca-v3
+# Engine invariants: schema 4 / ca-v4
 
 These invariants govern engine changes and every embedding client. Games are
 integration probes. The authoritative physical and snapshot contract is in
@@ -47,6 +47,11 @@ integration probes. The authoritative physical and snapshot contract is in
   energy. Unsupported intact fragments translate coherently downward.
 - Heat, phase changes and combustion compose with structure. Melting and consumed
   supports remove structural state, and the next support solve observes it.
+
+- Pressure is unsigned, bounded and valid only in fluid/gas phases; pending movement
+  markers never survive a complete tick. Velocity transport preserves all cell coordinates.
+- Pressure demand uses opposing-face differences. It does not enter the gravity
+  reaction or thermal energy ledgers. Mechanics has no conservation-of-momentum claim.
 
 ## Verification and evolution
 

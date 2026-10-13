@@ -1,0 +1,15 @@
+<canvas id="canvas" width="1920" height="1080"></canvas><script type="module">
+import { createGpuField } from '/dist/sdk/state-space.js';
+import { seedScene } from '/web/demo.js';
+import { createMaterialRenderer } from '/web/renderer.js';
+import { measurePacing } from './pressure-profile-benchmark.js';
+window.probe={done:false};
+try {
+ const field=await createGpuField(256,256); seedScene(field,'lighting');
+ const renderer=await createMaterialRenderer(document.getElementById('canvas'),256,256,field.registry);
+ performance.mark('paced-lighting-start');
+ const result=await measurePacing(field,renderer,1200,60);
+ performance.mark('paced-lighting-end');
+ window.probe={done:true,result}; renderer.close(); field.close();
+} catch(error) {window.probe={done:true,error:String(error.stack)};}
+</script>

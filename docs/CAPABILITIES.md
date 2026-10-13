@@ -1,31 +1,33 @@
 # State Space: capabilities and next directions
 
-The engine is the product. The games are integration probes. State Space 0.3
+The engine is the product. The games are integration probes. State Space 0.4
 is a deterministic cellular material simulator with coupled movement, heat,
 phase changes, combustion and structural failure. Its strongest foundation is
 the ability to inspect, reproduce and compare those interactions across backends.
-The current release evidence and requirement audit are in
-[C7](checkpoints/C7.md); earlier checkpoints retain their original version scope.
+Current pressure/velocity release evidence is in
+[the full-frame report](checkpoints/PRESSURE_PERFORMANCE.md).
+[C7](checkpoints/C7.md) and earlier checkpoints retain their original version scope.
 
 ## What the current engine supports
 
 | Capability | Implemented behavior | Approximation or boundary | Direct evidence |
 | --- | --- | --- | --- |
-| Complete state | Packed cell + integer energy + persistent integrity, bonds and anchoring; absolute tick and registry identity | Schema 3 / ca-v3. Old snapshots require an explicit migration or lossy import; no automatic reconstruction | Snapshot rejection, atomic restore, mutation and restart properties; installed SDK clients |
-| Grains and liquids | Conservative gravity, diagonal movement and lateral density exchange; structural bodies displace cells coherently | Local cellular exchange; no incompressibility, pressure solve, viscosity calibration or surface tension | Per-pass CPU/native/WebGPU corpus, material counts, 1,024-tick flow with split restart |
-| Gas and fire motion | Full-temperature buoyancy and lateral routing around baffles | No gas pressure, compressibility or advective velocity field | Hot smoke, gas baffles, competing fuel/oxidizer and mixed-scene conformance |
+| Complete state | Packed cell + integer energy + persistent integrity, bonds and anchoring; absolute tick and registry identity | Schema 4 / ca-v4. Old snapshots require an explicit migration or lossy import; no automatic reconstruction | Snapshot rejection, atomic restore, mutation and restart properties; installed SDK clients |
+| Grains and liquids | Conservative gravity, diagonal movement and lateral density exchange; structural bodies displace cells coherently | Local cellular exchange; global cellular hydrostatic pressure; no incompressibility projection, viscosity calibration or surface tension | Per-pass CPU/native/WebGPU corpus, material counts, 1,024-tick flow with split restart |
+| Gas and fire motion | Full-temperature buoyancy and lateral routing around baffles | Temperature-driven component pressure and bounded quantized velocity; no resolved compressible mass fractions | Hot smoke, gas baffles, competing fuel/oxidizer and mixed-scene conformance |
 | Heat | Four disjoint cardinal exchanges, harmonic conductivity, exact equal-and-opposite integer transfer | Unit cell heat capacity, model units, directional ordering bias and bounded sub-Q rounding; no radiation | Pair equalization, insulated cells, extremes and overflow controls; long coupled cases |
 | Phase changes | Finite latent intervals; melting, boiling, freezing and condensation; phase-family identity | Partial phase is represented by energy, not a resolved material mixture. Sand vitrification is irreversible | Forward/reverse phase cycles, saturated thermal views and phase/structure scenes |
 | Combustion | Mutually owned fuel/oxidizer pairs, finite chemical store, conserved inert products; burning removes support | Abstract two-cell chemistry; no molecular stoichiometry or flame-front model | Shared oxygen, finite fire, water/fire identity, consumed support and cascade |
-| Cohesion and failure | Reciprocal persistent bonds, support graph, integer load distribution, heat weakening, damage, fracture, anchors and coherent downward fragments | Quasistatic cellular strength; no rotation, elasticity, momentum, SI stress or mechanical-energy budget. Fluid/grain pressure is not applied to structures | Three independent planners, native GPU permutations, spans, fragments, break/repair/weld and coupled failure |
+| Cohesion and failure | Reciprocal persistent bonds, support graph, integer load distribution, heat weakening, damage, fracture, anchors and coherent downward fragments | Quasistatic cellular strength; no rotation, elasticity, momentum, SI stress or mechanical-energy budget. Fluid pressure adds opposing-face traction to damage demand | Three independent planners, native GPU permutations, spans, fragments, break/repair/weld and coupled failure |
 | Embedding | Python native GPU, browser WebGPU, browser/Node CPU; explicit edits, samples, pass reports, snapshots and registry export | WebGPU is asynchronous. GPU backends need a usable adapter. Reports add synchronization and memory cost | Packages installed outside the checkout; external Python/JS/TS clients; actual browser UI |
 | Material extension | Validated properties, defaults and phase/reaction graphs; custom IDs 18–255; canonical cross-language catalog hash | Configures existing laws. Some air/fire/water/smoke treatment retains built-in identity. No arbitrary shader-plugin ABI | Copper family, resin and ID-255 grit; malformed and incompatible registry controls |
 | Evolution | Exact-source, composed candidate evaluation; required positive behavior; immutable receipts; measured ranking | A bounded correctness corpus cannot prove all possible worlds. A physics-contract change needs new reference expectations, not optimization admission | Compiled bad candidates, reference-content tampering, staging controls and benchmark matrix |
 
 See [the contract](../ENGINE_CONTRACT.md), [SDK](SDK.md), [structural model](STRUCTURES.md)
 and [evolution protocol](EVOLUTION.md) for exact definitions. A tick is a discrete
-18-pass update, not a calibrated duration in seconds. Kinetic bits are transported
-metadata; they do not implement momentum. There is no electrical or pressure law.
+23-pass update, not a calibrated duration in seconds. Kinetic bits carry quantized
+velocity; global cellular pressure loads structures. See [PRESSURE.md](PRESSURE.md)
+for exact rules and limits. There is no electrical law or full momentum budget.
 One model energy unit is 256 Q. Temperature labels in the lab are model units,
 not degrees Celsius. Air and stone start at 20. Water starts to freeze at 15 and
 ice starts to melt at 30, so both stay unchanged at 20; water freezes only near
@@ -33,6 +35,10 @@ something colder. Exact conservation applies to thermal + latent + chemical
 energy, with edits accounted externally; gravity is outside that ledger.
 
 ## Backend and scale scope
+
+Current 256 x 256 all-effects measurements are in
+[PRESSURE_PERFORMANCE.md](checkpoints/PRESSURE_PERFORMANCE.md). The older
+measurements below describe their original ca-v3 rules and workloads.
 
 The native and browser GPU backends use host structural planning plus GPU
 transport and local physics. They read all three state arrays after each tick.
@@ -61,10 +67,10 @@ distributions; the numbers above remain the explicitly dated C6 baseline.
 
 ### CPU complete-tick measurements (2026-10-10)
 
-The shared JavaScript CPU engine now validates complete state at the tick
+The ca-v3 JavaScript CPU optimization validates complete state at the tick
 boundary, reuses private pass buffers, avoids redundant unsigned-array scans,
 and skips heat exchanges with provably zero flux. Public single-pass inputs,
-snapshot validation, observer isolation and the ca-v3 physical rules remain
+snapshot validation, observer isolation and the ca-v3 physical rules remained
 checked. All 15 benchmark trajectories retain the baseline's complete state.
 
 On Windows x64, Node 22.22.3 and one JavaScript thread of an Intel i9-11900K:
@@ -105,7 +111,7 @@ operations, and `view.js` renders committed samples. `app.js` connects the UI.
 That separation is the example extension pattern, not an additional physics layer.
 
 Point at a cell or use the canvas arrow keys to inspect it. Choose an intervention
-and click, or press Enter. Pass inspection exposes all 18 reports from a requested
+and click, or press Enter. Pass inspection exposes all 23 reports from a requested
 tick. Overlays show material/bonds, temperature, integrity and support distance.
 Save/download includes the complete snapshot and its catalog. Import supplies
 that exact registry before restore. The lab caps file imports at 20 MB and 16,384

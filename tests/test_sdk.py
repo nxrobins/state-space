@@ -82,8 +82,8 @@ class RegistryProperties(unittest.TestCase):
         source = Path("engine/compositor.py").read_text()
         self.assertEqual(lint_runtime(source, "engine/compositor.py"), [])
         for mutant in [source.replace("resources.callback(buffer.destroy)", "pass"),
-                       source.replace("keep(self.device.create_buffer(size=count * 8, usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_DST))",
-                                      "self.device.create_buffer(size=count * 8, usage=wgpu.BufferUsage.STORAGE | wgpu.BufferUsage.COPY_DST)")]:
+                       source.replace("keep(self.device.create_buffer(size=size, usage=usage))",
+                                      "self.device.create_buffer(size=size, usage=usage)")]:
             self.assertNotEqual(mutant, source)
             self.assertTrue(any("SS019" in issue for issue in lint_runtime(mutant, "engine/compositor.py")))
         mutant = source.replace('        pipelines = {}', '        self.pipelines = {}')
@@ -109,7 +109,7 @@ class NativeFieldProperties(unittest.TestCase):
             report = field.step(3, inspect=True)
             self.assertEqual(field.sample(0, 0)["material"], 19)
             self.assertEqual(field.energy_q[0], 120 * 256 + 17)
-            self.assertEqual(len(report), 54)
+            self.assertEqual(len(report), 69)
             self.assertTrue(any(change.before_packed & 255 == 18 and change.after_packed & 255 == 19 for item in report for change in item.changes))
             self.assertTrue(all(item.before.total_q == item.after.total_q for item in report))
             saved = field.snapshot()
@@ -183,7 +183,9 @@ class NativeFieldProperties(unittest.TestCase):
              patch.object(self.engine.device, "create_bind_group", side_effect=RuntimeError("injected allocation follow-up failure")):
             with self.assertRaisesRegex(RuntimeError, "injected"):
                 self.engine.run([0], DEFAULT_REGISTRY.cold_table(), 1, 1, 1)
-        self.assertEqual(len(resources), 8)
+        # Coordinates, cold table, plan and pooled staging are all owned before
+        # bind-group creation; a partial workspace must destroy every buffer.
+        self.assertEqual(len(resources), 9)
         for call in destroyed:
             call.assert_called_once_with()
 

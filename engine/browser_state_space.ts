@@ -38,6 +38,9 @@ export interface FieldSample {
   integrity: number;
   anchored: boolean;
   bonds: number;
+  pressureQ: number;
+  velocityX: number;
+  velocityY: number;
 }
 
 export interface StateSpaceFieldSnapshot {
@@ -319,6 +322,7 @@ export class FieldState {
       temperatureQ: temperatureQ(this.cells[index], this.energies[index], this.coldTable),
       phase: voxel.phase,
       flags: voxel.flags,
+      pressureQ: this.bonds[index] >>> 16, velocityX: voxel.kineticX, velocityY: voxel.kineticY,
       structure: this.bonds[index], integrity: this.bonds[index] & INTEGRITY_MASK,
       anchored: (this.bonds[index] & ANCHOR) !== 0, bonds: this.bonds[index] & BOND_BITS.reduce((a, b) => a | b, 0),
     };

@@ -4,6 +4,8 @@ Owns a GPU device and private presentation resources. Fields are consumed throug
 public copies; rendering never writes to a field or schedules physical ticks.
 """
 import struct
+import gc
+import weakref
 
 import numpy as np
 import wgpu
@@ -27,11 +29,14 @@ class MaterialRenderer:
             raise RuntimeError('No rendering adapter')
         self.adapter_info = dict(adapter.info)
         self.device = adapter.request_device_sync()
+        self._gpu_attributes = set()
         try:
             self._initialize()
         except Exception:
+            self._gpu_attributes = set(vars(self)) - {'width', 'height', 'output_size', 'registry', '_closed', 'adapter_info', '_gpu_attributes'}
             self.close()
             raise
+        self._gpu_attributes = set(vars(self)) - {'width', 'height', 'output_size', 'registry', '_closed', 'adapter_info', '_gpu_attributes'}
 
     def _initialize(self):
         device = self.device
@@ -88,6 +93,8 @@ class MaterialRenderer:
             colors[record['id']] = [*[int(record['color'][i:i+2], 16) / 255 for i in (1, 3, 5)], 1]
         device.queue.write_buffer(palette, 0, colors)
         self._uniforms = [buffer(32, True) for _ in range(3)]
+        self._uniform_data = [bytearray(32) for _ in range(3)]
+        self._attachments = {}
         self._groups = [device.create_bind_group(layout=state_layout, entries=[
             {'binding': i, 'resource': {'buffer': resource}} for i, resource in enumerate([*self._coordinates, cold, palette, uniform])
         ]) for uniform in self._uniforms]
@@ -148,16 +155,19 @@ class MaterialRenderer:
         for buffer, values in zip(self._coordinates, (field.grid, field.energy_q, field.structure)):
             self.device.queue.write_buffer(buffer, 0, values)
         for i, buffer in enumerate(self._uniforms):
-            self.device.queue.write_buffer(buffer, 0, struct.pack('<4I4f', self.width, self.height, field.tick % 65536,
+            struct.pack_into('<4I4f', self._uniform_data[i], 0, self.width, self.height, field.tick % 65536,
                 (1 | (2 if lighting else 0) | (4 if bloom else 0) | (8 if water else 0) |
                  (16 if reflections else 0) | (32 if refraction else 0) | (64 if haze else 0) | (128 if distortion else 0)) if styled else 0,
-                *self.output_size, 4 if i == 1 else 0, 1 if i == 2 else 0))
+                *self.output_size, 4 if i == 1 else 0, 1 if i == 2 else 0)
+            self.device.queue.write_buffer(buffer, 0, self._uniform_data[i])
         encoder = self.device.create_command_encoder()
 
         def draw(pipeline, targets, group, textures):
-            render_pass = encoder.begin_render_pass(color_attachments=[{
-                'view': target.create_view(), 'load_op': 'clear', 'store_op': 'store', 'clear_value': (0, 0, 0, 1),
-            } for target in targets])
+            for target in targets:
+                if target not in self._attachments:
+                    self._attachments[target] = {'view': target.create_view(), 'load_op': 'clear',
+                                                 'store_op': 'store', 'clear_value': (0, 0, 0, 1)}
+            render_pass = encoder.begin_render_pass(color_attachments=[self._attachments[target] for target in targets])
             render_pass.set_pipeline(pipeline)
             render_pass.set_bind_group(0, group)
             render_pass.set_bind_group(1, textures)
@@ -202,9 +212,16 @@ class MaterialRenderer:
     def close(self):
         if not self._closed:
             self._closed = True
-            for resource in self._owned:
-                resource.destroy()
+            while self._owned:
+                self._owned.pop().destroy()
+            retired = weakref.ref(self.device)
             self.device.destroy()
+            for name in self._gpu_attributes:
+                delattr(self, name)
+            # Device/queue cycles otherwise defer native driver destruction to
+            # an arbitrary later GC, producing large stalls in unrelated frames.
+            if retired() is not None:
+                gc.collect()
 
     def __enter__(self):
         return self

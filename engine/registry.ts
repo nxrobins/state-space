@@ -46,7 +46,7 @@ export function canonicalCatalog(catalog: MaterialCatalog): string {
 export function validateCatalog(value: unknown): asserts value is MaterialCatalog {
   sameKeys(value, Object.keys(DEFAULT_CATALOG), 'Catalog');
   const catalog = value as MaterialCatalog;
-  integer(catalog.schema_version, 3, 3, 'schema_version');
+  integer(catalog.schema_version, 4, 4, 'schema_version');
   integer(catalog.capacity, 256, 256, 'capacity');
   integer(catalog.cold_stride, 24, 24, 'cold_stride');
   sameKeys(catalog.structure_fields, Object.keys(DEFAULT_CATALOG.structure_fields), 'structure_fields');

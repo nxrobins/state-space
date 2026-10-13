@@ -34,7 +34,7 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Cannot read native evidence: ${response.status}`);
   const cases = await response.json();
-  if (!Array.isArray(cases) || cases.length < 31 || new Set(cases.map(value => value.name)).size !== cases.length) throw new Error('Incomplete or ambiguous corpus');
+  if (!Array.isArray(cases) || cases.length < 35 || new Set(cases.map(value => value.name)).size !== cases.length) throw new Error('Incomplete or ambiguous corpus');
   const rows = [];
   let backendInfo;
   for (const fixture of cases) {
@@ -89,6 +89,23 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
       if (!rejected || calls !== 2) throw new Error('Pooled readback fault was not exercised');
       same(gpu.packedSnapshot(), committed, 'failed resident pooled step remains atomic');
       await gpu.step(3); same(gpu.packedSnapshot(), expected, 'pooled retry matches CPU');
+    }
+    // The final mapping and validation scope finish together. A scope error or
+    // rejection must leave the previous public state intact and permit retry.
+    for (const inspect of [false, true]) for (const failure of ['validation', 'rejection']) {
+      const committed = gpu.packedSnapshot(); cpu.restore(committed); cpu.step(2);
+      const original = GPUDevice.prototype.popErrorScope; let calls = 0;
+      GPUDevice.prototype.popErrorScope = async function (...args) {
+        calls++; await original.apply(this, args);
+        if (failure === 'rejection') throw new Error('injected scope rejection');
+        return new GPUValidationError('injected validation failure');
+      };
+      let rejected = false;
+      try { await gpu.step(2, { inspect }); } catch { rejected = true; }
+      finally { GPUDevice.prototype.popErrorScope = original; }
+      if (!rejected || calls !== 1) throw new Error('Scope completion fault was not exercised');
+      same(gpu.packedSnapshot(), committed, 'scope failure must not commit');
+      await gpu.step(2, { inspect }); same(gpu.packedSnapshot(), cpu.packedSnapshot(), 'scope retry');
     }
     const target = { grid: new Uint32Array(63), energyQ: new Uint32Array(63), structure: new Uint32Array(63) };
     const pending = gpu.step(); let rejected = false;
@@ -147,6 +164,6 @@ export async function verifyBrowserCorpus(url, progress = () => {}) {
       await advance(`${name} continuation`, 0);
     }
   } finally { GPUQueue.prototype.writeBuffer = originalWrite; resident.close(); reference.close(); }
-  return { passed: true, backendInfo, ownedReadbackRollback: true, reusableCopyIsolation: true, residentStateUploadIsolation: true,
+  return { passed: true, backendInfo, scopeCompletionRollback: true, ownedReadbackRollback: true, reusableCopyIsolation: true, residentStateUploadIsolation: true,
     caseCount: rows.length, passComparisons: rows.reduce((sum, row) => sum + row.passComparisons, 0), rows };
 }
