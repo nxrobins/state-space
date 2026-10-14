@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "5eac01f98bd7439b89229fd4847d6605",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_cavern_ui",
+    "--browser-cli",
+    "C:/Users/nxrob/AppData/Local/npm-cache/_npx/ba0727cbf2d10686/node_modules/agent-browser/bin/agent-browser.js"
+  ],
+  "startedAt": 1792012211.311922,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 90.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "childPid": 11948,
+  "exitCode": 0,
+  "finishedAt": 1792012220.60173
+}

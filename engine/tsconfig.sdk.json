@@ -7,6 +7,14 @@
     "rootDir": ".",
     "outDir": "../dist/sdk/types"
   },
-  "include": ["index.ts", "experimental/3d.ts", "experimental/3d-gpu.ts"],
-  "exclude": ["**/*.test.ts"]
+  "include": [
+    "index.ts",
+    "experimental/3d.ts",
+    "experimental/3d-gpu.ts",
+    "experimental/world.ts",
+    "experimental/world-gpu.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts"
+  ]
 }

@@ -63,6 +63,11 @@ readback for the integer character controller. Save or replay the complete
 player and terrain state. [Integration guide](examples/first-person/README.md) ·
 [M2 verification and full-frame benchmark](docs/checkpoints/3D_M2.md).
 
+For the finite chunked world, open [The Cavern](http://127.0.0.1:8765/examples/cavern/).
+Its seeded 64³ terrain uses eight 32³ chunks, exact global physics, cached GPU
+terrain, and a first-person water/freezing challenge.
+[World SDK and controls](examples/cavern/README.md) · [M3 evidence](docs/checkpoints/3D_M3.md).
+
 Open the [engine lab](http://127.0.0.1:8765/examples/lab/). Five experiments cover
 support, coherent fragments, burning supports, phase changes, and custom
 materials. Inspect cells and bonds, change the scene, switch backends, and export

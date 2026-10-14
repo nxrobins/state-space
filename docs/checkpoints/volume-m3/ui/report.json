@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "harnessSha256": "5cc0bb242fdf70ca3a206b74cea35736bb6623642192958931bdb71463f68462",
+  "checks": {
+    "cancellationRetained": true,
+    "fileImportAtomic": true,
+    "fileRoundTrip": true,
+    "iceWalk": true,
+    "pausedViewIdle": true,
+    "playPauseStep": true,
+    "routeWonAt": 215,
+    "sameTickRestoreRedraws": true,
+    "softwareErrorRecovery": true
+  },
+  "errors": []
+}

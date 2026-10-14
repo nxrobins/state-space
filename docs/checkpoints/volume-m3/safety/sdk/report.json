@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "f9f29c875c9e47d6ba31fcf80475e2d7",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_sdk",
+    "--report",
+    "docs/checkpoints/volume-m3/sdk.json"
+  ],
+  "startedAt": 1792011962.8903053,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 600.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "childPid": 22780,
+  "exitCode": 0,
+  "finishedAt": 1792011986.2223778
+}

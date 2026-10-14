@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "9270be73d7954b418bf406657e89bf60",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m3_browser",
+    "--browser-cli",
+    "C:/Users/nxrob/AppData/Local/npm-cache/_npx/ba0727cbf2d10686/node_modules/agent-browser/bin/agent-browser.js"
+  ],
+  "startedAt": 1792011479.6729765,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 600.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "childPid": 25080,
+  "exitCode": 0,
+  "finishedAt": 1792011561.094011
+}

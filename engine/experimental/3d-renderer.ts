@@ -8,7 +8,7 @@ const COMMON = `
 struct Camera { eye:vec4f, right:vec4f, up:vec4f, forward:vec4f, projection:vec4f, shape:vec4u }
 const normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,0),vec3i(0,0,-1),vec3i(0,0,1));
 `;
-const MESH = COMMON + `
+export const MESH = COMMON + `
 @group(0) @binding(0) var<storage,read> grid:array<u32>;
 @group(0) @binding(1) var<storage,read_write> faces:array<u32>;
 struct Draw { vertices:u32, count:atomic<u32>, first:u32, instance:u32 }
@@ -24,7 +24,7 @@ struct Draw { vertices:u32, count:atomic<u32>, first:u32, instance:u32 }
   if(exposed){let slot=atomicAdd(&args.count,1u);faces[slot]=i*6u+f;}
  }
 }`;
-const DRAW = COMMON + `
+export const DRAW = COMMON + `
 @group(0) @binding(0) var<storage,read> grid:array<u32>;
 @group(0) @binding(1) var<storage,read> faces:array<u32>;
 @group(0) @binding(2) var<uniform> camera:Camera;

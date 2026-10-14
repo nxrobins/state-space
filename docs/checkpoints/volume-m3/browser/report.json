@@ -1,0 +1,501 @@
+{
+  "version": 1,
+  "passed": true,
+  "recordedAt": 1792011480.2285192,
+  "host": "Windows-10-10.0.26300-SP0",
+  "sourceHashes": {
+    "dist/sdk/state-space-3d-gpu.js": "e60ea873f54213ed923e87be2499328dfcdbb752114994851c09c604e022dad1",
+    "dist/sdk/state-space-3d.js": "6f48742d91cd4914bcee72fd2345499ae55cd6253fc88cb869af1d37c6da20e3",
+    "dist/sdk/state-space-world-gpu.js": "29e6d5c814e2749739c0681c69e54d0f7476876ac8eb8ff0de964f4609216a06",
+    "dist/sdk/state-space-world.js": "c5b84ca3799ba1c6700d00bb42a872dfb951870559f470e8f7a3a222ed80ce8c",
+    "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+    "engine/experimental/3d-core.ts": "02603e99c47eadc0a5f3bd1958201fcf202afa5759e96f6271c84c5ae1b92937",
+    "engine/experimental/3d-gpu-core.ts": "39161cf877b136119491ecadd22dabce772dc0e77cb7dfab99aac6c2c676610d",
+    "engine/experimental/3d-gpu.ts": "8cd92b7c9dc6b9b0e53d0c1d3e5c2564508b3d5c11382468f5e470a7c9cac351",
+    "engine/experimental/3d-renderer.ts": "36eec348f5c69d6032d12cb8e0c00c836fe28e6f8a5a406e0c683fd34fef6200",
+    "engine/experimental/3d-shader.ts": "88b340c349d32e9c189acae65ae9baa502a90030243635608b8d29d1d70d04e3",
+    "engine/experimental/3d-view.ts": "3416147ba72edf77c3bcf4f26fe1e65f40eb3ae47605e89707a78b33a7f96f25",
+    "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
+    "engine/experimental/3d.ts": "327c0df14182b0004a6f09e748f6f4037d636795f5cf062161326e13732abd5e",
+    "engine/experimental/world-core.ts": "1112a2abd7eaba7a137d55f7af0b7aacf609699736bacd184ba39d7042d17b63",
+    "engine/experimental/world-gpu.ts": "bf5125eabb0abade680393a996c6c4da9b7f399200375abdc0ecce26fe8b22e0",
+    "engine/experimental/world-renderer.ts": "bc2d26e44b0bceb5a7f77a72cb8c57db33e820e24bcab5571476d5173be07184",
+    "engine/experimental/world.test.ts": "2104a1749f76ef923bde39804e378a481c425b08bbe096a077c1de9664e22ed8",
+    "engine/experimental/world.ts": "ee140d976202733b10dc2744dc89babe7ae9883f75fcb7a57b88cc82a42309c0",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "engine/lint_ts.mjs": "52bebd66e1ace6e2d57a92c73f726ff6ce7235eee8cb1d15d715a1ddd8ce8184",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/tsconfig.sdk.json": "29a30f9846e0b146d05e81e3a6ac8a123fe803bdd9faca0c0041881b61709feb",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/vite.volume-gpu.config.ts": "e39029aa41c94ddd24e025c8053985fc2ecba5278c9cad58b23ed48e39ad9712",
+    "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
+    "engine/vite.world-gpu.config.ts": "df174ef007d24f61e04e9056b3fddead9a4fb9ae938e3c4db6b4caaa311f719d",
+    "engine/vite.world.config.ts": "d7f8fea7995b57a1395774d146e611d353cc4fbad74c93b3411baa295a6603a0",
+    "engine/vitest.config.ts": "53f7f679616bed6d34fd50709bf09258ce2e478fd4b60ce37008529491031eb6",
+    "examples/cavern/app.js": "2eeb606f77dbcbc9c424bab9f5d16a1e7731c83acd2c4ff0eb9317b8d716ce77",
+    "examples/cavern/game.js": "d96af01d5cdffdb9d394b5cc5718cae28d66e5de6e23330ce12b738b30280687",
+    "examples/cavern/game.test.mjs": "47c1c431c891e2f5d7000ebe62499a89d6dd0082f149122a929d20850ab95476",
+    "examples/cavern/index.html": "8362c46877594f4dd13e6a344fb13264f82e8e43647fbf4847bd28dfd21940bc",
+    "examples/cavern/README.md": "b7576b4188b517dd32d60402e886820d2dc64f943c60155f2e4faa4c34d306f2",
+    "examples/cavern/scene.js": "ac0b770dc170611f62d882e6b3149f1d990ad4af91c8ee3e7cc24a023d303b45",
+    "examples/cavern/style.css": "62b26577914f988230e046665654edc7802a7db0e156c19c206f429489c3cb89",
+    "examples/cavern/verify.js": "eb677fffc453c466c11141d926c881f0eb5be5511577dd363b8077f88e7e762e",
+    "examples/first-person/app.js": "7db3a81bf2ee60379418aeb212ebb9498b5c436fe9b953e6f0e4ed5a1734b3be",
+    "examples/first-person/game.js": "6274ef1a986d10b607f6e67b164da6d69f36ab59ba02cce139670cf05f58ccd5",
+    "examples/first-person/game.test.mjs": "5fb468e09c19cf68e2b1a3b89ec576699462af20e5773918d0b5985f0e4f74bb",
+    "examples/first-person/index.html": "528176cb07bd2066eef6cc262896782c39795a6cc626016bba89295a0800e35e",
+    "examples/first-person/scene.js": "a9271dfb828733bd5ce74037292457359effff65fe42aa62c8f7f4354b5c2051",
+    "examples/first-person/style.css": "4b1dcf7ed52bbac86c484666ee3a058d5ffe8b9cd871d8bb248ef7d2af1cd3e8",
+    "examples/first-person/verify.js": "838446bd625ae717a7cf079b8ad590993cdbdad6decff508892cafaec9e23a6b",
+    "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
+    "package.json": "a35299d696455f4c9d0bf1f7985762392a5cac0737a8461642ff168847c2f7ac",
+    "scripts/verification_guard.mjs": "3d3ba94476040f4e7766945aa5112f87da0b4488b1a0bcea778690156bad7bc7",
+    "scripts/verification_guard.py": "5f966a4dc5bc80db32509d45b2717102da5ed9124ae4e2300ad2e1bdc340b4c1",
+    "scripts/verify_checks.mjs": "0f662637066034722e8a371cf8b013689564c915e9143cdf92fb98700988dd09",
+    "scripts/verify_volume_m2_browser.py": "8dc56ae69200d974ba2ff1a9f968ed494a3db92afa5e8bb406c88b9d97a59ce1",
+    "scripts/verify_volume_m2.mjs": "2952c9d3ad576bd3803b82ce1914972ba86f87008741bc14babacbf22f5d4d38",
+    "scripts/verify_volume_m3_browser.py": "12ce3ecdfb26e08e4af87d5f9cbaba92b4daf93547917c276359983a74e8b86e",
+    "scripts/verify_volume_m3.mjs": "acfdf2dcc743fb762b605a5b3f153426b6a18a4d95abe30d985547c3705693f3",
+    "scripts/volume_evidence.mjs": "6fa8c4e5e8d81d539fd77bb31e7d2ffb7c8dffcee01de4848987d9940c82e966",
+    "scripts/volume_m2_evidence.mjs": "8e06800454dd3257ff37b611f9213e6a6a394462304c088f85ca1acd9bb26c97",
+    "scripts/volume_m3_evidence.mjs": "1548e050021462fa75a6149e2b55575d3c56b9cc9ca6e6b29cb514a5624bab41",
+    "tests/test_verification_guard.py": "bd10853196f8423643bcaf28a1df1072a5d0a4d15f702f58a0ada9531146e78b",
+    "web/frame-clock.js": "50d398668dc373502b8311c2fdb6709fcc8876ec3243dda7c00deab4af38783f",
+    "web/frame-pump.js": "11239949d7e9a613f3af20bb92bdcb92d432a3bce2fdd4cded6bf96ed517f8e1",
+    "web/rendering.test.mjs": "078e32c3bacee26f24e9f09f31b7161209ffee1dd3f65b19f4e03468c234bb4c"
+  },
+  "referenceInputHashes": {
+    "dist/sdk/state-space-3d.js": "6f48742d91cd4914bcee72fd2345499ae55cd6253fc88cb869af1d37c6da20e3",
+    "engine/experimental/3d.ts": "327c0df14182b0004a6f09e748f6f4037d636795f5cf062161326e13732abd5e",
+    "engine/experimental/3d-core.ts": "02603e99c47eadc0a5f3bd1958201fcf202afa5759e96f6271c84c5ae1b92937",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "scripts/verify_volume_m3.mjs": "acfdf2dcc743fb762b605a5b3f153426b6a18a4d95abe30d985547c3705693f3",
+    "examples/cavern/game.js": "d96af01d5cdffdb9d394b5cc5718cae28d66e5de6e23330ce12b738b30280687",
+    "dist/sdk/state-space-world.js": "c5b84ca3799ba1c6700d00bb42a872dfb951870559f470e8f7a3a222ed80ce8c",
+    "engine/experimental/world.ts": "ee140d976202733b10dc2744dc89babe7ae9883f75fcb7a57b88cc82a42309c0",
+    "engine/experimental/world-core.ts": "1112a2abd7eaba7a137d55f7af0b7aacf609699736bacd184ba39d7042d17b63",
+    "examples/cavern/scene.js": "ac0b770dc170611f62d882e6b3149f1d990ad4af91c8ee3e7cc24a023d303b45"
+  },
+  "nodeReferenceReceiptHash": "c2f9b5edba8ae04b9931440c5ec95631086fbc9285d345b22829fac6e674e769",
+  "backendInfo": {
+    "architecture": "lovelace",
+    "description": "",
+    "device": "",
+    "isFallbackAdapter": false,
+    "vendor": "nvidia"
+  },
+  "verification": {
+    "checks": [
+      {
+        "composedTicks": 32,
+        "edge": 2,
+        "exact": true,
+        "passComparisons": 135
+      },
+      {
+        "composedTicks": 32,
+        "edge": 4,
+        "exact": true,
+        "passComparisons": 135
+      },
+      {
+        "cachedMeshesExact": true,
+        "cameraIsolated": true,
+        "interiorAndCornerInvalidation": true,
+        "thermalGeometryReuse": true
+      },
+      {
+        "concurrencyRejected": true,
+        "exact": true,
+        "gameRestarts": [
+          3,
+          31,
+          32,
+          157,
+          509
+        ],
+        "gameTicks": 600,
+        "invalidInputsAtomic": true,
+        "ledgerExact": true,
+        "queriesIsolated": true,
+        "worldRestarts": [
+          3,
+          31,
+          32,
+          509
+        ],
+        "worldTicks": 1024
+      },
+      {
+        "liveInputsAtomic": true,
+        "publicStepRestoreReplay": true,
+        "viewIsolated": true
+      }
+    ],
+    "passed": true
+  },
+  "browserErrors": [],
+  "sourceUnchanged": true,
+  "commands": [
+    {
+      "arguments": [
+        "open",
+        "http://127.0.0.1:53783/examples/cavern/"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "set",
+        "viewport",
+        "1920",
+        "1080"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "wait",
+        "--fn",
+        "Boolean(window.cavern?.ready)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "window.cavern.backendInfo"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\volume-m3\\browser\\ready.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m3Job.done,error:window.__m3Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "window.__m3Job.result"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\volume-m3\\browser\\verified.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "errors"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ]
+}

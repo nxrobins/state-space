@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "id": "8efd55506c4d44ff9ade4fd87e4a99c1",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m2_browser",
+    "--browser-cli",
+    "C:/Users/nxrob/AppData/Local/npm-cache/_npx/ba0727cbf2d10686/node_modules/agent-browser/bin/agent-browser.js",
+    "--node-report",
+    "docs/checkpoints/volume-m3/m2-node.json",
+    "--output",
+    "docs/checkpoints/volume-m3/m2-browser"
+  ],
+  "startedAt": 1792011746.8384092,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 600.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 50.0,
+  "containment": "Windows job",
+  "childPid": 2324,
+  "exitCode": 0,
+  "finishedAt": 1792011887.9523418
+}
