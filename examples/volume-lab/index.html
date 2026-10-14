@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>State Space · Volume Lab</title><link rel="stylesheet" href="style.css"></head>
+<body><header><a href="../../">STATE SPACE</a><span>EXPERIMENTAL / 3D MILESTONE 1</span><h1>Volume Lab<span>32³</span></h1>
+<p>Material, motion and heat in three dimensions.</p></header>
+<main><section class="stage"><canvas id="world" width="1280" height="720" aria-label="Orbitable three-dimensional material simulation"></canvas>
+<div class="overlay"><span id="mode">PAUSED</span><span id="tick">TICK 0</span></div>
+<p class="hint">Drag to orbit · Scroll to zoom · Use the cutaway to inspect the interior</p></section>
+<aside><label>Scene<select id="scene"></select></label><p id="description"></p>
+<div class="buttons"><button id="play">Play</button><button id="step">Step</button><button id="reset">Reset</button></div>
+<div class="metrics"><div><span>SIMULATION</span><strong id="rate">—</strong></div><div><span>ENERGY DRIFT</span><strong id="drift">0 Q</strong></div></div>
+<label>Color<select id="color"><option value="material">Material</option><option value="temperature">Temperature · display range 0–255</option></select></label>
+<label class="check"><input id="steam" type="checkbox" checked> Show steam markers</label>
+<label>Depth cutaway <output id="cut-value">32 / 32</output><input id="cut" type="range" min="0" max="32" value="32"></label>
+<details open><summary>Inspect & edit voxel</summary><div class="coordinates"><label>X<input id="x" type="number" min="0" max="31" value="8"></label><label>Y<input id="y" type="number" min="0" max="31" value="18"></label><label>Z<input id="z" type="number" min="0" max="31" value="8"></label></div>
+<button id="inspect">Inspect</button><pre id="sample">Select coordinates to inspect.</pre>
+<label>Material<select id="material"></select></label><label>Placement temperature<input id="thermal" type="number" min="0" max="255" value="20"></label><button id="place">Place material</button>
+<label>Conserved energy Q<input id="energy" type="number" min="0" max="1073741823" value="5120"></label><button id="heat">Set energy</button></details>
+<details><summary>Material counts</summary><div id="counts"></div></details>
+<div class="buttons"><button id="export">Export snapshot</button><button id="import">Import</button><input id="file" type="file" accept="application/json,.json" hidden></div>
+<button id="benchmark">Measure full frames</button><button id="cancel" hidden>Cancel measurement</button><a id="receipt" hidden>Download receipt</a>
+<p class="boundary">Fixed solids · Closed boundaries · CPU physics<br>Pressure, combustion and structural collapse arrive in later milestones.</p>
+</aside></main><footer><span id="status" role="status">Loading worker and renderer…</span><span id="frame">Performance is measured; 60 Hz is not a milestone gate.</span></footer>
+<script type="module" src="app.js"></script></body></html>

@@ -49,6 +49,20 @@ All visual effects and game sprites share the renderer's GPU completion boundary
 See the [integration guide](examples/spillway/README.md) for the client/engine
 boundary and how to reuse it.
 
+For the experimental 3D CPU engine, open [Volume Lab](http://127.0.0.1:8765/examples/volume-lab/).
+Orbit a 32³ world, inspect cutaways, edit cells and energy, and export exact
+snapshots. Sand, water, steam and phase changes run in a worker; solids remain
+fixed until transformed. The separate `state-space-engine/experimental/3d`
+entry runs in browsers and Node. [Rules, limitations and evidence](docs/checkpoints/3D_M1.md).
+
+For a playable 3D integration, open [The Crossing](http://127.0.0.1:8765/examples/first-person/).
+Carve a dam, release water, freeze a crossing and walk across. The experimental
+`state-space-engine/experimental/3d/gpu` backend runs the exact CPU rules on WebGPU;
+terrain faces are generated and rendered on the GPU, with bounded collision
+readback for the integer character controller. Save or replay the complete
+player and terrain state. [Integration guide](examples/first-person/README.md) ·
+[M2 verification and full-frame benchmark](docs/checkpoints/3D_M2.md).
+
 Open the [engine lab](http://127.0.0.1:8765/examples/lab/). Five experiments cover
 support, coherent fragments, burning supports, phase changes, and custom
 materials. Inspect cells and bonds, change the scene, switch backends, and export

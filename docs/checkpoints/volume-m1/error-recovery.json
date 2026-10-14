@@ -1,0 +1,1 @@
+{"success":true,"data":{"origin":"http://127.0.0.1:8765/examples/volume-lab/","result":{"backendInfo":{"architecture":"lovelace","description":"","device":"","isFallbackAdapter":false,"vendor":"nvidia"},"errorStateExportExact":true,"nextRequestRecovered":true,"passed":true,"rendererExceptionPaused":true,"retainedStateExact":true,"uncloneableInputRejected":true}},"error":null}

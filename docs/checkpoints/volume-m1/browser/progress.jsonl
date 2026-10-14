@@ -1,0 +1,33 @@
+{"time": 1791955530.087963, "event": "started", "session": "volume-15786e483ce9"}
+{"time": 1791955532.7591588, "event": "progress", "done": false, "status": "Ready. Solids remain fixed until edited or transformed."}
+{"time": 1791955620.3022513, "event": "progress", "done": false, "status": "Sand & water \u00b7 warmup 4 / 60"}
+{"time": 1791955622.532891, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 34 / 600"}
+{"time": 1791955624.7728462, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 110 / 600"}
+{"time": 1791955627.018991, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 183 / 600"}
+{"time": 1791955629.2552528, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 253 / 600"}
+{"time": 1791955631.4969797, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 321 / 600"}
+{"time": 1791955633.7241592, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 388 / 600"}
+{"time": 1791955635.9704328, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 454 / 600"}
+{"time": 1791955638.2351604, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 522 / 600"}
+{"time": 1791955640.4766967, "event": "progress", "done": false, "status": "Sand & water \u00b7 measured 589 / 600"}
+{"time": 1791955642.742601, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 warmup 52 / 60"}
+{"time": 1791955644.998635, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 60 / 600"}
+{"time": 1791955647.2338758, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 128 / 600"}
+{"time": 1791955649.4753373, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 195 / 600"}
+{"time": 1791955651.6998928, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 263 / 600"}
+{"time": 1791955653.9398503, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 330 / 600"}
+{"time": 1791955656.170262, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 397 / 600"}
+{"time": 1791955658.4126737, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 464 / 600"}
+{"time": 1791955660.6460657, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 531 / 600"}
+{"time": 1791955662.880285, "event": "progress", "done": false, "status": "Hot / cold chamber \u00b7 measured 599 / 600"}
+{"time": 1791955665.1102114, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 9 / 600"}
+{"time": 1791955667.3491795, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 79 / 600"}
+{"time": 1791955669.5899322, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 149 / 600"}
+{"time": 1791955671.8205957, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 218 / 600"}
+{"time": 1791955674.061434, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 289 / 600"}
+{"time": 1791955676.293463, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 358 / 600"}
+{"time": 1791955678.5255668, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 429 / 600"}
+{"time": 1791955680.760395, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 498 / 600"}
+{"time": 1791955682.9904914, "event": "progress", "done": false, "status": "From rock to liquid \u00b7 measured 568 / 600"}
+{"time": 1791955685.2343137, "event": "progress", "done": true, "status": "Measurement complete. Exact replay is verified separately; 60 Hz is not a release gate."}
+{"time": 1791955686.0060463, "event": "completed", "passed": true}

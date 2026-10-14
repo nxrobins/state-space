@@ -1,0 +1,52 @@
+{
+  "reportVersion": 1,
+  "passed": true,
+  "runtimeSourcesMatch": true,
+  "sourceHashes": {
+    "dist/sdk/state-space-3d.js": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c",
+    "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
+    "engine/experimental/3d.ts": "cf4d9573f8a83f8c5e68ef832ab9a5d50e95805b6040731125fdfcfad08b006b",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/tsconfig.sdk.json": "348c9029cf63012e31a50b66dd4ba9d2926069121f95b538bed7367cf093d2ff",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/vite.sdk.config.ts": "b7868ceb2bf6227b0024e9ae71d0ae1ac8597ed8bb102ddf08f698dd0daa1edc",
+    "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
+    "examples/volume-lab/app.js": "73ebaca27ae001d0868c057fa8345690feed503a9e2a4475104ed1c2753a82b7",
+    "examples/volume-lab/index.html": "753dd0fa990e9a447ed8f7527fd5a89abe5cd5eef87d5fe42e5f56abc95ceb71",
+    "examples/volume-lab/renderer.js": "b2413eb06c4b66694330a2f1d7a6bef52c769f105f0f64b67a74b2dbb7e0dbf5",
+    "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
+    "examples/volume-lab/style.css": "838c04214cbf77005dc1a744c34c9b1440647fca28a82d2f6a467407940f5c40",
+    "examples/volume-lab/verify.js": "903f287a8a61b97a57a4a9447efa6a5508d6fd2718547cf6fcf81b161156f745",
+    "examples/volume-lab/worker.js": "5d7e2fbf5aefb819c7d34e5c79b9ab3190caa786676ff5a701b8c0c9dbf6566e",
+    "package.json": "0fb624a6e43f5cafa9bfad374dc1b5790fbd449babd4a5e084197a7d1f8c08fb",
+    "scripts/benchmark_volume.mjs": "d1448b07abced1d8fc253d5af4942bf24b963dfeb5088e7440f398d31ce82cdd",
+    "scripts/verify_volume.mjs": "aba1f0e590e39d51b54e068904fd3d4ed95ea66e175ad98ecd7504f972c6d5a8",
+    "scripts/verify_volume_browser.py": "9a5dd13a140c9e3eb1f33090fae1aefc9773f026139128ddb77efbc279377c92",
+    "scripts/volume_evidence.mjs": "6fa8c4e5e8d81d539fd77bb31e7d2ffb7c8dffcee01de4848987d9940c82e966"
+  },
+  "stable2dSdkSha256": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+  "legacySuiteChangesAfterRun": [
+    "examples/volume-lab/app.js",
+    "examples/volume-lab/renderer.js",
+    "examples/volume-lab/verify.js",
+    "scripts/verify_volume.mjs"
+  ],
+  "legacyChangesScope": "Only 3D client/reporting recovery; checked again by final browser and Node verification. Shared 2D runtime unchanged.",
+  "artifacts": {
+    "node-verification.json": "fb0852e4062163134955143876216de46392ee6ef374fcc8b899c0b01e4ba658",
+    "cpu.json": "0c444d4e33b834019c94fbba6fb0d4c3c0af19a9de3bb949af1febb64bccd2b4",
+    "cpu-comparison.json": "f482d2d2c3ae02deb24c3ddd8ca46da699144a1a1cde0a9b817e75999ee932cf",
+    "browser/report.json": "04ee8b133aa6da3124c95f23890c4ea555882fb04d94108b42e98e715d6c9e5f",
+    "error-recovery.json": "1f560900bf94c3e58b0c648fb2cedaacc702c3f1801a6828f140cff949930499",
+    "existing-verification.json": "f1170cbe83eda92d0e7f2d807f10e67f11dfcdcde84468622acd18f1563f2063",
+    "existing-verification-sdk.json": "b602080c4eaba1f2c3bcfcc84f187e3d6f114372d5bfbf077980499bb0a18170",
+    "legacy-artifacts.zip": "ca60fddf354d9165189c532d52a7b61b13a8c9728aea6d803b410abf765d84f4",
+    "legacy-artifacts.json": "5733db23bbe9c092650c9308406032e22148ddff6f6d5d5924ba547ee2c9e4a4",
+    "benchmark-host.json": "c3ab01223b7c68a22c625683bc8df0ba2ee7e9d3f7da5d5e465a76523a819c1a",
+    "benchmark-host-after.json": "8ee9000601c7478192920c9e7adbe44dc441649c16261aeeca6b1a413b05368e",
+    "file-import-ui.json": "d24f29297cf420a126dabf2b4e7bad62753e02a80563d85e8d2a604a6e83a29b"
+  }
+}

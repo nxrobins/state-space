@@ -1,0 +1,1 @@
+{"success":true,"data":{"origin":"http://127.0.0.1:8765/examples/volume-lab/","result":{"balance":{"currentQ":"189314560","driftQ":"0","externalQ":"0","initialQ":"189314560"},"invalidJsonPreservesState":true,"passed":true,"validFileRestoresCompleteState":true}},"error":null}

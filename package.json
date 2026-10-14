@@ -12,10 +12,13 @@
   "scripts": {
     "lint": "node engine/lint_ts.mjs",
     "pretest": "npm run build:sdk",
-    "test": "vitest run --config engine/vitest.config.ts && node --test web/rendering.test.mjs",
+    "test": "vitest run --config engine/vitest.config.ts && node --test web/rendering.test.mjs examples/first-person/game.test.mjs",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
-    "build:sdk": "vite build --config engine/vite.sdk.config.ts && tsc -p engine/tsconfig.sdk.json",
+    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && tsc -p engine/tsconfig.sdk.json",
+    "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
+    "benchmark:3d": "npm run build:sdk && node scripts/benchmark_volume.mjs",
+    "verify:3d:m2": "npm run build:sdk && node scripts/verify_volume_m2.mjs",
     "prepack": "npm run build:sdk"
   },
   "devDependencies": {
@@ -29,6 +32,14 @@
     ".": {
       "types": "./dist/sdk/types/index.d.ts",
       "import": "./dist/sdk/state-space.js"
+    },
+    "./experimental/3d/gpu": {
+      "types": "./dist/sdk/types/experimental/3d-gpu.d.ts",
+      "import": "./dist/sdk/state-space-3d-gpu.js"
+    },
+    "./experimental/3d": {
+      "types": "./dist/sdk/types/experimental/3d.d.ts",
+      "import": "./dist/sdk/state-space-3d.js"
     }
   },
   "files": [
@@ -38,6 +49,8 @@
     "docs/STRUCTURES.md",
     "docs/PRESSURE.md",
     "docs/CAPABILITIES.md",
-    "docs/EVOLUTION.md"
+    "docs/EVOLUTION.md",
+    "docs/checkpoints/3D_M1.md",
+    "docs/checkpoints/3D_M2.md"
   ]
 }

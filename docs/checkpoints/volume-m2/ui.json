@@ -1,0 +1,396 @@
+{
+  "cancelledMeasurement": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "cancelled": true,
+    "complete": false,
+    "dimensions": [
+      32,
+      32,
+      32
+    ],
+    "finishedAt": "2026-10-14T07:46:15.267Z",
+    "recordedAt": "2026-10-14T07:46:15.054Z",
+    "resolution": [
+      1920,
+      1080
+    ],
+    "samples": [],
+    "scope": "Complete 1080p gameplay: input, bounded GPU edits, all 27 physics passes, 16\u00b3 collision readback, integer controller, HUD, GPU face compaction, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.",
+    "targetHz": 60,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "version": 1,
+    "warmup": [
+      {
+        "activeGameplay": true,
+        "callbackAt": 8498.899999999907,
+        "callbackDelayMs": 0.29999999990650394,
+        "callbackInterval": null,
+        "completedAt": 8517,
+        "completionMs": 18.399999999999636,
+        "physicsAndQueryMs": 7.100000000093132,
+        "renderAndHudMs": 11,
+        "tick": 1,
+        "timestamp": 8498.6,
+        "tool": "none",
+        "workMs": 18.100000000093132
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8517.100000000093,
+        "callbackDelayMs": 1.700000000093496,
+        "callbackInterval": 16.799999999999272,
+        "completedAt": 8526.100000000093,
+        "completionMs": 10.700000000093496,
+        "physicsAndQueryMs": 5.5,
+        "renderAndHudMs": 3.5,
+        "tick": 2,
+        "timestamp": 8515.4,
+        "tool": "none",
+        "workMs": 9
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8532.199999999953,
+        "callbackDelayMs": 0.09999999995307007,
+        "callbackInterval": 16.700000000000728,
+        "completedAt": 8539,
+        "completionMs": 6.899999999999636,
+        "physicsAndQueryMs": 1.199999999953434,
+        "renderAndHudMs": 5.600000000093132,
+        "tick": 3,
+        "timestamp": 8532.1,
+        "tool": "none",
+        "workMs": 6.800000000046566
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8548.899999999907,
+        "callbackDelayMs": 0.19999999990614015,
+        "callbackInterval": 16.600000000000364,
+        "completedAt": 8555.899999999907,
+        "completionMs": 7.19999999990614,
+        "physicsAndQueryMs": 1.5,
+        "renderAndHudMs": 5.5,
+        "tick": 4,
+        "timestamp": 8548.7,
+        "tool": "none",
+        "workMs": 7
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8565.600000000093,
+        "callbackDelayMs": 0.20000000009349608,
+        "callbackInterval": 16.69999999999891,
+        "completedAt": 8572.899999999907,
+        "completionMs": 7.499999999907232,
+        "physicsAndQueryMs": 1.5999999998603016,
+        "renderAndHudMs": 5.699999999953434,
+        "tick": 5,
+        "timestamp": 8565.4,
+        "tool": "none",
+        "workMs": 7.299999999813736
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8582.399999999907,
+        "callbackDelayMs": 0.19999999990614015,
+        "callbackInterval": 16.80000000000109,
+        "completedAt": 8588.5,
+        "completionMs": 6.299999999999272,
+        "physicsAndQueryMs": 1.5,
+        "renderAndHudMs": 4.600000000093132,
+        "tick": 6,
+        "timestamp": 8582.2,
+        "tool": "none",
+        "workMs": 6.100000000093132
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8598.899999999907,
+        "callbackDelayMs": 0.29999999990650394,
+        "callbackInterval": 16.399999999999636,
+        "completedAt": 8604.600000000093,
+        "completionMs": 6.0000000000927685,
+        "physicsAndQueryMs": 1.5,
+        "renderAndHudMs": 4.2000000001862645,
+        "tick": 7,
+        "timestamp": 8598.6,
+        "tool": "none",
+        "workMs": 5.7000000001862645
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8615.600000000093,
+        "callbackDelayMs": 0.10000000009313226,
+        "callbackInterval": 16.899999999999636,
+        "completedAt": 8622.600000000093,
+        "completionMs": 7.100000000093132,
+        "physicsAndQueryMs": 1.3999999999068675,
+        "renderAndHudMs": 5.600000000093132,
+        "tick": 8,
+        "timestamp": 8615.5,
+        "tool": "none",
+        "workMs": 7
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8632.399999999907,
+        "callbackDelayMs": 0.29999999990650394,
+        "callbackInterval": 16.600000000000364,
+        "completedAt": 8637.699999999953,
+        "completionMs": 5.59999999995307,
+        "physicsAndQueryMs": 1.1000000000931325,
+        "renderAndHudMs": 4.199999999953434,
+        "tick": 9,
+        "timestamp": 8632.1,
+        "tool": "none",
+        "workMs": 5.300000000046566
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8649.100000000093,
+        "callbackDelayMs": 0.30000000009385985,
+        "callbackInterval": 16.69999999999891,
+        "completedAt": 8654.699999999953,
+        "completionMs": 5.8999999999541615,
+        "physicsAndQueryMs": 1.5,
+        "renderAndHudMs": 4.099999999860302,
+        "tick": 10,
+        "timestamp": 8648.8,
+        "tool": "none",
+        "workMs": 5.599999999860302
+      },
+      {
+        "activeGameplay": true,
+        "callbackAt": 8665.600000000093,
+        "callbackDelayMs": 0.20000000009349608,
+        "callbackInterval": 16.600000000000364,
+        "completedAt": 8672.300000000047,
+        "completionMs": 6.90000000004693,
+        "physicsAndQueryMs": 1.5999999998603016,
+        "renderAndHudMs": 5.100000000093132,
+        "tick": 11,
+        "timestamp": 8665.4,
+        "tool": "none",
+        "workMs": 6.699999999953434
+      }
+    ]
+  },
+  "errorCheckpointExportExact": true,
+  "errorClearedAfterValidImport": true,
+  "fileImportAtomic": true,
+  "fileImportExact": true,
+  "frameFailurePaused": true,
+  "invalidTapeAtomic": true,
+  "passed": true,
+  "playPause": true,
+  "replayRoundTripExact": true,
+  "resetRebuiltDevice": true,
+  "routeAt145": true,
+  "routeButtonWon": true,
+  "sourceHashes": {
+    "dist/sdk/state-space-3d-gpu.js": "34bd28e7b197ca54906c22a2e0dc475e8df5341eb8f8599b93bce1b02bd0173b",
+    "dist/sdk/state-space-3d.js": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c",
+    "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+    "engine/experimental/3d-gpu.ts": "0104ad31182950e1a127d43a78b2e3180705ee12b11c05a73fbc28e8a96ac6b7",
+    "engine/experimental/3d-renderer.ts": "9b0d0faf579d20b44fed9ed9d06094e5908b00c249c959ea5599e6159c68229f",
+    "engine/experimental/3d-shader.ts": "132919110f4299fef636d1ce250fec0fba4d8113e3f68421617ded940c00ab0c",
+    "engine/experimental/3d-view.ts": "a873b2b31049e250ea11bc17ee42cd70a0de0e307ca3372bfcc824a959bd8a20",
+    "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
+    "engine/experimental/3d.ts": "cf4d9573f8a83f8c5e68ef832ab9a5d50e95805b6040731125fdfcfad08b006b",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "engine/lint_ts.mjs": "15e34299f693bb76c2329eed020855984801cbb59e7523f2ca48f9f8ffebe575",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/tsconfig.sdk.json": "ec84230f499e292cc27e6cb2ec022643288c1bbc6e62975ada411c529431cc26",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/vite.volume-gpu.config.ts": "e39029aa41c94ddd24e025c8053985fc2ecba5278c9cad58b23ed48e39ad9712",
+    "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
+    "examples/first-person/app.js": "18f4446aa5662e88df4dbdf73fb2adb524e62f3d3ff56983c60c672daf06fad6",
+    "examples/first-person/game.js": "6274ef1a986d10b607f6e67b164da6d69f36ab59ba02cce139670cf05f58ccd5",
+    "examples/first-person/game.test.mjs": "5fb468e09c19cf68e2b1a3b89ec576699462af20e5773918d0b5985f0e4f74bb",
+    "examples/first-person/index.html": "528176cb07bd2066eef6cc262896782c39795a6cc626016bba89295a0800e35e",
+    "examples/first-person/scene.js": "a9271dfb828733bd5ce74037292457359effff65fe42aa62c8f7f4354b5c2051",
+    "examples/first-person/style.css": "4b1dcf7ed52bbac86c484666ee3a058d5ffe8b9cd871d8bb248ef7d2af1cd3e8",
+    "examples/first-person/verify.js": "c3c31f112c198af8529bffd8cb386cc246966e8ef6dbb4481a2706309c1e4f97",
+    "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
+    "package.json": "0ad483a84094a8010f9469d28628802690b6498d2e77c76ce2a41534c7bfebc8",
+    "scripts/verify_volume_m2.mjs": "ceb27e4ab8ad78a9c8c0561613e89b16600353fc203e72fa536b6b79231717a3",
+    "scripts/verify_volume_m2_browser.py": "f0a0142354d1dc0e8f0be049a1bbdc264b80e37537249eeb4cc80e38d2493ab6",
+    "scripts/volume_evidence.mjs": "6fa8c4e5e8d81d539fd77bb31e7d2ffb7c8dffcee01de4848987d9940c82e966",
+    "scripts/volume_m2_evidence.mjs": "45661e9496e1fef92f0254de3d60ec7f604b0e19547c3a881094aa5a3189f9fa",
+    "web/frame-clock.js": "50d398668dc373502b8311c2fdb6709fcc8876ec3243dda7c00deab4af38783f",
+    "web/frame-pump.js": "11239949d7e9a613f3af20bb92bdcb92d432a3bce2fdd4cded6bf96ed517f8e1"
+  },
+  "testSource": "\nwindow.__uiDone=false;window.__uiMid=false;\nvoid(async()=>{\n const w=window.crossing,check=(v,m)=>{if(!v)throw new Error(m);},same=(a,b)=>JSON.stringify(a)===JSON.stringify(b),wait=ms=>new Promise(r=>setTimeout(r,ms));\n const initial=await w.snapshot(),file=document.getElementById('file');\n async function upload(content){const dt=new DataTransfer();dt.items.add(new File([content],'state.json',{type:'application/json'}));file.files=dt.files;file.dispatchEvent(new Event('change'));await wait(250);}\n await upload('{bad json');check(same(await w.snapshot(),initial),'Malformed file mutated field');\n await w.step({moveX:256});await upload(JSON.stringify(initial));check(same(await w.snapshot(),initial),'File restore differs');check(document.getElementById('error').hidden,'Successful import left an error visible');\n const {routeInput}=await import('./game.js');for(let t=0;t<145;t++)await w.step(routeInput(w.game));await w.view({yaw:Math.PI/2,pitch:.45});check(w.game.events.some(e=>e.type==='ice-walk'),'No ice walk');\n window.__uiMid=true;await new Promise(resolve=>window.__uiContinue=resolve);\n const tape=w.replayTape(),saved=await w.snapshot(),bad=structuredClone(tape);bad.commands.at(-1).tick++;let rejected=false;try{await w.replay(bad);}catch{rejected=true;}check(rejected&&same(await w.snapshot(),saved),'Bad tape mutated state');check(same(await w.replay(tape),saved),'Replay round trip differs');\n await w.reset();document.getElementById('play').click();await wait(120);document.getElementById('play').click();const paused=await w.snapshot();check(paused.field.tick>0,'Play failed');await wait(60);check(same(await w.snapshot(),paused),'Pause failed');\n document.getElementById('route').click();const deadline=performance.now()+10000;while(w.game.status==='playing'&&performance.now()<deadline)await wait(40);check(w.game.status==='won','UI route did not win');\n await w.reset();const oldField=w.game.field;w.game.field.step=async()=>{throw new Error('Injected frame failure');};document.getElementById('play').click();await wait(200);check(document.getElementById('mode').textContent.includes('ERROR'),'Failure did not pause');\n let exported;const originalClick=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.href.startsWith('blob:'))void fetch(this.href).then(r=>r.json()).then(value=>exported=value);else originalClick.call(this);};\n try{document.getElementById('export').click();for(let n=0;n<100&&!exported;n++)await wait(10);check(same(exported,initial),'Error export lost explicit checkpoint');}finally{HTMLAnchorElement.prototype.click=originalClick;}\n await w.reset();check(w.game.field!==oldField,'Reset did not rebuild device');await w.step({moveX:256});check((await w.snapshot()).field.tick===1,'Recovered step failed');\n const pending=w.runBenchmark();setTimeout(()=>w.cancelBenchmark(),200);const partial=await pending;check(partial.cancelled&&!partial.complete&&partial.warmup.length>0,'Cancellation lost partial samples');\n return{passed:true,fileImportAtomic:true,fileImportExact:true,errorClearedAfterValidImport:true,routeAt145:true,replayRoundTripExact:true,invalidTapeAtomic:true,playPause:true,routeButtonWon:true,frameFailurePaused:true,errorCheckpointExportExact:true,resetRebuiltDevice:true,cancelledMeasurement:partial};\n})().then(result=>{window.__uiResult=result;window.__uiDone=true;},error=>{window.__uiResult={passed:false,error:String(error.stack||error)};window.__uiDone=true;});'started'\n",
+  "commands": [
+    {
+      "arguments": [
+        "open",
+        "http://127.0.0.1:8765/examples/first-person/"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "wait",
+        "--fn",
+        "Boolean(window.crossing?.ready)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\volume-m2\\crossing.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "window.__uiContinue();\"continued\""
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__uiDone,mid:window.__uiMid})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "window.__uiResult"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ]
+}

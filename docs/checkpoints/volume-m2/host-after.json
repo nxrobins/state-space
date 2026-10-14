@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-14T07:47:33.5331952Z",
+  "cpu": [
+    {
+      "Name": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+      "LoadPercentage": 8
+    }
+  ],
+  "gpu": "NVIDIA GeForce RTX 4090, 595.79, 2 %, 11636 MiB",
+  "ffmpegProcesses": []
+}

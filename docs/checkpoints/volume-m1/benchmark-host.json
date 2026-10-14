@@ -1,0 +1,8 @@
+{
+  "recordedAt": "2026-10-14T05:24:37.0738171Z",
+  "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+  "cpuPercent": 12,
+  "ffmpegProcesses": 0,
+  "gpu": "NVIDIA GeForce RTX 4090, 595.79, 0 %, 12400 MiB",
+  "condition": "Earlier correctness runs overlapped saturated background encoding. Before sequential timing runs, no FFmpeg encodes remained; CPU was 12 percent and GPU was idle."
+}
