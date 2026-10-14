@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "37507565df754491ab76c8d569db8a2a",
+  "kind": "cpu",
+  "command": [
+    "node",
+    "dist/volume-m3-review/checks.mjs"
+  ],
+  "startedAt": 1792014436.2344615,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 30.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "childPid": 35208,
+  "exitCode": 0,
+  "finishedAt": 1792014438.9664233
+}

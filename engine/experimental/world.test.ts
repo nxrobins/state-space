@@ -29,6 +29,22 @@ describe('finite chunked 3D worlds',()=>{
     expect(w.energyBalance().externalQ).not.toBe(0n);w.step(17);expect(w.energyBalance().driftQ).toBe(0n);
     w.restore(w.snapshot());expect(w.energyBalance().externalQ).toBe(0n);
   });
+  it('rejects null edit batches without changing state, tick or accounting',()=>{
+    const w=createStateSpaceWorld3D({width:4,height:4,depth:4,chunkSize:2});
+    w.setCell(1,0,1,MAT.SAND);w.setEnergy(2,1,2,123456);w.step(3);
+    const before=w.snapshot(),balance=w.energyBalance();
+    const options={edits:null} as unknown as Parameters<typeof w.step>[1];
+    for(const ticks of [0,1]){
+      expect(()=>w.step(ticks,options)).toThrow();
+      expect(w.snapshot()).toEqual(before);expect(w.energyBalance()).toEqual(balance);
+    }
+  });
+  it('keeps omitted, undefined and empty edit batches equivalent',()=>{
+    const worlds=Array.from({length:3},()=>createStateSpaceWorld3D({width:4,height:4,depth:4,chunkSize:2}));
+    for(const w of worlds)w.setCell(1,0,1,MAT.WATER);
+    worlds[0].step();worlds[1].step(1,{edits:undefined});worlds[2].step(1,{edits:[]});
+    for(const w of worlds){expect(w.snapshot()).toEqual(worlds[0].snapshot());expect(w.energyBalance()).toEqual(worlds[0].energyBalance());}
+  });
   it('returns isolated global neighborhoods spanning faces, edges and corners',()=>{
     const w=createStateSpaceWorld3D({width:8,height:8,depth:8,chunkSize:4});
     for(let z=3;z<5;z++)for(let y=3;y<5;y++)for(let x=3;x<5;x++)w.setCell(x,y,z,MAT.STONE,x+y+z);

@@ -85,7 +85,7 @@ export class CpuWorld3D {
   step(ticks=1,options:GpuStepOptions3D={}):Region3D|undefined {
     checkedInteger(ticks,0,32,'world ticks per request');checkedInteger(this.tick+ticks,0,Number.MAX_SAFE_INTEGER,'end tick');
     if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['edits','region'].includes(k)))throw new Error('Invalid world step options.');
-    const region=options.region===undefined?undefined:checkedWorldRegion(options.region,this),edits=options.edits??[];
+    const region=options.region===undefined?undefined:checkedWorldRegion(options.region,this),edits=options.edits===undefined?[]:options.edits;
     if(!Array.isArray(edits))throw new Error('Invalid edits.');checkedInteger(edits.length,0,64,'edit count');
     const seen=new Set<number>(),seed=referenceVolume(1,1,1),owned:VolumeEdit3D[]=[];
     for(let k=0;k<edits.length;k++){

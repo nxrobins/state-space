@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "id": "f5c7bf7f8ea74d7f99a856c080dfb788",
+  "kind": "cpu",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.config.ts",
+    "engine/experimental/world.test.ts"
+  ],
+  "startedAt": 1792014253.146841,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 18.0,
+  "containment": "Windows job",
+  "childPid": 30644,
+  "exitCode": 0,
+  "finishedAt": 1792014254.2330594
+}

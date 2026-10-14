@@ -134,8 +134,9 @@ def main() -> int:
                 "const w=createStateSpaceWorld3D({width:8,height:8,depth:8,chunkSize:4});\n"
                 "w.setCell(3,3,3,2,25);w.step(3);const saved=w.snapshot();w.step(7);const end=w.snapshot();\n"
                 "w.restore(saved);w.step(7);assert.deepEqual(w.snapshot(),end);assert.equal(w.energyBalance().driftQ,0n);\n"
+                "const balance=w.energyBalance();for(const ticks of [0,1]){assert.throws(()=>w.step(ticks,{edits:null}));assert.deepEqual(w.snapshot(),end);assert.deepEqual(w.energyBalance(),balance);}\n"
                 "await assert.rejects(()=>createGpuWorld3D({width:8,height:8,depth:8,chunkSize:4}),/WebGPU/);\n"
-                "console.log(JSON.stringify({chunks:end.chunks.length,tick:w.tick,replayExact:true,nodeGpuRejected:true}));\n",
+                "console.log(JSON.stringify({chunks:end.chunks.length,tick:w.tick,replayExact:true,nodeGpuRejected:true,nullEditsAtomic:true}));\n",
                 encoding="utf-8")
             report["experimentalWorld"] = json.loads(run([shutil.which("node"), str(world_client)], temp))
             client = temp / "client.mts"

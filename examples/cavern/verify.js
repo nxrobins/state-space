@@ -6,8 +6,37 @@ const equal=(a,b,label)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw new Err
 const check=(v,label)=>{if(!v)throw new Error(label);};
 const progress=s=>document.getElementById('status').textContent=s;
 const yieldCheck=()=>new Promise(resolve=>setTimeout(resolve,5));
-async function safeStep(field){const start=performance.now();await field.step();if(performance.now()-start>100)throw new Error('Conformance tick exceeded responsiveness budget.');await yieldCheck();}
+async function safeStep(field,options={}){const start=performance.now();await field.step(1,options);if(performance.now()-start>100)throw new Error('Conformance tick exceeded responsiveness budget.');await yieldCheck();}
 async function rejected(fn){let error;try{await fn();}catch(e){error=e;}check(error,'Expected rejection.');}
+/** Small standalone regression: no live game, rendering, or long GPU batches. */
+export async function verifyWorldEditBatches(){
+  const geometry={width:8,height:8,depth:8,chunkSize:4},cpu=createStateSpaceWorld3D(geometry),gpu=await createGpuWorld3D(geometry);
+  try{
+    cpu.setCell(3,1,3,MAT.WATER);cpu.setCell(4,2,4,MAT.SAND);cpu.setEnergy(2,1,2,123456);cpu.step(3);
+    await gpu.restore(cpu.snapshot());cpu.restore(cpu.snapshot());
+    // Keep a nonzero external ledger, so validation must preserve accounting too.
+    cpu.setEnergy(2,1,2,654321);await gpu.setEnergy(2,1,2,654321);
+    const before=cpu.snapshot(),balance=cpu.energyBalance();
+    const sameBalance=async field=>{
+      const current=await field.energyBalance();
+      for(const key of ['initialQ','externalQ','currentQ','driftQ'])check(current[key]===balance[key],`Edit validation changed ${key}.`);
+    };
+    let rejections=0;
+    for(const ticks of [0,1])for(const edits of [null,false,0,'',{},new Array(1)]){
+      for(const field of [cpu,gpu]){
+        await rejected(()=>field.step(ticks,{edits}));equal(await field.snapshot(),before,'Invalid edit batch changed state or tick.');await sameBalance(field);rejections++;
+      }
+      await yieldCheck();
+    }
+    for(const options of [{},{edits:undefined},{edits:[]}]){
+      cpu.step(1,options);await safeStep(gpu,options);
+      equal(await gpu.snapshot(),cpu.snapshot(),'Valid edit defaults differ across CPU/GPU.');
+      const actual=await gpu.energyBalance(),expected=cpu.energyBalance();
+      for(const key of ['initialQ','externalQ','currentQ','driftQ'])check(actual[key]===expected[key],`Valid edit default ${key} differs.`);
+    }
+    return{passed:true,dimensions:[8,8,8],backendInfo:gpu.backendInfo,rejections,invalidTicks:[0,1],stateTickAndLedgerUnchanged:true,validDefaults:['omitted','undefined','empty'],validDefaultsExact:true};
+  }finally{gpu.close();}
+}
 const bytesHash=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(v=>v.toString(16).padStart(2,'0')).join('');
 export async function readFixture(reference){
   const raw=await fetch('/'+reference.path).then(r=>{if(!r.ok)throw new Error('Missing reference.');return r.arrayBuffer();});check(await bytesHash(raw)===reference.compressedSha256,'Compressed fixture hash mismatch.');
@@ -24,6 +53,7 @@ function expectedMesh(flat,edge){
 }
 export async function verifyCavern(expected){
   check(expected.passed&&expected.sourceUnchanged,'Fresh Node reference required.');await window.cavern.suspend();const checks=[];
+  checks.push({editBatchConsistency:await verifyWorldEditBatches()});
   for(const edge of [2,4]){
     const cpu=createStateSpaceWorld3D({width:8,height:8,depth:8,chunkSize:edge}),gpu=await createGpuWorld3D({width:8,height:8,depth:8,chunkSize:edge});
     try{
