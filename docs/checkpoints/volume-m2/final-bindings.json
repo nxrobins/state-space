@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "assembledAt": "2026-10-14T06:30:01.322Z",
+  "passed": true,
+  "sourceHashes": {
+    "dist/sdk/state-space-3d-gpu.js": "0c383187f9b74d0c5aaf361e16d7c4a89847e627cdd9551ef135e89039d86cc0",
+    "dist/sdk/state-space-3d.js": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c",
+    "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+    "engine/experimental/3d-gpu.ts": "b4b5deb1b53fcd543a5eb76b59e049e9293cecdb0fc40123670f479af47d4678",
+    "engine/experimental/3d-renderer.ts": "85068548e48d0bba55f686157a942b040e9e10d6ce73aa0eca98df61a5f15447",
+    "engine/experimental/3d-shader.ts": "132919110f4299fef636d1ce250fec0fba4d8113e3f68421617ded940c00ab0c",
+    "engine/experimental/3d-view.ts": "a873b2b31049e250ea11bc17ee42cd70a0de0e307ca3372bfcc824a959bd8a20",
+    "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
+    "engine/experimental/3d.ts": "cf4d9573f8a83f8c5e68ef832ab9a5d50e95805b6040731125fdfcfad08b006b",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "engine/lint_ts.mjs": "15e34299f693bb76c2329eed020855984801cbb59e7523f2ca48f9f8ffebe575",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/tsconfig.sdk.json": "ec84230f499e292cc27e6cb2ec022643288c1bbc6e62975ada411c529431cc26",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/vite.volume-gpu.config.ts": "e39029aa41c94ddd24e025c8053985fc2ecba5278c9cad58b23ed48e39ad9712",
+    "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
+    "examples/first-person/app.js": "94d29b089918eeb5e3288830421d8b89436b9fc3ac90516a0e2ca6bed6c6a70c",
+    "examples/first-person/game.js": "aefeee555f7d37f1233f97b23206490c150a75e6784c4c71adabd536c74bb9ef",
+    "examples/first-person/game.test.mjs": "97fcfd1d6a1de28b3deceb17e0e7ffbbbef5fc0fb2d27e806933a2121b4e2020",
+    "examples/first-person/index.html": "528176cb07bd2066eef6cc262896782c39795a6cc626016bba89295a0800e35e",
+    "examples/first-person/scene.js": "a9271dfb828733bd5ce74037292457359effff65fe42aa62c8f7f4354b5c2051",
+    "examples/first-person/style.css": "4b1dcf7ed52bbac86c484666ee3a058d5ffe8b9cd871d8bb248ef7d2af1cd3e8",
+    "examples/first-person/verify.js": "77dfa8f07adf07e0793ebf60e88e3d1c2fe74b6d5153f0222caa19fe118e4bf2",
+    "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
+    "package.json": "0ad483a84094a8010f9469d28628802690b6498d2e77c76ce2a41534c7bfebc8",
+    "scripts/verify_volume_m2.mjs": "ceb27e4ab8ad78a9c8c0561613e89b16600353fc203e72fa536b6b79231717a3",
+    "scripts/verify_volume_m2_browser.py": "f0a0142354d1dc0e8f0be049a1bbdc264b80e37537249eeb4cc80e38d2493ab6",
+    "scripts/volume_evidence.mjs": "6fa8c4e5e8d81d539fd77bb31e7d2ffb7c8dffcee01de4848987d9940c82e966",
+    "scripts/volume_m2_evidence.mjs": "45661e9496e1fef92f0254de3d60ec7f604b0e19547c3a881094aa5a3189f9fa",
+    "web/frame-clock.js": "50d398668dc373502b8311c2fdb6709fcc8876ec3243dda7c00deab4af38783f",
+    "web/frame-pump.js": "11239949d7e9a613f3af20bb92bdcb92d432a3bce2fdd4cded6bf96ed517f8e1"
+  },
+  "checks": {
+    "nodeCpuReference": true,
+    "hardwareGpuConformance": true,
+    "completeGameAndRestartReplay": true,
+    "energyDriftQ": "0",
+    "vitestEngineTests": {
+      "passed": true,
+      "count": 68
+    },
+    "nodeRenderingAndControllerTests": {
+      "passed": true,
+      "count": 17
+    },
+    "lint": true,
+    "typecheck": true,
+    "pythonHarnessRuff": true,
+    "installedSdk": true,
+    "installedExperimental3dTypes": true,
+    "uiFileReplayRecoveryAndCancellation": true,
+    "coverageNote": "The unit suite ran before the final public declaration isolation and UI error clearing. Its engine/CPU/controller runtime inputs remain unchanged; the final declaration and UI changes passed fresh installed-client, lint/typecheck, complete GPU/browser and UI checks."
+  },
+  "performance": {
+    "passed": true,
+    "frames": 600,
+    "warmup": 60,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "dimensions": [
+      32,
+      32,
+      32
+    ],
+    "physicsHz": 59.960560165821086,
+    "p95CompletionMs": 7.199999994039899,
+    "worstCompletionMs": 10.200000000000728,
+    "missedDeadlines": 0,
+    "lostDisplaySlots": 0,
+    "coalesced": 0
+  },
+  "stableBundles": {
+    "shipped2D": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+    "m1Cpu": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c"
+  },
+  "initialGameHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+  "finalGameHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+  "artifactHashes": {
+    "README.md": "636295f6ba242e1686d7458fa27861b59ee4ad66c5ff7d0fee1cb1f12028fd60",
+    "docs/checkpoints/3D_M2.md": "ee0c276f2baa3c2698a076623c070aea2cecd18a2378ab9772c0ca8428802913",
+    "docs/checkpoints/sdk-evidence/b6b5080a9ce75702b411363511959304d8bd159a5d3d99e548a21e5aaef5c1b8.json": "b6b5080a9ce75702b411363511959304d8bd159a5d3d99e548a21e5aaef5c1b8",
+    "docs/checkpoints/volume-m2/browser-final/progress.jsonl": "bb14e9a6b4e3482888ec5e0eba04393e650d7b91935a29f79c0b78e315909501",
+    "docs/checkpoints/volume-m2/browser-final/ready.png": "622025ba7fd2dd6a1dba954d4c15ed72fb95404fade31197d32038832997d79c",
+    "docs/checkpoints/volume-m2/browser-final/report.json": "022afb1eed676948be9665a879f23f8bd6decdf52e8665de7f69ab8a156265e4",
+    "docs/checkpoints/volume-m2/browser-final/verified.png": "81308c59314b92f5ebba8a55f0150c1dfd536fbfe6aa57e82adea64b61ec874b",
+    "docs/checkpoints/volume-m2/browser/progress.jsonl": "41e012fd4a5932ac94305b1b8af750f9fed61dc1afd72d323c59d15620be6431",
+    "docs/checkpoints/volume-m2/browser/ready.png": "38d89424341390e27edc1f86d90c6bd273e641f0133df170a353cd347de8dd62",
+    "docs/checkpoints/volume-m2/browser/report.json": "d5a71f344c4a6b52591131f26b6bbcd038289a51b0cf300b02b2304a4dd9ff51",
+    "docs/checkpoints/volume-m2/browser/verified.png": "622025ba7fd2dd6a1dba954d4c15ed72fb95404fade31197d32038832997d79c",
+    "docs/checkpoints/volume-m2/crossing.png": "4c6d2f223eed0cf59c6854c5ddf2a22ca9d95df8605b0a1d356c32b5b592f618",
+    "docs/checkpoints/volume-m2/frames/measured.png": "a194110bff7bc9f01744b9118573df57c405799da98694396e2b5e15dbde03ee",
+    "docs/checkpoints/volume-m2/frames/progress.jsonl": "fcc3e8ac78faaaedafbc80e98771c8c7a86915655f8d7173331512c74ac43af6",
+    "docs/checkpoints/volume-m2/frames/ready.png": "622025ba7fd2dd6a1dba954d4c15ed72fb95404fade31197d32038832997d79c",
+    "docs/checkpoints/volume-m2/frames/report.json": "2fcd9967d83bf9fb89a4336bd183708e20ba76bd0658f530fdcce1fa59f8b9b4",
+    "docs/checkpoints/volume-m2/host-after.json": "36fd9b6a12717f4073bfa09655b034313723ea90c1affb0e2ed4d6a603146ff6",
+    "docs/checkpoints/volume-m2/host-before.json": "0258b8ee01ab990d770d0cfa9513c04e5c00ceeb211cfb47d265ab85a549538b",
+    "docs/checkpoints/volume-m2/installed-3d.json": "e08bca21719053afc78569a4fc6caf9a6e98485ff3bfd3043c907e17b6fdeaae",
+    "docs/checkpoints/volume-m2/node.json": "0ee8045b59faa94f5a6253e5c02ae76c25769fc377f66ca72ea50410aa94a246",
+    "docs/checkpoints/volume-m2/sdk.json": "1cb74ff02c324f4a9fe12697355f813f4265f91e69df0ad91814fd3f9cb69db1",
+    "docs/checkpoints/volume-m2/ui.json": "864947bebe8f08b43e56ad7b12a60901228b5c6255e9d5aa2fbe3e2ad688354a",
+    "examples/first-person/README.md": "7e8fb3e0ddd6f2693dd6715b68ff4ac17316cc1f2ebdd51268a67d789117e9f8"
+  }
+}

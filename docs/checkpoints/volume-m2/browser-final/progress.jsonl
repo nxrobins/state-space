@@ -1,0 +1,9 @@
+{"time": 1791958865.794673, "event": "started", "session": "volume-m2-bdcdcb1438b6"}
+{"time": 1791958868.2886355, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel. Watch the route for a complete demonstration."}
+{"time": 1791958870.547701, "event": "progress", "done": false, "status": "Exact pass conformance: 1\u00d77\u00d71"}
+{"time": 1791958872.799821, "event": "progress", "done": false, "status": "Exact pass conformance: 1\u00d75\u00d73"}
+{"time": 1791958875.0524933, "event": "progress", "done": false, "status": "melt: 1024 GPU ticks and both restarts exact"}
+{"time": 1791958879.5445032, "event": "progress", "done": false, "status": "Player + terrain restart 3: exact"}
+{"time": 1791958881.802407, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel to make your crossing."}
+{"time": 1791958884.03942, "event": "progress", "done": true, "status": "All GPU physics, gameplay and restart checks passed."}
+{"time": 1791958884.832143, "event": "completed", "passed": true, "performancePassed": null}

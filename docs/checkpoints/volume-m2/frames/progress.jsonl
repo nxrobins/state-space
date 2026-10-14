@@ -1,0 +1,8 @@
+{"time": 1791958920.1979246, "event": "started", "session": "volume-m2-38a314c6f85c"}
+{"time": 1791958922.7882016, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel to make your crossing."}
+{"time": 1791958925.0450587, "event": "progress", "done": false, "status": "Measured 60 / 600 frames"}
+{"time": 1791958927.2969308, "event": "progress", "done": false, "status": "Measured 180 / 600 frames"}
+{"time": 1791958929.5379138, "event": "progress", "done": false, "status": "Measured 300 / 600 frames"}
+{"time": 1791958931.7860487, "event": "progress", "done": false, "status": "Measured 480 / 600 frames"}
+{"time": 1791958934.03808, "event": "progress", "done": true, "status": "Measured 600 frames \u00b7 59.96 Hz \u00b7 0 deadline misses \u00b7 60 Hz gate passed"}
+{"time": 1791958934.9596171, "event": "completed", "passed": true, "performancePassed": true}

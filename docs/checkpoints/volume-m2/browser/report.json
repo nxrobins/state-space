@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "passed": true,
+  "recordedAt": 1791958389.588507,
+  "host": "Windows-10-10.0.26300-SP0",
+  "sourceHashes": {
+    "dist/sdk/state-space-3d-gpu.js": "0c383187f9b74d0c5aaf361e16d7c4a89847e627cdd9551ef135e89039d86cc0",
+    "dist/sdk/state-space-3d.js": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c",
+    "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+    "engine/experimental/3d-gpu.ts": "9fbb742bf4a9cc8b623b07178cd86e74edad252368dda30604aeb5f415c79575",
+    "engine/experimental/3d-renderer.ts": "97fcaaff4950639be5b1bc6f031f2b43c96a868ad717916d8e71529af83bb521",
+    "engine/experimental/3d-shader.ts": "132919110f4299fef636d1ce250fec0fba4d8113e3f68421617ded940c00ab0c",
+    "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
+    "engine/experimental/3d.ts": "cf4d9573f8a83f8c5e68ef832ab9a5d50e95805b6040731125fdfcfad08b006b",
+    "engine/generated/materials.ts": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead",
+    "engine/lint_ts.mjs": "e9e96dbb0e98a12c70c44294bf346b02adf6d2f36204b34297bf945d4e29da63",
+    "engine/materials.json": "a74bccc779197f0106db6f9989d057ff8d139b4c2739792e1b62fdc9d5f0bd78",
+    "engine/registry.ts": "e49586fc38cf0828535b3e9ed49d5aa641d95fca03ee07052f4273dc00a9e84b",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/tsconfig.sdk.json": "ec84230f499e292cc27e6cb2ec022643288c1bbc6e62975ada411c529431cc26",
+    "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
+    "engine/vite.volume-gpu.config.ts": "e39029aa41c94ddd24e025c8053985fc2ecba5278c9cad58b23ed48e39ad9712",
+    "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
+    "examples/first-person/app.js": "53a776958dbb8e4801c091402a12a2a111bcab46cb62c0c09a90aa6f4659de06",
+    "examples/first-person/game.js": "aefeee555f7d37f1233f97b23206490c150a75e6784c4c71adabd536c74bb9ef",
+    "examples/first-person/game.test.mjs": "97fcfd1d6a1de28b3deceb17e0e7ffbbbef5fc0fb2d27e806933a2121b4e2020",
+    "examples/first-person/index.html": "528176cb07bd2066eef6cc262896782c39795a6cc626016bba89295a0800e35e",
+    "examples/first-person/scene.js": "a9271dfb828733bd5ce74037292457359effff65fe42aa62c8f7f4354b5c2051",
+    "examples/first-person/style.css": "4b1dcf7ed52bbac86c484666ee3a058d5ffe8b9cd871d8bb248ef7d2af1cd3e8",
+    "examples/first-person/verify.js": "77dfa8f07adf07e0793ebf60e88e3d1c2fe74b6d5153f0222caa19fe118e4bf2",
+    "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
+    "package.json": "e514efb4def4bbea237168793ccc58751f4ab247b9f8f56d9b2bdbd398313012",
+    "scripts/verify_volume_m2.mjs": "ceb27e4ab8ad78a9c8c0561613e89b16600353fc203e72fa536b6b79231717a3",
+    "scripts/verify_volume_m2_browser.py": "f0a0142354d1dc0e8f0be049a1bbdc264b80e37537249eeb4cc80e38d2493ab6",
+    "scripts/volume_evidence.mjs": "6fa8c4e5e8d81d539fd77bb31e7d2ffb7c8dffcee01de4848987d9940c82e966",
+    "scripts/volume_m2_evidence.mjs": "45661e9496e1fef92f0254de3d60ec7f604b0e19547c3a881094aa5a3189f9fa",
+    "web/frame-clock.js": "50d398668dc373502b8311c2fdb6709fcc8876ec3243dda7c00deab4af38783f",
+    "web/frame-pump.js": "11239949d7e9a613f3af20bb92bdcb92d432a3bce2fdd4cded6bf96ed517f8e1"
+  },
+  "verification": {
+    "checks": [
+      {
+        "exact": true,
+        "passes": 135,
+        "shape": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "exact": true,
+        "passes": 135,
+        "shape": [
+          1,
+          7,
+          1
+        ]
+      },
+      {
+        "exact": true,
+        "passes": 135,
+        "shape": [
+          3,
+          5,
+          7
+        ]
+      },
+      {
+        "exact": true,
+        "passes": 135,
+        "shape": [
+          7,
+          1,
+          5
+        ]
+      },
+      {
+        "exact": true,
+        "passes": 135,
+        "shape": [
+          1,
+          5,
+          3
+        ]
+      },
+      {
+        "exact": true,
+        "restarts": [
+          3,
+          509
+        ],
+        "scene": "flow",
+        "ticks": 1024
+      },
+      {
+        "exact": true,
+        "restarts": [
+          3,
+          509
+        ],
+        "scene": "phase",
+        "ticks": 1024
+      },
+      {
+        "exact": true,
+        "restarts": [
+          3,
+          509
+        ],
+        "scene": "melt",
+        "ticks": 1024
+      },
+      {
+        "concurrentOperationsRejected": true,
+        "invalidInputsAtomic": true,
+        "ledgerExact": true,
+        "regionIsolated": true
+      },
+      {
+        "exact": true,
+        "gameTicks": 600,
+        "renderingIsolated": true,
+        "restarts": [
+          3,
+          119,
+          157,
+          509
+        ],
+        "won": true
+      }
+    ],
+    "passed": true
+  },
+  "browserErrors": [],
+  "sourceUnchanged": true,
+  "commands": [
+    {
+      "arguments": [
+        "open",
+        "http://127.0.0.1:60737/examples/first-person/"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "wait",
+        "--fn",
+        "Boolean(window.crossing?.ready)"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\volume-m2\\browser\\ready.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "--stdin"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "({done:window.__m2Job.done,error:window.__m2Job.error,status:document.getElementById(\"status\").textContent})"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "eval",
+        "window.__m2Job.result"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "screenshot",
+        "D:\\state-space\\docs\\checkpoints\\volume-m2\\browser\\verified.png"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "errors"
+      ],
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ]
+}

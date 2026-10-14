@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "nodeReportSha256": "fb0852e4062163134955143876216de46392ee6ef374fcc8b899c0b01e4ba658",
+  "cpuReportSha256": "0c444d4e33b834019c94fbba6fb0d4c3c0af19a9de3bb949af1febb64bccd2b4",
+  "rows": [
+    {
+      "scene": "flow",
+      "cpuBenchmarkMatchesNodeAt660": true,
+      "p95Ms": 13.302599999999984
+    },
+    {
+      "scene": "phase",
+      "cpuBenchmarkMatchesNodeAt660": true,
+      "p95Ms": 18.282799999999042
+    },
+    {
+      "scene": "melt",
+      "cpuBenchmarkMatchesNodeAt660": true,
+      "p95Ms": 17.217899999999645
+    }
+  ]
+}
