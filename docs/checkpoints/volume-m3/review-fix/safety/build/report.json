@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "id": "c2162f72ca874a8fb0ff1e0d312ab97c",
+  "kind": "cpu",
+  "command": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm",
+    "run",
+    "build:sdk"
+  ],
+  "startedAt": 1792014271.276147,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 40.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "childPid": 33116,
+  "exitCode": 0,
+  "finishedAt": 1792014275.2970834
+}

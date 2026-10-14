@@ -177,3 +177,16 @@ step fail until that step is awaited. Ordinary getters and snapshots still retur
 independent copies. Both CPU and WebGPU fields support this optional copy path.
 
 Pressure and velocity sampling, version compatibility and model limits are in [PRESSURE.md](PRESSURE.md). Schema 3 snapshots must not be resumed as schema 4.
+
+## Experimental finite 3D worlds
+
+`state-space-engine/experimental/3d/world` exports the synchronous
+`createStateSpaceWorld3D(options?)`; `/experimental/3d/world/gpu` exports
+`createGpuWorld3D(options?)`. Both default to a closed 64³ world with eight 32³
+chunks, one absolute tick and the existing integer `ca-3d-m1` schedule.
+World snapshots have a separate versioned chunk envelope. The bounded M1/M2
+volume entries retain their 32,768-cell limit and snapshot compatibility.
+
+The [Cavern guide](../examples/cavern/README.md) covers global-coordinate edits,
+bounded collision reads, GPU-resident cached terrain, saves/replay, and limitations.
+The [M3 checkpoint](checkpoints/3D_M3.md) records verification and frame evidence.

@@ -4,9 +4,9 @@ import { CrossingGame, GAME_VERSION, commandFor, routeInput, Q, MAX_TICKS } from
 import { createLevel } from './scene.js';
 import { createFramePump } from '../../web/frame-pump.js';
 import { FrameClock } from '../../web/frame-clock.js';
-
 const $=id=>document.getElementById(id),canvas=$('world'),clock=new FrameClock(),keys=new Set();
 let field,renderer,game,initial,recordingInitial,lastCheckpoint,pump,active=Promise.resolve(),exclusive=false,playing=false,auto=false,failed=false,benchmarking=false,cancelled=false;
+let lastView='';
 let yaw=Math.PI/2,pitch=.10,tool='carve',mouse=false,drag=null;
 const hash=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))))].map(v=>v.toString(16).padStart(2,'0')).join('');
 const dist=a=>{const s=[...a].sort((a,b)=>a-b);return{count:s.length,min:s[0],median:s[Math.floor(s.length/2)],p95:s[Math.ceil(s.length*.95)-1],p99:s[Math.ceil(s.length*.99)-1],max:s.at(-1)};};
@@ -32,10 +32,11 @@ async function frame(now,interval){if(exclusive||benchmarking||failed)return;
   if(keys.has('ArrowLeft'))yaw+=.025;if(keys.has('ArrowRight'))yaw-=.025;if(keys.has('ArrowUp'))pitch=Math.max(-1.35,pitch-.02);if(keys.has('ArrowDown'))pitch=Math.min(1.35,pitch+.02);
   const ticks=clock.advance(now,!playing,interval);
   for(let n=0;n<ticks;n++){if(field.tick>=MAX_TICKS){playing=false;break;}await game.step(auto?routeInput(game):input());if(auto){follow();if(game.status!=='playing'){playing=false;auto=false;$('status').textContent=game.status==='won'?'Crossing complete. The recorded inputs reproduce both player and terrain exactly.':'Route stopped.';break;}}}
-  await draw();hud(performance.now()-started);
+  const viewKey=[field.tick,yaw,pitch].join(',');if(!ticks&&viewKey===lastView)return;
+  await draw();lastView=viewKey;hud(performance.now()-started);
 }
 async function pausedOperation(fn){if(exclusive||benchmarking)throw new Error('Another operation is in flight.');exclusive=true;playing=false;auto=false;keys.clear();mouse=false;
-  try{await active.catch(error=>{if(!failed)throw error;});clock.reset();return await fn();}finally{exclusive=false;}
+  try{await active.catch(error=>{if(!failed)throw error;});clock.reset();return await fn();}finally{lastView='';exclusive=false;}
 }
 async function reset(){
   const recovering=failed;
@@ -58,12 +59,13 @@ async function runBenchmark(){
   if(benchmarking||exclusive||failed)throw new Error('Benchmark unavailable while another operation is active.');exclusive=true;playing=false;auto=false;
   try{await active;}catch(error){exclusive=false;fatal(error);throw error;}
   pump.stop();benchmarking=true;cancelled=false;$('cancel').hidden=false;$('receipt').hidden=true;
-  const report={version:1,scope:'Complete 1080p gameplay: input, bounded GPU edits, all 27 physics passes, 16³ collision readback, integer controller, HUD, GPU face compaction, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.',resolution:[1920,1080],dimensions:[32,32,32],targetHz:60,warmup:[],samples:[],backendInfo:field.backendInfo,userAgent:navigator.userAgent,recordedAt:new Date().toISOString(),cancelled:false};
+  const report={version:1,scope:'Complete 1080p gameplay: input, bounded GPU edits, all 27 physics passes, 16³ collision readback, integer controller, HUD, GPU face compaction, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.',resolution:[1920,1080],viewport:[innerWidth,innerHeight],devicePixelRatio,dimensions:[32,32,32],targetHz:60,warmup:[],samples:[],backendInfo:field.backendInfo,userAgent:navigator.userAgent,recordedAt:new Date().toISOString(),cancelled:false};
   window.crossing.benchmarkResult=report;
   async function measure(count,rows){return new Promise((resolve,reject)=>{let loop;loop=createFramePump(async(timestamp,interval)=>{
     if(cancelled){loop.stop();resolve();return;}
     const start=performance.now(),tick=field.tick+1,wasPlaying=game.status==='playing',command=routeInput(game);
     await game.step(command);follow();const physicsDone=performance.now();await draw();const done=performance.now();
+    if(done-start>100||done-timestamp>250)throw new Error('Verification frame exceeded the responsiveness budget; measurement stopped.');
     rows.push({tick,timestamp,callbackAt:start,completedAt:done,callbackInterval:interval??null,callbackDelayMs:start-timestamp,physicsAndQueryMs:physicsDone-start,renderAndHudMs:done-physicsDone,workMs:done-start,completionMs:done-timestamp,activeGameplay:wasPlaying,tool:command.tool??'none'});
     hud(done-start);if(rows.length%60===0)$('status').textContent=`${rows===report.warmup?'Warmup':'Measured'} ${rows.length} / ${count} frames`;
     if(rows.length>=count){loop.stop();report.pump=loop.statistics();resolve();}

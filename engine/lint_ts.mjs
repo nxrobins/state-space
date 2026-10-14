@@ -70,7 +70,7 @@ export function lintSource(source, name = 'cpu_physics.ts') {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const errors = ['cpu_physics.ts', 'thermal.ts', 'pressure.ts', 'structure.ts', 'structure_compiled.ts', 'browser_state_space.ts', 'registry.ts', 'contracts.ts', 'inspection.ts', 'webgpu_field.ts', 'index.ts', 'conformance.test.ts', 'structure.test.ts', 'sdk.test.ts', 'experimental/3d.ts',
-    'experimental/3d-gpu.ts', 'experimental/3d-shader.ts', 'experimental/3d-renderer.ts', 'experimental/3d-view.ts',
+    'experimental/3d-gpu.ts', 'experimental/3d-core.ts', 'experimental/3d-gpu-core.ts', 'experimental/world.ts', 'experimental/world-core.ts', 'experimental/world-gpu.ts', 'experimental/world-renderer.ts', 'experimental/3d-shader.ts', 'experimental/3d-renderer.ts', 'experimental/3d-view.ts',
     '../examples/first-person/app.js', '../examples/first-person/game.js', '../examples/first-person/scene.js', '../examples/first-person/verify.js',
     '../examples/volume-lab/app.js', '../examples/volume-lab/worker.js', '../examples/volume-lab/renderer.js', '../examples/volume-lab/scenes.js', '../examples/volume-lab/verify.js',
     '../examples/lab/app.js', '../examples/lab/controller.js', '../examples/lab/scenarios.js', '../examples/lab/view.js', '../examples/lab/verify.js'].flatMap(name => lintSource(readFileSync(new URL(`./${name}`, import.meta.url), 'utf8'), name));

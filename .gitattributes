@@ -1,5 +1,6 @@
 # Preserve exact source/evidence bytes across checkouts for provenance hashes.
 * whitespace=cr-at-eol
+/.gitattributes -text
 /engine/** -text
 /eval/** -text
 /tests/** -text
@@ -20,6 +21,8 @@
 # Keep the implementation prominent in GitHub's default review view.
 /docs/checkpoints/** linguist-generated=true
 /docs/checkpoints/*.md linguist-generated=false
+# Preserve captured SDK output verbatim, including command-line whitespace.
+/docs/checkpoints/volume-m3/safety/sdk/stdout.txt -whitespace
 /dist/packages/evidence/** linguist-generated=true
 /engine/generated/** linguist-generated=true
 /engine/_generated_schema.py linguist-generated=true

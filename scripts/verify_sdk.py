@@ -17,11 +17,14 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main() -> int:
+    from scripts.verification_guard import guarded_entry
+    guarded_entry('gpu', 600)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report", type=Path, default=ROOT / "docs/checkpoints/latest-sdk-verification.json")
     args = parser.parse_args()
     report = {"checks": []}
     def run(command, cwd=ROOT):
+        print("Installed SDK check: " + " ".join(str(x) for x in command[:4]), flush=True)
         result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
         report["checks"].append({"command": [str(arg) for arg in command], "cwd": str(cwd), "exitCode": result.returncode,
                                  "stdout": result.stdout, "stderr": result.stderr})
@@ -123,11 +126,28 @@ def main() -> int:
                 "print(json.dumps({'renderIsolation':True,'rgbaBytes':len(pixels),'waterOptics':True,'litSmokeAndSteam':True,'heatDistortion':True}))\n"
             )
             report["nativeRendering"] = json.loads(run([sys.executable, "-I", "-c", render_client], temp))
+            world_client = temp / "world.mjs"
+            world_client.write_text(
+                "import assert from 'node:assert/strict';\n"
+                "import {createStateSpaceWorld3D} from 'state-space-engine/experimental/3d/world';\n"
+                "import {createGpuWorld3D} from 'state-space-engine/experimental/3d/world/gpu';\n"
+                "const w=createStateSpaceWorld3D({width:8,height:8,depth:8,chunkSize:4});\n"
+                "w.setCell(3,3,3,2,25);w.step(3);const saved=w.snapshot();w.step(7);const end=w.snapshot();\n"
+                "w.restore(saved);w.step(7);assert.deepEqual(w.snapshot(),end);assert.equal(w.energyBalance().driftQ,0n);\n"
+                "const balance=w.energyBalance();for(const ticks of [0,1]){assert.throws(()=>w.step(ticks,{edits:null}));assert.deepEqual(w.snapshot(),end);assert.deepEqual(w.energyBalance(),balance);}\n"
+                "await assert.rejects(()=>createGpuWorld3D({width:8,height:8,depth:8,chunkSize:4}),/WebGPU/);\n"
+                "console.log(JSON.stringify({chunks:end.chunks.length,tick:w.tick,replayExact:true,nodeGpuRejected:true,nullEditsAtomic:true}));\n",
+                encoding="utf-8")
+            report["experimentalWorld"] = json.loads(run([shutil.which("node"), str(world_client)], temp))
             client = temp / "client.mts"
             client.write_text("import {createStateSpaceField,createGpuField,MAT,DEFAULT_REGISTRY,type PackedSnapshot} from 'state-space-engine';\n"
                               "const field=createStateSpaceField(2,1,MAT.STONE,DEFAULT_REGISTRY);\n"
                               "const snapshot: PackedSnapshot=field.packedSnapshot(); field.restore(snapshot);\n"
-                              "const gpu: ReturnType<typeof createGpuField>=createGpuField(2,1); void gpu;\n")
+                              "const gpu: ReturnType<typeof createGpuField>=createGpuField(2,1); void gpu;\n"
+                              "import {createStateSpaceWorld3D,type WorldSnapshot3D} from 'state-space-engine/experimental/3d/world';\n"
+                              "import {createGpuWorld3D,type GpuWorld3D} from 'state-space-engine/experimental/3d/world/gpu';\n"
+                              "const world=createStateSpaceWorld3D();const saved:WorldSnapshot3D=world.snapshot();world.restore(saved);\n"
+                              "const pending:Promise<GpuWorld3D>=createGpuWorld3D();void pending;\n")
             for compiler in (ROOT / "node_modules/typescript/bin/tsc", ROOT / "tower-defense-rogue/node_modules/typescript/bin/tsc"):
                 run([shutil.which("node"), str(compiler), "--noEmit", "--strict", "--target", "ES2022", "--module", "NodeNext",
                      "--moduleResolution", "NodeNext", "--lib", "ES2022,DOM", str(client)], temp)

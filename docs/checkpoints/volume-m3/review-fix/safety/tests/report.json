@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "8784392e12244527b790b6b7a2ca3e47",
+  "kind": "gpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "D:\\state-space\\scripts\\verify_checks.mjs"
+  ],
+  "startedAt": 1792014301.6972477,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 900.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "childPid": 21180,
+  "exitCode": 0,
+  "finishedAt": 1792014385.609244
+}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "id": "254172fddf0d4052a7762d2f034bf8a2",
+  "kind": "frames",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m3_browser",
+    "--browser-cli",
+    "C:/Users/nxrob/AppData/Local/npm-cache/_npx/ba0727cbf2d10686/node_modules/agent-browser/bin/agent-browser.js",
+    "--frames-only",
+    "--output",
+    "docs/checkpoints/volume-m3/frames64"
+  ],
+  "startedAt": 1792011584.876028,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 600.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "childPid": 3488,
+  "exitCode": 0,
+  "finishedAt": 1792011601.861473
+}

@@ -107,3 +107,44 @@ export const ACCESS_SHADER = VOLUME_SHADER.slice(0, VOLUME_SHADER.indexOf('@comp
   results[i]=cells[index(vec3i(c))];
 }
 `;
+
+/** Storage partitioning changes addresses only; pair ownership and hashing stay global. */
+export function chunkShaders(edge:number) {
+  if (!edge) return {physics:VOLUME_SHADER,access:ACCESS_SHADER};
+  const mapping=`
+const EDGE=${edge}u;
+fn linear(c:vec3i)->u32{return u32(c.x)+p.shape.x*(u32(c.y)+p.shape.y*u32(c.z));}
+fn index(c:vec3i)->u32{
+ let u=vec3u(c);let n=p.shape.xyz/EDGE;let k=u/EDGE;let local=u%EDGE;
+ return (k.x+n.x*(k.y+n.y*k.z))*EDGE*EDGE*EDGE+local.x+EDGE*(local.y+EDGE*local.z);
+}
+fn coordinate(i:u32)->vec3i{
+ let n=p.shape.xyz/EDGE;let k=i/(EDGE*EDGE*EDGE);let local=i%(EDGE*EDGE*EDGE);
+ return vec3i(vec3u(k%n.x,(k/n.x)%n.y,k/(n.x*n.y))*EDGE+vec3u(local%EDGE,(local/EDGE)%EDGE,local/(EDGE*EDGE)));
+}
+`;
+  const translate=(code:string)=>code
+    .replace('fn index(c:vec3i)->u32{return u32(c.x)+p.shape.x*(u32(c.y)+p.shape.y*u32(c.z));}',mapping)
+    .replace('let c=vec3i(vec3u(i%p.shape.x,(i/p.shape.x)%p.shape.y,i/(p.shape.x*p.shape.y)));','let c=coordinate(i);')
+    .replace('var hash=ai*374761393u','var hash=linear(a)*374761393u')
+    .replace('!rise(s,s-p.shape.x)','!rise(s,index(select(b,a,choose)+vec3i(0,-1,0)))');
+  const dirty=`
+@group(0) @binding(6) var<storage,read_write> dirty:array<atomic<u32>>;
+fn mark(c:vec3i){
+ let n=p.shape.xyz/EDGE;let k=vec3u(c)/EDGE;
+ atomicStore(&dirty[k.x+n.x*(k.y+n.y*k.z)],1u);
+}
+fn changed(c:vec3i){
+ mark(c);
+ for(var axis=0u;axis<3u;axis++){
+  var t=c;t[axis]-=1;
+  if(inside(t)&&u32(c[axis])%EDGE==0u){mark(t);}
+  t=c;t[axis]+=1;
+  if(inside(t)&&u32(t[axis])%EDGE==0u){mark(t);}
+ }
+}
+`;
+  const physics=translate(VOLUME_SHADER).replace('@compute @workgroup_size(64) fn main',dirty+'\n@compute @workgroup_size(64) fn main')
+    .replace('nextCells[i]=outV;nextEnergies[i]=outQ;','if((v&255u)!=(outV&255u)){changed(coordinate(i));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;');
+  return {physics,access:translate(ACCESS_SHADER)};
+}

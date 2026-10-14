@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "id": "6554539c64b04931b81ad6e9d245f137",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "D:\\state-space\\scripts\\verify_volume_m2.mjs",
+    "--report",
+    "docs/checkpoints/volume-m3/m2-node.json"
+  ],
+  "startedAt": 1792011638.091279,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 25,
+  "timeoutSeconds": 900.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "childPid": 11408,
+  "exitCode": 0,
+  "finishedAt": 1792011711.6043203
+}

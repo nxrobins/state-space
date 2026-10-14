@@ -1,0 +1,70 @@
+Cavern reference 128/1024
+Cavern reference 256/1024
+Cavern reference 384/1024
+Cavern reference 512/1024
+Cavern reference 640/1024
+Cavern reference 768/1024
+Cavern reference 896/1024
+Cavern reference 1024/1024
+Repeated partition 64/1024
+Repeated partition 128/1024
+Repeated partition 192/1024
+Repeated partition 256/1024
+Repeated partition 320/1024
+Repeated partition 384/1024
+Repeated partition 448/1024
+Repeated partition 512/1024
+Repeated partition 576/1024
+Repeated partition 640/1024
+Repeated partition 704/1024
+Repeated partition 768/1024
+Repeated partition 832/1024
+Repeated partition 896/1024
+Repeated partition 960/1024
+Repeated partition 1024/1024
+Partition restart 512/1024
+Partition restart 576/1024
+Partition restart 640/1024
+Partition restart 704/1024
+Partition restart 768/1024
+Partition restart 832/1024
+Partition restart 896/1024
+Partition restart 960/1024
+Partition restart 1024/1024
+1024 ticks: repeated partition and restart exact.
+Gameplay reference 120/600
+Gameplay reference 240/600
+Gameplay reference 360/600
+Gameplay reference 480/600
+Gameplay reference 600/600
+Repeated gameplay 64/600
+Repeated gameplay 128/600
+Repeated gameplay 192/600
+Repeated gameplay 256/600
+Repeated gameplay 320/600
+Repeated gameplay 384/600
+Repeated gameplay 448/600
+Repeated gameplay 512/600
+Repeated gameplay 576/600
+Gameplay restart 31: 64/600
+Gameplay restart 31: 128/600
+Gameplay restart 31: 192/600
+Gameplay restart 31: 256/600
+Gameplay restart 31: 320/600
+Gameplay restart 31: 384/600
+Gameplay restart 31: 448/600
+Gameplay restart 31: 512/600
+Gameplay restart 31: 576/600
+Gameplay restart 31: exact
+Gameplay restart 157: 192/600
+Gameplay restart 157: 256/600
+Gameplay restart 157: 320/600
+Gameplay restart 157: 384/600
+Gameplay restart 157: 448/600
+Gameplay restart 157: 512/600
+Gameplay restart 157: 576/600
+Gameplay restart 157: exact
+Gameplay restart 509: 512/600
+Gameplay restart 509: 576/600
+Gameplay restart 509: exact
+M3 Node verification passed: docs/checkpoints/volume-m3/node.json

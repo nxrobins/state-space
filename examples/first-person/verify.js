@@ -26,11 +26,12 @@ export async function verifyCrossing(expected){
     }finally{gpu.close();}
   }
   const gpu=await createGpuField3D(32,32,32);
+  const advance=async target=>{while(gpu.tick<target){await gpu.step();await new Promise(resolve=>setTimeout(resolve,5));if(gpu.tick%32===0)progress(`M2 replay ${gpu.tick}/${target}`);}};
   try{
     for(const scene of expected.scenes){
       await gpu.restore(scene.initial);
-      for(const t of [1,3,4,509,510,1024]){await gpu.step(t-gpu.tick);equal(await gpu.snapshot(),scene.checkpoints[t],`${scene.scene} at ${t}`);}
-      for(const tick of [3,509]){await gpu.restore(scene.checkpoints[tick]);await gpu.step(1024-tick);equal(await gpu.snapshot(),scene.checkpoints[1024],`${scene.scene} restart ${tick}`);check((await gpu.energyBalance()).driftQ===0n,'Energy drift.');}
+      for(const t of [1,3,4,509,510,1024]){await advance(t);equal(await gpu.snapshot(),scene.checkpoints[t],`${scene.scene} at ${t}`);}
+      for(const tick of [3,509]){await gpu.restore(scene.checkpoints[tick]);await advance(1024);equal(await gpu.snapshot(),scene.checkpoints[1024],`${scene.scene} restart ${tick}`);check((await gpu.energyBalance()).driftQ===0n,'Energy drift.');}
       checks.push({scene:scene.scene,ticks:1024,restarts:[3,509],exact:true});progress(`${scene.scene}: 1024 GPU ticks and both restarts exact`);
     }
     await gpu.restore(expected.game.initial.field);const before=await gpu.snapshot();

@@ -1,0 +1,35 @@
+Carve the dam ahead and left, then cool the channel. Watch the route for a complete demonstration.
+Chunk 4: all global passes and composed schedule exact
+World replay 192/509
+World replay 416/509
+World replay 672/1024
+World replay 928/1024
+World replay 128/1024
+World replay 384/1024
+World replay 640/1024
+World replay 864/1024
+World replay 128/1024
+World replay 384/1024
+World replay 640/1024
+World replay 896/1024
+World replay 128/1024
+World replay 384/1024
+World replay 640/1024
+World replay 864/1024
+World replay 608/1024
+World replay 832/1024
+Gameplay replay 32/600
+Gameplay replay 288/600
+Gameplay replay 544/600
+Gameplay restart 3: 160/600
+Gameplay restart 3: 416/600
+Gameplay restart 31: 64/600
+Gameplay restart 31: 320/600
+Gameplay restart 31: 576/600
+Gameplay restart 32: 224/600
+Gameplay restart 32: 480/600
+Gameplay restart 157: 256/600
+Gameplay restart 157: 480/600
+Gameplay restart 509: exact
+Carve the dam ahead and left, then cool the channel to make your crossing.
+M3 exact world, gameplay, meshes and restarts passed.

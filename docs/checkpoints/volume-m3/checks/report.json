@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "unittest",
+        "tests.test_verification_guard",
+        "-v"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "engine/lint_ts.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "-p",
+        "engine/tsconfig.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import {readFileSync} from 'node:fs';import{lintSource}from'./engine/lint_ts.mjs';for(const f of ['app.js','game.js','scene.js','verify.js']){const n='examples/cavern/'+f;const errors=lintSource(readFileSync(n,'utf8'),n);if(errors.length)throw Error(errors.join('\\n'));}console.log('Cavern structural lint passed');"
+      ],
+      "exitCode": 0
+    }
+  ]
+}

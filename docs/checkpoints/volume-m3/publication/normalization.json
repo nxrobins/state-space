@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "change": "Replace CRCRLF with CRLF in Cavern HTML only",
+  "source": "examples/cavern/index.html",
+  "beforeSha256": "8362c46877594f4dd13e6a344fb13264f82e8e43647fbf4847bd28dfd21940bc",
+  "afterSha256": "3461d0a2a993f171bb5866447d7a10dd071aae65736767e519ca4c5f34f43044",
+  "originalFile": "cavern-index-before.html.gz",
+  "htmlParser": "Python html.parser.HTMLParser with convert_charrefs=True",
+  "comparison": "Exact ordered declarations, start/end tags, attributes, comments, and non-whitespace text; ignore whitespace-only text nodes",
+  "tokenCount": 196,
+  "tokensSha256": "f0b860705cf695399a6b4afcf046cfdad3d218f8777e059b57fb88a5f001221b",
+  "simulationAndRenderingCodeUnchanged": true
+}

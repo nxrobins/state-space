@@ -1,0 +1,117 @@
+{
+  "queriedAt": "2026-10-14T21:15:19.5811419Z",
+  "since": "2026-10-13T21:15:19.2040921Z",
+  "unexpectedShutdowns": [
+    {
+      "timeUtc": "2026-10-14T09:19:54.5341159Z",
+      "id": 41,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+      "data": {
+        "SleepInProgress": "0",
+        "InputSuppressionState": "0",
+        "ConnectedStandbyInProgress": "false",
+        "PowerButtonTimestamp": "0",
+        "BugcheckParameter2": "0x0",
+        "LongPowerButtonPressDetected": "false",
+        "LidState": "3",
+        "SystemSleepTransitionsToOn": "0",
+        "LidReliability": "false",
+        "PowerButtonSuppressionState": "0",
+        "BugcheckParameter3": "0x0",
+        "CheckpointStatus": "0",
+        "BootAppStatus": "0",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "BugcheckInfoFromEFI": "false",
+        "BugcheckCode": "0",
+        "CsEntryScenarioInstanceId": "0",
+        "Checkpoint": "0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter1": "0x0",
+        "WHEABootErrorCount": "0"
+      }
+    },
+    {
+      "timeUtc": "2026-10-14T09:19:59.4173060Z",
+      "id": 6008,
+      "provider": "EventLog",
+      "message": "The previous system shutdown at 2:03:37 AM on ‎10/‎14/‎2026 was unexpected.",
+      "data": {}
+    },
+    {
+      "timeUtc": "2026-10-14T08:23:32.5241991Z",
+      "id": 41,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+      "data": {
+        "SleepInProgress": "0",
+        "InputSuppressionState": "0",
+        "ConnectedStandbyInProgress": "false",
+        "PowerButtonTimestamp": "0",
+        "BugcheckParameter2": "0x0",
+        "LongPowerButtonPressDetected": "false",
+        "LidState": "3",
+        "SystemSleepTransitionsToOn": "0",
+        "LidReliability": "false",
+        "PowerButtonSuppressionState": "0",
+        "BugcheckParameter3": "0x0",
+        "CheckpointStatus": "0",
+        "BootAppStatus": "0",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "BugcheckInfoFromEFI": "false",
+        "BugcheckCode": "0",
+        "CsEntryScenarioInstanceId": "0",
+        "Checkpoint": "0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter1": "0x0",
+        "WHEABootErrorCount": "0"
+      }
+    },
+    {
+      "timeUtc": "2026-10-14T08:23:37.2658999Z",
+      "id": 6008,
+      "provider": "EventLog",
+      "message": "The previous system shutdown at 1:04:26 AM on ‎10/‎14/‎2026 was unexpected.",
+      "data": {}
+    },
+    {
+      "timeUtc": "2026-10-14T07:24:21.5995369Z",
+      "id": 41,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+      "data": {
+        "SleepInProgress": "0",
+        "InputSuppressionState": "0",
+        "ConnectedStandbyInProgress": "false",
+        "PowerButtonTimestamp": "0",
+        "BugcheckParameter2": "0x0",
+        "LongPowerButtonPressDetected": "false",
+        "LidState": "3",
+        "SystemSleepTransitionsToOn": "0",
+        "LidReliability": "false",
+        "PowerButtonSuppressionState": "0",
+        "BugcheckParameter3": "0x0",
+        "CheckpointStatus": "0",
+        "BootAppStatus": "0",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "BugcheckInfoFromEFI": "false",
+        "BugcheckCode": "0",
+        "CsEntryScenarioInstanceId": "0",
+        "Checkpoint": "0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter1": "0x0",
+        "WHEABootErrorCount": "0"
+      }
+    },
+    {
+      "timeUtc": "2026-10-14T07:24:26.1605789Z",
+      "id": 6008,
+      "provider": "EventLog",
+      "message": "The previous system shutdown at 11:30:23 PM on ‎10/‎13/‎2026 was unexpected.",
+      "data": {}
+    }
+  ],
+  "driverHardwareMemoryEvents": [],
+  "recentDumpMetadata": [],
+  "diagnosis": "Unexpected shutdowns confirmed; no specific driver or hardware cause established. Removed overlapping native GPU verification and unyielding trajectories. New bounded runs completed without host-monitor stalls."
+}

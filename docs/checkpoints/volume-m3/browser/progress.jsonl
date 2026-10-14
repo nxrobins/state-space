@@ -1,0 +1,37 @@
+{"time": 1792011480.2619264, "event": "started", "session": "volume-m3-73a1e09ef565"}
+{"time": 1792011483.3453052, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel. Watch the route for a complete demonstration."}
+{"time": 1792011485.5752563, "event": "progress", "done": false, "status": "Chunk 4: all global passes and composed schedule exact"}
+{"time": 1792011487.8145628, "event": "progress", "done": false, "status": "World replay 192/509"}
+{"time": 1792011490.0414112, "event": "progress", "done": false, "status": "World replay 416/509"}
+{"time": 1792011492.2855825, "event": "progress", "done": false, "status": "World replay 672/1024"}
+{"time": 1792011494.520575, "event": "progress", "done": false, "status": "World replay 928/1024"}
+{"time": 1792011496.7455463, "event": "progress", "done": false, "status": "World replay 128/1024"}
+{"time": 1792011498.9706342, "event": "progress", "done": false, "status": "World replay 384/1024"}
+{"time": 1792011501.2141685, "event": "progress", "done": false, "status": "World replay 640/1024"}
+{"time": 1792011503.4625833, "event": "progress", "done": false, "status": "World replay 864/1024"}
+{"time": 1792011505.7050278, "event": "progress", "done": false, "status": "World replay 128/1024"}
+{"time": 1792011508.0879023, "event": "progress", "done": false, "status": "World replay 384/1024"}
+{"time": 1792011510.3259706, "event": "progress", "done": false, "status": "World replay 640/1024"}
+{"time": 1792011512.5671742, "event": "progress", "done": false, "status": "World replay 896/1024"}
+{"time": 1792011514.814736, "event": "progress", "done": false, "status": "World replay 128/1024"}
+{"time": 1792011517.1093268, "event": "progress", "done": false, "status": "World replay 384/1024"}
+{"time": 1792011519.3528638, "event": "progress", "done": false, "status": "World replay 640/1024"}
+{"time": 1792011521.5968907, "event": "progress", "done": false, "status": "World replay 864/1024"}
+{"time": 1792011523.8433034, "event": "progress", "done": false, "status": "World replay 608/1024"}
+{"time": 1792011526.0811338, "event": "progress", "done": false, "status": "World replay 832/1024"}
+{"time": 1792011528.309585, "event": "progress", "done": false, "status": "Gameplay replay 32/600"}
+{"time": 1792011530.5462213, "event": "progress", "done": false, "status": "Gameplay replay 288/600"}
+{"time": 1792011532.7900257, "event": "progress", "done": false, "status": "Gameplay replay 544/600"}
+{"time": 1792011535.0127318, "event": "progress", "done": false, "status": "Gameplay restart 3: 160/600"}
+{"time": 1792011537.254701, "event": "progress", "done": false, "status": "Gameplay restart 3: 416/600"}
+{"time": 1792011539.4918478, "event": "progress", "done": false, "status": "Gameplay restart 31: 64/600"}
+{"time": 1792011541.718384, "event": "progress", "done": false, "status": "Gameplay restart 31: 320/600"}
+{"time": 1792011543.9546125, "event": "progress", "done": false, "status": "Gameplay restart 31: 576/600"}
+{"time": 1792011546.204378, "event": "progress", "done": false, "status": "Gameplay restart 32: 224/600"}
+{"time": 1792011548.4258091, "event": "progress", "done": false, "status": "Gameplay restart 32: 480/600"}
+{"time": 1792011550.647268, "event": "progress", "done": false, "status": "Gameplay restart 157: 256/600"}
+{"time": 1792011552.8786337, "event": "progress", "done": false, "status": "Gameplay restart 157: 480/600"}
+{"time": 1792011555.0944622, "event": "progress", "done": false, "status": "Gameplay restart 509: exact"}
+{"time": 1792011557.327382, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel to make your crossing."}
+{"time": 1792011559.76755, "event": "progress", "done": true, "status": "M3 exact world, gameplay, meshes and restarts passed."}
+{"time": 1792011560.5514905, "event": "completed", "passed": true, "performancePassed": null}

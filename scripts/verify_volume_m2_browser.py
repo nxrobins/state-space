@@ -1,5 +1,6 @@
 """Hardware GPU conformance, exact gameplay replay, and complete 32-cubed frames."""
 import argparse
+import sys
 import functools
 import hashlib
 import http.server
@@ -17,6 +18,8 @@ from scripts.verify_browser import run_captured
 
 
 def main():
+    from scripts.verification_guard import guarded_entry
+    guarded_entry('frames' if '--frames-only' in sys.argv else 'gpu', 600)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-cli', type=Path, required=True)
     parser.add_argument('--node-report', type=Path, default=Path('docs/checkpoints/volume-m2/node.json'))
@@ -28,7 +31,25 @@ def main():
     expected = json.loads(args.node_report.read_text(encoding='utf-8'))
     if not expected.get('passed') or not expected.get('sourceUnchanged'):
         raise ValueError('Passing fresh Node reference required.')
-    sources = expected['sourceHashes']
+    # Freeze CPU inputs independently from the GPU/UI implementation under test.
+    # A presentation or GPU fix does not require repeating thousands of unchanged
+    # CPU ticks; each browser receipt separately binds its complete current source.
+    reference_paths = [
+        'dist/sdk/state-space-3d.js', 'engine/experimental/3d.ts',
+        'engine/experimental/3d-core.ts', 'engine/thermal.ts', 'engine/registry.ts',
+        'engine/validation.ts', 'engine/materials.json', 'engine/generated/materials.ts',
+        'scripts/verify_volume_m2.mjs', 'examples/first-person/game.js',
+    ]
+    if 'm2' == 'm3':
+        reference_paths += ['dist/sdk/state-space-world.js', 'engine/experimental/world.ts',
+                            'engine/experimental/world-core.ts', 'examples/cavern/scene.js']
+    else:
+        reference_paths += ['examples/volume-lab/scenes.js', 'examples/first-person/scene.js']
+    reference_hashes = {p: expected['sourceHashes'][p] for p in reference_paths}
+    if not all(hashlib.sha256((ROOT / p).read_bytes()).hexdigest() == h for p, h in reference_hashes.items()):
+        raise ValueError('CPU reference inputs changed; regenerate the Node reference.')
+    sources = {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in expected['sourceHashes']}
+
 
     def unchanged():
         return all((ROOT / p).is_file() and hashlib.sha256((ROOT / p).read_bytes()).hexdigest() == h
@@ -81,11 +102,15 @@ def main():
 
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Handler, directory=str(ROOT)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    report = {'version': 1, 'passed': False, 'recordedAt': time.time(), 'host': platform.platform(), 'sourceHashes': sources}
+    report = {'version': 1, 'passed': False, 'recordedAt': time.time(), 'host': platform.platform(), 'sourceHashes': sources, 'referenceInputHashes': reference_hashes, 'nodeReferenceReceiptHash': hashlib.sha256(args.node_report.read_bytes()).hexdigest()}
     journal('started', session=session)
     try:
         cli('open', f'http://127.0.0.1:{server.server_address[1]}/examples/first-person/')
+        cli('set', 'viewport', '1920', '1080')
         cli('wait', '--fn', 'Boolean(window.crossing?.ready)')
+        report['backendInfo'] = cli('eval', 'window.crossing.backendInfo')['result']
+        if report['backendInfo'].get('isFallbackAdapter') is not False:
+            raise ValueError('Hardware WebGPU adapter required.')
         cli('screenshot', str((args.output / 'ready.png').resolve()))
         if not args.frames_only:
             url = '/' + args.node_report.as_posix()

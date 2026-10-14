@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "baseCommit": "3e73032731fb6f4b3c629907d8bb3aab024d3daf",
+  "worldCoreBeforeSha256": "1112a2abd7eaba7a137d55f7af0b7aacf609699736bacd184ba39d7042d17b63",
+  "worldCoreAfterSha256": "761728a8e90bd7414cb45ebf0b956865d1013c19f38fb87afd277c2af20630b6",
+  "onlyRuntimeSourceChange": {
+    "path": "engine/experimental/world-core.ts",
+    "before": "edits=options.edits??[];",
+    "after": "edits=options.edits===undefined?[]:options.edits;",
+    "exactByteReplacementVerified": true
+  },
+  "cpuBundleOnlyEditDefaultExpressionChanged": true,
+  "bundles": {
+    "dist/sdk/state-space-3d-gpu.js": {
+      "beforeSha256": "e60ea873f54213ed923e87be2499328dfcdbb752114994851c09c604e022dad1",
+      "afterSha256": "e60ea873f54213ed923e87be2499328dfcdbb752114994851c09c604e022dad1",
+      "byteIdentical": true
+    },
+    "dist/sdk/state-space-3d.js": {
+      "beforeSha256": "6f48742d91cd4914bcee72fd2345499ae55cd6253fc88cb869af1d37c6da20e3",
+      "afterSha256": "6f48742d91cd4914bcee72fd2345499ae55cd6253fc88cb869af1d37c6da20e3",
+      "byteIdentical": true
+    },
+    "dist/sdk/state-space-world-gpu.js": {
+      "beforeSha256": "29e6d5c814e2749739c0681c69e54d0f7476876ac8eb8ff0de964f4609216a06",
+      "afterSha256": "29e6d5c814e2749739c0681c69e54d0f7476876ac8eb8ff0de964f4609216a06",
+      "byteIdentical": true
+    },
+    "dist/sdk/state-space-world.js": {
+      "beforeSha256": "c5b84ca3799ba1c6700d00bb42a872dfb951870559f470e8f7a3a222ed80ce8c",
+      "afterSha256": "a914f21a7d8caceb4ff07ebd346d0b9f0f5e15e99a4078b378925ec01a3149b3",
+      "byteIdentical": false
+    },
+    "dist/sdk/state-space.js": {
+      "beforeSha256": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+      "afterSha256": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
+      "byteIdentical": true
+    }
+  },
+  "gpuPhysicsRenderingAndControllerUnchanged": true,
+  "existingFrameEvidenceRetained": true,
+  "newFrameBenchmarksRun": false
+}
