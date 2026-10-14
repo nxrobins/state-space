@@ -92,17 +92,22 @@ class ResidentVolume implements GpuVolume3D {
   }
   #shape(params: Uint32Array, slot: number) { params.set([this.width, this.height, this.depth, this.width * this.height * this.depth], slot * 64); }
   #region(region?: RegionRequest3D): RegionRequest3D | undefined {
-    if (!region) return;
-    if (!Array.isArray(region.origin) || !Array.isArray(region.size) || region.origin.length !== 3 || region.size.length !== 3) throw new Error('Region needs three origin and size coordinates.');
-    const shape = [this.width, this.height, this.depth];
-    region.size.forEach((v,i) => { checkedInteger(v, 1, shape[i], 'region size'); checkedInteger(region.origin[i], 0, shape[i] - v, 'region origin'); });
-    checkedInteger(region.size.reduce((a,b) => a*b,1), 1, 4096, 'region cell count');
-    return { origin: [...region.origin], size: [...region.size] };
+    if (region === undefined) return;
+    if (!region || !Array.isArray(region.origin) || !Array.isArray(region.size) || region.origin.length !== 3 || region.size.length !== 3) throw new Error('Region needs three origin and size coordinates.');
+    const shape = [this.width, this.height, this.depth], origin: number[] = [], size: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      size.push(checkedInteger(region.size[i], 1, shape[i], 'region size'));
+      origin.push(checkedInteger(region.origin[i], 0, shape[i] - size[i], 'region origin'));
+    }
+    checkedInteger(size[0] * size[1] * size[2], 1, 4096, 'region cell count');
+    return { origin, size };
   }
   #edits(edits: readonly VolumeEdit3D[] = []) {
-    if (!Array.isArray(edits) || edits.length > 64) throw new Error('A commit supports at most 64 unique cell edits.');
-    const seen = new Set<number>(), data = new Uint32Array(edits.length * 4), seed = createStateSpaceField3D(1,1,1);
-    edits.forEach((e,k) => {
+    if (!Array.isArray(edits)) throw new Error('A commit supports at most 64 unique cell edits.');
+    const count = checkedInteger(edits.length, 0, 64, 'edit count');
+    const seen = new Set<number>(), data = new Uint32Array(count * 4), seed = createStateSpaceField3D(1,1,1);
+    for (let k = 0; k < count; k++) {
+      const e = edits[k];
       if (!e || typeof e !== 'object') throw new Error('Invalid volume edit.');
       checkedInteger(e.x, 0, this.width-1, 'x'); checkedInteger(e.y, 0, this.height-1, 'y'); checkedInteger(e.z, 0, this.depth-1, 'z');
       const i=e.x+this.width*(e.y+this.height*e.z); if(seen.has(i)) throw new Error('Duplicate edit coordinate.'); seen.add(i);
@@ -115,7 +120,7 @@ class ResidentVolume implements GpuVolume3D {
         if(keys!=='energyQ,x,y,z') throw new Error('Unknown energy edit field.');
         checkedInteger(e.energyQ,0,MAX_ENERGY_Q,'energyQ');data.set([i,1,0,e.energyQ],k*4);
       }
-    });
+    }
     return data;
   }
   async #finish(encoder: GPUCommandEncoder, reads: { buffer: GPUBuffer; bytes: number }[] = []) {
@@ -133,6 +138,7 @@ class ResidentVolume implements GpuVolume3D {
   }
   async step(ticks = 1, options: GpuStepOptions3D = {}): Promise<Region3D | undefined> {
     checkedInteger(ticks,0,1024,'ticks per request'); checkedInteger(this.#tick+ticks,0,Number.MAX_SAFE_INTEGER,'end tick');
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(k => k !== 'edits' && k !== 'region')) throw new Error('Invalid GPU step options.');
     const region=this.#region(options.region), edits=this.#edits(options.edits);
     return this.#run(async()=>{
       const params=this.#parameters(ticks*27+2);this.#shape(params,0);params[9]=edits.length/4;
@@ -168,7 +174,7 @@ class ResidentVolume implements GpuVolume3D {
       return region ? {origin:[...region.origin],size:[...region.size],grid:values[0],tick:this.#tick} : undefined;
     });
   }
-  async queryRegion(region: RegionRequest3D) { return (await this.step(0,{region}))!; }
+  async queryRegion(region: RegionRequest3D) { const checked = this.#region(region); if (!checked) throw new Error('A region is required.'); return (await this.step(0,{region:checked}))!; }
   async #snapshot(current = this.#current): Promise<VolumeSnapshot> {
     const bytes=this.width*this.height*this.depth*4;this.#device.pushErrorScope('validation');const encoder=this.#device.createCommandEncoder();
     encoder.copyBufferToBuffer(this.#cells[current],0,this.#fullRead,0,bytes);encoder.copyBufferToBuffer(this.#energy[current],0,this.#fullRead,bytes,bytes);

@@ -72,4 +72,4 @@ or failed measurement retains its partial receipt for download.
 
 See [M2 rules, verification and measured results](../../docs/checkpoints/3D_M2.md).
 The recorded i9-11900K / RTX 4090 run passes the 32³ / 1080p 60 Hz gate:
-600 measured frames, p95 completion 7.2 ms, worst 10.2 ms and zero deadlines missed.
+600 measured frames, p95 completion 7.2 ms, worst 11.0 ms and zero deadlines missed.

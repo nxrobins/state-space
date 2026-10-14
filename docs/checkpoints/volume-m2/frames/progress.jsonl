@@ -6,3 +6,19 @@
 {"time": 1791958931.7860487, "event": "progress", "done": false, "status": "Measured 480 / 600 frames"}
 {"time": 1791958934.03808, "event": "progress", "done": true, "status": "Measured 600 frames \u00b7 59.96 Hz \u00b7 0 deadline misses \u00b7 60 Hz gate passed"}
 {"time": 1791958934.9596171, "event": "completed", "passed": true, "performancePassed": true}
+{"time": 1791963478.9572198, "event": "started", "session": "volume-m2-3c62e79e0086"}
+{"time": 1791963481.2911305, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel to make your crossing."}
+{"time": 1791963483.5269787, "event": "progress", "done": false, "status": "Measured 60 / 600 frames"}
+{"time": 1791963485.7665431, "event": "progress", "done": false, "status": "Measured 180 / 600 frames"}
+{"time": 1791963487.9952695, "event": "progress", "done": false, "status": "Measured 300 / 600 frames"}
+{"time": 1791963490.2351968, "event": "progress", "done": false, "status": "Measured 480 / 600 frames"}
+{"time": 1791963492.463875, "event": "progress", "done": true, "status": "Measured 600 frames \u00b7 59.97 Hz \u00b7 0 deadline misses \u00b7 60 Hz gate passed"}
+{"time": 1791963493.3215518, "event": "completed", "passed": true, "performancePassed": true}
+{"time": 1791964003.292925, "event": "started", "session": "volume-m2-df21810f06cb"}
+{"time": 1791964005.6959722, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel to make your crossing."}
+{"time": 1791964007.9236326, "event": "progress", "done": false, "status": "Measured 60 / 600 frames"}
+{"time": 1791964010.150224, "event": "progress", "done": false, "status": "Measured 180 / 600 frames"}
+{"time": 1791964012.381137, "event": "progress", "done": false, "status": "Measured 300 / 600 frames"}
+{"time": 1791964014.6155434, "event": "progress", "done": false, "status": "Measured 480 / 600 frames"}
+{"time": 1791964016.8554406, "event": "progress", "done": true, "status": "Measured 600 frames \u00b7 59.96 Hz \u00b7 0 deadline misses \u00b7 60 Hz gate passed"}
+{"time": 1791964017.7235658, "event": "completed", "passed": true, "performancePassed": true}

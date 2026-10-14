@@ -39,18 +39,25 @@ async function pausedOperation(fn){if(exclusive||benchmarking)throw new Error('A
 }
 async function reset(){
   const recovering=failed;
-  if(recovering){pump?.stop();renderer?.close();field?.close();field=await createGpuField3D(32,32,32);renderer=await field.createRenderer(canvas);game=new CrossingGame(field);window.crossing.game=game;}
+  if(recovering){pump?.stop();renderer?.close();field?.close();active=Promise.resolve();field=await createGpuField3D(32,32,32);renderer=await field.createRenderer(canvas);game=new CrossingGame(field);window.crossing.game=game;}
   await game.restore(initial);recordingInitial=structuredClone(initial);lastCheckpoint=structuredClone(initial);yaw=Math.PI/2;pitch=.10;failed=false;$('error').hidden=true;$('status').textContent='Carve the dam ahead and left, then cool the channel to make your crossing.';hud();
   if(recovering)pump=createFramePump((n,i)=>{active=frame(n,i);return active;},{onError:fatal});
 }
 async function replay(saved){
+  saved=structuredClone(saved);
   if(!saved||saved.version!==GAME_VERSION||!Array.isArray(saved.commands)||saved.commands.length>MAX_TICKS||!saved.initial)throw new Error('Invalid replay file.');
   // Validate the whole input tape before restoring anything.
-  saved.commands.forEach((c,i)=>commandFor(c,saved.initial.field.tick+i+1));
+  for (let i=0;i<saved.commands.length;i++) {
+    const command=saved.commands[i];
+    if (!command || typeof command !== 'object') throw new Error('Invalid replay command.');
+    commandFor(command,saved.initial.field.tick+i+1);
+  }
   await game.restore(saved.initial);recordingInitial=structuredClone(saved.initial);for(const c of saved.commands)await game.step(c);follow();return game.snapshot();
 }
 async function runBenchmark(){
-  if(benchmarking||exclusive||failed)throw new Error('Benchmark unavailable while another operation is active.');exclusive=true;playing=false;auto=false;await active;pump.stop();benchmarking=true;cancelled=false;$('cancel').hidden=false;$('receipt').hidden=true;
+  if(benchmarking||exclusive||failed)throw new Error('Benchmark unavailable while another operation is active.');exclusive=true;playing=false;auto=false;
+  try{await active;}catch(error){exclusive=false;fatal(error);throw error;}
+  pump.stop();benchmarking=true;cancelled=false;$('cancel').hidden=false;$('receipt').hidden=true;
   const report={version:1,scope:'Complete 1080p gameplay: input, bounded GPU edits, all 27 physics passes, 16³ collision readback, integer controller, HUD, GPU face compaction, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.',resolution:[1920,1080],dimensions:[32,32,32],targetHz:60,warmup:[],samples:[],backendInfo:field.backendInfo,userAgent:navigator.userAgent,recordedAt:new Date().toISOString(),cancelled:false};
   window.crossing.benchmarkResult=report;
   async function measure(count,rows){return new Promise((resolve,reject)=>{let loop;loop=createFramePump(async(timestamp,interval)=>{

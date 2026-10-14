@@ -28,3 +28,13 @@ test('invalid commands and invalid game saves preserve the complete live state',
   for(const saved of [{...before,player:{...before.player,x:NaN}},{...before,field:{...before.field,rulesVersion:'other'}},{...before,player:{...before.player,y:25*Q}}])await assert.rejects(g.restore(saved));
   assert.deepEqual(await g.snapshot(),before);
 });
+test('sparse look vectors and event lists reject before changing player or terrain',async()=>{
+  const g=await fixture(),before=await g.snapshot();
+  for(const look of [[256,,0],[256,0,],new Array(3)]){
+    assert.throws(()=>commandFor({look},1));
+    await assert.rejects(g.step({look}));
+    await assert.rejects(g.restore({...before,look}));
+  }
+  await assert.rejects(g.restore({...before,events:new Array(1)}));
+  assert.deepEqual(await g.snapshot(),before);
+});

@@ -36,24 +36,44 @@ export async function verifyCrossing(expected){
     await gpu.restore(expected.game.initial.field);const before=await gpu.snapshot();
     for(const operation of [()=>gpu.setCell(0,0,0,4),()=>gpu.setEnergy(0,0,0,-1),()=>gpu.step(1,{edits:[{x:0,y:0,z:0,material:1},{x:0,y:0,z:0,energyQ:0}]}),()=>gpu.queryRegion({origin:[31,0,0],size:[2,1,1]}),()=>gpu.restore({...before,tick:-1}),()=>gpu.restore({...before,rulesVersion:'ca-v4'})]){await rejected(operation);equal(await gpu.snapshot(),before,'Rejected operation mutated state.');}
     const corrupt=structuredClone(before);corrupt.packedCells[0]|=1<<16;await rejected(()=>gpu.restore(corrupt));equal(await gpu.snapshot(),before,'Bad packed state changed field.');
+    const partial=[{x:1,y:1,z:1,material:8},,];
+    for(const options of [{edits:new Array(1)},{edits:partial},{region:{origin:[0,0,0],size:[1,,1]}},{region:{origin:[0,,0],size:[1,1,1]}},{region:null},null,{unknown:true}]){
+      await rejected(()=>gpu.step(1,options));equal(await gpu.snapshot(),before,'Malformed batch advanced or corrupted state.');
+    }
+    await rejected(()=>gpu.queryRegion());equal(await gpu.snapshot(),before,'Missing region mutated state.');
     const running=gpu.step();await rejected(()=>gpu.setEnergy(0,0,0,0));await rejected(()=>gpu.close());await running;
     const cpu=createStateSpaceField3D(32,32,32);cpu.restore(await gpu.snapshot());
     const edits=[{x:0,y:0,z:0,material:8,thermal:5},{x:1,y:2,z:3,energyQ:MAX_ENERGY_Q}];for(const e of edits){if('material'in e)cpu.setCell(e.x,e.y,e.z,e.material,e.thermal);else cpu.setEnergy(e.x,e.y,e.z,e.energyQ);}await gpu.step(0,{edits});equal(await gpu.snapshot(),cpu.snapshot(),'Batched edits differ.');
     // Reset the accounting baseline on both sides before checking exact deltas.
     await gpu.restore(cpu.snapshot());cpu.restore(cpu.snapshot());const q=123456;cpu.setEnergy(1,2,3,q);await gpu.setEnergy(1,2,3,q);equal(await gpu.snapshot(),cpu.snapshot(),'Edits differ.');equal(Object.fromEntries(Object.entries(await gpu.energyBalance()).map(([k,v])=>[k,String(v)])),Object.fromEntries(Object.entries(cpu.energyBalance()).map(([k,v])=>[k,String(v)])),'Ledger differs.');
     const region=await gpu.queryRegion({origin:[1,2,3],size:[3,5,7]}),grid=cpu.grid;let k=0;for(let z=3;z<10;z++)for(let y=2;y<7;y++)for(let x=1;x<4;x++)check(region.grid[k++]===grid[x+32*(y+32*z)],'Region order mismatch.');region.grid.fill(0);equal(await gpu.snapshot(),cpu.snapshot(),'Region was not isolated.');
-    checks.push({invalidInputsAtomic:true,concurrentOperationsRejected:true,ledgerExact:true,regionIsolated:true});
+    checks.push({invalidInputsAtomic:true,sparseInputsAtomic:true,concurrentOperationsRejected:true,ledgerExact:true,regionIsolated:true});
     const g=new CrossingGame(gpu);await g.restore(expected.game.initial);
     for(const c of expected.game.commands)await g.step(c);equal(await g.snapshot(),expected.game.final,'Full game replay differs.');
     equal(g.commands,expected.game.commands,'Input tape differs.');check((await gpu.energyBalance()).driftQ===0n,'Gameplay drift.');
     for(const tick of [3,119,157,509]){await g.restore(expected.game.checkpoints[tick]);for(const c of expected.game.commands.slice(tick))await g.step(c);equal(await g.snapshot(),expected.game.final,`Game restart ${tick}`);check((await gpu.energyBalance()).driftQ===0n,'Restart energy drift.');progress(`Player + terrain restart ${tick}: exact`);}
     const canvas=document.createElement('canvas');canvas.width=640;canvas.height=360;const renderer=await gpu.createRenderer(canvas);const state=await gpu.snapshot();
+    await rejected(()=>renderer.render({eye:[6,,15],forward:[1,0,0],right:[0,0,-1],up:[0,-1,0]}));
     for(const eye of [[6,22,15],[8,18,10],[25,22,15]])await renderer.render({eye,forward:[1,0,0],right:[0,0,-1],up:[0,-1,0]});
     renderer.close();equal(await gpu.snapshot(),state,'Rendering changed physics.');
     checks.push({gameTicks:600,won:true,restarts:[3,119,157,509],exact:true,renderingIsolated:true});
   }finally{gpu.close();}
   const live=window.crossing;await live.reset();const saved=await live.snapshot();await rejected(()=>live.restore({...saved,player:{...saved.player,x:-1}}));equal(await live.snapshot(),saved,'Bad game save changed live state.');
+  for(const invalid of [{...saved,look:[256,,0]},{...saved,events:new Array(1)}]){await rejected(()=>live.restore(invalid));equal(await live.snapshot(),saved,'Sparse game save changed live state.');}
+  await rejected(()=>live.replay({version:saved.version,initial:saved,commands:new Array(1)}));equal(await live.snapshot(),saved,'Sparse replay changed live state.');
   await live.step({moveX:256});check((await live.snapshot()).field.tick===1,'Public step failed.');document.getElementById('step').click();await new Promise(resolve=>setTimeout(resolve,100));check((await live.snapshot()).field.tick===2,'UI step failed.');
   const beforeView=(await live.snapshot()).field;await live.view({yaw:.2,pitch:.3});equal((await live.snapshot()).field,beforeView,'Camera isolation');await live.reset();
+  let rejectFrame;live.game.field.step=()=>new Promise((_,reject)=>{rejectFrame=reject;});document.getElementById('play').click();
+  const deadline=performance.now()+5000;
+  while(!rejectFrame&&performance.now()<deadline)await new Promise(resolve=>setTimeout(resolve,5));
+  check(rejectFrame,'Controlled frame did not begin.');
+  const pendingBenchmark=live.runBenchmark(),benchmarkRejected=rejected(()=>pendingBenchmark);
+  rejectFrame(new Error('Controlled recovery regression'));await benchmarkRejected;
+  check(document.getElementById('mode').textContent.includes('ERROR'),'Injected frame error did not pause.');
+  const originalRAF=window.requestAnimationFrame,requestFrame=originalRAF.bind(window),callbacks=[];let held=true;
+  window.requestAnimationFrame=callback=>held?(callbacks.push(callback),0):requestFrame(callback);
+  try{await live.reset();await live.step({moveX:256});check((await live.snapshot()).field.tick===1,'Recovery depends on a display callback.');}
+  finally{held=false;window.requestAnimationFrame=originalRAF;for(const callback of callbacks)requestFrame(callback);}
+  await live.reset();checks.push({benchmarkStartupUnlocksAfterError:true,recoveryBeforeNextDisplayCallback:true});
   progress('All GPU physics, gameplay and restart checks passed.');return{passed:true,checks};
 }

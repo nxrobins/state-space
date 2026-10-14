@@ -8,6 +8,8 @@ const int=(n,lo,hi)=>Number.isSafeInteger(n)&&n>=lo&&n<=hi;
 const sum=q=>q.reduce((s,v)=>s+BigInt(v),0n);
 export function commandFor(input={},tick){
   const c={tick,moveX:input.moveX??0,moveZ:input.moveZ??0,jump:input.jump??false,tool:input.tool??'none',look:input.look??[256,0,0]};
+  if (!Array.isArray(c.look) || c.look.length !== 3) throw new Error('Invalid deterministic game command.');
+  c.look = [c.look[0],c.look[1],c.look[2]];
   if(!int(tick,1,MAX_TICKS)||!int(c.moveX,-256,256)||!int(c.moveZ,-256,256)||c.moveX**2+c.moveZ**2>257**2||typeof c.jump!=='boolean'||!['none','carve','freeze'].includes(c.tool)||!Array.isArray(c.look)||c.look.length!==3||!c.look.every(v=>int(v,-256,256))||c.look.reduce((s,v)=>s+v*v,0)<250**2||c.look.reduce((s,v)=>s+v*v,0)>262**2||(input.tick!==undefined&&input.tick!==tick))throw new Error('Invalid deterministic game command.');
   return{...c,look:[...c.look]};
 }
@@ -98,7 +100,7 @@ export function validateGameSnapshot(s){
   const p=s.player,keys='blocked,cooldown,grounded,jumpHeld,vy,wet,x,y,z';
   if(!p||Object.keys(p).sort().join(',')!==keys||![p.x,p.z].every(v=>int(v,HALF,SIZE*Q-HALF))||!int(p.y,HEIGHT,SIZE*Q)||!int(p.vy,-150,150)||!int(p.cooldown,0,6)||!['grounded','wet','jumpHeld','blocked'].every(k=>typeof p[k]==='boolean'))throw new Error('Invalid game player.');
   commandFor({look:s.look},1);
-  if(!Array.isArray(s.events)||s.events.length>MAX_TICKS*2||s.events.some(e=>!e||!int(e.tick,0,s.field.tick)||!['carved','cooled','ice-walk','crossed','trapped','fell'].includes(e.type)||Object.values(e).some(v=>v===undefined)))throw new Error('Invalid game events.');
+  if(!Array.isArray(s.events)||s.events.length>MAX_TICKS*2||Array.from(s.events).some(e=>!e||!int(e.tick,0,s.field.tick)||!['carved','cooled','ice-walk','crossed','trapped','fell'].includes(e.type)||Object.values(e).some(v=>v===undefined)))throw new Error('Invalid game events.');
   // Also reject a saved actor inside terrain, before the live field changes.
   const field=createStateSpaceField3D(SIZE,SIZE,SIZE);field.restore(s.field);const grid=field.grid;
   for(let z=Math.floor((p.z-HALF)/Q);z<=Math.floor((p.z+HALF-1)/Q);z++)for(let y=Math.floor((p.y-HEIGHT)/Q);y<=Math.floor((p.y-1)/Q);y++)for(let x=Math.floor((p.x-HALF)/Q);x<=Math.floor((p.x+HALF-1)/Q);x++)if(s.status==='playing'&&solid(grid[x+SIZE*(y+SIZE*z)]))throw new Error('Saved actor overlaps terrain.');

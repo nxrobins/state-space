@@ -66,14 +66,19 @@ export async function makeTerrainRenderer(device:GPUDevice,canvas:HTMLCanvasElem
   return {
     async render(camera:TerrainCamera){
       if(closed)throw new Error('Terrain renderer is closed.');
-      for(const a of [camera.eye,camera.forward,camera.right,camera.up])if(a.length!==3||!a.every(Number.isFinite))throw new Error('Invalid terrain camera.');
+      const vectors = [camera.eye,camera.right,camera.up,camera.forward].map(a => {
+        if (!a || a.length !== 3) throw new Error('Invalid terrain camera.');
+        const copy = [a[0],a[1],a[2]];
+        if (!copy.every(Number.isFinite)) throw new Error('Invalid terrain camera.');
+        return copy;
+      });
       if(camera.target!==undefined)checkedTarget(camera.target,count);
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
       if(!depth||width!==canvas.width||height!==canvas.height){depth?.destroy();width=canvas.width;height=canvas.height;depth=device.createTexture({size:[width,height],format:'depth24plus',usage:GPUTextureUsage.RENDER_ATTACHMENT});}
       const {grid,shape}=state();let groups=bindings.get(grid);
       if(!groups){groups={mesh:device.createBindGroup({layout:mesh.getBindGroupLayout(0),entries:[grid,faces,args,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[grid,faces,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))})};bindings.set(grid,groups);}
       const data=new ArrayBuffer(96),f=new Float32Array(data),u=new Uint32Array(data);const near=.06,far=160,tan=Math.tan(Math.PI/6);
-      f.set([...camera.eye,0,...camera.right,0,...camera.up,0,...camera.forward,0,tan*width/height,tan,far/(far-near),-near*far/(far-near)]);u.set([...shape,camera.target??0xffffffff],20);
+      f.set([...vectors[0],0,...vectors[1],0,...vectors[2],0,...vectors[3],0,tan*width/height,tan,far/(far-near),-near*far/(far-near)]);u.set([...shape,camera.target??0xffffffff],20);
       device.queue.writeBuffer(uniform,0,data);device.queue.writeBuffer(args,0,new Uint32Array([6,0,0,0]));
       device.pushErrorScope('validation');
       const encoder=device.createCommandEncoder();const compute=encoder.beginComputePass();compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroups(Math.ceil(count/64));compute.end();

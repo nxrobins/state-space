@@ -1,14 +1,14 @@
 {
   "version": 1,
   "passed": true,
-  "recordedAt": 1791958865.7599297,
+  "recordedAt": 1791963955.916017,
   "host": "Windows-10-10.0.26300-SP0",
   "sourceHashes": {
-    "dist/sdk/state-space-3d-gpu.js": "0c383187f9b74d0c5aaf361e16d7c4a89847e627cdd9551ef135e89039d86cc0",
+    "dist/sdk/state-space-3d-gpu.js": "34bd28e7b197ca54906c22a2e0dc475e8df5341eb8f8599b93bce1b02bd0173b",
     "dist/sdk/state-space-3d.js": "2197e756308d050a7507bdcdb7614c9a7666c8ef89a425928dd4e96b148b712c",
     "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb",
-    "engine/experimental/3d-gpu.ts": "b4b5deb1b53fcd543a5eb76b59e049e9293cecdb0fc40123670f479af47d4678",
-    "engine/experimental/3d-renderer.ts": "85068548e48d0bba55f686157a942b040e9e10d6ce73aa0eca98df61a5f15447",
+    "engine/experimental/3d-gpu.ts": "0104ad31182950e1a127d43a78b2e3180705ee12b11c05a73fbc28e8a96ac6b7",
+    "engine/experimental/3d-renderer.ts": "9b0d0faf579d20b44fed9ed9d06094e5908b00c249c959ea5599e6159c68229f",
     "engine/experimental/3d-shader.ts": "132919110f4299fef636d1ce250fec0fba4d8113e3f68421617ded940c00ab0c",
     "engine/experimental/3d-view.ts": "a873b2b31049e250ea11bc17ee42cd70a0de0e307ca3372bfcc824a959bd8a20",
     "engine/experimental/3d.test.ts": "f1d189861a33a226810f55b074ab9f07914dbe4b7ce95d7665fd0daaaee35f41",
@@ -22,13 +22,13 @@
     "engine/validation.ts": "bc156ff8b6084c31e8cd87e9595d70d611d9aa906453e164e990c2ef47e40395",
     "engine/vite.volume-gpu.config.ts": "e39029aa41c94ddd24e025c8053985fc2ecba5278c9cad58b23ed48e39ad9712",
     "engine/vite.volume.config.ts": "551dd8918b3382db02d1331cc726567280174bd1a595186f0275005b91ba10b1",
-    "examples/first-person/app.js": "94d29b089918eeb5e3288830421d8b89436b9fc3ac90516a0e2ca6bed6c6a70c",
-    "examples/first-person/game.js": "aefeee555f7d37f1233f97b23206490c150a75e6784c4c71adabd536c74bb9ef",
-    "examples/first-person/game.test.mjs": "97fcfd1d6a1de28b3deceb17e0e7ffbbbef5fc0fb2d27e806933a2121b4e2020",
+    "examples/first-person/app.js": "18f4446aa5662e88df4dbdf73fb2adb524e62f3d3ff56983c60c672daf06fad6",
+    "examples/first-person/game.js": "6274ef1a986d10b607f6e67b164da6d69f36ab59ba02cce139670cf05f58ccd5",
+    "examples/first-person/game.test.mjs": "5fb468e09c19cf68e2b1a3b89ec576699462af20e5773918d0b5985f0e4f74bb",
     "examples/first-person/index.html": "528176cb07bd2066eef6cc262896782c39795a6cc626016bba89295a0800e35e",
     "examples/first-person/scene.js": "a9271dfb828733bd5ce74037292457359effff65fe42aa62c8f7f4354b5c2051",
     "examples/first-person/style.css": "4b1dcf7ed52bbac86c484666ee3a058d5ffe8b9cd871d8bb248ef7d2af1cd3e8",
-    "examples/first-person/verify.js": "77dfa8f07adf07e0793ebf60e88e3d1c2fe74b6d5153f0222caa19fe118e4bf2",
+    "examples/first-person/verify.js": "c3c31f112c198af8529bffd8cb386cc246966e8ef6dbb4481a2706309c1e4f97",
     "examples/volume-lab/scenes.js": "f286938161500a08fe5ac664decc992a8fe19c37209f226153b56c2b53e3d69e",
     "package.json": "0ad483a84094a8010f9469d28628802690b6498d2e77c76ce2a41534c7bfebc8",
     "scripts/verify_volume_m2.mjs": "ceb27e4ab8ad78a9c8c0561613e89b16600353fc203e72fa536b6b79231717a3",
@@ -116,7 +116,8 @@
         "concurrentOperationsRejected": true,
         "invalidInputsAtomic": true,
         "ledgerExact": true,
-        "regionIsolated": true
+        "regionIsolated": true,
+        "sparseInputsAtomic": true
       },
       {
         "exact": true,
@@ -129,6 +130,10 @@
           509
         ],
         "won": true
+      },
+      {
+        "benchmarkStartupUnlocksAfterError": true,
+        "recoveryBeforeNextDisplayCallback": true
       }
     ],
     "passed": true
@@ -139,7 +144,7 @@
     {
       "arguments": [
         "open",
-        "http://127.0.0.1:60640/examples/first-person/"
+        "http://127.0.0.1:52874/examples/first-person/"
       ],
       "exitCode": 0,
       "stderr": ""
