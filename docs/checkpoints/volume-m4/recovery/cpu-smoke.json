@@ -1,0 +1,9 @@
+{
+  "stage": "cpu-smoke",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\cpu-smoke-6df10db3\\supervisor\\report.json",
+  "supervisorSha256": "ef209210cebac40c9adb9e63bdfcd443e1963941374432fc5486b019a32343d1",
+  "evidence": null,
+  "holdRemainsActive": true
+}

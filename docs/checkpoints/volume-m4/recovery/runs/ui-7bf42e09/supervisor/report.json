@@ -1,0 +1,59 @@
+{
+  "version": 2,
+  "id": "28790f9bc6fa4f198282337cb6506251",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_active_cavern_ui",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\ui-7bf42e09\\evidence"
+  ],
+  "startedAt": 1792047356.35192,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 253.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792047357.376141,
+      "hostCpuPercent": 6.034482758620685,
+      "freeMemoryMiB": 96016.83203125
+    },
+    "gpu": {
+      "time": 1792047357.4296036,
+      "temperatureC": 40.0,
+      "utilizationPercent": 7.0,
+      "freeMemoryMiB": 11061.0,
+      "powerW": 68.62
+    }
+  },
+  "childPid": 15004,
+  "lastOutput": "{\"cancellationRetained\": true, \"exportIsolation\": true, \"fileImportAtomic\": true, \"fileRoundTrip\": true, \"iceWalk\": true, \"inputLatencyIsolated\": true, \"pausedViewIdle\": true, \"playPauseStep\": true, \"routeWonAt\": 191, \"sameTickRestoreRedraws\": true, \"softwareErrorRecovery\": true}",
+  "lastHealth": {
+    "host": {
+      "time": 1792047386.9270835,
+      "hostCpuPercent": 18.659420289855078,
+      "freeMemoryMiB": 95940.7890625
+    },
+    "gpu": {
+      "time": 1792047386.2874844,
+      "temperatureC": 41.0,
+      "utilizationPercent": 10.0,
+      "freeMemoryMiB": 10854.0,
+      "powerW": 69.51
+    },
+    "job": {
+      "cpuSeconds": 32.84375,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 1772.7109375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792047386.9331315
+}

@@ -12,7 +12,9 @@
     "experimental/3d.ts",
     "experimental/3d-gpu.ts",
     "experimental/world.ts",
-    "experimental/world-gpu.ts"
+    "experimental/world-gpu.ts",
+    "experimental/active-world.ts",
+    "experimental/active-world-gpu.ts"
   ],
   "exclude": [
     "**/*.test.ts"

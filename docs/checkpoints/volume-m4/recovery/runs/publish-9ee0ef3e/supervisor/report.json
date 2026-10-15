@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "id": "ebd3db238ec34f6680f7616d86780476",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.publish_volume_m4"
+  ],
+  "startedAt": 1792032501.6404119,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 50.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792032502.6517224,
+      "hostCpuPercent": 14.84375,
+      "freeMemoryMiB": 105376.9296875
+    },
+    "gpu": null
+  },
+  "childPid": 34624,
+  "lastOutput": "Retained 99 evidence files; CPU inputs and all fixture hashes match.",
+  "exitCode": 0,
+  "finishedAt": 1792032503.6171148
+}

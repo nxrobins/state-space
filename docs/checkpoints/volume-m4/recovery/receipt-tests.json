@@ -1,0 +1,9 @@
+{
+  "stage": "receipt-tests",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\receipt-tests-6cc07540\\supervisor\\report.json",
+  "supervisorSha256": "f7ba4e97a77a61c035ef921e35934caddacf6f94480d0d838f6581a7578a974b",
+  "evidence": null,
+  "holdRemainsActive": true
+}

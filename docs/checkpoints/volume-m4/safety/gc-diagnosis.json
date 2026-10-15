@@ -1,0 +1,111 @@
+{
+  "scope": "Observed Chrome diagnostic frame; profiler overhead can perturb timing. CPU waits overlap GPU execution. Earlier failures are retained, but their GC was not directly traced.",
+  "run": "diagnostic128-9af7f613",
+  "traceSha256": "f9a2ed06f22078b584a3413c802b25755685c862ea5d4f3d6ce331e6856cc0a5",
+  "frame": {
+    "activeGameplay": false,
+    "callbackAt": 16318.60000000149,
+    "callbackDelayMs": 0.20000000149047992,
+    "callbackInterval": 16.69999999999891,
+    "completedAt": 16337.89999999851,
+    "completionMs": 19.499999998510248,
+    "controllerCompletedAt": 16331,
+    "input": {
+      "event": null,
+      "sampledAt": 16318.60000000149,
+      "source": "scripted"
+    },
+    "physicsAndQueryMs": 12.399999998509884,
+    "renderAndHudMs": 6.899999998509884,
+    "renderInputSampledAt": 16331,
+    "tick": 506,
+    "timestamp": 16318.4,
+    "tool": "none",
+    "workMs": 19.299999997019768
+  },
+  "rendererEvents": [
+    {
+      "name": "MajorGC",
+      "startMs": 16322.478000003844,
+      "durationMs": 8.107,
+      "args": {
+        "type": "finalize incremental marking via task",
+        "usedHeapSizeAfter": 37959952,
+        "usedHeapSizeBefore": 110575800
+      }
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "startMs": 16331.858000002801,
+      "durationMs": 5.311,
+      "args": {
+        "src_file": "v8/src/heap/cppgc-internal/sweeper.cc",
+        "src_func": "static Handle cppgc::internal::Sweeper::SweeperImpl::IncrementalSweepTask::Post(SweeperImpl &, const std::shared_ptr<cppgc::TaskRunner> &, cppgc::TaskPriority, std::optional<v8::base::TimeDelta>)",
+        "src_line": 1466
+      }
+    }
+  ],
+  "physicsAndRender": [
+    {
+      "cpu": {
+        "completedAt": 16331,
+        "encodedAt": 16318.699999999257,
+        "preparedAt": 16318.699999999257,
+        "queueCompletedAt": 16330.89999999851,
+        "readbacksReadyAt": 16330.89999999851,
+        "startedAt": 16318.60000000149,
+        "submittedAt": 16318.699999999257,
+        "validationCompletedAt": 16321.199999999257
+      },
+      "gpu": {
+        "ms": {
+          "collisionQuery": 0,
+          "physicsPlanningAndCertification": 4.128768
+        },
+        "status": "complete"
+      },
+      "id": 1138,
+      "kind": "step",
+      "tick": 506
+    },
+    {
+      "cpu": {
+        "completedAt": 16337.800000000743,
+        "encodedAt": 16331.60000000149,
+        "preparedAt": 16331.199999999257,
+        "queueCompletedAt": 16337.800000000743,
+        "startedAt": 16331.199999999257,
+        "submittedAt": 16331.699999999257
+      },
+      "gpu": {
+        "ms": {
+          "draw": 0,
+          "mesh": 0.065536
+        },
+        "status": "complete"
+      },
+      "id": 1139,
+      "kind": "render",
+      "tick": 506
+    }
+  ],
+  "traceClock": {
+    "args": {
+      "data": {
+        "callTime": 20795704047,
+        "navigationId": "3027A27318781E7E20B04A088625145F",
+        "sampleTraceId": 4497461995852914,
+        "startTime": 4287.10000000149
+      }
+    },
+    "cat": "blink.user_timing",
+    "name": "m4-clock-4287.10000000149",
+    "ph": "I",
+    "pid": 32840,
+    "s": "t",
+    "tid": 11268,
+    "ts": 20795704038,
+    "tts": 2611599
+  },
+  "diagnosis": "Renderer-thread major GC and native-wrapper sweeping delay asynchronous GPU completion delivery. GPU pass timestamps alone do not expose this CPU stall."
+}

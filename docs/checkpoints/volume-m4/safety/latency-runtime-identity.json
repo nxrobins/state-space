@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "reason": "Public data types moved out of the internal GPU profiler module. Rebuilt runtime JavaScript is byte-for-byte identical to the verified and measured bundles.",
+  "runtimeHashes": {
+    "dist/sdk/state-space-3d-gpu.js": "14c7b4b7e55ff24f74967ef7ffbfb1f6c243b903c3d6f96ac5f778b8aceb0bd1",
+    "dist/sdk/state-space-3d.js": "6f48742d91cd4914bcee72fd2345499ae55cd6253fc88cb869af1d37c6da20e3",
+    "dist/sdk/state-space-active-world-gpu.js": "1de311314c446c4dc348093c643d5008eb7255be804ae079efc18044573176ef",
+    "dist/sdk/state-space-active-world.js": "bf96c9e20fe1115c73598b0f188fb14856aa1b06bfb776411f3270fc2e857963",
+    "dist/sdk/state-space-world-gpu.js": "7df67eb904c8e2d608158fa265464d6d405691770a14fab6c62a8677ede0cfe6",
+    "dist/sdk/state-space-world.js": "a914f21a7d8caceb4ff07ebd346d0b9f0f5e15e99a4078b378925ec01a3149b3",
+    "dist/sdk/state-space.js": "0862c671ccb7d051697b47bd62760e36e04402b232035006f8935744d790a4eb"
+  },
+  "receipts": {
+    "gate64": "dist\\volume-m4\\recovery\\gate64-a8a49f3e\\evidence\\report.json",
+    "frames32": "dist\\volume-m4\\recovery\\frames32-65bd9adc\\evidence\\report.json",
+    "frames64": "dist\\volume-m4\\recovery\\frames64-bb104c49\\evidence\\report.json",
+    "continuation128": "dist\\volume-m4\\recovery\\continuation128-c67e18cb\\evidence\\report.json",
+    "frames128": "dist\\volume-m4\\recovery\\frames128-5e944182\\evidence\\report.json"
+  }
+}

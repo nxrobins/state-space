@@ -1,0 +1,167 @@
+{
+  "before": {
+    "completion": {
+      "count": 600,
+      "max": 25.80000000004657,
+      "median": 12.500000000047294,
+      "min": 10.000000000092768,
+      "p95": 15.20000000013897,
+      "p99": 16.59999999995307
+    },
+    "physicsAndQuery": {
+      "count": 600,
+      "max": 12.699999999953434,
+      "median": 9.300000000046566,
+      "min": 6.5,
+      "p95": 11.100000000093132,
+      "p99": 12.099999999860302
+    },
+    "renderAndHud": {
+      "count": 600,
+      "max": 8,
+      "median": 3,
+      "min": 2.0999999998603016,
+      "p95": 4.099999999860302,
+      "p99": 5.899999999906868
+    },
+    "physicsHz": 60.0074132697523,
+    "missedDeadlines": 4,
+    "lostDisplaySlots": 0,
+    "performancePassed": false,
+    "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+    "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+    "nodeExact": true
+  },
+  "after": {
+    "completion": {
+      "count": 600,
+      "max": 13.399999999999636,
+      "median": 9.10000000074433,
+      "min": 6.699999999254942,
+      "p95": 11,
+      "p99": 12.200000000000728
+    },
+    "physicsAndQuery": {
+      "count": 600,
+      "max": 8.800000000745058,
+      "median": 5.600000001490116,
+      "min": 3.5,
+      "p95": 7,
+      "p99": 7.800000000745058
+    },
+    "renderAndHud": {
+      "count": 600,
+      "max": 7.5,
+      "median": 3.199999999254942,
+      "min": 2.699999999254942,
+      "p95": 4.199999999254942,
+      "p99": 4.899999998509884
+    },
+    "physicsHz": 59.95275842739824,
+    "missedDeadlines": 0,
+    "lostDisplaySlots": 0,
+    "performancePassed": true,
+    "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+    "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+    "nodeExact": true
+  },
+  "beforeReport": "docs/checkpoints/volume-m4/recovery/runs/frames128-b6a652dd/evidence/report.json.gz",
+  "afterReport": "docs/checkpoints/volume-m4/recovery/runs/frames128-e1a0382f/evidence/report.json.gz",
+  "endpointHashesIdentical": true,
+  "timingIncludesFinalHudUpdates": true,
+  "startupBefore": [
+    {
+      "activeGameplay": true,
+      "callbackAt": 7598,
+      "callbackDelayMs": 13.5,
+      "callbackInterval": null,
+      "completedAt": 7610.300000000047,
+      "completionMs": 25.80000000004657,
+      "physicsAndQueryMs": 8.300000000046566,
+      "renderAndHudMs": 4,
+      "tick": 1,
+      "timestamp": 7584.5,
+      "tool": "none",
+      "workMs": 12.300000000046566
+    },
+    {
+      "activeGameplay": true,
+      "callbackAt": 7610.40000000014,
+      "callbackDelayMs": 9.300000000139336,
+      "callbackInterval": 16.600000000000364,
+      "completedAt": 7619,
+      "completionMs": 17.899999999999636,
+      "physicsAndQueryMs": 6.5,
+      "renderAndHudMs": 2.0999999998603016,
+      "tick": 2,
+      "timestamp": 7601.1,
+      "tool": "none",
+      "workMs": 8.599999999860302
+    }
+  ],
+  "startupAfter": [
+    {
+      "activeGameplay": true,
+      "callbackAt": 7213.5,
+      "callbackDelayMs": 0.3000000000001819,
+      "callbackInterval": null,
+      "completedAt": 7221.099999997765,
+      "completionMs": 7.899999997765008,
+      "controllerCompletedAt": 7217,
+      "input": {
+        "event": null,
+        "sampledAt": 7213.5,
+        "source": "scripted"
+      },
+      "physicsAndQueryMs": 3.5,
+      "renderAndHudMs": 4.099999997764826,
+      "renderInputSampledAt": 7217,
+      "tick": 1,
+      "timestamp": 7213.2,
+      "tool": "none",
+      "workMs": 7.599999997764826
+    },
+    {
+      "activeGameplay": true,
+      "callbackAt": 7230,
+      "callbackDelayMs": 0.1999999999998181,
+      "callbackInterval": 16.600000000000364,
+      "completedAt": 7237,
+      "completionMs": 7.199999999999818,
+      "controllerCompletedAt": 7234.099999997765,
+      "input": {
+        "event": null,
+        "sampledAt": 7230,
+        "source": "scripted"
+      },
+      "physicsAndQueryMs": 4.099999997764826,
+      "renderAndHudMs": 2.900000002235174,
+      "renderInputSampledAt": 7234.099999997765,
+      "tick": 2,
+      "timestamp": 7229.8,
+      "tool": "none",
+      "workMs": 7
+    }
+  ],
+  "referenceRuleSourcesUnchanged": {
+    "engine/experimental/3d-core.ts": true,
+    "examples/active-cavern/scene.js": true
+  },
+  "gpuKernelOptimization": {
+    "beforeShaderSha256": "88b340c349d32e9c189acae65ae9baa502a90030243635608b8d29d1d70d04e3",
+    "afterShaderSha256": "057d1a4cb019020645ed7544a2b0c9a5636988464c6579295ef40f1067e01a8e",
+    "proofs": [
+      "recovery/probe.json",
+      "gate64.json.gz",
+      "continuation128.json.gz"
+    ],
+    "currentKernelHashesVerified": true
+  },
+  "gameSetupRefactor": {
+    "changedInputs": [
+      "examples/active-cavern/game.js"
+    ],
+    "cpuFullReplayExact": true,
+    "reference": "docs/checkpoints/volume-m4/reference/node.json"
+  }
+}

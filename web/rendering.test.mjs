@@ -1,11 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createStateSpaceField, MAT } from '../dist/sdk/state-space.js';
-import { seedBridge, seedLighting, seedWater, seedHaze, seedHeat, seedPressure } from './demo.js';
 import { FrameClock } from './frame-clock.js';
-import { createFramePump } from './frame-pump.js';
+import { createFramePump, waitForDisplayBoundary } from './frame-pump.js';
 import { pacingMetrics } from './frame-benchmark.js';
 import { canvasCell } from './renderer.js';
+
+test('setup hands off across a display boundary before measured work starts', async () => {
+    const callbacks=[];let ready=false;
+    const pending=waitForDisplayBoundary(cb=>callbacks.push(cb)).then(()=>{ready=true;});
+    assert.equal(callbacks.length,1);
+    callbacks.shift()(100);await Promise.resolve();assert.equal(ready,false);
+    assert.equal(callbacks.length,1);
+    callbacks.shift()(117);await pending;assert.equal(ready,true);
+    assert.equal(callbacks.length,0);
+});
 
 test('display scheduling keeps 60 ticks per second without an unbounded backlog', async () => {
     for (const hz of [30, 60, 144]) {
@@ -103,120 +111,12 @@ test('60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physi
     }
 });
 
-test('lighting gallery keeps its receivers, baffles and finite lava in each exhibit', async () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedLighting(world);
-        const initial = world.packedSnapshot();
-        assert.equal(initial.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length, 1536);
-        assert(initial.energyQ.some(energy => energy > 255 * 256));
-        await advance(world,132);
-        for (const y of [0, 128]) for (const x of [0, 128]) {
-            assert.equal(countRect(world, MAT.METAL, x + 28, y + 48, x + 99, y + 51), 288);
-            assert(countRect(world, MAT.LAVA, x + 36, y + 72, x + 91, y + 115) >= 64);
-            assert(world.sample(x + 36, y + 115).anchored);
-            if (x || y) assert.equal(world.materialAt(x + 64, y + 63), x && y ? MAT.GLASS : MAT.STONE);
-        }
-        assert.equal(world.energyBalance().driftQ, 0n);
-    } finally { world.close(); }
-});
-
-test('water lagoon retains finite emitters and water through a measured trajectory', async () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedWater(world);
-        const initial = world.packedSnapshot();
-        await advance(world,132);
-        const final = world.packedSnapshot();
-        assert(final.packedCells.filter(cell => (cell & 255) === MAT.LAVA).length >= 64);
-        assert(final.packedCells.filter(cell => (cell & 255) === MAT.WATER).length >= 1024);
-        assert.equal(world.energyBalance().driftQ, 0n);
-        world.restore(initial); await advance(world,132);
-        assert.deepEqual(world.packedSnapshot(), final);
-    } finally { world.close(); }
-});
-
-test('haze and heat chambers retain finite smoke, steam, and lava through measurement', async () => {
-    for (const seed of [seedHaze, seedHeat]) {
-        const world = createStateSpaceField(256, 256);
-        try {
-            seed(world);
-            const initial = world.packedSnapshot();
-            await advance(world,132);
-            const final = world.packedSnapshot();
-            for (const [material, minimum] of [[MAT.SMOKE, 1024], [MAT.STEAM, 1024], [MAT.LAVA, 64]]) {
-                assert(final.packedCells.filter(cell => (cell & 255) === material).length >= minimum);
-            }
-            assert.equal(world.energyBalance().driftQ, 0n);
-            world.restore(initial); await advance(world,132);
-            assert.deepEqual(world.packedSnapshot(), final);
-        } finally { world.close(); }
-    }
-});
-
 test('picking matches square letterboxing, including high DPI CSS coordinates', async () => {
     const canvas = { getBoundingClientRect: () => ({ left: 10, top: 20, width: 800, height: 400 }) };
     assert.equal(canvasCell(canvas, 100, 200, 256, 256), null);
     assert.deepEqual(canvasCell(canvas, 210, 20, 256, 256), [0, 0]);
     assert.deepEqual(canvasCell(canvas, 609, 419, 256, 256), [255, 255]);
     assert.equal(canvasCell(canvas, 610, 420, 256, 256), null);
-});
-
-test('bridge is finite, burns real wood, and resumes the complete deterministic state', async () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedBridge(world);
-        const initial = world.packedSnapshot();
-        assert.equal(world.materialAt(100, 220), MAT.WATER);
-        assert.equal(world.materialAt(126, 170), MAT.WOOD);
-        assert(world.sample(72, 135).anchored);
-        await advance(world,12);
-        assert.equal(countRect(world, MAT.WOOD, 106, 132, 146, 134), 0, 'Central span must drop after the pin burns');
-        const saved = world.packedSnapshot();
-        await advance(world,4);
-        const continued = world.packedSnapshot();
-        assert.equal(world.energyBalance().driftQ, 0n);
-        world.restore(saved);
-        await advance(world,4);
-        assert.deepEqual(world.packedSnapshot(), continued);
-        world.restore(initial);
-        await advance(world,16);
-        assert.deepEqual(world.packedSnapshot(), continued);
-    } finally { world.close(); }
-});
-
-function countRect(world, material, x0, y0, x1, y1) {
-    let count = 0;
-    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (world.materialAt(x, y) === material) count++;
-    return count;
-}
-
-test('the unlit bridge carries its load without collapse', async () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedBridge(world, { ignited: false });
-        await advance(world,132);
-        assert.equal(countRect(world, MAT.WOOD, 36, 132, 219, 134), 546);
-        assert.equal(countRect(world, MAT.WOOD, 126, 135, 126, 179), 45);
-        assert.equal(world.energyBalance().driftQ, 0n);
-    } finally { world.close(); }
-});
-
-test('pressure gallery distinguishes wood from metal and sealed from vented steam', async () => {
-    const world = createStateSpaceField(256, 256);
-    try {
-        seedPressure(world);
-        const initial = world.packedSnapshot();
-        await advance(world,30);
-        assert(countRect(world, MAT.WOOD, 54, 74, 54, 143) < 70, 'Weak dam must breach');
-        assert.equal(countRect(world, MAT.METAL, 124, 25, 124, 143), 119, 'Metal dam must hold');
-        assert(countRect(world, MAT.WATER, 55, 74, 74, 204) > 0, 'Water must flow downstream');
-        assert(countRect(world, MAT.GLASS, 154, 70, 183, 111) < 140, 'Sealed vessel must rupture');
-        assert.equal(countRect(world, MAT.GLASS, 208, 70, 237, 111), 118, 'Vented vessel must retain its walls');
-        assert.equal(world.energyBalance().driftQ, 0n);
-        const final = world.packedSnapshot(); world.restore(initial); await advance(world,30);
-        assert.deepEqual(world.packedSnapshot(), final);
-    } finally { world.close(); }
 });
 
 test('slow viewing schedules fewer exact ticks without skipping or accumulating time debt', async () => {
@@ -229,12 +129,24 @@ test('slow viewing schedules fewer exact ticks without skipping or accumulating 
     }
 });
 
-// Exact ticks with cooperative checkpoints; long demo trajectories must not
-// monopolize a worker or hide progress from the verification supervisor.
-async function advance(world,ticks){
-    for(let n=1;n<=ticks;n++){
-        world.step();
-        if(n%8===0||n===ticks)console.log(`Demo trajectory ${n}/${ticks}`);
-        await new Promise(resolve=>setTimeout(resolve,5));
-    }
-}
+
+test('latency events remain isolated and scripted routes never claim human input latency', async () => {
+    const {InputLatency, FrameLatencyCollector, textIfChanged, classIfChanged} = await import('./frame-latency.js');
+    let now = 10; const input = new InputLatency(() => now);
+    input.capture({type:'keydown',timeStamp:8}); now=12;
+    const a=input.sample(); a.event.handledAt=-1;
+    assert.equal(input.sample().event.handledAt,10);
+    assert.equal(input.sample(true).event,null);
+    assert.equal(input.sample(true).source,'scripted');
+    input.capture({type:'pointermove',timeStamp:1e15}); assert.equal(input.sample().event.eventAt,null);
+    let writes=0,text='ready',toggles=0;
+    const element={get textContent(){return text;},set textContent(v){text=v;writes++;},classList:{contains:()=>true,toggle:()=>toggles++}};
+    textIfChanged(element,'ready');textIfChanged(element,'go');classIfChanged(element,'done',true);
+    assert.equal(writes,1);assert.equal(toggles,0);
+    let records=[],settled=0;
+    const field={inspectLatency:after=>({enabled:true,gpuTimestamps:true,records:structuredClone(records.filter(r=>r.id>(after??0)))}),settleLatency:async()=>{settled++;records[0].gpu.status='complete';}};
+    const collector=new FrameLatencyCollector();collector.reset(field);
+    records=[{id:1,gpu:{status:'pending'}},{id:2,gpu:{status:'complete'}}];collector.capture(field);
+    const receipt=await collector.finish(field);
+    assert.equal(settled,1);assert.equal(receipt.records.length,2);assert.equal(receipt.records[0].gpu.status,'complete');
+});

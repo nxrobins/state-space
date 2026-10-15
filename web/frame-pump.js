@@ -1,5 +1,11 @@
 // Arm the next display callback before asynchronous GPU work. Keep at most one
 // pending timestamp and serialize work; a slow frame never grows a promise queue.
+// Setup can finish during a callback whose display timestamp is already old.
+// Cross a display boundary before arming a new measured loop; no ticks run here.
+export function waitForDisplayBoundary(requestFrame = requestAnimationFrame) {
+    return new Promise(resolve => requestFrame(() => requestFrame(() => resolve())));
+}
+
 export function createFramePump(onFrame, {
     requestFrame = requestAnimationFrame, cancelFrame = cancelAnimationFrame, onError = console.error,
 } = {}) {

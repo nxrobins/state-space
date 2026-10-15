@@ -131,12 +131,16 @@ def main() -> int:
                 "import assert from 'node:assert/strict';\n"
                 "import {createStateSpaceWorld3D} from 'state-space-engine/experimental/3d/world';\n"
                 "import {createGpuWorld3D} from 'state-space-engine/experimental/3d/world/gpu';\n"
+                "import {createStateSpaceActiveWorld3D} from 'state-space-engine/experimental/3d/active-world';\n"
+                "import {createGpuActiveWorld3D} from 'state-space-engine/experimental/3d/active-world/gpu';\n"
                 "const w=createStateSpaceWorld3D({width:8,height:8,depth:8,chunkSize:4});\n"
                 "w.setCell(3,3,3,2,25);w.step(3);const saved=w.snapshot();w.step(7);const end=w.snapshot();\n"
                 "w.restore(saved);w.step(7);assert.deepEqual(w.snapshot(),end);assert.equal(w.energyBalance().driftQ,0n);\n"
                 "const balance=w.energyBalance();for(const ticks of [0,1]){assert.throws(()=>w.step(ticks,{edits:null}));assert.deepEqual(w.snapshot(),end);assert.deepEqual(w.energyBalance(),balance);}\n"
                 "await assert.rejects(()=>createGpuWorld3D({width:8,height:8,depth:8,chunkSize:4}),/WebGPU/);\n"
-                "console.log(JSON.stringify({chunks:end.chunks.length,tick:w.tick,replayExact:true,nodeGpuRejected:true,nullEditsAtomic:true}));\n",
+                "const a=createStateSpaceActiveWorld3D({width:8,height:8,depth:8,chunkSize:4});a.setCell(3,3,3,2,20);a.step(3);const first=a.snapshot();a.step(9);const last=a.snapshot();a.restore(first);a.step(9);assert.deepEqual(a.snapshot(),last);assert.throws(()=>a.step(1,{edits:null}));assert.deepEqual(a.snapshot(),last);\n"
+                "await assert.rejects(()=>createGpuActiveWorld3D({width:8,height:8,depth:8,chunkSize:4}),/WebGPU/);\n"
+                "console.log(JSON.stringify({chunks:end.chunks.length,tick:w.tick,replayExact:true,nodeGpuRejected:true,nullEditsAtomic:true,activeWorldReplayExact:true,activeWorldNodeGpuRejected:true}));\n",
                 encoding="utf-8")
             report["experimentalWorld"] = json.loads(run([shutil.which("node"), str(world_client)], temp))
             client = temp / "client.mts"
@@ -147,7 +151,12 @@ def main() -> int:
                               "import {createStateSpaceWorld3D,type WorldSnapshot3D} from 'state-space-engine/experimental/3d/world';\n"
                               "import {createGpuWorld3D,type GpuWorld3D} from 'state-space-engine/experimental/3d/world/gpu';\n"
                               "const world=createStateSpaceWorld3D();const saved:WorldSnapshot3D=world.snapshot();world.restore(saved);\n"
-                              "const pending:Promise<GpuWorld3D>=createGpuWorld3D();void pending;\n")
+                              "const pending:Promise<GpuWorld3D>=createGpuWorld3D();void pending;\n"
+                              "import {createStateSpaceActiveWorld3D,type ActiveWorldSnapshot3D} from 'state-space-engine/experimental/3d/active-world';\n"
+                              "import {createGpuActiveWorld3D,type GpuActiveWorld3D,type GameplayState3D,type GameplayRules3D,type GameplayCommand3D,type ResidentGameplay3D} from 'state-space-engine/experimental/3d/active-world/gpu';\n"
+                              "const active=createStateSpaceActiveWorld3D();const activeSave:ActiveWorldSnapshot3D=active.snapshot();active.restore(activeSave);\n"
+                              "const activeGpu:Promise<GpuActiveWorld3D>=createGpuActiveWorld3D();void activeGpu;\n"
+                              "async function resident(w:GpuActiveWorld3D,s:GameplayState3D,r:GameplayRules3D,c:GameplayCommand3D){const driver:ResidentGameplay3D=await w.createGameplay(s,r);const frame=await driver.step(c);const bytes:512=frame.actorReadbackBytes;const one:1=frame.completionBoundaries;void bytes;void one;await driver.restore(s);driver.close();}void resident;\n")
             for compiler in (ROOT / "node_modules/typescript/bin/tsc", ROOT / "tower-defense-rogue/node_modules/typescript/bin/tsc"):
                 run([shutil.which("node"), str(compiler), "--noEmit", "--strict", "--target", "ES2022", "--module", "NodeNext",
                      "--moduleResolution", "NodeNext", "--lib", "ES2022,DOM", str(client)], temp)

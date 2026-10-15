@@ -1,0 +1,11 @@
+{"stage":"preflight","host":{"time":1792046746.1343095,"hostCpuPercent":8.59375,"freeMemoryMiB":95031.66015625},"gpu":null}
+{"stage":"running","host":{"time":1792046747.2909887,"hostCpuPercent":11.993243243243246,"freeMemoryMiB":94873.8828125},"gpu":null,"job":{"cpuSeconds":1.109375,"activeProcesses":5,"peakMemoryMiB":295.46875}}
+{"stage":"running","host":{"time":1792046748.3777354,"hostCpuPercent":12.5,"freeMemoryMiB":94799.08203125},"gpu":null,"job":{"cpuSeconds":2.3125,"activeProcesses":5,"peakMemoryMiB":348.72265625}}
+{"stage":"running","host":{"time":1792046749.4660661,"hostCpuPercent":12.5,"freeMemoryMiB":94891.125},"gpu":null,"job":{"cpuSeconds":3.1875,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046750.5535295,"hostCpuPercent":11.250000000000004,"freeMemoryMiB":94883.83984375},"gpu":null,"job":{"cpuSeconds":4.140625,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046751.6371734,"hostCpuPercent":12.409420289855078,"freeMemoryMiB":94884.9140625},"gpu":null,"job":{"cpuSeconds":5.171875,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046752.722353,"hostCpuPercent":11.696428571428575,"freeMemoryMiB":94877.58984375},"gpu":null,"job":{"cpuSeconds":6.234375,"activeProcesses":7,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046753.8123333,"hostCpuPercent":21.42857142857143,"freeMemoryMiB":94890.65234375},"gpu":null,"job":{"cpuSeconds":7.453125,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046754.9011433,"hostCpuPercent":19.47463768115942,"freeMemoryMiB":94892.30078125},"gpu":null,"job":{"cpuSeconds":8.546875,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046756.0127122,"hostCpuPercent":11.795774647887324,"freeMemoryMiB":94952.96875},"gpu":null,"job":{"cpuSeconds":9.59375,"activeProcesses":5,"peakMemoryMiB":361.9140625}}
+{"stage":"running","host":{"time":1792046757.0966449,"hostCpuPercent":11.339285714285719,"freeMemoryMiB":94995.8984375},"gpu":null,"job":{"cpuSeconds":10.53125,"activeProcesses":4,"peakMemoryMiB":361.9140625}}

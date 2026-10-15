@@ -1,0 +1,6 @@
+M4 gameplay-probe: starting isolated hardware session
+Starting bounded M4 verification
+Resident gameplay dense: trapped
+Resident gameplay sparse: tools
+Resident gameplay sparse: fall
+M4 gameplay-probe: passed=True

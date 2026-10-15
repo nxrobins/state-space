@@ -68,6 +68,13 @@ Its seeded 64³ terrain uses eight 32³ chunks, exact global physics, cached GPU
 terrain, and a first-person water/freezing challenge.
 [World SDK and controls](examples/cavern/README.md) · [M3 evidence](docs/checkpoints/3D_M3.md).
 
+[The Living Cavern](http://127.0.0.1:8765/examples/active-cavern/) extends this to
+a finite 128³ world with exact active tiles, a live activity inspector, and
+CPU/dense-GPU/sparse-GPU replay verification. Its optional
+[GPU gameplay mode](http://127.0.0.1:8765/examples/active-cavern/?gameplay=gpu)
+keeps collision and movement resident and renders through one completion boundary.
+[M4 SDK and controls](examples/active-cavern/README.md) · [M4 evidence](docs/checkpoints/3D_M4.md).
+
 Open the [engine lab](http://127.0.0.1:8765/examples/lab/). Five experiments cover
 support, coherent fragments, burning supports, phase changes, and custom
 materials. Inspect cells and bonds, change the scene, switch backends, and export
@@ -206,9 +213,17 @@ npm --prefix game ci
 npm --prefix tower-defense-rogue ci
 ```
 
-With `agent-browser` on `PATH`, run the complete verification suite:
+`npm test` runs CPU unit and controller checks. Native parity fixtures run
+separately with `npm run test:native -- --file engine/conformance.test.ts` (or
+`engine/structure.test.ts`, `engine/sdk.test.ts`). The legacy 256×256 demo
+trajectories are quarantined after a workstation freeze; the full release gate
+continues to require them. See the [incident diagnosis and staged recovery](docs/checkpoints/3D_M4.md).
+
+On an isolated verification host, with `agent-browser` on `PATH`, the complete
+verification entry is:
 
 ```powershell
+$env:STATE_SPACE_RUN_LEGACY_DEMOS = 'isolated-host'
 uv run python -m engine.verify --report docs/checkpoints/local-verification.json
 ```
 

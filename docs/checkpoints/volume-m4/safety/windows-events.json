@@ -1,0 +1,18 @@
+[
+  {
+    "Time": "2026-10-14T19:08:40.8987874-07:00",
+    "Id": 41,
+    "Provider": "Microsoft-Windows-Kernel-Power",
+    "Message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+    "Xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-Power' Guid='{331c3b3a-2005-44c2-ac5e-77220c37d6b4}'/><EventID>41</EventID><Version>10</Version><Level>1</Level><Task>63</Task><Opcode>0</Opcode><Keywords>0x8000400000000002</Keywords><TimeCreated SystemTime='2026-10-15T02:08:40.8987874Z'/><EventRecordID>54297</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>[redacted]</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='BugcheckCode'>0</Data><Data Name='BugcheckParameter1'>0x0</Data><Data Name='BugcheckParameter2'>0x0</Data><Data Name='BugcheckParameter3'>0x0</Data><Data Name='BugcheckParameter4'>0x0</Data><Data Name='SleepInProgress'>0</Data><Data Name='PowerButtonTimestamp'>0</Data><Data Name='BootAppStatus'>0</Data><Data Name='Checkpoint'>0</Data><Data Name='ConnectedStandbyInProgress'>false</Data><Data Name='SystemSleepTransitionsToOn'>0</Data><Data Name='CsEntryScenarioInstanceId'>0</Data><Data Name='BugcheckInfoFromEFI'>false</Data><Data Name='CheckpointStatus'>0</Data><Data Name='CsEntryScenarioInstanceIdV2'>0</Data><Data Name='LongPowerButtonPressDetected'>false</Data><Data Name='LidReliability'>false</Data><Data Name='InputSuppressionState'>0</Data><Data Name='PowerButtonSuppressionState'>0</Data><Data Name='LidState'>3</Data><Data Name='WHEABootErrorCount'>0</Data></EventData></Event>",
+    "redaction": "Computer name omitted; diagnostic fields unchanged."
+  },
+  {
+    "Time": "2026-10-14T19:08:45.6093226-07:00",
+    "Id": 6008,
+    "Provider": "EventLog",
+    "Message": "The previous system shutdown at 7:00:02 PM on \u200e10/\u200e14/\u200e2026 was unexpected.",
+    "Xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6008</EventID><Version>0</Version><Level>2</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-10-15T02:08:45.6093226Z'/><EventRecordID>54279</EventRecordID><Correlation/><Execution ProcessID='3012' ThreadID='2548'/><Channel>System</Channel><Computer>[redacted]</Computer><Security/></System><EventData><Data>7:00:02 PM</Data><Data>\u200e10/\u200e14/\u200e2026</Data><Data></Data><Data></Data><Data>60008</Data><Data></Data><Data></Data><Binary>EA070A0003000E001300000002009000EA070A0004000F000200000002009000600900003C000000010000006009000001000000B00400000000000000000000</Binary></EventData></Event>",
+    "redaction": "Computer name omitted; diagnostic fields unchanged."
+  }
+]

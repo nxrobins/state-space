@@ -1,0 +1,9 @@
+{
+  "stage": "ui-gpu",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\ui-gpu-5a063a33\\supervisor\\report.json",
+  "supervisorSha256": "b676efb42fb63056442953748f0b411c475ab93126c42805d796f428628f9008",
+  "evidence": "dist\\volume-m4\\recovery\\ui-gpu-5a063a33\\evidence\\report.json",
+  "holdRemainsActive": true
+}

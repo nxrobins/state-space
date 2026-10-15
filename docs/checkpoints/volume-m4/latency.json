@@ -1,0 +1,3906 @@
+{
+  "defaultMode": "CPU stage timings; GPU timing opt-in",
+  "worlds": {
+    "32": {
+      "summary": {
+        "passed": true,
+        "frames": 600,
+        "records": 1200,
+        "gpuTimestamps": false,
+        "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+        "milliseconds": {
+          "step.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.19999999925494194,
+            "max": 0.30000000074505806
+          },
+          "step.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925494194,
+            "max": 0.20000000298023224
+          },
+          "step.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.20000000297841325
+          },
+          "step.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 3,
+            "p95": 4.600000001490116,
+            "p99": 5.0,
+            "max": 5.200000002978413
+          },
+          "step.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925494194,
+            "max": 0.30000000074505806
+          },
+          "step.cpu.readbackReadyWait": {
+            "count": 600,
+            "median": 3,
+            "p95": 4.600000001490116,
+            "p99": 5.0,
+            "max": 5.200000002978413
+          },
+          "render.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149011612,
+            "max": 0.19999999925676093
+          },
+          "render.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.20000000297841325,
+            "max": 0.29999999701976776
+          },
+          "render.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.19999999925676093
+          },
+          "render.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 3.399999998509884,
+            "p95": 4.600000001491935,
+            "p99": 5.0,
+            "max": 5.199999999254942
+          },
+          "render.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.09999999776482582,
+            "p99": 0.10000000149011612,
+            "max": 0.10000000149193511
+          },
+          "inputSamplingToCompletion": {
+            "count": 600,
+            "median": 6.399999998508065,
+            "p95": 8.300000000745058,
+            "p99": 9.0,
+            "max": 9.400000002235174
+          },
+          "controllerAfterFieldCommit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.20000000298023224
+          },
+          "presentationBeforeRenderer": {
+            "count": 600,
+            "median": 0.09999999776482582,
+            "p95": 0.19999999925494194,
+            "p99": 0.20000000298023224,
+            "max": 0.30000000074505806
+          },
+          "cameraSampleToCompletion": {
+            "count": 600,
+            "median": 3.5,
+            "p95": 4.800000000745058,
+            "p99": 5.100000001490116,
+            "max": 5.400000002233355
+          }
+        }
+      },
+      "attempts": {
+        "baseline": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-d702c38c/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 9.10000000074524,
+            "median": 5.300000000745058,
+            "min": 2.900000000372529,
+            "p95": 6.999999999255124,
+            "p99": 8.200000000371801
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 4.700000001117587,
+            "median": 1.400000000372529,
+            "min": 1,
+            "p95": 1.900000000372529,
+            "p99": 3.600000001490116
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.699999999254942,
+            "median": 3.599999999627471,
+            "min": 0.900000000372529,
+            "p95": 4.700000001117587,
+            "p99": 5.700000001117587
+          },
+          "physicsHz": 59.96536224484912,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": null
+        },
+        "gpuDiagnostic": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-6e6b74c3/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.099999999254578,
+            "median": 7.300000000745058,
+            "min": 2.7999999992553057,
+            "p95": 8.999999999627107,
+            "p99": 9.599999999254578
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.900000000372529,
+            "median": 3.799999998882413,
+            "min": 1.099999999627471,
+            "p95": 5,
+            "p99": 5.5
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.700000001117587,
+            "median": 3.599999999627471,
+            "min": 1.199999999254942,
+            "p95": 4.599999999627471,
+            "p99": 5.199999999254942
+          },
+          "physicsHz": 59.9569591111556,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.40000000037252903
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.2000000011157681
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.599999999627471,
+                "p95": 4.799999998882413,
+                "p99": 5.300000000745058,
+                "max": 5.700000001118042
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 3.599999999627471,
+                "p95": 4.799999998882413,
+                "p99": 5.300000000745058,
+                "max": 5.700000001118042
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 0.065536,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.131072
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.2000000011175871
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.400000000372529,
+                "p95": 4.400000000372529,
+                "p99": 5.0,
+                "max": 5.5
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 14,
+                "median": 0,
+                "p95": 0,
+                "p99": 0,
+                "max": 0
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 7.199999999254942,
+                "p95": 8.799999998882413,
+                "p99": 9.40000000037071,
+                "max": 9.900000000372529
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962792572,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999962747097,
+                "p95": 0.19999999925494194,
+                "p99": 0.2000000011175871,
+                "max": 0.30000000074505806
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.5,
+                "p99": 5.100000001490116,
+                "max": 5.599999999627471
+              }
+            }
+          }
+        },
+        "previousLatency": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-65bd9adc/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 9.700000000744694,
+            "median": 6.399999999999636,
+            "min": 2.300000000745058,
+            "p95": 8.500000001490207,
+            "p99": 9.100000001490116
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.399999998509884,
+            "median": 1.4000000022351742,
+            "min": 0.8999999985098839,
+            "p95": 4.5,
+            "p99": 5.099999997764826
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.800000000745058,
+            "median": 3.600000001490116,
+            "min": 0.9000000022351742,
+            "p95": 4.900000002235174,
+            "p99": 5.200000002980232
+          },
+          "physicsHz": 59.94735841313744,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 1.2000000029802322,
+                "p95": 4.399999998509884,
+                "p99": 4.899999998509884,
+                "max": 5.200000002980232
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 1.2000000029797775,
+                "p95": 4.399999998509884,
+                "p99": 4.899999998509884,
+                "max": 5.200000002980232
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.699999999254942,
+                "p99": 5.0,
+                "max": 5.600000001490116
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 6.199999999254942,
+                "p95": 8.300000000745058,
+                "p99": 8.800000000745058,
+                "max": 9.599999997764826
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000148966137,
+                "p95": 0.19999999925676093,
+                "p99": 0.20000000298023224,
+                "max": 0.4000000022351742
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.600000001490116,
+                "p95": 4.899999998509884,
+                "p99": 5.199999999254942,
+                "max": 5.800000000745058
+              }
+            }
+          }
+        },
+        "beforeKernelOptimization": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-26ca7823/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 8.899999999999636,
+            "median": 4.799999999255306,
+            "min": 1.699999999999818,
+            "p95": 6.499999998510248,
+            "p99": 7.900000001490298
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 4.5,
+            "median": 1,
+            "min": 0.6999999992549419,
+            "p95": 2.199999999254942,
+            "p99": 4.100000001490116
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.600000001490116,
+            "median": 3.599999997764826,
+            "min": 0.8000000007450581,
+            "p95": 4.800000000745058,
+            "p99": 5.100000001490116
+          },
+          "physicsHz": 59.96236085528056,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 0.8000000007450581,
+                "p95": 2.0,
+                "p99": 3.800000000746877,
+                "max": 4.399999998509884
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 0.8000000007450581,
+                "p95": 2.0,
+                "p99": 3.800000000746877,
+                "max": 4.399999998509884
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.399999998509884,
+                "p95": 4.600000001490116,
+                "p99": 4.900000002235174,
+                "max": 5.400000002233355
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 4.5,
+                "p95": 6.199999999254942,
+                "p99": 7.699999999254942,
+                "max": 8.600000001490116
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000298023224,
+                "max": 0.20000000298023224
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.700000002980232,
+                "p99": 5.099999997764826,
+                "max": 5.600000001486478
+              }
+            }
+          }
+        },
+        "passSpecializationReverted": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-5ad7f164/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 9.90000000298096,
+            "median": 5.800000001489934,
+            "min": 1.8000000014899342,
+            "p95": 8.300000001489934,
+            "p99": 8.900000001489389
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.300000000745058,
+            "median": 1.300000000745058,
+            "min": 0.6000000014901161,
+            "p95": 4.5,
+            "p99": 5.100000001490116
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.800000000745058,
+            "median": 3.599999997764826,
+            "min": 0.8999999985098839,
+            "p95": 4.800000000745058,
+            "p99": 5.300000000745058
+          },
+          "physicsHz": 59.962961109164624,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 1.1000000014901161,
+                "p95": 4.399999998508065,
+                "p99": 4.899999998508065,
+                "max": 5.099999997763007
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.2000000029797775
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 1.1000000014901161,
+                "p95": 4.399999998509884,
+                "p99": 4.899999998508065,
+                "max": 5.099999997763007
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925312295
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.399999998509884,
+                "p95": 4.600000001490116,
+                "p99": 5.099999997764826,
+                "max": 5.700000002980232
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 5.699999999254942,
+                "p95": 8.100000001490116,
+                "p99": 8.699999999254942,
+                "max": 9.800000000745058
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000298023224,
+                "max": 0.20000000298023224
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.800000000745058,
+                "p99": 5.200000002980232,
+                "max": 5.800000000745058
+              }
+            }
+          }
+        },
+        "current": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames32-8c6951a5/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 9.399999999999636,
+            "median": 6.499999998510248,
+            "min": 2.1999999977651896,
+            "p95": 8.499999998510248,
+            "p99": 9.100000000000364
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.300000000745058,
+            "median": 3.100000001490116,
+            "min": 0.7999999970197678,
+            "p95": 4.800000000745058,
+            "p99": 5.100000001490116
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.400000002235174,
+            "median": 3.600000001490116,
+            "min": 1,
+            "p95": 4.899999998509884,
+            "p99": 5.100000001490116
+          },
+          "physicsHz": 59.95395856270643,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "c7725447d0e8da4c5b7d5bf14737f5ee425ced79636ebc47574168eb0018097b",
+          "finalHash": "8c71d616164ccf80f4f6b069641a8f6075e331f45522ad769a3673f98972b884",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3,
+                "p95": 4.600000001490116,
+                "p99": 5.0,
+                "max": 5.200000002978413
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 3,
+                "p95": 4.600000001490116,
+                "p99": 5.0,
+                "max": 5.200000002978413
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.20000000297841325,
+                "max": 0.29999999701976776
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.399999998509884,
+                "p95": 4.600000001491935,
+                "p99": 5.0,
+                "max": 5.199999999254942
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 6.399999998508065,
+                "p95": 8.300000000745058,
+                "p99": 9.0,
+                "max": 9.400000002235174
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000298023224,
+                "max": 0.30000000074505806
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.800000000745058,
+                "p99": 5.100000001490116,
+                "max": 5.400000002233355
+              }
+            }
+          }
+        }
+      }
+    },
+    "64": {
+      "summary": {
+        "passed": true,
+        "frames": 600,
+        "records": 1200,
+        "gpuTimestamps": false,
+        "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+        "milliseconds": {
+          "step.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.19999999925494194,
+            "max": 0.29999999701976776
+          },
+          "step.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.19999999925312295,
+            "max": 0.20000000298023224
+          },
+          "step.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.10000000149193511
+          },
+          "step.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 3.300000000743239,
+            "p95": 4.800000000745058,
+            "p99": 5.0,
+            "max": 5.199999999254942
+          },
+          "step.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.2000000029797775,
+            "max": 0.30000000074505806
+          },
+          "step.cpu.readbackReadyWait": {
+            "count": 600,
+            "median": 3.300000000745058,
+            "p95": 4.800000000745058,
+            "p99": 5.0,
+            "max": 5.199999999254942
+          },
+          "render.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.30000000074505806
+          },
+          "render.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925494194,
+            "max": 0.20000000298023224
+          },
+          "render.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149011612,
+            "max": 0.19999999925676093
+          },
+          "render.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 3.2999999970197678,
+            "p95": 4.600000001490116,
+            "p99": 4.900000002235174,
+            "max": 5.299999997019768
+          },
+          "render.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0,
+            "p99": 0.10000000149011612,
+            "max": 0.10000000149193511
+          },
+          "inputSamplingToCompletion": {
+            "count": 600,
+            "median": 6.699999999253123,
+            "p95": 8.399999998509884,
+            "p99": 9.100000001490116,
+            "max": 9.899999998509884
+          },
+          "controllerAfterFieldCommit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.20000000298023224
+          },
+          "presentationBeforeRenderer": {
+            "count": 600,
+            "median": 0.09999999776482582,
+            "p95": 0.19999999925494194,
+            "p99": 0.20000000298023224,
+            "max": 0.4000000022351742
+          },
+          "cameraSampleToCompletion": {
+            "count": 600,
+            "median": 3.400000002236993,
+            "p95": 4.800000000745058,
+            "p99": 5.199999999254942,
+            "max": 5.600000001490116
+          }
+        }
+      },
+      "attempts": {
+        "baseline": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-e10f588c/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.400000000745422,
+            "median": 5.900000000745422,
+            "min": 2.899999999999636,
+            "p95": 8.800000000745058,
+            "p99": 9.500000000372893
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 6.199999999254942,
+            "median": 1.5,
+            "min": 1,
+            "p95": 5.099999999627471,
+            "p99": 5.299999998882413
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.100000001490116,
+            "median": 3.799999998882413,
+            "min": 1.099999999627471,
+            "p95": 5.099999999627471,
+            "p99": 5.699999999254942
+          },
+          "physicsHz": 59.968363934888,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": null
+        },
+        "gpuDiagnostic": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-235fd74d/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.699999999627837,
+            "median": 7.599999998881685,
+            "min": 2.799999999627289,
+            "p95": 9.000000000372893,
+            "p99": 9.999999999627107
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 6.099999999627471,
+            "median": 3.900000000372529,
+            "min": 1.200000001117587,
+            "p95": 5,
+            "p99": 5.400000000372529
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.099999999627471,
+            "median": 3.5,
+            "min": 1.199999999254942,
+            "p95": 4.900000000372529,
+            "p99": 5.300000000745058
+          },
+          "physicsHz": 59.95635897744103,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149057087,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.699999999254942,
+                "p95": 4.800000000745058,
+                "p99": 5.200000001115768,
+                "max": 5.900000000374348
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149057087,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 3.699999999254942,
+                "p95": 4.800000000745058,
+                "p99": 5.200000001117587,
+                "max": 5.900000000374348
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 0.131072,
+                "p95": 0.131072,
+                "p99": 0.131072,
+                "max": 0.131072
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.2000000011175871,
+                "max": 0.2000000011175871
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000745058,
+                "p95": 4.599999999627471,
+                "p99": 5.099999999627471,
+                "max": 6.0
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149057087
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 13,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 7.400000000372529,
+                "p95": 8.900000000372529,
+                "p99": 9.90000000037071,
+                "max": 10.5
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149057087
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999962747097,
+                "p95": 0.19999999925494194,
+                "p99": 0.2000000011175871,
+                "max": 0.2000000011175871
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.800000000743239,
+                "p99": 5.299999998882413,
+                "max": 6.099999999627471
+              }
+            }
+          }
+        },
+        "previousLatency": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-bb104c49/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.5,
+            "median": 6.799999999255306,
+            "min": 2.200000000745149,
+            "p95": 8.900000001489389,
+            "p99": 9.70000000149048
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.5,
+            "median": 3.100000001490116,
+            "min": 0.8999999985098839,
+            "p95": 4.800000000745058,
+            "p99": 5.199999999254942
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6,
+            "median": 3.800000000745058,
+            "min": 1,
+            "p95": 5.100000001490116,
+            "p99": 5.599999997764826
+          },
+          "physicsHz": 59.95575885571795,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 2.899999998509884,
+                "p95": 4.599999997766645,
+                "p99": 5.0,
+                "max": 5.199999999256761
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 2.899999998509884,
+                "p95": 4.599999997766645,
+                "p99": 5.0,
+                "max": 5.199999999256761
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925312295,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.599999997764826,
+                "p95": 4.899999998508065,
+                "p99": 5.299999997019768,
+                "max": 5.699999999254942
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 6.5,
+                "p95": 8.699999999256761,
+                "p99": 9.5,
+                "max": 10.199999999254942
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000148647814,
+                "p95": 0.19999999925676093,
+                "p99": 0.20000000298023224,
+                "max": 0.30000000074505806
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.7000000029802322,
+                "p95": 5.099999997764826,
+                "p99": 5.5,
+                "max": 5.899999998509884
+              }
+            }
+          }
+        },
+        "beforeKernelOptimization": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-1849068a/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 9.500000000745786,
+            "median": 5.000000002235538,
+            "min": 1.900000000745422,
+            "p95": 7.500000000744876,
+            "p99": 8.700000002234447
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5,
+            "median": 1,
+            "min": 0.6000000014901161,
+            "p95": 3.600000001490116,
+            "p99": 4.5
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.699999999254942,
+            "median": 3.699999999254942,
+            "min": 0.8999999985098839,
+            "p95": 4.899999998509884,
+            "p99": 5.299999997019768
+          },
+          "physicsHz": 59.95335848904632,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 0.8000000007450581,
+                "p95": 3.5,
+                "p99": 4.300000000745058,
+                "max": 4.699999999254942
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 0.8000000007450581,
+                "p95": 3.5,
+                "p99": 4.300000000745058,
+                "max": 4.699999999254942
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.700000002978413,
+                "p99": 5.099999997764826,
+                "max": 5.5
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 4.800000000745058,
+                "p95": 7.199999999254942,
+                "p99": 8.5,
+                "max": 9.199999999254942
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000297841325,
+                "max": 0.20000000298023224
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.699999999254942,
+                "p95": 4.800000000746877,
+                "p99": 5.299999997019768,
+                "max": 5.600000001491935
+              }
+            }
+          }
+        },
+        "passSpecializationReverted": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-07feab35/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.70000000149048,
+            "median": 6.5,
+            "min": 1.9000000029800503,
+            "p95": 8.80000000223481,
+            "p99": 9.500000002235538
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.400000002235174,
+            "median": 3.100000001490116,
+            "min": 0.6999999992549419,
+            "p95": 4.599999997764826,
+            "p99": 5
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.199999999254942,
+            "median": 3.699999999254942,
+            "min": 0.9000000022351742,
+            "p95": 4.899999998509884,
+            "p99": 5.299999997019768
+          },
+          "physicsHz": 59.93956010968133,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.0,
+                "p95": 4.300000000746877,
+                "p99": 4.800000000745058,
+                "max": 5.400000002236993
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 3.0,
+                "p95": 4.399999998508065,
+                "p99": 4.800000000745058,
+                "max": 5.400000002236993
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.600000001491935,
+                "p99": 5.099999997764826,
+                "max": 5.800000000745058
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 6.300000000745058,
+                "p95": 8.699999999253123,
+                "p99": 9.300000000745058,
+                "max": 10.5
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000298023224,
+                "max": 0.30000000074505806
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.699999999254942,
+                "p95": 4.800000000745058,
+                "p99": 5.199999999254942,
+                "max": 6.199999999254942
+              }
+            }
+          }
+        },
+        "current": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames64-1d9c2786/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 10.099999998509702,
+            "median": 6.79999999850952,
+            "min": 2.2999999992553057,
+            "p95": 8.499999999254214,
+            "p99": 9.299999997764644
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 5.400000002235174,
+            "median": 3.5,
+            "min": 0.8000000007450581,
+            "p95": 5,
+            "p99": 5.199999999254942
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.600000001490116,
+            "median": 3.5,
+            "min": 1.199999999254942,
+            "p95": 4.800000000745058,
+            "p99": 5.199999999254942
+          },
+          "physicsHz": 59.95095831456738,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "29da4fbafb2a64d19548f7d217d93bdefa1b0b782c90fc2feba3a696a9bfa966",
+          "finalHash": "ae097c577df49a0b8142d11bce9b0de23cffa500672feb594de30e49cc4ce2ea",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.29999999701976776
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925312295,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000743239,
+                "p95": 4.800000000745058,
+                "p99": 5.0,
+                "max": 5.199999999254942
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.2000000029797775,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 3.300000000745058,
+                "p95": 4.800000000745058,
+                "p99": 5.0,
+                "max": 5.199999999254942
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.30000000074505806
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.2999999970197678,
+                "p95": 4.600000001490116,
+                "p99": 4.900000002235174,
+                "max": 5.299999997019768
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 6.699999999253123,
+                "p95": 8.399999998509884,
+                "p99": 9.100000001490116,
+                "max": 9.899999998509884
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000298023224,
+                "max": 0.4000000022351742
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.400000002236993,
+                "p95": 4.800000000745058,
+                "p99": 5.199999999254942,
+                "max": 5.600000001490116
+              }
+            }
+          }
+        }
+      }
+    },
+    "128": {
+      "summary": {
+        "passed": true,
+        "frames": 600,
+        "records": 1200,
+        "gpuTimestamps": false,
+        "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+        "milliseconds": {
+          "step.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925676093,
+            "max": 0.30000000074687705
+          },
+          "step.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925494194,
+            "max": 0.20000000297841325
+          },
+          "step.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.10000000149193511
+          },
+          "step.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 5.399999998509884,
+            "p95": 6.800000000743239,
+            "p99": 7.5,
+            "max": 8.400000002235174
+          },
+          "step.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925676093,
+            "max": 0.20000000297841325
+          },
+          "step.cpu.readbackReadyWait": {
+            "count": 600,
+            "median": 5.399999998509884,
+            "p95": 6.800000000745058,
+            "p99": 7.5,
+            "max": 8.400000002235174
+          },
+          "render.cpu.prepare": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.19999999925676093
+          },
+          "render.cpu.encode": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149193511,
+            "p99": 0.19999999925676093,
+            "max": 0.20000000297841325
+          },
+          "render.cpu.submit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.19999999925494194
+          },
+          "render.cpu.queueCompletionWait": {
+            "count": 600,
+            "median": 3.0,
+            "p95": 4.0,
+            "p99": 4.699999999254942,
+            "max": 6.899999998508065
+          },
+          "render.cpu.afterQueueCompletion": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.09999999776482582,
+            "p99": 0.10000000149011612,
+            "max": 0.10000000149193511
+          },
+          "inputSamplingToCompletion": {
+            "count": 600,
+            "median": 8.900000002235174,
+            "p95": 10.800000000745058,
+            "p99": 11.800000000743239,
+            "max": 13.100000001490116
+          },
+          "controllerAfterFieldCommit": {
+            "count": 600,
+            "median": 0,
+            "p95": 0.10000000149011612,
+            "p99": 0.10000000149193511,
+            "max": 0.20000000297841325
+          },
+          "presentationBeforeRenderer": {
+            "count": 600,
+            "median": 0.09999999776664481,
+            "p95": 0.19999999925676093,
+            "p99": 0.30000000074323907,
+            "max": 0.4000000022351742
+          },
+          "cameraSampleToCompletion": {
+            "count": 600,
+            "median": 3.100000001490116,
+            "p95": 4.199999999254942,
+            "p99": 4.899999998508065,
+            "max": 7.300000000745058
+          }
+        }
+      },
+      "attempts": {
+        "baseline": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-4c4bfae8/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 15.100000000000364,
+            "median": 10.50000000111686,
+            "min": 7.500000000372893,
+            "p95": 12.500000000745786,
+            "p99": 13.400000001118316
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 10.099999999627473,
+            "median": 7.299999998882413,
+            "min": 4.299999998882413,
+            "p95": 8.599999999627471,
+            "p99": 9.200000001117589
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 5.5,
+            "median": 3.099999999627471,
+            "min": 2.699999999254942,
+            "p95": 4.099999999627471,
+            "p99": 5
+          },
+          "physicsHz": 59.93836055075472,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": null
+        },
+        "gpuDiagnostic": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-ccca2fa6/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 18.299999998882413,
+            "median": 11,
+            "min": 7.599999998882595,
+            "p95": 13.099999999254578,
+            "p99": 13.899999999999636
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 9.899999998509884,
+            "median": 7.199999999254942,
+            "min": 4.199999999254942,
+            "p95": 8.600000001490116,
+            "p99": 9.200000001117589
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 11.699999999254942,
+            "median": 3.599999999627471,
+            "min": 2.699999999254942,
+            "p95": 4.700000001117587,
+            "p99": 5.100000001490116
+          },
+          "physicsHz": 59.92816623812745,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999962747097,
+                "p95": 0.19999999925494194,
+                "p99": 0.2000000011175871,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999962747097,
+                "p95": 0.10000000149011612,
+                "p99": 0.2000000011175871,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.3999999985098839
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.0,
+                "p95": 8.399999998509884,
+                "p99": 9.0,
+                "max": 9.59999999962929
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.2000000011175871
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.0,
+                "p95": 8.399999998509884,
+                "p99": 9.0,
+                "max": 9.699999999254942
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 4.325376,
+                "p95": 4.718592,
+                "p99": 4.9152,
+                "max": 5.046272
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.2000000011157681,
+                "max": 0.2000000011175871
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000745058,
+                "p95": 4.5,
+                "p99": 4.900000000372529,
+                "max": 11.300000000745058
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962747097,
+                "p99": 0.10000000149011612,
+                "max": 0.2000000011175871
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0.065536,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 16,
+                "median": 0,
+                "p95": 0,
+                "p99": 0,
+                "max": 0
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 10.800000000745058,
+                "p95": 12.800000000745058,
+                "p99": 13.700000001117587,
+                "max": 18.199999999254942
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999962928996,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999962747097,
+                "p95": 0.2000000011157681,
+                "p99": 0.2999999988842319,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.600000001490116,
+                "p99": 5.100000001490116,
+                "max": 11.699999999254942
+              }
+            }
+          }
+        },
+        "previousLatency": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-5e944182/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 17.60000000074433,
+            "median": 10.999999999254214,
+            "min": 7.299999999255306,
+            "p95": 13.000000001491571,
+            "p99": 14.099999999254578
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 11.799999997019768,
+            "median": 7.300000000745058,
+            "min": 3.800000000745058,
+            "p95": 9,
+            "p99": 9.900000002235174
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 9.100000001490116,
+            "median": 3.5,
+            "min": 2.5,
+            "p95": 4.600000001490116,
+            "p99": 5.300000000745058
+          },
+          "physicsHz": 59.93536186349053,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925312295,
+                "p99": 0.20000000298023224,
+                "max": 0.30000000074687705
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.0,
+                "p95": 8.699999999256761,
+                "p99": 9.600000001490116,
+                "max": 11.5
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.0,
+                "p95": 8.699999999256761,
+                "p99": 9.600000001490116,
+                "max": 11.5
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000745058,
+                "p95": 4.5,
+                "p99": 5.0,
+                "max": 8.799999997019768
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 10.800000000746877,
+                "p95": 12.899999998513522,
+                "p99": 13.699999999256761,
+                "max": 15.299999997019768
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.5,
+                "p95": 4.600000001490116,
+                "p99": 5.199999999254942,
+                "max": 9.100000001490116
+              }
+            }
+          }
+        },
+        "plannerOnly": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-2c8a36d9/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 20.09999999851061,
+            "median": 11.700000000000728,
+            "min": 7.300000000000182,
+            "p95": 13.999999997764462,
+            "p99": 15
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 12,
+            "median": 8,
+            "min": 4,
+            "p95": 10.100000001490116,
+            "p99": 10.699999999254942
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 7.800000000745058,
+            "median": 3.399999998509884,
+            "min": 2.599999997764826,
+            "p95": 4.599999997764826,
+            "p99": 5
+          },
+          "physicsHz": 59.94135953809468,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925312295,
+                "p99": 0.20000000298023224,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.800000000743239,
+                "p95": 9.800000000746877,
+                "p99": 10.5,
+                "max": 11.800000000743239
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.800000000743239,
+                "p95": 9.800000000746877,
+                "p99": 10.5,
+                "max": 11.800000000743239
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999776300683,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.199999999254942,
+                "p95": 4.399999998509884,
+                "p99": 4.799999997019768,
+                "max": 7.100000001490116
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 11.5,
+                "p95": 13.799999997019768,
+                "p99": 14.800000000743239,
+                "max": 19.800000000745058
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000149011612,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074505806,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.399999998509884,
+                "p95": 4.5,
+                "p99": 4.900000002235174,
+                "max": 7.699999999253123
+              }
+            }
+          }
+        },
+        "fixedSolids": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-a11b1766/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 19.70000000149048,
+            "median": 11.599999999254578,
+            "min": 7.499999999255124,
+            "p95": 14.20000000149048,
+            "p99": 15.299999999255306
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 11.899999998509884,
+            "median": 7.899999998509884,
+            "min": 3.699999999254942,
+            "p95": 10.300000000745058,
+            "p99": 11
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 7.600000001490116,
+            "median": 3.5,
+            "min": 2.600000001490116,
+            "p95": 4.5,
+            "p99": 5
+          },
+          "physicsHz": 59.918574758183965,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149193511,
+                "p99": 0.20000000297841325,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.600000001490116,
+                "p95": 10,
+                "p99": 10.800000000745058,
+                "max": 11.699999999254942
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.600000001490116,
+                "p95": 10.0,
+                "p99": 10.800000000745058,
+                "max": 11.699999999254942
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.20000000297841325,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.2999999970215868,
+                "p95": 4.200000002980232,
+                "p99": 4.799999997019768,
+                "max": 6.900000002233355
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 11.399999998513522,
+                "p95": 14.100000001486478,
+                "p99": 15.0,
+                "max": 19.5
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074505806,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.399999998513522,
+                "p95": 4.400000002233355,
+                "p99": 4.900000002233355,
+                "max": 7.5
+              }
+            }
+          }
+        },
+        "httpObserver": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-da189aec/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 20.39999999925567,
+            "median": 11.700000000000728,
+            "min": 7.199999998509156,
+            "p95": 14,
+            "p99": 15.299999997765552
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 11.800000000745058,
+            "median": 8,
+            "min": 4,
+            "p95": 10.100000001490116,
+            "p99": 10.800000000745058
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 13.399999998509884,
+            "median": 3.400000002235174,
+            "min": 2.600000001490116,
+            "p95": 4.5,
+            "p99": 5.099999997764826
+          },
+          "physicsHz": 59.93176383483693,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.19999999925494194,
+                "p99": 0.20000000297841325,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.20000000297841325,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.700000002978413,
+                "p95": 9.800000000746877,
+                "p99": 10.5,
+                "max": 11.399999998509884
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.700000002978413,
+                "p95": 9.800000000746877,
+                "p99": 10.5,
+                "max": 11.399999998509884
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.199999999256761,
+                "p95": 4.300000000745058,
+                "p99": 4.800000000745058,
+                "max": 13
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 11.5,
+                "p95": 13.800000000743239,
+                "p99": 14.899999998509884,
+                "max": 20.100000001490116
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925676093
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000148647814,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.399999998513522,
+                "p95": 4.399999998513522,
+                "p99": 5.099999997764826,
+                "max": 13.300000000745058
+              }
+            }
+          }
+        },
+        "gpuClears": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-714f66cc/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 16.700000000000728,
+            "median": 11.399999997764098,
+            "min": 7.19999999776519,
+            "p95": 15.099999998510611,
+            "p99": 15.899999997764098
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 12.5,
+            "median": 7.599999997764826,
+            "min": 4,
+            "p95": 11,
+            "p99": 11.699999999254942
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 10,
+            "median": 3.5,
+            "min": 2.599999997764826,
+            "p95": 4.599999997764826,
+            "p99": 5
+          },
+          "physicsHz": 59.92816623812745,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925312295,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 7.399999998509884,
+                "p95": 10.800000000743239,
+                "p99": 11.600000001486478,
+                "max": 12.299999997021587
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 7.399999998509884,
+                "p95": 10.800000000743239,
+                "p99": 11.600000001486478,
+                "max": 12.299999997021587
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000743239,
+                "p95": 4.400000002233355,
+                "p99": 4.800000000745058,
+                "max": 9.800000000745058
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 11.199999999253123,
+                "p95": 14.800000000746877,
+                "p99": 15.699999999256761,
+                "max": 16.5
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925676093
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.400000002233355,
+                "p95": 4.5,
+                "p99": 5,
+                "max": 10
+              }
+            }
+          }
+        },
+        "gcDiagnostic": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/diagnostic128-9af7f613/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 19.499999998510248,
+            "median": 10.499999998508429,
+            "min": 7.399999998509884,
+            "p95": 11.70000000149048,
+            "p99": 12.10000000074433
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 12.399999998509884,
+            "median": 6.800000000745058,
+            "min": 4.300000000745058,
+            "p95": 7.600000001490116,
+            "p99": 8.300000000745058
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.899999998509884,
+            "median": 3.5,
+            "min": 2.800000000745058,
+            "p95": 4.299999997019768,
+            "p99": 4.5
+          },
+          "physicsHz": 59.94435882552195,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.20000000298023224,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 6.600000001490116,
+                "p95": 7.400000002233355,
+                "p99": 8.0,
+                "max": 12.199999999253123
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 6.600000001486478,
+                "p95": 7.400000002233355,
+                "p99": 8.0,
+                "max": 12.199999999253123
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 4.194304,
+                "p95": 4.58752,
+                "p99": 4.718592,
+                "max": 5.111808
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925676093,
+                "max": 0.4000000022333552
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.199999999256761,
+                "p95": 4.0,
+                "p99": 4.200000002980232,
+                "max": 6.100000001486478
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0.065536,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 16,
+                "median": 0,
+                "p95": 0,
+                "p99": 0,
+                "max": 0
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 10.200000002980232,
+                "p95": 11.5,
+                "p99": 11.900000002233355,
+                "max": 19.299999997019768
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925494194
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000148647814,
+                "p95": 0.19999999925676093,
+                "p99": 0.3999999985098839,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.399999998509884,
+                "p95": 4.199999999256761,
+                "p99": 4.400000002233355,
+                "max": 6.899999998509884
+              }
+            }
+          }
+        },
+        "beforeKernelOptimization": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-1ed02ba6/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 14.600000000000364,
+            "median": 10.400000000745422,
+            "min": 6.700000000744694,
+            "p95": 12.20000000149048,
+            "p99": 13.300000001490844
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 9.5,
+            "median": 6.799999997019768,
+            "min": 3.599999997764826,
+            "p95": 8.300000000745058,
+            "p99": 9
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 7.199999999254942,
+            "median": 3.399999998509884,
+            "min": 2.5,
+            "p95": 4.600000001490116,
+            "p99": 5
+          },
+          "physicsHz": 59.9431590745292,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925312295
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 6.599999997763007,
+                "p95": 8.100000001490116,
+                "p99": 8.699999999256761,
+                "max": 9.200000002980232
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.29999999701976776
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 6.599999997763007,
+                "p95": 8.100000001490116,
+                "p99": 8.699999999256761,
+                "max": 9.200000002980232
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.199999999254942,
+                "p95": 4.399999998509884,
+                "p99": 4.800000000743239,
+                "max": 7.0
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 10.199999999254942,
+                "p95": 12.099999997763007,
+                "p99": 13.0,
+                "max": 14.299999997019768
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000149011612,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.6999999992567609
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.399999998508065,
+                "p95": 4.599999997764826,
+                "p99": 4.899999998509884,
+                "max": 7.099999997764826
+              }
+            }
+          }
+        },
+        "passSpecializationReverted": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-e362e1f2/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 16.1000000022359,
+            "median": 10.500000000745786,
+            "min": 6.900000002235174,
+            "p95": 12.500000001489752,
+            "p99": 13.200000000000728
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 9.400000002235174,
+            "median": 6.800000000745058,
+            "min": 3.800000000745058,
+            "p95": 8.300000000745058,
+            "p99": 9.200000002980232
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 6.700000002980232,
+            "median": 3.5,
+            "min": 2.599999997764826,
+            "p95": 4.599999997764826,
+            "p99": 5
+          },
+          "physicsHz": 59.91917413571897,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 6.600000001491935,
+                "p95": 8.100000001486478,
+                "p99": 8.899999998509884,
+                "max": 9.300000000745058
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.10000000149193511,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 6.600000001491935,
+                "p95": 8.100000001486478,
+                "p99": 8.899999998509884,
+                "max": 9.300000000745058
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.29999999701976776
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.300000000743239,
+                "p95": 4.300000000746877,
+                "p99": 4.700000002980232,
+                "max": 6.0
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 10.300000000745058,
+                "p95": 12.299999997021587,
+                "p99": 12.900000002235174,
+                "max": 16.0
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074505806,
+                "max": 0.4000000022351742
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.400000002235174,
+                "p95": 4.5,
+                "p99": 4.900000002235174,
+                "max": 6.700000002980232
+              }
+            }
+          }
+        },
+        "beforeKernelGpuTiming": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/diagnostic128-120008c5/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 20.499999998510248,
+            "median": 10.100000000000364,
+            "min": 7.099999998509702,
+            "p95": 12.099999998510611,
+            "p99": 13.399999999999636
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 9.700000002980232,
+            "median": 6.699999999254942,
+            "min": 3.800000000745058,
+            "p95": 8.199999999254942,
+            "p99": 9
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 12.599999997764826,
+            "median": 3.100000001490116,
+            "min": 2.699999999254942,
+            "p95": 4.199999999254942,
+            "p99": 4.800000000745058
+          },
+          "physicsHz": 59.93596157694617,
+          "missedDeadlines": 1,
+          "performancePassed": false,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0.09999999776482582,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925312295
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 6.5,
+                "p95": 8.0,
+                "p99": 8.899999998513522,
+                "max": 9.399999998509884
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 6.5,
+                "p95": 8.0,
+                "p99": 8.899999998513522,
+                "max": 9.399999998509884
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 4.194304,
+                "p95": 4.58752,
+                "p99": 4.784128,
+                "max": 5.111808
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.19999999925494194,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.19999999925312295
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.0,
+                "p95": 4.0,
+                "p99": 4.600000001490116,
+                "max": 12.200000002980232
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000148647814,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0.065536,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 16,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 9.899999998513522,
+                "p95": 11.899999998509884,
+                "p99": 13.199999999256761,
+                "max": 20.299999997019768
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149011612
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.5
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.100000001490116,
+                "p95": 4.100000001490116,
+                "p99": 4.800000000743239,
+                "max": 12.5
+              }
+            }
+          }
+        },
+        "kernelGpuTiming": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/timing128-338cda1f/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 13.399999997764098,
+            "median": 9.19999999776519,
+            "min": 6.899999998509884,
+            "p95": 11.200000000000728,
+            "p99": 11.999999997020495
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 8.300000000745058,
+            "median": 5.600000001490116,
+            "min": 3.799999997019768,
+            "p95": 6.899999998509884,
+            "p99": 7.899999998509884
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 7.300000000745058,
+            "median": 3.300000000745058,
+            "min": 2.699999999254942,
+            "p95": 4.5,
+            "p99": 5
+          },
+          "physicsHz": 59.95095831456738,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": true,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.30000000074505806
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 5.400000002236993,
+                "p95": 6.799999997019768,
+                "p99": 7.699999999253123,
+                "max": 8.100000001490116
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.19999999925676093
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 5.400000002236993,
+                "p95": 6.799999997019768,
+                "p99": 7.699999999253123,
+                "max": 8.100000001490116
+              },
+              "step.gpu.collisionQuery": {
+                "count": 600,
+                "median": 0,
+                "p95": 0,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.physicsPlanningAndCertification": {
+                "count": 600,
+                "median": 2.818048,
+                "p95": 3.211264,
+                "p99": 3.473408,
+                "max": 3.735552
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000298023224
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925312295
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.100000001490116,
+                "p95": 4.300000000745058,
+                "p99": 4.800000000745058,
+                "max": 7.099999997764826
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "render.gpu.draw": {
+                "count": 600,
+                "median": 0.065536,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "render.gpu.mesh": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.065536,
+                "p99": 0.065536,
+                "max": 0.065536
+              },
+              "step.gpu.edits": {
+                "count": 16,
+                "median": 0,
+                "p95": 0,
+                "p99": 0,
+                "max": 0
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 9.0,
+                "p95": 11.0,
+                "p99": 11.799999997019768,
+                "max": 13.199999999254942
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000298023224
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.10000000149011612,
+                "p95": 0.19999999925676093,
+                "p99": 0.20000000298023224,
+                "max": 0.4000000022351742
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.2999999970197678,
+                "p95": 4.5,
+                "p99": 5.0,
+                "max": 7.199999999254942
+              }
+            }
+          }
+        },
+        "current": {
+          "report": "docs/checkpoints/volume-m4/recovery/runs/frames128-e1a0382f/evidence/report.json.gz",
+          "completion": {
+            "count": 600,
+            "max": 13.399999999999636,
+            "median": 9.10000000074433,
+            "min": 6.699999999254942,
+            "p95": 11,
+            "p99": 12.200000000000728
+          },
+          "physicsAndQuery": {
+            "count": 600,
+            "max": 8.800000000745058,
+            "median": 5.600000001490116,
+            "min": 3.5,
+            "p95": 7,
+            "p99": 7.800000000745058
+          },
+          "renderAndHud": {
+            "count": 600,
+            "max": 7.5,
+            "median": 3.199999999254942,
+            "min": 2.699999999254942,
+            "p95": 4.199999999254942,
+            "p99": 4.899999998509884
+          },
+          "physicsHz": 59.95275842739824,
+          "missedDeadlines": 0,
+          "performancePassed": true,
+          "nodeExact": true,
+          "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+          "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+          "latencySummary": {
+            "passed": true,
+            "frames": 600,
+            "records": 1200,
+            "gpuTimestamps": false,
+            "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+            "milliseconds": {
+              "step.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.30000000074687705
+              },
+              "step.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925494194,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.10000000149193511
+              },
+              "step.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 5.399999998509884,
+                "p95": 6.800000000743239,
+                "p99": 7.5,
+                "max": 8.400000002235174
+              },
+              "step.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000297841325
+              },
+              "step.cpu.readbackReadyWait": {
+                "count": 600,
+                "median": 5.399999998509884,
+                "p95": 6.800000000745058,
+                "p99": 7.5,
+                "max": 8.400000002235174
+              },
+              "render.cpu.prepare": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925676093
+              },
+              "render.cpu.encode": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149193511,
+                "p99": 0.19999999925676093,
+                "max": 0.20000000297841325
+              },
+              "render.cpu.submit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.19999999925494194
+              },
+              "render.cpu.queueCompletionWait": {
+                "count": 600,
+                "median": 3.0,
+                "p95": 4.0,
+                "p99": 4.699999999254942,
+                "max": 6.899999998508065
+              },
+              "render.cpu.afterQueueCompletion": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.09999999776482582,
+                "p99": 0.10000000149011612,
+                "max": 0.10000000149193511
+              },
+              "inputSamplingToCompletion": {
+                "count": 600,
+                "median": 8.900000002235174,
+                "p95": 10.800000000745058,
+                "p99": 11.800000000743239,
+                "max": 13.100000001490116
+              },
+              "controllerAfterFieldCommit": {
+                "count": 600,
+                "median": 0,
+                "p95": 0.10000000149011612,
+                "p99": 0.10000000149193511,
+                "max": 0.20000000297841325
+              },
+              "presentationBeforeRenderer": {
+                "count": 600,
+                "median": 0.09999999776664481,
+                "p95": 0.19999999925676093,
+                "p99": 0.30000000074323907,
+                "max": 0.4000000022351742
+              },
+              "cameraSampleToCompletion": {
+                "count": 600,
+                "median": 3.100000001490116,
+                "p95": 4.199999999254942,
+                "p99": 4.899999998508065,
+                "max": 7.300000000745058
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "note": "Separate sequential runs, not a controlled causal estimate of cleanup or instrumentation overhead. All retained attempts remain available."
+}

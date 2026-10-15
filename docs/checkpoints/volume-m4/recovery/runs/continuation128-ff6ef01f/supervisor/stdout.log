@@ -1,0 +1,20 @@
+M4 continuation128: starting isolated hardware session
+Starting bounded M4 verification
+128³ dense exact replay 64/600
+128³ dense exact replay 288/600
+128³ dense exact replay 544/600
+128³ dense exact replay 576/600
+128³ sparse exact replay 96/600
+128³ sparse exact replay 256/600
+128³ sparse exact replay 448/600
+128³ sparse exact replay 576/600
+128³ sparse restart 3: 64/600
+128³ sparse restart 3: 224/600
+128³ sparse restart 3: 416/600
+128³ sparse restart 3: 576/600
+128³ sparse restart 31: 96/600
+128³ sparse restart 31: 256/600
+128³ sparse restart 31: 448/600
+128³ sparse restart 31: 576/600
+128³ sparse restart 509: 576/600
+M4 continuation128: passed=True

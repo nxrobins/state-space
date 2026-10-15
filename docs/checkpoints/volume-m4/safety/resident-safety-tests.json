@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "tests": 14,
+  "testSeconds": 3.942,
+  "command": [
+    ".venv/Scripts/python.exe",
+    "-m",
+    "unittest",
+    "tests.test_verification_guard"
+  ],
+  "scope": "Isolated print/sleep containment fixtures and mocked prerequisite rejection. No simulation or GPU workload. The real incident hold was not consumed or cleared.",
+  "observedToolChunk": "0a6781",
+  "recordedAt": "2026-10-15T10:08:10.187629+00:00",
+  "sourceHashes": {
+    "tests/test_verification_guard.py": "66a2b6a6705aa93d4954a3560407d3be75980b73f3429e82eb6ab4b78ab89356",
+    "scripts/recover_m4_verification.py": "e01e88b8707fd786faafc443d3546090dae57f8f73d8880b62e1c75c4800388d",
+    "scripts/verification_guard.py": "f48a02a24f5e48c99856548dbc3a51e27ca5c044a07163dcbce349c63c923e49",
+    "scripts/verification_health.py": "5edbfc1712c80ca8d5d8db5720b538f4e5114a686dad9deea75c3ab9321434f0"
+  }
+}

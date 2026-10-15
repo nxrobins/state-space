@@ -42,7 +42,7 @@ export async function readFixture(reference){
   const raw=await fetch('/'+reference.path).then(r=>{if(!r.ok)throw new Error('Missing reference.');return r.arrayBuffer();});check(await bytesHash(raw)===reference.compressedSha256,'Compressed fixture hash mismatch.');
   const bytes=await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();check(await bytesHash(bytes)===reference.sha256,'Reference hash mismatch.');return JSON.parse(new TextDecoder().decode(bytes));
 }
-function expectedMesh(flat,edge){
+export function expectedMesh(flat,edge){
   const w=flat.width,h=flat.height,d=flat.depth,groups=Array.from({length:w*h*d/edge**3},()=>[]),offsets=[[-1,0,0],[1,0,0],[0,-1,0],[0,1,0],[0,0,-1],[0,0,1]];
   for(let z=0;z<d;z++)for(let y=0;y<h;y++)for(let x=0;x<w;x++){
     const m=flat.packedCells[x+w*(y+h*z)]&255;if(!m)continue;

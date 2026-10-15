@@ -1,0 +1,9 @@
+{
+  "stage": "frames64",
+  "passed": true,
+  "performancePassed": true,
+  "supervisor": "dist\\volume-m4\\recovery\\frames64-1d9c2786\\supervisor\\report.json",
+  "supervisorSha256": "fc69f880a3c5e7ef00f18bfdfc1f396b46538ffc101ae8a3cfae67544410ccad",
+  "evidence": "dist\\volume-m4\\recovery\\frames64-1d9c2786\\evidence\\report.json",
+  "holdRemainsActive": true
+}
