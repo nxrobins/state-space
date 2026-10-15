@@ -1,0 +1,9 @@
+{
+  "stage": "sdk",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\sdk-a74c45eb\\supervisor\\report.json",
+  "supervisorSha256": "e4ac295c897965d1ea061817f401a64a29fcf133ee360997efc7bdf71d2263ba",
+  "evidence": "dist\\volume-m4\\recovery\\sdk-a74c45eb\\evidence\\report.json",
+  "holdRemainsActive": true
+}

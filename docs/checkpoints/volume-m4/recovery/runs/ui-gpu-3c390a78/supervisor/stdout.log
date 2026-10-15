@@ -1,0 +1,16 @@
+Starting bounded UI smoke test
+Switching resident/CPU backends through the selector
+Playback and single step: tick 0
+Playback and single step: tick 4
+Playback and single step: tick 0
+Paused view and same-tick restore: tick 0
+Atomic file imports: tick 0
+Deterministic crossing: tick 0
+Deterministic crossing: tick 70
+Deterministic crossing: tick 143
+Benchmark cancellation: tick 191
+Benchmark cancellation: tick 0
+Software error and reset recovery: tick 0
+Software error and reset recovery: tick 1
+Software error and reset recovery: tick 0
+{"cancellationRetained": true, "exportIsolation": true, "fileImportAtomic": true, "fileRoundTrip": true, "iceWalk": true, "inputLatencyIsolated": true, "pausedViewIdle": true, "playPauseStep": true, "routeWonAt": 191, "sameTickRestoreRedraws": true, "softwareErrorRecovery": true}

@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "id": "5fa16a312172437d94bf3ae471ed3ef3",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.json"
+  ],
+  "startedAt": 1792056854.813067,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 35.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792056855.8256633,
+      "hostCpuPercent": 4.195121951219516,
+      "freeMemoryMiB": 98733.73046875
+    },
+    "gpu": null
+  },
+  "childPid": 36604,
+  "lastHealth": {
+    "host": {
+      "time": 1792056859.1750095,
+      "hostCpuPercent": 5.625000000000002,
+      "freeMemoryMiB": 98512.35546875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 3.6875,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 230.77734375
+    }
+  },
+  "lastOutput": "engine/experimental/world-renderer.ts(85,99): error TS18047: 'context' is possibly 'null'.",
+  "exitCode": 2,
+  "finishedAt": 1792056859.839039
+}

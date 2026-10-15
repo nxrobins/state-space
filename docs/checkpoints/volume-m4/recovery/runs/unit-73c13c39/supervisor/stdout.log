@@ -1,0 +1,142 @@
+Verification scope: unit. Native fixtures and legacy demo trajectories are separate gates.
+Sequential check: node node_modules/vitest/vitest.mjs run --config engine/vitest.cpu.config.ts
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/mutations.test.ts (5 tests) 1630ms
+   ✓ conformance properties reject reproduced regression classes > detects duplicated oxygen claims when mutual ownership is removed  500ms
+   ✓ conformance properties reject reproduced regression classes > detects floating-point hash multiplication and blocked positive behavior  615ms
+   ✓ conformance properties reject reproduced regression classes > detects movement that transports packed cells without their energy  419ms
+ ✓ engine/experimental/active-world.test.ts (5 tests) 1201ms
+   ✓ M4 active world contract > retains exact material law and repartitioned restart  1190ms
+ ✓ engine/fidelity.test.ts (5 tests) 1183ms
+   ✓ ca-v2 public energy state > keeps default water liquid in a default world  1154ms
+ ✓ engine/experimental/world.test.ts (6 tests) 310ms
+ ✓ engine/contracts.test.ts (7 tests) 507ms
+   ✓ portable engine contracts > matches every Python cold-table slot, including optical and reserved data  411ms
+ ✓ engine/structure_compiled.test.ts (4 tests) 162ms
+ ✓ engine/experimental/3d.test.ts (8 tests) 40ms
+ ✓ engine/cpu_physics.test.ts (3 tests) 21ms
+ ✓ engine/structure_public.test.ts (5 tests) 17ms
+ ✓ engine/pressure.test.ts (4 tests) 14ms
+ ✓ engine/experimental/latency.test.ts (2 tests) 8ms
+ ✓ engine/validation.test.ts (4 tests) 4ms
+
+ Test Files  12 passed (12)
+      Tests  58 passed (58)
+   Start at  23:33:42
+   Duration  9.30s (transform 302ms, setup 0ms, collect 1.40s, tests 5.10s, environment 2ms, prepare 974ms)
+
+Sequential check: node --test --test-concurrency=1 web/rendering.test.mjs examples/first-person/game.test.mjs examples/cavern/game.test.mjs
+TAP version 13
+# Subtest: seeded terrain is reproducible and the challenge crosses chunk seams
+ok 1 - seeded terrain is reproducible and the challenge crosses chunk seams
+  ---
+  duration_ms: 258.2885
+  type: 'test'
+  ...
+# Subtest: the actor and collision neighborhood cross the global X seam
+ok 2 - the actor and collision neighborhood cross the global X seam
+  ---
+  duration_ms: 67.2936
+  type: 'test'
+  ...
+# Subtest: malformed world/game saves and sparse commands preserve complete state
+ok 3 - malformed world/game saves and sparse commands preserve complete state
+  ---
+  duration_ms: 344.1497
+  type: 'test'
+  ...
+# Subtest: integer actor collides on X/Z, lands on ice, and passes through water
+ok 4 - integer actor collides on X/Z, lands on ice, and passes through water
+  ---
+  duration_ms: 79.7028
+  type: 'test'
+  ...
+# Subtest: voxel targeting is blocked by the first surface and rejects remote targets
+ok 5 - voxel targeting is blocked by the first surface and rejects remote targets
+  ---
+  duration_ms: 24.4893
+  type: 'test'
+  ...
+# Subtest: invalid commands and invalid game saves preserve the complete live state
+ok 6 - invalid commands and invalid game saves preserve the complete live state
+  ---
+  duration_ms: 48.6886
+  type: 'test'
+  ...
+# Subtest: sparse look vectors and event lists reject before changing player or terrain
+ok 7 - sparse look vectors and event lists reject before changing player or terrain
+  ---
+  duration_ms: 42.5415
+  type: 'test'
+  ...
+# Subtest: setup hands off across a display boundary before measured work starts
+ok 8 - setup hands off across a display boundary before measured work starts
+  ---
+  duration_ms: 0.8548
+  type: 'test'
+  ...
+# Subtest: display scheduling keeps 60 ticks per second without an unbounded backlog
+ok 9 - display scheduling keeps 60 ticks per second without an unbounded backlog
+  ---
+  duration_ms: 0.5339
+  type: 'test'
+  ...
+# Subtest: rounded display timestamps do not alternate zero and double physics ticks
+ok 10 - rounded display timestamps do not alternate zero and double physics ticks
+  ---
+  duration_ms: 0.2574
+  type: 'test'
+  ...
+# Subtest: missed callbacks do not start a continuing multi-tick catch-up loop
+ok 11 - missed callbacks do not start a continuing multi-tick catch-up loop
+  ---
+  duration_ms: 0.9217
+  type: 'test'
+  ...
+# Subtest: display callbacks stay armed across GPU waits with one bounded pending frame
+ok 12 - display callbacks stay armed across GPU waits with one bounded pending frame
+  ---
+  duration_ms: 3.9482
+  type: 'test'
+  ...
+# Subtest: a failed GPU frame cancels future callbacks and reports the error once
+ok 13 - a failed GPU frame cancels future callbacks and reports the error once
+  ---
+  duration_ms: 0.4945
+  type: 'test'
+  ...
+# Subtest: 60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physics despite average cadence
+ok 14 - 60 Hz acceptance rejects deadline misses, lost callbacks, and slowed physics despite average cadence
+  ---
+  duration_ms: 0.8923
+  type: 'test'
+  ...
+# Subtest: picking matches square letterboxing, including high DPI CSS coordinates
+ok 15 - picking matches square letterboxing, including high DPI CSS coordinates
+  ---
+  duration_ms: 0.3688
+  type: 'test'
+  ...
+# Subtest: slow viewing schedules fewer exact ticks without skipping or accumulating time debt
+ok 16 - slow viewing schedules fewer exact ticks without skipping or accumulating time debt
+  ---
+  duration_ms: 0.7777
+  type: 'test'
+  ...
+# Subtest: latency events remain isolated and scripted routes never claim human input latency
+ok 17 - latency events remain isolated and scripted routes never claim human input latency
+  ---
+  duration_ms: 1.3537
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1365.1624

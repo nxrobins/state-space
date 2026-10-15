@@ -1,0 +1,20 @@
+M4 gameplay128: starting isolated hardware session
+Starting bounded M4 verification
+Resident 128³ dense restart 0: 224/600
+Resident 128³ dense restart 0: 448/600
+Resident 128³ dense restart 0: 576/600
+Resident 128³ sparse restart 0: 128/600
+Resident 128³ sparse restart 0: 288/600
+Resident 128³ sparse restart 0: 448/600
+Resident 128³ sparse restart 0: 576/600
+Resident 128³ sparse restart 3: 64/600
+Resident 128³ sparse restart 3: 224/600
+Resident 128³ sparse restart 3: 384/600
+Resident 128³ sparse restart 3: 544/600
+Resident 128³ sparse restart 31: 32/600
+Resident 128³ sparse restart 31: 192/600
+Resident 128³ sparse restart 31: 352/600
+Resident 128³ sparse restart 31: 512/600
+Resident 128³ sparse restart 31: 576/600
+Resident 128³ sparse restart 509: 576/600
+M4 gameplay128: passed=True

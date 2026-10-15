@@ -1,0 +1,32 @@
+{
+  "cause": "undetermined from existing logs",
+  "observations": [
+    "Native Vitest suite completed: 14 files, 78 tests passed.",
+    "Last test progress: first legacy 256x256 lighting CPU trajectory, tick 16/132. The next eight-tick interval is unobserved.",
+    "Supervisor report last written at 19:07:37 PDT, max observed monitor lag 35 ms, no completion record.",
+    "Windows rebooted at 19:08:37 PDT; Event 41 has BugcheckCode 0 and WHEABootErrorCount 0.",
+    "No contemporaneous display/WHEA/resource-exhaustion/bugcheck event or crash dump was found.",
+    "Event 6008 shutdown estimate predates still-recorded test output; it is not used as the precise freeze timestamp.",
+    "No pre-freeze CPU temperature, GPU telemetry or job memory samples were retained; thermal, power, driver and external load causes cannot be distinguished."
+  ],
+  "verificationDefects": [
+    "Aggregate entry chained native GPU fixtures and unrelated long CPU demo trajectories.",
+    "Only every eighth demo tick logged completion, with no per-tick start or duration.",
+    "25 percent aggregate CPU cap did not bound GPU use or individual synchronous tick latency.",
+    "OS process lease disappears on reboot and did not prevent an automatic retry.",
+    "Resource caps and a supervisor cannot guarantee recovery from a kernel/hardware stall."
+  ],
+  "containmentChanges": [
+    "Legacy demo trajectories quarantined; default tests are CPU-only and native fixtures require a single explicit file.",
+    "Persistent incident hold retained; exact-command recovery permits are consumed once before launch.",
+    "CPU jobs capped at 6 percent aggregate CPU and 4 GiB; GPU correctness at 12 percent CPU and 8 GiB.",
+    "Frame runs retain normal CPU priority and unthrottled display pacing, with host/GPU preflight and runtime abort thresholds.",
+    "Atomic fsynced supervisor receipts, per-second host/job telemetry, two-second GPU monitoring and progress timeouts."
+  ],
+  "rawEvidenceSha256": {
+    "report.json": "886fb4a40c20553c4d10e0aaea062f2fb7c4a40fb72d3c3766453f42a1165472",
+    "stdout.log": "5a00769cee01fdc67b6a18c939e6ae76ee8afbb1a11ae99dbc17d93298270197",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "m4Status": "Incomplete until remaining checks and 32/64/128 full-frame receipts pass their gates."
+}

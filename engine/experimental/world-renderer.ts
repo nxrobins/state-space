@@ -1,9 +1,15 @@
+import { type LatencyProfiler, type Trace } from './latency.js';
 /// <reference types="@webgpu/types" />
 /** Persistent per-chunk face lists. Physics owns invalidation, never visibility. */
 import { DRAW } from './3d-renderer.js';
 import type { TerrainCamera, TerrainRenderer } from './3d-view.js';
 
-export async function makeChunkRenderer(device:GPUDevice,canvas:HTMLCanvasElement,state:()=>{grid:GPUBuffer;shape:number[]},dirty:GPUBuffer,edge:number):Promise<TerrainRenderer>{
+export interface ResidentChunkRenderer extends TerrainRenderer {
+  validateCamera(camera:TerrainCamera):void;
+  encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,gpuCamera:GPUBuffer,trace?:Trace):void;
+}
+
+export async function makeChunkRenderer(device:GPUDevice,canvas:HTMLCanvasElement,state:()=>{grid:GPUBuffer;shape:number[]},dirty:GPUBuffer,edge:number,profiler?:LatencyProfiler,tick:()=>number=()=>0):Promise<ResidentChunkRenderer>{
   const context=canvas.getContext('webgpu');if(!context)throw new Error('Cannot create WebGPU canvas.');
   const shape=state().shape,count=shape.reduce((a,b)=>a*b,1),capacity=edge**3*6,chunks=count/edge**3;
   const format=navigator.gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
@@ -20,13 +26,22 @@ fn linear(c:vec3u)->u32{return c.x+camera.shape.x*(c.y+camera.shape.y*c.z);}
 @group(0) @binding(3) var<uniform> camera:Camera;
 @group(0) @binding(4) var<storage,read_write> dirty:array<atomic<u32>>;
 @group(0) @binding(5) var<storage,read_write> rebuild:array<u32>;
+@group(0) @binding(6) var<storage,read_write> work:array<u32>;
+@group(0) @binding(7) var<storage,read_write> dispatch:array<u32>;
 ${mapping}
-@compute @workgroup_size(64) fn reset(@builtin(global_invocation_id) id:vec3u){
- let k=id.x;if(k>=${chunks}u){return;}let changed=atomicExchange(&dirty[k],0u);rebuild[k]=changed;
- if(changed!=0u){atomicStore(&args[k*4u],6u);atomicStore(&args[k*4u+1u],0u);atomicStore(&args[k*4u+2u],k*6u);atomicStore(&args[k*4u+3u],0u);}
+@compute @workgroup_size(1) fn reset(){
+ var length=0u;
+ for(var k=0u;k<${chunks}u;k++){
+  let changed=atomicExchange(&dirty[k],0u);rebuild[k]=changed;
+  if(changed!=0u){
+   work[length]=k;length++;
+   atomicStore(&args[k*4u],6u);atomicStore(&args[k*4u+1u],0u);atomicStore(&args[k*4u+2u],k*6u);atomicStore(&args[k*4u+3u],0u);
+  }
+ }
+ dispatch[0]=${Math.ceil(edge**3/64)}u;dispatch[1]=length;dispatch[2]=1u;
 }
 @compute @workgroup_size(64) fn mesh(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=${count}u){return;}let k=i/(EDGE*EDGE*EDGE);if(rebuild[k]==0u){return;}
+ if(id.x>=EDGE*EDGE*EDGE){return;}let k=work[id.y];let i=k*EDGE*EDGE*EDGE+id.x;
  let m=grid[i]&255u;if(m==0u){return;}let c=vec3i(coordinate(i));
  let normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,0),vec3i(0,0,-1),vec3i(0,0,1));
  for(var f=0u;f<6u;f++){let t=c+normals[f];var exposed=true;
@@ -45,45 +60,70 @@ ${mapping}
   const draw=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:drawModule,entryPoint:'vertex'},fragment:{module:drawModule,entryPoint:'fragment',targets:[{format}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth24plus',depthWriteEnabled:true,depthCompare:'less'}});
   const buffer=(size:number,usage:number)=>device.createBuffer({size,usage});
   const faces=buffer(count*24,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),args=buffer(chunks*16,GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_SRC),rebuild=buffer(chunks*4,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),uniform=buffer(96,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST);
+  const work=buffer(chunks*4,GPUBufferUsage.STORAGE),dispatch=buffer(12,GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_SRC);
   // Invalidation belongs to each cache. Restrict worlds to one terrain renderer.
   device.queue.writeBuffer(dirty,0,new Uint32Array(chunks).fill(1));
-  const resetGroup=device.createBindGroup({layout:reset.getBindGroupLayout(0),entries:[{binding:2,resource:{buffer:args}},{binding:4,resource:{buffer:dirty}},{binding:5,resource:{buffer:rebuild}}]});
+  const resetGroup=device.createBindGroup({layout:reset.getBindGroupLayout(0),entries:[{binding:2,resource:{buffer:args}},{binding:4,resource:{buffer:dirty}},{binding:5,resource:{buffer:rebuild}},{binding:6,resource:{buffer:work}},{binding:7,resource:{buffer:dispatch}}]});
   const bindings=new Map<GPUBuffer,{mesh:GPUBindGroup;draw:GPUBindGroup}>();
+  const data=new ArrayBuffer(96),f=new Float32Array(data),u=new Uint32Array(data),near=.06,far=160,tan=Math.tan(Math.PI/6);
+  const n=shape.map(v=>v/edge),radius=Math.sqrt(3)*edge/2,centers=new Float64Array(chunks*3);
+  for(let k=0;k<chunks;k++){centers[k*3]=(k%n[0]+.5)*edge;centers[k*3+1]=(Math.floor(k/n[0])%n[1]+.5)*edge;centers[k*3+2]=(Math.floor(k/(n[0]*n[1]))+.5)*edge;}
   let depth:GPUTexture|undefined,width=0,height=0,closed=false;
-  const renderer:TerrainRenderer={
-    async render(camera:TerrainCamera){
+  function encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,trace?:Trace,gpuCamera?:GPUBuffer){
       if(closed)throw new Error('Terrain renderer is closed.');
       const vectors=[camera.eye,camera.right,camera.up,camera.forward].map(a=>{if(!a||a.length!==3)throw new Error('Invalid terrain camera.');const v=[a[0],a[1],a[2]];if(!v.every(Number.isFinite))throw new Error('Invalid terrain camera.');return v;});
       if(camera.target!==undefined&&(!Number.isSafeInteger(camera.target)||camera.target<0||camera.target>=count))throw new Error('Invalid target.');
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
       if(!depth||width!==canvas.width||height!==canvas.height){depth?.destroy();width=canvas.width;height=canvas.height;depth=device.createTexture({size:[width,height],format:'depth24plus',usage:GPUTextureUsage.RENDER_ATTACHMENT});}
-      const {grid}=state();let groups=bindings.get(grid);
-      if(!groups){groups={mesh:device.createBindGroup({layout:mesh.getBindGroupLayout(0),entries:[grid,faces,args,uniform,dirty,rebuild].flatMap((buffer,binding)=>binding===4?[]:[{binding,resource:{buffer}}])}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[grid,faces,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))})};bindings.set(grid,groups);}
-      const data=new ArrayBuffer(96),f=new Float32Array(data),u=new Uint32Array(data),near=.06,far=160,tan=Math.tan(Math.PI/6);
-      f.set([...vectors[0],0,...vectors[1],0,...vectors[2],0,...vectors[3],0,tan*width/height,tan,far/(far-near),-near*far/(far-near)]);u.set([...shape,camera.target??0xffffffff],20);device.queue.writeBuffer(uniform,0,data);
-      device.pushErrorScope('validation');const encoder=device.createCommandEncoder();
-      const compute=encoder.beginComputePass();compute.setPipeline(reset);compute.setBindGroup(0,resetGroup);compute.dispatchWorkgroups(Math.ceil(chunks/64));compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroups(Math.ceil(count/64));compute.end();
-      const pass=encoder.beginRenderPass({colorAttachments:[{view:context.getCurrentTexture().createView(),clearValue:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      let groups=bindings.get(grid);
+      if(!groups){groups={mesh:device.createBindGroup({layout:mesh.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:1,resource:{buffer:faces}},{binding:2,resource:{buffer:args}},{binding:3,resource:{buffer:uniform}},{binding:6,resource:{buffer:work}}]}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[grid,faces,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))})};bindings.set(grid,groups);}
+      for(let i=0;i<4;i++)f.set(vectors[i],i*4);
+      f.set([tan*width/height,tan,far/(far-near),-near*far/(far-near)],16);u.set([...shape,camera.target??0xffffffff],20);device.queue.writeBuffer(uniform,0,data);
+      profiler?.mark(trace,gpuCamera?'renderPreparedAt':'preparedAt');
+      if(gpuCamera){encoder.copyBufferToBuffer(gpuCamera,64,uniform,0,16);encoder.copyBufferToBuffer(gpuCamera,80,uniform,92,4);}
+      const compute=encoder.beginComputePass(profiler?.pass(trace,'mesh'));compute.setPipeline(reset);compute.setBindGroup(0,resetGroup);compute.dispatchWorkgroups(1);compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroupsIndirect(dispatch,0);compute.end();
+      const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:context!.getCurrentTexture().createView(),clearValue:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
       pass.setPipeline(draw);pass.setBindGroup(0,groups.draw);
-      const n=shape.map(v=>v/edge),radius=Math.sqrt(3)*edge/2;
+      // The controller can depenetrate three voxels and move by <=150/256.
+      // Cull around the prior committed eye with a conservative four-voxel
+      // margin; the draw uses the same-tick GPU eye copied above.
+      const bound=radius+(gpuCamera?4:0),horizontal=tan*width/height,horizontalRadius=bound*Math.hypot(1,horizontal),verticalRadius=bound*Math.hypot(1,tan);
       for(let k=0;k<chunks;k++){
-        const center=[k%n[0],Math.floor(k/n[0])%n[1],Math.floor(k/(n[0]*n[1]))].map((v,i)=>(v+.5)*edge-vectors[0][i]);
-        const dot=(v:number[])=>center.reduce((s,c,i)=>s+c*v[i],0),z=dot(vectors[3]);
+        const cx=centers[k*3]-vectors[0][0],cy=centers[k*3+1]-vectors[0][1],cz=centers[k*3+2]-vectors[0][2];
+        const z=cx*vectors[3][0]+cy*vectors[3][1]+cz*vectors[3][2];
+        const x=cx*vectors[1][0]+cy*vectors[1][1]+cz*vectors[1][2],y=cx*vectors[2][0]+cy*vectors[2][1]+cz*vectors[2][2];
         // Sphere/frustum test, enlarged plane bounds remain conservative.
-        if(z+radius<near||z-radius>far||Math.abs(dot(vectors[1]))>z*tan*width/height+radius*Math.hypot(1,tan*width/height)||Math.abs(dot(vectors[2]))>z*tan+radius*Math.hypot(1,tan))continue;
+        if(z+bound<near||z-bound>far||Math.abs(x)>z*horizontal+horizontalRadius||Math.abs(y)>z*tan+verticalRadius)continue;
         pass.drawIndirect(args,k*16);
       }
-      pass.end();device.queue.submit([encoder.finish()]);const results=await Promise.allSettled([device.popErrorScope(),device.queue.onSubmittedWorkDone()]);for(const r of results){if(r.status==='rejected')throw r.reason;if(r.value)throw new Error((r.value as GPUError).message);}
+      pass.end();
+  }
+  const renderer:ResidentChunkRenderer={
+    validateCamera(camera){
+      if(closed)throw new Error('Terrain renderer is closed.');
+      for(const a of [camera.eye,camera.right,camera.up,camera.forward])if(!a||a.length!==3||![a[0],a[1],a[2]].every(Number.isFinite))throw new Error('Invalid terrain camera.');
+      if(camera.target!==undefined&&(!Number.isSafeInteger(camera.target)||camera.target<0||camera.target>=count))throw new Error('Invalid target.');
+      if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
+    },
+    encode(encoder,camera,grid,gpuCamera,trace){encode(encoder,camera,grid,trace,gpuCamera);},
+    async render(camera:TerrainCamera){
+      renderer.validateCamera(camera);
+      const trace=profiler?.begin('render',tick());device.pushErrorScope('validation');const encoder=device.createCommandEncoder();
+      encode(encoder,camera,state().grid,trace);
+      profiler?.resolve(encoder,trace);profiler?.mark(trace,'encodedAt');device.queue.submit([encoder.finish()]);profiler?.submitted(trace);
+      const results=await Promise.allSettled([device.popErrorScope(),device.queue.onSubmittedWorkDone().then(()=>profiler?.mark(trace,'queueCompletedAt'))]);
+      for(const r of results){if(r.status==='rejected')throw r.reason;if(r.value)throw new Error((r.value as GPUError).message);}
+      profiler?.mark(trace,'completedAt');
     },
     async inspectMesh(){
       if(closed)throw new Error('Terrain renderer is closed.');
-      const bytes=chunks*20+count*24,read=buffer(bytes,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ),e=device.createCommandEncoder();
-      e.copyBufferToBuffer(args,0,read,0,chunks*16);e.copyBufferToBuffer(rebuild,0,read,chunks*16,chunks*4);e.copyBufferToBuffer(faces,0,read,chunks*20,count*24);device.queue.submit([e.finish()]);
+      const meshBytes=chunks*20+count*24,bytes=meshBytes+12,read=buffer(bytes,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ),e=device.createCommandEncoder();
+      e.copyBufferToBuffer(args,0,read,0,chunks*16);e.copyBufferToBuffer(rebuild,0,read,chunks*16,chunks*4);e.copyBufferToBuffer(faces,0,read,chunks*20,count*24);e.copyBufferToBuffer(dispatch,0,read,meshBytes,12);device.queue.submit([e.finish()]);
       try{await read.mapAsync(GPUMapMode.READ);const words=new Uint32Array(read.getMappedRange()),result:number[][]=[];
         for(let k=0;k<chunks;k++)result.push(Array.from(words.subarray(chunks*5+k*capacity,chunks*5+k*capacity+words[k*4+1])).sort((a,b)=>a-b));
-        return{faces:result,rebuilt:Array.from(words.subarray(chunks*4,chunks*5))};
+        return{faces:result,rebuilt:Array.from(words.subarray(chunks*4,chunks*5)),meshDispatch:Array.from(words.subarray(meshBytes/4,meshBytes/4+3))};
       }finally{if(read.mapState==='mapped')read.unmap();read.destroy();}
     },
-    close(){if(closed)return;closed=true;depth?.destroy();faces.destroy();args.destroy();rebuild.destroy();uniform.destroy();context.unconfigure();bindings.clear();},
+    close(){if(closed)return;closed=true;depth?.destroy();faces.destroy();args.destroy();rebuild.destroy();uniform.destroy();work.destroy();dispatch.destroy();context.unconfigure();bindings.clear();},
   };return renderer;
 }

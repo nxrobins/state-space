@@ -28,6 +28,8 @@ def source_hashes() -> dict[str, str]:
 
 
 def main() -> int:
+    from scripts.verification_guard import guarded_entry
+    guarded_entry('gpu', 1800, module='engine.verify')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report", type=Path, default=ROOT / "docs/checkpoints/latest-verification.json")
     parser.add_argument("--browser-cli", default=os.environ.get("STATE_SPACE_BROWSER_CLI"), help="agent-browser executable or JavaScript launcher; otherwise use PATH")
@@ -42,6 +44,10 @@ def main() -> int:
         (".", [sys.executable, "test_cascade.py"]),
         (".", [sys.executable, "test_invariants.py"]),
         (".", [npm, "test"]),
+        (".", [npm, "run", "test:native", "--", "--file", "engine/conformance.test.ts"]),
+        (".", [npm, "run", "test:native", "--", "--file", "engine/structure.test.ts"]),
+        (".", [npm, "run", "test:native", "--", "--file", "engine/sdk.test.ts"]),
+        (".", [npm, "run", "test:demos"]),
         (".", [npm, "run", "lint"]),
         (".", [npm, "run", "typecheck"]),
         ("game", [npm, "test"]),

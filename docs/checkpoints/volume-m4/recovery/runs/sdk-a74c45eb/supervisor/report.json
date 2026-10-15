@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "id": "4cd7b305ad4f4a359612ea2397e31d91",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_sdk",
+    "--report",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\sdk-a74c45eb\\evidence\\report.json"
+  ],
+  "startedAt": 1792060779.5103076,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 30.0,
+  "maxMonitorLagMs": 175.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792060780.5208335,
+      "hostCpuPercent": 4.541062801932371,
+      "freeMemoryMiB": 98560.35546875
+    },
+    "gpu": {
+      "time": 1792060780.573515,
+      "temperatureC": 40.0,
+      "utilizationPercent": 4.0,
+      "freeMemoryMiB": 11529.0,
+      "powerW": 62.91
+    }
+  },
+  "childPid": 39408,
+  "lastOutput": "Installed SDK clients match: 69 pass deltas, exact state/replay, both TypeScript compilers.",
+  "lastHealth": {
+    "host": {
+      "time": 1792060799.423425,
+      "hostCpuPercent": 20.318021201413426,
+      "freeMemoryMiB": 98589.62890625
+    },
+    "gpu": {
+      "time": 1792060799.1299639,
+      "temperatureC": 40.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11532.0,
+      "powerW": 62.13
+    },
+    "job": {
+      "cpuSeconds": 23.125,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 593.67578125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792060799.4300313
+}

@@ -1,0 +1,9 @@
+{
+  "stage": "timing128gpu",
+  "passed": true,
+  "performancePassed": true,
+  "supervisor": "dist\\volume-m4\\recovery\\timing128gpu-992b8690\\supervisor\\report.json",
+  "supervisorSha256": "2c8ed40e47f85eb400bcb502c408b03b4f60319f4af2941b0372b41355ec9a2c",
+  "evidence": "dist\\volume-m4\\recovery\\timing128gpu-992b8690\\evidence\\report.json",
+  "holdRemainsActive": true
+}

@@ -1,0 +1,680 @@
+{
+  "scope": "600 complete 1080p display-paced frames per sequential run; identical CPU fixtures.",
+  "optimization": "One canonical planner dispatch per tick; append uniquely awakened tiles between immutable pass prefixes.",
+  "attempts": {
+    "before": {
+      "fullFrame": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/frames128gpu-f7cd8375/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 10.100000001490116,
+          "median": 7.299999999999272,
+          "min": 4.5,
+          "p95": 8.900000000745422,
+          "p99": 9.600000001490116
+        },
+        "physicsHz": 59.93776078927938,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": false,
+        "framesAtOrAbove8ms": 138,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": false,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.19999999925676093
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.19999999925676093,
+              "p99": 0.20000000297841325,
+              "max": 0.30000000074505806
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.20000000297841325
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 6.800000000745058,
+              "p95": 8.300000000746877,
+              "p99": 9.199999999253123,
+              "max": 9.5
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149193511,
+              "p99": 0.19999999925676093,
+              "max": 0.20000000297841325
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 6.800000000745058,
+              "p95": 8.300000000746877,
+              "p99": 9.199999999253123,
+              "max": 9.5
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 7.100000001491935,
+              "p95": 8.699999999254942,
+              "p99": 9.400000002235174,
+              "max": 9.900000002233355
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776482582,
+              "p95": 0.10000000149193511,
+              "p99": 0.30000000074505806,
+              "max": 0.5
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 7.100000001491935,
+              "p95": 8.699999999254942,
+              "p99": 9.400000002235174,
+              "max": 9.900000002233355
+            }
+          }
+        }
+      },
+      "gpuDiagnostic": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/timing128gpu-2eee17cc/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 9.899999999999636,
+          "median": 7.100000000000364,
+          "min": 4.399999998509884,
+          "p95": 8.700000000744694,
+          "p99": 9.299999999255306
+        },
+        "physicsHz": 59.9431590745292,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": false,
+        "framesAtOrAbove8ms": 109,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": true,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149011612,
+              "max": 0.19999999925312295
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.19999999925676093,
+              "p99": 0.20000000298023224,
+              "max": 0.30000000074323907
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149011612,
+              "max": 0.19999999925676093
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 6.600000001490116,
+              "p95": 8.199999999253123,
+              "p99": 8.699999999256761,
+              "max": 9.300000000743239
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.19999999925494194,
+              "max": 0.19999999925676093
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 6.600000001486478,
+              "p95": 8.199999999253123,
+              "p99": 8.699999999256761,
+              "max": 9.300000000743239
+            },
+            "gameplay.gpu.collisionCache": {
+              "count": 600,
+              "median": 0,
+              "p95": 0,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.controller": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.draw": {
+              "count": 600,
+              "median": 0.065536,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.mesh": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.physicsPlanningAndCertification": {
+              "count": 600,
+              "median": 3.670016,
+              "p95": 4.25984,
+              "p99": 4.390912,
+              "max": 4.653056
+            },
+            "gameplay.gpu.tools": {
+              "count": 600,
+              "median": 0,
+              "p95": 0,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 6.900000002233355,
+              "p95": 8.5,
+              "p99": 9.0,
+              "max": 9.600000001490116
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776482582,
+              "p95": 0.10000000149011612,
+              "p99": 0.30000000074323907,
+              "max": 0.6000000014901161
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 6.900000002233355,
+              "p95": 8.5,
+              "p99": 9.0,
+              "max": 9.600000001490116
+            }
+          }
+        }
+      }
+    },
+    "fixedTileReductionReverted": {
+      "fullFrame": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/frames128gpu-cd3373af/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 11.599999999254578,
+          "median": 8.799999999255306,
+          "min": 5,
+          "p95": 10.400000000745422,
+          "p99": 11.100000000000364
+        },
+        "physicsHz": 59.938360550743546,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": false,
+        "framesAtOrAbove8ms": 460,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": false,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149011612,
+              "max": 0.30000000074687705
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.20000000298023224,
+              "p99": 0.30000000074505806,
+              "max": 0.4000000022351742
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149011612,
+              "max": 0.19999999925676093
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 8.300000000745058,
+              "p95": 9.899999998509884,
+              "p99": 10.5,
+              "max": 10.899999998509884
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0.09999999776482582,
+              "p95": 0.10000000149011612,
+              "p99": 0.19999999925676093,
+              "max": 0.20000000298023224
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 8.300000000745058,
+              "p95": 9.899999998509884,
+              "p99": 10.5,
+              "max": 10.899999998509884
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 8.699999999254942,
+              "p95": 10.199999999256761,
+              "p99": 10.899999998509884,
+              "max": 11.399999998513522
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776664481,
+              "p95": 0.19999999925494194,
+              "p99": 0.30000000074323907,
+              "max": 0.4000000022351742
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 8.699999999254942,
+              "p95": 10.199999999256761,
+              "p99": 10.899999998509884,
+              "max": 11.399999998513522
+            }
+          }
+        }
+      },
+      "gpuDiagnostic": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/timing128gpu-265e29ae/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 11.500000000745786,
+          "median": 8.399999999999636,
+          "min": 4.39999999925476,
+          "p95": 10.099999998510611,
+          "p99": 10.799999999255306
+        },
+        "physicsHz": 59.93896032421074,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": false,
+        "framesAtOrAbove8ms": 381,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": true,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.19999999925312295
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.19999999925676093,
+              "p99": 0.20000000298023224,
+              "max": 0.30000000074323907
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.10000000149193511
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 7.900000002235174,
+              "p95": 9.5,
+              "p99": 10.199999999256761,
+              "max": 10.899999998508065
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149193511,
+              "p99": 0.19999999925676093,
+              "max": 0.20000000297841325
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 7.900000002235174,
+              "p95": 9.5,
+              "p99": 10.199999999256761,
+              "max": 11.0
+            },
+            "gameplay.gpu.collisionCache": {
+              "count": 600,
+              "median": 0,
+              "p95": 0,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.controller": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.draw": {
+              "count": 600,
+              "median": 0.065536,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.mesh": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.physicsPlanningAndCertification": {
+              "count": 600,
+              "median": 4.849664,
+              "p95": 5.439488,
+              "p99": 5.701632,
+              "max": 6.029312
+            },
+            "gameplay.gpu.tools": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 8.200000002980232,
+              "p95": 9.899999998509884,
+              "p99": 10.600000001486478,
+              "max": 11.400000002233355
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776482582,
+              "p95": 0.19999999925312295,
+              "p99": 0.30000000074323907,
+              "max": 0.5
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 8.200000002980232,
+              "p95": 9.899999998509884,
+              "p99": 10.600000001486478,
+              "max": 11.400000002233355
+            }
+          }
+        }
+      }
+    },
+    "appendScheduler": {
+      "fullFrame": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/frames128gpu-8804afda/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 9.5,
+          "median": 6.300000000745058,
+          "min": 4.300000001490844,
+          "p95": 7.900000000745422,
+          "p99": 8.700000000744694
+        },
+        "physicsHz": 59.9431590745292,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": true,
+        "framesAtOrAbove8ms": 27,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": false,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.20000000298023224
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.20000000298023224,
+              "p99": 0.20000000298023224,
+              "max": 0.30000000074687705
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.19999999925312295
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 5.699999999254942,
+              "p95": 7.199999999256761,
+              "p99": 8.0,
+              "max": 8.699999999254942
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149193511,
+              "p99": 0.19999999925676093,
+              "max": 0.20000000298023224
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 5.699999999254942,
+              "p95": 7.200000002980232,
+              "p99": 8.0,
+              "max": 8.699999999254942
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 6.099999997764826,
+              "p95": 7.600000001490116,
+              "p99": 8.300000000743239,
+              "max": 9.099999997764826
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776300683,
+              "p95": 0.19999999925494194,
+              "p99": 0.29999999701976776,
+              "max": 0.30000000074505806
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 6.099999997763007,
+              "p95": 7.600000001490116,
+              "p99": 8.300000000743239,
+              "max": 9.099999997764826
+            }
+          }
+        }
+      },
+      "gpuDiagnostic": {
+        "report": "docs/checkpoints/volume-m4/recovery/runs/timing128gpu-992b8690/evidence/report.json.gz",
+        "completion": {
+          "count": 600,
+          "max": 8.999999999254214,
+          "median": 6.299999999253487,
+          "min": 4.299999999255306,
+          "p95": 7.70000000149048,
+          "p99": 8.400000002235174
+        },
+        "physicsHz": 59.9455586245636,
+        "missedDeadlines": 0,
+        "lostDisplaySlots": 0,
+        "sub8msTargetPassed": true,
+        "framesAtOrAbove8ms": 18,
+        "nodeExact": true,
+        "latencySummary": {
+          "passed": true,
+          "frames": 600,
+          "records": 600,
+          "gpuTimestamps": true,
+          "note": "CPU waits overlap GPU durations; percentiles must not be added. Scripted input excludes device/event-delivery latency and OS scanout. Physics GPU stage includes all planning and certification.",
+          "milliseconds": {
+            "gameplay.cpu.prepare": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.30000000074505806
+            },
+            "gameplay.cpu.encode": {
+              "count": 600,
+              "median": 0.10000000149011612,
+              "p95": 0.20000000297841325,
+              "p99": 0.20000000298023224,
+              "max": 0.30000000074687705
+            },
+            "gameplay.cpu.submit": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149011612,
+              "p99": 0.10000000149193511,
+              "max": 0.19999999925494194
+            },
+            "gameplay.cpu.queueCompletionWait": {
+              "count": 600,
+              "median": 5.699999999256761,
+              "p95": 7.199999999256761,
+              "p99": 7.699999999254942,
+              "max": 8.5
+            },
+            "gameplay.cpu.afterQueueCompletion": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.10000000149193511,
+              "p99": 0.19999999925676093,
+              "max": 0.20000000298023224
+            },
+            "gameplay.cpu.readbackReadyWait": {
+              "count": 600,
+              "median": 5.699999999256761,
+              "p95": 7.199999999256761,
+              "p99": 7.699999999254942,
+              "max": 8.5
+            },
+            "gameplay.gpu.collisionCache": {
+              "count": 600,
+              "median": 0,
+              "p95": 0,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.controller": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.draw": {
+              "count": 600,
+              "median": 0.065536,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.mesh": {
+              "count": 600,
+              "median": 0,
+              "p95": 0.065536,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "gameplay.gpu.physicsPlanningAndCertification": {
+              "count": 600,
+              "median": 2.686976,
+              "p95": 3.014656,
+              "p99": 3.211264,
+              "max": 3.538944
+            },
+            "gameplay.gpu.tools": {
+              "count": 600,
+              "median": 0,
+              "p95": 0,
+              "p99": 0.065536,
+              "max": 0.065536
+            },
+            "inputSamplingToCompletion": {
+              "count": 600,
+              "median": 6.099999997766645,
+              "p95": 7.599999997764826,
+              "p99": 8.100000001490116,
+              "max": 8.799999997021587
+            },
+            "residentCommitToHudCompletion": {
+              "count": 600,
+              "median": 0.09999999776482582,
+              "p95": 0.10000000149193511,
+              "p99": 0.20000000297841325,
+              "max": 0.39999999851352186
+            },
+            "cameraSampleToCompletion": {
+              "count": 600,
+              "median": 6.099999997766645,
+              "p95": 7.599999997764826,
+              "p99": 8.100000001490116,
+              "max": 8.799999997021587
+            }
+          }
+        }
+      }
+    }
+  },
+  "sources": [
+    "docs/checkpoints/volume-m4/history/sub8/3d-gpu-core-before.ts",
+    "docs/checkpoints/volume-m4/history/sub8/3d-gpu-core-fixed-trial.ts",
+    "docs/checkpoints/volume-m4/history/sub8/active-shader-before.ts",
+    "docs/checkpoints/volume-m4/history/sub8/active-shader-fixed-trial.ts",
+    "docs/checkpoints/volume-m4/history/sub8/gameplay-shader-before.ts",
+    "docs/checkpoints/volume-m4/history/sub8/gameplay-shader-fixed-trial.ts"
+  ]
+}

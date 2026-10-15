@@ -1,0 +1,4 @@
+engine/experimental/3d-gpu-core.ts(337,110): error TS2322: Type 'GameplayState3D' is not assignable to type '{ player: { x: number; y: number; z: number; vy: number; grounded: boolean; wet: boolean; jumpHeld: boolean; cooldown: number; blocked: boolean; }; look: any[]; status: "playing" | "won" | "lost"; carved: boolean; iceWalk: boolean; }'.
+  Types of property 'look' are incompatible.
+    The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'any[]'.
+engine/experimental/world-renderer.ts(85,99): error TS18047: 'context' is possibly 'null'.

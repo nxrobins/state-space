@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "id": "3b5f808dc8224f9cb2120559eb4afeac",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_sdk",
+    "--report",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\sdk-cc0a04ed\\evidence\\report.json"
+  ],
+  "startedAt": 1792047515.0427382,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 30.0,
+  "maxMonitorLagMs": 472.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792047516.0587385,
+      "hostCpuPercent": 9.002904162633108,
+      "freeMemoryMiB": 95978.84375
+    },
+    "gpu": {
+      "time": 1792047516.111845,
+      "temperatureC": 40.0,
+      "utilizationPercent": 7.0,
+      "freeMemoryMiB": 10915.0,
+      "powerW": 67.31
+    }
+  },
+  "childPid": 37556,
+  "lastOutput": "",
+  "lastHealth": {
+    "host": {
+      "time": 1792047533.5388672,
+      "hostCpuPercent": 21.875,
+      "freeMemoryMiB": 95823.30078125
+    },
+    "gpu": {
+      "time": 1792047532.6032233,
+      "temperatureC": 40.0,
+      "utilizationPercent": 7.0,
+      "freeMemoryMiB": 10874.0,
+      "powerW": 69.06
+    },
+    "job": {
+      "cpuSeconds": 19.4375,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 585.8046875
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792047534.1983643
+}

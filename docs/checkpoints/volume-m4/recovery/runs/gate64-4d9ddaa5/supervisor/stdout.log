@@ -1,0 +1,32 @@
+M4 gate64: starting isolated hardware session
+Starting bounded M4 verification
+64³ dense/sparse/CPU 32/96
+64³ dense/sparse/CPU 64/96
+64³ dense/sparse/CPU 96/96
+64³ full cavern equivalence 128/1024
+64³ full cavern equivalence 256/1024
+64³ full cavern equivalence 384/1024
+64³ full cavern equivalence 512/1024
+64³ full cavern equivalence 672/1024
+64³ full cavern equivalence 800/1024
+64³ full cavern equivalence 960/1024
+64³ restart 3: 32/1024
+64³ restart 3: 192/1024
+64³ restart 3: 320/1024
+64³ restart 3: 480/1024
+64³ restart 3: 608/1024
+64³ restart 3: 768/1024
+64³ restart 3: 896/1024
+64³ restart 31: 32/1024
+64³ restart 31: 192/1024
+64³ restart 31: 320/1024
+64³ restart 31: 448/1024
+64³ restart 31: 608/1024
+64³ restart 31: 736/1024
+64³ restart 31: 896/1024
+64³ restart 509: 512/1024
+64³ restart 509: 640/1024
+64³ restart 509: 800/1024
+64³ restart 509: 928/1024
+64³ restart 509: 1024/1024
+M4 gate64: passed=True

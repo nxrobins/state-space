@@ -81,8 +81,12 @@ fn spread(s:u32,t:u32)->bool{return liquid(cells[s])&&gas(cells[t])&&prop(cells[
         let s=select(bi,ai,choose);let t=select(ai,bi,choose);let sy=select(b.y,a.y,choose);
         swap=(cells[s]&255u)!=0u&&gas(cells[s])&&gas(cells[t])&&(sy==0||!rise(s,s-p.shape.x))&&((cells[t]&255u)==0u||rank(s)>rank(t)+16);
       } else if(kind==5u){
-        let eq=pairEnergy(cells[ai],cells[bi],energies[ai],energies[bi]);
-        outQ=select(eq,energies[ai]+energies[bi]-eq,lower);outV=thermal(v,outQ);
+        // Valid states already have normalized thermal bits. This is the same
+        // exact no-op used by the CPU reference for equal material/energy pairs.
+        if((cells[ai]&255u)!=(cells[bi]&255u)||energies[ai]!=energies[bi]){
+          let eq=pairEnergy(cells[ai],cells[bi],energies[ai],energies[bi]);
+          outQ=select(eq,energies[ai]+energies[bi]-eq,lower);outV=thermal(v,outQ);
+        }
       }
       if(swap){let other=select(bi,ai,lower);outV=cells[other];outQ=energies[other];}
     }

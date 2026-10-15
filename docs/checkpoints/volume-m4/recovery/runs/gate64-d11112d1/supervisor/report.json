@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "id": "922c0203fbed4c288323c9b8e2b7332c",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m4_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--phase",
+    "gate64",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\gate64-d11112d1\\evidence"
+  ],
+  "startedAt": 1792053953.8033595,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('GPU is busy before launch')",
+  "finishedAt": 1792053954.8757842
+}

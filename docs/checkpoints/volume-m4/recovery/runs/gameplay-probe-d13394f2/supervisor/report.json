@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "10147170ae0f456d9a83a89ec1065180",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m4_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--phase",
+    "gameplay-probe",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\gameplay-probe-d13394f2\\evidence"
+  ],
+  "startedAt": 1792057395.0754464,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 50.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792057396.0822191,
+      "hostCpuPercent": 4.00390625,
+      "freeMemoryMiB": 98137.19921875
+    },
+    "gpu": {
+      "time": 1792057396.1370285,
+      "temperatureC": 39.0,
+      "utilizationPercent": 3.0,
+      "freeMemoryMiB": 11573.0,
+      "powerW": 61.6
+    }
+  },
+  "childPid": 14832,
+  "lastOutput": "    at async <anonymous>:1:163",
+  "lastHealth": {
+    "host": {
+      "time": 1792057400.5363493,
+      "hostCpuPercent": 2.875112309074568,
+      "freeMemoryMiB": 97754.94140625
+    },
+    "gpu": {
+      "time": 1792057400.2466664,
+      "temperatureC": 39.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11509.0,
+      "powerW": 61.76
+    },
+    "job": {
+      "cpuSeconds": 4.4375,
+      "activeProcesses": 18,
+      "peakMemoryMiB": 501.24609375
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792057401.229825
+}

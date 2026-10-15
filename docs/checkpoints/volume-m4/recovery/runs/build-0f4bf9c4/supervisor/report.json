@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "id": "9c2db6d9cb474295974b626a597f4da0",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\npm.cmd",
+    "run",
+    "build:sdk"
+  ],
+  "startedAt": 1792053847.340074,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792053848.3486989,
+      "hostCpuPercent": 4.284323271665047,
+      "freeMemoryMiB": 92296.94140625
+    },
+    "gpu": null
+  },
+  "childPid": 4392,
+  "lastOutput": "\u2713 built in 397ms",
+  "lastHealth": {
+    "host": {
+      "time": 1792053856.0093348,
+      "hostCpuPercent": 7.321428571428568,
+      "freeMemoryMiB": 92104.40234375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 7.46875,
+      "activeProcesses": 5,
+      "peakMemoryMiB": 266.05859375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792053856.6636982
+}

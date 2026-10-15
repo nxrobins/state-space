@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 165, in <module>
+    if __name__=='__main__': raise SystemExit(main())
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 121, in main
+    if state.get('error'): raise RuntimeError(state['error'])
+RuntimeError: Error: Tool fixture must carve and cool.
+    at check (http://127.0.0.1:63751/examples/active-cavern/verify-gameplay.js:9:33)
+    at Module.verifyGameplayProbe (http://127.0.0.1:63751/examples/active-cavern/verify-gameplay.js:93:23)
+    at async <anonymous>:1:163

@@ -190,3 +190,126 @@ volume entries retain their 32,768-cell limit and snapshot compatibility.
 The [Cavern guide](../examples/cavern/README.md) covers global-coordinate edits,
 bounded collision reads, GPU-resident cached terrain, saves/replay, and limitations.
 The [M3 checkpoint](checkpoints/3D_M3.md) records verification and frame evidence.
+
+
+## Experimental active 3D worlds
+
+`state-space-engine/experimental/3d/active-world` exports
+`createStateSpaceActiveWorld3D(options?)`, the dense CPU reference. Its `/gpu`
+entry exports `createGpuActiveWorld3D(options?)`, defaulting to exact sparse
+execution; `execution: 'dense'` provides a GPU reference. The finite default is
+128³ with 32³ storage chunks and 8³ activity tiles. Sleeping/waking changes
+work scheduling while preserving the global `ca-3d-m1` law and both physical
+coordinates exactly. Activity is derived metadata, absent from portable saves.
+The optional GPU `activityReadbackInterval` (0–3,600, default 0) batches diagnostic
+readback at matching absolute request-end ticks. `inspectActivity()` returns
+isolated cached data until a write, restore or terrain render invalidates it;
+physics and snapshots are unchanged. The cavern uses an interval of 60.
+Sparse activity also reports `plannerBuilds` and `plannerReuses` for the last
+step request. Canonical compaction runs at most once per tick; unique wakes
+append to the next pass while the current dispatch keeps an immutable prefix.
+`plannerBuilds` counts canonical rebuilds and `plannerReuses` counts passes using
+the existing or appended list. These describe work scheduling, not skipped
+simulation ticks. List ordering never participates in physical decisions.
+
+The separate snapshot envelope is `finite-active-1`. Existing M1/M2 volume and
+M3 world entries keep their bounds and envelopes.
+[SDK details and limitations](../examples/active-cavern/README.md) ·
+[verification and frame evidence](checkpoints/3D_M4.md).
+
+
+## Experimental 3D latency diagnostics
+
+GPU factories accept `profiling: true` (default false): as an option on
+`createGpuWorld3D` / `createGpuActiveWorld3D`, or the fifth argument to
+`createGpuField3D(width, height, depth, fillMaterial, {profiling: true})`.
+CPU timings are collected by default. Add `gpuTiming: true` alongside
+`profiling: true` to request optional `timestamp-query` support when available.
+Unsupported adapters retain CPU timings and explicitly report GPU timestamps
+unavailable; disabled GPU timing is distinguished from unsupported hardware.
+
+`inspectLatency(afterId = 0)` synchronously returns isolated records from a
+32-record history. IDs increase across restores; each record identifies a
+`step`, `render` or resident `gameplay` and its absolute tick. CPU stamps use `performance.now()`:
+start, prepared, encoded, submitted, queue completion, field readback readiness,
+and operation completion. GPU durations are milliseconds for edits, the complete
+physics/planning/certification pass, collision query, mesh and draw. Resident
+records additionally separate tools, collision-cache gathering and controller. CPU waits
+and GPU durations overlap; do not add them. An individual physics family is not
+separately timed because that would require changing compute pass boundaries.
+
+Three reusable timestamp slots bound pending maps. Busy slots report `busy`;
+disabled, unsupported, pending and failed diagnostics are explicit. No extra GPU submission
+or awaited telemetry readback is added to gameplay. `settleLatency()` waits for
+pending telemetry after a measurement loop, for receipt finalization. Diagnostics
+never enter snapshots, command tapes, material rules or movement scheduling.
+
+The three first-person examples enable CPU profiling and expose `latency()` through
+their existing browser APIs (`crossing`, `cavern`, `activeCavern`). Append
+`?gpuTiming=1` for opt-in GPU pass timing; the benchmark retains the chosen mode.
+GPU timestamps can perturb timing, so compare that diagnostic mode separately.
+Browser input
+records separate event timestamps, handler observation and command sampling;
+invalid/foreign-clock event timestamps are null. Automated routes are marked
+`scripted` and never claim physical input-to-screen latency. Frame receipts retain
+all 600 step/render traces and include HUD/telemetry collection in completion time;
+final telemetry settlement and report serialization happen after measurement.
+
+GPU timestamps may be quantized. A zero duration means below the measured resolution,
+not proof that a pass did no work.
+
+
+## Optional resident 3D gameplay
+
+Chunked WebGPU worlds expose `await field.createGameplay(state, rules)`. This is
+an experimental fixed-point first-person controller matching the crossing/cavern
+examples. It is opt-in; existing `step`, collision queries, rendering and portable
+world snapshots retain their contracts. Dimensions must be at least 16 on each axis.
+One controller and one terrain renderer may belong to a field at a time.
+
+`state` contains `player` (`x/y/z/vy` in 1/256-voxel units, `grounded`, `wet`,
+`jumpHeld`, `cooldown`, `blocked`), `look` (three integer components, length about
+256), `status` (`playing`, `won`, `lost`), and prior `carved`/`iceWalk` event flags.
+`rules` supplies fixed-point goal bounds `{minX,maxY,minZ,maxZ}`, `fallY`, and an
+exclusive voxel `toolCeiling`. Full command records contain absolute `tick`,
+`moveX`, `moveZ`, `jump`, `tool` (`none`, `carve`, `freeze`) and `look`.
+Commands are limited to the existing examples' 7,200-tick session contract.
+
+```js
+const controller = await field.createGameplay(state, rules);
+const committed = await controller.step(command, {
+  renderer,
+  camera: { forward, right, up }, // orthonormal; eye/target come from the GPU
+});
+// Committed player, look, status, new events, target and absolute tick are owned copies.
+// Use committed state for HUD and save/replay after the promise resolves.
+```
+
+A presented tick uploads the command, applies reach-limited tool edits using the
+previous collision cache, executes the unchanged 27 physical passes, refreshes a
+GPU-resident 16³ collision neighborhood, moves the actor, updates the same-tick
+camera and target, meshes dirty terrain and draws. These commands share one queue
+submission and one awaited completion boundary. Validation and a 512-byte
+actor/event/energy-ledger readback complete together. The optional scheduled
+activity readback shares this boundary; GPU timestamp diagnostics add their own
+asynchronous diagnostic mapping. There is no ordinary collision-neighborhood
+transfer to the CPU. Initialization, saves, restore and explicit inspections are
+outside this per-frame contract.
+
+`controller.step(command)` without a presentation advances exact gameplay without
+rendering. `controller.present({renderer,camera})` updates the paused view and target
+without changing the tick, actor, ledger or terrain. Camera movement cannot select
+physical work. Terrain culling expands its prior-eye bounds by four voxels, covering
+the controller's maximum depenetration and movement; the draw uses the new GPU eye.
+
+Save the committed actor/event history alongside `await field.snapshot()`, using the
+example's existing game envelope. After `field.restore(snapshot)`, call
+`await controller.restore(state)` to refresh the collision cache. External terrain
+steps or edits invalidate the controller until this explicit refresh. Concurrent
+operations, stale commands, invalid records and foreign renderers are rejected.
+A GPU failure faults the field; recreate it from an application checkpoint.
+`controller.close()` releases its buffers; `field.close()` also closes the controller.
+
+The 128³ example selects this path with `?gameplay=gpu` or its backend selector.
+Changing the backend resets the level. CPU gameplay remains the default reference.
+The existing game snapshot/replay envelope is shared by both paths.

@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "id": "1868befc9a7243efb79eab5eaca0a5b3",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "scripts/verify_checks.mjs",
+    "--suite",
+    "unit"
+  ],
+  "startedAt": 1792041250.835343,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 113.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792041251.8509526,
+      "hostCpuPercent": 2.115384615384619,
+      "freeMemoryMiB": 103513.6171875
+    },
+    "gpu": null
+  },
+  "childPid": 33328,
+  "lastOutput": "# duration_ms 1138.5795",
+  "lastHealth": {
+    "host": {
+      "time": 1792041261.4440866,
+      "hostCpuPercent": 10.202205882352944,
+      "freeMemoryMiB": 103396.23046875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 9.546875,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 361.1796875
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792041262.1745677
+}

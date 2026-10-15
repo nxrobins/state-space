@@ -1,3 +1,4 @@
+import { type LatencyProfiler } from './latency.js';
 /// <reference types="@webgpu/types" />
 import { MATERIALS_3D } from './3d.js';
 import { type TerrainCamera, type TerrainRenderer } from './3d-view.js';
@@ -51,7 +52,7 @@ struct Out{@builtin(position) position:vec4f,@location(0) color:vec3f,@location(
 `;
 
 async function moduleFor(device:GPUDevice,code:string){const module=device.createShaderModule({code});const info=await module.getCompilationInfo();const errors=info.messages.filter(m=>m.type==='error');if(errors.length)throw new Error(errors.map(m=>m.message).join('\n'));return module;}
-export async function makeTerrainRenderer(device:GPUDevice,canvas:HTMLCanvasElement,state:()=>{grid:GPUBuffer;shape:number[]}):Promise<TerrainRenderer>{
+export async function makeTerrainRenderer(device:GPUDevice,canvas:HTMLCanvasElement,state:()=>{grid:GPUBuffer;shape:number[]},profiler?:LatencyProfiler,tick:()=>number=()=>0):Promise<TerrainRenderer>{
   const context=canvas.getContext('webgpu');if(!context)throw new Error('Cannot create WebGPU canvas.');
   const format=navigator.gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
   const meshModule=await moduleFor(device,MESH),drawModule=await moduleFor(device,DRAW);
@@ -62,6 +63,7 @@ export async function makeTerrainRenderer(device:GPUDevice,canvas:HTMLCanvasElem
   const args=device.createBuffer({size:16,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_DST});
   const uniform=device.createBuffer({size:96,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
   let depth:GPUTexture|undefined,width=0,height=0,closed=false;
+  const data=new ArrayBuffer(96),f=new Float32Array(data),u=new Uint32Array(data),resetArgs=new Uint32Array([6,0,0,0]);
   const bindings=new Map<GPUBuffer,{mesh:GPUBindGroup;draw:GPUBindGroup}>();
   return {
     async render(camera:TerrainCamera){
@@ -74,17 +76,19 @@ export async function makeTerrainRenderer(device:GPUDevice,canvas:HTMLCanvasElem
       });
       if(camera.target!==undefined)checkedTarget(camera.target,count);
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
+      const trace=profiler?.begin('render',tick());
       if(!depth||width!==canvas.width||height!==canvas.height){depth?.destroy();width=canvas.width;height=canvas.height;depth=device.createTexture({size:[width,height],format:'depth24plus',usage:GPUTextureUsage.RENDER_ATTACHMENT});}
       const {grid,shape}=state();let groups=bindings.get(grid);
       if(!groups){groups={mesh:device.createBindGroup({layout:mesh.getBindGroupLayout(0),entries:[grid,faces,args,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[grid,faces,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))})};bindings.set(grid,groups);}
-      const data=new ArrayBuffer(96),f=new Float32Array(data),u=new Uint32Array(data);const near=.06,far=160,tan=Math.tan(Math.PI/6);
+      const near=.06,far=160,tan=Math.tan(Math.PI/6);
       f.set([...vectors[0],0,...vectors[1],0,...vectors[2],0,...vectors[3],0,tan*width/height,tan,far/(far-near),-near*far/(far-near)]);u.set([...shape,camera.target??0xffffffff],20);
-      device.queue.writeBuffer(uniform,0,data);device.queue.writeBuffer(args,0,new Uint32Array([6,0,0,0]));
-      device.pushErrorScope('validation');
-      const encoder=device.createCommandEncoder();const compute=encoder.beginComputePass();compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroups(Math.ceil(count/64));compute.end();
-      const pass=encoder.beginRenderPass({colorAttachments:[{view:context.getCurrentTexture().createView(),clearValue:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-      pass.setPipeline(draw);pass.setBindGroup(0,groups.draw);pass.drawIndirect(args,0);pass.end();device.queue.submit([encoder.finish()]);
-      const [error]=await Promise.all([device.popErrorScope(),device.queue.onSubmittedWorkDone()]);if(error)throw new Error(error.message);
+      device.queue.writeBuffer(uniform,0,data);device.queue.writeBuffer(args,0,resetArgs);
+      profiler?.mark(trace,'preparedAt');device.pushErrorScope('validation');
+      const encoder=device.createCommandEncoder();const compute=encoder.beginComputePass(profiler?.pass(trace,'mesh'));compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroups(Math.ceil(count/64));compute.end();
+      const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:context.getCurrentTexture().createView(),clearValue:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      pass.setPipeline(draw);pass.setBindGroup(0,groups.draw);pass.drawIndirect(args,0);pass.end();profiler?.resolve(encoder,trace);profiler?.mark(trace,'encodedAt');device.queue.submit([encoder.finish()]);profiler?.submitted(trace);
+      const [error]=await Promise.all([device.popErrorScope(),device.queue.onSubmittedWorkDone().then(()=>profiler?.mark(trace,'queueCompletedAt'))]);if(error)throw new Error(error.message);
+      profiler?.mark(trace,'completedAt');
     },
     close(){if(closed)return;closed=true;depth?.destroy();faces.destroy();args.destroy();uniform.destroy();context.unconfigure();bindings.clear();},
   };

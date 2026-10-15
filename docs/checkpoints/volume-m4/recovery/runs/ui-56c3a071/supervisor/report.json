@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "id": "40ad09d3b00e4d4baf9f0f419eb7ed8b",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_active_cavern_ui",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\ui-56c3a071\\evidence"
+  ],
+  "startedAt": 1792031817.6533046,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 143.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792031818.6615589,
+      "hostCpuPercent": 3.6786060019361133,
+      "freeMemoryMiB": 106239.08984375
+    },
+    "gpu": {
+      "time": 1792031818.7178159,
+      "temperatureC": 39.0,
+      "utilizationPercent": 3.0,
+      "freeMemoryMiB": 12341.0,
+      "powerW": 62.16
+    }
+  },
+  "childPid": 8656,
+  "lastOutput": "Starting bounded UI smoke test",
+  "lastHealth": {
+    "host": {
+      "time": 1792031833.9751694,
+      "hostCpuPercent": 33.514492753623195,
+      "freeMemoryMiB": 104819.64453125
+    },
+    "gpu": {
+      "time": 1792031833.1497986,
+      "temperatureC": 40.0,
+      "utilizationPercent": 26.0,
+      "freeMemoryMiB": 12155.0,
+      "powerW": 62.5
+    },
+    "job": {
+      "cpuSeconds": 18.3125,
+      "activeProcesses": 20,
+      "peakMemoryMiB": 1745.109375
+    }
+  },
+  "error": "Timeout or missing progress",
+  "exitCode": 125,
+  "finishedAt": 1792031834.2009447
+}

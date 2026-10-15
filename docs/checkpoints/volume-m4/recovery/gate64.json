@@ -1,0 +1,9 @@
+{
+  "stage": "gate64",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\gate64-c8d305f1\\supervisor\\report.json",
+  "supervisorSha256": "fe07ce58ed16d74ca107ee209b92dd1aade2f36394860e296f6c55d62cc15af2",
+  "evidence": "dist\\volume-m4\\recovery\\gate64-c8d305f1\\evidence\\report.json",
+  "holdRemainsActive": true
+}

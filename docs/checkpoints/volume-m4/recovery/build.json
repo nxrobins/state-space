@@ -1,0 +1,9 @@
+{
+  "stage": "build",
+  "passed": true,
+  "performancePassed": null,
+  "supervisor": "dist\\volume-m4\\recovery\\build-e86cf10a\\supervisor\\report.json",
+  "supervisorSha256": "9e53e0746441280020a5805c5bd61221cc61c41642807374d7653f85c173060c",
+  "evidence": null,
+  "holdRemainsActive": true
+}

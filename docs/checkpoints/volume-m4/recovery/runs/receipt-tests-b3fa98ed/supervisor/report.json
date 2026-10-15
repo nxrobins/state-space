@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "id": "f2abbde1dc55419aad510de541873043",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "tests.test_volume_latency_report"
+  ],
+  "startedAt": 1792047425.1545706,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 15.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 3.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792047426.1694334,
+      "hostCpuPercent": 6.549364613880748,
+      "freeMemoryMiB": 95986.99609375
+    },
+    "gpu": null
+  },
+  "childPid": 36900,
+  "lastOutput": "OK",
+  "exitCode": 0,
+  "finishedAt": 1792047426.465012
+}
