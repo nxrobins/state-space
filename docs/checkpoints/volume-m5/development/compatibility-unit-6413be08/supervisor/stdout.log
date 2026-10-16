@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/fidelity.test.ts (5 tests) 1025ms
+   ✓ ca-v2 public energy state > keeps default water liquid in a default world  997ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  05:22:19
+   Duration  1.67s (transform 401ms, setup 0ms, collect 459ms, tests 1.02s, environment 0ms, prepare 64ms)
+

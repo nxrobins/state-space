@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "39574d13362c4c7998f1c6217eb99968",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gpu-active-tiny-99d738a2\\evidence",
+    "--probe",
+    "active-tiny"
+  ],
+  "startedAt": 1792148148.3633475,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 128.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792148149.379736,
+      "hostCpuPercent": 3.100775193798455,
+      "freeMemoryMiB": 88103.73046875
+    },
+    "gpu": {
+      "time": 1792148149.4293635,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11354.0,
+      "powerW": 59.53
+    }
+  },
+  "childPid": 36224,
+  "lastOutput": "M5 tiny exact replay and edit rollback passed",
+  "lastHealth": {
+    "host": {
+      "time": 1792148159.358036,
+      "hostCpuPercent": 6.341911764705888,
+      "freeMemoryMiB": 88077.37109375
+    },
+    "gpu": {
+      "time": 1792148157.7065752,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11330.0,
+      "powerW": 59.54
+    },
+    "job": {
+      "cpuSeconds": 6.0,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 515.24609375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792148159.3623548
+}

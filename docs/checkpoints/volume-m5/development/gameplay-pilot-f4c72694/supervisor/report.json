@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "id": "91f822fe545e4f5699cfd4e791529c6b",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gameplay-pilot-f4c72694\\evidence",
+    "--probe",
+    "gameplay",
+    "--mode",
+    "active",
+    "--size",
+    "64",
+    "--scene",
+    "ice-heat"
+  ],
+  "startedAt": 1792151496.765635,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 97.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792151497.7763467,
+      "hostCpuPercent": 4.073714839961207,
+      "freeMemoryMiB": 87997.3125
+    },
+    "gpu": {
+      "time": 1792151497.8357103,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11374.0,
+      "powerW": 60.14
+    }
+  },
+  "childPid": 4252,
+  "lastOutput": "M5 64\u00b3 ice-heat gameplay, restart and presentation isolation passed",
+  "lastHealth": {
+    "host": {
+      "time": 1792151513.0218227,
+      "hostCpuPercent": 4.438405797101453,
+      "freeMemoryMiB": 87984.16796875
+    },
+    "gpu": {
+      "time": 1792151512.2622826,
+      "temperatureC": 31.0,
+      "utilizationPercent": 1.0,
+      "freeMemoryMiB": 11355.0,
+      "powerW": 60.4
+    },
+    "job": {
+      "cpuSeconds": 13.28125,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 774.43359375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792151513.0260475
+}

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/world.test.ts (6 tests) 223ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  05:22:44
+   Duration  819ms (transform 369ms, setup 0ms, collect 397ms, tests 223ms, environment 0ms, prepare 65ms)
+

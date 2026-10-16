@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "id": "ead07ddd9a004cfba84cf504b9e89c8a",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\frames-43af3496\\evidence",
+    "--probe",
+    "frames",
+    "--mode",
+    "active",
+    "--size",
+    "32",
+    "--scene",
+    "ice-heat"
+  ],
+  "startedAt": 1792150313.423736,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 191.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792150314.4363556,
+      "hostCpuPercent": 2.710551790900295,
+      "freeMemoryMiB": 87961.3359375
+    },
+    "gpu": {
+      "time": 1792150314.4930458,
+      "temperatureC": 31.0,
+      "utilizationPercent": 1.0,
+      "freeMemoryMiB": 11359.0,
+      "powerW": 60.35
+    }
+  },
+  "childPid": 9544,
+  "lastOutput": "MEASURED \u00b7 59.94 Hz \u00b7 0 MISSES",
+  "lastHealth": {
+    "host": {
+      "time": 1792150332.989259,
+      "hostCpuPercent": 13.888888888888884,
+      "freeMemoryMiB": 87854.8515625
+    },
+    "gpu": {
+      "time": 1792150331.026813,
+      "temperatureC": 32.0,
+      "utilizationPercent": 13.0,
+      "freeMemoryMiB": 11206.0,
+      "powerW": 67.71
+    },
+    "job": {
+      "cpuSeconds": 16.234375,
+      "activeProcesses": 6,
+      "peakMemoryMiB": 780.69140625
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792150333.4061265
+}

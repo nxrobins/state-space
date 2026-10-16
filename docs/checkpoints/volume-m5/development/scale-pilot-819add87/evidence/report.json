@@ -1,0 +1,338 @@
+{
+  "passed": true,
+  "probe": "scale",
+  "scope": "One bounded M5 stage; not complete release acceptance",
+  "hardware": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalProcessors": 16,
+    "gpu": "NVIDIA GeForce RTX 4090, 595.79, 24564"
+  },
+  "observer": {
+    "mode": "cli-poll",
+    "events": []
+  },
+  "result": {
+    "appearance": "naturalistic",
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "energyDriftQ": "0",
+    "frames": [
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 5799,
+              "queueCompletedAt": 5799,
+              "submittedAt": 5793.5,
+              "validatedAt": 5796.20000000298
+            },
+            {
+              "mappedAt": 5809.79999999702,
+              "queueCompletedAt": 5809.70000000298,
+              "submittedAt": 5799.70000000298,
+              "validatedAt": 5803.20000000298
+            }
+          ],
+          "completedAt": 5809.79999999702,
+          "preparedAt": 5792.9000000059605,
+          "renderEncodedAt": 5799.600000008941,
+          "renderStartedAt": 5799.4000000059605,
+          "startedAt": 5792.79999999702
+        },
+        "ms": 17.19999998807907,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 11,
+          "maxDistance": 10,
+          "planReusable": true,
+          "planReused": false,
+          "reactionTotal": 233232,
+          "supportPasses": 11,
+          "supportedWeight": 233232,
+          "tick": 1
+        },
+        "tick": 1
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 5847.20000000298,
+              "queueCompletedAt": 5847.20000000298,
+              "submittedAt": 5840.9000000059605,
+              "validatedAt": 5842.5
+            }
+          ],
+          "completedAt": 5847.20000000298,
+          "preparedAt": 5840.5,
+          "renderEncodedAt": 5840.9000000059605,
+          "renderStartedAt": 5840.70000000298,
+          "startedAt": 5840.5
+        },
+        "ms": 6.899999991059303,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 0,
+          "componentPasses": 0,
+          "fallbackMask": 0,
+          "loadPasses": 0,
+          "maxDistance": 10,
+          "planReusable": true,
+          "planReused": true,
+          "reactionTotal": 233232,
+          "supportPasses": 0,
+          "supportedWeight": 233232,
+          "tick": 2
+        },
+        "tick": 2
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 5885.600000008941,
+              "queueCompletedAt": 5885.600000008941,
+              "submittedAt": 5878.600000008941,
+              "validatedAt": 5880
+            }
+          ],
+          "completedAt": 5885.600000008941,
+          "preparedAt": 5878.29999999702,
+          "renderEncodedAt": 5878.600000008941,
+          "renderStartedAt": 5878.5,
+          "startedAt": 5878.29999999702
+        },
+        "ms": 7.400000005960464,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 0,
+          "componentPasses": 0,
+          "fallbackMask": 0,
+          "loadPasses": 0,
+          "maxDistance": 10,
+          "planReusable": true,
+          "planReused": true,
+          "reactionTotal": 233232,
+          "supportPasses": 0,
+          "supportedWeight": 233232,
+          "tick": 3
+        },
+        "tick": 3
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 5922.5,
+              "queueCompletedAt": 5922.5,
+              "submittedAt": 5918.100000008941,
+              "validatedAt": 5919.9000000059605
+            },
+            {
+              "mappedAt": 5929.600000008941,
+              "queueCompletedAt": 5929.600000008941,
+              "submittedAt": 5922.9000000059605,
+              "validatedAt": 5924.29999999702
+            }
+          ],
+          "completedAt": 5929.70000000298,
+          "preparedAt": 5917.9000000059605,
+          "renderEncodedAt": 5922.9000000059605,
+          "renderStartedAt": 5922.70000000298,
+          "startedAt": 5917.9000000059605
+        },
+        "ms": 12.399999991059303,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 4,
+          "maxDistance": 3,
+          "planReusable": false,
+          "planReused": false,
+          "reactionTotal": 232972,
+          "supportPasses": 4,
+          "supportedWeight": 232972,
+          "tick": 4
+        },
+        "tick": 4
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 5965.4000000059605,
+              "queueCompletedAt": 5965.4000000059605,
+              "submittedAt": 5960.4000000059605,
+              "validatedAt": 5962.100000008941
+            },
+            {
+              "mappedAt": 5973,
+              "queueCompletedAt": 5973,
+              "submittedAt": 5965.79999999702,
+              "validatedAt": 5967.20000000298
+            }
+          ],
+          "completedAt": 5973,
+          "preparedAt": 5960.29999999702,
+          "renderEncodedAt": 5965.79999999702,
+          "renderStartedAt": 5965.70000000298,
+          "startedAt": 5960.29999999702
+        },
+        "ms": 12.900000005960464,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 4,
+          "maxDistance": 3,
+          "planReusable": false,
+          "planReused": false,
+          "reactionTotal": 232568,
+          "supportPasses": 4,
+          "supportedWeight": 232568,
+          "tick": 5
+        },
+        "tick": 5
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 6007.4000000059605,
+              "queueCompletedAt": 6007.4000000059605,
+              "submittedAt": 6003.600000008941,
+              "validatedAt": 6005.20000000298
+            },
+            {
+              "mappedAt": 6014.29999999702,
+              "queueCompletedAt": 6014.29999999702,
+              "submittedAt": 6007.70000000298,
+              "validatedAt": 6008.9000000059605
+            }
+          ],
+          "completedAt": 6014.4000000059605,
+          "preparedAt": 6003.4000000059605,
+          "renderEncodedAt": 6007.70000000298,
+          "renderStartedAt": 6007.5,
+          "startedAt": 6003.29999999702
+        },
+        "ms": 11.200000002980232,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 4,
+          "maxDistance": 3,
+          "planReusable": false,
+          "planReused": false,
+          "reactionTotal": 232348,
+          "supportPasses": 4,
+          "supportedWeight": 232348,
+          "tick": 6
+        },
+        "tick": 6
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 6049.79999999702,
+              "queueCompletedAt": 6049.79999999702,
+              "submittedAt": 6044.9000000059605,
+              "validatedAt": 6046.5
+            },
+            {
+              "mappedAt": 6057.70000000298,
+              "queueCompletedAt": 6057.70000000298,
+              "submittedAt": 6050.100000008941,
+              "validatedAt": 6051.4000000059605
+            }
+          ],
+          "completedAt": 6057.70000000298,
+          "preparedAt": 6044.70000000298,
+          "renderEncodedAt": 6050.100000008941,
+          "renderStartedAt": 6049.79999999702,
+          "startedAt": 6044.70000000298
+        },
+        "ms": 13.099999994039536,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 4,
+          "maxDistance": 3,
+          "planReusable": false,
+          "planReused": false,
+          "reactionTotal": 232268,
+          "supportPasses": 4,
+          "supportedWeight": 232268,
+          "tick": 7
+        },
+        "tick": 7
+      },
+      {
+        "latency": {
+          "boundaries": [
+            {
+              "mappedAt": 6093.29999999702,
+              "queueCompletedAt": 6093.29999999702,
+              "submittedAt": 6089.20000000298,
+              "validatedAt": 6090.70000000298
+            },
+            {
+              "mappedAt": 6100.29999999702,
+              "queueCompletedAt": 6100.29999999702,
+              "submittedAt": 6093.5,
+              "validatedAt": 6094.79999999702
+            }
+          ],
+          "completedAt": 6100.4000000059605,
+          "preparedAt": 6089.100000008941,
+          "renderEncodedAt": 6093.4000000059605,
+          "renderStartedAt": 6093.4000000059605,
+          "startedAt": 6089
+        },
+        "ms": 11.400000005960464,
+        "solve": {
+          "batchedSolve": true,
+          "blockingPasses": 1,
+          "componentPasses": 8,
+          "fallbackMask": 0,
+          "loadPasses": 4,
+          "maxDistance": 3,
+          "planReusable": false,
+          "planReused": false,
+          "reactionTotal": 232252,
+          "supportPasses": 4,
+          "supportedWeight": 232252,
+          "tick": 8
+        },
+        "tick": 8
+      }
+    ],
+    "heatDistortion": true,
+    "passed": true,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "scenario": "cut",
+    "scope": "128\u00b3 eight-frame responsiveness and energy probe, not a replay or full-frame acceptance gate",
+    "size": 128
+  },
+  "errors": []
+}

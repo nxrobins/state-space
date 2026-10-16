@@ -1,0 +1,35 @@
+M5: isolated level-trajectory probe
+M5 bounded probe starting
+M5 bounded probe starting
+M5 bounded probe starting
+M5 32³ ice-heat active: 0->48/1024
+M5 32³ ice-heat active: 0->80/1024
+M5 32³ ice-heat active: 0->128/1024
+M5 32³ ice-heat active: 0->176/1024
+M5 32³ ice-heat active: 0->224/1024
+M5 32³ ice-heat active: 0->272/1024
+M5 32³ ice-heat active: 0->336/1024
+M5 32³ ice-heat active: 0->384/1024
+M5 32³ ice-heat active: 0->432/1024
+M5 32³ ice-heat active: 0->496/1024
+M5 32³ ice-heat active: 0->544/1024
+M5 32³ ice-heat active: 0->592/1024
+M5 32³ ice-heat active: 0->656/1024
+M5 32³ ice-heat active: 0->704/1024
+M5 32³ ice-heat active: 0->752/1024
+M5 32³ ice-heat active: 0->800/1024
+M5 32³ ice-heat active: 0->864/1024
+M5 32³ ice-heat active: 0->912/1024
+M5 32³ ice-heat active: 0->960/1024
+M5 32³ ice-heat active: 0->1008/1024
+M5 32³ ice-heat active: 509->512/1024
+M5 32³ ice-heat active: 509->560/1024
+M5 32³ ice-heat active: 509->608/1024
+M5 32³ ice-heat active: 509->672/1024
+M5 32³ ice-heat active: 509->720/1024
+M5 32³ ice-heat active: 509->768/1024
+M5 32³ ice-heat active: 509->832/1024
+M5 32³ ice-heat active: 509->880/1024
+M5 32³ ice-heat active: 509->928/1024
+M5 32³ ice-heat active: 509->976/1024
+M5 32³ ice-heat active: every tick and odd restarts exact

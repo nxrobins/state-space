@@ -1,0 +1,5 @@
+{
+  "passed": false,
+  "scope": "Tiny M5 shader compilation only",
+  "error": "Error: mechanics:4:36 cannot use function 'read' as access\n    at Module.verifyM5ShaderCompile (http://127.0.0.1:61456/dist/volume-m5/structural-probe.js:289:34)"
+}

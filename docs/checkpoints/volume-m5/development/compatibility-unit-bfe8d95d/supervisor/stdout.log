@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/pressure.test.ts (4 tests) 14ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  05:22:28
+   Duration  633ms (transform 121ms, setup 0ms, collect 427ms, tests 14ms, environment 0ms, prepare 65ms)
+

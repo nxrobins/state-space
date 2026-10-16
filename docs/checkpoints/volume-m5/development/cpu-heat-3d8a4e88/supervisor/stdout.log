@@ -1,0 +1,49 @@
+heat: uninterrupted 64/1024
+heat: uninterrupted 128/1024
+heat: uninterrupted 192/1024
+heat: uninterrupted 256/1024
+heat: uninterrupted 320/1024
+heat: uninterrupted 384/1024
+heat: uninterrupted 448/1024
+heat: uninterrupted 512/1024
+heat: uninterrupted 576/1024
+heat: uninterrupted 640/1024
+heat: uninterrupted 704/1024
+heat: uninterrupted 768/1024
+heat: uninterrupted 832/1024
+heat: uninterrupted 896/1024
+heat: uninterrupted 960/1024
+heat: uninterrupted 1024/1024
+heat: repartitioned repeat 64/1024
+heat: repartitioned repeat 128/1024
+heat: repartitioned repeat 192/1024
+heat: repartitioned repeat 256/1024
+heat: repartitioned repeat 320/1024
+heat: repartitioned repeat 384/1024
+heat: repartitioned repeat 448/1024
+heat: repartitioned repeat 512/1024
+heat: repartitioned repeat 576/1024
+heat: repartitioned repeat 640/1024
+heat: repartitioned repeat 704/1024
+heat: repartitioned repeat 768/1024
+heat: repartitioned repeat 832/1024
+heat: repartitioned repeat 896/1024
+heat: repartitioned repeat 960/1024
+heat: repartitioned repeat 1024/1024
+heat: restart 31 64/1024
+heat: restart 31 128/1024
+heat: restart 31 192/1024
+heat: restart 31 256/1024
+heat: restart 31 320/1024
+heat: restart 31 384/1024
+heat: restart 31 448/1024
+heat: restart 509 512/1024
+heat: restart 509 576/1024
+heat: restart 509 640/1024
+heat: restart 509 704/1024
+heat: restart 509 768/1024
+heat: restart 509 832/1024
+heat: restart 509 896/1024
+heat: restart 509 960/1024
+heat: restart 509 1024/1024
+{"scene":"heat","passed":true,"finalHash":"7ce8638bcf7a62fd20277dcff1e811cdbe5e9c4113ff2454322d63815f82dd2a"}

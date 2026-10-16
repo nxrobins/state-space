@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/structure_public.test.ts (5 tests) 286ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  05:22:34
+   Duration  684ms (transform 141ms, setup 0ms, collect 211ms, tests 286ms, environment 0ms, prepare 66ms)
+

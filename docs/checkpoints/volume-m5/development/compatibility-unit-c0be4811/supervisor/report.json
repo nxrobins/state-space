@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "id": "fe5f6cb3473b49d29b57a129d72f8025",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "engine/cpu_physics.test.ts",
+    "--config",
+    "engine/vitest.cpu.config.ts"
+  ],
+  "startedAt": 1792153334.695827,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792153335.727344,
+      "hostCpuPercent": 4.807692307692313,
+      "freeMemoryMiB": 87652.9296875
+    },
+    "gpu": null
+  },
+  "childPid": 42616,
+  "lastOutput": "",
+  "lastHealth": {
+    "host": {
+      "time": 1792153336.8635268,
+      "hostCpuPercent": 11.130136986301364,
+      "freeMemoryMiB": 87616.6328125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 1.15625,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 209.47265625
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792153337.2874038
+}

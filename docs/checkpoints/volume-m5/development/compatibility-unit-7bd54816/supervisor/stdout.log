@@ -1,0 +1,13 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/mutations.test.ts (5 tests) 1610ms
+   ✓ conformance properties reject reproduced regression classes > detects duplicated oxygen claims when mutual ownership is removed  493ms
+   ✓ conformance properties reject reproduced regression classes > detects floating-point hash multiplication and blocked positive behavior  601ms
+   ✓ conformance properties reject reproduced regression classes > executes an illegal pin-displacement mutation and lints the missing destination guard  437ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  05:22:23
+   Duration  2.48s (transform 130ms, setup 0ms, collect 682ms, tests 1.61s, environment 0ms, prepare 64ms)
+

@@ -1,0 +1,2 @@
+engine/experimental/structural-probe.ts(101,119): error TS7034: Variable 'checks' implicitly has type 'any[]' in some locations where its type cannot be determined.
+engine/experimental/structural-probe.ts(118,18): error TS7005: Variable 'checks' implicitly has an 'any[]' type.

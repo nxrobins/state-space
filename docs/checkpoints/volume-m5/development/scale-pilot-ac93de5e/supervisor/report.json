@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "id": "a56ed010635b4651b98d8c5fed570120",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\scale-pilot-ac93de5e\\evidence",
+    "--probe",
+    "scale",
+    "--mode",
+    "active",
+    "--size",
+    "128",
+    "--scene",
+    "ice-heat"
+  ],
+  "startedAt": 1792151262.2577975,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 222.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792151263.2642379,
+      "hostCpuPercent": 18.45703125,
+      "freeMemoryMiB": 87476.25
+    },
+    "gpu": {
+      "time": 1792151263.3219125,
+      "temperatureC": 32.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11374.0,
+      "powerW": 59.76
+    }
+  },
+  "childPid": 28416,
+  "lastOutput": "128\u00b3 SCALE PROBE 8/8",
+  "lastHealth": {
+    "host": {
+      "time": 1792151276.2412722,
+      "hostCpuPercent": 4.227941176470584,
+      "freeMemoryMiB": 87388.1640625
+    },
+    "gpu": {
+      "time": 1792151276.078699,
+      "temperatureC": 32.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11325.0,
+      "powerW": 59.89
+    },
+    "job": {
+      "cpuSeconds": 10.78125,
+      "activeProcesses": 11,
+      "peakMemoryMiB": 1135.3125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792151277.1107228
+}

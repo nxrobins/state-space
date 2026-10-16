@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "id": "7757d2bf85fe4de6a31b0d803334a7c0",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "scripts/verify_volume_m5_cpu.mjs",
+    "--scene",
+    "ice",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\cpu-ice-88cfd897\\evidence"
+  ],
+  "startedAt": 1792148144.8839798,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 81.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792148145.908074,
+      "hostCpuPercent": 4.154589371980677,
+      "freeMemoryMiB": 88110.60546875
+    },
+    "gpu": null
+  },
+  "childPid": 15120,
+  "lastOutput": "{\"scene\":\"ice\",\"passed\":true,\"finalHash\":\"43b1d4ba64e673a97c3911176c1370913239d4784dfc89bf4550664e286ad263\"}",
+  "lastHealth": {
+    "host": {
+      "time": 1792148147.0646966,
+      "hostCpuPercent": 7.094594594594595,
+      "freeMemoryMiB": 88088.6171875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 0.640625,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 66.203125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792148147.78205
+}

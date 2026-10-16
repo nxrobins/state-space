@@ -1,0 +1,145 @@
+{
+  "passed": true,
+  "scope": "8^3 CPU foundation only; not M5 GPU or gameplay acceptance",
+  "scene": "cut",
+  "dimensions": [
+    8,
+    8,
+    8
+  ],
+  "ticks": 1024,
+  "checkpoints": {
+    "0": {
+      "path": "tick-0.json.gz",
+      "sha256": "4a50cb346140737184ca2ed977c0eb8849cb32c2ffb5dd2acc5ee68761706a76",
+      "stateHash": "85df06b6fb3c1bda786ffcbfa077b1ea83eff9364709e2189f97ffa43d7e0f96"
+    },
+    "3": {
+      "path": "tick-3.json.gz",
+      "sha256": "be16bb178d75747d91a66cbe9544106b6fe51ec3b62085a136338b9c5b588285",
+      "stateHash": "9a12a0af1f33213da93d3be4c84b84dab7fa5c6db54c1b944286bce29fba0f53"
+    },
+    "8": {
+      "path": "tick-8.json.gz",
+      "sha256": "251abeddb9c31466cc58ceff6464f3efafea5ad708c62440da76b2e3fb3486d0",
+      "stateHash": "a7968780fe141bccde163ca9f0dac090d0ebf421d1fa7852e952695b8c1dd77d"
+    },
+    "9": {
+      "path": "tick-9.json.gz",
+      "sha256": "531e49a13fbdca46bfa213738b5bac6ac9a232e062c6fd628e0bb0cda003f621",
+      "stateHash": "824f5b0ddfdeeb8d35c2cba3b4d2c6f26fbae65d20c54688dc6318407eb0d104"
+    },
+    "31": {
+      "path": "tick-31.json.gz",
+      "sha256": "4575cfe6dccfbdb0af13c4bb8347ca9dd2ed8b4495f3f0e1220e458cf7772523",
+      "stateHash": "7e54fd7edc696a3ddb277f12548aac01d3c84f72447a74a569714f208a42a15a"
+    },
+    "64": {
+      "path": "tick-64.json.gz",
+      "sha256": "bbdca7be8dfd5443db482b0a37f06a9c9be3ebe8f32fe39d60b33ef34a0e6346",
+      "stateHash": "60a147034d6b78d82f3ea6c5e8b7f0c14b2e1d7e399efaac546fd80a6b72c826"
+    },
+    "128": {
+      "path": "tick-128.json.gz",
+      "sha256": "c6ca69e64148ff9599ac6669744ecab8bc17751fa7bc8b2c2b194554de2ff3b4",
+      "stateHash": "7e3a90784a7e0456974349325a8df5dde7c97a3b49b678d038066c0100edc0c5"
+    },
+    "192": {
+      "path": "tick-192.json.gz",
+      "sha256": "cb3af91531e8c3ed839c7ab29856d2dfb8e4672dd4d7e241f5cf3f4df5054986",
+      "stateHash": "ccf65c988d4003e4e992b4d5d505c78742923f0219f08fc33cda93bcaebd4416"
+    },
+    "256": {
+      "path": "tick-256.json.gz",
+      "sha256": "91748cb4c3daddd4f4a2db65955d9ab44b107b99ac2ab376ad6cbf4bc629a8c7",
+      "stateHash": "1692dc2da06a937a0de19c72521dc7eb53dda34d838dbe2f52e759a045fe602b"
+    },
+    "320": {
+      "path": "tick-320.json.gz",
+      "sha256": "bebd02161839a9ad036559ad929afc5e25ba5a6b2975bd0cc7a6802f7d7a482c",
+      "stateHash": "854b69d3c45de03f13bb5dfb80a8ceba1751689eb2996380b6780a1039d1188b"
+    },
+    "384": {
+      "path": "tick-384.json.gz",
+      "sha256": "cdc6ea18c5b9204fe003735dca6b877c973c9409295dc38e2c0b2bd54187e123",
+      "stateHash": "93707e55ab0637eb3fc6edddb8bd736d66491493cd42d7ddc6678919315cc2d0"
+    },
+    "448": {
+      "path": "tick-448.json.gz",
+      "sha256": "7d4fd84fceefced8d75fbd1bcf0161dcff23a1d0dcd927a8e64ea007f3ccdbd2",
+      "stateHash": "2f250279185f2772b8bf3bf5abe74ac623157ea93e91ed57e270c0211432aadf"
+    },
+    "509": {
+      "path": "tick-509.json.gz",
+      "sha256": "1e9d2cb5079709af40a6685c0fcb66691bc4675b99da2b701fcac40c074ffc5f",
+      "stateHash": "cec9e73f8b3ef0e631f74e73758beb57d98b9e35fcb2d9d4cb7f3a7696c1a0d8"
+    },
+    "512": {
+      "path": "tick-512.json.gz",
+      "sha256": "f133fc4ed386c21ba70215f35e5c7829be4d34632d813c5d0477074c13182da8",
+      "stateHash": "e386edf68a880d8112f8e3af8854e29a0b11a88b6efafe81543777fc26ec11a0"
+    },
+    "576": {
+      "path": "tick-576.json.gz",
+      "sha256": "662f0e5238061add2169985fcf2f28536c214a1d8bb4c83e24459571eb93113e",
+      "stateHash": "e07d3d31d5e00b658ba31cc62aebd29ba1771d666de0a3e5d347a1228a05a18f"
+    },
+    "640": {
+      "path": "tick-640.json.gz",
+      "sha256": "9659949127461764ce81e625b15c064ea577a08296aefd2194153dbc9adea063",
+      "stateHash": "e35b82d48fc07e6f07db8345d92770353f9116ddc47c6f8dd2ad748716222dd2"
+    },
+    "704": {
+      "path": "tick-704.json.gz",
+      "sha256": "bd77f52ec32a000a0041d6199d56365b8ffffa14f38342d2f11635a00397f046",
+      "stateHash": "c46c1882db59a0d7ab4102dc7a4f1b8cdb3df847ce2e8cdc823f5be6538e5b17"
+    },
+    "768": {
+      "path": "tick-768.json.gz",
+      "sha256": "7039b26de1cc837083b0d0330f53512be1cc0b5e95d6f16da3f20096d2b985e4",
+      "stateHash": "5a25dbe14db7f1bb644fc958ad6a77696deb96fdbd247a8812fa21f8a644547f"
+    },
+    "832": {
+      "path": "tick-832.json.gz",
+      "sha256": "a9977be0ae771a664b3a592d5ae49d67a60fec965eff728bc2c80e4feb0c00ce",
+      "stateHash": "0e4656b5de2eb717aa26a0ddc02fd5854a1522453bf89325f6a4fd6d41208223"
+    },
+    "896": {
+      "path": "tick-896.json.gz",
+      "sha256": "a972047b0d307c34a089e21f40968e26cac955c93aeb88b5a7202e2ac66e5fcd",
+      "stateHash": "19de28e2e3360747c2c7e59932de824189ae8d1a397a03e35b649431dff54124"
+    },
+    "960": {
+      "path": "tick-960.json.gz",
+      "sha256": "5599942ee0a1208f2043244db780496d2ea2d4843649811a9500eaa7f1720a78",
+      "stateHash": "82973b676a2776c73834e5f62ae11896f895e7d2042bf9a50c0d184d259a96ac"
+    },
+    "1024": {
+      "path": "tick-1024.json.gz",
+      "sha256": "1f0c61e5a897497adbc63622256f9985934d6aaeb86be6c5192f8af13b7ac512",
+      "stateHash": "a6984bb2f19560e36e92df1fd83bfb43a0b27c827a693a5a9863b2169c90dfc0"
+    }
+  },
+  "restarts": [
+    {
+      "start": 3,
+      "end": 31,
+      "exact": true
+    },
+    {
+      "start": 31,
+      "end": 509,
+      "exact": true
+    },
+    {
+      "start": 509,
+      "end": 1024,
+      "exact": true
+    }
+  ],
+  "partitionExact": true,
+  "failureTick": 9,
+  "controlStableThrough": 8,
+  "energyDriftQ": "0",
+  "finalHash": "a6984bb2f19560e36e92df1fd83bfb43a0b27c827a693a5a9863b2169c90dfc0"
+}

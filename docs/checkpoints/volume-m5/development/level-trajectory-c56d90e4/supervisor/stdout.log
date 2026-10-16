@@ -1,0 +1,33 @@
+M5: isolated level-trajectory probe
+M5 bounded probe starting
+M5 bounded probe starting
+M5 bounded probe starting
+M5 32³ cut active: 0->48/1024
+M5 32³ cut active: 0->96/1024
+M5 32³ cut active: 0->144/1024
+M5 32³ cut active: 0->192/1024
+M5 32³ cut active: 0->256/1024
+M5 32³ cut active: 0->304/1024
+M5 32³ cut active: 0->352/1024
+M5 32³ cut active: 0->416/1024
+M5 32³ cut active: 0->464/1024
+M5 32³ cut active: 0->528/1024
+M5 32³ cut active: 0->624/1024
+M5 32³ cut active: 0->688/1024
+M5 32³ cut active: 0->736/1024
+M5 32³ cut active: 0->784/1024
+M5 32³ cut active: 0->832/1024
+M5 32³ cut active: 0->896/1024
+M5 32³ cut active: 0->944/1024
+M5 32³ cut active: 0->1008/1024
+M5 32³ cut active: 3->16/31
+M5 32³ cut active: 509->544/1024
+M5 32³ cut active: 509->608/1024
+M5 32³ cut active: 509->656/1024
+M5 32³ cut active: 509->720/1024
+M5 32³ cut active: 509->784/1024
+M5 32³ cut active: 509->832/1024
+M5 32³ cut active: 509->880/1024
+M5 32³ cut active: 509->944/1024
+M5 32³ cut active: 509->992/1024
+M5 32³ cut active: all ranges exact

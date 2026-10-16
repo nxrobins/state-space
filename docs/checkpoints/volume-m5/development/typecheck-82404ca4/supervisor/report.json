@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "id": "e657c0d5172148748f3ae7ee10ec1316",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.json"
+  ],
+  "startedAt": 1792148812.662137,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792148813.683278,
+      "hostCpuPercent": 3.8461538461538436,
+      "freeMemoryMiB": 87689.3359375
+    },
+    "gpu": null
+  },
+  "childPid": 11844,
+  "lastHealth": {
+    "host": {
+      "time": 1792148818.0215554,
+      "hostCpuPercent": 7.706255666364459,
+      "freeMemoryMiB": 87430.63671875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 4.421875,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 245.94140625
+    }
+  },
+  "lastOutput": "    The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'number[]'.",
+  "exitCode": 2,
+  "finishedAt": 1792148818.2435405
+}

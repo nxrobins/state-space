@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "probe": "seams",
+  "scope": "M5 foundation probe; not gameplay or release acceptance",
+  "result": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "mode": "dense",
+    "passed": true,
+    "results": [
+      {
+        "axis": "x",
+        "chunksAlongBeam": 8,
+        "exact": true,
+        "fellAt": 13,
+        "finalHash": "e25d3cdb36d92cc344e5afd84cf39e7d9e9d74275ebf18c87246bdda9e3f7bd0",
+        "firstSupportRemovedAt": 9,
+        "geometry": {
+          "depth": 8,
+          "height": 8,
+          "width": 32
+        },
+        "lastSupportRemovedAt": 13,
+        "restart": 3,
+        "reuseCount": 16,
+        "stableThrough": 12,
+        "ticks": 24
+      },
+      {
+        "axis": "z",
+        "chunksAlongBeam": 8,
+        "exact": true,
+        "fellAt": 13,
+        "finalHash": "1462aea75845632ba47699cf1317f2e3059111110aa3132752d7023a0cc972a6",
+        "firstSupportRemovedAt": 9,
+        "geometry": {
+          "depth": 32,
+          "height": 8,
+          "width": 8
+        },
+        "lastSupportRemovedAt": 13,
+        "restart": 3,
+        "reuseCount": 16,
+        "stableThrough": 12,
+        "ticks": 24
+      }
+    ],
+    "scope": "32x8x8 and 8x8x32 distant support, not full-size gameplay acceptance"
+  },
+  "errors": []
+}

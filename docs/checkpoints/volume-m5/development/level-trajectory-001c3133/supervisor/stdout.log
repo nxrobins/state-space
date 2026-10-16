@@ -1,0 +1,30 @@
+M5: isolated level-trajectory probe
+M5 bounded probe starting
+M5 bounded probe starting
+M5 32³ heat dense: 0->32/1024
+M5 32³ heat dense: 0->80/1024
+M5 32³ heat dense: 0->144/1024
+M5 32³ heat dense: 0->192/1024
+M5 32³ heat dense: 0->256/1024
+M5 32³ heat dense: 0->304/1024
+M5 32³ heat dense: 0->368/1024
+M5 32³ heat dense: 0->416/1024
+M5 32³ heat dense: 0->480/1024
+M5 32³ heat dense: 0->528/1024
+M5 32³ heat dense: 0->592/1024
+M5 32³ heat dense: 0->656/1024
+M5 32³ heat dense: 0->816/1024
+M5 32³ heat dense: 0->880/1024
+M5 32³ heat dense: 0->928/1024
+M5 32³ heat dense: 0->992/1024
+M5 32³ heat dense: 3->16/31
+M5 32³ heat dense: 509->544/1024
+M5 32³ heat dense: 509->592/1024
+M5 32³ heat dense: 509->656/1024
+M5 32³ heat dense: 509->704/1024
+M5 32³ heat dense: 509->768/1024
+M5 32³ heat dense: 509->832/1024
+M5 32³ heat dense: 509->880/1024
+M5 32³ heat dense: 509->944/1024
+M5 32³ heat dense: 509->992/1024
+M5 32³ heat dense: all ranges exact

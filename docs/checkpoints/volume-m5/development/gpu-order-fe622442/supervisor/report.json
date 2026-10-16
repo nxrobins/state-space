@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "aa02e8a8f3fb459dadf3dea4be053ecf",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gpu-order-fe622442\\evidence",
+    "--probe",
+    "order"
+  ],
+  "startedAt": 1792152762.8357365,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 128.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792152763.850197,
+      "hostCpuPercent": 3.22265625,
+      "freeMemoryMiB": 87962.16796875
+    },
+    "gpu": {
+      "time": 1792152763.9019635,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11374.0,
+      "powerW": 60.11
+    }
+  },
+  "childPid": 40704,
+  "lastOutput": "M5 active distant z support: 24/24",
+  "lastHealth": {
+    "host": {
+      "time": 1792152775.9484215,
+      "hostCpuPercent": 4.319852941176472,
+      "freeMemoryMiB": 87952.00390625
+    },
+    "gpu": {
+      "time": 1792152774.2308145,
+      "temperatureC": 31.0,
+      "utilizationPercent": 1.0,
+      "freeMemoryMiB": 11323.0,
+      "powerW": 59.95
+    },
+    "job": {
+      "cpuSeconds": 7.46875,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 541.1171875
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792152775.952796
+}

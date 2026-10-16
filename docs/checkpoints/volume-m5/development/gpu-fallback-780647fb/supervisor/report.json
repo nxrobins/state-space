@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "43aeb77dc9644816b5280606fdaa4336",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gpu-fallback-780647fb\\evidence",
+    "--probe",
+    "fallback"
+  ],
+  "startedAt": 1792153266.2231524,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 222.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792153267.2381618,
+      "hostCpuPercent": 3.6398467432950166,
+      "freeMemoryMiB": 87877.265625
+    },
+    "gpu": {
+      "time": 1792153267.2978334,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11374.0,
+      "powerW": 59.95
+    }
+  },
+  "childPid": 3676,
+  "lastOutput": "M5 active distant z support: 24/24",
+  "lastHealth": {
+    "host": {
+      "time": 1792153274.8597791,
+      "hostCpuPercent": 7.390510948905105,
+      "freeMemoryMiB": 87494.93359375
+    },
+    "gpu": {
+      "time": 1792153273.4827435,
+      "temperatureC": 31.0,
+      "utilizationPercent": 5.0,
+      "freeMemoryMiB": 11289.0,
+      "powerW": 60.02
+    },
+    "job": {
+      "cpuSeconds": 7.078125,
+      "activeProcesses": 18,
+      "peakMemoryMiB": 543.265625
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792153275.5541422
+}

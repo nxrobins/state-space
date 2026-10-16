@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/structural-world.test.ts (16 tests) 395ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  03:36:16
+   Duration  806ms (transform 118ms, setup 0ms, collect 162ms, tests 395ms, environment 0ms, prepare 65ms)
+

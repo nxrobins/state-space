@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "3144772955de4b2aa18e49b5ad878a38",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gpu-active-tiny-24c35612\\evidence",
+    "--probe",
+    "active-tiny"
+  ],
+  "startedAt": 1792147904.524807,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 81.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792147905.5402124,
+      "hostCpuPercent": 8.477842003853564,
+      "freeMemoryMiB": 88094.7265625
+    },
+    "gpu": {
+      "time": 1792147905.5963318,
+      "temperatureC": 31.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11359.0,
+      "powerW": 59.62
+    }
+  },
+  "childPid": 35140,
+  "lastOutput": "    at async Module.verifyM5GpuTiny (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:3202:9)",
+  "lastHealth": {
+    "host": {
+      "time": 1792147912.079696,
+      "hostCpuPercent": 2.583025830258301,
+      "freeMemoryMiB": 87866.83984375
+    },
+    "gpu": {
+      "time": 1792147911.7757406,
+      "temperatureC": 31.0,
+      "utilizationPercent": 1.0,
+      "freeMemoryMiB": 11331.0,
+      "powerW": 59.26
+    },
+    "job": {
+      "cpuSeconds": 5.46875,
+      "activeProcesses": 11,
+      "peakMemoryMiB": 525.3359375
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792147912.7403946
+}
