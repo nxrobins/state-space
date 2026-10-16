@@ -8,6 +8,9 @@ import { createFramePump, waitForDisplayBoundary } from '../../web/frame-pump.js
 import { FrameClock } from '../../web/frame-clock.js';
 
 const residentGameplay=new URLSearchParams(location.search).get('gameplay')==='gpu',Game=residentGameplay?GpuActiveCavernGame:ActiveCavernGame;
+let heatDistortion=true;
+let appearance=new URLSearchParams(location.search).get('appearance')??'naturalistic';
+if(!['diagnostic','naturalistic'].includes(appearance))throw new Error('Invalid terrain appearance.');
 const seedText=new URLSearchParams(location.search).get('seed'),seed=seedText===null?DEFAULT_SEED:Number(seedText);
 if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw new Error('Seed must be an unsigned 32-bit integer.');
 const elements=new Map(),$=id=>{if(!elements.has(id))elements.set(id,document.getElementById(id));return elements.get(id);};
@@ -73,7 +76,7 @@ async function pausedOperation(fn){if(exclusive||benchmarking)throw new Error('A
 }
 async function reset(){
   const recovering=failed;activity=null;activityTick=-1;
-  if(recovering){pump?.stop();renderer?.close();field?.close();active=Promise.resolve();field=await createGpuActiveWorld3D({activityReadbackInterval:60,profiling:true,gpuTiming:new URLSearchParams(location.search).get('gpuTiming')==='1'});renderer=await field.createRenderer(canvas);game=new Game(field,seed);window.activeCavern.game=game;}
+  if(recovering){pump?.stop();renderer?.close();field?.close();active=Promise.resolve();field=await createGpuActiveWorld3D({activityReadbackInterval:60,profiling:true,gpuTiming:new URLSearchParams(location.search).get('gpuTiming')==='1'});renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(heatDistortion);game=new Game(field,seed);window.activeCavern.game=game;}
   // These baselines stay private and are never mutated. Public tape reads clone
   // them at the boundary; resetting need not allocate two more full worlds.
   await game.restore(initial);recordingInitial=initial;lastCheckpoint=initial;yaw=Math.PI/2;pitch=.10;failed=false;$('error').hidden=true;$('status').textContent='Carve the dam ahead and left, then cool the channel to make your crossing.';await draw();
@@ -94,7 +97,7 @@ async function runBenchmark(){
   if(benchmarking||exclusive||failed)throw new Error('Benchmark unavailable while another operation is active.');exclusive=true;playing=false;auto=false;
   try{await active;}catch(error){exclusive=false;fatal(error);throw error;}
   pump.stop();benchmarking=true;cancelled=false;$('cancel').hidden=false;$('receipt').hidden=true;
-  const report={version:residentGameplay?2:1,gameplayBackend:residentGameplay?'gpu':'cpu',scope:'Complete seeded 128³ gameplay: input, bounded GPU edits, all 27 physics passes, 16³ collision readback, integer controller, HUD, dirty chunk mesh updates and culled GPU terrain, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.',resolution:[1920,1080],viewport:[innerWidth,innerHeight],devicePixelRatio,dimensions:[128,128,128],targetHz:60,warmup:[],samples:[],backendInfo:field.backendInfo,userAgent:navigator.userAgent,recordedAt:new Date().toISOString(),cancelled:false};
+  const report={appearance,heatDistortion,appearanceVersion:'cavern-heat-1',version:residentGameplay?2:1,gameplayBackend:residentGameplay?'gpu':'cpu',scope:'Complete seeded 128³ gameplay: input, bounded GPU edits, all 27 physics passes, 16³ collision readback, integer controller, HUD, dirty chunk mesh updates and culled GPU terrain, uploads, draw, validation and GPU completion. Excludes setup, warmup reset, snapshots, reference replay, source hashing and OS scanout.',resolution:[1920,1080],viewport:[innerWidth,innerHeight],devicePixelRatio,dimensions:[128,128,128],targetHz:60,warmup:[],samples:[],backendInfo:field.backendInfo,userAgent:navigator.userAgent,recordedAt:new Date().toISOString(),cancelled:false};
   if(residentGameplay)report.scope='Complete 128³ GPU-resident gameplay: command upload, cached tool targeting, exact physics, resident collision/controller, same-tick camera, terrain mesh/draw, compact readback, HUD, validation and one GPU completion boundary. Excludes setup, snapshots, hashing and OS scanout.';
   window.activeCavern.benchmarkResult=report;const traceCollector=new FrameLatencyCollector();report.setupHandoffFrames=2;
   async function measure(count,rows){return new Promise((resolve,reject)=>{let loop;loop=createFramePump(async(timestamp,interval)=>{
@@ -118,9 +121,24 @@ async function runBenchmark(){
   finally{if(!report.complete)delete report.initial;report.finishedAt=new Date().toISOString();benchmarking=false;exclusive=false;$('cancel').hidden=true;$('receipt').hidden=false;$('receipt').href='#';$('receipt').onclick=e=>{e.preventDefault();download(report,'cavern-frames.json');};clock.reset();pump=createFramePump((n,i)=>{active=frame(n,i);return active;},{onError:fatal});}
   return report;
 }
+function appearanceLabel(){
+ $('heat-distortion').checked=heatDistortion;$('heat-distortion').disabled=appearance!=='naturalistic';
+ $('appearance-toggle').textContent=appearance==='naturalistic'?'B · Naturalistic':'A · Diagnostic';
+ $('appearance-toggle').setAttribute('aria-pressed',String(appearance==='naturalistic'));
+ $('appearance-label').textContent=appearance==='naturalistic'?'BASALT / SURVEY LIGHT':'MATERIAL / DIAGNOSTIC';
+}
+async function setHeatDistortion(value){return pausedOperation(async()=>{
+ await renderer.setHeatDistortion(value);heatDistortion=value;appearanceLabel();await draw();return heatDistortion;
+});}
+async function setAppearance(value){return pausedOperation(async()=>{
+ if(!['diagnostic','naturalistic'].includes(value))throw new Error('Invalid terrain appearance.');
+ await renderer.setAppearance(value);appearance=value;appearanceLabel();await draw();return appearance;
+});}
 async function main(){
+ appearanceLabel();$('heat-distortion').onchange=()=>notify(async()=>{try{await setHeatDistortion($('heat-distortion').checked);}finally{appearanceLabel();}});$('appearance-toggle').onclick=()=>notify(()=>setAppearance(appearance==='naturalistic'?'diagnostic':'naturalistic'));
+ $('study-view').onchange=()=>notify(()=>pausedOperation(async()=>{const views={crossing:[Math.PI/2,.10],lava:[-.09,.06],ice:[1.04,.06]};[yaw,pitch]=views[$('study-view').value];await draw();}));
   $('gameplay-backend').value=residentGameplay?'gpu':'cpu';$('gameplay-backend').onchange=()=>{const url=new URL(location.href);url.searchParams.set('gameplay',$('gameplay-backend').value);location.assign(url);};
-  field=await createGpuActiveWorld3D({activityReadbackInterval:60,profiling:true,gpuTiming:new URLSearchParams(location.search).get('gpuTiming')==='1'});await field.restore(createLevel(seed).snapshot());renderer=await field.createRenderer(canvas);game=new Game(field,seed);await game.initialize();initial=await game.snapshot();recordingInitial=initial;lastCheckpoint=initial;
+  field=await createGpuActiveWorld3D({activityReadbackInterval:60,profiling:true,gpuTiming:new URLSearchParams(location.search).get('gpuTiming')==='1'});await field.restore(createLevel(seed).snapshot());renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(heatDistortion);game=new Game(field,seed);await game.initialize();initial=await game.snapshot();recordingInitial=initial;lastCheckpoint=initial;
   const select=name=>{tool=name;for(const id of ['carve','freeze']){$(id).classList.toggle('selected',id===name);$(id).setAttribute('aria-pressed',String(id===name));}};
   $('carve').onclick=()=>select('carve');$('freeze').onclick=()=>select('freeze');
   $('activity-layer').oninput=activityMap;
@@ -137,7 +155,7 @@ async function main(){
   $('import').onclick=()=>$('file').click();$('file').onchange=()=>notify(async()=>{const file=$('file').files[0];if(!file)return;if(file.size>64*1024*1024)throw new Error('Import exceeds 64 MiB.');const saved=JSON.parse(await file.text());await pausedOperation(async()=>{if(saved.commands)await replay(saved);else{await game.restore(saved);recordingInitial=await game.snapshot();}lastCheckpoint=await game.snapshot();follow();hud();});$('file').value='';});
   $('benchmark').onclick=()=>notify(runBenchmark);$('cancel').onclick=()=>{cancelled=true;};document.addEventListener('visibilitychange',()=>{if(document.hidden){playing=false;cancelled=true;keys.clear();mouse=false;clock.reset();}});
   // API operations use the same exclusive boundary as UI mutations.
-  window.activeCavern={ready:false,gameplayBackend:residentGameplay?'gpu':'cpu',backendInfo:field.backendInfo,benchmarkResult:null,game,get operationInFlight(){return exclusive||benchmarking||game.busy;},
+  window.activeCavern={ready:false,get appearance(){return appearance;},setAppearance,get heatDistortion(){return heatDistortion;},setHeatDistortion,gameplayBackend:residentGameplay?'gpu':'cpu',backendInfo:field.backendInfo,benchmarkResult:null,game,get operationInFlight(){return exclusive||benchmarking||game.busy;},
     suspend:()=>pausedOperation(async()=>{pump.stop();return game.snapshot();}),
     latency:()=>({engine:field.inspectLatency(),input:lastInput?structuredClone(lastInput):null,controllerCompletedAt,renderInputSampledAt}),
     snapshot:()=>pausedOperation(()=>game.snapshot()),step:(c={})=>pausedOperation(async()=>{await game.step(c);return game.snapshot();}),

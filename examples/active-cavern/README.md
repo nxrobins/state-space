@@ -1,5 +1,61 @@
 # The Living Cavern · experimental 3D M4
 
+## Naturalistic material study
+
+The chamber now opens in the **B · Naturalistic** appearance. Its native WebGPU
+pass adds scanned rock color, fissures and surface normals, roughness and
+wet-contact shading, a warm camera-mounted survey lamp, contact occlusion,
+temperature-driven lava/molten-glass lighting, HDR tone mapping and restrained
+bloom. Water and ice add native voxel-ray reflections, refraction and depth tint.
+Tick-driven water ripples contrast with static frosted ice and inclusions.
+Volumetric steam and cavern fog catch lava light and stop at foreground terrain.
+Hot lava also makes the air shimmer. The **Heat shimmer** checkbox isolates this
+effect without changing lighting, physics or the replay. **A · Diagnostic** restores the original palette renderer immediately.
+Neither switch resets the world, advances a tick or changes the replay.
+The view selector turns toward the crossing, lava basin or ice shelf.
+
+Rock maps are the bundled 1K CC0 **Rock Boulder Dry** set from Poly Haven
+([credits](../../docs/THIRD_PARTY.md)). World-space projection, full mip chains
+and anisotropic filtering keep detail continuous across chunks and stable at a
+distance. The appearance module and textures load only when selected; there is
+no runtime external asset service.
+
+Use `?appearance=diagnostic` for the original view, or
+`?gameplay=gpu&appearance=naturalistic` for the material study with the resident
+controller. `activeCavern.setAppearance('naturalistic')` uses the same exclusive
+operation boundary as the UI. The benchmark records the selected appearance;
+switches are rejected during measurement. Reset and snapshot imports preserve it.
+
+This is a material and lighting pass over the exact existing voxel surfaces.
+Water and ice transmit and reflect terrain, including offscreen objects. Steam
+uses the committed physical gas cells for volumetric density. Diagnostic mode
+keeps its original markers. Rock silhouette reconstruction remains future work. Optical rays stop after 64 cells or 40 voxels and
+allow four subsequent dielectric interfaces; distant misses use the cavern fill.
+Secondary hits use simplified direct lighting. This is bounded single-bounce
+reflection, not recursive mirror transport or caustics.
+The light budget is one exposed hot emitter per storage chunk, with a 22-cell
+range and two bounded shadow samples. This is an approximation of local direct
+light; it does not implement global illumination or change physical heat.
+Haze integrates 32 samples over at most 48 voxels at quarter resolution, with
+terrain-depth clipping and depth-aware upsampling. Each ray selects two nearby
+chunk emitters; opaque terrain shadows their single-scattered light. Thin steam
+features and distant fog are approximations. There is no temporal history,
+multiple scattering or steam self-shadowing. Reflections/refraction keep their
+simpler distance fog. Visual drift follows the completed tick, so paused images
+and exact snapshot continuation stay stable. All passes share the existing
+single submission/completion boundary.
+Heat shares the existing quarter-resolution volume pass. Bounded visual plumes
+rise above the selected exposed hot emitters; tick-driven turbulence refracts
+the background by at most six pixels at 1080p. Foreground depth and canvas-edge
+checks reject unsafe samples. This is an artistic emitter-driven approximation,
+not a new physical air/pressure field. It adds no queue submission, completion or
+state readback. `activeCavern.setHeatDistortion(boolean)` is exclusive like A/B;
+the setting survives reset/import and is recorded in the benchmark receipt.
+See [heat verification and frame evidence](../../docs/checkpoints/CAVERN_HEAT.md),
+[haze verification and frame evidence](../../docs/checkpoints/CAVERN_HAZE.md),
+[water/ice verification and frame evidence](../../docs/checkpoints/CAVERN_OPTICS.md)
+and the [original material study](../../docs/checkpoints/CAVERN_MATERIALS.md).
+
 Build with `npm run build:sdk`, serve the repository, and open
 `http://127.0.0.1:8765/examples/active-cavern/`. Choose an unsigned seed with
 `?seed=123`. WASD moves, mouse/right drag or arrows look, Space jumps/swims,
@@ -7,7 +63,7 @@ Build with `npm run build:sdk`, serve the repository, and open
 
 The finite 128³ level has nine connected seeded chambers, a central dam/freezing
 crossing, and finite offscreen water, lava and ice. Stone, glass and ice stay
-fixed until edited or transformed. Water is opaque diagnostic terrain. There is
+fixed until edited or transformed. Diagnostic mode keeps the opaque palette view. There is
 no 3D pressure, stored velocity, combustion, structural collapse or streaming.
 
 ```js

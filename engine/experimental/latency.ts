@@ -12,7 +12,7 @@ export class LatencyProfiler {
   constructor(device: GPUDevice, enabled = false, gpuTiming = false) {
     this.enabled = enabled; this.gpuTimingRequested = enabled && gpuTiming; this.gpuTimestamps = this.gpuTimingRequested && device.features.has('timestamp-query');
     if (this.gpuTimestamps) for (let i = 0; i < 3; i++) this.#slots.push({
-      query: device.createQuerySet({type: 'timestamp', count: 16}),
+      query: device.createQuerySet({type: 'timestamp', count: 20}),
       resolve: device.createBuffer({size: 256, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC}),
       read: device.createBuffer({size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ}), busy: false,
     });
@@ -29,7 +29,7 @@ export class LatencyProfiler {
   mark(trace: Trace | undefined, name: string) { if (trace) trace.record.cpu[name] = performance.now(); }
   pass(trace: Trace | undefined, label: string): GPUComputePassDescriptor {
     if (!trace?.slot) return {};
-    if (trace.labels.length >= 8) throw new Error('Latency query capacity exceeded.');
+    if (trace.labels.length >= 10) throw new Error('Latency query capacity exceeded.');
     const index = trace.labels.length * 2; trace.labels.push(label);
     return {timestampWrites: {querySet: trace.slot.query, beginningOfPassWriteIndex: index, endOfPassWriteIndex: index + 1}};
   }

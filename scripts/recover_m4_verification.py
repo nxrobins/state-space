@@ -17,7 +17,7 @@ import uuid
 from scripts.verification_guard import ROOT, Lease
 
 
-STAGES = ('gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'ui-gpu', 'cpu-smoke', 'cpu-reference', 'receipt-tests', 'unit', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128', 'diagnostic128', 'ui', 'lint', 'typecheck', 'build', 'sdk', 'publish')
+STAGES = ('heat-probe', 'haze-probe', 'optics-probe', 'appearance-probe', 'appearance-replay', 'frames128beauty', 'appearance-timing', 'appearance-ui', 'gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'ui-gpu', 'cpu-smoke', 'cpu-reference', 'receipt-tests', 'unit', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128', 'diagnostic128', 'ui', 'lint', 'typecheck', 'build', 'sdk', 'publish')
 
 
 def main():
@@ -30,16 +30,16 @@ def main():
     base.mkdir(parents=True, exist_ok=True)
     # UI correctness depends on a fresh exactness proof, not a timing pass.
     # The frame gates remain strict; publication retains timing failures.
-    previous = {'gameplay-probe':'probe', 'gameplay128':'continuation128', 'frames128gpu':'gameplay128', 'timing128gpu':'gameplay128', 'ui-gpu':'gameplay128', 'unit': 'cpu-smoke', 'cpu-reference': 'unit', 'probe': 'unit', 'gate64': 'probe', 'frames32': 'gate64', 'frames64': 'frames32',
+    previous = {'heat-probe':'haze-probe', 'haze-probe':'optics-probe', 'optics-probe':'appearance-probe', 'appearance-probe':'probe', 'appearance-replay':'appearance-probe', 'frames128beauty':'appearance-replay', 'appearance-timing':'appearance-replay', 'appearance-ui':'appearance-replay', 'gameplay-probe':'probe', 'gameplay128':'continuation128', 'frames128gpu':'gameplay128', 'timing128gpu':'gameplay128', 'ui-gpu':'gameplay128', 'unit': 'cpu-smoke', 'cpu-reference': 'unit', 'probe': 'unit', 'gate64': 'probe', 'frames32': 'gate64', 'frames64': 'frames32',
                 'continuation128': 'frames64', 'frames128': 'continuation128', 'timing128': 'continuation128', 'diagnostic128': 'continuation128', 'ui': 'continuation128', 'sdk': 'probe', 'publish': 'sdk'}.get(stage)
-    prerequisites=([previous] if previous else [])+(['gameplay-probe'] if stage=='gameplay128' else [])
+    prerequisites=([previous] if previous else [])+(['gameplay-probe'] if stage=='gameplay128' else [])+(['optics-probe','haze-probe','heat-probe'] if stage=='appearance-replay' else [])
     for previous in prerequisites:
         receipt = json.loads((base / (previous + '.json')).read_text(encoding='utf-8'))
         if not receipt.get('passed'):
             raise RuntimeError(f'Previous recovery stage {previous} did not pass.')
-        if previous in ('probe', 'gate64', 'frames32', 'frames64', 'continuation128', 'frames128', 'gameplay-probe', 'gameplay128'):
+        if previous in ('heat-probe', 'haze-probe', 'optics-probe', 'appearance-probe', 'appearance-replay', 'probe', 'gate64', 'frames32', 'frames64', 'continuation128', 'frames128', 'gameplay-probe', 'gameplay128'):
             prior = json.loads((ROOT / receipt['evidence']).read_text(encoding='utf-8'))
-            for name in ('3d-gpu-core.ts', '3d-shader.ts', 'active-shader.ts', 'world-renderer.ts', 'active-world-gpu.ts', '3d-renderer.ts', 'latency.ts', 'gameplay-gpu.ts', 'gameplay-shader.ts', 'gameplay-view.ts'):
+            for name in ('3d-gpu-core.ts', '3d-shader.ts', 'active-shader.ts', 'world-renderer.ts', 'cavern-appearance.ts', 'cavern-optics.ts', 'cavern-haze.ts', 'rock-textures.ts', '3d-view.ts', 'active-world-gpu.ts', '3d-renderer.ts', 'latency.ts', 'gameplay-gpu.ts', 'gameplay-shader.ts', 'gameplay-view.ts'):
                 path = 'engine/experimental/' + name
                 if prior['sourceHashes'].get(path) != hashlib.sha256((ROOT / path).read_bytes()).hexdigest():
                     raise RuntimeError(f'{previous} is stale for {path}; repeat the bounded prerequisite first.')
@@ -62,22 +62,22 @@ assert.deepEqual(w.snapshot(),end);assert.equal(w.energyBalance().driftQ,0n);con
         command = [sys.executable, '-m', 'unittest', 'tests.test_volume_latency_report']; timeout = 15
     elif stage == 'unit':
         command = [node, 'scripts/verify_checks.mjs', '--suite', 'unit']
-    elif stage in ('gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128', 'diagnostic128'):
+    elif stage in ('heat-probe', 'haze-probe', 'optics-probe', 'appearance-probe', 'appearance-replay', 'frames128beauty', 'appearance-timing', 'gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128', 'diagnostic128'):
         if not args.browser_cli or not args.browser_cli.is_file():
             parser.error('--browser-cli must identify the installed browser CLI')
-        kind = 'frames' if stage.startswith('frames') or stage in ('timing128','diagnostic128','timing128gpu') else 'gpu'
+        kind = 'frames' if stage.startswith('frames') or stage in ('timing128','diagnostic128','timing128gpu','appearance-timing') else 'gpu'
         timeout = 120
         command = [sys.executable, '-m', 'scripts.verify_volume_m4_browser', '--browser-cli',
-                   str(args.browser_cli.resolve()), '--phase', 'frames128gpu' if stage=='timing128gpu' else 'frames128' if stage in ('timing128','diagnostic128','timing128gpu') else stage, '--output', str(out / 'evidence')]
-        if stage in ('timing128','diagnostic128','timing128gpu'): command.append('--gpu-timing')
+                   str(args.browser_cli.resolve()), '--phase', 'frames128beauty' if stage=='appearance-timing' else 'frames128gpu' if stage=='timing128gpu' else 'frames128' if stage in ('timing128','diagnostic128','timing128gpu','appearance-timing') else stage, '--output', str(out / 'evidence')]
+        if stage in ('timing128','diagnostic128','timing128gpu','appearance-timing'): command.append('--gpu-timing')
         if stage=='diagnostic128': command.append('--devtools-trace')
-    elif stage in ('ui','ui-gpu'):
+    elif stage in ('ui','ui-gpu','appearance-ui'):
         if not args.browser_cli or not args.browser_cli.is_file():
             parser.error('--browser-cli must identify the installed browser CLI')
         kind = 'gpu'
         command = [sys.executable, '-m', 'scripts.verify_active_cavern_ui', '--browser-cli',
                    str(args.browser_cli.resolve()), '--output', str(out / 'evidence')]
-        if stage=='ui-gpu': command.append('--resident-gameplay')
+        if stage in ('ui-gpu','appearance-ui'): command.append('--resident-gameplay')
     elif stage == 'lint':
         command = [node, 'engine/lint_ts.mjs']
     elif stage == 'typecheck':

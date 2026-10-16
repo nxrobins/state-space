@@ -2,11 +2,12 @@ import { type LatencyProfiler, type Trace } from './latency.js';
 /// <reference types="@webgpu/types" />
 /** Persistent per-chunk face lists. Physics owns invalidation, never visibility. */
 import { DRAW } from './3d-renderer.js';
+import type { makeCavernAppearance } from './cavern-appearance.js';
 import type { TerrainCamera, TerrainRenderer } from './3d-view.js';
 
 export interface ResidentChunkRenderer extends TerrainRenderer {
   validateCamera(camera:TerrainCamera):void;
-  encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,gpuCamera:GPUBuffer,trace?:Trace):void;
+  encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,gpuCamera:GPUBuffer,trace?:Trace,presentationTick?:number):void;
 }
 
 export async function makeChunkRenderer(device:GPUDevice,canvas:HTMLCanvasElement,state:()=>{grid:GPUBuffer;shape:number[]},dirty:GPUBuffer,edge:number,profiler?:LatencyProfiler,tick:()=>number=()=>0):Promise<ResidentChunkRenderer>{
@@ -69,12 +70,14 @@ ${mapping}
   const n=shape.map(v=>v/edge),radius=Math.sqrt(3)*edge/2,centers=new Float64Array(chunks*3);
   for(let k=0;k<chunks;k++){centers[k*3]=(k%n[0]+.5)*edge;centers[k*3+1]=(Math.floor(k/n[0])%n[1]+.5)*edge;centers[k*3+2]=(Math.floor(k/(n[0]*n[1]))+.5)*edge;}
   let depth:GPUTexture|undefined,width=0,height=0,closed=false;
-  function encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,trace?:Trace,gpuCamera?:GPUBuffer){
+  let heatDistortion=true;
+  let appearance:'diagnostic'|'naturalistic'='diagnostic',natural:Awaited<ReturnType<typeof makeCavernAppearance>>|undefined;
+  function encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,trace?:Trace,gpuCamera?:GPUBuffer,presentationTick=tick()){
       if(closed)throw new Error('Terrain renderer is closed.');
       const vectors=[camera.eye,camera.right,camera.up,camera.forward].map(a=>{if(!a||a.length!==3)throw new Error('Invalid terrain camera.');const v=[a[0],a[1],a[2]];if(!v.every(Number.isFinite))throw new Error('Invalid terrain camera.');return v;});
       if(camera.target!==undefined&&(!Number.isSafeInteger(camera.target)||camera.target<0||camera.target>=count))throw new Error('Invalid target.');
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
-      if(!depth||width!==canvas.width||height!==canvas.height){depth?.destroy();width=canvas.width;height=canvas.height;depth=device.createTexture({size:[width,height],format:'depth24plus',usage:GPUTextureUsage.RENDER_ATTACHMENT});}
+      if(!depth||width!==canvas.width||height!==canvas.height){depth?.destroy();width=canvas.width;height=canvas.height;depth=device.createTexture({size:[width,height],format:'depth24plus',usage:GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.TEXTURE_BINDING});}
       let groups=bindings.get(grid);
       if(!groups){groups={mesh:device.createBindGroup({layout:mesh.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:1,resource:{buffer:faces}},{binding:2,resource:{buffer:args}},{binding:3,resource:{buffer:uniform}},{binding:6,resource:{buffer:work}}]}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[grid,faces,uniform].map((buffer,binding)=>({binding,resource:{buffer}}))})};bindings.set(grid,groups);}
       for(let i=0;i<4;i++)f.set(vectors[i],i*4);
@@ -82,8 +85,10 @@ ${mapping}
       profiler?.mark(trace,gpuCamera?'renderPreparedAt':'preparedAt');
       if(gpuCamera){encoder.copyBufferToBuffer(gpuCamera,64,uniform,0,16);encoder.copyBufferToBuffer(gpuCamera,80,uniform,92,4);}
       const compute=encoder.beginComputePass(profiler?.pass(trace,'mesh'));compute.setPipeline(reset);compute.setBindGroup(0,resetGroup);compute.dispatchWorkgroups(1);compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroupsIndirect(dispatch,0);compute.end();
-      const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:context!.getCurrentTexture().createView(),clearValue:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-      pass.setPipeline(draw);pass.setBindGroup(0,groups.draw);
+      const output=context!.getCurrentTexture().createView(),beauty=appearance==='naturalistic'?natural:undefined;
+      const prepared=beauty?.prepare(encoder,grid,depth,width,height,presentationTick,heatDistortion,profiler,trace);
+      const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:prepared?.view??output,clearValue:beauty?[.028,.045,.06,1]:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
+      pass.setPipeline(beauty?.draw??draw);pass.setBindGroup(0,prepared?.group??groups.draw);
       // The controller can depenetrate three voxels and move by <=150/256.
       // Cull around the prior committed eye with a conservative four-voxel
       // margin; the draw uses the same-tick GPU eye copied above.
@@ -97,15 +102,27 @@ ${mapping}
         pass.drawIndirect(args,k*16);
       }
       pass.end();
+      beauty?.finish(encoder,output,profiler,trace);
   }
   const renderer:ResidentChunkRenderer={
+    async setHeatDistortion(value){
+      if(closed)throw new Error('Terrain renderer is closed.');
+      if(typeof value!=='boolean')throw new Error('Heat distortion must be boolean.');
+      heatDistortion=value;
+    },
+    async setAppearance(value){
+      if(closed)throw new Error('Terrain renderer is closed.');
+      if(value!=='diagnostic'&&value!=='naturalistic')throw new Error('Invalid terrain appearance.');
+      if(value==='naturalistic'&&!natural){const {makeCavernAppearance}=await import('./cavern-appearance.js');natural=await makeCavernAppearance(device,format,shape,edge,capacity,faces,uniform);}
+      appearance=value;
+    },
     validateCamera(camera){
       if(closed)throw new Error('Terrain renderer is closed.');
       for(const a of [camera.eye,camera.right,camera.up,camera.forward])if(!a||a.length!==3||![a[0],a[1],a[2]].every(Number.isFinite))throw new Error('Invalid terrain camera.');
       if(camera.target!==undefined&&(!Number.isSafeInteger(camera.target)||camera.target<0||camera.target>=count))throw new Error('Invalid target.');
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
     },
-    encode(encoder,camera,grid,gpuCamera,trace){encode(encoder,camera,grid,trace,gpuCamera);},
+    encode(encoder,camera,grid,gpuCamera,trace,presentationTick){encode(encoder,camera,grid,trace,gpuCamera,presentationTick);},
     async render(camera:TerrainCamera){
       renderer.validateCamera(camera);
       const trace=profiler?.begin('render',tick());device.pushErrorScope('validation');const encoder=device.createCommandEncoder();
@@ -124,6 +141,6 @@ ${mapping}
         return{faces:result,rebuilt:Array.from(words.subarray(chunks*4,chunks*5)),meshDispatch:Array.from(words.subarray(meshBytes/4,meshBytes/4+3))};
       }finally{if(read.mapState==='mapped')read.unmap();read.destroy();}
     },
-    close(){if(closed)return;closed=true;depth?.destroy();faces.destroy();args.destroy();rebuild.destroy();uniform.destroy();work.destroy();dispatch.destroy();context.unconfigure();bindings.clear();},
+    close(){if(closed)return;closed=true;natural?.close();depth?.destroy();faces.destroy();args.destroy();rebuild.destroy();uniform.destroy();work.destroy();dispatch.destroy();context.unconfigure();bindings.clear();},
   };return renderer;
 }

@@ -1,0 +1,4 @@
+M4 heat-probe: starting isolated hardware session
+Heat: bounded 16³ plume, cold control and foreground rejection
+Heat: exact CPU/GPU evolution, odd restart and resident presentation
+M4 heat-probe: passed=True

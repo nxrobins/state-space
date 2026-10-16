@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "residentGameplay": true,
+  "harnessSha256": "dfa2651675f2f1f590eba8e847ac01b5ef32bba9b99fda6d3df93f76c83696f0",
+  "backendSelectorResets": true,
+  "checks": {
+    "appearanceToggleExact": true,
+    "cancellationRetained": true,
+    "exportIsolation": true,
+    "fileImportAtomic": true,
+    "fileRoundTrip": true,
+    "heatToggleExact": true,
+    "iceWalk": true,
+    "inputLatencyIsolated": true,
+    "pausedViewIdle": true,
+    "playPauseStep": true,
+    "routeWonAt": 191,
+    "sameTickRestoreRedraws": true,
+    "softwareErrorRecovery": true
+  },
+  "errors": []
+}

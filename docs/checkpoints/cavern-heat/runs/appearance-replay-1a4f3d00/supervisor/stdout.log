@@ -1,0 +1,7 @@
+M4 appearance-replay: starting isolated hardware session
+Starting bounded M4 verification
+Appearance 128³: exact restart 3 → 31
+Appearance restart 3: 16/31
+Appearance restart 509: 560/600
+Appearance restart 509: 592/600
+M4 appearance-replay: passed=True

@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "id": "74509db07a004c9285543239c8388f00",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\npm.cmd",
+    "run",
+    "build:sdk"
+  ],
+  "startedAt": 1792095739.2465334,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 81.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792095740.2618916,
+      "hostCpuPercent": 12.109375,
+      "freeMemoryMiB": 93272.55859375
+    },
+    "gpu": null
+  },
+  "childPid": 38320,
+  "lastOutput": "engine/experimental/rock-textures.ts(3,14): error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.",
+  "lastHealth": {
+    "host": {
+      "time": 1792095751.2399898,
+      "hostCpuPercent": 16.964285714285708,
+      "freeMemoryMiB": 93120.80859375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 11.078125,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 449.1484375
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792095751.243958
+}

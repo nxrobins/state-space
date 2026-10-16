@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "tests.test_verification_guard"
+  ],
+  "exitCode": 0,
+  "startedAt": 1792096935.3855057,
+  "finishedAt": 1792096940.2121766,
+  "scope": "Isolated supervisor mocks and print/sleep payloads only; no simulation or GPU."
+}

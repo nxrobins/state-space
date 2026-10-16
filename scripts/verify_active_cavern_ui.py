@@ -31,7 +31,15 @@ def main():
      const mark=text=>{window.__ui.stage=text;};mark('Playback and single step');
      const live=window.activeCavern,check=(v,m)=>{if(!v)throw Error(m)},same=(a,b)=>JSON.stringify(a)===JSON.stringify(b),sleep=ms=>new Promise(r=>setTimeout(r,ms));
      async function until(test,ms=8000){const end=performance.now()+ms;while(!test()){if(performance.now()>end)throw Error('UI wait timed out');await sleep(10);}}
-     const initial=await live.snapshot();window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyQ'}));document.getElementById('play').click();await until(()=>live.game.field.tick>=3);document.getElementById('play').click();const paused=await live.snapshot();const latency=live.latency();check(latency.input?.source==='browser-event'&&latency.input.event?.type==='keydown','Missing input timestamps');check(latency.engine.enabled&&latency.engine.records.length<=32,'Unbounded or disabled UI latency');latency.input.event.handledAt=-1;check(live.latency().input.event.handledAt>=0,'Latency API leaked mutable state');window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyQ'}));
+     const initial=await live.snapshot();
+     mark('Naturalistic/diagnostic A/B isolation');
+     check(live.appearance==='naturalistic','Beauty should be the chamber default');
+     check(live.heatDistortion===true,'Heat should default on');
+     for(const enabled of [false,true]){document.getElementById('heat-distortion').click();await until(()=>live.heatDistortion===enabled&&!live.operationInFlight);check(same(await live.snapshot(),initial),'Heat switch changed full state');}
+     let invalidHeat=false;try{await live.setHeatDistortion(1);}catch{invalidHeat=true;}check(invalidHeat&&live.heatDistortion,'Invalid heat switch changed mode');
+     for(const appearance of ['diagnostic','naturalistic']){document.getElementById('appearance-toggle').click();await until(()=>live.appearance===appearance&&!live.operationInFlight);check(same(await live.snapshot(),initial),'A/B changed full physical state');}
+     let rejected=false;try{await live.setAppearance('bad');}catch{rejected=true;}check(rejected&&live.appearance==='naturalistic','Invalid appearance changed mode');
+     window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyQ'}));document.getElementById('play').click();await until(()=>live.game.field.tick>=3);document.getElementById('play').click();const paused=await live.snapshot();const latency=live.latency();check(latency.input?.source==='browser-event'&&latency.input.event?.type==='keydown','Missing input timestamps');check(latency.engine.enabled&&latency.engine.records.length<=32,'Unbounded or disabled UI latency');latency.input.event.handledAt=-1;check(live.latency().input.event.handledAt>=0,'Latency API leaked mutable state');window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyQ'}));
      document.getElementById('step').click();await until(()=>live.game.field.tick===paused.field.tick+1&&!live.operationInFlight);await live.reset();
      const tape=live.replayTape();tape.initial.seed=-1;tape.initial.player.x=-1;tape.initial.field.chunks[0].energyQ[0]=12345;
      await live.reset();check(same(await live.snapshot(),initial),'Exported tape corrupted a shared reset baseline');
@@ -47,7 +55,7 @@ def main():
      mark('Benchmark cancellation');
      await live.reset();const pending=live.runBenchmark();await until(()=>live.benchmarkResult?.warmup.length>=3);live.cancelBenchmark();const partial=await pending;check(partial.cancelled&&!partial.complete&&partial.samples.length<600,'Cancellation was not retained');check(!document.getElementById('receipt').hidden,'No partial receipt');
      mark('Software error and reset recovery');live.game.step=async()=>{throw Error('Injected UI recovery check')};document.getElementById('play').click();await until(()=>document.getElementById('mode').textContent.includes('ERROR'));await live.reset();await live.step();check((await live.snapshot()).field.tick===1,'Reset recovery failed');await live.reset();
-     return{inputLatencyIsolated:true,playPauseStep:true,exportIsolation:true,pausedViewIdle:true,sameTickRestoreRedraws:true,fileImportAtomic:true,fileRoundTrip:true,routeWonAt:route.field.tick,iceWalk:true,cancellationRetained:true,softwareErrorRecovery:true};
+     return{heatToggleExact:true,appearanceToggleExact:true,inputLatencyIsolated:true,playPauseStep:true,exportIsolation:true,pausedViewIdle:true,sameTickRestoreRedraws:true,fileImportAtomic:true,fileRoundTrip:true,routeWonAt:route.field.tick,iceWalk:true,cancellationRetained:true,softwareErrorRecovery:true};
     })()'''
      call('eval','--stdin',stdin='window.__ui={done:false,stage:"Starting UI checks"};void('+script+').then(result=>Object.assign(window.__ui,{done:true,result}),error=>Object.assign(window.__ui,{done:true,error:String(error.stack||error)}));"started"')
      deadline=time.monotonic()+100;last=''
@@ -59,7 +67,7 @@ def main():
       if state['done']:break
       if time.monotonic()>deadline:raise TimeoutError('UI checks exceeded the recovery budget')
       time.sleep(1)
-     report['checks']=call('eval','window.__ui.result')['result'];report['errors']=call('errors').get('errors',[]);report['passed']=not report['errors'];call('screenshot',str(out/'cavern.png'));print(json.dumps(report['checks']),flush=True)
+     report['checks']=call('eval','window.__ui.result')['result'];report['errors']=call('errors').get('errors',[]);report['passed']=not report['errors'];call('screenshot',str(out/'cavern.png'));call('eval',"window.activeCavern.setAppearance('diagnostic')");call('screenshot',str(out/'diagnostic.png'));call('eval',"window.activeCavern.setAppearance('naturalistic')");call('eval',"window.activeCavern.view({yaw:-.09,pitch:.06})");call('screenshot',str(out/'lava.png'));call('eval',"window.activeCavern.view({yaw:1.04,pitch:.06})");call('screenshot',str(out/'ice.png'));print(json.dumps(report['checks']),flush=True)
     finally:
      (out/'report.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
      call('close');server.shutdown();server.server_close()

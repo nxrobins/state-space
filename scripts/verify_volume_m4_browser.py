@@ -24,7 +24,7 @@ def main():
     guarded_entry('frames' if any(a.startswith('frames') for a in sys.argv) else 'gpu', 600)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-cli', type=Path, required=True)
-    parser.add_argument('--phase', choices=['gameplay-probe', 'gameplay128', 'frames128gpu', 'probe', 'gate64', 'frames32', 'frames64', 'frames128', 'replay128', 'continuation128'], default='probe')
+    parser.add_argument('--phase', choices=['heat-probe','haze-probe','optics-probe', 'appearance-probe', 'appearance-replay', 'frames128beauty', 'gameplay-probe', 'gameplay128', 'frames128gpu', 'probe', 'gate64', 'frames32', 'frames64', 'frames128', 'replay128', 'continuation128'], default='probe')
     parser.add_argument('--gpu-timing', action='store_true', help='Separate diagnostic run with optional GPU timestamps')
     parser.add_argument('--devtools-trace', action='store_true', help='Separate diagnostic capture; may perturb timing')
     parser.add_argument('--node-report', type=Path, default=Path('dist/volume-m4/node128/report.json'))
@@ -33,7 +33,7 @@ def main():
     paths = sorted({p.relative_to(ROOT).as_posix() for pattern in ['engine/experimental/*.ts','examples/active-cavern/*','examples/cavern/*','examples/first-person/*','examples/volume-lab/*.js','web/frame-*.js','scripts/*volume_m4*','dist/sdk/*.js'] for p in ROOT.glob(pattern) if p.is_file()} | {'package.json', 'scripts/volume_latency_report.py'})
     hashes = {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths}
     references = {}; node = None
-    if args.phase in ('frames128', 'frames128gpu', 'gameplay128', 'continuation128'):
+    if args.phase in ('frames128beauty', 'appearance-replay', 'frames128', 'frames128gpu', 'gameplay128', 'continuation128'):
         node = json.loads(args.node_report.read_text(encoding='utf-8'))
         if not node.get('passed') or not node.get('sourceUnchanged'): raise ValueError('A passing dense CPU reference is required.')
         if not all(hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h for p,h in node['referenceInputHashes'].items()): raise ValueError('CPU reference inputs changed.')
@@ -76,16 +76,16 @@ def main():
         return value['data']
     try:
         print(f'M4 {args.phase}: starting isolated hardware session',flush=True)
-        path={'frames32':'/examples/first-person/','frames64':'/examples/cavern/','frames128':'/examples/active-cavern/','frames128gpu':'/examples/active-cavern/?gameplay=gpu'}.get(args.phase,'/__m4')
+        path={'frames32':'/examples/first-person/','frames64':'/examples/cavern/','frames128':'/examples/active-cavern/?appearance=diagnostic','frames128gpu':'/examples/active-cavern/?gameplay=gpu&appearance=diagnostic','frames128beauty':'/examples/active-cavern/?gameplay=gpu&appearance=naturalistic'}.get(args.phase,'/__m4')
         if args.gpu_timing: path+=('&' if '?' in path else '?')+'gpuTiming=1'
         call('open',f'http://127.0.0.1:{server.server_address[1]}'+path);call('set','viewport','1920','1080')
-        functions={'gameplay-probe':'verifyGameplayProbe','gameplay128':'verifyResident128','probe':'verifyM4Probe','gate64':'verify64Gate','replay128':'verify128Replay','continuation128':'verify128Continuation'}
+        functions={'heat-probe':'verifyHeatProbe','haze-probe':'verifyHazeProbe','optics-probe':'verifyOpticsProbe','appearance-probe':'verifyAppearanceProbe','appearance-replay':'verifyAppearanceReplay','gameplay-probe':'verifyGameplayProbe','gameplay128':'verifyResident128','probe':'verifyM4Probe','gate64':'verify64Gate','replay128':'verify128Replay','continuation128':'verify128Continuation'}
         if args.phase in functions:
-            argument=json.dumps('/'+args.node_report.as_posix()) if args.phase in ('continuation128','gameplay128') else ''
-            module='verify-gameplay.js' if args.phase in ('gameplay-probe','gameplay128') else 'verify.js'
+            argument=json.dumps('/'+args.node_report.as_posix()) if args.phase in ('appearance-replay','continuation128','gameplay128') else ''
+            module='verify-appearance.js' if (args.phase.startswith('appearance') or args.phase in ('heat-probe','haze-probe','optics-probe')) else 'verify-gameplay.js' if args.phase in ('gameplay-probe','gameplay128') else 'verify.js'
             expression='const m=await import("/examples/active-cavern/'+module+'");return await m.'+functions[args.phase]+'('+argument+');'
         else:
-            name={'frames32':'crossing','frames64':'cavern','frames128':'activeCavern','frames128gpu':'activeCavern'}[args.phase]
+            name={'frames32':'crossing','frames64':'cavern','frames128':'activeCavern','frames128gpu':'activeCavern','frames128beauty':'activeCavern'}[args.phase]
             call('wait','--fn',f'Boolean(window.{name}?.ready)');expression=f'return await window.{name}.runBenchmark();'
         if args.devtools_trace: call('profiler','start','--categories','devtools.timeline,v8,v8.execute,blink.user_timing,toplevel,gpu,disabled-by-default-v8.gc,disabled-by-default-devtools.timeline,disabled-by-default-v8.cpu_profiler')
         push=args.phase.startswith('frames')
@@ -137,7 +137,7 @@ void sendProgress();
             if not result.get('complete'):
                 report['passed'] = False
                 raise RuntimeError(result.get('error') or 'Frame benchmark incomplete; partial samples retained.')
-            if args.phase in ('frames128','frames128gpu'):
+            if args.phase in ('frames128','frames128gpu','frames128beauty'):
                 def fixture(name): return json.loads(gzip.decompress((ROOT/node['fixtures'][name]['path']).read_bytes()))
                 initial=json.loads(gzip.decompress(base64.b64decode(result['initialCompressed']['data'])))
                 final=json.loads(gzip.decompress(base64.b64decode(result['finalCompressed']['data'])))
@@ -155,7 +155,10 @@ void sendProgress();
         report['referencesUnchanged']=all(hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h for p,h in references.items());report['passed'] &= report['referencesUnchanged']
         call('screenshot',str((args.output/'verified.png').resolve()));print(f'M4 {args.phase}: passed={report["passed"]}',flush=True)
     except BaseException as error:
-        report['error']=str(error);raise
+        report['error']=str(error)
+        try: call('screenshot',str((args.output/'failed.png').resolve()))
+        except Exception: pass
+        raise
     finally:
         (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
         try: call('close')

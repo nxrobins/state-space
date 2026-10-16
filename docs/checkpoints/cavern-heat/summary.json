@@ -1,0 +1,179 @@
+{
+  "passed": true,
+  "performancePassed": true,
+  "sub8msTargetPassed": true,
+  "selectedRuns": {
+    "build": "build-ffc79aec",
+    "unit": "unit-3e89d3fd",
+    "physicsProbe": "probe-d83adc3d",
+    "appearanceProbe": "appearance-probe-be5f8eff",
+    "opticsProbe": "optics-probe-1f963d40",
+    "hazeProbe": "haze-probe-c4248b04",
+    "heatProbe": "heat-probe-3993ebf7",
+    "appearanceReplay": "appearance-replay-1a4f3d00",
+    "ui": "appearance-ui-cabb5615",
+    "frames": "frames128beauty-b5cca1a9",
+    "gpuTiming": "appearance-timing-70534979",
+    "lint": "lint-8e33111c",
+    "typecheck": "typecheck-51e87d3b"
+  },
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "cores": 8,
+    "logicalProcessors": 16,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "driver": "595.79",
+    "vramMiB": 24564,
+    "os": "Microsoft Windows 11 Home 10.0.26300",
+    "lastBoot": "2026-10-14T19:08:37.5-07:00"
+  },
+  "configuration": {
+    "appearance": "naturalistic",
+    "heatDistortion": true,
+    "appearanceVersion": "cavern-heat-1",
+    "gameplayBackend": "gpu",
+    "dimensions": [
+      128,
+      128,
+      128
+    ],
+    "resolution": [
+      1920,
+      1080
+    ],
+    "viewport": [
+      1920,
+      1080
+    ],
+    "devicePixelRatio": 1,
+    "targetHz": 60,
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "scope": "Complete 128\u00b3 GPU-resident gameplay: command upload, cached tool targeting, exact physics, resident collision/controller, same-tick camera, terrain mesh/draw, compact readback, HUD, validation and one GPU completion boundary. Excludes setup, snapshots, hashing and OS scanout."
+  },
+  "warmupFrames": 60,
+  "metrics": {
+    "completion": {
+      "count": 600,
+      "max": 9.500000002979505,
+      "median": 6.500000002979505,
+      "min": 4.499999994039172,
+      "p95": 7.800000005960101,
+      "p99": 8.700000000000728
+    },
+    "physicsHz": 59.94855833230277,
+    "callbackHz": 59.94915830981404,
+    "missedDeadlines": 0,
+    "lostDisplaySlots": 0,
+    "framesAtOrAbove8ms": 24,
+    "activeGameplay": {
+      "completion": {
+        "count": 191,
+        "max": 8.800000002980596,
+        "median": 6.40000000298096,
+        "min": 4.499999994039172,
+        "p95": 7.700000005959737,
+        "p99": 8.500000002979505
+      },
+      "count": 191,
+      "missedDeadlines": 0
+    },
+    "pump": {
+      "callbacks": 600,
+      "coalesced": 0
+    }
+  },
+  "exactness": {
+    "nodeExact": true,
+    "initialHash": "5694fed11bf10fd458bcf74191d5592f3ef45773e87a090c8c9f3f97a06faeea",
+    "finalHash": "506105f11ef608ead0ab8bb83c2b9a90f07c7a7941849a807f11b93da9cdc7da",
+    "finalStatus": "won",
+    "finalTick": 600,
+    "energyBalance": {
+      "currentQ": "10741080748",
+      "driftQ": "0",
+      "externalQ": "-759892",
+      "initialQ": "10741840640"
+    }
+  },
+  "gpuTimingDiagnostic": {
+    "gameplay.gpu.collisionCache": {
+      "count": 600,
+      "median": 0,
+      "p95": 0,
+      "p99": 0.065536,
+      "max": 0.065536
+    },
+    "gameplay.gpu.controller": {
+      "count": 600,
+      "median": 0,
+      "p95": 0.065536,
+      "p99": 0.065536,
+      "max": 0.393216
+    },
+    "gameplay.gpu.draw": {
+      "count": 600,
+      "median": 0.393216,
+      "p95": 1.048576,
+      "p99": 1.114112,
+      "max": 1.179648
+    },
+    "gameplay.gpu.lighting": {
+      "count": 600,
+      "median": 0.131072,
+      "p95": 0.196608,
+      "p99": 0.196608,
+      "max": 0.458752
+    },
+    "gameplay.gpu.mesh": {
+      "count": 600,
+      "median": 0,
+      "p95": 0.065536,
+      "p99": 0.065536,
+      "max": 0.065536
+    },
+    "gameplay.gpu.physicsPlanningAndCertification": {
+      "count": 600,
+      "median": 2.686976,
+      "p95": 3.080192,
+      "p99": 3.342336,
+      "max": 3.670016
+    },
+    "gameplay.gpu.toneAndBloom": {
+      "count": 600,
+      "median": 0,
+      "p95": 0.065536,
+      "p99": 0.065536,
+      "max": 0.065536
+    },
+    "gameplay.gpu.tools": {
+      "count": 600,
+      "median": 0,
+      "p95": 0.065536,
+      "p99": 0.065536,
+      "max": 0.065536
+    },
+    "gameplay.gpu.volumetrics": {
+      "count": 600,
+      "median": 0.131072,
+      "p95": 0.131072,
+      "p99": 0.131072,
+      "max": 0.32768
+    }
+  },
+  "limitations": [
+    "Single 600-frame scripted route on the listed machine, with 60 warmup frames.",
+    "No physical input-to-photon or OS scanout measurement.",
+    "Setup, module and texture load, pipeline compilation and snapshot serialization are excluded from steady-state timing.",
+    "Water and ice optics use bounded single-bounce rays; voxel silhouettes and collision surfaces are unchanged.",
+    "One exposed hot light per storage chunk; haze selects two sources per ray with fixed 32-step integration at quarter resolution. No multiple scattering, steam self-shadowing or volumetric reflections.",
+    "Heat uses emitter-driven plumes and bounded screen-space displacement; it does not solve a physical refractive-index field. Foreground/depth rejection, two-source selection and quarter resolution limit thin features.",
+    "No legacy demo trajectory or aggregate release suite ran; the incident safety hold remains active."
+  ]
+}

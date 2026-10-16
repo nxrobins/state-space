@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 168, in <module>
+    if __name__=='__main__': raise SystemExit(main())
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 121, in main
+    if state.get('error'): raise RuntimeError(state['error'])
+RuntimeError: Error: edit count must be an integer in [0, 64].
+    at checkedInteger (http://127.0.0.1:58729/dist/sdk/state-space-active-world-gpu.js:28:11)
+    at ResidentVolume.edits_fn (http://127.0.0.1:58729/dist/sdk/state-space-active-world-gpu.js:3524:17)
+    at ResidentVolume.step (http://127.0.0.1:58729/dist/sdk/state-space-active-world-gpu.js:3035:175)
+    at Object.step (http://127.0.0.1:58729/dist/sdk/state-space-active-world-gpu.js:3726:20)
+    at Module.verifyOpticsProbe (http://127.0.0.1:58729/examples/active-cavern/verify-appearance.js:112:44)
+    at async <anonymous>:1:165

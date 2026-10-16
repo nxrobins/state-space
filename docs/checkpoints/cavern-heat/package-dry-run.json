@@ -1,0 +1,351 @@
+[
+  {
+    "id": "state-space-engine@0.4.0",
+    "name": "state-space-engine",
+    "version": "0.4.0",
+    "size": 4969663,
+    "unpackedSize": 7355601,
+    "shasum": "7192b4c62d6527acb08361fb98dd2252f8b4bbac",
+    "integrity": "sha512-VyoX5nkZ1V4gqxBznsMIWmpIWdL6meKhzpt1Ts2RNUl7KVUgKbp742p6ZbKjF2I7Tu72Vt/Rc30ZCCTb85VTmg==",
+    "filename": "state-space-engine-0.4.0.tgz",
+    "files": [
+      {
+        "path": "ENGINE_CONTRACT.md",
+        "size": 9351,
+        "mode": 420
+      },
+      {
+        "path": "LICENSE",
+        "size": 1101,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 12543,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/cavern-appearance-B1KAbJm-.js",
+        "size": 3139441,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/cavern-appearance-BcJhaaAy.js",
+        "size": 3139148,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-3d-gpu.js",
+        "size": 145217,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-3d.js",
+        "size": 50956,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-active-world-gpu.js",
+        "size": 167665,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-active-world.js",
+        "size": 62334,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-world-gpu.js",
+        "size": 149878,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space-world.js",
+        "size": 58395,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/state-space.js",
+        "size": 159090,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/browser_state_space.d.ts",
+        "size": 5488,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/contracts.d.ts",
+        "size": 607,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/cpu_physics.d.ts",
+        "size": 856,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-core.d.ts",
+        "size": 3471,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-gpu-core.d.ts",
+        "size": 3217,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-gpu.d.ts",
+        "size": 420,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-renderer.d.ts",
+        "size": 402,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-shader.d.ts",
+        "size": 5811,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d-view.d.ts",
+        "size": 1130,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/3d.d.ts",
+        "size": 576,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/active-shader.d.ts",
+        "size": 136,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/active-world-core.d.ts",
+        "size": 3235,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/active-world-gpu.d.ts",
+        "size": 1154,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/active-world.d.ts",
+        "size": 363,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/cavern-appearance.d.ts",
+        "size": 914,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/cavern-haze.d.ts",
+        "size": 5139,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/cavern-optics.d.ts",
+        "size": 5427,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/gameplay-gpu.d.ts",
+        "size": 1928,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/gameplay-shader.d.ts",
+        "size": 296,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/gameplay-view.d.ts",
+        "size": 1949,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/latency.d.ts",
+        "size": 1073,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/rock-textures.d.ts",
+        "size": 55,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/world-core.d.ts",
+        "size": 3071,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/world-gpu.d.ts",
+        "size": 903,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/world-renderer.d.ts",
+        "size": 661,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/experimental/world.d.ts",
+        "size": 375,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/generated/materials.d.ts",
+        "size": 10250,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/generated/schedule.d.ts",
+        "size": 1803,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/generated/shaders.d.ts",
+        "size": 13688,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/generated/structure_solver.d.ts",
+        "size": 10302,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/index.d.ts",
+        "size": 1258,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/inspection.d.ts",
+        "size": 1009,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/pressure.d.ts",
+        "size": 528,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/registry.d.ts",
+        "size": 1361,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/structure_compiled.d.ts",
+        "size": 1736,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/structure.d.ts",
+        "size": 3199,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/thermal.d.ts",
+        "size": 1297,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/validation.d.ts",
+        "size": 558,
+        "mode": 420
+      },
+      {
+        "path": "dist/sdk/types/webgpu_field.d.ts",
+        "size": 849,
+        "mode": 420
+      },
+      {
+        "path": "docs/CAPABILITIES.md",
+        "size": 14638,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/3D_M1.md",
+        "size": 10457,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/3D_M2.md",
+        "size": 11250,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/3D_M3.md",
+        "size": 14253,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/3D_M4.md",
+        "size": 32223,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/CAVERN_HAZE.md",
+        "size": 8500,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/CAVERN_HEAT.md",
+        "size": 8055,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/CAVERN_MATERIALS.md",
+        "size": 8216,
+        "mode": 420
+      },
+      {
+        "path": "docs/checkpoints/CAVERN_OPTICS.md",
+        "size": 7171,
+        "mode": 420
+      },
+      {
+        "path": "docs/EVOLUTION.md",
+        "size": 8329,
+        "mode": 420
+      },
+      {
+        "path": "docs/PRESSURE.md",
+        "size": 4730,
+        "mode": 420
+      },
+      {
+        "path": "docs/SDK.md",
+        "size": 22699,
+        "mode": 420
+      },
+      {
+        "path": "docs/STRUCTURES.md",
+        "size": 8221,
+        "mode": 420
+      },
+      {
+        "path": "docs/THIRD_PARTY.md",
+        "size": 681,
+        "mode": 420
+      },
+      {
+        "path": "engine/experimental/ROCK_TEXTURES.md",
+        "size": 1245,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3319,
+        "mode": 420
+      }
+    ],
+    "entryCount": 67,
+    "bundled": []
+  }
+]

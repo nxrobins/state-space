@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "25773aa8cf464284a8fdc40d737bcb49",
+  "kind": "frames",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m4_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--phase",
+    "frames128beauty",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\frames128beauty-fe793f99\\evidence"
+  ],
+  "startedAt": 1792095170.4759595,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 206.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792095171.4841657,
+      "hostCpuPercent": 3.6821705426356544,
+      "freeMemoryMiB": 89922.484375
+    },
+    "gpu": {
+      "time": 1792095171.5446107,
+      "temperatureC": 39.0,
+      "utilizationPercent": 1.0,
+      "freeMemoryMiB": 11477.0,
+      "powerW": 60.34
+    }
+  },
+  "childPid": 36348,
+  "lastOutput": "M4 frames128beauty: passed=True",
+  "lastHealth": {
+    "host": {
+      "time": 1792095194.5210168,
+      "hostCpuPercent": 21.467391304347828,
+      "freeMemoryMiB": 89325.01953125
+    },
+    "gpu": {
+      "time": 1792095194.278433,
+      "temperatureC": 39.0,
+      "utilizationPercent": 3.0,
+      "freeMemoryMiB": 11231.0,
+      "powerW": 61.62
+    },
+    "job": {
+      "cpuSeconds": 21.546875,
+      "activeProcesses": 9,
+      "peakMemoryMiB": 1486.1484375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792095195.373295
+}
