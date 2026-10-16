@@ -119,6 +119,81 @@ class VerificationHealthTests(unittest.TestCase):
 
 
 class VerificationRecoveryTests(unittest.TestCase):
+    def test_optics_probe_is_required_before_appearance_replay(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
+            hashes={}
+            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
+                path='engine/experimental/'+source.name;target=root/path
+                target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
+                hashes[path]=hashlib.sha256(data).hexdigest()
+            (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
+            (base/'appearance-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'optics-probe.json').write_text('{"passed":false}',encoding='utf-8')
+            with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','appearance-replay']), mock.patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'optics-probe did not pass'):recover_m4_verification.main()
+                child.assert_not_called()
+            self.assertFalse((root/'dist/verification/safety-hold.json').exists())
+
+    def test_haze_probe_is_required_before_appearance_replay(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
+            hashes={}
+            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
+                path='engine/experimental/'+source.name;target=root/path
+                target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
+                hashes[path]=hashlib.sha256(data).hexdigest()
+            (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
+            (base/'appearance-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'optics-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'haze-probe.json').write_text('{"passed":false}',encoding='utf-8')
+            with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','appearance-replay']), mock.patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'haze-probe did not pass'):recover_m4_verification.main()
+                child.assert_not_called()
+            self.assertFalse((root/'dist/verification/safety-hold.json').exists())
+
+    def test_heat_probe_is_required_before_appearance_replay(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
+            hashes={}
+            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
+                path='engine/experimental/'+source.name;target=root/path
+                target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
+                hashes[path]=hashlib.sha256(data).hexdigest()
+            (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
+            (base/'appearance-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'optics-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'haze-probe.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            (base/'heat-probe.json').write_text('{"passed":false}',encoding='utf-8')
+            with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','appearance-replay']), mock.patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'heat-probe did not pass'):recover_m4_verification.main()
+                child.assert_not_called()
+            self.assertFalse((root/'dist/verification/safety-hold.json').exists())
+
+    def test_beauty_frames_require_current_appearance_proof(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
+            hashes={}
+            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
+                relative='engine/experimental/'+source.name;destination=root/relative
+                destination.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();destination.write_bytes(data)
+                hashes[relative]=hashlib.sha256(data).hexdigest()
+            (root/'engine/experimental/cavern-appearance.ts').write_text('changed shading',encoding='utf-8')
+            (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
+            (base/'appearance-replay.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
+            with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','frames128beauty']), mock.patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'appearance-replay is stale.*cavern-appearance'):recover_m4_verification.main()
+                child.assert_not_called()
+            self.assertFalse((root/'dist/verification/safety-hold.json').exists())
+
+    def test_beauty_replay_requires_passing_small_probe(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
+            (base/'appearance-probe.json').write_text('{"passed":false}',encoding='utf-8')
+            with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','appearance-replay']), mock.patch.object(subprocess,'run') as child:
+                with self.assertRaisesRegex(RuntimeError,'appearance-probe did not pass'):recover_m4_verification.main()
+                child.assert_not_called()
+
     def test_stale_gpu_proof_stops_before_permit_or_child(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); base = root / 'dist/volume-m4/recovery'; base.mkdir(parents=True)

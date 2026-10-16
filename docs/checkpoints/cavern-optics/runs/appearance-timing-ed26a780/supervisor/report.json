@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "id": "670939804b2e490a9f6b2997bf6f02d8",
+  "kind": "frames",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m4_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--phase",
+    "frames128beauty",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\appearance-timing-ed26a780\\evidence",
+    "--gpu-timing"
+  ],
+  "startedAt": 1792096791.02159,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('Host CPU is busy before launch')",
+  "finishedAt": 1792096792.1048462
+}

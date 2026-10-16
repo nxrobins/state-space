@@ -1,0 +1,4 @@
+M4 haze-probe: starting isolated hardware session
+Haze: bounded 16³ steam, lava scattering and terrain occlusion
+Haze: exact CPU/GPU steam evolution and odd-tick restart
+M4 haze-probe: passed=True

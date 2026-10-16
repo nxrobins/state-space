@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "id": "d9b1f854a6b2412bb4514d18873da1ff",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_active_cavern_ui",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m4\\recovery\\appearance-ui-e423fba6\\evidence",
+    "--resident-gameplay"
+  ],
+  "startedAt": 1792094912.5044248,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 207.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792094913.5150836,
+      "hostCpuPercent": 3.8535645472061675,
+      "freeMemoryMiB": 94215.0390625
+    },
+    "gpu": {
+      "time": 1792094913.569219,
+      "temperatureC": 38.0,
+      "utilizationPercent": 0.0,
+      "freeMemoryMiB": 11447.0,
+      "powerW": 61.31
+    }
+  },
+  "childPid": 26872,
+  "lastOutput": "eToggleExact\": true, \"cancellationRetained\": true, \"exportIsolation\": true, \"fileImportAtomic\": true, \"fileRoundTrip\": true, \"iceWalk\": true, \"inputLatencyIsolated\": true, \"pausedViewIdle\": true, \"playPauseStep\": true, \"routeWonAt\": 191, \"sameTickRestoreRedraws\": true, \"softwareErrorRecovery\": true}",
+  "lastHealth": {
+    "host": {
+      "time": 1792094951.2175448,
+      "hostCpuPercent": 14.130434782608692,
+      "freeMemoryMiB": 94259.44140625
+    },
+    "gpu": {
+      "time": 1792094950.721362,
+      "temperatureC": 38.0,
+      "utilizationPercent": 0.0,
+      "freeMemoryMiB": 11431.0,
+      "powerW": 61.94
+    },
+    "job": {
+      "cpuSeconds": 40.265625,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 2344.55859375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792094951.2196813
+}

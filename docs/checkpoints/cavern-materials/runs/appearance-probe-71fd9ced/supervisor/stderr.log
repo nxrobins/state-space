@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 168, in <module>
+    if __name__=='__main__': raise SystemExit(main())
+  File "D:\state-space\scripts\verify_volume_m4_browser.py", line 121, in main
+    if state.get('error'): raise RuntimeError(state['error'])
+RuntimeError: Error: Lava failed to illuminate the nearby stone receiver: 0 vs 0; images 7014/149622; pixel 0,0,0,0
+    at check (http://127.0.0.1:62232/examples/active-cavern/verify-appearance.js:5:33)
+    at Module.verifyAppearanceProbe (http://127.0.0.1:62232/examples/active-cavern/verify-appearance.js:33:118)
+    at async <anonymous>:1:165

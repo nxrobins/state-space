@@ -259,6 +259,72 @@ GPU timestamps may be quantized. A zero duration means below the measured resolu
 not proof that a pass did no work.
 
 
+## Optional naturalistic terrain appearance
+
+Chunked GPU terrain renderers expose
+`await renderer.setAppearance('naturalistic' | 'diagnostic')`. The SDK default
+remains diagnostic. The active cavern example selects naturalistic on startup.
+The unchunked M1/M2 renderer does not expose this optional method.
+
+Naturalistic presentation reads committed material/thermal cells to shade rock,
+wet contacts, ice and lava, extract one exposed hot light per storage chunk,
+sample bounded shadows and apply HDR tone mapping/bloom. It uses the same face
+cache and collision surfaces as diagnostic rendering. No physics coordinate,
+energy ledger, controller command or snapshot schema changes. Camera and
+appearance settings are not stored in physical snapshots.
+
+The first naturalistic selection loads the optional module, compiles its pipelines
+and uploads bundled CC0 rock maps with mip chains; later A/B changes reuse them.
+Diagnostic startup does not load that payload. Call it while the field is idle.
+Invalid modes and calls during another
+field operation reject without changing the selected appearance. Closing the
+renderer frees both appearances, their light buffer, HDR and volume targets. Normal
+resident gameplay still has one queue submission and one completion boundary;
+lighting and post-processing add no state readback. Optional GPU timestamp
+records include `lighting`, `draw`, `volumetrics` and `toneAndBloom`.
+
+The material pass preserves voxel silhouettes. Diagnostic steam retains its
+markers; naturalistic steam is a participating volume. Naturalistic
+water and ice trace reflected and refracted rays through committed GPU cells,
+including offscreen terrain. Depth absorption, water ripples and ice inclusions
+are presentation only. Each ray has a 64-cell/40-voxel budget and at most four
+subsequent dielectric interfaces. Secondary hits use simplified direct lighting;
+there are no recursive mirror bounces or caustics. Water ripple phase derives
+from the completed absolute tick (repeating after 36,000 ticks), including in
+resident gameplay; pause and snapshot continuation reproduce it. Optics add no
+completion boundary, state readback or optical history buffer.
+Wetness is derived from adjacent water, not a new physical material.
+A quarter-resolution pass integrates physical steam density and artistic cavern
+fog over 32 steps, clipped to the opaque surface depth and 48 voxel units. Two
+nearby sources from the existing chunk light list illuminate each ray; bounded
+voxel shadows block their light. Depth-aware upsampling composites transmittance
+and scattering before tone mapping. Visual drift uses the same completed tick
+as water. Steam casts no surface-depth marker in naturalistic mode. There is no
+additional physical smoke/fog state, fluid law, simulation pass or GPU readback.
+Secondary reflected/refracted rays retain approximate distance fog; volume
+multiple scattering, steam self-shadowing and exact radiative transfer are not
+implemented.
+
+Naturalistic heat distortion is enabled by default on chunked renderers. Use
+`await renderer.setHeatDistortion(boolean)` while idle to compare it independently;
+non-booleans, closed renderers and overlapping field operations reject. This is
+presentation state and is not serialized into physical snapshots. Diagnostic
+appearance ignores it. Switching appearance, restoring snapshots and resizing
+preserve the setting.
+
+The existing volume pass integrates bounded visual plumes above exposed hot
+lava/molten-glass emitters. World-space turbulence follows the completed tick;
+the HDR background is displaced by at most six pixels at 1080p, proportional to
+vertical resolution. Terrain shadows, original/donor depth checks and canvas-edge
+rejection keep occluded heat from pulling foreground surfaces into the plume.
+The 48-voxel/32-sample volume budget and single completion boundary are unchanged.
+One extra quarter-resolution rgba16float target holds displacement and plume
+metadata (about 0.99 MiB at 1080p). There is no new simulation state or readback.
+This is emitter-driven screen-space refraction, not a solved air-temperature or
+refractive-index field; reflections and haze are not recursively distorted.
+See [heat evidence](checkpoints/CAVERN_HEAT.md),
+[haze](checkpoints/CAVERN_HAZE.md), and [water/ice](checkpoints/CAVERN_OPTICS.md).
+
 ## Optional resident 3D gameplay
 
 Chunked WebGPU worlds expose `await field.createGameplay(state, rules)`. This is

@@ -51,3 +51,13 @@ test('disabled and unsupported diagnostics allocate no GPU resources; mapping er
   expect(gpu.snapshot().records[0].gpu.error).toContain('device lost');
   expect(() => gpu.snapshot(-1)).toThrow('cursor'); gpu.close();
 });
+
+test('volumetric gameplay fits the fixed ten-pass timestamp allocation', () => {
+  const {device}=fakeDevice(),p=new LatencyProfiler(device,true,true),trace=p.begin('step',1)!;
+  for(let i=0;i<10;i++){
+    const writes=p.pass(trace,`pass${i}`).timestampWrites!;
+    expect(writes.beginningOfPassWriteIndex).toBe(i*2);expect(writes.endOfPassWriteIndex).toBe(i*2+1);
+  }
+  expect(()=>p.pass(trace,'overflow')).toThrow('capacity');expect(trace.labels).toHaveLength(10);
+  expect(device.createQuerySet).toHaveBeenCalledWith({type:'timestamp',count:20});p.close();
+});
