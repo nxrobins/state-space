@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "id": "4d3916f032c245169eb651644cf2a0ac",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "engine/lint_ts.mjs"
+  ],
+  "startedAt": 1792196123.6871476,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792196124.7009945,
+      "hostCpuPercent": 10.3515625,
+      "freeMemoryMiB": 88590.2734375
+    },
+    "gpu": null
+  },
+  "childPid": 9664,
+  "lastOutput": "CPU physics structural lint passed",
+  "lastHealth": {
+    "host": {
+      "time": 1792196125.8367612,
+      "hostCpuPercent": 21.48403796376186,
+      "freeMemoryMiB": 88584.27734375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 1.109375,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 87.203125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792196125.8426197
+}

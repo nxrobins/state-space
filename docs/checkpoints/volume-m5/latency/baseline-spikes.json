@@ -1,0 +1,245 @@
+{
+  "scope": "Diagnosis from retained baseline raw samples, not new performance evidence",
+  "frames": [
+    {
+      "id": "frames-be60e2e0",
+      "reportSHA256": "34c5c622d1546db7dabab4172b636f7f29f0339692a0eaa4d8b6d775a4ebde32",
+      "size": 32,
+      "physicsHz": 59.95275842739824,
+      "completion": {
+        "count": 600,
+        "min": 4.500000008940333,
+        "p50": 5.500000005960828,
+        "p95": 6.7000000089410605,
+        "p99": 7.600000008940697,
+        "worst": 9.70000000894106
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "groups": [
+        {
+          "planReused": false,
+          "count": 16,
+          "meanCompletionMs": 7.562500001676426,
+          "meanWorkMs": 7.387499999254942,
+          "completionBoundaries": [
+            2
+          ],
+          "fallbackMasks": [
+            0
+          ],
+          "ticks": [
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195
+          ]
+        },
+        {
+          "planReused": true,
+          "count": 584,
+          "meanCompletionMs": 5.611301372878941,
+          "meanWorkMs": 5.435102739741337,
+          "completionBoundaries": [
+            1
+          ],
+          "fallbackMasks": [
+            0
+          ],
+          "ticks": []
+        }
+      ]
+    },
+    {
+      "id": "frames-2579c44a",
+      "reportSHA256": "6d06d6906d82760a6963d360742796bb75e497a6a31507b95fc6b041c86b2507",
+      "size": 64,
+      "physicsHz": 59.95455864833425,
+      "completion": {
+        "count": 600,
+        "min": 6.59999999701995,
+        "p50": 7.899999999999636,
+        "p95": 10.399999997020132,
+        "p99": 13,
+        "worst": 14.899999999999636
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "groups": [
+        {
+          "planReused": false,
+          "count": 32,
+          "meanCompletionMs": 12.153124995250323,
+          "meanWorkMs": 12.03125,
+          "completionBoundaries": [
+            2
+          ],
+          "fallbackMasks": [
+            0
+          ],
+          "ticks": [
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211
+          ]
+        },
+        {
+          "planReused": true,
+          "count": 568,
+          "meanCompletionMs": 8.105809853388624,
+          "meanWorkMs": 7.973767605833184,
+          "completionBoundaries": [
+            1
+          ],
+          "fallbackMasks": [
+            0
+          ],
+          "ticks": []
+        }
+      ]
+    },
+    {
+      "id": "frames-5333b5b8",
+      "reportSHA256": "a3657d6bc03500a4c1502ddd3623f8444d73370428265a5c4f7b0d4239854b00",
+      "size": 128,
+      "physicsHz": 45.90249360121741,
+      "completion": {
+        "count": 600,
+        "min": 8.700000000000728,
+        "p50": 12.499999994039172,
+        "p95": 80.79999999404026,
+        "p99": 88.89999999999964,
+        "worst": 92.89999999999964
+      },
+      "missedDeadlines": 58,
+      "lostDisplaySlots": 0,
+      "groups": [
+        {
+          "planReused": false,
+          "count": 55,
+          "meanCompletionMs": 81.29454544966862,
+          "meanWorkMs": 72.42181818241423,
+          "completionBoundaries": [
+            20,
+            22,
+            23
+          ],
+          "fallbackMasks": [
+            11
+          ],
+          "ticks": [
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234
+          ]
+        },
+        {
+          "planReused": true,
+          "count": 545,
+          "meanCompletionMs": 12.286605498708772,
+          "meanWorkMs": 12.057981651419894,
+          "completionBoundaries": [
+            1
+          ],
+          "fallbackMasks": [
+            11
+          ],
+          "ticks": []
+        }
+      ]
+    }
+  ]
+}

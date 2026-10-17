@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "probe": "seams",
+  "scope": "One bounded M5 stage; not complete release acceptance",
+  "hardware": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalProcessors": 16,
+    "gpu": "NVIDIA GeForce RTX 4090, 595.79, 24564"
+  },
+  "observer": {
+    "mode": "cli-poll",
+    "events": []
+  },
+  "result": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "mode": "active",
+    "passed": true,
+    "results": [
+      {
+        "axis": "x",
+        "chunksAlongBeam": 8,
+        "exact": true,
+        "fallbackCount": 0,
+        "fellAt": 13,
+        "finalHash": "e25d3cdb36d92cc344e5afd84cf39e7d9e9d74275ebf18c87246bdda9e3f7bd0",
+        "firstSupportRemovedAt": 9,
+        "geometry": {
+          "depth": 8,
+          "height": 8,
+          "width": 32
+        },
+        "lastSupportRemovedAt": 13,
+        "restart": 3,
+        "reuseCount": 16,
+        "solveBatchLimit": 32,
+        "stableThrough": 12,
+        "ticks": 24,
+        "unbondedContactStack": false
+      },
+      {
+        "axis": "y",
+        "chunksAlongBeam": 8,
+        "exact": true,
+        "fallbackCount": 0,
+        "fellAt": 13,
+        "finalHash": "4c7db191e8924a153bb2f8000dd89e8a44bbbe767db9d54c446a76e25373f1ec",
+        "firstSupportRemovedAt": 9,
+        "geometry": {
+          "depth": 8,
+          "height": 32,
+          "width": 8
+        },
+        "lastSupportRemovedAt": 13,
+        "restart": 3,
+        "reuseCount": 18,
+        "solveBatchLimit": 32,
+        "stableThrough": 12,
+        "ticks": 24,
+        "unbondedContactStack": true
+      },
+      {
+        "axis": "z",
+        "chunksAlongBeam": 8,
+        "exact": true,
+        "fallbackCount": 0,
+        "fellAt": 13,
+        "finalHash": "1462aea75845632ba47699cf1317f2e3059111110aa3132752d7023a0cc972a6",
+        "firstSupportRemovedAt": 9,
+        "geometry": {
+          "depth": 32,
+          "height": 8,
+          "width": 8
+        },
+        "lastSupportRemovedAt": 13,
+        "restart": 3,
+        "reuseCount": 16,
+        "solveBatchLimit": 32,
+        "stableThrough": 12,
+        "ticks": 24,
+        "unbondedContactStack": false
+      }
+    ],
+    "scope": "32-cell beams and unbonded contact stack along all axes, not full-size gameplay acceptance"
+  },
+  "errors": []
+}
