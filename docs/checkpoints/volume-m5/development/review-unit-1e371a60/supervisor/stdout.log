@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/structural-client.test.ts (3 tests) 43ms
+ ✓ engine/experimental/structural-gameplay.test.ts (3 tests) 10ms
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  17:03:48
+   Duration  1.06s (transform 125ms, setup 0ms, collect 169ms, tests 53ms, environment 0ms, prepare 486ms)
+

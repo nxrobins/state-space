@@ -15,6 +15,7 @@ import { BONDS_3D, ANCHOR_3D, INTEGRITY_3D, type StructuralState3D } from './str
 import { makeChunkRenderer, type ResidentChunkRenderer } from './world-renderer.js';
 import { makeGameplayResources, checkedGameplayState, checkedGameplayRules, checkedGameplayCommand } from './gameplay-gpu.js';
 import { LatencyProfiler } from './latency.js';
+import { commitStructuralGoal } from './structural-gameplay.js';
 import type { TerrainRenderer, TerrainCamera, TerrainAppearance } from './3d-view.js';
 import type { GameplayState3D, GameplayRules3D, GameplayCommand3D, GameplayPresentation3D } from './gameplay-view.js';
 import type { StructuralResidentGameplay3D, StructuralGameplayOptions3D, StructuralGameplayCommit3D, StructuralSubmissionTiming3D, StructuralGameplayLatency3D } from './structural-view.js';
@@ -369,7 +370,7 @@ export class GpuStructuralWorld3D {
             e.copyBufferToBuffer(resources.result,0,resources.read,0,512);
             const rows=await this.#submit(e,[...(command?[{buffer:this.#controlRead,bytes:64}]:[]),{buffer:resources.read,bytes:512}]);
             const control=command?rows[0]:new Uint32Array(16);if(control[2])throw Error(`Structural gameplay rejected solve (${control[2]}).`);
-            const decoded=resources.decode(rows[command?1:0],c.tick),submissions=this.#submissions-start;
+            const result=resources.decode(rows[command?1:0],c.tick),decoded=command?commitStructuralGoal(result,checkedRules):result,submissions=this.#submissions-start;
             commit={...decoded,submissions,completionBoundaries:submissions,latency};return control;
           };
           if(command)await this.#tickOnce(edits,finish);else await finish(this.#device.createCommandEncoder(),this.#current);

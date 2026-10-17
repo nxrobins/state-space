@@ -11,7 +11,8 @@ $('size').value=params.get('size')??'32';$('scene').value=params.get('scene')??'
 function basis(yaw,pitch){const forward=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=[-Math.sin(pitch)*Math.sin(yaw),Math.cos(pitch),-Math.sin(pitch)*Math.cos(yaw)];return{forward,right,up:up.map(v=>-v)};}
 // In a +Y-down world, camera up points toward negative Y.
 function view(){return basis(yaw,pitch);}
-function fail(error){playing=false;failed=true;keys.clear();$('mode').textContent='PAUSED / ERROR';$('error').hidden=false;$('error').textContent=String(error.stack||error);}
+function fail(error){playing=false;failed=true;pump?.stop();keys.clear();$('mode').textContent='PAUSED / ERROR';$('error').hidden=false;$('error').textContent=String(error.stack||error);}
+function startFrames(){pump?.stop();pump=createFramePump((now,interval)=>{active=frame(now,interval);return active;},{onError:fail});}
 function notify(fn){void Promise.resolve().then(fn).catch(fail);}
 function text(id,value){if($(id).textContent!==value)$(id).textContent=value;}
 function hud(ms){
@@ -20,7 +21,7 @@ function hud(ms){
  const solve=field.inspectSolve();text('solve',solve.planReused?'Exact cache':'Global solve');
  const hit=lastCommit?.target;text('target',hit?`${names.get(hit.material)} · ${hit.cell.join(' / ')} · E to ${$('tool').value}`:'Aim at terrain within five voxels.');
  if(lastCommit?.status==='lost')text('mode','FELL / RESET TO RETRY');
- const p=lastCommit?.player??level.actor.player;if(p.x>=level.rules.goal.minX&&p.y<=level.rules.goal.maxY)text('mode','CROSSING COMPLETE');
+ if(lastCommit?.status==='won')text('mode','CROSSING COMPLETE');
 }
 function input(tick){
  const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0),side=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),scale=forward&&side?Math.SQRT1_2:1;
@@ -66,14 +67,14 @@ async function load(){
  driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=24;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
  text('dimension',`${size}³`);text('energy','Not inspected');
  text('expectation',scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.');
- await present();
+ await present();startFrames();
 }
 async function snapshot(){return{version:SCENE_VERSION,scenario:level.scenario,size:level.size,field:await field.snapshot(),actor:driver.inspect()};}
 async function restore(value){
  if(!value||value.version!==SCENE_VERSION||value.size!==level.size||value.scenario!==level.scenario)throw Error('Checkpoint belongs to a different chamber.');
  // Validate actor before any terrain publication; terrain validates atomically.
  const actor=validateStructuralGameplayState3D(value.actor,[level.size,level.size,level.size]);
- await field.restore(value.field);await driver.restore(actor);failed=false;$('error').hidden=true;pendingEdits=[];await present();
+ await field.restore(value.field);await driver.restore(actor);failed=false;$('error').hidden=true;pendingEdits=[];await present();startFrames();
 }
 $('play').onclick=()=>{if(failed||exclusive)return;playing=!playing;clock.reset();hud();};
 $('step').onclick=()=>notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),pendingEdits.splice(0))));
@@ -94,4 +95,4 @@ const api={get field(){return field;},get renderer(){return renderer;},get drive
  stop:async()=>{playing=false;pump?.stop();await active;},hud,view,ready:null};window.structuralCavern=api;
 api.runBenchmark=()=>exclusiveOperation(async()=>{const {benchmarkStructuralGameplay}=await import('./benchmark.js');return benchmarkStructuralGameplay(api);});
 api.runScaleProbe=()=>exclusiveOperation(async()=>{const {probeStructuralScale}=await import('./scale-probe.js');return probeStructuralScale(api);});
-api.ready=exclusiveOperation(load).then(()=>{pump=createFramePump((now,interval)=>{active=frame(now,interval);return active;},{onError:fail});});api.ready.catch(fail);
+api.ready=exclusiveOperation(load);api.ready.catch(fail);

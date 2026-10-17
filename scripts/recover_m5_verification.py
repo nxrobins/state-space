@@ -13,7 +13,7 @@ from scripts.verification_guard import ROOT, Lease
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('stage', choices=('typecheck', 'cpu-unit', 'build', 'declarations', 'lint', 'cpu-control', 'cpu-cut', 'cpu-heat', 'cpu-ice', 'gpu-build', 'probe-build', 'shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'level-pilot', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot', 'compatibility-unit', 'sdk-build'))
+    parser.add_argument('stage', choices=('typecheck', 'cpu-unit', 'review-unit', 'review-gpu', 'build', 'declarations', 'lint', 'cpu-control', 'cpu-cut', 'cpu-heat', 'cpu-ice', 'gpu-build', 'probe-build', 'shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'level-pilot', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot', 'compatibility-unit', 'sdk-build'))
     parser.add_argument('--browser-cli', type=Path)
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
@@ -31,6 +31,7 @@ def main():
     commands = {
         'typecheck': [node, 'node_modules/typescript/bin/tsc', '--noEmit', '-p', 'engine/tsconfig.json'],
         'cpu-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-world.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
+        'review-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
         'build': [node, 'node_modules/vite/bin/vite.js', 'build', '--config', 'engine/vite.structural-world.config.ts'],
         'declarations': [node, 'node_modules/typescript/bin/tsc', '-p', 'engine/tsconfig.sdk.json'],
         'lint': [node, 'engine/lint_ts.mjs'],
@@ -52,14 +53,14 @@ def main():
             reference=args.resume.resolve();reference.relative_to(ROOT)
             if not (reference/'report.json').is_file(): parser.error('Missing CPU continuation receipt')
             command += ['--resume',str(reference)]
-    elif args.stage in ('shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot'):
+    elif args.stage in ('review-gpu', 'shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot'):
         if not args.browser_cli or not args.browser_cli.is_file():
             parser.error('--browser-cli must identify the installed browser CLI')
         # Correctness probes are CPU-capped and below normal priority. Timed
         # display frames use the existing bounded frame policy, as M4 does.
         kind = 'frames' if args.stage=='frames' else 'gpu'
         command = [sys.executable, '-m', 'scripts.verify_volume_m5_browser', '--browser-cli', str(args.browser_cli.resolve()), '--output', str(out / 'evidence')]
-        command += ['--probe', {'shader-probe':'compile','gpu-tiny':'tiny','gpu-active-tiny':'active-tiny','gpu-trajectory':'trajectory','gpu-seams':'seams','gameplay-pilot':'gameplay','ui-pilot':'ui','frames':'frames','gpu-fallback':'fallback','gpu-order':'order','level-trajectory':'level-trajectory','scale-pilot':'scale'}[args.stage]]
+        command += ['--probe', {'review-gpu':'review','shader-probe':'compile','gpu-tiny':'tiny','gpu-active-tiny':'active-tiny','gpu-trajectory':'trajectory','gpu-seams':'seams','gameplay-pilot':'gameplay','ui-pilot':'ui','frames':'frames','gpu-fallback':'fallback','gpu-order':'order','level-trajectory':'level-trajectory','scale-pilot':'scale'}[args.stage]]
         if args.stage in ('gameplay-pilot','ui-pilot','frames','level-trajectory','scale-pilot'):
             command += ['--mode',args.mode,'--size',str(args.size),'--scene',args.scene]
         if args.stage == 'gpu-seams':
@@ -81,13 +82,14 @@ def main():
         ROOT / 'engine/lint_ts.mjs', ROOT / 'engine/tsconfig.json', ROOT / 'engine/tsconfig.sdk.json',
         ROOT / 'scripts/verify_volume_m5_cpu.mjs', ROOT / 'scripts/verify_volume_m5_browser.py']
     paths += [p for p in (ROOT/'examples/structural-cavern').glob('*') if p.suffix in ('.js','.html','.css')] + [ROOT/'scripts/verify_volume_m5_level.mjs']
+    paths += [ROOT/'examples/structural-cavern/README.md', ROOT/'web/frame-pump.js', ROOT/'web/frame-clock.js']
     if args.stage.startswith('cpu-') and args.stage != 'cpu-unit':
         paths += [ROOT / 'dist/sdk/state-space-structural-world.js']
     if args.stage=='level-pilot':
         paths += [ROOT/'dist/sdk/state-space-structural-world.js']
     if kind == 'gpu':
         paths += [ROOT / 'dist/volume-m5/structural-probe.js']
-    if args.stage in ('gameplay-pilot','ui-pilot','frames','level-trajectory','scale-pilot'):
+    if args.stage in ('review-gpu','gameplay-pilot','ui-pilot','frames','level-trajectory','scale-pilot'):
         paths += list((ROOT/'dist/sdk').glob('*.js'))
         paths += [ROOT/'web/frame-pump.js',ROOT/'web/frame-clock.js']
     if args.stage in ('gpu-trajectory','level-trajectory') or args.stage=='level-pilot' and args.resume:

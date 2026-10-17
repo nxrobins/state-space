@@ -1,0 +1,38 @@
+{
+  "baselineRevision": "2f974b69408e7669857a9070fcc51743df46c1ad",
+  "runtimeChanges": {
+    "engine/experimental/structural-world-gpu.ts": {
+      "beforeSHA256": "9b7393b00bfb33fb35c9b552397ff0be371fa1fcd8ebd089f476396f9e6a527b",
+      "afterSHA256": "415b4396f57c4c1bea66ad7d2514a096b1a836d6641dfb12778a5248c0b51178"
+    },
+    "examples/structural-cavern/app.js": {
+      "beforeSHA256": "b471afc867081672343f99f191c3d201bbf21ede7a1438f7e2839b15b72290a7",
+      "afterSHA256": "9d8f6ea64cac8660803f09a419b9f69f9b9d598fe3fcbd01ac2b7e28a31c62b3"
+    },
+    "dist/sdk/state-space-structural-world-gpu.js": {
+      "beforeSHA256": "3bbe853ab52fd158217222a2809a2034e643cf0e8029907d4ac7fd6576a83cc5",
+      "afterSHA256": "46b174f71c2aec57a3fbe017e4e101a4fc795006917954dc7d25f550bd2c884e"
+    }
+  },
+  "physicsSourceHashes": {
+    "engine/experimental/structural-world-core.ts": "e954d6eeb8c42bb4e2d741853d7aa79fd684e3ff908930951c27899e691c9e2c",
+    "engine/experimental/structural-mechanics.ts": "6c39bef44646fe861d55357609e9e6281a1ed6ec12edb5e0fda68af0e55693d1",
+    "engine/experimental/structural-material.ts": "65501ca4375d82cded120bdcfdc48a99d4afbe48b433ee81211a9e8ca92725d9",
+    "engine/experimental/structural-shader.ts": "6bcf2b9ab96738026376ba15364e2147ab06a8ddf0e9bd3637111234e13a2f9e",
+    "engine/experimental/structural-active-shader.ts": "9851594b0ee6c88f258a3de2a5d1ae16d85da112b572d18c5987f0fe4dfe4b81",
+    "engine/experimental/3d-core.ts": "02603e99c47eadc0a5f3bd1958201fcf202afa5759e96f6271c84c5ae1b92937",
+    "engine/experimental/3d-shader.ts": "057d1a4cb019020645ed7544a2b0c9a5636988464c6579295ef40f1067e01a8e",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "engine/experimental/gameplay-gpu.ts": "cab84c6295b3d9b8d26e9fe33aea5df07005b674e85fc7835b314182f7f1a72e",
+    "engine/experimental/gameplay-shader.ts": "6a6018576ff52bcd1101041ddd97c98e4de7751f2fa5cd1b9673504fd3a622ef"
+  },
+  "receipts": {
+    "review-unit": "review-unit-aa785fc7",
+    "review-gpu": "review-gpu-d9ea4088",
+    "cpu-unit": "cpu-unit-90313113",
+    "typecheck": "typecheck-b8107cfd",
+    "declarations": "declarations-23ac295d",
+    "lint": "lint-7c584482",
+    "gpu-build": "gpu-build-93589df2"
+  }
+}

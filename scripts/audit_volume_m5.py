@@ -6,6 +6,7 @@ import json
 import math
 from pathlib import Path
 import subprocess
+from scripts.audit_volume_m5_review import audit_review
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = ROOT / 'docs/checkpoints/volume-m5'
@@ -29,9 +30,10 @@ def read(path):
 
 
 def main():
+    review = audit_review()
     records = {r['id']: r for r in read(BASE/'development/index.json')['records']}
     selected = {}
-    report = {'passed': False, 'scope': 'M5 release criteria, retained evidence and current source audit; no new workload',
+    report = {'passed': False, 'scope': 'M5 baseline release evidence plus current bounded PR22 repair verification; no new workload', 'reviewFixes': review,
               'matrix': [], 'frames': [], 'requirements': [], 'receipts': selected}
 
     def receipt(name, cpu=False):
@@ -53,7 +55,11 @@ def main():
         if name.startswith(('gpu-tiny-', 'gpu-active-tiny-', 'gpu-order-', 'gpu-fallback-')):
             names += ['engine/experimental/structural-probe.ts', 'dist/volume-m5/structural-probe.js']
         for path in names:
-            assert sha((ROOT/path).read_bytes()) == r['sourceHashes'][path], f'Runtime changed: {name}/{path}'
+            # Original receipts remain attached to their measured revision.
+            # The review audit above checks the exact allowed source delta and
+            # fresh regressions; do not relabel old frames as new measurements.
+            expected = review['runtimeChanges'][path]['beforeSHA256'] if path in review['runtimeChanges'] else sha((ROOT/path).read_bytes())
+            assert expected == r['sourceHashes'][path], f'Runtime changed: {name}/{path}'
         selected[name] = {'directory': record['archivedDirectory'], 'receiptSHA256': sha((directory/'report.json').read_bytes()),
                           'evidenceSHA256': record['files'].get('evidence/report.json'), 'runtimeBindingsChecked': names}
         evidence = read(directory/'evidence/report.json') if (directory/'evidence/report.json').exists() else None

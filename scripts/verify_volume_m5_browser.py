@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-cli', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--probe', choices=('compile', 'tiny', 'active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
+    parser.add_argument('--probe', choices=('review', 'compile', 'tiny', 'active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--replay-part',choices=('all','main','restarts'),default='all')
@@ -103,6 +103,9 @@ def main():
         if args.probe == 'order':
             invocation = 'verifyM5ProcessingOrder()'
         module = '/dist/volume-m5/structural-probe.js'
+        if args.probe == 'review':
+            module = '/examples/structural-cavern/verify-review.js'
+            invocation = 'verifyStructuralReview()'
         if args.probe == 'gameplay':
             module = '/examples/structural-cavern/verify.js'
             invocation = 'verifyStructuralGameplay(' + json.dumps({'size':args.size,'scenario':args.scene,'mode':args.mode}) + ')'
