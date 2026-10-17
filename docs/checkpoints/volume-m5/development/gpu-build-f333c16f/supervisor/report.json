@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "id": "0e07cba27e6f4a228112d2259197cf85",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--config",
+    "engine/vite.structural-world-gpu.config.ts"
+  ],
+  "startedAt": 1792195896.7505872,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('Host CPU is busy before launch')",
+  "finishedAt": 1792195897.762737
+}

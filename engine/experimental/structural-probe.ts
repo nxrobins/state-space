@@ -139,16 +139,21 @@ export async function verifyM5GpuTrajectory(mode:'dense'|'active',base:string){
   }finally{gpu.close();}
 }
 
-/** Two long beams span eight storage chunks, with independently removed roots. */
+/** Long beams and an unbonded contact stack span eight storage chunks. */
 export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLimit=32){
   const results=[];let backendInfo:Readonly<Record<string,string|boolean>>={};
-  for(const axis of ['x','z'] as const){
-    const geometry=axis==='x'?{width:32,height:8,depth:8}:{width:8,height:8,depth:32};
-    const cpu=new CpuStructuralWorld3D({...geometry,chunkSize:8}),gpu=await createStateSpaceStructuralWorld3DGPU({...geometry,chunkSize:4,mode,solveBatchLimit});backendInfo=gpu.backendInfo;
-    const coordinate=(position:number,y=3)=>axis==='x'?{x:position,y,z:3}:{x:3,y,z:position};
+  for(const axis of ['x','y','z'] as const){
+    const geometry=axis==='x'?{width:32,height:8,depth:8}:axis==='y'?{width:8,height:32,depth:8}:{width:8,height:8,depth:32};
+    // The normal case exercises the public default budget. A one-pass override
+    // independently forces the exact general solver on the identical fixture.
+    const cpu=new CpuStructuralWorld3D({...geometry,chunkSize:8}),gpu=await createStateSpaceStructuralWorld3DGPU({...geometry,chunkSize:4,mode,...(solveBatchLimit===32?{}:{solveBatchLimit})});backendInfo=gpu.backendInfo;
+    const coordinate=(position:number,y=3)=>axis==='x'?{x:position,y,z:3}:axis==='y'?{x:3,y:position,z:3}:{x:3,y,z:position};
     try{
       const cold=cpu.snapshot();cold.packedCells=cold.packedCells.map(v=>v&0xffff00ff);cold.energyQ.fill(0);cpu.restore(cold);
       for(let p=1;p<=30;p++){const c=coordinate(p);cpu.setCell(c.x,c.y,c.z,MAT.STONE,0);}
+      // Thirty independent components transfer support through downward
+      // contacts. Blocking must converge globally, without welding the stack.
+      if(axis==='y')for(let p=1;p<30;p++)cpu.setBond(3,p,3,3,false);
       for(const p of [1,30]){const c=coordinate(p);cpu.setAnchor(c.x,c.y,c.z,true);}
       await gpu.restore(cpu.snapshot());const checkpoints=new Map<number,StructuralSnapshot3D>();let reuseCount=0,fallbackCount=0;
       const edits=(tick:number):StructuralEdit3D[]=>tick===9||tick===13?[{kind:'material',...coordinate(tick===9?1:30),material:MAT.AIR,thermal:0}]:[];
@@ -156,6 +161,7 @@ export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLim
         cpu.step(1,{edits:edits(tick)});await gpu.step(1,{edits:edits(tick)});const state=await gpu.snapshot();equalState(state,cpu.snapshot(),`${mode} ${axis} distant support ${tick}`);
         const c=coordinate(16,tick===13?4:3);
         if(tick<=13&&cpu.sample(c.x,c.y,c.z).material!==MAT.STONE)throw Error('Distant supported/control failure bound differs');
+        if(axis==='y'&&tick===13&&(cpu.sample(3,2,3).material!==MAT.AIR||cpu.sample(3,3,3).material!==MAT.STONE))throw Error('Contact stack did not fall after its lower root was removed');
         if(gpu.inspectSolve().planReused)reuseCount++;
         else if(gpu.inspectSolve().fallbackMask)fallbackCount++;
         if([3,12,13,24].includes(tick))checkpoints.set(tick,state);
@@ -167,10 +173,13 @@ export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLim
       if((await gpu.energyBalance()).driftQ!==0n)throw Error('Distant-support energy drift');
       if(!reuseCount)throw Error('Exact support cache not exercised');
       if(solveBatchLimit===1&&!fallbackCount)throw Error('Bounded-attempt fallback was not exercised');
-      results.push({axis,geometry,ticks:24,chunksAlongBeam:8,firstSupportRemovedAt:9,stableThrough:12,lastSupportRemovedAt:13,fellAt:13,restart:3,reuseCount,fallbackCount,solveBatchLimit,exact:true,finalHash:await digest(final)});
+      // Removing one end leaves a 29-cell beam supported from its far end.
+      // This exceeded the old 16-pass attempt and restarted every solve.
+      if(solveBatchLimit===32&&fallbackCount)throw Error('Default budget restarted the long-beam solve');
+      results.push({axis,geometry,ticks:24,chunksAlongBeam:8,unbondedContactStack:axis==='y',firstSupportRemovedAt:9,stableThrough:12,lastSupportRemovedAt:13,fellAt:13,restart:3,reuseCount,fallbackCount,solveBatchLimit,exact:true,finalHash:await digest(final)});
     }finally{gpu.close();}
   }
-  return{passed:true,scope:'32x8x8 and 8x8x32 distant support, not full-size gameplay acceptance',mode,backendInfo,results};
+  return{passed:true,scope:'32-cell beams and unbonded contact stack along all axes, not full-size gameplay acceptance',mode,backendInfo,results};
 }
 
 /** Verification-only permutation of invocation ownership and active chunk order.
@@ -195,7 +204,7 @@ export async function verifyM5ProcessingOrder(){
   };
   try{
     const result=await verifyM5DistantSupport('active',1);
-    if(mechanicsPermutations<28||listPermutations!==4)throw Error('Processing-order probe did not permute both worlds');
+    if(mechanicsPermutations<42||listPermutations!==6)throw Error('Processing-order probe did not permute all three worlds');
     return{...result,scope:'Reversed structural invocation ownership and reversed active worklist; exact CPU state across eight-chunk X/Z failures and odd restart',mechanicsPermutations,listPermutations};
   }finally{GPUDevice.prototype.createShaderModule=original;}
 }

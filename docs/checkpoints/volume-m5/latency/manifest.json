@@ -1,0 +1,38 @@
+{
+  "baselineRevision": "7332c30c7d12deace04fdfad5ba88ea872628f5c",
+  "scope": "Bounded solver-budget regressions; full trajectories and performance remain pending",
+  "performanceStatus": "deferred-by-user",
+  "receipts": {
+    "cpu-unit": "cpu-unit-91dfcb26",
+    "review-unit": "review-unit-d8e63bae",
+    "typecheck": "typecheck-6eda09a8",
+    "declarations": "declarations-73a405e0",
+    "lint": "lint-f6cdc768",
+    "gpu-build": "gpu-build-95caaeeb",
+    "probe-build": "probe-build-bffaf5d7",
+    "seams-active": "gpu-seams-5691f611",
+    "seams-dense": "gpu-seams-4ff479c2",
+    "gpu-fallback": "gpu-fallback-30c8b42f",
+    "gpu-order": "gpu-order-2a6788e4",
+    "gpu-tiny": "gpu-tiny-d0de2549",
+    "gpu-active-tiny": "gpu-active-tiny-6f3661e1"
+  },
+  "unchangedSourceHashes": {
+    "engine/experimental/structural-world-core.ts": "e954d6eeb8c42bb4e2d741853d7aa79fd684e3ff908930951c27899e691c9e2c",
+    "engine/experimental/structural-mechanics.ts": "6c39bef44646fe861d55357609e9e6281a1ed6ec12edb5e0fda68af0e55693d1",
+    "engine/experimental/structural-material.ts": "65501ca4375d82cded120bdcfdc48a99d4afbe48b433ee81211a9e8ca92725d9",
+    "engine/experimental/structural-shader.ts": "6bcf2b9ab96738026376ba15364e2147ab06a8ddf0e9bd3637111234e13a2f9e",
+    "engine/experimental/structural-active-shader.ts": "9851594b0ee6c88f258a3de2a5d1ae16d85da112b572d18c5987f0fe4dfe4b81",
+    "engine/experimental/3d-core.ts": "02603e99c47eadc0a5f3bd1958201fcf202afa5759e96f6271c84c5ae1b92937",
+    "engine/experimental/3d-shader.ts": "057d1a4cb019020645ed7544a2b0c9a5636988464c6579295ef40f1067e01a8e",
+    "engine/experimental/structural-gameplay.ts": "dabb20e330d2826feacc4c6402a09a4d4a0a22d56709d2722f0ba96f253f1de6",
+    "engine/experimental/gameplay-shader.ts": "6a6018576ff52bcd1101041ddd97c98e4de7751f2fa5cd1b9673504fd3a622ef",
+    "engine/thermal.ts": "7543bc405c70493aaab5469fd3e74a275676ec85f0f3a88744d3201c979ff9a8",
+    "examples/structural-cavern/app.js": "9d8f6ea64cac8660803f09a419b9f69f9b9d598fe3fcbd01ac2b7e28a31c62b3",
+    "examples/structural-cavern/scene.js": "11aed917d28bc87cc4c21d849616d4deebf54d2e9178163413a0dc086cb3a94b",
+    "examples/structural-cavern/benchmark.js": "1b8e5d30889250e904cde3097e6204be9e3007cb1f4d6dc296a06377f0a84614",
+    "scripts/verification_guard.py": "f48a02a24f5e48c99856548dbc3a51e27ca5c044a07163dcbce349c63c923e49",
+    "scripts/recover_m5_verification.py": "d8571d2df72629c3093e624f2adaa8b72302df0729c9ff3ef403e27fed9ee247",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  }
+}

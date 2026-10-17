@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "scope": "Bounded exact regression checks only",
+  "baselineRevision": "7332c30c7d12deace04fdfad5ba88ea872628f5c",
+  "receipts": {
+    "cpu-unit": "cpu-unit-91dfcb26",
+    "review-unit": "review-unit-d8e63bae",
+    "typecheck": "typecheck-6eda09a8",
+    "declarations": "declarations-73a405e0",
+    "lint": "lint-f6cdc768",
+    "gpu-build": "gpu-build-95caaeeb",
+    "probe-build": "probe-build-bffaf5d7",
+    "seams-active": "gpu-seams-5691f611",
+    "seams-dense": "gpu-seams-4ff479c2",
+    "gpu-fallback": "gpu-fallback-30c8b42f",
+    "gpu-order": "gpu-order-2a6788e4",
+    "gpu-tiny": "gpu-tiny-d0de2549",
+    "gpu-active-tiny": "gpu-active-tiny-6f3661e1"
+  },
+  "physicsKernelsUnchanged": true,
+  "legacyDemosQuarantined": true,
+  "incidentHoldActive": true,
+  "performanceStatus": "deferred-by-user",
+  "performancePassed": null,
+  "pending": [
+    "32/64 full trajectory and odd-restart checks",
+    "128 scale pilot",
+    "32/64/128 full gameplay benchmarks"
+  ]
+}

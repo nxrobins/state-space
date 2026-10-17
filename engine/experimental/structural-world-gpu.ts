@@ -175,7 +175,9 @@ export class GpuStructuralWorld3D {
       this.#parameters(slot,[1<<(slot-1),slot,0,0]);this.#dispatch(e,'relaxStart',input,damage);
       // These are attempt budgets, never physical iteration limits. Every
       // exhausted family discards the attempt and invokes complete convergence.
-      const budget=slot===4?Math.min(this.#solveBatchLimit,4):this.#solveBatchLimit;
+      // Blocking is a fixed-point solve too: four iterations can be exhausted
+      // by stacked disconnected components even when the other families fit.
+      const budget=this.#solveBatchLimit;
       for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure,0,true);this.#dispatch(e,'relaxAdvance',input,damage);}
       this.#dispatch(e,'relaxEnd',input,damage,input,slot);
     };
@@ -392,7 +394,9 @@ export class GpuStructuralWorld3D {
 
 export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpuOptions3D={}):Promise<GpuStructuralWorld3D>{
   if(!options||typeof options!=='object'||Array.isArray(options))throw Error('Invalid structural GPU options.');
-  const {mode='dense',solveBatchLimit=16,...geometry}=options;if(mode!=='dense'&&mode!=='active')throw Error('Invalid structural execution mode.');checkedInteger(solveBatchLimit,1,64,'solve batch limit');
+  // Thirty-two is an attempt budget, not a simulation horizon. Indirect work
+  // stops at the exact fixed point; exhaustion still runs general convergence.
+  const {mode='dense',solveBatchLimit=32,...geometry}=options;if(mode!=='dense'&&mode!=='active')throw Error('Invalid structural execution mode.');checkedInteger(solveBatchLimit,1,64,'solve batch limit');
   const g=activeWorldGeometry(geometry),initial=new CpuStructuralWorld3D(geometry).snapshot();
   if(!globalThis.navigator?.gpu)throw Error('WebGPU unavailable.');
   const adapter=await navigator.gpu.requestAdapter();if(!adapter)throw Error('No WebGPU adapter.');
