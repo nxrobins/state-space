@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "scope": "8^3 CPU foundation only; not M5 GPU or gameplay acceptance",
+  "scene": "control",
+  "dimensions": [
+    8,
+    8,
+    8
+  ],
+  "ticks": 1024,
+  "checkpoints": {
+    "0": {
+      "path": "tick-0.json.gz",
+      "sha256": "4a50cb346140737184ca2ed977c0eb8849cb32c2ffb5dd2acc5ee68761706a76",
+      "stateHash": "85df06b6fb3c1bda786ffcbfa077b1ea83eff9364709e2189f97ffa43d7e0f96"
+    },
+    "3": {
+      "path": "tick-3.json.gz",
+      "sha256": "be16bb178d75747d91a66cbe9544106b6fe51ec3b62085a136338b9c5b588285",
+      "stateHash": "9a12a0af1f33213da93d3be4c84b84dab7fa5c6db54c1b944286bce29fba0f53"
+    },
+    "8": {
+      "path": "tick-8.json.gz",
+      "sha256": "251abeddb9c31466cc58ceff6464f3efafea5ad708c62440da76b2e3fb3486d0",
+      "stateHash": "a7968780fe141bccde163ca9f0dac090d0ebf421d1fa7852e952695b8c1dd77d"
+    },
+    "9": {
+      "path": "tick-9.json.gz",
+      "sha256": "9e8e77eb022d4916eed806e6d257010b18174490c727d23e11b2af11af518cf9",
+      "stateHash": "d14020f9163cc848eb3d653b62ff17fdd90a850bcb2e899d66ef5dbb31c470f8"
+    },
+    "31": {
+      "path": "tick-31.json.gz",
+      "sha256": "3d57068ec36851578ba4f91a57d8899c38fdd3995d83212a00a915946cd7cc36",
+      "stateHash": "d0492983f63e1a2d1207518a9ed9db490b44ea1ed5f50decd2ed7bb15008dcb8"
+    },
+    "509": {
+      "path": "tick-509.json.gz",
+      "sha256": "31a979e261cc393bc61b356a9f015caa57756d036497d246a19ca24cd2f681ac",
+      "stateHash": "a7a42060d765c727f99a74d264e56478828d0ff1211440b4eb53e7281076f626"
+    },
+    "1024": {
+      "path": "tick-1024.json.gz",
+      "sha256": "653c4d884aab5693fba47ae4669a57b658a252bb9eeaf2e94df20631862a5962",
+      "stateHash": "db04a90f8de0e6b4acdf17b628dc0b7c883b66eacc38d16e50d6d6e6f944515a"
+    }
+  },
+  "restarts": [
+    {
+      "start": 3,
+      "end": 31,
+      "exact": true
+    },
+    {
+      "start": 31,
+      "end": 509,
+      "exact": true
+    },
+    {
+      "start": 509,
+      "end": 1024,
+      "exact": true
+    }
+  ],
+  "partitionExact": true,
+  "failureTick": null,
+  "controlStableThrough": 1024,
+  "energyDriftQ": "0",
+  "finalHash": "db04a90f8de0e6b4acdf17b628dc0b7c883b66eacc38d16e50d6d6e6f944515a"
+}

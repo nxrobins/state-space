@@ -1,0 +1,29 @@
+M5: isolated level-trajectory probe
+M5 bounded probe starting
+M5 bounded probe starting
+M5 32³ ice-heat dense: 0->16/1024
+M5 32³ ice-heat dense: 0->64/1024
+M5 32³ ice-heat dense: 0->96/1024
+M5 32³ ice-heat dense: 0->208/1024
+M5 32³ ice-heat dense: 0->272/1024
+M5 32³ ice-heat dense: 0->416/1024
+M5 32³ ice-heat dense: 0->464/1024
+M5 32³ ice-heat dense: 0->528/1024
+M5 32³ ice-heat dense: 0->576/1024
+M5 32³ ice-heat dense: 0->720/1024
+M5 32³ ice-heat dense: 0->768/1024
+M5 32³ ice-heat dense: 0->832/1024
+M5 32³ ice-heat dense: 0->880/1024
+M5 32³ ice-heat dense: 0->944/1024
+M5 32³ ice-heat dense: 0->992/1024
+M5 32³ ice-heat dense: 3->16/31
+M5 32³ ice-heat dense: 509->544/1024
+M5 32³ ice-heat dense: 509->608/1024
+M5 32³ ice-heat dense: 509->656/1024
+M5 32³ ice-heat dense: 509->720/1024
+M5 32³ ice-heat dense: 509->768/1024
+M5 32³ ice-heat dense: 509->832/1024
+M5 32³ ice-heat dense: 509->880/1024
+M5 32³ ice-heat dense: 509->928/1024
+M5 32³ ice-heat dense: 509->992/1024
+M5 32³ ice-heat dense: every tick and odd restarts exact

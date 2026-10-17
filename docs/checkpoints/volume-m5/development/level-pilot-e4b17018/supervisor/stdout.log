@@ -1,0 +1,17 @@
+64^3 ice-heat: 528/768; fall 181; melt 180
+64^3 ice-heat: 544/768; fall 181; melt 180
+64^3 ice-heat: 560/768; fall 181; melt 180
+64^3 ice-heat: 576/768; fall 181; melt 180
+64^3 ice-heat: 592/768; fall 181; melt 180
+64^3 ice-heat: 608/768; fall 181; melt 180
+64^3 ice-heat: 624/768; fall 181; melt 180
+64^3 ice-heat: 640/768; fall 181; melt 180
+64^3 ice-heat: 656/768; fall 181; melt 180
+64^3 ice-heat: 672/768; fall 181; melt 180
+64^3 ice-heat: 688/768; fall 181; melt 180
+64^3 ice-heat: 704/768; fall 181; melt 180
+64^3 ice-heat: 720/768; fall 181; melt 180
+64^3 ice-heat: 736/768; fall 181; melt 180
+64^3 ice-heat: 752/768; fall 181; melt 180
+64^3 ice-heat: 768/768; fall 181; melt 180
+{"passed":true,"size":64,"scenario":"ice-heat","firstFall":181,"supportMelt":180,"meanTickMs":91.77412148437494}

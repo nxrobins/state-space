@@ -23,6 +23,9 @@
 /docs/checkpoints/*.md linguist-generated=false
 # Preserve captured SDK output verbatim, including command-line whitespace.
 /docs/checkpoints/volume-m3/safety/sdk/stdout.txt -whitespace
+# Preserve captured M5 logs and the byte-bound frozen material-law source.
+/docs/checkpoints/volume-m5/**/supervisor/*.log -whitespace
+/engine/experimental/structural-material.ts whitespace=cr-at-eol,-blank-at-eof
 /dist/packages/evidence/** linguist-generated=true
 /engine/generated/** linguist-generated=true
 /engine/_generated_schema.py linguist-generated=true

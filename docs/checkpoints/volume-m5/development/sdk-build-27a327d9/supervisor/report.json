@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "id": "3c7a87ba4c394e9c99019306f7ec1bc4",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--config",
+    "engine/vite.world-gpu.config.ts"
+  ],
+  "startedAt": 1792153308.5602136,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792153309.5718968,
+      "hostCpuPercent": 3.581800580832528,
+      "freeMemoryMiB": 87624.12890625
+    },
+    "gpu": null
+  },
+  "childPid": 41944,
+  "lastOutput": "\u2713 built in 781ms",
+  "lastHealth": {
+    "host": {
+      "time": 1792153310.7251978,
+      "hostCpuPercent": 15.28716216216216,
+      "freeMemoryMiB": 87606.17578125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 1.140625,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 377.7421875
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792153310.7303686
+}

@@ -379,3 +379,19 @@ A GPU failure faults the field; recreate it from an application checkpoint.
 The 128³ example selects this path with `?gameplay=gpu` or its backend selector.
 Changing the backend resets the level. CPU gameplay remains the default reference.
 The existing game snapshot/replay envelope is shared by both paths.
+
+## Experimental M5 structural worlds
+
+`state-space-engine/experimental/3d/structural-world` and its `/gpu` entry
+introduce six-direction bonds, integrity, anchors, load transfer, thermal
+weakening and coherent downward collapse. These entries have their own schema
+and rules identity; the earlier 2D and 3D APIs retain their behavior. Older
+snapshots are rejected by M5 rather than silently acquiring structural state.
+
+See [the Structural Cavern integration guide](../examples/structural-cavern/README.md)
+for CPU/GPU setup, transactional edits and resident gameplay, and
+[the M5 rules and evidence](checkpoints/3D_M5.md) for acceptance status and limits.
+The existing 3D resident-controller description above applies to M1–M4. M5 uses
+structural edit batches and may need additional completion boundaries when its
+global support solve cannot be reused. Combustion, pressure, stored velocity,
+rotation, elasticity and reciprocal player forces are outside M5.

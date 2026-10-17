@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "probe": "ui",
+  "scope": "M5 foundation probe; not gameplay or release acceptance",
+  "result": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "passed": true,
+    "scope": "Paused M5 UI smoke probe",
+    "tick": 0
+  },
+  "errors": []
+}

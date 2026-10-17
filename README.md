@@ -75,6 +75,15 @@ CPU/dense-GPU/sparse-GPU replay verification. Its optional
 keeps collision and movement resident and renders through one completion boundary.
 [M4 SDK and controls](examples/active-cavern/README.md) · [M4 evidence](docs/checkpoints/3D_M4.md).
 
+[The Structural Cavern](http://127.0.0.1:8765/examples/structural-cavern/) adds
+experimental M5 bonds, load transfer, thermal weakening and coherent downward
+collapse. Compare intact, cut-support and heated-support bridges over lava, or
+melt the supports of a frozen crossing. The page starts paused and includes
+first-person/orbit views, visual A/B, inspection and exact checkpoints.
+Its separate structural SDK preserves the earlier 3D rules and snapshot formats.
+[Controls and integration](examples/structural-cavern/README.md) ·
+[M5 contract and verification status](docs/checkpoints/3D_M5.md).
+
 Open the [engine lab](http://127.0.0.1:8765/examples/lab/). Five experiments cover
 support, coherent fragments, burning supports, phase changes, and custom
 materials. Inspect cells and bonds, change the scene, switch backends, and export

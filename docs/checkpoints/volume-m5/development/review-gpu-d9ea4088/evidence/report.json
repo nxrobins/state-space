@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "probe": "review",
+  "scope": "One bounded M5 stage; not complete release acceptance",
+  "hardware": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalProcessors": 16,
+    "gpu": "NVIDIA GeForce RTX 4090, 595.79, 24564"
+  },
+  "observer": {
+    "mode": "cli-poll",
+    "events": []
+  },
+  "result": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "passed": true,
+    "results": [
+      {
+        "actorEventsExact": true,
+        "crossedAt": 4,
+        "energyDriftQ": "0",
+        "goalBounds": true,
+        "lossPreserved": true,
+        "mode": "dense",
+        "physicsExact": true,
+        "presentationIsolated": true,
+        "restart": 3,
+        "stateDigests": [
+          "e456663a61007eafcda81e385aaed351217ae2a9005b33aa7e28d162b9171a03",
+          "bf05785b2b5f5ade6e9606a6b5c95d8d33e6f570ab7d54ce5df065ea15bb70b5",
+          "c9c65872be41efdf0961b8a37eed2364846702b5f9ca88010c4999612bfb9ae0",
+          "d5df7b096ba4e59e9d6c83db76359327b6d1c9423404a1d7e2caa4da5e15651d",
+          "a29ae5dcf259f57dad169b01f796122a966953b8341d8f0db55e60b54ee8dc51",
+          "34a5a4ae589850451651190421613eb34c7ea40141aeef44a14e1f45ee5cbead",
+          "d761775bb221d067483ce37539c2754efecab14254d9c949352a6782a44718fe",
+          "a96c6ed533b178f7fff2a4992a1fa947254dd6aa4910e6b1dfd7064eaa8d8b94"
+        ],
+        "ticks": 8
+      },
+      {
+        "actorEventsExact": true,
+        "crossedAt": 4,
+        "energyDriftQ": "0",
+        "goalBounds": true,
+        "lossPreserved": true,
+        "mode": "active",
+        "physicsExact": true,
+        "presentationIsolated": true,
+        "restart": 3,
+        "stateDigests": [
+          "e456663a61007eafcda81e385aaed351217ae2a9005b33aa7e28d162b9171a03",
+          "bf05785b2b5f5ade6e9606a6b5c95d8d33e6f570ab7d54ce5df065ea15bb70b5",
+          "c9c65872be41efdf0961b8a37eed2364846702b5f9ca88010c4999612bfb9ae0",
+          "d5df7b096ba4e59e9d6c83db76359327b6d1c9423404a1d7e2caa4da5e15651d",
+          "a29ae5dcf259f57dad169b01f796122a966953b8341d8f0db55e60b54ee8dc51",
+          "34a5a4ae589850451651190421613eb34c7ea40141aeef44a14e1f45ee5cbead",
+          "d761775bb221d067483ce37539c2754efecab14254d9c949352a6782a44718fe",
+          "a96c6ed533b178f7fff2a4992a1fa947254dd6aa4910e6b1dfd7064eaa8d8b94"
+        ],
+        "ticks": 8
+      }
+    ],
+    "scope": "16 cubed M5 crossing regression, eight ticks per mode plus odd restart and boundary cases"
+  },
+  "errors": []
+}

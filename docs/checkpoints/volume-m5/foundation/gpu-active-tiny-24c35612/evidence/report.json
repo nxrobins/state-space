@@ -1,0 +1,5 @@
+{
+  "passed": false,
+  "scope": "Tiny M5 shader compilation only",
+  "error": "Error: [Buffer (unlabeled)] usage (Storage(read-write)|Storage(read-only)) includes writable usage and another usage in the same synchronization scope.\n - While validating compute pass usage.\n - While finishing [CommandEncoder (unlabeled)].\n\n    at GpuStructuralWorld3D.submit_fn (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:2981:22)\n    at async GpuStructuralWorld3D.control_fn (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:2990:19)\n    at async GpuStructuralWorld3D.tickOnce_fn (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:3077:166)\n    at async http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:2797:39\n    at async GpuStructuralWorld3D.run_fn (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:2925:12)\n    at async Module.verifyM5GpuTiny (http://127.0.0.1:64980/dist/volume-m5/structural-probe.js:3202:9)"
+}

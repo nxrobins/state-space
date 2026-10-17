@@ -1,0 +1,208 @@
+{
+  "passed": true,
+  "scope": "Tiny M5 shader compilation only",
+  "result": {
+    "activity": {
+      "dispatchedChunks": 0,
+      "finalAwake": 0,
+      "mode": "active",
+      "peakChunks": 0,
+      "tick": 1024,
+      "totalChunks": 8
+    },
+    "backendInfo": {
+      "architecture": "lovelace",
+      "description": "",
+      "device": "",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "checks": [
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 3
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 8
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 9
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 31
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 64
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 128
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 192
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 256
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 320
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 384
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 448
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 509
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 512
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 576
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 640
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 704
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 768
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 832
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 896
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 960
+      },
+      {
+        "exact": true,
+        "restart": 0,
+        "tick": 1024
+      },
+      {
+        "exact": true,
+        "restart": 3,
+        "tick": 8
+      },
+      {
+        "exact": true,
+        "restart": 3,
+        "tick": 9
+      },
+      {
+        "exact": true,
+        "restart": 3,
+        "tick": 31
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 512
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 576
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 640
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 704
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 768
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 832
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 896
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 960
+      },
+      {
+        "exact": true,
+        "restart": 509,
+        "tick": 1024
+      }
+    ],
+    "energyDriftQ": "0",
+    "finalHash": "a6984bb2f19560e36e92df1fd83bfb43a0b27c827a693a5a9863b2169c90dfc0",
+    "mode": "active",
+    "nodeFinalHash": "a6984bb2f19560e36e92df1fd83bfb43a0b27c827a693a5a9863b2169c90dfc0",
+    "passed": true,
+    "scene": "cut",
+    "scope": "8^3 Node/GPU foundation, 1024 ticks; not representative gameplay or M5 acceptance",
+    "solve": {
+      "blockingPasses": 0,
+      "componentPasses": 0,
+      "maxDistance": 0,
+      "planReusable": true,
+      "planReused": true,
+      "reactionTotal": 16,
+      "supportPasses": 0,
+      "supportedWeight": 16,
+      "tick": 1024
+    },
+    "ticks": 1024
+  },
+  "errors": []
+}

@@ -1,0 +1,32 @@
+M5: isolated level-trajectory probe
+M5 bounded probe starting
+M5 bounded probe starting
+M5 bounded probe starting
+M5 32³ control active: 0->48/1024
+M5 32³ control active: 0->112/1024
+M5 32³ control active: 0->160/1024
+M5 32³ control active: 0->208/1024
+M5 32³ control active: 0->272/1024
+M5 32³ control active: 0->320/1024
+M5 32³ control active: 0->384/1024
+M5 32³ control active: 0->432/1024
+M5 32³ control active: 0->496/1024
+M5 32³ control active: 0->560/1024
+M5 32³ control active: 0->624/1024
+M5 32³ control active: 0->672/1024
+M5 32³ control active: 0->800/1024
+M5 32³ control active: 0->848/1024
+M5 32³ control active: 0->896/1024
+M5 32³ control active: 0->960/1024
+M5 32³ control active: 0->1008/1024
+M5 32³ control active: 3->16/31
+M5 32³ control active: 509->560/1024
+M5 32³ control active: 509->608/1024
+M5 32³ control active: 509->672/1024
+M5 32³ control active: 509->720/1024
+M5 32³ control active: 509->768/1024
+M5 32³ control active: 509->832/1024
+M5 32³ control active: 509->880/1024
+M5 32³ control active: 509->944/1024
+M5 32³ control active: 509->992/1024
+M5 32³ control active: all ranges exact

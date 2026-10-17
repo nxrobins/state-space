@@ -1,0 +1,2838 @@
+{
+  "scope": "M5 implementation evidence, including failed attempts. Individual passes do not establish release completion.",
+  "acceptanceReport": "../release-audit.json",
+  "legacyDemosQuarantined": true,
+  "incidentHoldRemainsActive": true,
+  "records": [
+    {
+      "id": "build-2e603f41",
+      "stage": "build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/build-2e603f41",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/build-2e603f41",
+      "files": {
+        "report.json": "38fe69144626b1e41ec56b78af00fc0ebccbc7b6227fcdc212a151f6482810d7",
+        "supervisor/report.json": "f35d20c3e059175e53f73799e503152f3c3844060893251718c41c9e04d6f473",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9b1d60c1b72db2f4cc88e224922f166e031b800fa2c12331283e50c2230e989c",
+        "supervisor/telemetry.jsonl": "495ea9548af225bab5057148d7c4decdc5fb6a64ba163cc0dcddc15bbb8c7003"
+      }
+    },
+    {
+      "id": "build-dd6b0f94",
+      "stage": "build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/build-dd6b0f94",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/build-dd6b0f94",
+      "files": {
+        "report.json": "3c67c51b7524bc055d6c75d9f2403e3304d96d390818ff13afd5899b16ec020b",
+        "supervisor/report.json": "b35bd06518781fff8a3eff1d23f41afcbf896046cda5359d17de58a9e0923771",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3c560982b9bb80c45d3a365d1036c6e7e175e853f4ffcc9ba47c2d9d4ebfd1fd",
+        "supervisor/telemetry.jsonl": "bcc4bc2b8a37e25626d7c5504ac50af6ae1e345d9117b6da6d41a02be6cd9f43"
+      }
+    },
+    {
+      "id": "compatibility-unit-0c9e9c41",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-0c9e9c41",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-0c9e9c41",
+      "files": {
+        "report.json": "a75e22b92f8a0b53177260995e5054ec21cbec0b3471e0a8b4271a335a5d9a88",
+        "supervisor/report.json": "613427a9860e318f9bcbdec6dc6c7c6afcdfff312616d0301550658ac6082f79",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "44c62ccd648e060be63af34b3397f2b3133149e2d7ce2fa48482c42b3934b6c2",
+        "supervisor/telemetry.jsonl": "529e654c841a86fae7e73c2ca53f6ed22af22fecc56700097671e2b9916d831a"
+      }
+    },
+    {
+      "id": "compatibility-unit-2faa505a",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-2faa505a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-2faa505a",
+      "files": {
+        "report.json": "165fca4661f9c93cf68ba929a873ad4751d3bf434c1212bf90b302b0be72ee6d",
+        "supervisor/report.json": "4f74497a5b64224a14999ef9768a967a1a3a34ba8304192ef02bf7b48ef5eec9",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a1c3fc978c6c8cccfabd9e7dd10d5c50f74a6ef01bdd0620c1d559fb341d3450",
+        "supervisor/telemetry.jsonl": "98db0a12d321e4bfa3b1ac7ee3762dc6a4bedea029b2d3c22c14d99002844663"
+      }
+    },
+    {
+      "id": "compatibility-unit-6413be08",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-6413be08",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-6413be08",
+      "files": {
+        "report.json": "f0fd5622f22252606f8303a29628e79ff50ca8fd432ae79fc1b55ab258003dee",
+        "supervisor/report.json": "32c34219db29da5d545c0b6a7550f817932858d548c74d2b142588c03541cd54",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "8860045d2eea0351ebf8dfc72c9dd316b97286c4445890bad63555a9e717f507",
+        "supervisor/telemetry.jsonl": "c72e05801102fe32330c17e43d9d9658e16e3b29327a4c024d23003bbcbcfcc6"
+      }
+    },
+    {
+      "id": "compatibility-unit-7bd54816",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-7bd54816",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-7bd54816",
+      "files": {
+        "report.json": "31f320ec98fef303bbabc4d9f3cfffb1489b328b74b8d41b723d79f41c6f4f54",
+        "supervisor/report.json": "5a3816b38f50875c226d05f3b17fb7fa329c4209f5a6f00edaeaa1657f997120",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "309ba1fd49cb6387bb422b15fcfef42047cc515c1da543f352140e9c449fd6af",
+        "supervisor/telemetry.jsonl": "3c80f159b6f5eb5db53d7f9db3b9f9e2d7c6ab6d8db4bfcad9a0a4996b6694be"
+      }
+    },
+    {
+      "id": "compatibility-unit-8f8e7c95",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-8f8e7c95",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-8f8e7c95",
+      "files": {
+        "report.json": "0f5ee3ad403ccd5c616aa492f9bbd2f5d4cddc76c33714c06a48721abf3c72ed",
+        "supervisor/report.json": "4fc6c8997dfc7eaeb23f351ddb4a8017e829bbf3d1ff469ba0313978d57a119d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e09dfa4d3f023b3214fd6c850da574449ff06bb07d2392e1c5ddb5388065cce0",
+        "supervisor/telemetry.jsonl": "146b6681762c43c6d74b221d4ef5debd59c3d6595de57f9b92acd89756f1b243"
+      }
+    },
+    {
+      "id": "compatibility-unit-b1ac0afc",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-b1ac0afc",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-b1ac0afc",
+      "files": {
+        "report.json": "6a53c3464e4c6e563ed834abdf327062a77abf7163e8692e7d62c473bda07570",
+        "supervisor/report.json": "4ead26ca728f04c5879f0ff564ec8a0214ffb9dd104312ad525c27d01f14cf48",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "39e50b764e2dfeed1938e0489e847a5bf268e04c144f8a80b1c1c09230d7df9c",
+        "supervisor/telemetry.jsonl": "78f855110de9d0b1d3dc9b52ce83b3c2615972cec052ce583122df177ba35cac"
+      }
+    },
+    {
+      "id": "compatibility-unit-bfe8d95d",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-bfe8d95d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-bfe8d95d",
+      "files": {
+        "report.json": "777be69b3f36fd88b662464055ad2ee7d13b5d021461fd3117c093abb385c854",
+        "supervisor/report.json": "86bcb4eeef7c7aa0982071392e24981d0f4432cf901a93e49205f916c4f800aa",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1a6528f2a68a7f97bd53516b3f5288bf125b24fba48c48493656381c08ed5a04",
+        "supervisor/telemetry.jsonl": "23d235038cf8b482cdfb108c6abecd21b528140f343e140f82a87a7b14e9bc85"
+      }
+    },
+    {
+      "id": "compatibility-unit-c0be4811",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-c0be4811",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-c0be4811",
+      "files": {
+        "report.json": "c979581a0a8817eeb13d930f6e1a66b310fd030ae2ddf17f5c95de34b248c4c2",
+        "supervisor/report.json": "9e5850c6c7e7bca50a3a9a6be06f8473444ada0839f64aa284569d89b0650dfc",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "04a6e90fd0a0803e64059925c9b933644488a49a0609a1ebdb10e751ad24c8c5",
+        "supervisor/telemetry.jsonl": "f17f74549a3bbc2e1d35978bf33876de31dbd5311398d961685944efded868f8"
+      }
+    },
+    {
+      "id": "compatibility-unit-c528a60f",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-c528a60f",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-c528a60f",
+      "files": {
+        "report.json": "b6c65ffba52091e0fd772be0b954c36df5c2449b12e6ac7ba8720b6edd4c61fe",
+        "supervisor/report.json": "9f78b68fb3d286d8b35485d1206caec664aafe4325e4ac2e6ef23116f349e5f2",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a7f973d648d62eeccb8eb0d7714da18e054cb6d182293893c25b64811aa7f4a5",
+        "supervisor/telemetry.jsonl": "8b4abd3eb2d1ed688d485896cc8083bbc7c82cb4217d929afb35f1a3e912d6c8"
+      }
+    },
+    {
+      "id": "compatibility-unit-c5b6b5cb",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-c5b6b5cb",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-c5b6b5cb",
+      "files": {
+        "report.json": "6ed78ad8d1c7490bd44010124c70d812c1ca8fe123a4c51f582dc04c441dfc69",
+        "supervisor/report.json": "f7e1dc7609828d4d4bafadcfddc4de56c543955e6eeaf730480cbdabef6879bf",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "2a977d90eddbee6c25420b2f1a4e9e8a01414713f1829cc7430a088ea8a432fe",
+        "supervisor/telemetry.jsonl": "d3d2d643b94d9c4ddf7e6a743aefa20cd9fb144f28cb29e916e96a2ce6a42012"
+      }
+    },
+    {
+      "id": "compatibility-unit-d849b271",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-d849b271",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-d849b271",
+      "files": {
+        "report.json": "8ab5a025cd0640813949eb66a8fb3598d0649c9d3561cf27a9eceaf2cc682ff9",
+        "supervisor/report.json": "09d259b544455c42f321ffb2faaa2d8def2df512d784d12a9bb22024d7cb45aa",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "ef614166f253d65b3ee5e72410fc6a7d7f81570bf1ab4e37391bafd1a928b026",
+        "supervisor/telemetry.jsonl": "6ac5df6feb7feebb019d18a24a8335a7c3e77495d5a4f06c85ede6765e1e7e70"
+      }
+    },
+    {
+      "id": "compatibility-unit-e2cd3371",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-e2cd3371",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-e2cd3371",
+      "files": {
+        "report.json": "d39858a8214d090358b13b529953860b964fd35cc84d7a9271ed09f121676e93",
+        "supervisor/report.json": "0275c15813d88285a726ac19a133db837a41428b9f19b9d8b56e2ad65956e430",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e54cfb31238cfbff241753b2fbb3d42d40aede0dfb519889326b81a2f6f58998",
+        "supervisor/telemetry.jsonl": "3c5124bf7f060b6834f216513054ef7ff22fcc10391b781e06a36c4288b8aba5"
+      }
+    },
+    {
+      "id": "compatibility-unit-f97cfa45",
+      "stage": "compatibility-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/compatibility-unit-f97cfa45",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/compatibility-unit-f97cfa45",
+      "files": {
+        "report.json": "8729a62ed0f45d382ebc0989cbf59250fa807b827f687629021bb9dfb3f9ba69",
+        "supervisor/report.json": "58b4603d6f01b1d24578fb538b8fd0bfdecc59cfa8de9250d1939d76e641c7de",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4ba0ed642f96b4baaa5d4f317500b5db22f5f257cb7de75902a06a1a5cfe91ef",
+        "supervisor/telemetry.jsonl": "66e1e381603fcd0a5856f74580bb0de1ba8c89829a2aa5a9dff00c13f3b409b5"
+      }
+    },
+    {
+      "id": "cpu-control-7896038b",
+      "stage": "cpu-control",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-control-7896038b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-control-7896038b",
+      "files": {
+        "evidence/commands.json": "4ec8e2b6eaec01f7d721dc21624ed1c8769c82d483edc2d18da0f9428f770102",
+        "evidence/report.json": "acc4ce5c417593c7d5939dbe13c63c4d5fc643a8e307f5f0b665ce39c16c4ccc",
+        "evidence/tick-0.json.gz": "4a50cb346140737184ca2ed977c0eb8849cb32c2ffb5dd2acc5ee68761706a76",
+        "evidence/tick-1024.json.gz": "653c4d884aab5693fba47ae4669a57b658a252bb9eeaf2e94df20631862a5962",
+        "evidence/tick-3.json.gz": "be16bb178d75747d91a66cbe9544106b6fe51ec3b62085a136338b9c5b588285",
+        "evidence/tick-31.json.gz": "3d57068ec36851578ba4f91a57d8899c38fdd3995d83212a00a915946cd7cc36",
+        "evidence/tick-509.json.gz": "31a979e261cc393bc61b356a9f015caa57756d036497d246a19ca24cd2f681ac",
+        "evidence/tick-8.json.gz": "251abeddb9c31466cc58ceff6464f3efafea5ad708c62440da76b2e3fb3486d0",
+        "evidence/tick-9.json.gz": "9e8e77eb022d4916eed806e6d257010b18174490c727d23e11b2af11af518cf9",
+        "report.json": "8e137983726194a26d622e4b63660be9ecb91a05e66952c1e3eafd7738db10a0",
+        "supervisor/report.json": "e8f7981192be34ac90188fb0b7321fadf2756af837cf1bc8ff16ca277d142ac1",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "deb4e5e6d66a9d7191be3f72086883c7870c430545e5d4eab663c4d848830e5d",
+        "supervisor/telemetry.jsonl": "3ccdb87923a61e1c7ac8bf7fd874e021b5a999a3a871f39e101d2151e472cc63"
+      }
+    },
+    {
+      "id": "cpu-cut-d48e1de5",
+      "stage": "cpu-cut",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-cut-d48e1de5",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-cut-d48e1de5",
+      "files": {
+        "evidence/commands.json": "15f53257b81a0ea9a0df6d5738e3c940b4966b7b28bb1bd4bf788c05f8bc9b25",
+        "evidence/report.json": "de22656f3bec39d3feae07a4aeba88e5615a6abd6227e3d6ca91c2e67be22dbc",
+        "evidence/tick-0.json.gz": "4a50cb346140737184ca2ed977c0eb8849cb32c2ffb5dd2acc5ee68761706a76",
+        "evidence/tick-1024.json.gz": "1f0c61e5a897497adbc63622256f9985934d6aaeb86be6c5192f8af13b7ac512",
+        "evidence/tick-3.json.gz": "be16bb178d75747d91a66cbe9544106b6fe51ec3b62085a136338b9c5b588285",
+        "evidence/tick-31.json.gz": "4575cfe6dccfbdb0af13c4bb8347ca9dd2ed8b4495f3f0e1220e458cf7772523",
+        "evidence/tick-509.json.gz": "1e9d2cb5079709af40a6685c0fcb66691bc4675b99da2b701fcac40c074ffc5f",
+        "evidence/tick-8.json.gz": "251abeddb9c31466cc58ceff6464f3efafea5ad708c62440da76b2e3fb3486d0",
+        "evidence/tick-9.json.gz": "531e49a13fbdca46bfa213738b5bac6ac9a232e062c6fd628e0bb0cda003f621",
+        "report.json": "63ea010a198a17213ca3b3bb881c70656139b6f6ed1e151d24ad67296528ba46",
+        "supervisor/report.json": "463ce234c0bd2fb85cdcfd8508ae7331aad6381ab2965c23f6a11d01f6f2193c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "202ad460a72cd1749946bf74ca2541b83c6a54949cde37b23a2c386dba26e945",
+        "supervisor/telemetry.jsonl": "420eb0c78f8995cd662659d2d1db24baf6e81fade57287fe03e6a7012b14d30b"
+      }
+    },
+    {
+      "id": "cpu-heat-3d8a4e88",
+      "stage": "cpu-heat",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-heat-3d8a4e88",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-heat-3d8a4e88",
+      "files": {
+        "evidence/commands.json": "0eefc4934c505b4a6a35166163a2d78438621f480b912ce3863e4bfabcca6b40",
+        "evidence/report.json": "15ca478f7adf2e08f0ce7f92c2758720a666d63e6c5127df9d57491579ce7597",
+        "evidence/tick-0.json.gz": "4a50cb346140737184ca2ed977c0eb8849cb32c2ffb5dd2acc5ee68761706a76",
+        "evidence/tick-1024.json.gz": "56850fcdc8645d80c0f0eee8d85ffe4bd6b0a23a8e1d5e7215d3fcaaf09dd8c4",
+        "evidence/tick-3.json.gz": "be16bb178d75747d91a66cbe9544106b6fe51ec3b62085a136338b9c5b588285",
+        "evidence/tick-31.json.gz": "bf3944609ee211921d091d5c39003b9e33b6ac0863f91137ae489f31f394795a",
+        "evidence/tick-509.json.gz": "90d6fea4f107da519dde11a4200dad52c71d65f69c69df4e9a224e81ed95b720",
+        "evidence/tick-8.json.gz": "251abeddb9c31466cc58ceff6464f3efafea5ad708c62440da76b2e3fb3486d0",
+        "evidence/tick-9.json.gz": "caa223126fcbb5ee3f86c6a7aec5501793982e495c645a101291fa549ad094c5",
+        "report.json": "c7cb2394637d84614c48a11cd39c53d941cb1819f6706c700638ce33b50fcf7a",
+        "supervisor/report.json": "64f7a5e097ed7a4b1e0ee6bb93f4c803b59c28a36541a6563a98482657fefbdd",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "8320c40c82623eb97b2924657cea0bdbbaef16946e116881aa8413a07b9083aa",
+        "supervisor/telemetry.jsonl": "333d51caa02b1a01af0a2e73e8ddd2abd49aba0a2c94046489da6fd233d0cf76"
+      }
+    },
+    {
+      "id": "cpu-ice-0a4fe357",
+      "stage": "cpu-ice",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-ice-0a4fe357",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-ice-0a4fe357",
+      "files": {
+        "evidence/commands.json": "ef2b47270ad38942c5fa0c4e9f9c87ef876fbada50b28a23f15ccd6dfabc6cf3",
+        "evidence/report.json": "a914927ac8390a4edf9381ccf6b7c570ac6b03693e50020bcf608fa4939a6570",
+        "evidence/tick-0.json.gz": "247776ae9fb2670a4aa67cc4d56a2709c79185a63def571756fb7ffb7b364c9a",
+        "evidence/tick-1024.json.gz": "dac28c1dc41a1ba077ef05cae8759fa3702a59097c54fa75e53f2f04d9e88606",
+        "evidence/tick-3.json.gz": "6b0f24359af1c4ec3ae7db0938b118c79071c6bc616b05558f5654377b13a622",
+        "evidence/tick-31.json.gz": "ee746c465e203458ee1160412a3968cc2431a0e59503405ea90a21419aceb3e5",
+        "evidence/tick-509.json.gz": "613362b5f426616fe4f84afe13ec32c99308e24bf449ea30a3a0deb4c5cbf01c",
+        "evidence/tick-8.json.gz": "5aad4faceea6d173cf8e826d066b203db1419ed4adb50f37d3753b3c912ab16e",
+        "evidence/tick-9.json.gz": "b50375b81a1b1a82ddf0cfdd813bf867f10a9d86188ab41fb87532049f184885",
+        "report.json": "280757e108a5ceb5abc146dbc5becfe5a53ca1b5d2a6c6c9ff4471b078bebd2b",
+        "supervisor/report.json": "b13648fd4e9285e903b30b840fc2e4f088c4309ca7d05698acbda9bb0d4be922",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "974a5c052fc4b147479a6b31aff9df7e592fc76b05784d8973bf46e027d3d72a",
+        "supervisor/telemetry.jsonl": "142653ccc02009c1a006a20ea6aeac03bd2a2c432fc1abe18588ac949a098c59"
+      }
+    },
+    {
+      "id": "cpu-unit-5b396bfb",
+      "stage": "cpu-unit",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-5b396bfb",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-5b396bfb",
+      "files": {
+        "report.json": "8a16659db41627a2e358357d109740cef9edbf9c40779d70e2fcb864b3221b6a",
+        "supervisor/report.json": "c0255d48baee139c8ec62e43422d71e91391d3f526c4ac6aa094011b33ddb116",
+        "supervisor/stderr.log": "a89ac98cf112d84042274f0fe831b6b52c97bf822be999a19abb297ecc1950dd",
+        "supervisor/stdout.log": "283551937b61da214bb56bfa3fd915fe9f4e7a53aaf6284152f4a4d8b471aa4f",
+        "supervisor/telemetry.jsonl": "a10ed13c7082a712b5f8516b38490f2bbc9170a3a5d010218312aa5b2027f71d"
+      }
+    },
+    {
+      "id": "cpu-unit-6e54cf9c",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-6e54cf9c",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-6e54cf9c",
+      "files": {
+        "report.json": "fd9f631e46d41a7036d79a29d625cf64220e6b81a633bb1fb6cb8d86d8a7dabd",
+        "supervisor/report.json": "ba8a3c0d284b01d93664e4cfc36ca95c71c8bf606add7cc64710b021b7678dc0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "55f8811ba454fa215a87118e5ebe1f25594b0d4f0c3b50ae2e6468b308607fe0",
+        "supervisor/telemetry.jsonl": "ece388ef5c262ba9a7760aea4c366dcd13b618fa52d7d742f3d66adcff28ea20"
+      }
+    },
+    {
+      "id": "cpu-unit-7ea676fe",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-7ea676fe",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-7ea676fe",
+      "files": {
+        "report.json": "75197e43ace5e8d36445be56ec84c84a4c8a4677621ca10c281e3e18d8991c56",
+        "supervisor/report.json": "26e119b689159fc5a1792352ad89ff0ed9c1759912334fa75ffddf3dc68f38cc",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e598b81d0e4b2717af8f44a3b335647f66924f6eb46942556890dc51706c946b",
+        "supervisor/telemetry.jsonl": "80281dd78a7aae47b497b4c60c13a907007928ff6672b35d9420546becbed1ad"
+      }
+    },
+    {
+      "id": "cpu-unit-90313113",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-90313113",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-90313113",
+      "files": {
+        "report.json": "531504e360c508c53191af98623d2d2cdd0f7cd99b4b0411dbe28489e34f1db7",
+        "supervisor/report.json": "92cc0484c03825e02d34f7b3a0934d9f6e7f7374df1ed2d749fef139d7835146",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "8865de1899198c15a526bb09caa2e625f44a5923aac84f17c11b64cd7e003088",
+        "supervisor/telemetry.jsonl": "5eb345227e1a516b3b2f3c4cc0e232370b645fba59fbdd1a2daefaf268b1d2bc"
+      }
+    },
+    {
+      "id": "cpu-unit-d93753ba",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-d93753ba",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-d93753ba",
+      "files": {
+        "report.json": "c9952c308c14625bf6d6727ba31676e0b753791e75732d0c401618e556753735",
+        "supervisor/report.json": "a5c206edba08b85b9c6f0293b096d18b3f162cb201fbcf144053e3a054781977",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "19c117db8b6749d8f0682009e0285680df6bf9513baee4935afd4b8c85c8baeb",
+        "supervisor/telemetry.jsonl": "b3d2668303943e4eb26f8b10413c6839ea24c2eff20b94ecd3f24f70e8078d6c"
+      }
+    },
+    {
+      "id": "cpu-unit-dde47ef1",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-dde47ef1",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-dde47ef1",
+      "files": {
+        "report.json": "229f96b186248829bbeac3093d70d783411b3febf7384dd3240f4ac8f07a0778",
+        "supervisor/report.json": "1d524644bc5be99733333f94dc86f4ffc550e2a15056b039d45dd98d25c37767",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3ae8f833d6c2b47b71bf75f0f1497a37626f20eb2487ce801ef307a0bbb54870",
+        "supervisor/telemetry.jsonl": "e91ec2a3c4f9e9fcdb98e6dfce62c6a2601f4cd3ce1611736f5c9c7e37728be4"
+      }
+    },
+    {
+      "id": "cpu-unit-fcb73ddf",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-fcb73ddf",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-fcb73ddf",
+      "files": {
+        "report.json": "a8f0e88245fe234e76cff12e1542d17c6a598457c7d9693585947682e5718e33",
+        "supervisor/report.json": "de290b3ca5d9d2961358ba3de67a5aae96422337600b4378d529509a4f17fc09",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "be06708efefa3cb43be9b3293b6da528b550d836797c5938de965a96111ca879",
+        "supervisor/telemetry.jsonl": "5232c9fd76a0772568d07387f71f320358d27334858617a197268264afa46065"
+      }
+    },
+    {
+      "id": "declarations-23ac295d",
+      "stage": "declarations",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/declarations-23ac295d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/declarations-23ac295d",
+      "files": {
+        "report.json": "5967c0219bb79e4cac1df9e21a52ae51264f75b9ca7cf4be192af448b10164e0",
+        "supervisor/report.json": "b7ee28536037541768fd59952864283731d919eb5d12bd07c25d46ddf466b4fa",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "665383107b11893f8b92a1456be1c44f22078af7b1660abb1cd4293671dbb439"
+      }
+    },
+    {
+      "id": "declarations-5a3e603a",
+      "stage": "declarations",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/declarations-5a3e603a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/declarations-5a3e603a",
+      "files": {
+        "report.json": "2c6d757163bd2ee0a107d5fadbe5120e19284423619e82e486bcbaf0d84ee7ef",
+        "supervisor/report.json": "e01143525c9d2d113eb0f55a81f6b2a94c42fee732699acff4e51e589c73ab69",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "238a73c5cf38a6fdcac776ca7819c1dce99ab5b61f8f57d6f845fb7719f3479a"
+      }
+    },
+    {
+      "id": "declarations-9254016c",
+      "stage": "declarations",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/declarations-9254016c",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/declarations-9254016c",
+      "files": {
+        "report.json": "76f78c521830f9db107cd760a31697b5da8fb9792c48617cfcf1b9fcd75a3d45",
+        "supervisor/report.json": "035b9e6a2240e67c57d704ab21b0023c4e7d7c85631be7c5fdff9497263cca1f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "94fea4c3a81fbff5dd0fac6ea9de8a60bbc7665797ebe931aec1f17a0e047c23"
+      }
+    },
+    {
+      "id": "declarations-d36db057",
+      "stage": "declarations",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/declarations-d36db057",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/declarations-d36db057",
+      "files": {
+        "report.json": "36bc377081172140f81e1f8cc312cfa0f2cd66e655fc9df28814750f77aeabae",
+        "supervisor/report.json": "e4e801dcf81a7b06086739b71041a98a53f4038dab056d09b3dd3b2045bb284d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "6ea5d832f1f584f1c8c0af28bb6781e243a28e58b67b3faa18ae773899df59d5"
+      }
+    },
+    {
+      "id": "frames-1c94c43b",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-1c94c43b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-1c94c43b",
+      "files": {
+        "evidence/report.json": "7d33a43054b943a362bf01297189fa49ccb75c857b41e1cb356e5b003aa3d30c",
+        "report.json": "45343484d91f7661b68a137fbe246b387e50925a3d4f1426db7a33d392591702",
+        "supervisor/report.json": "38ee28b80f19271128f7f48fdd2ea8fa7dc1ece875331edfa7c12c7b97e57418",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "05d86a3052e8f5cec5f625cfd4622062bcd6bc45af66c74316a80c8813546a3b",
+        "supervisor/telemetry.jsonl": "d74eb3073c8ca4efbbdb447e79a69698f32016fb180ec655f1e527d87d93260a"
+      }
+    },
+    {
+      "id": "frames-2579c44a",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-2579c44a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-2579c44a",
+      "files": {
+        "evidence/report.json": "6d06d6906d82760a6963d360742796bb75e497a6a31507b95fc6b041c86b2507",
+        "report.json": "e156b20ed4ab667bfa9d75f29cc646e36d5db2f6480555cf9cf2714a42420c7f",
+        "supervisor/report.json": "e863d0db736d7fcd1c96f7d0a4f32e9f932287e437a30f367a1315260ceac96c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6fefa21d6ce83e2ed53bf95b4698c79c34ccd177bf519ea7432b0d761f26e1e1",
+        "supervisor/telemetry.jsonl": "775a0c56d96ad7fb15a8667c7aa64a6bcab37e78f4af44f4d5245a0e28e7486f"
+      }
+    },
+    {
+      "id": "frames-43af3496",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-43af3496",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-43af3496",
+      "files": {
+        "evidence/report.json": "2c7d774eb29726082b6d0357d098b45489b954437d74dc89e68d5d5356f2270a",
+        "report.json": "6a945aa6c48e659ee6b3ab92b33a53fc0cdd88922b8a1dff10b38a1462f286e7",
+        "supervisor/report.json": "ed1573ea05d8372af0bcf5e2a4ba047892e0bb279983d33b3e0f1e4cedfb0d92",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a0be7db1b24b309bd178e99fbb31bf23982b014aa3519d6e79d4ce52fc73bb85",
+        "supervisor/telemetry.jsonl": "3bafa4b56ffcdfaddd9be7e1a742d1dd943211ca1b089040882d9bed7c7d8250"
+      }
+    },
+    {
+      "id": "frames-5333b5b8",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-5333b5b8",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-5333b5b8",
+      "files": {
+        "evidence/report.json": "a3657d6bc03500a4c1502ddd3623f8444d73370428265a5c4f7b0d4239854b00",
+        "report.json": "e0931d88a195909acbef7f6ed9d76b676cd17e620618dd8ba54322e19dc0f410",
+        "supervisor/report.json": "1fd447f09eac58532589e616f5ceab2ea159d229913a1e7ff081c75e83fc3a38",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "01a5c034d21bca002fdea4766526820e2970b45a2f816e4e3c8fd77fbf1c9759",
+        "supervisor/telemetry.jsonl": "8410143653bdecc6ac3d4e56d6700120f7f2e7939360f53762459878e24f17c9"
+      }
+    },
+    {
+      "id": "frames-6b459d01",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-6b459d01",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-6b459d01",
+      "files": {
+        "evidence/report.json": "55cc06ca85a0152a772603fd249a74ada3f4acf2faf96a9d2026c1c8b9199909",
+        "report.json": "b5a87528a1fd6f644906c20e9629833aca6ecbd7d503a2a00aee666c692faf9e",
+        "supervisor/report.json": "954820e2ee56ecb8bf210dd948d8f99de5c613d07c8d3c2bb46b630858aeebe3",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "db6af1deb3d46a79d8b2d929876377dcea62136fd17022537cc0eceb7f7e64e5",
+        "supervisor/telemetry.jsonl": "f718c9e64aa64233d070374955f0d13ce3c7acbc0f58148540192845f1c040d1"
+      }
+    },
+    {
+      "id": "frames-77cc491f",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-77cc491f",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-77cc491f",
+      "files": {
+        "evidence/report.json": "bbbe6221e9f99b6a8146d66795cc0a4a1a981790aaf623ae86b85858b1b13a17",
+        "report.json": "3f1d553c024ccc6d98b834bfcd6a246ff35ff7db44d69debcc8fcb0a1d3fc0fe",
+        "supervisor/report.json": "e2ce90f1122ff8d5a407778ec1281efb8f97718870d61e5343b665881092dad1",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1b60f5e10dc638e78a2a888f5c740b0993615b77de7cdcb4f0e933d349bc2481",
+        "supervisor/telemetry.jsonl": "c8024d41e6245838a7269ff34cbeddb05df9299b185ff5ac21e530e484a46184"
+      }
+    },
+    {
+      "id": "frames-86ea2218",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-86ea2218",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-86ea2218",
+      "files": {
+        "evidence/report.json": "5463e7ed88bb68ab5c3e8461e2560a046f8d66d762baeedddf3c1c82684400e0",
+        "report.json": "298efe56cafb3a26588428bff81a2eeda23eec6251fbae5e308ba0a59941f7e4",
+        "supervisor/report.json": "f2f31332ca8125529c1248699d8990d6a66eec0bc0aa28f40593bb3243314c90",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c529b06d13f2387889e48a198631583b9984ec15c983084a4081865cc6fea73c",
+        "supervisor/telemetry.jsonl": "b446ee45a24d00df2b7fb4ef7ec5c61dc757b0b7f36e68cf706dc568105ac2f2"
+      }
+    },
+    {
+      "id": "frames-98b10264",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-98b10264",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-98b10264",
+      "files": {
+        "evidence/report.json": "0cb4d3a7717d6fbd1e7e4833678823564e03a4c5d677055555949bbdf7e45ba5",
+        "report.json": "e2e976bb40d86fb438d63208c20659d68258081a366ba50bc1646abffc54e20e",
+        "supervisor/report.json": "0a236ba966362a4f10ce8d5972abf701b2f14048232986c1295460ca64d9431b",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "13f9b89e406bd7d6bd89bc67fea1f7b4ae5997de6ec93b1870231e90742c0c3c",
+        "supervisor/telemetry.jsonl": "31fde1abdeba71ec09be5452e3600504a737dce3e41eccfcb297e6046d29c483"
+      }
+    },
+    {
+      "id": "frames-be60e2e0",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-be60e2e0",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-be60e2e0",
+      "files": {
+        "evidence/report.json": "34c5c622d1546db7dabab4172b636f7f29f0339692a0eaa4d8b6d775a4ebde32",
+        "report.json": "39af9e51abe16c33eb51739b85cd77c2ce586699f9737e055bf40d0a505779d4",
+        "supervisor/report.json": "b40216839978971206955e5e0894e0621b710d665d91cde4fc05fea44066b529",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "943ffbc3b6217c2e52ac2dfbbd3856f57feed0f58be3e07ce61187b021183b0a",
+        "supervisor/telemetry.jsonl": "8082e08e6806b8e45c2862c7c0dfe0ebd71a3b1bafaae17b10d306c0aa3656e3"
+      }
+    },
+    {
+      "id": "frames-d56e66bf",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-d56e66bf",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-d56e66bf",
+      "files": {
+        "evidence/report.json": "f482731bcd4aae642ef2544040698536fee3c3ddcbe033bbfd94761343306cb8",
+        "report.json": "fe99c5cf1476a5812e8ee37a745db6d18bb1f2cb20c94916a030b9ec284c7274",
+        "supervisor/report.json": "2be816b9f28588528efbe235395931d15aa44f5059aaec95e6d95bb0a5ecfbb6",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "01e229d55d1abac481eafc040f109e38ebfa77a7fb6b97f8bf2de5cc9b004a7d",
+        "supervisor/telemetry.jsonl": "872752a405abcd008d9a39d9e669844031096126100d1ccaf9ecd905640ab2ce"
+      }
+    },
+    {
+      "id": "frames-e97591f3",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-e97591f3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-e97591f3",
+      "files": {
+        "evidence/report.json": "d499328864b92f222da4b6655d5c7daa4eb0ed55a396d98a37d384d8f89e9bf9",
+        "report.json": "afda68bc45aa970a5cd0f15244aeaa5506f8071b67deb4dc3c43f2372e5e8a09",
+        "supervisor/report.json": "1fa2b356a61bb60ca01dd3574eafb2513176e8196de96178ab78c58f72925711",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1ddf07afdbc50d14f68f14e05aaba31320ca9aa3d8471c7799137245d81facf7",
+        "supervisor/telemetry.jsonl": "5a4e83d64f6e730161b02ecab50f36f848dd106ee95c1f699ee2d14d60773e57"
+      }
+    },
+    {
+      "id": "frames-eee2a7c4",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-eee2a7c4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-eee2a7c4",
+      "files": {
+        "evidence/report.json": "12f0d9c033fe8ce3a118fb0a027d478e82d7c7ee3de667e52e79785c19d56fac",
+        "report.json": "ce5bb1c80f561644f9dd2d17869964f9001553ef641ca117144475b22dd6639d",
+        "supervisor/report.json": "8d3e14ce1f870fdca4a1a26516540f87bc223a57c9a28d00ca5398bb08fd5308",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1c30b26e5ba4f2007ceb0905021a63abb976813d8fec730cc475acd3a94fc0ba",
+        "supervisor/telemetry.jsonl": "cbf1d6babb74cf96550a782c5d4a21784ce78f5b685a3e6fe8b1418f4872dca8"
+      }
+    },
+    {
+      "id": "frames-fa0c43ef",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-fa0c43ef",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-fa0c43ef",
+      "files": {
+        "evidence/report.json": "64052aab3907097e0986856bd99dc2b80c6d747a5c31bcc95209fc47e5a6e1b7",
+        "report.json": "a4f004a6b3490c60781749b6cc33a0e80bcbe3bb875d8082489cbee58062703b",
+        "supervisor/report.json": "f97b9916d5fbdf9338b67fa4dbc5db6b45563f835ef02eb35dfb4812c6d1d22e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "5adcb723259ec518c30eec4088fdbea7db91034ffba3af613bba09a0a0fcaf44",
+        "supervisor/telemetry.jsonl": "1c6179917825958116c280e9451e0ac8c80020c801e34dda12f6fea93004b2dc"
+      }
+    },
+    {
+      "id": "frames-fb149183",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-fb149183",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-fb149183",
+      "files": {
+        "evidence/report.json": "ae263b2dcd70446ef8a20cb2a4e6a8c185b1ac716f61653f37c20700a212e9cd",
+        "report.json": "f18b7d2d5cfd1489e2069896145d034765bde4c637c907df538045b055576126",
+        "supervisor/report.json": "165b479c3b69f092f2e8c8876d97783fc215c6e4a03b60bd97a1cb3e58e8162c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1954e59cc9facbc5200c15d783798917e8bd893b232a3f09f6eb8424407a03b2",
+        "supervisor/telemetry.jsonl": "b1ea1a0a03f8ef3bd1e3bd90a5c189dcbe5373935711fe93db665d5bf46be540"
+      }
+    },
+    {
+      "id": "gameplay-pilot-18a32a2e",
+      "stage": "gameplay-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gameplay-pilot-18a32a2e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gameplay-pilot-18a32a2e",
+      "files": {
+        "evidence/report.json": "9b82e8bb6b1fce0679820220491ff36b436dbb21f2980174b454640b3f37920a",
+        "report.json": "9f326ef1fbd762a9c7576a3f2895c5ff9b05386f76c5643eb5f573406629e337",
+        "supervisor/report.json": "8bc126ea346c5337d78dc266e5679a7687ac120ec707bf7cfd00caf5e625808c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a7a45e1b57dff9fe194aa2eaa491ec306df25dfe54744ac7ddf66cc732de5787",
+        "supervisor/telemetry.jsonl": "dac37227a7647bcb78dfa18e90df9e4767aa5e9b6cdceb7deda88556118da117"
+      }
+    },
+    {
+      "id": "gameplay-pilot-450e3d6b",
+      "stage": "gameplay-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gameplay-pilot-450e3d6b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gameplay-pilot-450e3d6b",
+      "files": {
+        "evidence/report.json": "2c0442c6920cc6c72b6f7e520da87bac2b446aa0d5afb489f033c2108e283238",
+        "report.json": "7be1139ff7dd2f736d6d0ca2d9b4cc1335f813e05bf11b513d4ec77a49e0dd6f",
+        "supervisor/report.json": "2a1f5123ce03320933f4d7d8e3cb9f4e52a59117f43c1f73e9dd0f47cd09fa68",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f190af6f6d22a2ea6f605b5e2aac1b103d1f3cf92c6e102e7fdbc4c13ce6b780",
+        "supervisor/telemetry.jsonl": "352170f5637d4e56a2759682399e422e747ea743f68cfaffd0dc30902e7c8d6c"
+      }
+    },
+    {
+      "id": "gameplay-pilot-6eed4a74",
+      "stage": "gameplay-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gameplay-pilot-6eed4a74",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gameplay-pilot-6eed4a74",
+      "files": {
+        "evidence/report.json": "4c617a4bd997be485582b7269103a79258b21e25e5f6a1b7900c88a91161d45d",
+        "report.json": "1cdef553f69b03cad53c991d248b5c81ddd4f78dc92dbe2c10b315b8d0f596ab",
+        "supervisor/report.json": "df12d857bb745485315cbd0e0242dbfd646a49078bc96173fdc3e9e67fd9caa5",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9667e446eddbfcefaf942257fd1b4d24d202882539b246fbf01039c6504768fc",
+        "supervisor/telemetry.jsonl": "ca9dba363f3581b23e231b431634477f2ca167b99893bb72fb1574ba57980301"
+      }
+    },
+    {
+      "id": "gameplay-pilot-c380d3fa",
+      "stage": "gameplay-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gameplay-pilot-c380d3fa",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gameplay-pilot-c380d3fa",
+      "files": {
+        "evidence/report.json": "febca2df706ba898e46e65d39cf88bcffef6381f4664e09a6792df929f3d6706",
+        "report.json": "5b4456d4e05e31f7812b01e52d7828041df59e4e776a13474329cf27615d90cd",
+        "supervisor/report.json": "19887e228b7e1d8871ca45900eb234cfe767871fbe81f0d78217341804ff5129",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "11008eb28066d0dc007232f5f79cdaefe0bb43845ba0461b5fdffe0c89b77b6a",
+        "supervisor/telemetry.jsonl": "86085c34481314e9091bc099ea2f72bcee96f98bd03fe4d229aa97bb8ac7a2e3"
+      }
+    },
+    {
+      "id": "gameplay-pilot-f4c72694",
+      "stage": "gameplay-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gameplay-pilot-f4c72694",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gameplay-pilot-f4c72694",
+      "files": {
+        "evidence/report.json": "ea4992e0ef28f4cbf23326cde2e9f36058119936b83a96a0278ac656e4b0999c",
+        "report.json": "cab0c99e81bf5c7856d0d1123b1841e7fa77424bf8a0e63907edb95953b29c24",
+        "supervisor/report.json": "089177c5cbdbdbfcca59c229383299c68b6d456612a0b51bc8fbb6d5bc3477f6",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "82b0183afa87607d5c9c64685b494f2c8b1e2c0db919791cef688db7be20f9de",
+        "supervisor/telemetry.jsonl": "3a6d1f2bb273a72ccb233d8cbeb3d57ecc3e8651ae5cfea9187aff33418b1cc3"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-0715317b",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-0715317b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-0715317b",
+      "files": {
+        "evidence/report.json": "90a95fc1f99ba2f9a02c7bbbeeb796cb78937b9ccbf222bec3d3c7dfca9e38d2",
+        "report.json": "ad536c434e875362757745980415610bd05907267ff07ef9847d47b90872b9b4",
+        "supervisor/report.json": "5e951bef576cccbc8496aebd6a6fce1a2e429e8272653c6d7962adf114ba98a1",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3f012b3bf659df3949b8881036f5f91ee9eba199b3b1d735448d34de03d4387d",
+        "supervisor/telemetry.jsonl": "77e1c2dcd0312d501e8db7bdac5a6063613b0a92caafbde0d9abd092f01d9700"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-11398053",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-11398053",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-11398053",
+      "files": {
+        "evidence/report.json": "ce064b0ca48ab57a433c8ea15b2df1ca3d3d5c30b7d539a1fe4b7c6d4d0228d7",
+        "report.json": "2674be47d1c0d5bfb1eed1380cc539c31742774708917150240923d6223d6144",
+        "supervisor/report.json": "7ceec170a8c2156606c245cec4c3999e87b8b9fb59a59370d512c3f3a06c3f84",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "5cdfd1b2e18f963db6cfef54221452553162381828e2fd33019ce84c09842151",
+        "supervisor/telemetry.jsonl": "ebb12062546dd5efdd127201699d0133eb5a0025a75e214710ecee2f246d7fc8"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-37a4c00c",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-37a4c00c",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-37a4c00c",
+      "files": {
+        "evidence/report.json": "3512945bfce3a838e39ec2330964902ddbccc879e102a858dcdc2427abcd7731",
+        "report.json": "efe3a4f5e20fc2ea964ae6f1d9b386135f71aa8fb572e479f4bcb1dbe9ac919c",
+        "supervisor/report.json": "7c274210b789577cf0ee9fdddaefd96ba8ce3e3a7db7a98275b8bc5242c9b7b8",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "5cdfd1b2e18f963db6cfef54221452553162381828e2fd33019ce84c09842151",
+        "supervisor/telemetry.jsonl": "14b345869138105627cb2fec15322314979440f069ce0d5f2b9aca4c1187abda"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-6eda6e5d",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-6eda6e5d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-6eda6e5d",
+      "files": {
+        "evidence/report.json": "fdb79e05c570368d246e37707a89de10a618d4c927a94fe726e87f0d539d8dd4",
+        "report.json": "ec8562680415a94960dd643e9b120712cc8bc291a18fccc7c2762062ef0bb745",
+        "supervisor/report.json": "91b3de87f7b117f5d2e630aea3593d573268d73da0057dfcd79ebeeb395fef96",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d48ce39d4dedd3b463c7d112773a814681969c54afc7e3cdbec3c6a941ceb9eb",
+        "supervisor/telemetry.jsonl": "73a76b8680d87394266b3a0a80ebe8df837cb53378ef4f1f9d11fd62feb0c9a6"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-7387111b",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-7387111b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-7387111b",
+      "files": {
+        "evidence/report.json": "f473e6c1302ac19cf298cad22a0891542003124d4ef4d870595cdd68dcba1f14",
+        "report.json": "4ecd9753b431f9acb2fc5ffa68fb8eea3e00f08595c2ae676905c3756f7a7b9e",
+        "supervisor/report.json": "008a6e6c990a2c3c244f2c01c95c4d4970bc74cce20fd4033637d4b1a385c1e4",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "bd1e2a3cf67835ed33d01e464d53ca25ced514d6fcdd12c5a50289b9a890e571",
+        "supervisor/telemetry.jsonl": "8e14fd3a332dc72a75b0a05cf14b53353f43906b559674d908bf3114644ea7f0"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-9c52a401",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-9c52a401",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-9c52a401",
+      "files": {
+        "evidence/report.json": "33c8c830ccf339999ad2b288942cf576cca6e289d84a01598a5309bfd930d652",
+        "report.json": "84df9ce9cb0e4d22a7be17cb02284fc5ca9b457ec1efdb8d0de8a689cb7947b8",
+        "supervisor/report.json": "50e68d42fbac4f11983964b6cb66b33b32cfd4636ce88ec88f9fb1979d4272d6",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "38722b3e30c9df7b3c789245ebf620cfe604ecad64840b8f96d7bc33a12b667c",
+        "supervisor/telemetry.jsonl": "da92d2e8ddd50b81171214e2aec690b642d641f97604f4ed265e081ed1e1c833"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-b1f11c7d",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-b1f11c7d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-b1f11c7d",
+      "files": {
+        "evidence/report.json": "687f72957486de56ddfd0f629dfd2c7e8e76649457d027ad246eb2ca057ade4f",
+        "report.json": "ed242006e4d7ce4bedc72f66b8a72612b42cebeeee542cdf6e094e9b89833e84",
+        "supervisor/report.json": "a800efad42695f3453c248b0f548c527819eccd033268f6a427c7e800f4cf5e3",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "74fad76f051537f7f360084fc5303b96e210793bdb1e141271b9d704edc8fee4",
+        "supervisor/telemetry.jsonl": "3d7a8e5c9f0b9248b7ad6539747d278fa0ed3bb43bbec3f577fe93ed56dea1eb"
+      }
+    },
+    {
+      "id": "gpu-build-0b48ce18",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-0b48ce18",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-0b48ce18",
+      "files": {
+        "report.json": "2eb6013b613f0c3c11368bb1a4f988c94f79787a61a62d7ebe2d0884140cab5f",
+        "supervisor/report.json": "e791560b77585a3e9de985484780bd09fadf40d24174f0633ede5d126fc68058",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c6696f680a59d9975ef5bd7fe7133b50e5deadc1127ad049dd373bf60c46fb63",
+        "supervisor/telemetry.jsonl": "e0f6f24b8ffc979e424ffbde4d02550c6b2f004efe1c5fe6f42670dbf256de30"
+      }
+    },
+    {
+      "id": "gpu-build-21364cd4",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-21364cd4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-21364cd4",
+      "files": {
+        "report.json": "c0db3faef7ef30b22e0e99cb29ed5734418b8feb943f4f451b56e1bc5b1b8f94",
+        "supervisor/report.json": "74b57213871ad8b2ba0ecbc2a857fe431901e90690b0935bb08f8d255f3afb78",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "cd52515a30a8d86599b2b0dadecde4d709a9a3076aec12af68273e7cc62bf4ee",
+        "supervisor/telemetry.jsonl": "8482ac7f1c460d6627ca54b1bbbf35c0f63e656232af822b1f4b195fef60291d"
+      }
+    },
+    {
+      "id": "gpu-build-6e54f3cd",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-6e54f3cd",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-6e54f3cd",
+      "files": {
+        "report.json": "a378bdc5bb7353b304620e2fa7d3f43bf2ef7cca55bacbf57d39ac51a48d814d",
+        "supervisor/report.json": "40f8d913ad8fa356362f746d696d0fed2493b8bc8ff934aa16d5ead98a79c111",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b9cce8fed1895668f0ea244f9b5b113ffc12c5a50c907c7e2d6f0a2c5f674a84",
+        "supervisor/telemetry.jsonl": "e3db829acb977e448e22a66e91e9cac7aa712a79353656c2d6bb1446198f6a8d"
+      }
+    },
+    {
+      "id": "gpu-build-93589df2",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-93589df2",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-93589df2",
+      "files": {
+        "report.json": "a00f035a7b2f675b45857300b8f5df03f2e961693e1cdfa0d91c48f902d3f13b",
+        "supervisor/report.json": "af5b584bec05a80f699330304eb0db1d77762e760738aca7b078f42f5f4197bf",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "0b40de75b4e6edb4967374e19bace50912f0ac22656e9f416b7096a0a2fbbf0c",
+        "supervisor/telemetry.jsonl": "ab00a66a8dabeddd3a418bcd8d545e41b477e22c92c415ea89cb9ca24be7bb5b"
+      }
+    },
+    {
+      "id": "gpu-build-95fc784f",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-95fc784f",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-95fc784f",
+      "files": {
+        "report.json": "9a8da7aa9a9862be7ced9f6b676574b6c045654d80619219018249c846598073",
+        "supervisor/report.json": "06a4dcd7e0203ea6afc5895fd32262685f64209ea0bd59017c244d10c2c1ff94",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c22bb0e28b668b18743fd1cb1ddfb9ac3146b70a450a947c0ad756ce5c560408",
+        "supervisor/telemetry.jsonl": "63e53af4bc4a07308f5c368842fe253973984f62d8028206b79d2d2e9382e8ac"
+      }
+    },
+    {
+      "id": "gpu-build-a61a61ed",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-a61a61ed",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-a61a61ed",
+      "files": {
+        "report.json": "77ba91166cc25e818dbdc60a45a2f2b79c5f0e88418d5b4f54324e81a30cbf63",
+        "supervisor/report.json": "85fa41cada2e4bec18dcbc32dfd69390aff6b7e7d695c378a95878326e0ec8a9",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "69be0cff664ab76b65b20bc6033ec5e6dcd399de3d7c9c7c0e0513194523484f",
+        "supervisor/telemetry.jsonl": "f162b34fd64dfa77712b38311800f4a57e3cbb81a3704b391da6f30723ccfc33"
+      }
+    },
+    {
+      "id": "gpu-build-b7694569",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-b7694569",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-b7694569",
+      "files": {
+        "report.json": "b6da999ad96a07ae21500b165188dfeae6da55b2e1fcbfc0a52d7640466fa40b",
+        "supervisor/report.json": "4695e882a4c1181a4b3463a25a9d6be7956d6b04a2e32948d9356ab5b2b89a0e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "666b4cad81db7b809a1466b81f601c93ffb417455964f6cfaea5e5d2809d40b8",
+        "supervisor/telemetry.jsonl": "2f5f4353952f9143292ca68a3ce4d69f076a85261ed69b2015bd8aed09c5e313"
+      }
+    },
+    {
+      "id": "gpu-build-cd53defc",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-cd53defc",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-cd53defc",
+      "files": {
+        "report.json": "f42e4b04f2c2c95aed0ebe94fcc24b133de5903454a1d4f81a862ac123306a90",
+        "supervisor/report.json": "9f3475d714491a68a47f079171d07d5895c657e03c8764d858b70d4b61d4148f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "62c20da080fab38b4edfbba8e69e41120cdce98801bbec1d98ec98211859d594",
+        "supervisor/telemetry.jsonl": "cd1f1e6c94fcee509d3b6b7702ed87753aea1c45626751388798088e916ee8f2"
+      }
+    },
+    {
+      "id": "gpu-build-e3180090",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-e3180090",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-e3180090",
+      "files": {
+        "report.json": "ef1708fbdf94d0f03d5a4cfa2ef8c5d94a6baf7da92178fee520defa2c533fe9",
+        "supervisor/report.json": "4d5cace10306003e0082cfa04e73867cb0a05120fc0b7b9c516fd9899a5c3915",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "05f1fdd2a53e68c0938624a592f22d396039b5918d9e9ad7b2d3cb2d311da5b9",
+        "supervisor/telemetry.jsonl": "808aeea999712cd59df5f5ab61dbc08e5b2a120facf4040a015a87b1d4bd3187"
+      }
+    },
+    {
+      "id": "gpu-build-fcc4f078",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-fcc4f078",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-fcc4f078",
+      "files": {
+        "report.json": "ffa7c5d30c31d23318e5450e6d03e92efa3783a3adcc337f981165b0b58937ce",
+        "supervisor/report.json": "1267da0d8ce78b1b13e95fcd6e5dde4196a986b1be9031cf408cc56515dedcd9",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "59158500a5559d688b4779b77345bdc24f47843ddd191248942e35385c890118",
+        "supervisor/telemetry.jsonl": "66b7f58bf6be52b179b26b27ec051f33efe3f37e5a8c0a69d132e93142a8712d"
+      }
+    },
+    {
+      "id": "gpu-build-fd9786ac",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-fd9786ac",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-fd9786ac",
+      "files": {
+        "report.json": "34f411b6e436d1854b7826f0081379cd96d8961d21eec6e4d0e643bd8fcb9a20",
+        "supervisor/report.json": "09873aaedf6b939767edd1f99a10ea2e5b994e91dce8e6b678939fdde1412baf",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "2bdc5ec82c5d642fa8fd96b85019bdc7648b17202b89572a7e2f98a457947962",
+        "supervisor/telemetry.jsonl": "5c084a78a8a5241a9aeb99b51ca79ed2057b5d95c385f6be5a800af066373791"
+      }
+    },
+    {
+      "id": "gpu-fallback-6414ad3d",
+      "stage": "gpu-fallback",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-fallback-6414ad3d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-fallback-6414ad3d",
+      "files": {
+        "evidence/report.json": "7cb05ead2b0e1c51df72e0aef0f57b2c7a08eb277b29b4a89e4c15902828e380",
+        "report.json": "609069395e3ecfffa72233222c378e51b4334a8b6742dc1c142829402e8f0a31",
+        "supervisor/report.json": "c134416cd594fa4a7f39cf7121417d87f3f1119b6a3b7955204303f38352b67f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b5c0cd2d3e1ceebcad50d850af2a6cf2c5b53dd1871453de40b1344130042bdb",
+        "supervisor/telemetry.jsonl": "5f336b66c20f5bce327d77d1591f75cb7b02a33463a4f5a5a5382ce16c08a5a3"
+      }
+    },
+    {
+      "id": "gpu-fallback-780647fb",
+      "stage": "gpu-fallback",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-fallback-780647fb",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-fallback-780647fb",
+      "files": {
+        "evidence/report.json": "117e4f4053b9a1a4bca681860ec6dc1e09a3f16c2a955bcdafec3bf6b6c856a8",
+        "report.json": "aeb70da610a83e950a44dfb42bd6b66da4cefd187f2763cd3df4ab4a00cb7559",
+        "supervisor/report.json": "585377e872774a2abebcffe583d29460635eec2d1157128079bf797dd4a0c512",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6499563c2ce4917a30340b94773462787749c7d6f319349acc1735112a14bdd9",
+        "supervisor/telemetry.jsonl": "464b2738ac7452edab19208670c0a1466f25340e3e6ed37a2170a70ba55bf694"
+      }
+    },
+    {
+      "id": "gpu-fallback-f29ecb59",
+      "stage": "gpu-fallback",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-fallback-f29ecb59",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-fallback-f29ecb59",
+      "files": {
+        "evidence/report.json": "d4af76b8fee265c9bba422f8bba9bdb8492a3d06349a039f0d218d152c63dcbf",
+        "report.json": "ffbd0076e155affca74ae2c0137c2f2aeef0fa1b4d1577e193148a657d1eef23",
+        "supervisor/report.json": "0e4de6e5c79eab7546ca80fde00edb125ce4acbc20bbd8858a6be8e3be804743",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b5c0cd2d3e1ceebcad50d850af2a6cf2c5b53dd1871453de40b1344130042bdb",
+        "supervisor/telemetry.jsonl": "613278a7fc9e503c41d23a9da0144e4f0da7e43b80f0bb0d68556ff95b2e4451"
+      }
+    },
+    {
+      "id": "gpu-order-fe622442",
+      "stage": "gpu-order",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-order-fe622442",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-order-fe622442",
+      "files": {
+        "evidence/report.json": "87a3ceb039a43c1595eb0845c525c90c20f48be23193d65d748e0275464fa537",
+        "report.json": "49019da407e173471c0612f561228a2e2e01f2e7d04fc3cf584ff86e009352a1",
+        "supervisor/report.json": "6f456acace976164208658b7e1441b618a636a4ba6b2fa7af831cc03a21b4772",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a0a2859fcc1429ea68db3c8934ee3ace49b8bb367a64f685b49e6a10fc7c0916",
+        "supervisor/telemetry.jsonl": "556c5781e2da4a633a59ac790af853524889bf3f04e80a360d8cbd47e7daf160"
+      }
+    },
+    {
+      "id": "gpu-tiny-24cd6618",
+      "stage": "gpu-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-tiny-24cd6618",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-tiny-24cd6618",
+      "files": {
+        "evidence/report.json": "7834ea63e1cc214cd8840f4cb2b8d56eed0f18bbcb02351e3e7d36a6200c0c3d",
+        "report.json": "0077d9ac4a695c9b15a06cf8dedf724a4353abccf0acd356d561d23c13e866d3",
+        "supervisor/report.json": "71b534950fdd4ef75030c473a1aa65ca65a5b2acb5f1a40b9a1b7454ffb51fef",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b9191ccbb71254bbed4179645e1a24f78c46099af515fa2be43859f75fadbb51",
+        "supervisor/telemetry.jsonl": "f333656dd7c42d495af9a9c5f788e20bf59e631b9223ea2baa6bc66d7d47becd"
+      }
+    },
+    {
+      "id": "gpu-tiny-d0cdce17",
+      "stage": "gpu-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-tiny-d0cdce17",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-tiny-d0cdce17",
+      "files": {
+        "evidence/report.json": "a341cce251da15952522c492ecf968a887997d52aaa36f4e3eca908794d8c6e5",
+        "report.json": "16e25264f3dd733380cc929375e46888780a29377f822a5691e949e0d3d606fd",
+        "supervisor/report.json": "1307f3b82e960a08467aeef27d8f5b083f60f3432e63ec4439f4f363399dff89",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "81fdbef233e990a31a3207b112a3f63a45b094bdf39bdb9e2ca91653c2773cae",
+        "supervisor/telemetry.jsonl": "32079b9e96bfce8949c6c2afe9956af4caf42881bb0ad8504cb98a58a03d8eb5"
+      }
+    },
+    {
+      "id": "level-pilot-067be455",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-067be455",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-067be455",
+      "files": {
+        "evidence/commands.json": "4ec8e2b6eaec01f7d721dc21624ed1c8769c82d483edc2d18da0f9428f770102",
+        "evidence/report.json": "b6752d42c6d2d15868d2eb85f09e9fa68bb6a4d37e3a115a298650c4296c56f5",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "5d57c1a16d0f9686ed2ca9762433de71bdd87d512a2872624af90ecc7818aead",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "48b208d0e5d8b75f55d307f93f1af1125f72babd473b41fc99e0d3a41bdb5034",
+        "evidence/tick-181.json.gz": "b333f48c9f522350b88b639ec668d98d8ad4f598b0e74f797ceff83a657b0cdb",
+        "evidence/tick-183.json.gz": "74b5b376066b0599d793a1f8726670b31bc2f70fc46fbad0ee0365309faf8d61",
+        "evidence/tick-192.json.gz": "2d483607bfc6c3905d7a39bf401bd112abf557f0db669f16cf2b536a542b81e6",
+        "evidence/tick-256.json.gz": "accb76ff35f201f70a30205538a5888199433640701c47b4aed6a290297bb186",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "83acd130683b8442906ee697aad2bf660ca0d288711da5289a3d54ada9c8b53f",
+        "evidence/tick-384.json.gz": "5d13b86c94ac4da794ab33f8540009d9f33596945400282c042511f5d7adc498",
+        "evidence/tick-448.json.gz": "d1717e650df286646c183896adaa21f67e5283544b07babd72c046192cb88acf",
+        "evidence/tick-509.json.gz": "aedfcebeb259bd19833f1b4ba5511febd42a7c98f0df3fbdbaeb1129bb94d8d2",
+        "evidence/tick-512.json.gz": "aeefae12eeca0fe402e6251d7990bb4440f2fc8d1252e66a95d1eb696db379c4",
+        "evidence/tick-576.json.gz": "10007283f268995767f095c1169aadc0a892fade86a1ffeae4d7dd94a850934f",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1e838d1bec34525eb8a73dfbd0d051532b82f6e227c7a965f67d19eb0d94778b",
+        "evidence/tick-704.json.gz": "23aac59b391732223ff7af73be87185427ff597eda75867770c1fe432f98e01e",
+        "evidence/tick-768.json.gz": "d63807bc052b43d26b0f5f5888dea5abceefc874b625815bb9d97977e15d35af",
+        "evidence/tick-832.json.gz": "11b24ae1c344c3608d659b65cb93de11a7fbeb30631459efcaf28048ffc80c07",
+        "evidence/tick-896.json.gz": "ed3257d38025a8c6aef4ff69fd276df3b6d4c54d32e3603886aa683843b88689",
+        "evidence/tick-960.json.gz": "176cccb7b3e52f6dbb339117ad63c449408d97e80aff9914aa4b6ed7427977d3",
+        "report.json": "be1fc8525b3ccd63455c2d5ce0ca3f398356f13c85346e96426aae3165972d8c",
+        "supervisor/report.json": "a7d2726192a8d7ffe1b4ebe14dc844aa42ec577f9b5e628da6dc622e96ff22e4",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3ede2b8857a449877ed1e8a34bb0f808ad5242b75b04f9ede278a75b3ba41c12",
+        "supervisor/telemetry.jsonl": "3f13d06a09f3f673bd79cd5f978ac00019190b3be2795e774ebb287a14633152"
+      }
+    },
+    {
+      "id": "level-pilot-0d075690",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-0d075690",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-0d075690",
+      "files": {
+        "evidence/commands.json": "f3ab024f2b878b86d4ca5d0d62c5ba2b3cd96b7a79df2cb1ee4004e118cca21a",
+        "evidence/report.json": "93ac8cdd54d16471ec77ac52253b301943b7bb41ec7e510b0fab449acaaf0abb",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "d7a89e11fc0ea100c3a7758802a5cf47fda4e1f275ea1262f9068cb69837fe9c",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "268584bf76d17c9d853d7762361f670dbbd3864de1d95eb956478642c3519184",
+        "evidence/tick-181.json.gz": "f8aec3448d734a2ec97a26a2befe0156d478431e7f9788ed0b762bfba7388b76",
+        "evidence/tick-183.json.gz": "abd92e6f41e39e5fa72bb8a0cf844ee8b88150a13e073f956907b6e62420a5ad",
+        "evidence/tick-192.json.gz": "746481259178c03c53b2d061acbcdf587d588bc0e49f899bc67ba6e2de5666aa",
+        "evidence/tick-256.json.gz": "fd1e01ed3e1da252173da3bc1408d2684b136cd5242607d7a4b74d66e4df13f2",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "04c04bb159959a2f2f172e3e61b722e6bc6625c0353c5a78cf5eca9370ed2fd2",
+        "evidence/tick-384.json.gz": "f2ea248e7f0e0d84655c5cb2b6f5aa1e7950c41a0940d69a143aed90de973f7d",
+        "evidence/tick-448.json.gz": "75db4f4857120b6504cec5dc8815aba57b329e0e80715ea0e80948b4cf2cbcbf",
+        "evidence/tick-509.json.gz": "d60938ba197e8ad36b5074534fb9a49bff34c0d0f3597dc629d6bfd842bc9875",
+        "evidence/tick-512.json.gz": "64ea532e3627a73097198c580d606efd880d1044637cf0ad3c6519422ef3da08",
+        "evidence/tick-576.json.gz": "166647b0983dbece4620dfb704c440af8dffb4e66ca025df2f5824f6edd030b7",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1d246ae82c02dd166680380cdce705546e347ead87a7b95169fe2663a8d5069a",
+        "evidence/tick-704.json.gz": "2296723519c0417ede72459c14881a48607f1cecd78fa398db999804a1a80571",
+        "evidence/tick-768.json.gz": "70fdc9bf6267faba66dba42499cd0918f1ece3649780975c02206f987760304c",
+        "evidence/tick-832.json.gz": "53899e8798a9880e3da416e66e6f7b398cef01b571334921f3a3a69af2e6929c",
+        "evidence/tick-896.json.gz": "b89b05df3f09ed8ffe5c7ea08eba3b7dafa1c3dbebcef28d8f20ef0e6227f261",
+        "evidence/tick-960.json.gz": "3182ca5a6386c26e75914da30dc1a17b34ceb88a43600873b961f3ad0be7a2cf",
+        "report.json": "2c4b9f423c9d3f5c8225ab7fc5fd227ef90f22b8bfaaf078e2a42bdee1ff49db",
+        "supervisor/report.json": "d5538c4993fec1a88c3d4828d99aab9493138d0b2ee88441964a559437508616",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d7f54168f841881d6d3f28ba06c20a724edf03ccf262d1bfb29ed2ae7b31e21b",
+        "supervisor/telemetry.jsonl": "e3bfe246301d2c90fa8f656bf22308b678b20cdd0882c8f0b8a40f12b434ef6d"
+      }
+    },
+    {
+      "id": "level-pilot-0ef191ef",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-0ef191ef",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-0ef191ef",
+      "files": {
+        "evidence/report.json": "abaa630aa655ebab2f4b925b54ea0d0c4b808d4c60837def282afeff3935d002",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-15.json.gz": "185bb0db202e422ffcf931d04ff5d4821da86bc63f87918a687467bebd865891",
+        "evidence/tick-16.json.gz": "85b8d7d8c0390c6d02efd44ada7cfaa9ec417e8f15e752855bf1ceddc561ecaf",
+        "evidence/tick-17.json.gz": "16ceb29d40d6cb156311c249513be52347dee38da84ee76a5a7a8cb85a0ce6f3",
+        "evidence/tick-19.json.gz": "6a52681fb69cd8b90f3b97465649d94826f9862fdf0c74b21a3af11efa7d0632",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "444abdc3711964f44e9629170b58d048de50f5f09f3d1d47751d3127997cccaa",
+        "evidence/tick-32.json.gz": "a66049772456f868757fc51cb2dce3b7573b68a571b4627dcfbc43cf1f5c46a9",
+        "report.json": "dcf66a23173f771bf717d3b512ab3b50ac23cd42a52a4093cd10db88ab78c146",
+        "supervisor/report.json": "b3f37c8312049988b51037cf51fb3c7cd8d62e45f47a88d205e28f4a03271809",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a5e065725756fa09e53d2c9845785af2de552b4166bb603d74d5671fc5cb26d0",
+        "supervisor/telemetry.jsonl": "62df54a5fcb32fd07a00b514157f2601f2c5e4718efc7675daeaf281a7cbf090"
+      }
+    },
+    {
+      "id": "level-pilot-23f14995",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-23f14995",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-23f14995",
+      "files": {
+        "evidence/commands.json": "01773a2c6e9f70771474688316f4c0d13f4787adcd7fd478fe362b5936525e80",
+        "evidence/report.json": "c9b193fbd995f38c313674194193a5055f1239b4a256421862b5078c9e66e51e",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-1024.json.gz": "8865f7b2d53b1d2f69f6544918d67836eb63276cddeaa2ed9cf1cbc95da97f49",
+        "evidence/tick-128.json.gz": "2a18294ee89e8628f37ba25277973100fe04876b3606aa1eb77e6e9103356e72",
+        "evidence/tick-179.json.gz": "fff85448649941c082b6751e06f91e44d23ea877f6e7d754a13b4f0723437fce",
+        "evidence/tick-180.json.gz": "25ab799101315ced11d01f099bfa90f20adc73d8ffcee800bedbbb18fc985d9c",
+        "evidence/tick-181.json.gz": "0ec9fbe9f8773e12adc771c1a633f6d1b01650d574272200722db1ba85f12e88",
+        "evidence/tick-183.json.gz": "b5e82930168010d2e2c0ae0183e1aa134130b10cc94352f1d70432961b4e665c",
+        "evidence/tick-192.json.gz": "48c1eef6243908a0c7fb4d1dd9df06b1da1620295c1c9319f848153ebe361977",
+        "evidence/tick-256.json.gz": "b968dd82e44957239f56ee33a144afa09fbf0996b283afaba33fc0d1e2ade070",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "444abdc3711964f44e9629170b58d048de50f5f09f3d1d47751d3127997cccaa",
+        "evidence/tick-320.json.gz": "f5eb40d32fbedd7ac23c44f30e13ffd1f1d62aa1ffe88d9b4ff75ccf7c472cfd",
+        "evidence/tick-384.json.gz": "f5aff590006529483b13853ed38cfba1ac1a9f70a07c1be2a91bd1ba8ed919c8",
+        "evidence/tick-448.json.gz": "29e182b51cdc66a21f6b4231a0f9da76e69b98b2889f06e63b19b9159ca11435",
+        "evidence/tick-509.json.gz": "01a59a772fa1607527df1ac4dbc3d06fee67d8a2a477a3dbd1dc50d4cb4499c7",
+        "evidence/tick-512.json.gz": "cf400b7793acd82936461f028048b1727e4e25a0a32a1d9bed024e2a1fd07845",
+        "evidence/tick-576.json.gz": "4207cb6ff4d9917f6e8490c55aae55393526cbca828a6c1405a260ea927bd353",
+        "evidence/tick-64.json.gz": "50b5f7e215e725e95c73cd536cce3a1b237cf39364db7888f812545dcf3586a6",
+        "evidence/tick-640.json.gz": "0da9c2bec399a8b9dfbe73f24093f1dd36d65495b6484b811eeadd20a8cf61bb",
+        "evidence/tick-704.json.gz": "3b2b4d4439e448a6d97fe218096e92c71e43f5c5baae824a002df6f28931ea3a",
+        "evidence/tick-768.json.gz": "88c1a9da512267125b4a621d67fcd8d5a59b3267361845de1c80e6ebdbdef3a0",
+        "evidence/tick-832.json.gz": "b6a311d3538e1899e734095974bff578a0bf9206ff26290c5b9a3b09f2e303ad",
+        "evidence/tick-896.json.gz": "1f3f5de50d7a15d3bd081a626920f7d53d8bf517c9939f4064d745cf01deafb5",
+        "evidence/tick-960.json.gz": "3de80bca056506fce0f90b02a70942d0e87ee58dcbcd3d51c7b1d40eb1a832ec",
+        "report.json": "f108d46444af924e20470ac328f40f37cace3904ed7def0df6dfec4b1790bca7",
+        "supervisor/report.json": "4a3f23b681e9654fa20ffa9dc74df0d5466fa447e95c439cb1238c6b05881766",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "dfbef892d3b511375ed6a8ea1545b71918aaa6cc684046cc20aebdf88a09a2b9",
+        "supervisor/telemetry.jsonl": "f6c56025bbddbb1bd5cac65ac4e07d23c64f26a52fb32bf332bf50bafe04b618"
+      }
+    },
+    {
+      "id": "level-pilot-42c448a0",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-42c448a0",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-42c448a0",
+      "files": {
+        "evidence/commands.json": "01773a2c6e9f70771474688316f4c0d13f4787adcd7fd478fe362b5936525e80",
+        "evidence/report.json": "4067e845c3e808fcfab809266ccecb3993cbeffb56f6b507a3aa8357711e3580",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-1024.json.gz": "8865f7b2d53b1d2f69f6544918d67836eb63276cddeaa2ed9cf1cbc95da97f49",
+        "evidence/tick-128.json.gz": "2a18294ee89e8628f37ba25277973100fe04876b3606aa1eb77e6e9103356e72",
+        "evidence/tick-179.json.gz": "fff85448649941c082b6751e06f91e44d23ea877f6e7d754a13b4f0723437fce",
+        "evidence/tick-180.json.gz": "25ab799101315ced11d01f099bfa90f20adc73d8ffcee800bedbbb18fc985d9c",
+        "evidence/tick-181.json.gz": "0ec9fbe9f8773e12adc771c1a633f6d1b01650d574272200722db1ba85f12e88",
+        "evidence/tick-183.json.gz": "b5e82930168010d2e2c0ae0183e1aa134130b10cc94352f1d70432961b4e665c",
+        "evidence/tick-192.json.gz": "48c1eef6243908a0c7fb4d1dd9df06b1da1620295c1c9319f848153ebe361977",
+        "evidence/tick-256.json.gz": "b968dd82e44957239f56ee33a144afa09fbf0996b283afaba33fc0d1e2ade070",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "444abdc3711964f44e9629170b58d048de50f5f09f3d1d47751d3127997cccaa",
+        "evidence/tick-320.json.gz": "f5eb40d32fbedd7ac23c44f30e13ffd1f1d62aa1ffe88d9b4ff75ccf7c472cfd",
+        "evidence/tick-384.json.gz": "f5aff590006529483b13853ed38cfba1ac1a9f70a07c1be2a91bd1ba8ed919c8",
+        "evidence/tick-448.json.gz": "29e182b51cdc66a21f6b4231a0f9da76e69b98b2889f06e63b19b9159ca11435",
+        "evidence/tick-509.json.gz": "01a59a772fa1607527df1ac4dbc3d06fee67d8a2a477a3dbd1dc50d4cb4499c7",
+        "evidence/tick-512.json.gz": "cf400b7793acd82936461f028048b1727e4e25a0a32a1d9bed024e2a1fd07845",
+        "evidence/tick-576.json.gz": "4207cb6ff4d9917f6e8490c55aae55393526cbca828a6c1405a260ea927bd353",
+        "evidence/tick-64.json.gz": "50b5f7e215e725e95c73cd536cce3a1b237cf39364db7888f812545dcf3586a6",
+        "evidence/tick-640.json.gz": "0da9c2bec399a8b9dfbe73f24093f1dd36d65495b6484b811eeadd20a8cf61bb",
+        "evidence/tick-704.json.gz": "3b2b4d4439e448a6d97fe218096e92c71e43f5c5baae824a002df6f28931ea3a",
+        "evidence/tick-768.json.gz": "88c1a9da512267125b4a621d67fcd8d5a59b3267361845de1c80e6ebdbdef3a0",
+        "evidence/tick-832.json.gz": "b6a311d3538e1899e734095974bff578a0bf9206ff26290c5b9a3b09f2e303ad",
+        "evidence/tick-896.json.gz": "1f3f5de50d7a15d3bd081a626920f7d53d8bf517c9939f4064d745cf01deafb5",
+        "evidence/tick-960.json.gz": "3de80bca056506fce0f90b02a70942d0e87ee58dcbcd3d51c7b1d40eb1a832ec",
+        "report.json": "5c0bbfcd806c0d43da16549b99f57443b1a5317963032bfe21d9caf7392e8a0e",
+        "supervisor/report.json": "33bb9ff555c9f094bb5cb0b0129199227756e77133a35272b9e98a8060577c26",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c0542e8e0c64e15de166d94983534e5bbee407b9618046844ab311257a991d16",
+        "supervisor/telemetry.jsonl": "9038c7bd8095f73403ee72bfb1cb56aebe9a50df8f136d8bcae40e5fbcbfb238"
+      }
+    },
+    {
+      "id": "level-pilot-63bd7838",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-63bd7838",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-63bd7838",
+      "files": {
+        "evidence/commands.json": "3efb22d4ce204343de639955617563e4ffb7e510b10f417b0367adc9b81ae023",
+        "evidence/report.json": "e8003db6d9186736cf1d62830f732dbdca6115c2dfd8eb8fbabf358599fc1302",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "3a1f6b7e4a7ce2c2e534023724dc399b660b25b1d800f3e97b12dcdcf49e4f39",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "8126e4998e62328a0651dc9ae505001ac6e3c5638891407489f69cfe493d29aa",
+        "evidence/tick-181.json.gz": "ecb7ae29c119d81bf601961f6517956a1a140f1665b96a833e03c1b912434b70",
+        "evidence/tick-183.json.gz": "dd3bcd906a3e60bd29962df2c59bfd05e83581c330dd21a1a3c525f8ea99de02",
+        "evidence/tick-192.json.gz": "c4108303da03751b9c9aa0345e92e87952357a27274f2c71b1c81a5896f7dc95",
+        "evidence/tick-256.json.gz": "d7fe1ea769768b3265bcad34d60968ada8aeffedb66cdf3be9709871791f821d",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "cc4bc4de96feaf6d27cbb4f089b0fac8af65beee790c0a2f509ae7fa0f268768",
+        "evidence/tick-384.json.gz": "7a9570b6b43f2b3dd8c55a709684c702d71bda26e3f724305ac3cbdbe6808f2e",
+        "evidence/tick-448.json.gz": "32aab9a44264a8915c9d51d6d6534a8c2f34dd9e5e7eb1d3b4fc0434d95aba38",
+        "evidence/tick-509.json.gz": "5ce7b91a3fb319283b94b46d3218212a7fbc2f5117b27be73a0bfba916f1e578",
+        "evidence/tick-512.json.gz": "4a91b6a4a633b743c23de416cfb7ef4e9b2e4075154de0329b34beeaca715496",
+        "evidence/tick-576.json.gz": "66af63d49f7a1bf274006b73e6eb94ddc670055e92178d47899b0d232b527186",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1b8a498bf2290978dff5bac7e4340674f6a963068136946f669afd6cce3cee80",
+        "evidence/tick-704.json.gz": "79f1c540aaef812b3b6a3247754c54d39431c32966ba88a17d045deb6ec2faa1",
+        "evidence/tick-768.json.gz": "ce2a2a5e3f1af4157edb240de43b3df3c797d209e72db681d9cd9ecb330029b3",
+        "evidence/tick-832.json.gz": "1a1aebc75b19f227ece1b35ea8934da29e9401b4e3c496c2e30cffdf5386874b",
+        "evidence/tick-896.json.gz": "344756eed14758794fd6c8d758e8c78f17d488e51f62cbe04edce3d461ebf7fb",
+        "evidence/tick-960.json.gz": "5597364c0196f62079eecdb0c2821bb3ebe7c0c6d7c247e987ef4810dd1bac0a",
+        "report.json": "b9e02ee16c0f0fde18091d9e510f8fe34a76f2d42415d598b4c4a83c82fe5527",
+        "supervisor/report.json": "922972e95efcd95fa31c9068a115d056f929f4fcb9190c535b942d18c92a6783",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6133415ca2c5aecf690fbdb354c7d8aefd35b4238ad6bc065519285291cc480d",
+        "supervisor/telemetry.jsonl": "4ffc3d826b341869abe48f495453f10f6205438024866538c7ef2e0f16c820f3"
+      }
+    },
+    {
+      "id": "level-pilot-723ad9bf",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-723ad9bf",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-723ad9bf",
+      "files": {
+        "evidence/commands.json": "4ec8e2b6eaec01f7d721dc21624ed1c8769c82d483edc2d18da0f9428f770102",
+        "evidence/report.json": "ebda9f250844e026085b804a3900111b1eaf0ce281e019bc27173d21ba5533fb",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-1024.json.gz": "bc9f0abacc70af59bec9360b74e18a17e6c9d81030ecc177f36af5ecd4573dd2",
+        "evidence/tick-128.json.gz": "2a18294ee89e8628f37ba25277973100fe04876b3606aa1eb77e6e9103356e72",
+        "evidence/tick-179.json.gz": "fff85448649941c082b6751e06f91e44d23ea877f6e7d754a13b4f0723437fce",
+        "evidence/tick-180.json.gz": "cec8e07d5ce20d35f56c71b6663f53431804bea645885f5341cc545005e566ac",
+        "evidence/tick-181.json.gz": "292d496fb58097b7d59110e27d40d6dd0ddbc3789fc2cf127beb66c77f87bc6f",
+        "evidence/tick-183.json.gz": "8324ec937dc82a8b83adac74027414f27aa36bb589466f8159686127ea35c022",
+        "evidence/tick-192.json.gz": "53ef614fedb377c40ea224e3bb998650da865362f19242f7d6b0ee2f2f0e1b3c",
+        "evidence/tick-256.json.gz": "84cb6e43f2dc2e7e3c027d1d4c0706888a4e73f0c75a798546e9ff6ffb10994e",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "444abdc3711964f44e9629170b58d048de50f5f09f3d1d47751d3127997cccaa",
+        "evidence/tick-320.json.gz": "a36b95bc6f22936d50bdfbf59563a54b505af79b18d6e40d90ee1237f386e41a",
+        "evidence/tick-384.json.gz": "e387838d39d4dbdf022206097099a824b7fc5f42ae6a33673cf33cb8b4c8048b",
+        "evidence/tick-448.json.gz": "7f3f597c79323d424d196b23f6e59e513a6dfb2b95baa107a4d4a57681bf682f",
+        "evidence/tick-509.json.gz": "8aa4438d8bbd3e25a48a626f70bfdfabc49e70911b4406ea8b7b0cbbc9546cc2",
+        "evidence/tick-512.json.gz": "51038c705d8fa1d759cc2e1ab287ff3552404927d084e8d81af96147ca8b31a4",
+        "evidence/tick-576.json.gz": "8f2602fbdc8dc3b0a7abea500ecf361dad2c5c366207bfd0e95c0caa82732225",
+        "evidence/tick-64.json.gz": "50b5f7e215e725e95c73cd536cce3a1b237cf39364db7888f812545dcf3586a6",
+        "evidence/tick-640.json.gz": "277f3703ec280548fc31afb9012db0b1ac50c3152371271d4d8cb2991140dc51",
+        "evidence/tick-704.json.gz": "5559e3b29a70bf2c018791202f387cd48687bbeeee1c784df8392d750457ab9c",
+        "evidence/tick-768.json.gz": "e9753f2fe302debbc0c11a973d824d3c79b906ebb475dfbfa5758c1bb0f0c4ca",
+        "evidence/tick-832.json.gz": "24add0a52584cdff231db5c7bca1cb2c051d3276c72835ab4f3eb65397ab8197",
+        "evidence/tick-896.json.gz": "195010191cd6b06f1e8424cade7cdb2f7932a974d5e976f8f9bc45c1067e7c14",
+        "evidence/tick-960.json.gz": "db1a3bc87e6abf4a1cf7a385315435147fa527bf7190a212124121b86d7e8105",
+        "report.json": "7a539e0cd33711d9c210925c393b678ffd80f5e1df3ee5a9e8bab4440d140be0",
+        "supervisor/report.json": "629e1499b196983bcd314a4d93f99fd16d3b66b1a98063379fc19c0ecd090922",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "fbfdfc61c661a3b7b34f95dca851336bf403b50bfb8556a12bcae66c410fa337",
+        "supervisor/telemetry.jsonl": "daf1772b78ee9a4172fcb30a66b49e2a5c801064524f2e9186cc843a07571bac"
+      }
+    },
+    {
+      "id": "level-pilot-739479de",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-739479de",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-739479de",
+      "files": {
+        "evidence/commands.json": "3efb22d4ce204343de639955617563e4ffb7e510b10f417b0367adc9b81ae023",
+        "evidence/report.json": "beb9050b9d854218bd784636aa0e635892146db71153f51bdbc130eeb7f3f4e8",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "3a1f6b7e4a7ce2c2e534023724dc399b660b25b1d800f3e97b12dcdcf49e4f39",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "8126e4998e62328a0651dc9ae505001ac6e3c5638891407489f69cfe493d29aa",
+        "evidence/tick-181.json.gz": "ecb7ae29c119d81bf601961f6517956a1a140f1665b96a833e03c1b912434b70",
+        "evidence/tick-183.json.gz": "dd3bcd906a3e60bd29962df2c59bfd05e83581c330dd21a1a3c525f8ea99de02",
+        "evidence/tick-192.json.gz": "c4108303da03751b9c9aa0345e92e87952357a27274f2c71b1c81a5896f7dc95",
+        "evidence/tick-256.json.gz": "d7fe1ea769768b3265bcad34d60968ada8aeffedb66cdf3be9709871791f821d",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "cc4bc4de96feaf6d27cbb4f089b0fac8af65beee790c0a2f509ae7fa0f268768",
+        "evidence/tick-384.json.gz": "7a9570b6b43f2b3dd8c55a709684c702d71bda26e3f724305ac3cbdbe6808f2e",
+        "evidence/tick-448.json.gz": "32aab9a44264a8915c9d51d6d6534a8c2f34dd9e5e7eb1d3b4fc0434d95aba38",
+        "evidence/tick-509.json.gz": "5ce7b91a3fb319283b94b46d3218212a7fbc2f5117b27be73a0bfba916f1e578",
+        "evidence/tick-512.json.gz": "4a91b6a4a633b743c23de416cfb7ef4e9b2e4075154de0329b34beeaca715496",
+        "evidence/tick-576.json.gz": "66af63d49f7a1bf274006b73e6eb94ddc670055e92178d47899b0d232b527186",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1b8a498bf2290978dff5bac7e4340674f6a963068136946f669afd6cce3cee80",
+        "evidence/tick-704.json.gz": "79f1c540aaef812b3b6a3247754c54d39431c32966ba88a17d045deb6ec2faa1",
+        "evidence/tick-768.json.gz": "ce2a2a5e3f1af4157edb240de43b3df3c797d209e72db681d9cd9ecb330029b3",
+        "evidence/tick-832.json.gz": "1a1aebc75b19f227ece1b35ea8934da29e9401b4e3c496c2e30cffdf5386874b",
+        "evidence/tick-896.json.gz": "344756eed14758794fd6c8d758e8c78f17d488e51f62cbe04edce3d461ebf7fb",
+        "evidence/tick-960.json.gz": "5597364c0196f62079eecdb0c2821bb3ebe7c0c6d7c247e987ef4810dd1bac0a",
+        "report.json": "bbaf78d5f4f70e6f3aec1812f74b47718ac72f355339a80091196052fca506ff",
+        "supervisor/report.json": "90b7c598468bf197af51f67a7380a820b2a5c6a42fd9db3cc1e437f24b4ccf98",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "fe11cc6be091d0716c0705d49602d5f8b5405522c155b482679b41fe29598f5f",
+        "supervisor/telemetry.jsonl": "5117c2a5938fc240dd688cb88d512f5430baf9e7236a20715511c37693ae1413"
+      }
+    },
+    {
+      "id": "level-pilot-8b73d8c1",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-8b73d8c1",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-8b73d8c1",
+      "files": {
+        "evidence/report.json": "315c327d9a975fcf15ceb11af18ab5fe282136185b02f5ec1a9d90c6e6aec175",
+        "evidence/tick-0.json.gz": "ea9e082d95ec110983e3ea92eeccd495c914a26f646911229e02df6c7c28f46f",
+        "evidence/tick-15.json.gz": "5e9e07436b68990d5941c70d8eb2303399006ed048a122187e62d14333cf9a88",
+        "evidence/tick-16.json.gz": "ad3cb11004cbfd065e14e00b784a7be44f2403b0f4dfe742d54218b86634f2aa",
+        "evidence/tick-17.json.gz": "34174b8b48e67859ba0d63ddf12fcba4fa1323dfb5cbd031f6e3b3f7191dc7d5",
+        "evidence/tick-19.json.gz": "8c0ff78756ae8b33f97a409d7bf54ce6347cc6cb13bfadf794ff36f596cd1d99",
+        "evidence/tick-3.json.gz": "21a502cbdb7169bf9198792b3b2e51a184530eb4726dc536bcf972ac5700afe2",
+        "evidence/tick-31.json.gz": "ea7e4dbd509736636fde86fde681df94bec9fc28f39cc1964fac712512788bf7",
+        "evidence/tick-32.json.gz": "ce56c93e858e2129b30d976b5e22bab45fe742279290fb46d420cc04f2a907b4",
+        "report.json": "b775e6a6199b7071ce7744a064db023dd62a145a1ea9524e2a4c0e8f47e809ca",
+        "supervisor/report.json": "68c614139d69e37ad5acaac48f2ff81e7002c048a00136bb65d498b50f6b7668",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f2acbd10e9436d61a2705d230b01c8a75ceb9b3eb5714824fc938bc72a04f83a",
+        "supervisor/telemetry.jsonl": "59b29dac95ecb4d793e8b8fd98f321e925382cc2f5f68454198c3cc7ddf70536"
+      }
+    },
+    {
+      "id": "level-pilot-9c47681d",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-9c47681d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-9c47681d",
+      "files": {
+        "evidence/report.json": "74789fab3030070fbb563e0666fe6cb62709d659927cc699df1b83d6efb684a3",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-15.json.gz": "0c928a3a081dec097a8185aa2090f6f1167f02a98fc0db6de52da3dc9969002d",
+        "evidence/tick-16.json.gz": "ca5e70c192d160ecedfda042c119419aeb3102d889b313d9a7a596137f8c58ce",
+        "evidence/tick-17.json.gz": "404df74d18217b034dcd981d1c07ff180b8c895458a994295c58fd7db29cef67",
+        "evidence/tick-19.json.gz": "5a6370b5744e3625481dc5b5467440c470bd2b74b52600683fcb515f6c3e9d9b",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "3e42cdc83e2f5b733ae0baa50b139d0c41cde01e1e763e2d816b26176cfed6b7",
+        "evidence/tick-32.json.gz": "606a7aa93b41760f5f178d8749d7c0f6c7aa16eee1d7593a2d69f0ffd5e5ad05",
+        "report.json": "8319bbb90438918098a20262eba093cb60346e0ca169a16988b7615818caa5eb",
+        "supervisor/report.json": "713b5cec138cfcd999a7002d298e8027315197a1ff8ee50ecd16114493506b5d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "cf38e2813a002a1c222ebbb1e1e561bf880ec0c41ae5c6c05346deb4be9e298e",
+        "supervisor/telemetry.jsonl": "b8652b660b87ebc78cdde9bc65cf437dce2e1d403a41adf828bc5d3f81da7957"
+      }
+    },
+    {
+      "id": "level-pilot-a4cc8aa5",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-a4cc8aa5",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-a4cc8aa5",
+      "files": {
+        "evidence/report.json": "971331c5dce7127eb8c2dc82ce3ae607264f2553b61f5aaddfb4675f20e9c776",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-15.json.gz": "185bb0db202e422ffcf931d04ff5d4821da86bc63f87918a687467bebd865891",
+        "evidence/tick-16.json.gz": "e85eece3b0eb775d3733b6ca6b2d83cc7ef110f77784051c1bade3c404f38029",
+        "evidence/tick-17.json.gz": "ff4ad91792cae523ec0a36a410036d4cc06c1f3e09374283b8301dc8b1f9fc76",
+        "evidence/tick-19.json.gz": "99e5f5193b31dd046d90c23af601a8a8c4f4dd6af566653f1db6cb9e9e42c49a",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "7603b2fd3e328f49c91f8e00cac369de21b23dc325efb2e6e79f29c3720f5539",
+        "evidence/tick-32.json.gz": "175efa2dd55f0551d627d21f3e7f69146623485acf3e6b39364c423585cfda7d",
+        "report.json": "8d666fbbccca5c392705be4c6691f0fca5e86a6385d259997ce5d879d7725949",
+        "supervisor/report.json": "f2c79b6161d09d625050f337cb039c50105d25eb85f82272d9cdd3ced655ad86",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "ec07779640b131ed2d5b4492e658a6c58d63630a119ab604cae1eec217c2d0e1",
+        "supervisor/telemetry.jsonl": "adeaa3e6bea5b52a7126bdac16c89fcb53e45905fe9590a3e5019e2d63c3d49b"
+      }
+    },
+    {
+      "id": "level-pilot-b1194a32",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-b1194a32",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-b1194a32",
+      "files": {
+        "evidence/commands.json": "6122f82415814c323e1bf313b105add438a70ce89d21e06cc24dd34614c43d09",
+        "evidence/report.json": "4a5e634f1f85a1559cba927b3cb2273de5c2f327992b803a345fb882f26d59ab",
+        "evidence/tick-0.json.gz": "491d8dda5910bd7db073f88a5f840ed2cc647124110f146311e5161e005fb12b",
+        "evidence/tick-128.json.gz": "cd7485d0b9036d35fb763be2f8eaa398d9145d357308bc3325ac463b5bc2e769",
+        "evidence/tick-179.json.gz": "cac7b2d64dd4c28f46a1f1a3269852167574733c1f72a8913840ac2204a4c9a2",
+        "evidence/tick-180.json.gz": "761c1b9a3a63e26dc0a8524e4a2249d39d192e06af0cfa5cc4702a97f8baae64",
+        "evidence/tick-181.json.gz": "7dad7af59cee9419ed39865fd94014d8c2c1cb01757192d459ae304d19ab4415",
+        "evidence/tick-183.json.gz": "0c11384099cbab10a523d9e6f74bea675dd110f13870ba2da4f02805ecd0879b",
+        "evidence/tick-192.json.gz": "dd4241ba8ad8df88ae1cab82faade04a9a127a954485213874ce9d2fbc4db0be",
+        "evidence/tick-256.json.gz": "7b165df4ba4bd9ec59db706e682b0678f250abf0a72b5ccd55391d2060cf0180",
+        "evidence/tick-3.json.gz": "560454a5a68a410465220caccc66dc5cba8c5964a2f34694f5db4587638808fc",
+        "evidence/tick-31.json.gz": "c1831cf302dbddf979a601a5b0fb24ac5503877825c8b32fc489c4a560a23b31",
+        "evidence/tick-64.json.gz": "61a50dc527ab7323dd62ed022aa2c7d51bbe1fb3cb1a6a61dfbde5752644250b",
+        "report.json": "5975a45757dd1907922c121c8effdbcca8d1586ec92c259761f3a1a195fd9331",
+        "supervisor/report.json": "35d3caed4b96341cfd1cdc60d82b64ce54b17c83367c032a09576d57bbf73c4e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b3f24a0b14468cc7210b59c99b0eaa6bb98bfd484c4a2b314ea72d06ef4e3f18",
+        "supervisor/telemetry.jsonl": "f85a20d4bf1550e31fb7e4332512b022dcf5e1fb8a37b6734a49b13ffd712300"
+      }
+    },
+    {
+      "id": "level-pilot-b35044a7",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-b35044a7",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-b35044a7",
+      "files": {
+        "evidence/commands.json": "8fb6396be0581a9e914c523887fe841e0c1a292d84319a4e9307fb9a987bc7ba",
+        "evidence/report.json": "30a7eef33e6a8d97614d4bf4143ded905c77713d1f0711fe714fee6a3beed214",
+        "evidence/tick-0.json.gz": "491d8dda5910bd7db073f88a5f840ed2cc647124110f146311e5161e005fb12b",
+        "evidence/tick-1024.json.gz": "df8a364275f927c45f06d35083503a9949d3742b1ec6aef60d21fe60980ab67f",
+        "evidence/tick-128.json.gz": "cd7485d0b9036d35fb763be2f8eaa398d9145d357308bc3325ac463b5bc2e769",
+        "evidence/tick-179.json.gz": "cac7b2d64dd4c28f46a1f1a3269852167574733c1f72a8913840ac2204a4c9a2",
+        "evidence/tick-180.json.gz": "761c1b9a3a63e26dc0a8524e4a2249d39d192e06af0cfa5cc4702a97f8baae64",
+        "evidence/tick-181.json.gz": "7dad7af59cee9419ed39865fd94014d8c2c1cb01757192d459ae304d19ab4415",
+        "evidence/tick-183.json.gz": "0c11384099cbab10a523d9e6f74bea675dd110f13870ba2da4f02805ecd0879b",
+        "evidence/tick-192.json.gz": "dd4241ba8ad8df88ae1cab82faade04a9a127a954485213874ce9d2fbc4db0be",
+        "evidence/tick-256.json.gz": "7b165df4ba4bd9ec59db706e682b0678f250abf0a72b5ccd55391d2060cf0180",
+        "evidence/tick-3.json.gz": "560454a5a68a410465220caccc66dc5cba8c5964a2f34694f5db4587638808fc",
+        "evidence/tick-31.json.gz": "c1831cf302dbddf979a601a5b0fb24ac5503877825c8b32fc489c4a560a23b31",
+        "evidence/tick-320.json.gz": "e90a1f5e51f9858d7c1ec1557fd39f8eba44ae666836c1b21c7cb0b3f7315ed0",
+        "evidence/tick-384.json.gz": "85cdd952f1f5f2c0752dab2eb238dad869bc92e5985fb4194e40fd78e541fdf9",
+        "evidence/tick-448.json.gz": "db6f8c6c103090fac4eb80ff569632ebc953f3fbd2f892757c4dc19fd775694e",
+        "evidence/tick-509.json.gz": "7e1cb8ea62a8ba995ffeaf253236ed95d4f0ca931adf648eea3a9f51dda988b2",
+        "evidence/tick-512.json.gz": "d21debcda2c509296b6267dd36cfbc52edb6c7dc48f27d1d3f54a89e39515e72",
+        "evidence/tick-576.json.gz": "69a62c425436c43d5d15a138e54ec99fd374473b62de917e8b99a8109b46c6ab",
+        "evidence/tick-64.json.gz": "61a50dc527ab7323dd62ed022aa2c7d51bbe1fb3cb1a6a61dfbde5752644250b",
+        "evidence/tick-640.json.gz": "9b093ce9a342fe5e0b154b8882ca11d8969e7401c654709f21e3c174a3a6402a",
+        "evidence/tick-704.json.gz": "ee8a23eb25e010e6fba71df41f72519436c3d0075fc597f6ffee9bc11a34006f",
+        "evidence/tick-768.json.gz": "fdd7bfc1e21d88c20dd9183ca52c58502030f3e823fd1f6477187a36bebcaeb9",
+        "evidence/tick-832.json.gz": "cd8eb94c73979c6630a120874ebb8efccf8ed4050f4dc5a5e895fca764101df6",
+        "evidence/tick-896.json.gz": "40e9b49e9248ae72d17f4e3b6f085c05b721d1c4c6f2ceabfaca59db39b8fbb8",
+        "evidence/tick-960.json.gz": "77e97c7433eccafc74de89b731756ac7b0bef49fa0706c32c4fe6eba5bb78d8e",
+        "report.json": "335117eaff1c0a9fae1d73337fc1e30643127d9deb0754f46f5325148299bb3a",
+        "supervisor/report.json": "d2d2e8ac8e8374db7d2b8fe64c44802dd7ee0269d386a9133623d81f2ecad9af",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "ab0352b007dbd11702ccc57194d97a9074431b1d68a674bc8f97c71b85ed6ed1",
+        "supervisor/telemetry.jsonl": "fbe71060675554c701b4fc27d224c41026c6bbbf3e87252d4e0456599ade8250"
+      }
+    },
+    {
+      "id": "level-pilot-b550bd38",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-b550bd38",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-b550bd38",
+      "files": {
+        "evidence/report.json": "7cab6f5894184d923615dc4425b0f2a29d2bb34c842d9450046f6984c914d775",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-15.json.gz": "0c928a3a081dec097a8185aa2090f6f1167f02a98fc0db6de52da3dc9969002d",
+        "evidence/tick-16.json.gz": "56aeed1da94c35eaa274395b9d633b1e061302a18e83cd93984fd8b5e60d19eb",
+        "evidence/tick-17.json.gz": "396ca102121e973f133d028f86284a02b1544c15f414cfd312fc14e7361fd1e7",
+        "evidence/tick-19.json.gz": "de27dd90874f40147cfb27de782d647dc89ea4827918a75510290194f3b0c9f8",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "4743b3c674e453067aa2414a7b6a895814f80f6f0b136bb00249333c802547f5",
+        "evidence/tick-32.json.gz": "9410f7e7b8c72af157c9934a3070f9c14022f5d49de58368ee533066fa570eff",
+        "report.json": "51bc2eb2431093acf5904b55b73d8d3218c3e1da9d5de34de1c10bfa1f7165f2",
+        "supervisor/report.json": "212ab27c92cfbd498082cb6669286f1ccb0eee528d28dca0c64e6217a7d9f12c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c25ad0a2b67813d4c71b112de01e6ddcf2dd48fbd079211eba7c11e49752d795",
+        "supervisor/telemetry.jsonl": "6cd8a81f24ca1fb24f07cffdc88c369bbf3d4dbfdedfeab5b5627133b9274e61"
+      }
+    },
+    {
+      "id": "level-pilot-b58c69ce",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-b58c69ce",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-b58c69ce",
+      "files": {
+        "evidence/commands.json": "4ec8e2b6eaec01f7d721dc21624ed1c8769c82d483edc2d18da0f9428f770102",
+        "evidence/report.json": "eb4067451813b199d967bab9a6138cb508554281062d63b65431270e7458cd25",
+        "evidence/tick-0.json.gz": "11d83b32c2ee315e72a5e07bb8116afd078e8b1c06e62fad46f1a09ef48b138a",
+        "evidence/tick-1024.json.gz": "bc9f0abacc70af59bec9360b74e18a17e6c9d81030ecc177f36af5ecd4573dd2",
+        "evidence/tick-128.json.gz": "2a18294ee89e8628f37ba25277973100fe04876b3606aa1eb77e6e9103356e72",
+        "evidence/tick-179.json.gz": "fff85448649941c082b6751e06f91e44d23ea877f6e7d754a13b4f0723437fce",
+        "evidence/tick-180.json.gz": "cec8e07d5ce20d35f56c71b6663f53431804bea645885f5341cc545005e566ac",
+        "evidence/tick-181.json.gz": "292d496fb58097b7d59110e27d40d6dd0ddbc3789fc2cf127beb66c77f87bc6f",
+        "evidence/tick-183.json.gz": "8324ec937dc82a8b83adac74027414f27aa36bb589466f8159686127ea35c022",
+        "evidence/tick-192.json.gz": "53ef614fedb377c40ea224e3bb998650da865362f19242f7d6b0ee2f2f0e1b3c",
+        "evidence/tick-256.json.gz": "84cb6e43f2dc2e7e3c027d1d4c0706888a4e73f0c75a798546e9ff6ffb10994e",
+        "evidence/tick-3.json.gz": "e77f7676b16513d9fa444853a66fd66dd6ad6b7df2d50018f89e210baed55a0a",
+        "evidence/tick-31.json.gz": "444abdc3711964f44e9629170b58d048de50f5f09f3d1d47751d3127997cccaa",
+        "evidence/tick-320.json.gz": "a36b95bc6f22936d50bdfbf59563a54b505af79b18d6e40d90ee1237f386e41a",
+        "evidence/tick-384.json.gz": "e387838d39d4dbdf022206097099a824b7fc5f42ae6a33673cf33cb8b4c8048b",
+        "evidence/tick-448.json.gz": "7f3f597c79323d424d196b23f6e59e513a6dfb2b95baa107a4d4a57681bf682f",
+        "evidence/tick-509.json.gz": "8aa4438d8bbd3e25a48a626f70bfdfabc49e70911b4406ea8b7b0cbbc9546cc2",
+        "evidence/tick-512.json.gz": "51038c705d8fa1d759cc2e1ab287ff3552404927d084e8d81af96147ca8b31a4",
+        "evidence/tick-576.json.gz": "8f2602fbdc8dc3b0a7abea500ecf361dad2c5c366207bfd0e95c0caa82732225",
+        "evidence/tick-64.json.gz": "50b5f7e215e725e95c73cd536cce3a1b237cf39364db7888f812545dcf3586a6",
+        "evidence/tick-640.json.gz": "277f3703ec280548fc31afb9012db0b1ac50c3152371271d4d8cb2991140dc51",
+        "evidence/tick-704.json.gz": "5559e3b29a70bf2c018791202f387cd48687bbeeee1c784df8392d750457ab9c",
+        "evidence/tick-768.json.gz": "e9753f2fe302debbc0c11a973d824d3c79b906ebb475dfbfa5758c1bb0f0c4ca",
+        "evidence/tick-832.json.gz": "24add0a52584cdff231db5c7bca1cb2c051d3276c72835ab4f3eb65397ab8197",
+        "evidence/tick-896.json.gz": "195010191cd6b06f1e8424cade7cdb2f7932a974d5e976f8f9bc45c1067e7c14",
+        "evidence/tick-960.json.gz": "db1a3bc87e6abf4a1cf7a385315435147fa527bf7190a212124121b86d7e8105",
+        "report.json": "09051ad4ed9bf2e9a5c7bb4f5bbc5a881c16f77e3d005535a2174cebf5f3c92a",
+        "supervisor/report.json": "172a80f66216946ed3a5fe00fdfe27aa451edb2679f4149e6bcda01f7f0c4778",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "ec4bae1d9a7489866b56c90a7e8ef4a4ba4e9c7faaccfa2747ab7ad3dd466e62",
+        "supervisor/telemetry.jsonl": "78982a636f3f098a3bae8abbb54c5a14b319a6b9c24cf34c06b4629cdd5984fe"
+      }
+    },
+    {
+      "id": "level-pilot-d601de05",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-d601de05",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-d601de05",
+      "files": {
+        "evidence/report.json": "a1c6f3061b4210946f8a23f65ab8da9a27863957b0b302a24fc2c9d13601069c",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "5d57c1a16d0f9686ed2ca9762433de71bdd87d512a2872624af90ecc7818aead",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "48b208d0e5d8b75f55d307f93f1af1125f72babd473b41fc99e0d3a41bdb5034",
+        "evidence/tick-181.json.gz": "b333f48c9f522350b88b639ec668d98d8ad4f598b0e74f797ceff83a657b0cdb",
+        "evidence/tick-183.json.gz": "74b5b376066b0599d793a1f8726670b31bc2f70fc46fbad0ee0365309faf8d61",
+        "evidence/tick-192.json.gz": "2d483607bfc6c3905d7a39bf401bd112abf557f0db669f16cf2b536a542b81e6",
+        "evidence/tick-256.json.gz": "accb76ff35f201f70a30205538a5888199433640701c47b4aed6a290297bb186",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "83acd130683b8442906ee697aad2bf660ca0d288711da5289a3d54ada9c8b53f",
+        "evidence/tick-384.json.gz": "5d13b86c94ac4da794ab33f8540009d9f33596945400282c042511f5d7adc498",
+        "evidence/tick-448.json.gz": "d1717e650df286646c183896adaa21f67e5283544b07babd72c046192cb88acf",
+        "evidence/tick-509.json.gz": "aedfcebeb259bd19833f1b4ba5511febd42a7c98f0df3fbdbaeb1129bb94d8d2",
+        "evidence/tick-512.json.gz": "aeefae12eeca0fe402e6251d7990bb4440f2fc8d1252e66a95d1eb696db379c4",
+        "evidence/tick-576.json.gz": "10007283f268995767f095c1169aadc0a892fade86a1ffeae4d7dd94a850934f",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1e838d1bec34525eb8a73dfbd0d051532b82f6e227c7a965f67d19eb0d94778b",
+        "evidence/tick-704.json.gz": "23aac59b391732223ff7af73be87185427ff597eda75867770c1fe432f98e01e",
+        "evidence/tick-768.json.gz": "d63807bc052b43d26b0f5f5888dea5abceefc874b625815bb9d97977e15d35af",
+        "evidence/tick-832.json.gz": "11b24ae1c344c3608d659b65cb93de11a7fbeb30631459efcaf28048ffc80c07",
+        "evidence/tick-896.json.gz": "ed3257d38025a8c6aef4ff69fd276df3b6d4c54d32e3603886aa683843b88689",
+        "evidence/tick-960.json.gz": "176cccb7b3e52f6dbb339117ad63c449408d97e80aff9914aa4b6ed7427977d3",
+        "report.json": "88bf4fbb1204ef65660f0336ffc90b8adac1cf351524a45dbeea706c84826750",
+        "supervisor/report.json": "486c3c20217f0b86f4907f1ba5bf26560824171db414ff09e9f2ef36cd79b32f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "cd95f0265f6fdef036af27c4878f67c4f6398be183a39f7c3ff85a455d599ec6",
+        "supervisor/telemetry.jsonl": "44c9961efa655ee08258681b2b1aea6c3b2dcf583fc46b0f383d400fcb5bde3d"
+      }
+    },
+    {
+      "id": "level-pilot-e4b17018",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-e4b17018",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-e4b17018",
+      "files": {
+        "evidence/commands.json": "49d84c0c15f346a247f3d708486645109dbc94534fa93192ed7a8d006220ed64",
+        "evidence/report.json": "9a8a996e1ef0e38593e0a81bcb2712b8ee2532e80f3843d698aa95e6885463c1",
+        "evidence/tick-0.json.gz": "491d8dda5910bd7db073f88a5f840ed2cc647124110f146311e5161e005fb12b",
+        "evidence/tick-128.json.gz": "cd7485d0b9036d35fb763be2f8eaa398d9145d357308bc3325ac463b5bc2e769",
+        "evidence/tick-179.json.gz": "cac7b2d64dd4c28f46a1f1a3269852167574733c1f72a8913840ac2204a4c9a2",
+        "evidence/tick-180.json.gz": "761c1b9a3a63e26dc0a8524e4a2249d39d192e06af0cfa5cc4702a97f8baae64",
+        "evidence/tick-181.json.gz": "7dad7af59cee9419ed39865fd94014d8c2c1cb01757192d459ae304d19ab4415",
+        "evidence/tick-183.json.gz": "0c11384099cbab10a523d9e6f74bea675dd110f13870ba2da4f02805ecd0879b",
+        "evidence/tick-192.json.gz": "dd4241ba8ad8df88ae1cab82faade04a9a127a954485213874ce9d2fbc4db0be",
+        "evidence/tick-256.json.gz": "7b165df4ba4bd9ec59db706e682b0678f250abf0a72b5ccd55391d2060cf0180",
+        "evidence/tick-3.json.gz": "560454a5a68a410465220caccc66dc5cba8c5964a2f34694f5db4587638808fc",
+        "evidence/tick-31.json.gz": "c1831cf302dbddf979a601a5b0fb24ac5503877825c8b32fc489c4a560a23b31",
+        "evidence/tick-320.json.gz": "e90a1f5e51f9858d7c1ec1557fd39f8eba44ae666836c1b21c7cb0b3f7315ed0",
+        "evidence/tick-384.json.gz": "85cdd952f1f5f2c0752dab2eb238dad869bc92e5985fb4194e40fd78e541fdf9",
+        "evidence/tick-448.json.gz": "db6f8c6c103090fac4eb80ff569632ebc953f3fbd2f892757c4dc19fd775694e",
+        "evidence/tick-509.json.gz": "7e1cb8ea62a8ba995ffeaf253236ed95d4f0ca931adf648eea3a9f51dda988b2",
+        "evidence/tick-512.json.gz": "d21debcda2c509296b6267dd36cfbc52edb6c7dc48f27d1d3f54a89e39515e72",
+        "evidence/tick-576.json.gz": "69a62c425436c43d5d15a138e54ec99fd374473b62de917e8b99a8109b46c6ab",
+        "evidence/tick-64.json.gz": "61a50dc527ab7323dd62ed022aa2c7d51bbe1fb3cb1a6a61dfbde5752644250b",
+        "evidence/tick-640.json.gz": "9b093ce9a342fe5e0b154b8882ca11d8969e7401c654709f21e3c174a3a6402a",
+        "evidence/tick-704.json.gz": "ee8a23eb25e010e6fba71df41f72519436c3d0075fc597f6ffee9bc11a34006f",
+        "evidence/tick-768.json.gz": "fdd7bfc1e21d88c20dd9183ca52c58502030f3e823fd1f6477187a36bebcaeb9",
+        "report.json": "ec2892171969ae3651292f31cae6c2f99e84704ee632b8624f7c11fa66108b98",
+        "supervisor/report.json": "e7582efafaea00056d0e23bbfe4cd98a4346ff7d06acbc7027caf6a5ccf3dcf0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6bab2595076137aae57ee7d10674d9ea2c3bb82e2fe744e3e06eafbfe48afe55",
+        "supervisor/telemetry.jsonl": "df2cbe783c2aa7b99f5bd369419556247be516595cb828da9eb74d46d22a9dff"
+      }
+    },
+    {
+      "id": "level-pilot-e8973b8a",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-e8973b8a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-e8973b8a",
+      "files": {
+        "evidence/commands.json": "4ec8e2b6eaec01f7d721dc21624ed1c8769c82d483edc2d18da0f9428f770102",
+        "evidence/report.json": "9211093164407039b46a9815b03ba6ac7535c3adfbeb5ff2eaf7029cdf2806fb",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "5d57c1a16d0f9686ed2ca9762433de71bdd87d512a2872624af90ecc7818aead",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "48b208d0e5d8b75f55d307f93f1af1125f72babd473b41fc99e0d3a41bdb5034",
+        "evidence/tick-181.json.gz": "b333f48c9f522350b88b639ec668d98d8ad4f598b0e74f797ceff83a657b0cdb",
+        "evidence/tick-183.json.gz": "74b5b376066b0599d793a1f8726670b31bc2f70fc46fbad0ee0365309faf8d61",
+        "evidence/tick-192.json.gz": "2d483607bfc6c3905d7a39bf401bd112abf557f0db669f16cf2b536a542b81e6",
+        "evidence/tick-256.json.gz": "accb76ff35f201f70a30205538a5888199433640701c47b4aed6a290297bb186",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "83acd130683b8442906ee697aad2bf660ca0d288711da5289a3d54ada9c8b53f",
+        "evidence/tick-384.json.gz": "5d13b86c94ac4da794ab33f8540009d9f33596945400282c042511f5d7adc498",
+        "evidence/tick-448.json.gz": "d1717e650df286646c183896adaa21f67e5283544b07babd72c046192cb88acf",
+        "evidence/tick-509.json.gz": "aedfcebeb259bd19833f1b4ba5511febd42a7c98f0df3fbdbaeb1129bb94d8d2",
+        "evidence/tick-512.json.gz": "aeefae12eeca0fe402e6251d7990bb4440f2fc8d1252e66a95d1eb696db379c4",
+        "evidence/tick-576.json.gz": "10007283f268995767f095c1169aadc0a892fade86a1ffeae4d7dd94a850934f",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1e838d1bec34525eb8a73dfbd0d051532b82f6e227c7a965f67d19eb0d94778b",
+        "evidence/tick-704.json.gz": "23aac59b391732223ff7af73be87185427ff597eda75867770c1fe432f98e01e",
+        "evidence/tick-768.json.gz": "d63807bc052b43d26b0f5f5888dea5abceefc874b625815bb9d97977e15d35af",
+        "evidence/tick-832.json.gz": "11b24ae1c344c3608d659b65cb93de11a7fbeb30631459efcaf28048ffc80c07",
+        "evidence/tick-896.json.gz": "ed3257d38025a8c6aef4ff69fd276df3b6d4c54d32e3603886aa683843b88689",
+        "evidence/tick-960.json.gz": "176cccb7b3e52f6dbb339117ad63c449408d97e80aff9914aa4b6ed7427977d3",
+        "report.json": "043642d6727bd7ac1866f6454793a48d3937b5a5aa2ee66d11c06a6fbdc58b96",
+        "supervisor/report.json": "4842fae04fdb3d218cca3efd5774479f73423c5121062cac9b408ee79700433b",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4167efb1a0e87d7e7e197dad46c7ffe81e721a0ab6222b9259a3f676816e8274",
+        "supervisor/telemetry.jsonl": "8cb95f2cdf3f4e477dbc5eafffadd7738fc09fe95e8fe7cc35dfde85378882c2"
+      }
+    },
+    {
+      "id": "level-pilot-ef367d9d",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-ef367d9d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-ef367d9d",
+      "files": {
+        "evidence/commands.json": "68e617e074b4d0b0fa39fce66dcbb72e217e21e40afb0d065f5100770949a5b8",
+        "evidence/report.json": "7323a90139f2bcb95303f0f18d53df6799e5c8ccfb771b81df30f09be27f4047",
+        "evidence/tick-0.json.gz": "491d8dda5910bd7db073f88a5f840ed2cc647124110f146311e5161e005fb12b",
+        "evidence/tick-128.json.gz": "cd7485d0b9036d35fb763be2f8eaa398d9145d357308bc3325ac463b5bc2e769",
+        "evidence/tick-179.json.gz": "cac7b2d64dd4c28f46a1f1a3269852167574733c1f72a8913840ac2204a4c9a2",
+        "evidence/tick-180.json.gz": "761c1b9a3a63e26dc0a8524e4a2249d39d192e06af0cfa5cc4702a97f8baae64",
+        "evidence/tick-181.json.gz": "7dad7af59cee9419ed39865fd94014d8c2c1cb01757192d459ae304d19ab4415",
+        "evidence/tick-183.json.gz": "0c11384099cbab10a523d9e6f74bea675dd110f13870ba2da4f02805ecd0879b",
+        "evidence/tick-192.json.gz": "dd4241ba8ad8df88ae1cab82faade04a9a127a954485213874ce9d2fbc4db0be",
+        "evidence/tick-256.json.gz": "7b165df4ba4bd9ec59db706e682b0678f250abf0a72b5ccd55391d2060cf0180",
+        "evidence/tick-3.json.gz": "560454a5a68a410465220caccc66dc5cba8c5964a2f34694f5db4587638808fc",
+        "evidence/tick-31.json.gz": "c1831cf302dbddf979a601a5b0fb24ac5503877825c8b32fc489c4a560a23b31",
+        "evidence/tick-320.json.gz": "e90a1f5e51f9858d7c1ec1557fd39f8eba44ae666836c1b21c7cb0b3f7315ed0",
+        "evidence/tick-384.json.gz": "85cdd952f1f5f2c0752dab2eb238dad869bc92e5985fb4194e40fd78e541fdf9",
+        "evidence/tick-448.json.gz": "db6f8c6c103090fac4eb80ff569632ebc953f3fbd2f892757c4dc19fd775694e",
+        "evidence/tick-509.json.gz": "7e1cb8ea62a8ba995ffeaf253236ed95d4f0ca931adf648eea3a9f51dda988b2",
+        "evidence/tick-512.json.gz": "d21debcda2c509296b6267dd36cfbc52edb6c7dc48f27d1d3f54a89e39515e72",
+        "evidence/tick-64.json.gz": "61a50dc527ab7323dd62ed022aa2c7d51bbe1fb3cb1a6a61dfbde5752644250b",
+        "report.json": "dc19763ad4b468452b72a8f22ce2d7aa4708416118bfe6af1c421410fb8d7601",
+        "supervisor/report.json": "11d30b255c735702671f87d2f71ee15b3c4ce335b7e8f5d5671c23478cdf3e1a",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a72fc2f2f0fe95a3e67237d29d9331ab686763fdf1fa66c31c0230fcb906d624",
+        "supervisor/telemetry.jsonl": "a449ed0e543180e521729dee54f74e0636c39e93d4db3b944fa77027a676d492"
+      }
+    },
+    {
+      "id": "level-pilot-f57d0aca",
+      "stage": "level-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-pilot-f57d0aca",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-pilot-f57d0aca",
+      "files": {
+        "evidence/commands.json": "f3ab024f2b878b86d4ca5d0d62c5ba2b3cd96b7a79df2cb1ee4004e118cca21a",
+        "evidence/report.json": "418fe6dbec33173de5a335a7ef1e3a54c1961b8d73e1d339d047bc3c971bf83c",
+        "evidence/tick-0.json.gz": "7611fe6ebc989ceb70f74098e66dfb55e0cd2098123d9b8db51a5b64afb8ac7d",
+        "evidence/tick-1024.json.gz": "d7a89e11fc0ea100c3a7758802a5cf47fda4e1f275ea1262f9068cb69837fe9c",
+        "evidence/tick-128.json.gz": "aae9a3cb18132e8fd391cdac07760c4b3a9cf35f10e0d2d6086ef0e5ddb6e3da",
+        "evidence/tick-179.json.gz": "db7766fcff1c3dc9292499f0d6299180b310aa8a35c6d546c24df942c13688d0",
+        "evidence/tick-180.json.gz": "268584bf76d17c9d853d7762361f670dbbd3864de1d95eb956478642c3519184",
+        "evidence/tick-181.json.gz": "f8aec3448d734a2ec97a26a2befe0156d478431e7f9788ed0b762bfba7388b76",
+        "evidence/tick-183.json.gz": "abd92e6f41e39e5fa72bb8a0cf844ee8b88150a13e073f956907b6e62420a5ad",
+        "evidence/tick-192.json.gz": "746481259178c03c53b2d061acbcdf587d588bc0e49f899bc67ba6e2de5666aa",
+        "evidence/tick-256.json.gz": "fd1e01ed3e1da252173da3bc1408d2684b136cd5242607d7a4b74d66e4df13f2",
+        "evidence/tick-3.json.gz": "7b536fd6603c3d9491182b3c6581176398d1de397ceee8dbfadbadc4e7ca4d86",
+        "evidence/tick-31.json.gz": "cd6b09921d872bee0cc017c4f1ea93aa83811befc388a00e4d20d1a4bf4bfd5d",
+        "evidence/tick-320.json.gz": "04c04bb159959a2f2f172e3e61b722e6bc6625c0353c5a78cf5eca9370ed2fd2",
+        "evidence/tick-384.json.gz": "f2ea248e7f0e0d84655c5cb2b6f5aa1e7950c41a0940d69a143aed90de973f7d",
+        "evidence/tick-448.json.gz": "75db4f4857120b6504cec5dc8815aba57b329e0e80715ea0e80948b4cf2cbcbf",
+        "evidence/tick-509.json.gz": "d60938ba197e8ad36b5074534fb9a49bff34c0d0f3597dc629d6bfd842bc9875",
+        "evidence/tick-512.json.gz": "64ea532e3627a73097198c580d606efd880d1044637cf0ad3c6519422ef3da08",
+        "evidence/tick-576.json.gz": "166647b0983dbece4620dfb704c440af8dffb4e66ca025df2f5824f6edd030b7",
+        "evidence/tick-64.json.gz": "34bfcdb33690a66dab9c4509f8b8f6dd5624e332a6bae1e50daef6592f02ccf7",
+        "evidence/tick-640.json.gz": "1d246ae82c02dd166680380cdce705546e347ead87a7b95169fe2663a8d5069a",
+        "evidence/tick-704.json.gz": "2296723519c0417ede72459c14881a48607f1cecd78fa398db999804a1a80571",
+        "evidence/tick-768.json.gz": "70fdc9bf6267faba66dba42499cd0918f1ece3649780975c02206f987760304c",
+        "evidence/tick-832.json.gz": "53899e8798a9880e3da416e66e6f7b398cef01b571334921f3a3a69af2e6929c",
+        "evidence/tick-896.json.gz": "b89b05df3f09ed8ffe5c7ea08eba3b7dafa1c3dbebcef28d8f20ef0e6227f261",
+        "evidence/tick-960.json.gz": "3182ca5a6386c26e75914da30dc1a17b34ceb88a43600873b961f3ad0be7a2cf",
+        "report.json": "6a180fe67f77d2419444942edd348216c6b2bcdd4732536d96e223ff22c5d4eb",
+        "supervisor/report.json": "a031ec9e49d93b157879b97daf6bedcd2b77b80255ed9d1c5775499666109e9e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "0c0b4576cf5515047b41bc128889b6f1474e1204fc5f7a360351bccc9f788349",
+        "supervisor/telemetry.jsonl": "44995c1e583149ec65b3f63208439d3e2d7ca7cb4e7668c89a884ae8f4279109"
+      }
+    },
+    {
+      "id": "level-trajectory-001c3133",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-001c3133",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-001c3133",
+      "files": {
+        "evidence/report.json": "eb69a42c337c20ef18d161e4d07aceb54d73393296cc618677413778751f97fc",
+        "report.json": "6f632e34d3041f4428390f92a017c063f0a64aa868ef505dabd01c011e288cca",
+        "supervisor/report.json": "32ba45591caff706936de37abcdc745a1a99dabd973c00c2ce41ef037c9697db",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "0ee4fc356d4cbdde61d8d0271e0f30f12165193f9e2f1183b639fb1cd041f56b",
+        "supervisor/telemetry.jsonl": "f8c13addd5e21e75918f3c05675398294d0fbc17b13889f3b65ad2a86f98514d"
+      }
+    },
+    {
+      "id": "level-trajectory-36877e9a",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-36877e9a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-36877e9a",
+      "files": {
+        "evidence/report.json": "d53e84f8cb27c17fe429ba19fd0305dfd8612163b52adf1d80c694beb00e7b29",
+        "report.json": "e1a362b478670e92b9b1c798b7cc925abd69134944d94f044748de064b802bf0",
+        "supervisor/report.json": "3c46307862a0c73dae2ce7fc3e5a8fa46692f8492d38abae35c7376551651ecb",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "5d2297937d9ad76e227bbaaaf0d7fb3e02448f3705ccd7532cbe4abd11cf3fe8",
+        "supervisor/telemetry.jsonl": "e2af044f896089d11750fc4f86801c9831101787fa983b669fbe48c68ee694ec"
+      }
+    },
+    {
+      "id": "level-trajectory-36cf5380",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-36cf5380",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-36cf5380",
+      "files": {
+        "evidence/report.json": "797dd10b976fd5b5a5cfea3190f2b899a798719595f569b11854916bbc39fa97",
+        "report.json": "a63d211af88abd7c0d8f7f64487f399f6029c54bb9f3009b289c7ae02f3b10d2",
+        "supervisor/report.json": "597d0874f1b3f37dccf25f81e5f6dc4de7dc6fee5c54563417fefe5cc02d64be",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "41d844dcbcc6f1748eb22d95c17f15aaf65c9b204aa76dc6a36d1e9189e3531d",
+        "supervisor/telemetry.jsonl": "dfe942b764fb6e1d0666a3944ee0814e2edca92d145dfba62bf1cc4271d84f22"
+      }
+    },
+    {
+      "id": "level-trajectory-37524151",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-37524151",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-37524151",
+      "files": {
+        "evidence/report.json": "1b2cf7723f239d968113250df6e6d4ddfe1feb046888e21cbc8260899e7c9dd1",
+        "report.json": "4eff4a6282b0330948da3c6f4285f22ed53e0f9edce27c0a34446902076c62c6",
+        "supervisor/report.json": "f03a9d83889442afb050c6e4c6d6c3ffbdf7568162a7be14185ef004a2d18df0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c9caf08a97f28961322d7abb3f08c6b16742205b598ac8e8317fb1367a66804a",
+        "supervisor/telemetry.jsonl": "411a64c43e8e1d2ceb8e6a9beac929a61edf47de576e2d4ca6a959f69d7ca993"
+      }
+    },
+    {
+      "id": "level-trajectory-3c4520f6",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-3c4520f6",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-3c4520f6",
+      "files": {
+        "evidence/report.json": "09b8878cc1c99219f69a71a3b4623aa8dcddb07865bc2a9c1167387641252392",
+        "report.json": "99c371ab05dada6969b6899354f6719ccf0dd3b644d35eb4968759c640a03b86",
+        "supervisor/report.json": "4ebe253d202e7ae0a0b394e8209daebd52c300677aea626b460860e18a870537",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d7e9fc2014c18320a2d5d37c2201ba0935cf22ed5635fa638a8b7efe0a1185e0",
+        "supervisor/telemetry.jsonl": "65fa408486c5e8ee6dc78f073c8453d631c0b2fcb855ab94cb6b68d75b3e444a"
+      }
+    },
+    {
+      "id": "level-trajectory-43b00cfe",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-43b00cfe",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-43b00cfe",
+      "files": {
+        "evidence/report.json": "2f4618d9bd9187274b1991ed739605f0a62651e30fa874eaf57d97d8b82927ed",
+        "report.json": "3246738378f98c3f6894f334e5c5165d91fbbc92b1fda1fcea5727375a07e597",
+        "supervisor/report.json": "ee74fe2b0e958f64cff71e4af54f3c55e301fb863ca07c4aca7d514edd2195ec",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e0b6a577b91dfdcc0fc72124eee68ba7f765e051fd3bb4c3f35a4ac08bd8ca5c",
+        "supervisor/telemetry.jsonl": "5a33d8cd55675a4071181317da4bb8be3967e1c56a07a0757b10b79b166ac545"
+      }
+    },
+    {
+      "id": "level-trajectory-556beba8",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-556beba8",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-556beba8",
+      "files": {
+        "evidence/report.json": "8e346db2c32602c1e61da9a93d23df50647c20b529c05515b4a613de2a573361",
+        "report.json": "e0b4a166fac60e86397032142a084d39423fa902851487644a304e14a1b15816",
+        "supervisor/report.json": "0db093ec9bf37ea76a87a81b88d6d0ab2400511aa8d9a45836dc9edf24c16b88",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4f00ea3ed1d7b252b7cf0458bd7bb34d09ed5029dadba5fd3ec8254789594646",
+        "supervisor/telemetry.jsonl": "7d9782076922e8420012c4307a2667b6907279fa2096a325e7a926e8db7cb392"
+      }
+    },
+    {
+      "id": "level-trajectory-560486a4",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-560486a4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-560486a4",
+      "files": {
+        "evidence/report.json": "058b9de6e01c93cacd8b3175dd3457b7849d9a513232391176baccc13fea92c9",
+        "report.json": "2df3ca7e8f2143ce805e71cbc00fec591260d2475cb7788f71c2461d1aed7378",
+        "supervisor/report.json": "7ad1f966978a2a9f2b01673d0c5ac8a44cf3d8132e9723d04ea8255b1ab76494",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d82fa87b23c6e5cbaa7e95102cbbb7607543dd5e5504bacebbbadf6d14b6b7dc",
+        "supervisor/telemetry.jsonl": "e5b8902de30feeebcdaf1665166f7894f74a4a801d11227b97bb3b8249384c1d"
+      }
+    },
+    {
+      "id": "level-trajectory-71fe9c40",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-71fe9c40",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-71fe9c40",
+      "files": {
+        "evidence/report.json": "3d1fcec6a36cf12e74890392abf14531308b49740a5ca84f2d207c123f7db190",
+        "report.json": "dfb5ad1f14c3a923f3004ec3ffa82ced2fa5cd1ba336657860181fb0e7415e02",
+        "supervisor/report.json": "89b8d8cb12d8960e8a481560b48d6a3ef2590e79308ddfd2fe241a119218adfe",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6d784104c178697f10f97e729b444db5cd52bb107c80e867a4b893907367fa9a",
+        "supervisor/telemetry.jsonl": "13d4b0df5ac0eeaf404aeb8903a88c5b7c44c1e2cc82a34f7c3065895ed4685a"
+      }
+    },
+    {
+      "id": "level-trajectory-74e69658",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-74e69658",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-74e69658",
+      "files": {
+        "evidence/report.json": "21659842017fc3f03eabb129025941f33eda79e2967417594485a3d30e74be47",
+        "report.json": "203e47c33dee3c837a79d0ee3e80c0b41354e819fda13cdfb4faccfce105e8d1",
+        "supervisor/report.json": "bc9122f44ba46b9ffa74468bf5830fc780be773dca84f5bcadce0ac354cc8554",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "55fe86b44209faca30c5628f686e1a3e06cfeb087afd96b29631743c1e3bd2be",
+        "supervisor/telemetry.jsonl": "45e0b5e0c9c6691e03b3c474b1bf21366131122c4e0aa33dbc57517c533919b0"
+      }
+    },
+    {
+      "id": "level-trajectory-7865a13e",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-7865a13e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-7865a13e",
+      "files": {
+        "evidence/report.json": "af615d2556e79ad3f036bb0145c44e244dc253520ad7207a5148f239a17bebf2",
+        "report.json": "79b6154b176bfb20cc41d1d0395e86b17c1e654768561641888aba8750590935",
+        "supervisor/report.json": "e4ce6075f56cabe84f43ac560b81205f23ccb6c0dcf6e66a3672c12eac245d14",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "06caf57d6349a32fcf6281d623f4b5054b7ffbe3a2782d80f96bd76643e8f3c5",
+        "supervisor/telemetry.jsonl": "9a9c747e81d3e14ef800c7baf786134a6d0f231fa9316dc3c1c197fee4442d9d"
+      }
+    },
+    {
+      "id": "level-trajectory-7b7cfed7",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-7b7cfed7",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-7b7cfed7",
+      "files": {
+        "evidence/report.json": "e01cac1e6e387e3aa874450950108a2ad9ffd987592250fe4310a7dca1f60f85",
+        "report.json": "5c10343e578fe4ada60dbaa307c9d14d0d8fa3d036680bdba59cfc5090af4dcd",
+        "supervisor/report.json": "07a360b3c278afea04ae907331e9bd84b1d30b639a9ed8f3c3707c2c1c511289",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a40b1f9c69312a0b78691d47dd7f86b20c370f9033e2edb2d6578af1d988e9b7",
+        "supervisor/telemetry.jsonl": "242acee86e68c160a192d2058f0199331ea9439d790ada56b5d993faa3ceafa0"
+      }
+    },
+    {
+      "id": "level-trajectory-851f729d",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-851f729d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-851f729d",
+      "files": {
+        "evidence/report.json": "861d198499efa9630eaa3511fc1c5810a3add3caf182ab726b6408c6051e1c68",
+        "report.json": "12731decc6bdcbd1ccf9f4075e8e63696b3ef3ab1229b13ad7f7148d7c64930c",
+        "supervisor/report.json": "16dd492919ccb1b2511434340ecbc24d8a81edaac198eb9593cc58067cab9f43",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "fee08132325d379c0788fbf574ed3177d441c3b372f6f9c25cc3ce9c7218a712",
+        "supervisor/telemetry.jsonl": "f1b5e0d5feb388b77438550fd6e477b0839abb58ddedd5dafee26e1d5263a610"
+      }
+    },
+    {
+      "id": "level-trajectory-a378ff6b",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-a378ff6b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-a378ff6b",
+      "files": {
+        "evidence/report.json": "2221565550feccecc23c6140f269069751eff205b474974163f43c5aff4fdfd1",
+        "report.json": "cd6a6790572c7630c13053ebe73b6a470ccdd0ca3cca5ced3971bdd9cebc5aac",
+        "supervisor/report.json": "796f55af1e05a5a8bb3bb37bfbd5f904971aeb45c2f6a8d22f00ce4fca4e1bc5",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f38271d299fe09a9cae5bf824f7db4224d333d14a7ab3c83179c7ec272197106",
+        "supervisor/telemetry.jsonl": "6b2889a8d48e6f97ff94324bd1cd5293cba67f5182e0bbb3ee115ad1b71f05aa"
+      }
+    },
+    {
+      "id": "level-trajectory-a6820470",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-a6820470",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-a6820470",
+      "files": {
+        "evidence/report.json": "5c1b42b4183df6776c7fedd7b7d9360a4c833bc27fbe1f820eb897ed0c1f649a",
+        "report.json": "9d5017c08772fb193aee407fdd7daa5c957f13204aaa954208c74c3ca39483af",
+        "supervisor/report.json": "2f544a9de60ca25fec8598d8b5c3799450388ccc58ad4cc0073f2c026678eb96",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d2c43a3fa53d7df2733967ce8c4b5f57048dfe15f525be4180c79b5661fa61fa",
+        "supervisor/telemetry.jsonl": "aa8eb2b4f7b96beeb240fecfb0ccb6f6626511c9a37b2c07df06ef99701ba167"
+      }
+    },
+    {
+      "id": "level-trajectory-a799bae1",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-a799bae1",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-a799bae1",
+      "files": {
+        "evidence/report.json": "769d19388317143aea7300bdf08676d1cdfb6e6e1350488f0e0c92c44542bd1e",
+        "report.json": "e2071eaac8426347579f912135b03190e66f0eef495507056ce55c12881980a2",
+        "supervisor/report.json": "a5236e94974d376d23f337f934ae2fac87df05e6e0803fcb3913c906c9ac1d9e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d2f25ca8553f6d8b1776a599aee474ce6ec48ceb2ef153dd4e77201933cc4f3f",
+        "supervisor/telemetry.jsonl": "dba70722663aeb749cda1b3091159f018adbe9576f98e78e0e55ed537d82f782"
+      }
+    },
+    {
+      "id": "level-trajectory-afdb3a74",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-afdb3a74",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-afdb3a74",
+      "files": {
+        "evidence/report.json": "612554f4ff8c0efc818881a1fde895817a022c79a45fe45869ce06b28bea4183",
+        "report.json": "3571af101105310ef8f93a8651b8447dfa732886bd071ba7161161a2b07e7c3d",
+        "supervisor/report.json": "f003fa758ca6dc9761f62b30ae7e85a20dd4744866bf0fc75897bbbf2376b5fa",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "011b2e02d77571cd67188b8176fc0f73666a66b14e6ac7b2d7ef5917516b46d0",
+        "supervisor/telemetry.jsonl": "e53c05ba4b610ae810346d4adaf2556d92fcf3af0c1f7d97218a7b1eefbe3cbc"
+      }
+    },
+    {
+      "id": "level-trajectory-b94f9741",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-b94f9741",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-b94f9741",
+      "files": {
+        "evidence/report.json": "63d5ac2718927ce0c5eabeca62b24eabf611a6e8f318abd7e861a05aa0d776b4",
+        "report.json": "7b34494c3123494cf6383017d3ee3968cc32e73c8337e871604a84223fac0c19",
+        "supervisor/report.json": "257c76d114391e51e05c3e18e8a2a9317fa562249603806644b3ad9f4fc40758",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "bf47afe677523c64915e0555f9506f238e74ad59b3c158fa62f9cc04d6e1bd2b",
+        "supervisor/telemetry.jsonl": "3a92ae9b452e6367aaf8a6db9274702625b47227d5f6f292d8c77021898f804b"
+      }
+    },
+    {
+      "id": "level-trajectory-c2516023",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-c2516023",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-c2516023",
+      "files": {
+        "evidence/report.json": "5fc258cdd3f0cf2d2c68e4dd3db785e4a5ebaa73b7258b57022f400a07eb14df",
+        "report.json": "c05524cb83335b4a6131cad62028bb02d5ad83e3643ee30fba1dd97b940b013c",
+        "supervisor/report.json": "bccad40d796ced6d3846f2353dd7b8335f165ba84070fb7b95ab97e949091342",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3adb6f5740ab86830e20bc015941002329805edace9a1f504336d7e62e8c7494",
+        "supervisor/telemetry.jsonl": "3fdb4fc0f3268b8db84cdc413db1173df255bea88b8c10238af335c104ba702d"
+      }
+    },
+    {
+      "id": "level-trajectory-c56d90e4",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-c56d90e4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-c56d90e4",
+      "files": {
+        "evidence/report.json": "30fe5cbf0c49e7b34a3347fb17c94e5c8ce31534f6d48daea929390c5ca6fcf2",
+        "report.json": "089e76a42047dca385a80675c6dcfb2f17d060fde046d2fc3a872736e0573448",
+        "supervisor/report.json": "dd76d5f9c1690d59a077e1f579303eeb3f092930c8af20b11b5264fb7072a468",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6abdd4a7c056fdf6158867be1e0e3d28d0e875e3358353f2db890f24066057b3",
+        "supervisor/telemetry.jsonl": "63854b70a49f227d0423886b4ef6d37b0cb1d4945ed70717f30198ae47da6d28"
+      }
+    },
+    {
+      "id": "level-trajectory-e8c9e8b4",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-e8c9e8b4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-e8c9e8b4",
+      "files": {
+        "evidence/report.json": "01563e809cd6aa076447d71dd8f04c48e3c6edefed31353fd2fe16ba9d3efdcf",
+        "report.json": "e4cfd5659d368901bb33c81f1e107cf0d5adbd7981d6eb96bd569e1c098acf4a",
+        "supervisor/report.json": "1bcc9c06ef5cf009ee225b421460c680efbebc7991595b9c6738d1ed24a630ef",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "2830a59f9b14e41fa714801d850f97d35aefe412532b028e993a23cca24213b1",
+        "supervisor/telemetry.jsonl": "969ad90d885a899eba66b4503041920033677fa7a0e42c21a3ecb4060d933831"
+      }
+    },
+    {
+      "id": "lint-4a76bb0c",
+      "stage": "lint",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/lint-4a76bb0c",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/lint-4a76bb0c",
+      "files": {
+        "report.json": "07e03d480a6fd922abb8b2ab9cb19ff6a3ccfa4748d8379d216c546f80e9d46a",
+        "supervisor/report.json": "48a94bfd3af55e6f04683ae0abf076abba8936b9dae195ae0261f6a6d137b16e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "02b1c9d06a2d424dcc5b7940624026ec12d8e8dbc28528561d87f499a22ae722",
+        "supervisor/telemetry.jsonl": "93d5eda017b88af64319545ea15246ae44f3131f73a80162f6ff95db3c74c024"
+      }
+    },
+    {
+      "id": "lint-78dc5f64",
+      "stage": "lint",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/lint-78dc5f64",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/lint-78dc5f64",
+      "files": {
+        "report.json": "05b4391a1be25117ca87beaf0a1abead1313021118bed4578a654780c7bcd409",
+        "supervisor/report.json": "cf2add828ec7f65fc6e16ee5992753209eac4c21a6b8e3fa94bf49fd55d7c81d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "02b1c9d06a2d424dcc5b7940624026ec12d8e8dbc28528561d87f499a22ae722",
+        "supervisor/telemetry.jsonl": "bb30eab80974dd9103756f325db23ae647d431ffeccd62e2e66d40865ba92f95"
+      }
+    },
+    {
+      "id": "lint-7c584482",
+      "stage": "lint",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/lint-7c584482",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/lint-7c584482",
+      "files": {
+        "report.json": "a58dcc545bae34f342c9b82990c48256ec0b1a55bcdfe1f2a0ccc2a5fa34effc",
+        "supervisor/report.json": "d0ec2511ea2be50291da0546d1289be33a630a8746cfc0ee449943a12d285c78",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "02b1c9d06a2d424dcc5b7940624026ec12d8e8dbc28528561d87f499a22ae722",
+        "supervisor/telemetry.jsonl": "1093fb4bc8db3bdb7a9253ca259ce6fb76f4bb72128df4bb79c8f06ff0095c2d"
+      }
+    },
+    {
+      "id": "lint-97fd7e71",
+      "stage": "lint",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/lint-97fd7e71",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/lint-97fd7e71",
+      "files": {
+        "report.json": "6a0b8b0fec99e542776bdc058938f4a714a5b29c8633a15842f9cdea00d45fab",
+        "supervisor/report.json": "af4fb471a718e1429a78e110266c93e65f30021c45953dc8732007962f77a969",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "02b1c9d06a2d424dcc5b7940624026ec12d8e8dbc28528561d87f499a22ae722",
+        "supervisor/telemetry.jsonl": "78043c9babc1e89a56f7dc967e96af5f53ca57274d6deb511b87bf378a50fa6d"
+      }
+    },
+    {
+      "id": "lint-c7f80392",
+      "stage": "lint",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/lint-c7f80392",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/lint-c7f80392",
+      "files": {
+        "report.json": "12bf433fbc0e59b1168a59e70b8a0f2cd7be314695c5ce8de9f07e22ca124d1b",
+        "supervisor/report.json": "a6d209a701d6f2d053ecac91f3da8381a318fd6682f6f64bd9295a60d57f1612",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "02b1c9d06a2d424dcc5b7940624026ec12d8e8dbc28528561d87f499a22ae722",
+        "supervisor/telemetry.jsonl": "b15e550ad2b827f006b7edb09b3432c581e30ed995bbae206db618e4fdc69e05"
+      }
+    },
+    {
+      "id": "probe-build-29116c2e",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-29116c2e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-29116c2e",
+      "files": {
+        "report.json": "710695b674bc6a6037414b9d32ce42bf49844ee4ab6d9bf667a24457f8da41ef",
+        "supervisor/report.json": "f95dec92d1c76bea908b2f3452560613c7ba05aac9288e8c03f0dbe88809ab4f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9c7ee6f9da67da483a60a0a967313fcd2eb19f6e34b4c6c21d211969404746b1",
+        "supervisor/telemetry.jsonl": "2ff7c01c3b2fd261d23df5dfefe56cd8e7f255c359314d6988f9538608b81019"
+      }
+    },
+    {
+      "id": "probe-build-291ba5e7",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-291ba5e7",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-291ba5e7",
+      "files": {
+        "report.json": "eb59d7860fc611cd0441134fad32965d3e22861a35df73699fd062af8170161c",
+        "supervisor/report.json": "65757e9d5e380239bf8052046d93ce6b36528bd10f4657e48efe851b553ed8b2",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f4cec38b573308534a0b6056facef63e17e87cf0ee0f5e692570f420fda000a0",
+        "supervisor/telemetry.jsonl": "3d9cea51798afce2114b0db3fb7a4f68663ab5b4940dddf578ef529e36a5c222"
+      }
+    },
+    {
+      "id": "probe-build-3802478d",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-3802478d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-3802478d",
+      "files": {
+        "report.json": "9b93436e9f7be87a1b47fcbda6a9be39c020d1d0fe4984f3b010b6ca5a604109",
+        "supervisor/report.json": "9ec31c6f8a9803655b30d97ac067a638c599e4d2a7d46649c2484cc87f2e356f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f26e0524854495d29ad56969683c0800080a11d57f35197efff12d2b5dc39304",
+        "supervisor/telemetry.jsonl": "cbb4ab63e861a6fb68e20f4334a2bf6cd6ebd005693af34602a367f542494e47"
+      }
+    },
+    {
+      "id": "probe-build-38ce1190",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-38ce1190",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-38ce1190",
+      "files": {
+        "report.json": "087fb7b3829ffe4f5bdce15072fa8e66a5a34b3ac1b827be6c7e9cb281079cce",
+        "supervisor/report.json": "8629ec8a87f1fcb53eefe102238d151bb781eb7951a533d7c080ba66b0d4df2b",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "630cf25ea89901befe8ce37b0e1acce0d4ca2d5e2df629cebda505a1da94c9e9",
+        "supervisor/telemetry.jsonl": "92b981af37d6bbdbb1cb8568ef3701a684d6cea3f08013183a73aed632119dfa"
+      }
+    },
+    {
+      "id": "probe-build-4378e3a4",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-4378e3a4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-4378e3a4",
+      "files": {
+        "report.json": "5f6750aeba90880170c03f642e150cd49be8113a9ea7b4ad8f82202434c0ea48",
+        "supervisor/report.json": "eb23b293282dbc8b287f9768d78735dc6b02a620a0f175062914fdee05557a5c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "fc756be467c2f69beba27f5886ee92b171d36877cffbacbcf65525d9ef46c6ce",
+        "supervisor/telemetry.jsonl": "3c72780a114b9012b3f7807de934891c4e8a4a1c5a6de8b5deab27601c6dc2d0"
+      }
+    },
+    {
+      "id": "probe-build-441e2183",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-441e2183",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-441e2183",
+      "files": {
+        "report.json": "bb0ab57a2b790abdb1f9c355eb21716a6aabb6f77ccfca9c26ed361d52e2ec5d",
+        "supervisor/report.json": "4760b5f96b78d5b9a01ccf73018153bfead48e8898e9bcc27d88d0c2ea5f5bc0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "295fb9b5452fd0917e0183d5a6a1bfe95d3d2f267650e7a723af67757b08b942",
+        "supervisor/telemetry.jsonl": "e96690d7b5dcd7c4bd20a0c52a03b4eb7b77a514fb332ac657713a8df4ce162e"
+      }
+    },
+    {
+      "id": "probe-build-67744a40",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-67744a40",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-67744a40",
+      "files": {
+        "report.json": "690c8375486a311ad161fb1b19ce0b4456e83b2edd6f32f80fab24a9bfc755db",
+        "supervisor/report.json": "4401ca33b075403e3a583cc19795d84e91929ab06834065e1cc457836aa48983",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "2b9e9d55e3014057e8b91c429843c018be36ee6511cfffdc6b4b28b85cff4d5a",
+        "supervisor/telemetry.jsonl": "22c3ebb310403bb0c07a1e6b564d511443c79f50efed2adbebf4a858ad3778e7"
+      }
+    },
+    {
+      "id": "probe-build-6e59f0c2",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-6e59f0c2",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-6e59f0c2",
+      "files": {
+        "report.json": "1ad73833e397c550e7c5e125bab1589599039448a0b248fe46f192f8ec2568a9",
+        "supervisor/report.json": "24a0c10c618000d4384f313a0c25538a6bd29e61c68a04246c3a0b9c4409a1b4",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "126b9efa07ec96013c466604e671aae5fc44dca52b57793089b8af76a7dd60dc",
+        "supervisor/telemetry.jsonl": "4a78883c05d4e9e8ce214e982b0caa23fd7d05ccb699daa79c1745a6a23c5443"
+      }
+    },
+    {
+      "id": "probe-build-7e62eeb5",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-7e62eeb5",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-7e62eeb5",
+      "files": {
+        "report.json": "f1c4d0c7556d0d1afcb9365f9484ff86cafcdfa9e6843b6f819f5a68320332aa",
+        "supervisor/report.json": "ebbd8ed7eca3de8f1dd52ce2091f0fb9cdf16c3515c9619eb965eeca3fd9dd50",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "cbc1015388b19faf9a9ae803c1a656d430c360ff60f803a08572093cee44fa35",
+        "supervisor/telemetry.jsonl": "14c7d1183dfbd36ff2ee73ecd79697a393e3b19fe7958f8e9ec2811d4c7a50ab"
+      }
+    },
+    {
+      "id": "probe-build-c2121faf",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-c2121faf",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-c2121faf",
+      "files": {
+        "report.json": "259fd452ea16c6727e8bea865b431b063fedfb556672504ed6b0d4100719bf8e",
+        "supervisor/report.json": "8fd0bb20f1797ccbbbf094494ee96107ebe4c08a36109af31a4e7e8aaedb8075",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "7a62916228bac6095ee04449d231208af8a3623881d41af62a16f5937999336d",
+        "supervisor/telemetry.jsonl": "d61400297c36e2fd75b7c80139943a34b6421f9ee7eff1eca863cdd040c30811"
+      }
+    },
+    {
+      "id": "probe-build-d6d8261f",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-d6d8261f",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-d6d8261f",
+      "files": {
+        "report.json": "9bec8cd4ec7884cdbb7a8997eb478b0328d6d7070142b47bc2494477a6e28ff8",
+        "supervisor/report.json": "36898f5c82fd4315e7a43f6f56f64eac069fcb76443b90691b657e1dbac6f14a",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "47209bcce045f74633410d477a79fed5a9fd5c1c5313d75b8ca16cfa46e893b2",
+        "supervisor/telemetry.jsonl": "56dba4bc3044bde0a70bc32d75b027de140b19d6da77967a7ea04ddd87433908"
+      }
+    },
+    {
+      "id": "probe-build-e71a4dfc",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-e71a4dfc",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-e71a4dfc",
+      "files": {
+        "report.json": "866ff747cfbfea7c88532afceac05dc61144964de53aea8c2ce0a4f97f78b71c",
+        "supervisor/report.json": "6877f0459ecf2c6d768669b79a1620fcd9843b4f8c733213056d3c382e9295a4",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1628772166808251daa6ea9fcaad5f2066337a2a9c9ffb86bfeb7732152bd7a2",
+        "supervisor/telemetry.jsonl": "9e7b3f6f58bfc5bd2e53f2b74c38d00cde04b0fe282a5e3cde02592dc9c58b48"
+      }
+    },
+    {
+      "id": "probe-build-f68bf2bc",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-f68bf2bc",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-f68bf2bc",
+      "files": {
+        "report.json": "b7c82bdcaa3c3f6abf9ba6efe3b69b062dc8047660367caaf9991fb451f7bac8",
+        "supervisor/report.json": "5e7e234440ad7742d9af0179c8c6535cc4232f8149d00c40e0e4533fcb28d027",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "d6b098adb6285e0841b1738b9788645097a9148664e5fc3fbc9e2ec3a1809abb",
+        "supervisor/telemetry.jsonl": "accb2a0643340450159fe7431b55aeaa4c7429e679b1cf3e86da2b934f150963"
+      }
+    },
+    {
+      "id": "review-gpu-d9ea4088",
+      "stage": "review-gpu",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/review-gpu-d9ea4088",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/review-gpu-d9ea4088",
+      "files": {
+        "evidence/report.json": "316898ffac8b70717a915c356cf3384771a668fd4ce80333590bdba1ab861dbd",
+        "report.json": "5095457ea60d42f6f6de64348081dea1b402639e92225a35ede1c6ba84d9b998",
+        "supervisor/report.json": "ee6002d0d8803341bacbf243519be3f4d0120f238216e0dadd6b1cadd6a0ce20",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "20ccc02a10104862b9d96ba244565b3043b45d24ebac788b449158d2ae535388",
+        "supervisor/telemetry.jsonl": "33f272942c711f7c7185d6afc1eb7374b407367ee165bb87238e9a34d9f97033"
+      }
+    },
+    {
+      "id": "review-unit-1e371a60",
+      "stage": "review-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/review-unit-1e371a60",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/review-unit-1e371a60",
+      "files": {
+        "report.json": "f03b33f505f84891eead4ed604544e6b00962aeae8c7b8c546e665e49ffc39e1",
+        "supervisor/report.json": "05aa32476f5ffcb756c67843d38145a928ca8cf4f37983991541a59aa182638f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "69e35b03173865f9434b64f1584ce17b999d72c1cb5cb6c06f583b0e25c0cc2d",
+        "supervisor/telemetry.jsonl": "9193176e28d048556ca03070393fa9ef1eec3db51ec21607633e77603fd8251c"
+      }
+    },
+    {
+      "id": "review-unit-aa785fc7",
+      "stage": "review-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/review-unit-aa785fc7",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/review-unit-aa785fc7",
+      "files": {
+        "report.json": "99523b5072e13bc5765533b1246023044d677aea030163edf08a9c86a456f252",
+        "supervisor/report.json": "1d1711cac88f25cac4c92b476b4faa6b83f73d1cc9819ab64bd63ceb1098989e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1bf1340123b0620924da9725fa12c274fcd0414627bda94d00bacecaa69ca217",
+        "supervisor/telemetry.jsonl": "1c384cb2a0c04f56be7fbcfdfaf2e41d9178114e6af4b14b549747c67f2078cb"
+      }
+    },
+    {
+      "id": "scale-pilot-819add87",
+      "stage": "scale-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/scale-pilot-819add87",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/scale-pilot-819add87",
+      "files": {
+        "evidence/report.json": "721c2cbd309edf6732543bc4d03014d116513c516d24a612d2ff47d2e79bb537",
+        "report.json": "bd3ab783cfe47930db5e1aadbb0f805c3ed98bca91388482929a81818a8aa1c1",
+        "supervisor/report.json": "02455e2bf2482c945f942b3c1cbeeb70bd73bddc9e68e9d03ab97cd25bd0d343",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "abf9df1efd7b8be272fd28ec5ed0d0029f80c1f3b55c0f6c90792656c4d94f69",
+        "supervisor/telemetry.jsonl": "338e6e956e5d1ae40a0f0748f0cdb3de2ed8e56dde23dcd9633fd438b4684c8f"
+      }
+    },
+    {
+      "id": "scale-pilot-ac93de5e",
+      "stage": "scale-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/scale-pilot-ac93de5e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/scale-pilot-ac93de5e",
+      "files": {
+        "evidence/report.json": "e9fa899a28fe87f1a3cc8a25a815f656a0bc77167d85433b94901e0e0762e942",
+        "report.json": "2b562812a53993387bb02af418c80d02b584adbb7be16b6a88e29621022e5515",
+        "supervisor/report.json": "b83cdfaec51b2d4344054c4ba2b67ab309f382221100f548ea2c0eb9ac573839",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "18648d65c84b7dfc22b112dd52fd14b0b5f3c638413f4f3a3bb6317097f711d7",
+        "supervisor/telemetry.jsonl": "0fac9211a71e6b474eb3fbfd29f1631882fbf7ab38e020b88339b561d90b16f2"
+      }
+    },
+    {
+      "id": "sdk-build-27a327d9",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-27a327d9",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-27a327d9",
+      "files": {
+        "report.json": "22c32f8b622c1fb0d34012c189da22646636ba554fe315d9b7aeabdfa910da85",
+        "supervisor/report.json": "594cf059135117b05a9bd3c07ff5b9d7f12fc0bfa83dec6721db040d89cf773b",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "def97527f461d1a4a1a131a599e9939a5e2bd68c3ce8ff9520446a446f6e4f9a",
+        "supervisor/telemetry.jsonl": "906600e5382524eb9cff12473f3ed1a7ad92eb511ed1cd694ecd3d3a0394dc0b"
+      }
+    },
+    {
+      "id": "sdk-build-38564500",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-38564500",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-38564500",
+      "files": {
+        "report.json": "bb3030b0848f3b99d47268dd9c4ac949241b2c11d5101fae5cfa75fd295cdcd9",
+        "supervisor/report.json": "d5632bfb6330a4b9c2232a663860333f73e6424e8f0f2967a7b4502d50c016ab",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "56b3a893aba30295da2bb82a72d6defea565cafcdae8f61d67aeacedb2fad453",
+        "supervisor/telemetry.jsonl": "ffe5130399c71c56847adf53002d7b5e38d2143300ce60c18f320935a7392338"
+      }
+    },
+    {
+      "id": "sdk-build-4c6bb3f0",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-4c6bb3f0",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-4c6bb3f0",
+      "files": {
+        "report.json": "0a03a39e02207536d31cfacbc5d5935b17ba3e28a74b8af259166ec0ce14cf0d",
+        "supervisor/report.json": "a846f12c2036b64b82508a2e7367b5297ef3949dd56d7a92fd61772d780a6105",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "b7112866c3f7ec0c98d1d99e316191acb702f2c541ff7c29ed8767af4ae23d83",
+        "supervisor/telemetry.jsonl": "b51e18b4c5a5d387ca450774c821eb235088d1c534b6792dfb624e708ee8909a"
+      }
+    },
+    {
+      "id": "sdk-build-61f00a39",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-61f00a39",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-61f00a39",
+      "files": {
+        "report.json": "b362755958e2f9640660978a8214df57892c243d13113cf63825d69f9efbd3b5",
+        "supervisor/report.json": "cb63df209d08a545130b4a75c73ce710325cd0fc9d1c47bcc0e12672c82e4c47",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "17c418680c3ac69e56f50253925496c2bf500b2dac5923d46467e58e61ba393b",
+        "supervisor/telemetry.jsonl": "8e74172c50ca15b2e5c49d24967b46d0a71c8ed6efe12a6b391540a06bd6530e"
+      }
+    },
+    {
+      "id": "sdk-build-689434c3",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-689434c3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-689434c3",
+      "files": {
+        "report.json": "e9fa95b133c032e07257665544b0e58c2adc26a629e5dfd5e7e25bdee24b555b",
+        "supervisor/report.json": "8cc2c129aa6cb3334e835470aba0a14848ac2d9648fd532a1604455021ae72a5",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "08bb6055c0091249e095a80559ca7e05a24bdf7e2547a8bb95d26d458b768a72",
+        "supervisor/telemetry.jsonl": "0088312c47c76e67b9de6ef6bd2c7e32d20dcfa8738f24fb2881121495a4c27b"
+      }
+    },
+    {
+      "id": "sdk-build-e42d3704",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-e42d3704",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-e42d3704",
+      "files": {
+        "report.json": "220a8c02c37f77df7400fd68029b7225e6a1846f1a96273381f415b1bb2a8282",
+        "supervisor/report.json": "c12d534fb99b5d85db71f12a6bf28e3ff824722d505f6cd7d94442fd6ecf7130",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4489c27d840e7a455bd6658c8da4ceb38da92294cfc6cb4c7cb9d23e318c3957",
+        "supervisor/telemetry.jsonl": "ea1ed8d4ed9c35ce874854c39aa46b4da569df7ce4f52ed20e6381ee78a212fc"
+      }
+    },
+    {
+      "id": "sdk-build-f7d8a128",
+      "stage": "sdk-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/sdk-build-f7d8a128",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/sdk-build-f7d8a128",
+      "files": {
+        "report.json": "da6a763d435871acfdcfec1a86830ca20343c8eb647ba9e94309f68ca98720ac",
+        "supervisor/report.json": "6795246fbe7f4abe370c8975dfd0de74aae001c6bf539cf7d25a57da814709a1",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "eeb087363629d420268feacfc9baf6353c3248242aa70744d695ea982f474995",
+        "supervisor/telemetry.jsonl": "33efc8618a2aa5a2c38de924fb4d204f51e80594bb4f0a3f81c3ffbd7258d6bf"
+      }
+    },
+    {
+      "id": "shader-probe-1851fed3",
+      "stage": "shader-probe",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/shader-probe-1851fed3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/shader-probe-1851fed3",
+      "files": {
+        "evidence/report.json": "9185074812fdc8827e51b02bf4ea1676aa1352a8ad96ca3ba5ac625dc2f09491",
+        "report.json": "be5dc189bc1c99708f4e24295863d927645f6c67c4051207f171166a0f948b2d",
+        "supervisor/report.json": "8d5085c872400e34be2f01bf1b0ac15ae65f91a4683bb1d32dd897b0c61c3039",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "0ba04ca7a39c4f4a149b3398d32622476d4c8958f782f8a62da2e7014440215a",
+        "supervisor/telemetry.jsonl": "32fe0ed85186e9794c07e7cc78414d20e1c2d6d224c4b2970487f6d47012ad7a"
+      }
+    },
+    {
+      "id": "typecheck-2aa724be",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-2aa724be",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-2aa724be",
+      "files": {
+        "report.json": "42a7efe7542394c90bac2749dfa022d5053210c33cc7672764495325621c17f6",
+        "supervisor/report.json": "0a36f8409797deed82b4fb1d36292dccee9ddeea3bc15838e80741e323f25144",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "7d40cc53d792c2913c773b94f12dcad4b19110ae6fe60f0500cd078277c88796"
+      }
+    },
+    {
+      "id": "typecheck-30ba3d11",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-30ba3d11",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-30ba3d11",
+      "files": {
+        "report.json": "915946543112be2400f2bdfa90a5dccf9b6ea37f703ab9e2fb73d5aa0d774575",
+        "supervisor/report.json": "a123748027f035bc6ae73479c7f75f340414dbda4939f990775f2a89c40862ae",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "3d1b1f83ac1957efd06ade6e627861bed18f625a7e0eeef76d74902d69c8dee0"
+      }
+    },
+    {
+      "id": "typecheck-44a78015",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-44a78015",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-44a78015",
+      "files": {
+        "report.json": "c35fbf1765453f2fab8095b5d7d63d23cac328b442306346d803f890d0e13799",
+        "supervisor/report.json": "59644af5779f2466f77ae24a3eeb8c337d6bf3c4e6e0912c45b88d00a8129fc2",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "927b51870fbc06eb7c0783a6d9fa9b5697174464cd331ed4d899769af0a12e0e"
+      }
+    },
+    {
+      "id": "typecheck-45a78bb4",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-45a78bb4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-45a78bb4",
+      "files": {
+        "report.json": "4601d63576ff56b771b4e5a14ef7e9201041a63c8a2f3a315e423d7869f8dd98",
+        "supervisor/report.json": "598c140e0fcf39e79fc1a401430e6710555406c61e5d3e9f26592a3d768ef91a",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "12b0e23aa71404a8a6c4ddca6b23069786a014f1a80f2a65f7047dfa0b61a6ac"
+      }
+    },
+    {
+      "id": "typecheck-6615c08a",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-6615c08a",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-6615c08a",
+      "files": {
+        "report.json": "778b8ca7bdf0fcfbf52e82cc2138ee56b6dabeaa55577fb1ac266408f9ee4a7f",
+        "supervisor/report.json": "a10e29b59af085c3a0b40845213176296c00335505d18953da44c0b86613b688",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "82a42bece2105cc7f9b7cc432b1529bc59318c99bef46352d497487ca4b8aec9"
+      }
+    },
+    {
+      "id": "typecheck-69e19636",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-69e19636",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-69e19636",
+      "files": {
+        "report.json": "0716329568f22f4a8680238c5a4fa36048b91239d2ecc3eb376b648764e97cd4",
+        "supervisor/report.json": "22d1826510ced664b43437dc467d06472be36aaffd67b5aaf3296c6b98e39459",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "2f0e78f4b51884fe5e8649b15d3bc017e198c1844cffe002b43762fc90d3cd17"
+      }
+    },
+    {
+      "id": "typecheck-7c3b6443",
+      "stage": "typecheck",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-7c3b6443",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-7c3b6443",
+      "files": {
+        "report.json": "486a4c58406be34dfdeebf8de271100e85fe6940d8e4531fb3318a03c2c18804",
+        "supervisor/report.json": "82cafdcd7c01d165c31388722ee8f0c8278b15b071964fac2a57d8503da06050",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "88e1e23118fef333ecf8b831bde1cc3f73bb04402ce34e5eab59d1b73a2902ff",
+        "supervisor/telemetry.jsonl": "7131a97b6b01ead6503da330d8a7c3bcd324b007a419f7f429df3e743fa34bdf"
+      }
+    },
+    {
+      "id": "typecheck-7e5d3d41",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-7e5d3d41",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-7e5d3d41",
+      "files": {
+        "report.json": "09175af3d44647827a1918e0cb695d5fad5a83b292aa2ea8c45c81cfda2ab392",
+        "supervisor/report.json": "c01301974f0a5d50071440c52d6450b617878f7b859c3a5e151976adb6849e8e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "edabaa06f76439d561a297be67bdb017268ec9d92c0c5863c222c8702dcaf5ac"
+      }
+    },
+    {
+      "id": "typecheck-7f84cdf6",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-7f84cdf6",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-7f84cdf6",
+      "files": {
+        "report.json": "037f3ddd0889b77348e8ab54460c00570c3adb5132e861f952dd7733af9abdce",
+        "supervisor/report.json": "6f71599d882aa12ffd289f7f2c5409f1ea0edd51fce5ff43a64fdfafa3696496",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "b8534fe79b0d4951ca51053ef08e21a2c91a42466cd863abef99631713291a58"
+      }
+    },
+    {
+      "id": "typecheck-82404ca4",
+      "stage": "typecheck",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-82404ca4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-82404ca4",
+      "files": {
+        "report.json": "7beda2ae09f0ca5600e7b21a3aa57b7df4aef465e75b0652c3f8ceced4fa332c",
+        "supervisor/report.json": "420c503cc4c1d2d36e45da495c78a6bc290d01eddd3fa15154d04d74bb7fc855",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e56517e09e863c4c43a101d996325c7d5061cad64e3f0c9bc3c71c614a1b6cae",
+        "supervisor/telemetry.jsonl": "6e8867df9b98285605e82c2afc55e52c3d77b2ae7bed1db6aaa0a935af42bc08"
+      }
+    },
+    {
+      "id": "typecheck-8dd38cb8",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-8dd38cb8",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-8dd38cb8",
+      "files": {
+        "report.json": "c7798524c780f3c7219aab30485dbdbb0c9616fd9623e69745e8c90d48181041",
+        "supervisor/report.json": "257f1e89b28029b8df0db9219ffb49ac4de94961f79e018d7b21779e506db928",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "effb6015455749cb49b3a1e8ce900cc0546bfd1182e0c214519df53e4cf3e847"
+      }
+    },
+    {
+      "id": "typecheck-988a160b",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-988a160b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-988a160b",
+      "files": {
+        "report.json": "8d260a81674af9c401e7720e3752183ac9f623110d376236f3be3139f94b21a6",
+        "supervisor/report.json": "5afb551cadf5d2bcee5aae21b38b3bd0890032d36a764c0d2963a5de976a270f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "35c8cc0289d21ff1c891b14bb3adac375c607113ebc9a1b129a9401008378334"
+      }
+    },
+    {
+      "id": "typecheck-9db95b82",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-9db95b82",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-9db95b82",
+      "files": {
+        "report.json": "ade74104bb2a63e27f86addfc1dcd6e4768715c2c71d11368853be296742b3fe",
+        "supervisor/report.json": "b2e94f01d55296d1bf61dc73f9f9e0cd37e5148b6a48cf98a2480771d62c06ee",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "64220c924fbb41ab144d4a0ed4a0f4c6038aaa20df6ae2eea8fe6f7887603c94"
+      }
+    },
+    {
+      "id": "typecheck-ae919e77",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-ae919e77",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-ae919e77",
+      "files": {
+        "report.json": "23d96014a9fcff51ff1dea737a8746dd11d2c8affd8b11025d6fc0667c894028",
+        "supervisor/report.json": "35d6e0edf2b5cbd0700309f0b8532a6b18ace962256b185e4241f0170a50b58c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "f7e7c59034330e90443435d3fdb8f890fa9d1272a703f5ae4c093217d2c87376"
+      }
+    },
+    {
+      "id": "typecheck-b8107cfd",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-b8107cfd",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-b8107cfd",
+      "files": {
+        "report.json": "0621fcfb125392407e6428234d7f88c42764fb479e03e465a4d144e79a39129a",
+        "supervisor/report.json": "0f398460fbaadce199f9e99814747eb680ea638f36631a00f913c44f1f0a0c87",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "fc9df9f9d2b0edf7318817c84a41fcfeedd464f3f056b52bfa295ebbf77a58f8"
+      }
+    },
+    {
+      "id": "typecheck-bf74ceed",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-bf74ceed",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-bf74ceed",
+      "files": {
+        "report.json": "2c2c4b05826641e797f77c9478d2cad99028443a768889ceb89b0dd808cd135b",
+        "supervisor/report.json": "26284eebf432ba815fac201afb9ef3e7cd04420787cfec5fe5a6bda31934cf8e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "8705f473f6f4c84c0450a02c60ca145b5419aaf510724bdc27920bd25c5eb985"
+      }
+    },
+    {
+      "id": "typecheck-c17c32c0",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-c17c32c0",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-c17c32c0",
+      "files": {
+        "report.json": "5a1f755b59db60ea70a4b76ef17c5900967873fa63f91432076372986e1d8aa2",
+        "supervisor/report.json": "7209e09173b9211e1149840cefcad2177a96d3f6f5173c9f3f9011d91e8c55d3",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "47908519e1d9c6f90c921e2871006c1f6bac148c3aca882ae359cc4253216f99"
+      }
+    },
+    {
+      "id": "typecheck-d0154dd3",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-d0154dd3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-d0154dd3",
+      "files": {
+        "report.json": "1ad52236e10995418562842e4e3d3f9d880d02dd395bb4e03cd26c3130109114",
+        "supervisor/report.json": "c8586c26763826a0255755954bac8b994fe64cfb71db9c5013647f0e9206afda",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "f044ca5c0d5b2e929802a89f4c8c3e69cc7667ad08c041c6cc9782207a242323"
+      }
+    },
+    {
+      "id": "typecheck-fe23bfce",
+      "stage": "typecheck",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-fe23bfce",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-fe23bfce",
+      "files": {
+        "report.json": "4a2f0855ff6f8ad34a5b3f4fc32b39240a01898a1498a6091ad744d1c21b723c",
+        "supervisor/report.json": "53cced3dca5e8d66a10f90bc8461c48bcad9f64c91ac44a3a2da2c657bd1c722",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "c12aceee375d1a29172b3c9fcc652c2c2a5ed8480f1892815f10daf1820b4d04",
+        "supervisor/telemetry.jsonl": "4ea7edc14b8b9941c69097c4ed585bf3cb5f79c036644ea5b3a6e77c0aad9213"
+      }
+    },
+    {
+      "id": "ui-pilot-7469005c",
+      "stage": "ui-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/ui-pilot-7469005c",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/ui-pilot-7469005c",
+      "files": {
+        "evidence/report.json": "31d2e79fd9be49746ff606d880de9ca3a16d2e1588da1709fc567b41454b2be2",
+        "evidence/view.png": "c699307ab9abbc0d42d0dc16998464db4175283d437f421644559e6f9bbd3365",
+        "report.json": "d25d8c65eb5d0fa0cf176105f9e91c2797f81d499af47e78521928f16d34161d",
+        "supervisor/report.json": "7809048b1138ee72f4031588b07a1ef45a25c0b0dac4a53929feaf8e640e1bd6",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e10401f0773f14947834c904d0cafe63776f2342a160a7899b410408c5f830bd",
+        "supervisor/telemetry.jsonl": "4b771cc3182b895d038242b5e89b427b474bdea23eb8f726a848c94bbc8ff412"
+      }
+    },
+    {
+      "id": "ui-pilot-95e11ee6",
+      "stage": "ui-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/ui-pilot-95e11ee6",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/ui-pilot-95e11ee6",
+      "files": {
+        "evidence/report.json": "aa017062bbd7acd7535226d7a46d1595f822fe999d1300a137b33a81cfb4da02",
+        "evidence/view.png": "c699307ab9abbc0d42d0dc16998464db4175283d437f421644559e6f9bbd3365",
+        "report.json": "c81621b911b7fdf8d973004a6dc4c2f0e260b9e5a945be61e64de33c993a3a73",
+        "supervisor/report.json": "37a308449fc9e4bbb6a7bb70336c051cb574c04ae001307e92b8bd0128ddd6c0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e10401f0773f14947834c904d0cafe63776f2342a160a7899b410408c5f830bd",
+        "supervisor/telemetry.jsonl": "720fa0d394b078cdead8297e1a30c58b924cea665af978882f2c341d4e5b3b0c"
+      }
+    }
+  ]
+}

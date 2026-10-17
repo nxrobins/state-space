@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "id": "11ed9e6dee9b47719145c66331fde8a7",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "scripts/verify_volume_m5_level.mjs",
+    "--size",
+    "32",
+    "--scene",
+    "ice-control",
+    "--ticks",
+    "1024",
+    "--action-tick",
+    "180",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\level-pilot-b58c69ce\\evidence"
+  ],
+  "startedAt": 1792152621.5689256,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 190.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792152622.5867517,
+      "hostCpuPercent": 1.66015625,
+      "freeMemoryMiB": 87905.57421875
+    },
+    "gpu": null
+  },
+  "childPid": 39592,
+  "lastOutput": "{\"passed\":true,\"size\":32,\"scenario\":\"ice-control\",\"firstFall\":null,\"supportMelt\":null,\"meanTickMs\":14.457277929687482}",
+  "lastHealth": {
+    "host": {
+      "time": 1792152641.9858687,
+      "hostCpuPercent": 8.828828828828827,
+      "freeMemoryMiB": 87909.50390625
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 18.03125,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 198.3046875
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792152641.9888365
+}

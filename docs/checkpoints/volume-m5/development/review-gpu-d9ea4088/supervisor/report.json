@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "id": "27c19fb8ea4d43628605b5c24823cc18",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\review-gpu-d9ea4088\\evidence",
+    "--probe",
+    "review"
+  ],
+  "startedAt": 1792195468.0851743,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792195469.0854824,
+      "hostCpuPercent": 6.003937007874017,
+      "freeMemoryMiB": 89770.2421875
+    },
+    "gpu": {
+      "time": 1792195469.1359477,
+      "temperatureC": 39.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11044.0,
+      "powerW": 62.81
+    }
+  },
+  "childPid": 28156,
+  "lastOutput": "M5 review: active crossing, restart and exact terrain passed",
+  "lastHealth": {
+    "host": {
+      "time": 1792195476.6408439,
+      "hostCpuPercent": 6.764168190127973,
+      "freeMemoryMiB": 89511.1015625
+    },
+    "gpu": {
+      "time": 1792195475.333029,
+      "temperatureC": 39.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 10979.0,
+      "powerW": 63.08
+    },
+    "job": {
+      "cpuSeconds": 6.796875,
+      "activeProcesses": 11,
+      "peakMemoryMiB": 540.953125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792195477.5132737
+}

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/latency.test.ts (3 tests) 8ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  05:22:54
+   Duration  244ms (transform 35ms, setup 0ms, collect 49ms, tests 8ms, environment 0ms, prepare 64ms)
+

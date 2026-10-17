@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>State Space / Structural Cavern</title><link rel="stylesheet" href="style.css"></head>
+<body><main>
+ <aside><a class="brand" href="../../">STATE SPACE <span>EXPERIMENTAL / M5</span></a>
+ <h1>Weight.<br>Heat.<br><em>Consequences.</em></h1><p class="intro">A bonded world. Walk across it, remove its supports, or change what holds it together.</p>
+ <label for="scene">CHAMBER</label><select id="scene"><option value="control">Stone bridge · intact control</option><option value="cut">Stone bridge · sever the supports</option><option value="heat">Stone bridge · thermal failure</option><option value="ice-control">Frozen crossing · intact control</option><option value="ice-heat">Frozen crossing · melt the supports</option></select>
+ <label for="size">FINITE WORLD</label><select id="size"><option value="32">32 × 32 × 32</option><option value="64">64 × 64 × 64</option><option value="128">128 × 128 × 128</option></select>
+ <div class="buttons"><button id="play" class="primary">Play</button><button id="step">One tick</button><button id="reset">Reset</button></div>
+ <label class="check"><input id="script" type="checkbox"> Follow the scripted crossing & failure</label>
+ <div class="rule"></div><h2>Change the structure</h2><p id="expectation">An intact control should remain stable.</p>
+ <div class="buttons"><button id="cut">Cut supports</button><button id="heat">Heat supports</button><button id="melt">Melt ice</button></div>
+ <label for="tool">AIMED TOOL · PRESS E</label><select id="tool"><option value="cut">Cut one voxel</option><option value="heat">Heat one voxel</option><option value="cool">Cool one voxel</option></select>
+ <div class="rule"></div><h2>Presentation</h2><div class="buttons"><button id="appearance">A/B · Naturalistic</button><button id="camera">Orbit view</button></div>
+ <p class="keys">Click the world to look around.<br>WASD move · Space jump · E use tool<br>In orbit: drag to rotate · wheel to zoom</p>
+ <div class="buttons small"><button id="export">Save checkpoint</button><button id="import">Load checkpoint</button><button id="inspect">Inspect energy</button></div><input id="file" type="file" accept="application/json,.json" hidden>
+ <p class="limits">Solids carry their own weight. Detached pieces fall without rotation. The player is kinematic and applies no load. Contact never welds fragments.</p>
+ </aside>
+ <section class="viewport"><canvas id="world" width="1920" height="1080" tabindex="0" aria-label="Interactive structural cavern"></canvas><div class="crosshair" id="crosshair">+</div>
+  <div class="topline"><span id="mode">INITIALIZING</span><span id="dimension">32³</span></div>
+  <div class="bottomline"><div><small>COMPLETED TICK</small><strong id="tick">0</strong></div><div><small>FULL FRAME</small><strong id="frame">—</strong></div><div><small>SUPPORT PLAN</small><strong id="solve">—</strong></div><div><small>ENERGY DRIFT</small><strong id="energy">Not inspected</strong></div></div>
+  <div class="target" id="target">Walk onto the span or inspect it from orbit.</div><div id="error" role="alert" hidden></div>
+ </section>
+</main><script type="module" src="app.js"></script></body></html>

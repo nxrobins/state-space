@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "id": "b87587542325474588bc76483d65c233",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.json"
+  ],
+  "startedAt": 1792146616.4987793,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792146617.514862,
+      "hostCpuPercent": 3.4782608695652195,
+      "freeMemoryMiB": 91048.97265625
+    },
+    "gpu": null
+  },
+  "childPid": 43340,
+  "lastHealth": {
+    "host": {
+      "time": 1792146621.83691,
+      "hostCpuPercent": 6.525735294117652,
+      "freeMemoryMiB": 90914.94140625
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 4.5,
+      "activeProcesses": 1,
+      "peakMemoryMiB": 239.42578125
+    }
+  },
+  "lastOutput": "engine/experimental/structural-world-core.ts(72,45): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ material: string[]; energy: string[]; integrity: string[]; anchor: string[]; bond: string[]; }'.",
+  "exitCode": 2,
+  "finishedAt": 1792146622.0569446
+}

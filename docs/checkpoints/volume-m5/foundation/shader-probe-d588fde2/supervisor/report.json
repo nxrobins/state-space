@@ -1,0 +1,59 @@
+{
+  "version": 2,
+  "id": "8c8e1bb4a5e646c0a82b05b7fa436efc",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\shader-probe-d588fde2\\evidence"
+  ],
+  "startedAt": 1792147376.0667586,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 50.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792147377.067641,
+      "hostCpuPercent": 7.121951219512191,
+      "freeMemoryMiB": 91138.1796875
+    },
+    "gpu": {
+      "time": 1792147377.1253633,
+      "temperatureC": 32.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11355.0,
+      "powerW": 59.16
+    }
+  },
+  "childPid": 25936,
+  "lastOutput": "    at Module.verifyM5ShaderCompile (http://127.0.0.1:61456/dist/volume-m5/structural-probe.js:289:34)",
+  "lastHealth": {
+    "host": {
+      "time": 1792147381.493741,
+      "hostCpuPercent": 9.082813891362418,
+      "freeMemoryMiB": 91116.28125
+    },
+    "gpu": {
+      "time": 1792147381.2747045,
+      "temperatureC": 32.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 11355.0,
+      "powerW": 59.42
+    },
+    "job": {
+      "cpuSeconds": 3.515625,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 458.89453125
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792147381.4969163
+}

@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "scope": "Tiny M5 shader compilation only",
+  "result": {
+    "backendInfo": {
+      "architecture": "lovelace",
+      "isFallbackAdapter": false,
+      "vendor": "nvidia"
+    },
+    "compiled": [
+      "main",
+      "supportInit",
+      "supportRelax",
+      "supportSummary",
+      "loadLevel",
+      "damage",
+      "normalize",
+      "componentInit",
+      "componentRelax",
+      "blockInit",
+      "blockRelax",
+      "applyMotion"
+    ],
+    "passed": true,
+    "scope": "8^3 shader compilation only; no physics dispatch"
+  },
+  "errors": []
+}

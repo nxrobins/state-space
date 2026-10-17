@@ -17,7 +17,7 @@
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
-    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && tsc -p engine/tsconfig.sdk.json",
+    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && vite build --config engine/vite.structural-world.config.ts && vite build --config engine/vite.structural-world-gpu.config.ts && tsc -p engine/tsconfig.sdk.json",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
     "benchmark:3d": "npm run build:sdk && node scripts/benchmark_volume.mjs",
     "verify:3d:m2": "npm run build:sdk && node scripts/verify_volume_m2.mjs",
@@ -57,6 +57,14 @@
       "types": "./dist/sdk/types/experimental/active-world.d.ts",
       "import": "./dist/sdk/state-space-active-world.js"
     },
+    "./experimental/3d/structural-world/gpu": {
+      "types": "./dist/sdk/types/experimental/structural-world-gpu.d.ts",
+      "import": "./dist/sdk/state-space-structural-world-gpu.js"
+    },
+    "./experimental/3d/structural-world": {
+      "types": "./dist/sdk/types/experimental/structural-world.d.ts",
+      "import": "./dist/sdk/state-space-structural-world.js"
+    },
     "./experimental/3d/active-world/gpu": {
       "types": "./dist/sdk/types/experimental/active-world-gpu.d.ts",
       "import": "./dist/sdk/state-space-active-world-gpu.js"
@@ -76,6 +84,7 @@
     "docs/checkpoints/3D_M2.md",
     "docs/checkpoints/3D_M3.md",
     "docs/checkpoints/3D_M4.md",
+    "docs/checkpoints/3D_M5.md",
     "docs/checkpoints/CAVERN_MATERIALS.md",
     "docs/checkpoints/CAVERN_OPTICS.md",
     "docs/checkpoints/CAVERN_HAZE.md",

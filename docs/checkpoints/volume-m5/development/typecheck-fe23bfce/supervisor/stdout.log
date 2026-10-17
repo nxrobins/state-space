@@ -1,0 +1,1 @@
+engine/experimental/structural-world-core.ts(72,45): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ material: string[]; energy: string[]; integrity: string[]; anchor: string[]; bond: string[]; }'.
