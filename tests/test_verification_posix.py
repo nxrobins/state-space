@@ -114,3 +114,22 @@ class IndependentPosixWatchdogTests(unittest.TestCase):
                 if child.poll() is None:
                     os.killpg(child.pid, signal.SIGKILL)
                     child.wait()
+
+
+@unittest.skipUnless(os.name == 'posix', 'POSIX watchdog sampled RSS')
+class PosixWatchdogMemoryTests(unittest.TestCase):
+    def test_sampled_memory_budget_terminates_only_owned_workload(self):
+        from scripts.verification_posix_watchdog import PosixWatchdog
+        with tempfile.TemporaryDirectory() as temp:
+            child = subprocess.Popen([sys.executable, '-c', 'import time; data=bytearray(8*1024*1024); time.sleep(10)'], start_new_session=True)
+            watchdog = PosixWatchdog(child, 10, temp, memory_mib=1)
+            try:
+                child.wait(timeout=4)
+                watchdog.process.wait(timeout=3)
+                self.assertEqual(child.returncode, -signal.SIGKILL)
+                self.assertIn('RSS budget exceeded', watchdog.failure_reason())
+            finally:
+                if child.poll() is None:
+                    os.killpg(child.pid, signal.SIGKILL)
+                    child.wait()
+                watchdog.process.stdin.close()

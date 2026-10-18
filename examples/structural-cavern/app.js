@@ -6,10 +6,11 @@ import {FrameClock} from '../../web/frame-clock.js';
 const $=id=>document.getElementById(id),canvas=$('world'),params=new URLSearchParams(location.search),keys=new Set(),clock=new FrameClock();
 const names=new Map(MATERIALS_3D.map(m=>[m.id,m.name]));
 let field,renderer,driver,level,initial,active=Promise.resolve(),pump,playing=false,exclusive=false,failed=false,pendingEdits=[];
-let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=24,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
+let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=13,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
 function controls(){
  for(const element of document.querySelectorAll('aside button, aside select, aside input'))element.disabled=exclusive||(failed&&element.id!=='reset');
  $('resume').disabled=exclusive||failed||!remembered;
+ $('lighting').disabled=exclusive||failed||!renderer?.setLightingMode;
 }
 function checkpointText(){text('checkpoint-status',remembered?`Remembered tick ${remembered.field.tick}. Restore returns to this world and actor.`:'No remembered checkpoint.');}
 
@@ -76,7 +77,7 @@ async function load(){
  field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active'});
  await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);await applyLightingMode(lightingMode);
  $('lighting').disabled=!renderer.setLightingMode; text('lighting',renderer.setLightingMode?(lightingMode==='cached'?'Lighting B · Cached':'Lighting A · Reference'):'Lighting A · SDK update needed for B');
- driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=24;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
+ driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=13;orbit=false;text('camera','Orbit view');$('crosshair').hidden=false;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
  text('dimension',`${size}³`);text('energy','Not inspected');
  text('expectation',scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.');
  await present();startFrames();
@@ -103,7 +104,7 @@ $('import').onclick=()=>$('file').click();$('file').onchange=()=>notify(()=>excl
 canvas.addEventListener('click',()=>{if(!orbit)void canvas.requestPointerLock();});
 canvas.addEventListener('pointerdown',e=>{if(orbit)drag=[e.clientX,e.clientY];});window.addEventListener('pointerup',()=>{drag=null;});
 window.addEventListener('pointermove',e=>{if(document.pointerLockElement===canvas){yaw+=e.movementX*.0025;pitch=Math.max(-1.3,Math.min(1.3,pitch+e.movementY*.0025));}else if(drag&&orbit){orbitYaw-=(e.clientX-drag[0])*.006;orbitPitch=Math.max(-1.2,Math.min(1.2,orbitPitch+(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY];}});
-canvas.addEventListener('wheel',e=>{if(orbit){e.preventDefault();distance=Math.max(6,Math.min(100,distance+e.deltaY*.025));}},{passive:false});
+canvas.addEventListener('wheel',e=>{if(orbit){e.preventDefault();distance=Math.max(6,Math.min(level.size*.42,distance+e.deltaY*.025));}},{passive:false});
 window.addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;keys.add(e.code);if(['Space','KeyE'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&!e.repeat&&!exclusive){pendingEdits.push(...targetEdit());if(!playing)notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),pendingEdits.splice(0))));}});
 window.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>{keys.clear();playing=false;clock.reset();});
 const api={get lightingMode(){return lightingMode;},get field(){return field;},get renderer(){return renderer;},get driver(){return driver;},get level(){return level;},advance,present,snapshot,restore,

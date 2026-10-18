@@ -1097,6 +1097,14 @@ format, and pass schedule. The GPU backends require a usable GPU adapter.
 
 ## Install and run an external client
 
+The current bounded external-package check is `npm run verify:packages` after
+`npm run build:sdk`. On macOS, `uv run python -m scripts.verify_packages --native`
+also compares the installed Metal and JavaScript clients. The verifier uses a
+fresh Python environment, imports all 13 npm export paths and checks their public
+declarations. WebGPU types are included as a package dependency. See the
+[current support matrix](VALIDATION_STATUS.md) for experimental boundaries.
+
+
 From the development checkout:
 
 ```powershell

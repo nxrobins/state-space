@@ -446,7 +446,7 @@ def main():
                 receipt['error'] = reason
                 receipt['passed'] = False
             try:
-                watchdog.close(disarm=not job or job.handle is None)
+                watchdog.close(disarm=job.handle is None if job else posix_stopped)
             except Exception as error:
                 receipt['error'] = 'Independent watchdog cleanup failed: ' + str(error)
                 receipt['passed'] = False

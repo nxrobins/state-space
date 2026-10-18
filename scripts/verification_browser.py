@@ -33,7 +33,8 @@ class PersistentBrowser:
         self.stderr = (Path(output) / 'browser-transport.log').open('xb')
         try:
             self.child = subprocess.Popen([node, str(ROOT / 'scripts/verification_browser.mjs'),
-                str(Path(executable).resolve()), str(Path(output).resolve())], cwd=ROOT,
+                str(Path(executable).resolve()), str(Path(output).resolve()),
+                *(['headed'] if os.environ.get('STATE_SPACE_BROWSER_HEADED') == '1' and mac else [])], cwd=ROOT,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr, bufsize=0,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
             self.reader = threading.Thread(target=self._read, daemon=True)

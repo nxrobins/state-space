@@ -20,9 +20,10 @@ async function replay(size,scenario,ticks){
   const state=cpu.snapshot();digests.push(await structuralStateDigest(state));
   if([3,actionTick-1].includes(tick))checkpoints.set(tick,state);
   if(tick===actionTick-1)check(deck.every(c=>(state.packedCells[at(c)]&255)===(scenario.startsWith('ice')?MAT.ICE:MAT.STONE)),'Positive control: bridge changed before action');
-  if(tick===actionTick+4){report.supportFailure=deck.some(c=>(state.packedCells[at(c)]&255)!==(scenario.startsWith('ice')?MAT.ICE:MAT.STONE));check(report.supportFailure,'Support action did not detach or melt the span');}
+  if(tick===actionTick+4&&!scenario.endsWith('control')){report.supportFailure=deck.some(c=>(state.packedCells[at(c)]&255)!==(scenario.startsWith('ice')?MAT.ICE:MAT.STONE));check(report.supportFailure,'Support action did not detach or melt the span');}
   if(tick%8===0){progress('CPU '+size+'³ '+scenario+' '+tick+'/'+ticks);await pause();}
  }
+ if(scenario.endsWith('control')){check(deck.every(c=>(cpu.snapshot().packedCells[at(c)]&255)===(scenario.startsWith('ice')?MAT.ICE:MAT.STONE)),'Intact control bridge failed');report.intactControl=true;}
  check(cpu.energyBalance().driftQ===0n,'CPU conservation failure');
  report.referenceFinalHash=digests.at(-1);report.referenceDigests=digests;save();
  for(const mode of ['dense','active']){
@@ -53,7 +54,7 @@ async function frames(lightingMode){
  const size=32,level=createStructuralLevel(size,'cut'),initial=level.field.snapshot();delete level.field;
  const gpu=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:8,mode:'active'});
  let renderer,driver;
- report={...report,size,scenario:'cut',lightingMode,warmup:[],samples:[],targetHz:60,resolution:[1920,1080],scope:'Display callbacks through completed simulation, resident actor, rendering, transfers and GPU completion; headless diagnostic, not physical display acceptance'};
+ report={...report,size,scenario:'cut',lightingMode,warmup:[],samples:[],targetHz:60,resolution:[1920,1080],scope:'Display callbacks through completed simulation, resident actor, rendering, transfers and GPU completion; browser mode recorded by the outer receipt; excludes OS scanout'};
  try{
   check(gpu.backendInfo.isFallbackAdapter===false,'Hardware GPU required');report.backendInfo=gpu.backendInfo;
   await gpu.restore(initial);renderer=await gpu.createRenderer(document.getElementById('world'));
@@ -71,7 +72,7 @@ async function frames(lightingMode){
     const completedAt=performance.now(),row={tick,timestamp,callbackAt,completedAt,interval:interval??null,workMs:completedAt-callbackAt,completionMs:completedAt-timestamp,submissions:commit.submissions,completionBoundaries:commit.completionBoundaries};
     (tick<=60?report.warmup:report.samples).push(row);
     if(row.workMs>1000){pump.stop();reject(Error('Single frame exceeded one-second responsiveness budget'));return;}
-    if(tick%30===0)save();
+    if(tick%30===0){report.progress='Frames '+tick+'/660';save();}
     if(tick===660){pump.stop();report.pump=pump.statistics();resolve();}
    },{onError:reject});
   });
@@ -84,12 +85,29 @@ async function frames(lightingMode){
   report.finalHash=await structuralStateDigest(await gpu.snapshot());report.finalActor=driver.inspect();report.measuredFrames=report.samples.length;
  }finally{driver?.close();renderer?.close();gpu.close();}
 }
+async function lighting(){
+ const level=createStructuralLevel(32,'control'),initial=level.field.snapshot();
+ const gpu=await createStateSpaceStructuralWorld3DGPU({width:32,height:32,depth:32,chunkSize:8,mode:'active'});let renderer,driver;
+ try{
+  check(gpu.backendInfo.isFallbackAdapter===false,'Hardware GPU required');await gpu.restore(initial);
+  renderer=await gpu.createRenderer(document.getElementById('world'));await renderer.setAppearance('naturalistic');
+  driver=await gpu.createGameplay(level.actor,level.rules);
+  const presentation={renderer,camera:{forward:[1,0,0],right:[0,0,-1],up:[0,-1,0]}};
+  await driver.present(presentation);const before=await gpu.snapshot();
+  await renderer.setLightingMode('cached');await driver.present(presentation);
+  check(JSON.stringify(await gpu.snapshot())===JSON.stringify(before),'Cached presentation mutated physics');
+  await renderer.setLightingMode('reference');await driver.present(presentation);
+  check(JSON.stringify(await gpu.snapshot())===JSON.stringify(before),'Reference A/B mutated physics');
+  report.backendInfo=gpu.backendInfo;report.cacheCompiled=true;report.zeroTickIsolation=true;
+ }finally{driver?.close();renderer?.close();gpu.close();}
+}
 window.macQualification={ready:true,run(stage){
  report={stage,passed:false,done:false,releaseAccepted:false,startedAt:new Date().toISOString()};
  void(async()=>{try{
   if(stage==='pilot')await replay(32,'cut',4);
-  else if(/^replay-(32|64)-(cut|heat|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
-  else if(stage==='frames-reference'||stage==='frames-cached')await frames(stage.slice(7));
+  else if(/^replay-(32|64)-(control|cut|heat|ice-control|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
+  else if(stage==='lighting')await lighting();
+  else if(stage==='frames-reference'||stage==='frames-cached'||stage==='frames-visible')await frames(stage==='frames-visible'?'reference':stage.slice(7));
   else throw Error('Unknown fixed stage');
   report.passed=true;
  }catch(error){report.error=String(error.stack||error);}finally{report.done=true;report.finishedAt=new Date().toISOString();progress(report.passed?'Stage complete: '+stage:'Stage failed: '+report.error);}})();

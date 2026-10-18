@@ -92,7 +92,7 @@ def main():
             report['bounds'] = bounded_corpus(conformance_cases())
             save()
             command = [shutil.which('node'), 'node_modules/vitest/vitest.mjs', 'run',
-                       'engine/conformance.test.ts', '--config', 'engine/vitest.config.ts']
+                       'engine/conformance.test.ts', '--config', 'engine/vitest.config.ts', '--disableConsoleIntercept']
             print('Checking bounded native/CPU corpus: ' + json.dumps(report['bounds']), flush=True)
             result = reference(command, out, 'conformance', 50)
             print((out / 'conformance.stdout.log').read_text(), flush=True)

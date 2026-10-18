@@ -1,0 +1,688 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "completedRequestedValidation": true,
+  "fullReleaseAccepted": false,
+  "hardware": "Apple M3 Ultra / macOS 26.6.2 / Metal",
+  "replays": [
+    {
+      "size": 32,
+      "scenario": "cut",
+      "ticks": 1024,
+      "energyDriftQ": "0",
+      "exactComparisons": 2076,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-32-cut-f24dec71f92a/report.json",
+      "reportSha256": "0193c528a00bc8bec2d9f5e0b82e7e0ae56d29aaa3cfd010fca5c22378e20862",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 32,
+      "scenario": "heat",
+      "ticks": 1024,
+      "energyDriftQ": "0",
+      "exactComparisons": 2076,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-32-heat-8c5d173993a1/report.json",
+      "reportSha256": "53c9c60d722d291672989954d0fada303090277775813b999ff7df440b8489a1",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 32,
+      "scenario": "ice-heat",
+      "ticks": 1024,
+      "energyDriftQ": "0",
+      "exactComparisons": 2076,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-32-ice-heat-fe313d335359/report.json",
+      "reportSha256": "01196c9f0b2e108ae7cd97e6039abf7397178730f1c4bee6fd8cbf5d3c05d2c5",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 32,
+      "scenario": "control",
+      "ticks": 1024,
+      "energyDriftQ": "0",
+      "exactComparisons": 2076,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-32-control-e3f24340c4d5/report.json",
+      "reportSha256": "8948f34fe9e978f1810d3ccee5ce808180ffd19d2db3197dc770b45b41e44daa",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 32,
+      "scenario": "ice-control",
+      "ticks": 1024,
+      "energyDriftQ": "0",
+      "exactComparisons": 2076,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-32-ice-control-624a93fca1a3/report.json",
+      "reportSha256": "1ea875fab680cf77fb436d4655e0d3f00a3ba658ed09ce2b79ec131920c8aa50",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 64,
+      "scenario": "cut",
+      "ticks": 256,
+      "energyDriftQ": "0",
+      "exactComparisons": 540,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-64-cut-1259ae677031/report.json",
+      "reportSha256": "0ea32872c38d325d19285182d4af827e10a66961db6ec118e4f1961b1722c6bd",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 64,
+      "scenario": "heat",
+      "ticks": 256,
+      "energyDriftQ": "0",
+      "exactComparisons": 540,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-64-heat-2c20cd707ed3/report.json",
+      "reportSha256": "90f5c50494bd15be71792c207ec7555e9defa83faf4c1531ae3a9e0ef4213fa7",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 64,
+      "scenario": "ice-heat",
+      "ticks": 256,
+      "energyDriftQ": "0",
+      "exactComparisons": 540,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-64-ice-heat-42b841a15fe3/report.json",
+      "reportSha256": "c6cabb58d2c2bf3cec43d13afe2a425e8b18f809ef1fe5a4686512d1248279b1",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 64,
+      "scenario": "control",
+      "ticks": 256,
+      "energyDriftQ": "0",
+      "exactComparisons": 540,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-64-control-cc216e5abba9/report.json",
+      "reportSha256": "1100bed61452f74905e0e6d14c1c1530502a8594b93bdef4f3ded84f01b7397b",
+      "simulationSourcesStillMatch": true
+    },
+    {
+      "size": 64,
+      "scenario": "ice-control",
+      "ticks": 256,
+      "energyDriftQ": "0",
+      "exactComparisons": 540,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "report": "verification/macos-replay-64-ice-control-2056a1da2d87/report.json",
+      "reportSha256": "93a55678f9295974528da63d641eb862c10e520729f7c5ab8f3b2fb7c593622b",
+      "simulationSourcesStillMatch": true
+    }
+  ],
+  "frames": [
+    {
+      "size": 32,
+      "scenario": "cut",
+      "lightingMode": "reference",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "work": {
+        "count": 600,
+        "min": 4.599999904632568,
+        "p50": 6.5,
+        "p95": 7.300000190734863,
+        "p99": 9.5,
+        "worst": 11.600000381469727
+      },
+      "completion": {
+        "count": 600,
+        "min": 4.599999904632568,
+        "p50": 6.599999904632568,
+        "p95": 7.39999990463275,
+        "p99": 9.699999904632477,
+        "worst": 11.800000000000182
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.98577966606661,
+      "performancePassed": true,
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "headless": false,
+      "report": "verification/macos-gameplay-visible-ff379751071d/report.json",
+      "reportSha256": "8f63899453f7d0844dccddc32a3f4ce1fcf47cc5723d73a64d5e82b5de3723cc"
+    },
+    {
+      "size": 32,
+      "scenario": "cut",
+      "lightingMode": "cached",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "work": {
+        "count": 600,
+        "min": 4.900000095367432,
+        "p50": 6.699999809265137,
+        "p95": 7.599999904632568,
+        "p99": 9,
+        "worst": 10.300000190734863
+      },
+      "completion": {
+        "count": 600,
+        "min": 5.100000000000364,
+        "p50": 6.899999809265182,
+        "p95": 7.899999713898069,
+        "p99": 9.299999809265046,
+        "worst": 10.49999990463266
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.00681212386367,
+      "performancePassed": true,
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "headless": false,
+      "report": "verification/macos-gameplay-cached-visible-60c9bf2e94c8/report.json",
+      "reportSha256": "6f1fe34b6f64740f3803262504ab7d44b967a59d4c0851264c7b35d89fe1f379"
+    },
+    {
+      "size": 64,
+      "scenario": "cut",
+      "lightingMode": "reference",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "work": {
+        "count": 600,
+        "min": 7.900000095367432,
+        "p50": 10.400000095367432,
+        "p95": 14.5,
+        "p99": 15.699999809265137,
+        "worst": 17.90000009536743
+      },
+      "completion": {
+        "count": 600,
+        "min": 7.900000286102113,
+        "p50": 10.500000286101567,
+        "p95": 14.500000381469363,
+        "p99": 15.800000190734863,
+        "worst": 18.200000286102295
+      },
+      "missedDeadlines": 4,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.01583055124684,
+      "performancePassed": false,
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "headless": false,
+      "report": "verification/macos-gameplay-64-visible-b121d83e6072/report.json",
+      "reportSha256": "b879778e0e0f4f7c0ba4cf38095610ca989bcec28cda9222bffc908f06f6f83e"
+    },
+    {
+      "size": 64,
+      "scenario": "cut",
+      "lightingMode": "cached",
+      "resolution": [
+        1920,
+        1080
+      ],
+      "work": {
+        "count": 600,
+        "min": 8.099999904632568,
+        "p50": 10.400000095367432,
+        "p95": 14.5,
+        "p99": 15.299999713897705,
+        "worst": 17.40000009536743
+      },
+      "completion": {
+        "count": 600,
+        "min": 8.199999904632932,
+        "p50": 10.600000000000364,
+        "p95": 14.700000000000728,
+        "p99": 15.499999809265319,
+        "worst": 17.699999999999818
+      },
+      "missedDeadlines": 1,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.99779640929151,
+      "performancePassed": false,
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "headless": false,
+      "report": "verification/macos-gameplay-64-cached-visible-fb099c13d743/report.json",
+      "reportSha256": "a28cc9299e7fede62a414d8c36be24f5a9f40a85041f7c65e7ac95d09d80bb90"
+    }
+  ],
+  "checks": {
+    "cpuVitest": 1793,
+    "cpuControllers": 18,
+    "smokeVitest": 46,
+    "smokeNode": 13,
+    "harnessPassed": 63,
+    "windowsSkipped": 4,
+    "archiveTests": 2,
+    "nativeScenes": 35,
+    "nativePassComparisons": 4416,
+    "nativePipelineVariants": 53,
+    "independentNpmExportConsumers": 13
+  },
+  "limits": [
+    "64\u00b3 misses the strict 60 Hz deadline at 1080p",
+    "128\u00b3 unqualified",
+    "Apple GPU thermal/utilization telemetry unavailable",
+    "Existing incident holds and legacy quarantine unchanged",
+    "Tactical/reactive physical worker runtime not newly qualified"
+  ],
+  "exact3dComparisons": 13080,
+  "client": {
+    "report": "verification/macos-client-f8bf01049346/report.json",
+    "sha256": "9af63ba394ca82148ec5637aad7c6fe5f43c67a1fbe20534786ec08be278ce21",
+    "passed": true
+  },
+  "nativeConformance": {
+    "report": "verification/native-metal-conformance-9b1f0f95e6c6/report.json",
+    "sha256": "18cb8d3c75c69a39a9e61334db7723c9f78209e693c5f18cddb7dde83b3630ab",
+    "passed": true
+  },
+  "installedPackages": {
+    "report": "verification/packages-ab9426f33693/report.json",
+    "sha256": "666714de50078ce3abc17034a0a18d44f029ddc8468ff8de0d94d8c0705de09d",
+    "passed": true
+  },
+  "referenceCachedFinalCheckpointsExact": true,
+  "artifact": {
+    "url": "https://github.com/nxrobins/state-space/releases/download/macos-validation-2026-10-18/macos-stabilization-20261018.tar.gz",
+    "sha256": "5086d3cc77e50157399d7095d1366b792c609028da44363b64b905a516334573",
+    "bytes": 24949070,
+    "manifestSha256": "745fdb05b48691178b3e4c3e9c1a1b33eb2acaadcb8acbe57b892bda1fc2c0a6",
+    "containsFailedAttempts": true,
+    "sourceSnapshot": "source-hashes.json"
+  }
+}

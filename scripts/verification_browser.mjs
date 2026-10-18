@@ -98,7 +98,8 @@ export async function main(){
   })();return shutdownPromise;
  }
  try{
-  browser=spawn(browserPath,['--headless=new','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1',
+  const headed=process.platform==='darwin'&&process.env.STATE_SPACE_VERIFICATION_KIND==='macos-qualification'&&process.argv[4]==='headed';
+  browser=spawn(browserPath,[...(headed?[]:['--headless=new']),'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1',
    '--user-data-dir='+profile,'--no-first-run','--no-default-browser-check','--enable-unsafe-webgpu',
    '--window-size=1920,1080','about:blank'],{stdio:'ignore',windowsHide:true});
   let launchError;browser.on('error',error=>{launchError=error;cdp?.fail(error);});
@@ -124,7 +125,7 @@ export async function main(){
   for(const method of ['Runtime.enable','Page.enable','Inspector.enable'])await cdp.call(method,{},sessionId);
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:1920,height:1080,deviceScaleFactor:1,mobile:false},sessionId);
   const version=await cdp.call('Browser.getVersion');
-  await send({id:0,result:{transport:'persistent-cdp',version,pid:browser.pid,viewport:[1920,1080],headless:true}});
+  await send({id:0,result:{transport:'persistent-cdp',version,pid:browser.pid,viewport:[1920,1080],headless:!headed}});
   let expected=1,busy=false,buffer='';
   async function evaluate(expression){
    if(typeof expression!=='string'||expression.length>65536)throw Error('Invalid evaluation');

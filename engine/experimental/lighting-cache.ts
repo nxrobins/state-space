@@ -105,7 +105,7 @@ export function lightingCacheCompute(common: string, shape: readonly number[], e
 @group(0) @binding(4) var<storage,read> rebuilt:array<u32>;
 @group(0) @binding(5) var<storage,read_write> candidates:array<u32>;
 @group(0) @binding(6) var<storage,read_write> candidateCounts:array<atomic<u32>>;
-@group(0) @binding(7) var<storage,read_write> meta:array<atomic<u32>>;
+@group(0) @binding(7) var<storage,read_write> cacheFlags:array<atomic<u32>>;
 @group(0) @binding(8) var<uniform> force:vec4u;
 @group(0) @binding(9) var<storage,read_write> hierarchy:array<u32>;
 @group(0) @binding(10) var<storage,read_write> regions:array<u32>;
@@ -138,7 +138,7 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  best[lane]=selected;power[lane]=heat;amount[lane]=count;workgroupBarrier();
  for(var stride=32u;stride>0u;stride/=2u){if(lane<stride){let b=lane+stride;amount[lane]+=amount[b];if(power[b]>power[lane]||(power[b]==power[lane]&&best[b]<best[lane])){best[lane]=best[b];power[lane]=power[b];}}workgroupBarrier();}
  if(lane==0u){var out:Light;out.position=vec4f(0);out.color=vec4f(0);if(amount[0]>0u){out.position=vec4f(vec3f(coordinate(best[0]))+.5,1.);let hot=f32(power[0]-170u)/85.;out.color=vec4f(vec3f(1.,.22+.22*hot,.035)*hot*(10.+min(f32(amount[0]),24.)*2.),1.);}
-  if(force.x!=0u||any(lights[k].position!=out.position)){atomicStore(&meta[1],1u);}lights[k]=out;
+  if(force.x!=0u||any(lights[k].position!=out.position)){atomicStore(&cacheFlags[1],1u);}lights[k]=out;
  }
 }`;
   const leaf = layout.levels[0];
@@ -157,13 +157,13 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
   let c=base+vec3u(x,y,z);if(any(c>=SHAPE)){continue;}let m=cell(vec3i(c))&255u;
   if(m!=0u&&m!=9u){mask|=2u;if(m!=2u&&m!=8u&&m!=11u){mask|=1u;}}
  }}}
- hierarchy[id.x]=mask;atomicStore(&meta[0],1u);
+ hierarchy[id.x]=mask;atomicStore(&cacheFlags[0],1u);
 }`;
   const parents = layout.levels.slice(1).map((level, i) => {
     const previous = layout.levels[i];
     return declarations + `
 @compute @workgroup_size(64) fn parentsMain(@builtin(global_invocation_id) id:vec3u){
- if(id.x>=${level.count}u||atomicLoad(&meta[0])==0u){return;}
+ if(id.x>=${level.count}u||atomicLoad(&cacheFlags[0])==0u){return;}
  let dims=${vector(level.shape)};let prev=${vector(previous.shape)};
  let base=vec3u(id.x%dims.x,(id.x/dims.x)%dims.y,id.x/(dims.x*dims.y))*2u;var mask=0u;
  for(var z=0u;z<2u;z++){for(var y=0u;y<2u;y++){for(var x=0u;x<2u;x++){
@@ -174,7 +174,7 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
   });
   const regions = declarations + `
 @compute @workgroup_size(64) fn regionsMain(@builtin(global_invocation_id) id:vec3u){
- if(id.x>=${layout.regionCount}u||atomicLoad(&meta[1])==0u){return;}
+ if(id.x>=${layout.regionCount}u||atomicLoad(&cacheFlags[1])==0u){return;}
  let dims=${vector(layout.regionShape)};let q=vec3u(id.x%dims.x,(id.x/dims.x)%dims.y,id.x/(dims.x*dims.y));
  let low=vec3f(q*${LIGHT_REGION_EDGE}u);let high=low+vec3f(${LIGHT_REGION_EDGE}.);var count=vec2u(0);
  let base=id.x*${layout.regionStride}u;
@@ -202,14 +202,14 @@ export async function makeLightingCache(device: GPUDevice, common: string, shape
   };
   try {
     const candidates = buffer(chunks * edge ** 3 * 4), counts = buffer(chunks * 4);
-    const meta = buffer(8, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
+    const cacheFlags = buffer(8, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
     // Immutable per-mode uniforms: later encodes must not overwrite the force
     // bit seen by an earlier command buffer that has not been submitted yet.
     const steady = buffer(16, GPUBufferUsage.UNIFORM);
     const forced = buffer(16, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
     device.queue.writeBuffer(forced, 0, new Uint32Array([1, 0, 0, 0]));
     const hierarchy = buffer(layout.hierarchyWords * 4), regions = buffer(layout.regionCount * layout.regionStride * 4);
-    const resources = new Map<number, GPUBuffer>([[3, lights], [4, rebuilt], [5, candidates], [6, counts], [7, meta], [9, hierarchy], [10, regions]]);
+    const resources = new Map<number, GPUBuffer>([[3, lights], [4, rebuilt], [5, candidates], [6, counts], [7, cacheFlags], [9, hierarchy], [10, regions]]);
     async function pipeline(code: string, entryPoint: string, bindings: number[], dispatch: number) {
       const module = device.createShaderModule({code});
       const errors = (await module.getCompilationInfo()).messages.filter(m => m.type === 'error');
@@ -240,7 +240,7 @@ export async function makeLightingCache(device: GPUDevice, common: string, shape
             if (!group) { group = device.createBindGroup({layout: stage.pipeline.getBindGroupLayout(0), entries: stage.bindings.map(binding => ({binding, resource: {buffer: binding === 0 ? grid : binding === 8 ? force : resources.get(binding)!}}))}); byForce.set(force, group); }
             return group;
           });
-          encoder.clearBuffer(meta);
+          encoder.clearBuffer(cacheFlags);
           const pass = encoder.beginComputePass(descriptor);
           try {
             stages.forEach((stage, i) => { pass.setPipeline(stage.pipeline); pass.setBindGroup(0, groups[i]); pass.dispatchWorkgroups(stage.dispatch); });
