@@ -15,7 +15,7 @@ import { CpuStructuralWorld3D, prepareStructuralEdits3D, validateStructuralSnaps
 import { BONDS_3D, ANCHOR_3D, INTEGRITY_3D, type StructuralState3D } from './structural-mechanics.js';
 import { makeChunkRenderer, type ResidentChunkRenderer } from './world-renderer.js';
 import { makeGameplayResources, checkedGameplayState, checkedGameplayRules, checkedGameplayCommand } from './gameplay-gpu.js';
-import { LatencyProfiler } from './latency.js';
+import { LatencyProfiler, type Trace } from './latency.js';
 import { commitStructuralGoal } from './structural-gameplay.js';
 import type { TerrainRenderer, TerrainCamera, TerrainAppearance, TerrainLightingMode } from './3d-view.js';
 export type { TerrainRenderer, TerrainCamera, TerrainAppearance, TerrainLightingMode } from './3d-view.js';
@@ -44,7 +44,7 @@ const cold=buildColdTable();
 const total=(values:ArrayLike<number>)=>{let sum=0;for(let i=0;i<values.length;i++)sum+=values[i];return BigInt(sum);};
 const storage=()=>GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST;
 export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number};
-export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number};
+export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number;profiling?:boolean;gpuTiming?:boolean};
 
 export class GpuStructuralWorld3D {
   readonly width:number;readonly height:number;readonly depth:number;readonly chunkSize:number;
@@ -65,10 +65,12 @@ export class GpuStructuralWorld3D {
   #renderers=new Map<TerrainRenderer,ResidentChunkRenderer>();#gameplay?:StructuralResidentGameplay3D;
   #revision=0;#submissions=0;
   #submitTrace?:StructuralSubmissionTiming3D[];
+  #profiler:LatencyProfiler;#traces=new WeakMap<GPUCommandEncoder,Trace>();
   #stats:StructuralSolveStats3D={tick:0,supportPasses:0,componentPasses:0,blockingPasses:0,maxDistance:0,supportedWeight:0,reactionTotal:0};
-  constructor(initial:StructuralSnapshot3D,device:GPUDevice,pipelines:Pipelines,info:Record<string,string|boolean>,mode:'dense'|'active',solveBatchLimit:number) {
+  constructor(initial:StructuralSnapshot3D,device:GPUDevice,pipelines:Pipelines,info:Record<string,string|boolean>,mode:'dense'|'active',solveBatchLimit:number,profiling=false,gpuTiming=false) {
     this.width=initial.width;this.height=initial.height;this.depth=initial.depth;this.chunkSize=initial.chunkSize;
     this.#device=device;this.#pipelines=pipelines;this.backendInfo=Object.freeze({...info});this.mode=mode;this.#solveBatchLimit=solveBatchLimit;
+    this.#profiler=new LatencyProfiler(device,profiling,gpuTiming,128);
     const bytes=this.width*this.height*this.depth*4;
     const buffer=(size:number,usage:GPUBufferUsageFlags)=>{const b=device.createBuffer({size,usage});this.#owned.push(b);return b;};
     for(let i=0;i<3;i++)this.#banks.push({grid:buffer(bytes,storage()),energyQ:buffer(bytes,storage()),structure:buffer(bytes,storage())});
@@ -90,6 +92,14 @@ export class GpuStructuralWorld3D {
   }
   get tick(){return this.#tick;}
   inspectSolve(){return{...this.#stats};}
+  inspectLatency(afterId=0){return this.#profiler.snapshot(afterId);}
+  settleLatency(){return this.#profiler.settle();}
+  #trace(e:GPUCommandEncoder){
+    if(!this.#profiler.enabled)return;
+    let trace=this.#traces.get(e);
+    if(!trace){trace=this.#profiler.begin(this.#gameplay?'gameplay':'step',this.#tick+1)!;this.#traces.set(e,trace);}
+    return trace;
+  }
   inspectActivity(){return this.#run(async()=>{
     const chunks=this.width*this.height*this.depth/this.chunkSize**3;
     if(this.mode==='dense')return{mode:this.mode,tick:this.#tick,totalChunks:chunks,finalAwake:chunks,dispatchedChunks:chunks*27,peakChunks:chunks};
@@ -110,13 +120,13 @@ export class GpuStructuralWorld3D {
     group=this.#device.createBindGroup({layout:this.#pipelines[stage].getBindGroupLayout(0),entries:BINDINGS[stage].map(binding=>({binding,resource:{buffer:buffers[binding],...(binding===5?{size:48}:{})}}))});
     this.#groups.set(key,group);return group;
   }
-  #compute(e:GPUCommandEncoder,encode:()=>void){
+  #compute(e:GPUCommandEncoder,encode:()=>void,label='structuralSolve'){
     if(this.#computePass)throw Error('Nested structural compute encoding.');
-    const pass=e.beginComputePass();this.#computePass=pass;
+    const pass=e.beginComputePass(this.#profiler.pass(this.#trace(e),label));this.#computePass=pass;
     try{encode();}finally{pass.end();this.#computePass=undefined;}
   }
   #dispatch(e:GPUCommandEncoder,stage:Stage,input:number,output:number,structure=input,slot=0){
-    const shared=this.#computePass,pass=shared??e.beginComputePass();pass.setPipeline(this.#pipelines[stage]);
+    const shared=this.#computePass,pass=shared??e.beginComputePass(this.#profiler.pass(this.#trace(e),stage==='main'?'materials.'+KINDS[this.#params[slot*64+4]]:stage));pass.setPipeline(this.#pipelines[stage]);
     pass.setBindGroup(0,this.#group(stage,input,output,structure),(BINDINGS[stage] as readonly number[]).includes(5)?[slot*256]:[]);
     if(listStages.has(stage))pass.dispatchWorkgroups(this.#solveGroups);
     else if(stage==='main'&&this.mode==='active')pass.dispatchWorkgroupsIndirect(this.#indirect,0);
@@ -125,10 +135,11 @@ export class GpuStructuralWorld3D {
   #parameters(slot:number,values:number[]){this.#params.fill(0,slot*64,(slot+1)*64);this.#params.set(values,slot*64+4);}
   #writeParameters(slots:number){this.#device.queue.writeBuffer(this.#uniform,0,this.#params,0,slots*64);}
   async #submit(e:GPUCommandEncoder,reads:{buffer:GPUBuffer;bytes:number}[]=[]){
+    const trace=this.#traces.get(e);this.#profiler.resolve(e,trace);
     this.#device.pushErrorScope('validation');
     let timer:ReturnType<typeof setTimeout>|undefined;
     try{
-      this.#device.queue.submit([e.finish()]);this.#submissions++;
+      this.#device.queue.submit([e.finish()]);this.#submissions++;this.#profiler.submitted(trace);
       const timing:StructuralSubmissionTiming3D|undefined=this.#submitTrace?{submittedAt:performance.now()}:undefined;if(timing)this.#submitTrace!.push(timing);
       const validation=this.#device.popErrorScope().then(error=>{if(timing)timing.validatedAt=performance.now();return error;});
       const mapped=Promise.all(reads.map(async({buffer,bytes})=>{
@@ -138,7 +149,7 @@ export class GpuStructuralWorld3D {
       // completion of unrelated GPU work. Both waits share one host boundary.
       const pending=Promise.all([mapped,this.#device.queue.onSubmittedWorkDone().then(()=>{if(timing)timing.queueCompletedAt=performance.now();}),validation]).then(([values,,error])=>{if(error)throw Error(error.message);return values;});
       const values=await Promise.race([pending,new Promise<never>((_,reject)=>{timer=setTimeout(()=>{this.#fault='M5 GPU completion exceeded 1500 ms; state not committed.';this.#device.destroy();reject(Error(this.#fault));},1500);})]);
-      if(this.#fault)throw Error(this.#fault);return values;
+      if(this.#fault)throw Error(this.#fault);this.#profiler.mark(trace,'completedAt');return values;
     }finally{if(timer)clearTimeout(timer);}
   }
   async #control(e:GPUCommandEncoder){e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);const [value]=await this.#submit(e,[{buffer:this.#controlRead,bytes:64}]);if(value[2])throw Error(`Structural solve rejected scratch state (code ${value[2]}).`);if(value[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');return value;}
@@ -256,15 +267,24 @@ export class GpuStructuralWorld3D {
     // Compute dispatches retain their order and individual resource-usage
     // scopes. Copies/clears stay outside the pass; input/output banks still
     // swap after every material pass. Avoid one native wrapper per dispatch.
-    this.#compute(e,()=>{
-    if(this.mode==='active')this.#dispatch(e,'certifyLocal',current,spare);
-    for(const p of volumeSchedule(this.#tick)){
+    const schedule=volumeSchedule(this.#tick);
+    const materialPass=(p:typeof schedule[number])=>{
       this.#parameters(slot,[KINDS.indexOf(p.kind),p.axis,p.parity,p.direction>>>0,this.#tick>>>0]);
       if(this.mode==='active')this.#dispatch(e,'collectLocal',current,spare);
       this.#dispatch(e,'main',current,spare,current,slot++);[current,spare]=[spare,current];
-    }
-    this.#dispatch(e,'normalize',current,spare);
-    });this.#writeParameters(slot);
+    };
+    if(this.#profiler.gpuTimestamps){
+      // Diagnostic-only pass boundaries expose family costs; acceptance timing
+      // runs with profiling disabled and retains the combined compute pass.
+      if(this.mode==='active')this.#dispatch(e,'certifyLocal',current,spare);
+      for(const p of schedule)materialPass(p);
+      this.#dispatch(e,'normalize',current,spare);
+    }else this.#compute(e,()=>{
+      if(this.mode==='active')this.#dispatch(e,'certifyLocal',current,spare);
+      for(const p of schedule)materialPass(p);
+      this.#dispatch(e,'normalize',current,spare);
+    },'materials');
+    this.#writeParameters(slot);
     e.copyBufferToBuffer(this.#banks[spare].structure,0,this.#banks[current].structure,0,this.#banks[current].structure.size);
     // Count only membership changes for the next conservative dispatch bound.
     // The committed bank is immutable, including edits and phase transitions.
@@ -327,7 +347,7 @@ export class GpuStructuralWorld3D {
   energyLedger(){return this.#run(async()=>energyLedger(await this.#readState(),cold));}
   createRenderer(canvas:HTMLCanvasElement):Promise<TerrainRenderer>{return this.#run(async()=>{
     if(this.#renderers.size)throw Error('A structural world supports one terrain cache.');
-    const renderer=await makeChunkRenderer(this.#device,canvas,()=>({grid:this.#banks[this.#current].grid,shape:[this.width,this.height,this.depth]}),this.#dirty,this.chunkSize,undefined,()=>this.#tick);
+    const renderer=await makeChunkRenderer(this.#device,canvas,()=>({grid:this.#banks[this.#current].grid,shape:[this.width,this.height,this.depth]}),this.#dirty,this.chunkSize,this.#profiler,()=>this.#tick);
     let closed=false;
     const wrapped:TerrainRenderer={
       render:(camera:TerrainCamera)=>this.#run(()=>renderer.render(camera)),
@@ -343,7 +363,7 @@ export class GpuStructuralWorld3D {
     let state:GameplayState3D=checkedGameplayState(initial,shape);const checkedRules=checkedGameplayRules(rules,shape);
     return this.#run(async()=>{
       if(this.#gameplay)throw Error('A structural world supports one controller.');
-      const profiler=new LatencyProfiler(this.#device),resources=await makeGameplayResources(this.#device,shape,this.chunkSize,this.#cold,this.#dirty,undefined,checkedRules,profiler);
+      const profiler=this.#profiler,resources=await makeGameplayResources(this.#device,shape,this.chunkSize,this.#cold,this.#dirty,undefined,checkedRules,profiler);
       let closed=false,revision=this.#revision;
       const initialize=async(s:GameplayState3D)=>{
         resources.writeState(s);const e=this.#device.createCommandEncoder();resources.initialize(e,this.#banks[this.#current].grid,this.#banks[this.#current].energyQ);
@@ -373,10 +393,10 @@ export class GpuStructuralWorld3D {
           resources.writeState(state);resources.prepare(c,camera?camera.forward.map(v=>Math.round(v*256)):c.look);
           latency.preparedAt=performance.now();
           const finish=async(e:GPUCommandEncoder,bank:number)=>{
-            const {grid,energyQ}=this.#banks[bank];
-            if(command){resources.tools(e,grid,energyQ,false);resources.controller(e,grid,energyQ);}
-            else{resources.initialize(e,grid,energyQ);resources.present(e,grid,energyQ);}
-            latency.renderStartedAt=performance.now();if(renderer&&camera)renderer.encode(e,camera,grid,resources.result,undefined,c.tick);latency.renderEncodedAt=performance.now();
+            const {grid,energyQ}=this.#banks[bank],trace=this.#trace(e);
+            if(command){resources.tools(e,grid,energyQ,false,trace);resources.controller(e,grid,energyQ,trace);}
+            else{resources.initialize(e,grid,energyQ);resources.present(e,grid,energyQ,trace);}
+            latency.renderStartedAt=performance.now();if(renderer&&camera)renderer.encode(e,camera,grid,resources.result,trace,c.tick);latency.renderEncodedAt=performance.now();
             if(command)e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
             e.copyBufferToBuffer(resources.result,0,resources.read,0,512);
             const rows=await this.#submit(e,[...(command?[{buffer:this.#controlRead,bytes:64}]:[]),{buffer:resources.read,bytes:512}]);
@@ -393,17 +413,19 @@ export class GpuStructuralWorld3D {
         step:(command,options)=>execute(command,options),present:(presentation:GameplayPresentation3D)=>execute(undefined,{presentation}),
         restore:s=>{if(closed)throw Error('Structural gameplay closed.');const checked=checkedGameplayState(s,shape);return this.#run(()=>initialize(checked));},
         inspect:()=>structuredClone(state),
-        close:()=>{if(closed)return;if(this.#busy)throw Error('Cannot close gameplay with an operation in flight.');closed=true;resources.close();profiler.close();this.#gameplay=undefined;},
+        close:()=>{if(closed)return;if(this.#busy)throw Error('Cannot close gameplay with an operation in flight.');closed=true;resources.close();this.#gameplay=undefined;},
       };
-      try{await initialize(state);this.#gameplay=driver;return Object.freeze(driver);}catch(error){resources.close();profiler.close();throw error;}
+      try{await initialize(state);this.#gameplay=driver;return Object.freeze(driver);}catch(error){resources.close();throw error;}
     });
   }
-  close(){if(this.#closed)return;if(this.#busy)throw Error('Cannot close a structural world with an operation in flight.');this.#closed=true;this.#gameplay?.close();for(const renderer of Array.from(this.#renderers.keys()))renderer.close();this.#owned.forEach(b=>b.destroy());this.#device.destroy();}
+  close(){if(this.#closed)return;if(this.#busy)throw Error('Cannot close a structural world with an operation in flight.');this.#closed=true;this.#gameplay?.close();for(const renderer of Array.from(this.#renderers.keys()))renderer.close();this.#profiler.close();this.#owned.forEach(b=>b.destroy());this.#device.destroy();}
 }
 
 export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpuOptions3D={}):Promise<GpuStructuralWorld3D>{
   if(!options||typeof options!=='object'||Array.isArray(options))throw Error('Invalid structural GPU options.');
-  const {mode='dense',solveBatchLimit:requestedLimit,...geometry}=options;if(mode!=='dense'&&mode!=='active')throw Error('Invalid structural execution mode.');
+  const {mode='dense',solveBatchLimit:requestedLimit,profiling,gpuTiming,...geometry}=options;if(mode!=='dense'&&mode!=='active')throw Error('Invalid structural execution mode.');
+  if(profiling!==undefined&&typeof profiling!=='boolean')throw Error('Invalid profiling option.');
+  if(gpuTiming!==undefined&&typeof gpuTiming!=='boolean')throw Error('Invalid GPU timing option.');
   const g=activeWorldGeometry(geometry);
   // Budgets bound an attempt, never physical propagation. Large worlds need
   // room for landing contacts; exhausted attempts still converge completely.
@@ -413,7 +435,7 @@ export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpu
   if(!globalThis.navigator?.gpu)throw Error('WebGPU unavailable.');
   const adapter=await navigator.gpu.requestAdapter();if(!adapter)throw Error('No WebGPU adapter.');
   // editBatch uses eight storage bindings. No adapter-specific raised limit.
-  const device=await adapter.requestDevice();
+  const device=await adapter.requestDevice({requiredFeatures:profiling&&gpuTiming&&adapter.features.has('timestamp-query')?['timestamp-query']:[]});
   try{
     const base=structuralShaders(g.chunkSize,[g.width,g.height,g.depth]),active=mode==='active'?structuralActivityShaders(base.physics,g.chunkSize,g.width*g.height*g.depth/g.chunkSize**3):undefined;
     const codes={physics:active?.physics??base.physics,mechanics:base.mechanics,...(active?{planning:active.planning}:{})},pipelines={} as Pipelines;
@@ -428,6 +450,6 @@ export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpu
       }
     }
     const info=adapter.info;
-    return new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit);
+    return new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit,profiling,gpuTiming);
   }catch(error){device.destroy();throw error;}
 }

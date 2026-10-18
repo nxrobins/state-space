@@ -2,7 +2,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { LatencyProfiler } from './latency.js';
 
 afterEach(() => vi.unstubAllGlobals());
-function fakeDevice(supported = true) {
+function fakeDevice(supported = true, timestamps = [1000n, 251000n]) {
   vi.stubGlobal('GPUBufferUsage', {QUERY_RESOLVE: 1, COPY_SRC: 2, COPY_DST: 4, MAP_READ: 8});
   vi.stubGlobal('GPUMapMode', {READ: 1});
   const maps: {resolve: () => void; reject: (error: Error) => void}[] = [];
@@ -12,7 +12,7 @@ function fakeDevice(supported = true) {
     createBuffer: vi.fn(() => {
       const b = {mapState: 'unmapped', destroy: vi.fn(),
         mapAsync: () => new Promise<void>((resolve, reject) => maps.push({resolve: () => {b.mapState = 'mapped'; resolve();}, reject})),
-        getMappedRange: () => new BigUint64Array([1000n, 251000n]).buffer,
+        getMappedRange: () => new BigUint64Array(timestamps).buffer,
         unmap: () => {b.mapState = 'unmapped';}};
       buffers.push(b); return b;
     })};
@@ -60,4 +60,19 @@ test('volumetric gameplay fits the fixed ten-pass timestamp allocation', () => {
   }
   expect(()=>p.pass(trace,'overflow')).toThrow('capacity');expect(trace.labels).toHaveLength(10);
   expect(device.createQuerySet).toHaveBeenCalledWith({type:'timestamp',count:20});p.close();
+});
+
+
+test('structural timing supports bounded multi-pass batches and sums repeated stages', async () => {
+  const {device,maps}=fakeDevice(true,Array.from({length:128},(_,i)=>BigInt(i)*100000n));
+  const p=new LatencyProfiler(device,true,true,64),trace=p.begin('step',1)!;
+  const encoder={resolveQuerySet:vi.fn(),copyBufferToBuffer:vi.fn()} as unknown as GPUCommandEncoder;
+  for(let i=0;i<64;i++)p.pass(trace,'loadLevel');
+  expect(()=>p.pass(trace,'overflow')).toThrow('capacity');
+  p.resolve(encoder,trace);p.submitted(trace);maps[0].resolve();await p.settle();
+  expect(p.snapshot().records[0].gpu.ms.loadLevel).toBeCloseTo(6.4);
+  expect(device.createQuerySet).toHaveBeenCalledWith({type:'timestamp',count:128});
+  expect(encoder.copyBufferToBuffer).toHaveBeenCalledWith(expect.anything(),0,expect.anything(),0,1024);
+  p.close();
+  for(const capacity of [0,129,1.5,NaN])expect(()=>new LatencyProfiler(device,true,true,capacity)).toThrow('capacity');
 });

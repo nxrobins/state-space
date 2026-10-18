@@ -80,6 +80,8 @@ def main():
                 query.update(
                     {"scene": "cut", "size": "64" if "-64-" in args.stage else "32"}
                 )
+            if "profile" in args.stage:
+                query["profile"] = "gpu"
             page = "examples/structural-cavern/?" + urlencode(query)
         else:
             page = "examples/sdk/macos-qualification.html"

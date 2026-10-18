@@ -8,13 +8,17 @@ export class LatencyProfiler {
   readonly enabled: boolean;
   readonly gpuTimestamps: boolean;
   readonly gpuTimingRequested: boolean;
+  #maxPasses: number;
   #slots: Slot[] = []; #records: LatencyRecord[] = []; #pending = new Set<Promise<void>>(); #next = 0;
-  constructor(device: GPUDevice, enabled = false, gpuTiming = false) {
+  constructor(device: GPUDevice, enabled = false, gpuTiming = false, maxPasses = 10) {
+    if (!Number.isInteger(maxPasses) || maxPasses < 1 || maxPasses > 128) throw new Error('Invalid latency pass capacity.');
+    this.#maxPasses = maxPasses;
+    const bytes = Math.ceil(maxPasses * 16 / 256) * 256;
     this.enabled = enabled; this.gpuTimingRequested = enabled && gpuTiming; this.gpuTimestamps = this.gpuTimingRequested && device.features.has('timestamp-query');
     if (this.gpuTimestamps) for (let i = 0; i < 3; i++) this.#slots.push({
-      query: device.createQuerySet({type: 'timestamp', count: 20}),
-      resolve: device.createBuffer({size: 256, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC}),
-      read: device.createBuffer({size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ}), busy: false,
+      query: device.createQuerySet({type: 'timestamp', count: maxPasses * 2}),
+      resolve: device.createBuffer({size: bytes, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC}),
+      read: device.createBuffer({size: bytes, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ}), busy: false,
     });
   }
   begin(kind: LatencyRecord['kind'], tick: number): Trace | undefined {
@@ -29,7 +33,7 @@ export class LatencyProfiler {
   mark(trace: Trace | undefined, name: string) { if (trace) trace.record.cpu[name] = performance.now(); }
   pass(trace: Trace | undefined, label: string): GPUComputePassDescriptor {
     if (!trace?.slot) return {};
-    if (trace.labels.length >= 10) throw new Error('Latency query capacity exceeded.');
+    if (trace.labels.length >= this.#maxPasses) throw new Error('Latency query capacity exceeded.');
     const index = trace.labels.length * 2; trace.labels.push(label);
     return {timestampWrites: {querySet: trace.slot.query, beginningOfPassWriteIndex: index, endOfPassWriteIndex: index + 1}};
   }
@@ -49,7 +53,8 @@ export class LatencyProfiler {
       const times = new BigUint64Array(slot.read.getMappedRange(0, trace.labels.length * 16));
       for (let i = 0; i < trace.labels.length; i++) {
         if (times[i * 2 + 1] < times[i * 2]) throw new Error('Non-monotonic GPU timestamps.');
-        trace.record.gpu.ms[trace.labels[i]] = Number(times[i * 2 + 1] - times[i * 2]) / 1e6;
+        const label = trace.labels[i];
+        trace.record.gpu.ms[label] = (trace.record.gpu.ms[label] ?? 0) + Number(times[i * 2 + 1] - times[i * 2]) / 1e6;
       }
       trace.record.gpu.status = 'complete';
     }).catch(error => { trace.record.gpu.status = 'error'; trace.record.gpu.error = String(error); })

@@ -20,6 +20,7 @@ STAGES = (
     "gameplay-cached-visible",
     "gameplay-64-visible",
     "gameplay-64-cached-visible",
+    "gameplay-64-profile-visible",
 )
 
 

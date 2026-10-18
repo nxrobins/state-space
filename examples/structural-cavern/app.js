@@ -74,7 +74,7 @@ async function load(){
  const size=Number($('size').value),scenario=$('scene').value;level=createStructuralLevel(size,scenario);initial=level.field.snapshot();
  // The setup oracle is not retained alongside the GPU world during play.
  delete level.field;
- field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active'});
+ field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active',profiling:params.get('profile')==='gpu',gpuTiming:params.get('profile')==='gpu'});
  await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);await applyLightingMode(lightingMode);
  $('lighting').disabled=!renderer.setLightingMode; text('lighting',renderer.setLightingMode?(lightingMode==='cached'?'Lighting B · Cached':'Lighting A · Reference'):'Lighting A · SDK update needed for B');
  driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=13;orbit=false;text('camera','Orbit view');$('crosshair').hidden=false;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
