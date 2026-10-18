@@ -1,5 +1,7 @@
 # State Space
 
+[Current validation and support status](docs/VALIDATION_STATUS.md) · [macOS setup](docs/MACOS.md) · [Historical evidence archives](docs/ARCHIVES.md)
+
 [![License](https://img.shields.io/github/license/nxrobins/state-space)](LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/nxrobins/state-space/main)](https://github.com/nxrobins/state-space/commits/main)
 [![Open issues](https://img.shields.io/github/issues/nxrobins/state-space)](https://github.com/nxrobins/state-space/issues)
@@ -30,6 +32,8 @@ game prototypes demonstrate how clients can build on it.
   passes, and define custom materials through validated registries.
 
 ## Try the engine lab
+
+On macOS, start with the [local setup and bounded verification guide](docs/MACOS.md).
 
 Install Python **3.10+**, Node.js/npm, and `uv`. From the repository root:
 
@@ -244,8 +248,9 @@ evolution checks, and benchmarks. Reports retain failures and source hashes.
 
 The [merged-catalog verification](docs/checkpoints/pressure-merged-verification.json)
 records the 16 release gates, including 35 conformance scenes and 4,416 per-pass comparisons.
-Checkpoint evidence and content-addressed package artifacts are retained in Git;
-generated evidence is collapsed by default in GitHub review.
+Compact checkpoint reports and provenance manifests are retained in Git. Large
+historical payloads are preserved in a content-verified release archive; see the
+[restoration guide](docs/ARCHIVES.md). Generated evidence is collapsed in review.
 
 ## License
 

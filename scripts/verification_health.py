@@ -2,6 +2,7 @@
 import ctypes
 from ctypes import wintypes as W
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -12,12 +13,22 @@ import time
 class HostHealth:
     def __init__(self):
         self.previous = None
+        self.portable = None
         if os.name != 'nt':
-            raise RuntimeError('Host health telemetry is currently Windows-only; refusing an unmonitored run.')
+            try:
+                import psutil
+            except ImportError as error:
+                raise RuntimeError('Portable host telemetry requires development dependencies; run uv sync.') from error
+            self.portable = psutil
+            psutil.cpu_percent(interval=None)  # Prime the first nonblocking interval.
+            return
         self.kernel = ctypes.WinDLL('kernel32', use_last_error=True)
         self.kernel.GetSystemTimes.argtypes = [ctypes.c_void_p] * 3
 
     def sample(self):
+        if self.portable is not None:
+            return {'time': time.time(), 'hostCpuPercent': self.portable.cpu_percent(interval=None),
+                    'freeMemoryMiB': self.portable.virtual_memory().available / 1024**2}
         class Memory(ctypes.Structure):
             _fields_ = [('length', W.DWORD), ('load', W.DWORD)] + [
                 (name, ctypes.c_uint64) for name in ('total', 'available', 'pageTotal', 'pageAvailable',
@@ -32,7 +43,8 @@ class HostHealth:
             if total > 0:
                 cpu = max(0, min(100, 100 * (1 - (current[0] - self.previous[0]) / total)))
         self.previous = current
-        memory = Memory(); memory.length = ctypes.sizeof(memory)
+        memory = Memory()
+        memory.length = ctypes.sizeof(memory)
         if not self.kernel.GlobalMemoryStatusEx(ctypes.byref(memory)):
             raise ctypes.WinError(ctypes.get_last_error())
         return {'time': time.time(), 'hostCpuPercent': cpu, 'freeMemoryMiB': memory.available / 1024**2}
@@ -56,6 +68,11 @@ def gpu_sample():
 
 
 def health_error(host, gpu=None, *, preflight=False):
+    memory, cpu = host.get('freeMemoryMiB'), host.get('hostCpuPercent')
+    if not isinstance(memory, (int, float)) or not math.isfinite(memory) or memory < 0:
+        return 'Invalid host memory telemetry'
+    if cpu is not None and (not isinstance(cpu, (int, float)) or not math.isfinite(cpu) or not 0 <= cpu <= 100):
+        return 'Invalid host CPU telemetry'
     if host['freeMemoryMiB'] < 8192:
         return 'Less than 8 GiB system memory available'
     if preflight and host.get('hostCpuPercent') is not None and host['hostCpuPercent'] > 50:

@@ -1,3 +1,4 @@
+/// <reference types="@webgpu/types" preserve="true" />
 /** Supported browser/Node package entry point. */
 export { createStateSpaceField, packVoxel, unpackVoxel, defaultPhase, defaultThermal, materialName } from './browser_state_space.js';
 export type { StateSpaceField, FieldSample, VoxelState } from './browser_state_space.js';

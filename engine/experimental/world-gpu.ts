@@ -1,3 +1,4 @@
+/// <reference types="@webgpu/types" preserve="true" />
 /** Public finite-world factory. No writable GPU buffers cross this boundary. */
 import { checkedInteger } from '../validation.js';
 import { createResidentVolume, type GpuVolume3D } from './3d-gpu-core.js';

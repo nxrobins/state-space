@@ -1,3 +1,4 @@
+/// <reference types="@webgpu/types" preserve="true" />
 /// <reference types="@webgpu/types" />
 import { cameraData, copyStamp, sceneData, TACTICAL_RENDER_LIMITS_3D, type TacticalCamera3D, type TacticalScene3D } from './tactical-presentation.js';
 import { TACTICAL_MESH, TACTICAL_TERRAIN, TACTICAL_BOXES } from './tactical-render-shaders.js';

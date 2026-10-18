@@ -32,7 +32,8 @@ class DurableProgress:
 
     def feed(self, data):
         self.tail += data.decode('utf-8', errors='replace')
-        lines = self.tail.split('\n'); self.tail = lines.pop()
+        lines = self.tail.split('\n')
+        self.tail = lines.pop()
         if len(self.tail) > 8192 or any(len(line) > 8192 for line in lines):
             raise RuntimeError('Oversized progress record')
         changed = False
@@ -43,7 +44,8 @@ class DurableProgress:
             if (not isinstance(event, dict) or event.get('job') != self.job
                     or type(event.get('sequence')) is not int or event['sequence'] != self.sequence + 1):
                 raise RuntimeError('Invalid durable progress sequence')
-            self.sequence = event['sequence']; changed = True
+            self.sequence = event['sequence']
+            changed = True
         return changed
 
     def finish(self):
@@ -75,7 +77,8 @@ def drain_output(out, offsets, progress=None, *, final=False, watchdog=None):
                     changed = progress.feed(data) or changed
                 decoded = data.decode('utf-8', errors='replace')
                 last_line = decoded.splitlines()[-1][-300:]
-                stream.write(decoded); stream.flush()
+                stream.write(decoded)
+                stream.flush()
                 if not final:
                     break
     if final and progress:
@@ -224,7 +227,8 @@ class WindowsJob:
             raise ctypes.WinError(ctypes.get_last_error())
         resumed = False
         try:
-            row = Thread(); row.size = ctypes.sizeof(row)
+            row = Thread()
+            row.size = ctypes.sizeof(row)
             more = k.Thread32First(snapshot, ctypes.byref(row))
             while more:
                 if row.pid == child.pid:
@@ -273,37 +277,59 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding='utf-8', errors='replace')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames'], required=True)
+    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames', 'metal-smoke', 'macos-qualification'], required=True)
     parser.add_argument('--timeout', type=float, default=600)
-    parser.add_argument('--stall', type=float, default=40)
+    parser.add_argument('--stall', type=float, help='Missing-progress deadline; defaults to min(40, timeout)')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--structured-progress', action='store_true')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
+    if args.stall is None:
+        args.stall = min(40, args.timeout)
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
     if not command or not 0 < args.timeout <= 1800 or not 0 < args.stall <= args.timeout:
         parser.error('A command and bounded timeout/stall interval are required.')
+    metal_scope = None
+    if args.kind == 'metal-smoke':
+        from scripts.verification_metal import validate_metal_smoke
+        metal_scope = validate_metal_smoke(command, args.timeout)
+    if args.kind == 'macos-qualification':
+        from scripts.verification_macos import validate_qualification
+        metal_scope = validate_qualification(command, args.timeout)
     run_id = uuid.uuid4().hex
     out = args.output or ROOT / 'dist/verification' / run_id
     out.mkdir(parents=True, exist_ok=True)
     cpu_limit = 6 if args.kind == 'cpu' else 12 if args.kind == 'gpu' else 0
     memory_limit = 4096 if args.kind == 'cpu' else 8192
     receipt = {'version': 3, 'id': run_id, 'kind': args.kind, 'command': command, 'startedAt': time.time(),
-               'passed': False, 'memoryLimitMiB': memory_limit, 'cpuLimitPercent': cpu_limit or None,
+               'passed': False, 'memoryLimitMiB': memory_limit if os.name == 'nt' else None,
+               'cpuLimitPercent': (cpu_limit or None) if os.name == 'nt' else None,
                'timeoutSeconds': args.timeout, 'stallSeconds': args.stall, 'maxMonitorLagMs': 0,
                'containment': 'Windows job' if os.name == 'nt' else 'POSIX process group'}
+    if metal_scope:
+        receipt['metalSmokeScope'] = metal_scope
     job = child = gpu_monitor = watchdog = None
+    posix_stopped = False
     def save():
         pending = out / 'report.tmp'
         with pending.open('w', encoding='utf-8') as stream:
-            stream.write(json.dumps(receipt, indent=2) + '\n'); stream.flush(); os.fsync(stream.fileno())
+            stream.write(json.dumps(receipt, indent=2) + '\n')
+            stream.flush()
+            os.fsync(stream.fileno())
         pending.replace(out / 'report.json')
     def stop():
+        nonlocal posix_stopped
         try:
             if job:
                 job.close()
-            elif child and child.poll() is None:
-                os.killpg(child.pid, signal.SIGKILL)
+            elif child and not posix_stopped:
+                # A successfully exited leader may still have living descendants.
+                # The child owns a new session; never target the caller's group.
+                try:
+                    os.killpg(child.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                posix_stopped = True
         except Exception as error:
             receipt['cleanupError'] = 'Workload termination failed: ' + str(error)
             receipt['passed'] = False
@@ -326,6 +352,8 @@ def main():
             stdout = streams.enter_context((out / 'stdout.log').open('wb'))
             stderr = streams.enter_context((out / 'stderr.log').open('wb'))
             env = {**os.environ, 'STATE_SPACE_VERIFICATION_JOB': run_id,
+                   'STATE_SPACE_PYTHON': os.environ.get('STATE_SPACE_PYTHON', sys.executable),
+                   'STATE_SPACE_VERIFICATION_KIND': args.kind,
                    'STATE_SPACE_VERIFY_YIELD_MS': '20', 'PYTHONIOENCODING': 'utf-8',
                    'OMP_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
             if os.name == 'nt':
@@ -344,19 +372,29 @@ def main():
                     raise
             else:
                 child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=stdout, stderr=stderr, start_new_session=True)
+                from scripts.verification_posix_watchdog import PosixWatchdog
+                # A very short process may already have exited; no live workload
+                # needs a watchdog, but stop() still cleans up its owned group.
+                if child.poll() is None:
+                    watchdog = PosixWatchdog(child, args.timeout, out, memory_limit)
+                    receipt['independentWatchdog'] = {'armed': True, 'heartbeatSeconds': 3,
+                        'deadlineSeconds': args.timeout, 'sampledRssLimitMiB': memory_limit,
+                        'transport': 'owned pipe', 'kernelMemoryCap': False}
             receipt['childPid'] = child.pid
             save()
             start = last_output = previous = time.monotonic()
             offsets = [0, 0]
             progress = DurableProgress(run_id) if args.structured_progress else None
-            last_sample = start; overloaded_since = None
+            last_sample = start
+            overloaded_since = None
             while child.poll() is None:
                 if watchdog:
                     watchdog.pulse()
                 time.sleep(.2)
                 now = time.monotonic()
                 lag = max(0, now - previous - .2)
-                receipt['maxMonitorLagMs'] = max(receipt['maxMonitorLagMs'], round(lag * 1000, 3)); previous = now
+                receipt['maxMonitorLagMs'] = max(receipt['maxMonitorLagMs'], round(lag * 1000, 3))
+                previous = now
                 changed, last_line = drain_output(out, offsets, progress)
                 if changed:
                     last_output = now
@@ -365,7 +403,8 @@ def main():
                 if last_line is not None:
                     receipt['lastOutput'] = last_line
                 if now - last_sample >= 1:
-                    host = health.sample(); gpu = gpu_monitor.latest if gpu_monitor else None
+                    host = health.sample()
+                    gpu = gpu_monitor.latest if gpu_monitor else None
                     stats = job.statistics() if job else None
                     receipt['lastHealth'] = {'host': host, 'gpu': gpu, 'job': stats}
                     append_sample(telemetry, {'stage': 'running', **receipt['lastHealth']})
@@ -378,11 +417,14 @@ def main():
                     if overloaded_since and now - overloaded_since >= 2:
                         error = 'Host CPU exceeded 85 percent for two seconds'
                     if error:
-                        receipt['error'] = error; stop(); break
+                        receipt['error'] = error
+                        stop()
+                        break
                 save()
                 if lag > 2 or now - start > args.timeout or now - last_output > args.stall or (out / 'cancel').exists():
                     receipt['error'] = 'Host monitor stalled' if lag > 2 else 'Cancelled' if (out / 'cancel').exists() else 'Timeout or missing progress'
-                    stop(); break
+                    stop()
+                    break
             receipt['exitCode'] = child.wait(timeout=10)
             if watchdog:
                 watchdog.pulse()
@@ -404,7 +446,7 @@ def main():
                 receipt['error'] = reason
                 receipt['passed'] = False
             try:
-                watchdog.close(disarm=not job or job.handle is None)
+                watchdog.close(disarm=job.handle is None if job else posix_stopped)
             except Exception as error:
                 receipt['error'] = 'Independent watchdog cleanup failed: ' + str(error)
                 receipt['passed'] = False
