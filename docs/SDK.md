@@ -1320,7 +1320,8 @@ M3 world entries keep their bounds and envelopes.
 ## Experimental 3D latency diagnostics
 
 GPU factories accept `profiling: true` (default false): as an option on
-`createGpuWorld3D` / `createGpuActiveWorld3D`, or the fifth argument to
+`createGpuWorld3D` / `createGpuActiveWorld3D` /
+`createStateSpaceStructuralWorld3DGPU`, or the fifth argument to
 `createGpuField3D(width, height, depth, fillMaterial, {profiling: true})`.
 CPU timings are collected by default. Add `gpuTiming: true` alongside
 `profiling: true` to request optional `timestamp-query` support when available.
@@ -1334,8 +1335,14 @@ start, prepared, encoded, submitted, queue completion, field readback readiness,
 and operation completion. GPU durations are milliseconds for edits, the complete
 physics/planning/certification pass, collision query, mesh and draw. Resident
 records additionally separate tools, collision-cache gathering and controller. CPU waits
-and GPU durations overlap; do not add them. An individual physics family is not
-separately timed because that would require changing compute pass boundaries.
+and GPU durations overlap; do not add them. M1–M4 keep the combined physics pass. Structural GPU timing additionally
+separates material families and active-list collection into individual passes;
+repeated stage labels sum their durations within each submission. This diagnostic
+mode changes pass boundaries, so acceptance benchmarks must disable profiling.
+Structural records describe submissions (a tick can have several); CPU stamps
+cover start, submission and completion, while the gameplay commit retains its
+separate end-to-end timing. Append `?profile=gpu` to the structural cavern URL
+to enable this mode. The default runtime retains its combined material pass.
 
 Three reusable timestamp slots bound pending maps. Busy slots report `busy`;
 disabled, unsupported, pending and failed diagnostics are explicit. No extra GPU submission

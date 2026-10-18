@@ -94,10 +94,10 @@ export class GpuStructuralWorld3D {
   inspectSolve(){return{...this.#stats};}
   inspectLatency(afterId=0){return this.#profiler.snapshot(afterId);}
   settleLatency(){return this.#profiler.settle();}
-  #trace(e:GPUCommandEncoder){
+  #trace(e:GPUCommandEncoder,tick=this.#tick+1){
     if(!this.#profiler.enabled)return;
     let trace=this.#traces.get(e);
-    if(!trace){trace=this.#profiler.begin(this.#gameplay?'gameplay':'step',this.#tick+1)!;this.#traces.set(e,trace);}
+    if(!trace){trace=this.#profiler.begin(this.#gameplay?'gameplay':'step',tick)!;this.#traces.set(e,trace);}
     return trace;
   }
   inspectActivity(){return this.#run(async()=>{
@@ -163,14 +163,14 @@ export class GpuStructuralWorld3D {
     }
     throw Error(`Structural ${stage} failed to converge; tick not committed.`);
   }
-  async #edits(commands:Uint32Array,bank:number):Promise<bigint>{
+  async #edits(commands:Uint32Array,bank:number,tick=this.#tick+1):Promise<bigint>{
     if(!commands.length)return 0n;
     const count=commands.length/4;this.#device.queue.writeBuffer(this.#commands,0,commands);
     let e=this.#device.createCommandEncoder();e.clearBuffer(this.#work,0,64);
     for(const key of ['grid','energyQ','structure'] as const)e.copyBufferToBuffer(this.#banks[this.#current][key],0,this.#banks[bank][key],0,this.#banks[bank][key].size);
     for(let start=0;start<count;){
       let slots=0;
-      while(start<count&&slots<16){this.#parameters(slots,[0,0,0,0,0,start,Math.min(start+64,count)]);this.#dispatch(e,'editBatch',this.#current,bank,this.#current,slots++);start+=64;}
+      while(start<count&&slots<16){this.#trace(e,tick);this.#parameters(slots,[0,0,0,0,0,start,Math.min(start+64,count)]);this.#dispatch(e,'editBatch',this.#current,bank,this.#current,slots++);start+=64;}
       this.#writeParameters(slots);await this.#control(e);e=this.#device.createCommandEncoder();
     }
     e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,count*8);
@@ -296,7 +296,7 @@ export class GpuStructuralWorld3D {
     if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='edits'))throw Error('Invalid structural step options.');
     const commands=prepareStructuralEdits3D(options.edits===undefined?[]:options.edits,this);
     return this.#run(async()=>{
-      if(!ticks&&commands.length){this.#planReusable=false;const bank=(this.#current+1)%3,external=await this.#edits(commands,bank);this.#current=bank;this.#revision++;this.#external+=external;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4);}
+      if(!ticks&&commands.length){this.#planReusable=false;const bank=(this.#current+1)%3,external=await this.#edits(commands,bank,this.#tick);this.#current=bank;this.#revision++;this.#external+=external;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4);}
       for(let t=0;t<ticks;t++)await this.#tickOnce(t?new Uint32Array():commands);
     });
   }
@@ -393,7 +393,7 @@ export class GpuStructuralWorld3D {
           resources.writeState(state);resources.prepare(c,camera?camera.forward.map(v=>Math.round(v*256)):c.look);
           latency.preparedAt=performance.now();
           const finish=async(e:GPUCommandEncoder,bank:number)=>{
-            const {grid,energyQ}=this.#banks[bank],trace=this.#trace(e);
+            const {grid,energyQ}=this.#banks[bank],trace=this.#trace(e,c.tick);
             if(command){resources.tools(e,grid,energyQ,false,trace);resources.controller(e,grid,energyQ,trace);}
             else{resources.initialize(e,grid,energyQ);resources.present(e,grid,energyQ,trace);}
             latency.renderStartedAt=performance.now();if(renderer&&camera)renderer.encode(e,camera,grid,resources.result,trace,c.tick);latency.renderEncodedAt=performance.now();

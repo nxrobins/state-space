@@ -5,12 +5,17 @@ const M5_CHUNKS=${chunks}u;
 const M5_AWAKE=M5_CHUNKS;
 const M5_LIST=M5_AWAKE+M5_CHUNKS;
 const M5_COUNT=M5_LIST+M5_CHUNKS;
+// The fourth header word is cleared with the awake mask at tick start.
+// Only a zero-to-one membership transition invalidates the compact worklist.
+const M5_CHANGED=M5_COUNT+3u;
 fn wakeLocal(c:vec3i){
  let n=vec3i(SHAPE.xyz/EDGE);let k=c/i32(EDGE);let local=vec3u(c)%EDGE;
  let lo=-vec3i(select(vec3u(0),vec3u(1),local<vec3u(2)));
  let hi=vec3i(select(vec3u(0),vec3u(1),local+vec3u(2)>=vec3u(EDGE)));
  for(var z=lo.z;z<=hi.z;z++){for(var y=lo.y;y<=hi.y;y++){for(var x=lo.x;x<=hi.x;x++){
-  let t=k+vec3i(x,y,z);if(all(t>=vec3i(0))&&all(t<n)){atomicStore(&dirty[M5_AWAKE+u32(t.x+n.x*(t.y+n.y*t.z))],1u);}
+  let t=k+vec3i(x,y,z);if(all(t>=vec3i(0))&&all(t<n)){
+   if(atomicOr(&dirty[M5_AWAKE+u32(t.x+n.x*(t.y+n.y*t.z))],1u)==0u){atomicStore(&dirty[M5_CHANGED],1u);}
+  }
  }}}
 }
 // Every parity/direction is considered. Tick order alone cannot awaken a tile.
@@ -41,9 +46,17 @@ fn locallyQuiet(i:u32)->bool{
 }
 @group(0) @binding(12) var<storage,read_write> localDispatch:array<u32>;
 @compute @workgroup_size(1) fn collectLocal(){
- var count=0u;
- for(var k=0u;k<M5_CHUNKS;k++){if(atomicLoad(&dirty[M5_AWAKE+k])!=0u){atomicStore(&dirty[M5_LIST+count],k);count++;}}
- atomicStore(&dirty[M5_COUNT],count);atomicAdd(&dirty[M5_COUNT+1u],count);atomicMax(&dirty[M5_COUNT+2u],count);
+ var count=atomicLoad(&dirty[M5_COUNT]);
+ // Awake membership only grows between material passes. The preceding dispatch
+ // has completed all wakeups before this pass observes the flag. A cached list
+ // therefore names exactly the same cells as a fresh scan, including an empty
+ // first pass after the per-tick count/mask/header reset.
+ if(atomicExchange(&dirty[M5_CHANGED],0u)!=0u){
+  count=0u;
+  for(var k=0u;k<M5_CHUNKS;k++){if(atomicLoad(&dirty[M5_AWAKE+k])!=0u){atomicStore(&dirty[M5_LIST+count],k);count++;}}
+  atomicStore(&dirty[M5_COUNT],count);
+ }
+ atomicAdd(&dirty[M5_COUNT+1u],count);atomicMax(&dirty[M5_COUNT+2u],count);
  localDispatch[0]=count*EDGE*EDGE*EDGE/64u;localDispatch[1]=1u;localDispatch[2]=1u;
 }
 `;
