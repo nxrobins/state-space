@@ -1,0 +1,70 @@
+/** Frozen pre-motion kernel for held equivalence verification only. */
+/** M5 local material schedule. Frozen M1 ordering, with mechanical ownership. */
+import { MAT, PHASE, PHASE_SHIFT, buildColdTable, COLD_STRIDE, COLD_DENSITY } from '../generated/materials.js';
+import { temperatureQ, exchangeEnergy, thermalView, phaseMaterial, rewriteMaterial } from '../thermal.js';
+import type { VolumePass } from './3d-core.js';
+import { structuralEligible, INTEGRITY_3D, ANCHOR_3D, FRESH_3D, type StructuralState3D } from './structural-mechanics.js';
+const cold=buildColdTable();
+const material=(v:number)=>v&255;
+const phase=(v:number)=>(v>>>PHASE_SHIFT)&15;
+const liquid=(v:number)=>phase(v)===PHASE.LIQUID||phase(v)===PHASE.VISCOUS||phase(v)===PHASE.MOLTEN;
+const falling=(v:number)=>phase(v)===PHASE.POWDER||liquid(v)||structuralEligible(v);
+const gas=(v:number)=>phase(v)===PHASE.GAS;
+const density=(v:number)=>cold[material(v)*COLD_STRIDE+COLD_DENSITY];
+function choice(index: number, axis: number, tick: number): boolean {
+  let h = (Math.imul(index, 374761393) + Math.imul(axis, 668265263) + Math.imul(tick >>> 0, 1442695041)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return ((h ^ (h >>> 16)) & 1) === 0;
+}
+
+export function executeStructuralMaterialPass(input: StructuralState3D, output: StructuralState3D, w: number, h: number, d: number, tick: number, pass: VolumePass): void {
+  const aGrid = input.grid, aEnergy = input.energyQ, bGrid = output.grid, bEnergy = output.energyQ;
+  bGrid.set(aGrid); bEnergy.set(aEnergy); output.structure.set(input.structure);
+  const layer = w * h;
+  const bound = (index: number) => (input.structure[index] & (INTEGRITY_3D | ANCHOR_3D)) !== 0;
+  const canFall = (source: number, target: number) => falling(aGrid[source]) && !bound(source) && !bound(target) && density(aGrid[source]) > density(aGrid[target]);
+  const gasRank = (i: number) => Math.floor(temperatureQ(aGrid[i], aEnergy[i], cold) / 256) * 2 - density(aGrid[i]);
+  const canRise = (s: number, t: number) => material(aGrid[s]) !== MAT.AIR && gas(aGrid[s]) && gas(aGrid[t]) && gasRank(s) > gasRank(t) + 16;
+  const swap = (s: number, t: number) => { bGrid[s] = aGrid[t]; bGrid[t] = aGrid[s]; bEnergy[s] = aEnergy[t]; bEnergy[t] = aEnergy[s]; output.structure[s] = input.structure[t]; output.structure[t] = input.structure[s]; };
+  const hasFall = (i: number, x: number, y: number, z: number) => y + 1 < h && (
+    canFall(i, i + w) || (x > 0 && canFall(i, i + w - 1)) || (x + 1 < w && canFall(i, i + w + 1)) ||
+    (z > 0 && canFall(i, i + w - layer)) || (z + 1 < d && canFall(i, i + w + layer)));
+  if (pass.kind === 'phase') {
+    for (let i = 0; i < aGrid.length; i++) {
+      const next = phaseMaterial(aGrid[i], aEnergy[i], cold);
+      if (next !== material(aGrid[i])) {
+        bGrid[i] = rewriteMaterial(aGrid[i], next, aEnergy[i], cold);
+        output.structure[i] = structuralEligible(bGrid[i]) ? INTEGRITY_3D | FRESH_3D : 0;
+      }
+    }
+    return;
+  }
+  const vertical = ['gravity', 'diagonal', 'buoyancy'].includes(pass.kind);
+  const pairAxis = vertical ? 1 : pass.axis;
+  for (let z = pairAxis === 2 ? pass.parity : 0; z < d; z += pairAxis === 2 ? 2 : 1) {
+    for (let y = pairAxis === 1 ? pass.parity : 0; y < h; y += pairAxis === 1 ? 2 : 1) {
+      for (let x = pairAxis === 0 ? pass.parity : 0; x < w; x += pairAxis === 0 ? 2 : 1) {
+        let tx = x + (pairAxis === 0 ? 1 : 0), ty = y + (pairAxis === 1 ? 1 : 0), tz = z + (pairAxis === 2 ? 1 : 0);
+        if (pass.kind === 'diagonal') { tx += pass.axis === 0 ? pass.direction : 0; tz += pass.axis === 2 ? pass.direction : 0; }
+        if (tx < 0 || tx >= w || ty >= h || tz < 0 || tz >= d) continue;
+        const a = x + w * (y + h * z), b = tx + w * (ty + h * tz);
+        if (pass.kind === 'gravity') { if (canFall(a, b)) swap(a, b); }
+        else if (pass.kind === 'diagonal') { if (!canFall(a, a + w) && canFall(a, b)) swap(a, b); }
+        else if (pass.kind === 'buoyancy') { if (canRise(b, a)) swap(a, b); }
+        else if (pass.kind === 'liquid') {
+          const spread = (s: number, t: number) => liquid(aGrid[s]) && gas(aGrid[t]) && density(aGrid[s]) > density(aGrid[t]);
+          if ((spread(a, b) && !hasFall(a, x, y, z)) || (spread(b, a) && !hasFall(b, tx, ty, tz))) swap(a, b);
+        } else if (pass.kind === 'gas') {
+          const [s, t, sy] = choice(a, pass.axis, tick) ? [a, b, y] : [b, a, ty];
+          if (material(aGrid[s]) !== MAT.AIR && gas(aGrid[s]) && gas(aGrid[t]) && (sy === 0 || !canRise(s, s - w)) &&
+            (material(aGrid[t]) === MAT.AIR || gasRank(s) > gasRank(t) + 16)) swap(s, t);
+        } else if (pass.kind === 'heat') {
+          if (material(aGrid[a]) === material(aGrid[b]) && aEnergy[a] === aEnergy[b]) continue;
+          [bEnergy[a], bEnergy[b]] = exchangeEnergy(aGrid[a], aGrid[b], aEnergy[a], aEnergy[b], cold);
+          bGrid[a] = thermalView(aGrid[a], bEnergy[a], cold); bGrid[b] = thermalView(aGrid[b], bEnergy[b], cold);
+        }
+      }
+    }
+  }
+}
+

@@ -1,5 +1,6 @@
 import {createStateSpaceStructuralWorld3DGPU} from '../../dist/sdk/state-space-structural-world-gpu.js';
 import {structuralStateDigest} from './state-evidence.js';
+import {verificationEvent} from './verification-events.js';
 
 /** A single supervised trajectory; reference digests include every cell/tick. */
 export async function verifyStructuralTrajectory({mode='active',base,part='all'}={}){
@@ -25,16 +26,25 @@ export async function verifyStructuralTrajectory({mode='active',base,part='all'}
  try{
   const ranges=part==='main'?[[0,1024]]:part==='restarts'?[[3,31],[reference.actionTick-1,reference.actionTick+3],[509,1024]]:[[0,1024],[3,31],[reference.actionTick-1,reference.actionTick+3],[509,1024]];
   for(const [start,end] of ranges){
+   await verificationEvent({kind:'status',text:`Restoring ${start} for range ${start}..${end}`});
    await gpu.restore(await checkpoint(start));
+   await verificationEvent({kind:'range-start',start,end});
    for(let tick=start+1;tick<=end;tick++){
+    await verificationEvent({kind:'phase',tick,phase:'step'});
     const begin=performance.now();await gpu.step(1,{edits:commands[tick-1].edits});tickMs.push(performance.now()-begin);
-    const state=await gpu.snapshot(),actual=await structuralStateDigest(state);
+    await verificationEvent({kind:'phase',tick,phase:'snapshot'});
+    const state=await gpu.snapshot();
+    await verificationEvent({kind:'phase',tick,phase:'hash'});
+    const actual=await structuralStateDigest(state);
     if(actual!==reference.stateDigests[tick])throw Error(`${size}^3 ${reference.scenario} ${mode} restart ${start}: complete state differs at ${tick}`);
     checks.push({start,tick,digest:actual});
-    if(tick%16===0){status(`M5 ${size}³ ${reference.scenario} ${mode}: ${start}->${tick}/${end}`);await new Promise(r=>setTimeout(r,5));}
+    await verificationEvent({kind:'verified',start,tick,digest:actual,stepMs:tickMs.at(-1)});
+    status(`M5 ${size}³ ${reference.scenario} ${mode}: ${start}->${tick}/${end}`);
+    await new Promise(r=>setTimeout(r,20));
    }
    if((await gpu.energyBalance()).driftQ!==0n)throw Error('Accounted energy drift');
    runs.push({start,end,exact:true});
+   await verificationEvent({kind:'range-end',end});
   }
   finalHash=await structuralStateDigest(await gpu.snapshot());
   status(`M5 ${size}³ ${reference.scenario} ${mode}: ${part} ranges exact`);

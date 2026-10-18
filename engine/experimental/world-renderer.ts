@@ -3,7 +3,7 @@ import { type LatencyProfiler, type Trace } from './latency.js';
 /** Persistent per-chunk face lists. Physics owns invalidation, never visibility. */
 import { DRAW } from './3d-renderer.js';
 import type { makeCavernAppearance } from './cavern-appearance.js';
-import type { TerrainCamera, TerrainRenderer } from './3d-view.js';
+import type { TerrainCamera, TerrainRenderer, TerrainLightingMode } from './3d-view.js';
 
 export interface ResidentChunkRenderer extends TerrainRenderer {
   validateCamera(camera:TerrainCamera):void;
@@ -71,9 +71,11 @@ ${mapping}
   for(let k=0;k<chunks;k++){centers[k*3]=(k%n[0]+.5)*edge;centers[k*3+1]=(Math.floor(k/n[0])%n[1]+.5)*edge;centers[k*3+2]=(Math.floor(k/(n[0]*n[1]))+.5)*edge;}
   let depth:GPUTexture|undefined,width=0,height=0,closed=false;
   let heatDistortion=true;
+  let lightingMode:TerrainLightingMode='reference';
   let appearance:'diagnostic'|'naturalistic'='diagnostic',natural:Awaited<ReturnType<typeof makeCavernAppearance>>|undefined;
   function encode(encoder:GPUCommandEncoder,camera:TerrainCamera,grid:GPUBuffer,trace?:Trace,gpuCamera?:GPUBuffer,presentationTick=tick()){
       if(closed)throw new Error('Terrain renderer is closed.');
+      try{
       const vectors=[camera.eye,camera.right,camera.up,camera.forward].map(a=>{if(!a||a.length!==3)throw new Error('Invalid terrain camera.');const v=[a[0],a[1],a[2]];if(!v.every(Number.isFinite))throw new Error('Invalid terrain camera.');return v;});
       if(camera.target!==undefined&&(!Number.isSafeInteger(camera.target)||camera.target<0||camera.target>=count))throw new Error('Invalid target.');
       if(canvas.width<1||canvas.height<1)throw new Error('Canvas must have positive dimensions.');
@@ -86,9 +88,10 @@ ${mapping}
       if(gpuCamera){encoder.copyBufferToBuffer(gpuCamera,64,uniform,0,16);encoder.copyBufferToBuffer(gpuCamera,80,uniform,92,4);}
       const compute=encoder.beginComputePass(profiler?.pass(trace,'mesh'));compute.setPipeline(reset);compute.setBindGroup(0,resetGroup);compute.dispatchWorkgroups(1);compute.setPipeline(mesh);compute.setBindGroup(0,groups.mesh);compute.dispatchWorkgroupsIndirect(dispatch,0);compute.end();
       const output=context!.getCurrentTexture().createView(),beauty=appearance==='naturalistic'?natural:undefined;
-      const prepared=beauty?.prepare(encoder,grid,depth,width,height,presentationTick,heatDistortion,profiler,trace);
+      const prepared=beauty?.prepare(encoder,grid,depth,width,height,presentationTick,heatDistortion,lightingMode==='cached',profiler,trace);
+      if(!beauty)natural?.invalidate();
       const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:prepared?.view??output,clearValue:beauty?[.028,.045,.06,1]:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-      pass.setPipeline(beauty?.draw??draw);pass.setBindGroup(0,prepared?.group??groups.draw);
+      pass.setPipeline(prepared?.draw??draw);pass.setBindGroup(0,prepared?.group??groups.draw);
       // The controller can depenetrate three voxels and move by <=150/256.
       // Cull around the prior committed eye with a conservative four-voxel
       // margin; the draw uses the same-tick GPU eye copied above.
@@ -103,8 +106,16 @@ ${mapping}
       }
       pass.end();
       beauty?.finish(encoder,output,profiler,trace);
+      }catch(error){natural?.invalidate();throw error;}
   }
   const renderer:ResidentChunkRenderer={
+    async setLightingMode(value){
+      if(closed)throw new Error('Terrain renderer is closed.');
+      if(value!=='reference'&&value!=='cached')throw new Error('Invalid terrain lighting mode.');
+      await natural?.prepareLighting(value==='cached');
+      if(value!==lightingMode)natural?.invalidate();
+      lightingMode=value;
+    },
     async setHeatDistortion(value){
       if(closed)throw new Error('Terrain renderer is closed.');
       if(typeof value!=='boolean')throw new Error('Heat distortion must be boolean.');
@@ -113,7 +124,8 @@ ${mapping}
     async setAppearance(value){
       if(closed)throw new Error('Terrain renderer is closed.');
       if(value!=='diagnostic'&&value!=='naturalistic')throw new Error('Invalid terrain appearance.');
-      if(value==='naturalistic'&&!natural){const {makeCavernAppearance}=await import('./cavern-appearance.js');natural=await makeCavernAppearance(device,format,shape,edge,capacity,faces,uniform);}
+      if(value==='naturalistic'&&!natural){const {makeCavernAppearance}=await import('./cavern-appearance.js');natural=await makeCavernAppearance(device,format,shape,edge,capacity,faces,uniform,rebuild);}
+      if(value==='naturalistic')await natural!.prepareLighting(lightingMode==='cached');
       appearance=value;
     },
     validateCamera(camera){

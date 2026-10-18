@@ -12,3 +12,9 @@ checkpoints/
 !docs/checkpoints/**
 .cuda_cache/
 evolution-v2/
+
+# Checkpoint inclusion must not publish Python bytecode or private host inventories.
+docs/checkpoints/**/__pycache__/
+docs/checkpoints/**/*.pyc
+docs/checkpoints/verification-harness/cpu-spikes-20261017T175127Z/
+docs/checkpoints/tactical-interventions/build-53-2026-10-17/cpu-attribution-01/

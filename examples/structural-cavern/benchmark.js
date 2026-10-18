@@ -6,7 +6,7 @@ const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SH
 export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={}){
  if(warmup!==60||frames!==600)throw Error('M5 benchmark requires 60 warmup and 600 measured frames.');
  await api.stop();document.body.classList.add('benchmark');
- const report={passed:false,complete:false,scope:'Full display-paced gameplay: scripted input/edit generation, exact structural/material physics, resident integer controller, mesh invalidation and uploads, all naturalistic effects, draw, HUD update, validation and GPU queue completion. Excludes initial setup and retained snapshot compression.',
+ const report={passed:false,complete:false,lightingMode:api.lightingMode??'reference',scope:'Full display-paced gameplay: scripted input/edit generation, exact structural/material physics, resident integer controller, mesh invalidation and uploads, all naturalistic effects, draw, HUD update, validation and GPU queue completion. Excludes initial setup and retained snapshot compression.',
   size:api.level.size,scenario:api.level.scenario,execution:api.field.mode,resolution:[1920,1080],viewport:[innerWidth,innerHeight],appearance:'naturalistic',heatDistortion:true,targetHz:60,warmup:[],samples:[],userAgent:navigator.userAgent,backendInfo:api.field.backendInfo,startedAt:new Date().toISOString()};
  let cancelled=false;api.cancelBenchmark=()=>{cancelled=true;};
  const visible=()=>{if(document.hidden)cancelled=true;};document.addEventListener('visibilitychange',visible);
@@ -16,6 +16,7 @@ export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={})
    const pump=createFramePump(async(timestamp,interval)=>{
     if(cancelled){pump.stop();resolve(pump.statistics());return;}
     const callbackAt=performance.now(),tick=api.field.tick+1,command=scriptedInput(api.level,tick),edits=fixtureEdits(api.level,tick);
+    globalThis.__stateSpaceVerification?.check();
     const result=await api.advance(command,edits);
     document.getElementById('mode').textContent=`${rows===report.warmup?'WARMUP':'MEASURED'} ${rows.length+1}/${count}`;
     const completedAt=performance.now();
@@ -23,6 +24,10 @@ export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={})
      command,editCount:edits.length,submissions:result.commit.submissions,completionBoundaries:result.commit.completionBoundaries,actorStatus:result.commit.status,player:result.commit.player,solve:result.solve,
      latency:result.commit.latency,jsHeapBytes:performance.memory?.usedJSHeapSize??null};
     rows.push(row);
+    // Bounded background persistence does not insert an artificial wait between
+    // measured frames. Overflow or an unflushed tail fails the entire receipt.
+    if(globalThis.__stateSpaceVerification)void globalThis.__stateSpaceVerification.emit({kind:'frame',tick,
+     workMs:row.workMs,completionMs:row.completionMs}).catch(()=>{cancelled=true;});
     if(row.workMs>150||row.completionMs>250){report.abortedFrame=row;throw Error(`M5 responsiveness limit exceeded (${row.workMs.toFixed(1)} ms work).`);}
     if(rows.length===count){pump.stop();resolve(pump.statistics());}
    },{onError:error=>{pump.stop();reject(error);}});
@@ -37,6 +42,7 @@ export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={})
   if(!cancelled)report.measuredPump=await measure(frames,report.samples);
   report.cancelled=cancelled;report.complete=!cancelled&&report.samples.length===frames;
   if(report.complete){
+   await globalThis.__stateSpaceVerification?.flush();
    const final=await api.snapshot();report.finalHash=await hash(final);report.finalTick=api.field.tick;
    const data=new Blob([JSON.stringify(final)]).stream().pipeThrough(new CompressionStream('gzip'));
    const bytes=new Uint8Array(await new Response(data).arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));report.finalCheckpoint={encoding:'gzip-base64',data:btoa(binary)};
@@ -48,7 +54,7 @@ export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={})
    report.performancePassed=report.physicsHz>=59.9&&report.missedDeadlines===0&&report.lostDisplaySlots===0&&report.measuredPump.coalesced===0;
    report.passed=report.complete&&report.energyBalance.driftQ==='0'&&(api.level.size===128||report.performancePassed);
   }
- }catch(error){report.error=String(error.stack||error);}
+ }catch(error){report.passed=false;report.complete=false;report.error=String(error.stack||error);}
  finally{document.removeEventListener('visibilitychange',visible);report.finishedAt=new Date().toISOString();api.cancelBenchmark=undefined;document.getElementById('mode').textContent=report.complete?`MEASURED · ${report.physicsHz.toFixed(2)} Hz · ${report.missedDeadlines} MISSES`:'MEASUREMENT STOPPED';}
  return report;
 }

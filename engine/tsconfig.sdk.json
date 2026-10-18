@@ -16,7 +16,11 @@
     "experimental/active-world.ts",
     "experimental/active-world-gpu.ts",
     "experimental/structural-world.ts",
-    "experimental/structural-world-gpu.ts"
+    "experimental/structural-world-gpu.ts",
+    "experimental/interventions.ts",
+    "experimental/tactical-session.ts",
+    "experimental/tactical-renderer.ts",
+    "experimental/reactive-materials.ts"
   ],
   "exclude": [
     "**/*.test.ts"

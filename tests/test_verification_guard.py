@@ -25,11 +25,61 @@ class VerificationHoldTests(unittest.TestCase):
 
     def test_engine_entry_reenters_the_correct_module(self):
         with mock.patch.dict(os.environ, {}, clear=True), \
+             mock.patch.object(verification_guard, 'assert_runtime_not_blocked'), \
              mock.patch.object(subprocess, 'call', return_value=0) as child, \
              mock.patch.object(sys, 'argv', ['verify.py', '--report', 'example.json']):
             with self.assertRaises(SystemExit):
                 verification_guard.guarded_entry('gpu', 1800, module='engine.verify')
             self.assertIn('engine.verify', child.call_args.args[0])
+
+    def test_inherited_job_does_not_bypass_hard_hold(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); hold = root / 'dist/verification/safety-hold.json'
+            hold.parent.mkdir(parents=True); hold.write_text('{"blockRecovery":true}')
+            with mock.patch.object(verification_guard, 'ROOT', root), \
+                 mock.patch.dict(os.environ, {'STATE_SPACE_VERIFICATION_JOB': 'fake-job'}), \
+                 mock.patch.object(subprocess, 'call') as child:
+                with self.assertRaisesRegex(RuntimeError, 'blocked'):
+                    verification_guard.guarded_entry('gpu')
+                child.assert_not_called()
+
+    def test_m5_refuses_before_permit_hashing_and_launch(self):
+        from scripts import recover_m5_verification
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); hold = root / 'dist/verification/safety-hold.json'
+            hold.parent.mkdir(parents=True); hold.write_text('{"blockRecovery":true}')
+            before = hold.read_bytes()
+            with mock.patch.object(recover_m5_verification, 'ROOT', root), \
+                 mock.patch.object(sys, 'argv', ['recovery', 'typecheck']), \
+                 mock.patch.object(subprocess, 'run') as child:
+                with self.assertRaisesRegex(RuntimeError, 'blocked'):
+                    recover_m5_verification.main()
+                child.assert_not_called()
+            self.assertEqual(hold.read_bytes(), before)
+            self.assertFalse((root / 'dist/volume-m5').exists())
+
+    def test_expired_watchdog_cannot_resume_a_late_created_child(self):
+        job = verification_guard.WindowsJob.__new__(verification_guard.WindowsJob)
+        job.handle = 1; job.k = mock.Mock()
+        job.k.AssignProcessToJobObject.return_value = 1
+        child = mock.Mock(); child._handle = 2
+        pulse = mock.Mock(side_effect=RuntimeError('watchdog expired during process creation'))
+        with self.assertRaisesRegex(RuntimeError, 'watchdog expired'):
+            job.assign_and_resume(child, pulse)
+        job.k.AssignProcessToJobObject.assert_called_once()
+        job.k.ResumeThread.assert_not_called()
+        job.k.CreateToolhelp32Snapshot.assert_not_called()
+
+    def test_termination_failure_is_not_silently_reported_as_cleanup_success(self):
+        job = verification_guard.WindowsJob.__new__(verification_guard.WindowsJob)
+        job.handle = 1; job.k = mock.Mock()
+        job.k.TerminateJobObject.return_value = 0
+        job.k.CloseHandle.return_value = 1
+        job.check = mock.Mock(side_effect=RuntimeError('termination failed'))
+        with self.assertRaisesRegex(RuntimeError, 'termination failed'):
+            job.close()
+        job.k.CloseHandle.assert_called_once_with(1)
+        self.assertIsNone(job.handle)
 
     def test_hold_blocks_runtime_preflight(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -98,6 +148,19 @@ class VerificationHoldTests(unittest.TestCase):
                 'timeoutSeconds': 5, 'expiresAt': time.time() - 1}}), encoding='utf-8')
             with self.assertRaises(RuntimeError):
                 assert_verification_allowed(root, command=['node'], kind='cpu', timeout=5)
+
+    def test_new_incident_blocks_even_valid_recovery_permits(self):
+        for blocked in (True, None, 1, 'true', {}):
+            with self.subTest(blocked=blocked), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp); hold = root / 'dist/verification/safety-hold.json'
+                hold.parent.mkdir(parents=True)
+                command = ['node', 'tiny-probe.mjs']
+                state = {'blockRecovery': blocked, 'recoveryPermit': {'command': command,
+                    'kind': 'cpu', 'timeoutSeconds': 5, 'expiresAt': time.time() + 60}}
+                hold.write_text(json.dumps(state), encoding='utf-8')
+                with self.assertRaisesRegex(RuntimeError, 'recovery launches are blocked'):
+                    assert_verification_allowed(root, command=command, kind='cpu', timeout=5)
+                self.assertEqual(json.loads(hold.read_text()), state)
 
 
 class VerificationHealthTests(unittest.TestCase):
@@ -228,14 +291,19 @@ class VerificationRecoveryTests(unittest.TestCase):
             self.assertFalse((root/'dist/verification/safety-hold.json').exists())
 
 
+@unittest.skipUnless(os.name == 'nt' and os.environ.get('STATE_SPACE_TEST_CONTAINMENT') == 'reviewed-non-gpu',
+                     'Owned print/sleep subprocess tests require explicit non-GPU containment approval')
 class VerificationGuardTests(unittest.TestCase):
-    def run_guard(self, folder, script, timeout=5):
+    def run_guard(self, folder, script, timeout=5, stalled_writer=False):
         # Isolated state directory; tests neither consume nor clear the real
         # host incident hold. Payloads only print or sleep, with no simulation.
         entry = ('import sys;from pathlib import Path;from scripts import verification_guard as guard;'
                  'guard.ROOT=Path(sys.argv.pop(1));'
                  'guard.HostHealth=type("TestHost",(),{"sample":lambda self:{"time":guard.time.time(),'
                  '"hostCpuPercent":0,"freeMemoryMiB":32768}});'
+                 + ('original_fsync=guard.os.fsync;first=[True];'
+                    'guard.os.fsync=lambda fd:((first.pop() and guard.time.sleep(4)) if first else None,original_fsync(fd));'
+                    if stalled_writer else '') +
                  'raise SystemExit(guard.main())')
         return subprocess.run([sys.executable, '-c', entry, str(folder), '--kind', 'cpu',
                                '--timeout', str(timeout), '--stall', str(timeout), '--output', str(folder),
@@ -249,6 +317,18 @@ class VerificationGuardTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertTrue(report['passed'])
             self.assertIn('bounded child', (Path(temp) / 'stdout.log').read_text())
+
+    @unittest.skipUnless(os.name == 'nt', 'Independent watchdog uses Windows Jobs')
+    def test_independent_watchdog_survives_blocked_receipt_writer(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result = self.run_guard(Path(temp), 'import time;print("started",flush=True);time.sleep(30)',
+                                    timeout=10, stalled_writer=True)
+            report = json.loads((Path(temp) / 'report.json').read_text())
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(report['passed'])
+            self.assertTrue(report['independentWatchdog']['armed'])
+            self.assertIn('heartbeat expired', report['error'])
+            self.assertEqual(report['exitCode'], 125)
 
     def test_second_verification_never_starts(self):
         with tempfile.TemporaryDirectory() as temp, mock.patch.object(verification_guard, 'ROOT', Path(temp)), Lease():
