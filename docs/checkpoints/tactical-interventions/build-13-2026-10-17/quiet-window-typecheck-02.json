@@ -1,0 +1,15 @@
+{
+  "purpose": "Build 13 bounded CPU typecheck",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792232190.1089716,
+      "hostCpuPercent": 100,
+      "freeMemoryMiB": 99263.51953125
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792232190.1089716
+}

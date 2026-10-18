@@ -1,0 +1,55 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > saves own canonical reservoirs while preserving each original world format 4ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > water extraction exchanges hot air rather than deleting its volume or energy 3ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > reverse transfer restores every coordinate and combined accounting exactly 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > offsets work along all six axis directions without changing transported history 6ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > bonded slabs retain damage heat and internal bonds on every axis across rectangular geometry 4ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > external bonds reject by default and explicit cuts update both source endpoints without welding 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > permanent anchors require explicit release and never hitchhike into storage 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > mobile displacement conserves water steam smoke lava powder and failed debris 6ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > catalog-specific fixed noncohesive solids remain obstacles despite zero structural words 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > selected custom matter transfers without receiving default material properties 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > intact and anchored destination structures cannot be erased by mobile transfer 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > source holds require explicit release independently of permanent-anchor policy 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > a held failed destination blocks displacement and unrelated holds retain lifetime 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > reservoir-to-reservoir exchange leaves the primary world and its holds untouched 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > selection order and slice budgets produce identical complete states and receipts 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > partial swaps have no public result and require a separate publication boundary 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > late obstruction rolls back earlier private exchanges and preserves a sibling tick 7ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > cancellation after each incomplete transfer boundary discards cuts releases and swaps 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > identical tuple exchanges retain correspondence even when both net diffs are empty 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > requests inputs and results own their arrays and cannot alter eventual committed state 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > strict malformed selections offsets policies and domain identities reject without mutation 4ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > accessor requests and saves reject without invoking user getters 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > reactive reservoir saves and conservative transfers > invalid work budgets reject before any additional private work 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > one domain set tick equals the same complete kernel run independently on each domain 3ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > a completed primary tick remains private until every reservoir and publication finish 5ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > cancellation after a primary domain finishes leaves all domains and ledgers untouched 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > stored custom fuel keeps its chemical heat and burns using ordinary reactive world rules 3ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > extracting a floor support releases the complete distant walkway on the next shared tick 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > reservoir hold expiry runs on the shared tick and preserves damage through subsequent fall 8ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > stored water freezes under an accounted cooling edit and returns as the same resulting ice 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > six shared ticks and odd-tick JSON restarts preserve every world and complete report 20ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > local translations work in reservoirs without reseeding matter or changing other domains 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > external energy and placement costs are accounted across primary and reservoir edits 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > identical placement retires reservoir holds while failed late edits preserve them 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > every successful domain change makes older tick transfer and translation jobs stale 5ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > foreign consumed incomplete and wrong-kind capabilities cannot publish 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > failed edits and invalid restores leave an already prepared commit usable 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > swallowed reentry poisons transfer preparation without altering previous capabilities 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > swallowed reentry during a staged edit cannot publish the staged domain 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > public holds reports and snapshots cannot mutate committed reservoir storage 2ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > restore establishes a new combined baseline and preserves exact saved hold lifetime 5ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > malformed mismatched and changed-topology saves reject before replacing any domain 3ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > domain and combined cell bounds reject before oversized coordinate allocation 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > all-singleton domains share exact maximum ticks without overflow 1ms
+ ✓ engine/experimental/reactive-domains.test.ts > atomic synchronized reactive domains > pure domain jobs isolate their input and produce budget-independent reports 3ms
+
+ Test Files  1 passed (1)
+      Tests  45 passed (45)
+   Start at  16:13:07
+   Duration  1.33s (transform 499ms, setup 0ms, collect 934ms, tests 133ms, environment 0ms, prepare 86ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-47-2026-10-17/attempt-07/vitest.json

@@ -1,0 +1,377 @@
+engine/experimental/reactive-actor-group.test.ts(25,63): error TS2344: Type 'Game' does not satisfy the constraint 'TacticalValue'.
+  Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+    Property 'commands' is incompatible with index signature.
+      Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+        Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+          Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+              Property 'impulseQ' is incompatible with index signature.
+                Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                  The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(26,60): error TS2344: Type 'Game' does not satisfy the constraint 'TacticalValue'.
+  Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+    Property 'commands' is incompatible with index signature.
+      Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+        Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+          Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+              Property 'impulseQ' is incompatible with index signature.
+                Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                  The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(36,37): error TS2344: Type 'Game' does not satisfy the constraint 'TacticalValue'.
+  Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+    Property 'commands' is incompatible with index signature.
+      Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+        Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+          Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+              Property 'impulseQ' is incompatible with index signature.
+                Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                  The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(42,31): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(42,128): error TS2322: Type '{ game: TacticalValue; command: ReactiveSessionCommand3D<TacticalValue>; receipt: CommandReceipt; beforeQueries: ReactiveSessionQueryAccess3D; queries: ReactiveSessionQueryAccess3D; translation: ReactiveSessionTranslationAccess3D; }' is not assignable to type '{ game: Game; command: ReactiveSessionCommand3D<Game>; receipt: CommandReceipt; beforeQueries: ReactiveSessionQueryAccess3D; queries: ReactiveSessionQueryAccess3D; translation: ReactiveSessionTranslationAccess3D; }'.
+  Types of property 'game' are incompatible.
+    Type 'TacticalValue' is not assignable to type 'Game'.
+      Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(43,153): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(49,45): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(49,93): error TS2322: Type '{ game: TacticalValue; domains: ReactiveDomainsSnapshot3D; report: ReactiveDomainsTickReport3D; beforeQueries: ReactiveSessionQueryAccess3D; queries: ReactiveSessionQueryAccess3D; movement: ReactiveSessionMovementAccess3D; }' is not assignable to type '{ game: Game; domains: ReactiveDomainsSnapshot3D; report: ReactiveDomainsTickReport3D; beforeQueries: ReactiveSessionQueryAccess3D; queries: ReactiveSessionQueryAccess3D; movement: ReactiveSessionMovementAccess3D; }'.
+  Types of property 'game' are incompatible.
+    Type 'TacticalValue' is not assignable to type 'Game'.
+      Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(49,201): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(57,39): error TS2344: Type 'Game' does not satisfy the constraint 'TacticalValue'.
+  Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+    Property 'commands' is incompatible with index signature.
+      Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+        Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+          Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+              Property 'impulseQ' is incompatible with index signature.
+                Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                  The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(163,36): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(170,36): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(178,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(184,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(186,37): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(190,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(197,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(201,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(207,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(208,103): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(212,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(216,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(222,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(229,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(235,153): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(240,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(248,111): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(249,37): error TS2698: Spread types may only be created from object types.
+engine/experimental/reactive-actor-group.test.ts(252,25): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(256,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(256,149): error TS2698: Spread types may only be created from object types.
+engine/experimental/reactive-actor-group.test.ts(257,25): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(260,87): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(261,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(262,30): error TS2322: Type '{ ap: number; units: NamedReactiveBody3D[]; commands: ReactiveActorMovementCommand3D[]; }' is not assignable to type 'TacticalValue'.
+  Type '{ ap: number; units: NamedReactiveBody3D[]; commands: ReactiveActorMovementCommand3D[]; }' is not assignable to type 'null'.
+engine/experimental/reactive-actor-group.test.ts(262,177): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(263,39): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(264,150): error TS2698: Spread types may only be created from object types.
+engine/experimental/reactive-actor-group.test.ts(264,230): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.
+engine/experimental/reactive-actor-group.test.ts(268,64): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(269,33): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(269,71): error TS2345: Argument of type '{ worldId: string; gameRulesVersion: string; domains: ReactiveDomainsSnapshot3D; game: Game; }' is not assignable to parameter of type 'ReactiveSessionInitial3D<TacticalValue>'.
+  Types of property 'game' are incompatible.
+    Type 'Game' is not assignable to type 'TacticalValue'.
+      Type 'Game' is not assignable to type '{ [key: string]: TacticalValue; }'.
+        Property 'commands' is incompatible with index signature.
+          Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue'.
+            Type 'ActorCommand3D[]' is not assignable to type 'TacticalValue[]'.
+              Type 'ActorCommand3D' is not assignable to type 'TacticalValue'.
+                Type 'ActorCommand3D' is not assignable to type '{ [key: string]: TacticalValue; }'.
+                  Property 'impulseQ' is incompatible with index signature.
+                    Type 'readonly number[]' is not assignable to type 'TacticalValue'.
+                      The type 'readonly number[]' is 'readonly' and cannot be assigned to the mutable type 'TacticalValue[]'.
+engine/experimental/reactive-actor-group.test.ts(270,214): error TS2345: Argument of type 'ReactiveBranch3D<TacticalValue>' is not assignable to parameter of type 'ReactiveBranch3D<Game>'.
+  Type 'TacticalValue' is not assignable to type 'Game'.
+    Type 'null' is not assignable to type 'Game'.

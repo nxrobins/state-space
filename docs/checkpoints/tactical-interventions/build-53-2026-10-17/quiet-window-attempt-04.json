@@ -1,0 +1,15 @@
+{
+  "purpose": "Build 53 user-authorized CPU resumption tests",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 50,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792284526.8228207,
+      "hostCpuPercent": 99.90328820116055,
+      "freeMemoryMiB": 96614.51953125
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792284526.8228364
+}

@@ -1,0 +1,25 @@
+{
+  "purpose": "Build 18 bounded CPU tests",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792237264.4510171,
+      "hostCpuPercent": 16.87804878048781,
+      "freeMemoryMiB": 101724.47265625
+    },
+    {
+      "time": 1792237265.4632037,
+      "hostCpuPercent": 9.519230769230768,
+      "freeMemoryMiB": 101741.18359375
+    },
+    {
+      "time": 1792237266.464969,
+      "hostCpuPercent": 23.2421875,
+      "freeMemoryMiB": 101933.47265625
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792237266.464969
+}

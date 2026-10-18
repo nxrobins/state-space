@@ -1,0 +1,34 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > hot water and displaced air exchange exactly and return without a fresh seed 10ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > damaged bonded ice crosses different geometries without repair or welding 2ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > external bonds and permanent pins require explicit policies and cut reciprocally 5ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > mobile displacement returns the destination liquid rather than deleting it 2ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > intact solids and pinned broken matter block mobile displacement 3ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > temporary held sources must be released and cannot be displaced as targets 3ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > reservoir-to-reservoir handoffs leave primary terrain and holds untouched 2ms
+ ✓ engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > invalid domains, coordinates, duplicates and late bounds errors never partially commit 75ms
+ × engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > caller ordering cannot change canonical transfers or receipts 14ms
+   → expected { snapshot: { …(13) }, …(4) } to deeply equal { snapshot: { …(13) }, …(4) }
+ · engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > saved domains, inputs, receipt arrays and previews own their memory
+ · engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > genesis includes reservoir energy and rejects incomplete accounting
+ · engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > invalid saved state, tick, versions and topology reject before replacing live state
+ · engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > capacity, domain count and malformed records fail before oversized state allocation
+ · engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > game policy and stale revisions prevent otherwise valid material transfers
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > all domains advance sequentially before one complete game boundary is visible
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > a reservoir step failure cannot publish the already-advanced main world
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > partial driver creation failure closes previously created domains
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > cleanup visits every driver even when a reservoir close fails
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > invalid reservoir tick output rejects the whole tick
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > invalid reservoir energy output rejects the whole tick
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > invalid reservoir geometry output rejects the whole tick
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > discard during a reservoir tick waits for cleanup and publishes no partial boundary
+ · engine/experimental/material-reservoirs.test.ts > reservoir tick protocol: inert drivers only > mock snapshot continuation matches uninterrupted domain state across odd ticks
+
+ Test Files  1 failed (8)
+      Tests  1 failed | 8 passed (23)
+   Start at  02:19:25
+   Duration  1.07s (transform 180ms, setup 0ms, collect 242ms, tests 119ms, environment 0ms, prepare 441ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/validation-08-2026-10-17/attempt-01/vitest.json

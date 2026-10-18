@@ -1,0 +1,13 @@
+{
+  "purpose": "Read-only CPU health gate for selected edit/mock tests only; SDK checks remain deferred; no GPU telemetry",
+  "passed": false,
+  "requiredSeconds": 10,
+  "maxHostCpuPercent": 20,
+  "samples": [
+    {
+      "time": 1792225599.4220004,
+      "hostCpuPercent": 48.65384615384616,
+      "freeMemoryMiB": 88875.1015625
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "63cd3221048c4203ac838588bfdc5b7f",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792275295.024271,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792275296.084051,
+      "hostCpuPercent": 7.602339181286554,
+      "freeMemoryMiB": 102193.3671875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 44648,
+  "lastOutput": ":5,\"holdExpiryContinuation\":true,\"noTemporaryAnchorResidue\":true,\"reactiveDomains\":true,\"domainRules\":\"reactive-domains-1\",\"transferRules\":\"reactive-transfer-1\",\"domainCells\":8,\"completedDomainSetTicks\":2,\"containedWorldTicks\":4,\"storedMaterialHistory\":true,\"synchronizedReservoirContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792275297.1072173
+}

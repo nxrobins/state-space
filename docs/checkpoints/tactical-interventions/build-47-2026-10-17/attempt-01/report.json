@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "id": "a7c3a435a95a40d0b391044897207477",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.reactive-actors.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\tactical-interventions\\build-47-2026-10-17\\attempt-01\\vitest.json"
+  ],
+  "startedAt": 1792278646.6314,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 17.033,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792278647.6649573,
+      "hostCpuPercent": 10.288461538461535,
+      "freeMemoryMiB": 101407.8359375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 36580,
+  "lastOutput": "",
+  "lastHealth": {
+    "host": {
+      "time": 1792278649.9235787,
+      "hostCpuPercent": 18.75,
+      "freeMemoryMiB": 101278.2734375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 2.078125,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 264.40234375
+    }
+  },
+  "exitCode": 1,
+  "finishedAt": 1792278650.1629148
+}

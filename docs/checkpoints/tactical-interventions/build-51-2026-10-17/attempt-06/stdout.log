@@ -1,0 +1,47 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > creation binds catalog and component rules while owning all input vectors 6ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > all six axis directions collide exactly with the closed world boundary 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > X Z Y ordering and fractional travel exactly match the existing M5 adapter 5ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > an absent floor loses footing and gravity advances the explicit actor cadence 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > body exposure reports immersion and sensible heat without blocking fluids 1ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > malformed body fields rules vectors and getters reject without side effects 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > world domain and catalog mismatches cannot silently rebind a saved body 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > adding and releasing holds preserves body compatibility across world envelope versions 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > invalid summed speed step overflow and command accessors leave the input untouched 1ms
+ ✓ engine/experimental/reactive-actors.test.ts > portable reactive bodies and shared kinematic arithmetic > initial embedded and outside resolutions keep the original step and position 1ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > a grounded body follows its falling platform without an actor step or impulse 10ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > fractional debris contact pushes by exact remaining travel and records the rational time 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > debris crushing against anchored terrain reports exact opposing constraints without publishing a body 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > the closed bottom boundary participates in debris crushing 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > one stationary support prevents carry by a neighboring falling fragment 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > loose powder leaves its rider unsupported without automatic carry 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > melting ice stops supporting the actor before structural settlement 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > combustion into custom smoke retires support without a phantom solid collider 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > freezing around an immersed actor reports the exact phase-overlap boundary 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > a transient phase overlap is detected before settlement through lighter melt clears the cell 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > contact energy reflects completed heat exchange before structural movement 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > held platforms stay fixed then carry on the first tick after absolute expiry 7ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > liquid displaced by a falling fragment is not treated as a swept solid 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > final exposure follows the carried body into existing water with no implicit actor load 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > disabled or overflowed capture cannot be accepted as a clear terrain response 5ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > the exact measured work budget succeeds and one fewer discards the complete response 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > contact and event exhaustion discard an earlier push and its crush witness 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > invalid budgets and accessor options cannot execute or mutate state 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > cloned observations and equal-stamp foreign views cannot forge executed provenance 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > public movement and response mutation cannot alter repeated resolution or physics 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > contexts remain historical after commit and restore without binding to a newer revision 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > reusing a context for different bodies never leaks pass state between resolutions 3ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > initial outside and embedded saved bodies remain unresolved without partial motion 2ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > a paid ability publishes carried body and terrain together only at commit 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > rejected crushing rolls back actor terrain AP accounting and revision 4ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > body response and complete physics continue exactly after an odd-tick JSON restart 13ms
+ ✓ engine/experimental/reactive-actors.test.ts > bounded provenance and atomic game integration > body response leaves complete material states identical to an unobserved branch 4ms
+
+ Test Files  1 passed (1)
+      Tests  37 passed (37)
+   Start at  17:11:46
+   Duration  1.76s (transform 761ms, setup 0ms, collect 1.22s, tests 149ms, environment 0ms, prepare 75ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-51-2026-10-17/attempt-06/vitest.json

@@ -1,0 +1,17 @@
+{
+  "kind": "read-only source projection, not runtime equivalence proof",
+  "files": {
+    "structural-material.ts": {
+      "physicalSourceAfterRemovingInstrumentationMatchesBaselineIgnoringWhitespace": true,
+      "currentSHA256": "156d551b68bb86cc44a823b353011c341017ff310afa2f335bcfb741fe9a87ff",
+      "baselineSHA256": "65501ca4375d82cded120bdcfdc48a99d4afbe48b433ee81211a9e8ca92725d9"
+    },
+    "structural-world-core.ts": {
+      "physicalSourceAfterRemovingInstrumentationMatchesBaselineIgnoringWhitespace": true,
+      "currentSHA256": "cdb3356790ac5ccb33eec37cc4ce68ea9045e97cf4f9c7c00cc952473baba1e0",
+      "baselineSHA256": "e954d6eeb8c42bb4e2d741853d7aa79fd684e3ff908930951c27899e691c9e2c"
+    }
+  },
+  "frozenKernelExactApartFromHeader": true,
+  "physicalReplayVerified": false
+}

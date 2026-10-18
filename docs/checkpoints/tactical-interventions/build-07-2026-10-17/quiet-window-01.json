@@ -1,0 +1,19 @@
+{
+  "purpose": "Read-only CPU gate for pure trace fixtures and inert-driver tests only; SDK and real physical runtime checks remain deferred/held",
+  "passed": false,
+  "requiredSeconds": 10,
+  "maxHostCpuPercent": 20,
+  "samples": [
+    {
+      "time": 1792227947.4296792,
+      "hostCpuPercent": 13.996138996138995,
+      "freeMemoryMiB": 101853.140625
+    },
+    {
+      "time": 1792227948.4373205,
+      "hostCpuPercent": 22.65625,
+      "freeMemoryMiB": 101679.27734375
+    }
+  ],
+  "workloadLaunched": false
+}

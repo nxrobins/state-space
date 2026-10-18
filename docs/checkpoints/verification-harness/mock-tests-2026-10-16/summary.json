@@ -1,0 +1,87 @@
+{
+  "scope": "Authorized non-GPU mock and temporary-file harness tests only",
+  "recordedAt": "2026-10-17T06:01:10.525147+00:00",
+  "localDate": "2026-10-16",
+  "timezone": "America/Los_Angeles",
+  "status": "passed-mocks-ready-for-separately-authorized-bounded-containment-tests",
+  "passed": 52,
+  "failed": 0,
+  "skippedContainmentTests": 4,
+  "firstAttemptsOnly": true,
+  "harnessCodeChangesNeeded": false,
+  "sequential": true,
+  "timeoutPerSuiteSeconds": 30,
+  "python": "3.10.16",
+  "node": "v22.22.3",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "suites": [
+    {
+      "suite": "browser",
+      "passed": 10,
+      "skipped": 0,
+      "failed": 0,
+      "wallSeconds": 0.844,
+      "receipt": "browser-1.json",
+      "receiptSha256": "dbb5d47c4dd29213341082b63136036e0c08d6942ff81c847fb329ad7640789b",
+      "stdout": "browser-1.stdout.log",
+      "stderr": "browser-1.stderr.log"
+    },
+    {
+      "suite": "journal",
+      "passed": 14,
+      "skipped": 0,
+      "failed": 0,
+      "wallSeconds": 2.328,
+      "receipt": "journal-1.json",
+      "receiptSha256": "9b682a833b02ec0c5f70c3f511db0526fdb075a33d4eddb09f79701ac7f4a853",
+      "stdout": "journal-1.stdout.log",
+      "stderr": "journal-1.stderr.log"
+    },
+    {
+      "suite": "guard",
+      "passed": 21,
+      "skipped": 4,
+      "failed": 0,
+      "wallSeconds": 1.422,
+      "receipt": "guard-1.json",
+      "receiptSha256": "9471f5362cecd0bebffe984fbdddadf6a6ef9ca1497b3a82bf8380ecaf79114a",
+      "stdout": "guard-1.stdout.log",
+      "stderr": "guard-1.stderr.log"
+    },
+    {
+      "suite": "events",
+      "passed": 7,
+      "skipped": 0,
+      "failed": 0,
+      "wallSeconds": 0.125,
+      "receipt": "events-1.json",
+      "receiptSha256": "55654da6bc255f44ea25759413f7bbb0fa03e5907515f486f417c89627c4cee5",
+      "stdout": "events-1.stdout.log",
+      "stderr": "events-1.stderr.log"
+    }
+  ],
+  "allTestedSourceHashesMatchCurrentFiles": true,
+  "protectedFilesUnchanged": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "runtimeHold": {
+    "blockRecovery": true,
+    "recoveryPermitPresent": false
+  },
+  "m5CompletionStatus": "suspended-after-host-freeze",
+  "notRun": [
+    "real containment tests",
+    "browser",
+    "builds",
+    "replay",
+    "GPU telemetry",
+    "benchmarks",
+    "legacy demos"
+  ],
+  "readinessLimits": [
+    "Real Windows Job enforcement, watchdog termination and descendant cleanup still untested.",
+    "No claim of protection against driver, kernel or whole-host hangs.",
+    "Runtime hold and legacy quarantine remain in force."
+  ]
+}

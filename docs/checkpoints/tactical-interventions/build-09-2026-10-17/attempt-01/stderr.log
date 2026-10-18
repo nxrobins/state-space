@@ -1,0 +1,12 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/terrain-body.test.ts > exact material and temperature exposure > prospective volume budget rejects an oversized scan before producing partial exposure
+Error: World requires power-of-two chunks, complete chunks and at most 512 chunks.
+ ❯ activeWorldGeometry engine/experimental/active-world-core.ts:18:118
+
+ ❯ new CpuStructuralWorld3D engine/experimental/structural-world-core.ts:129:13
+ ❯ engine/experimental/terrain-body.test.ts:154:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,579 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > disabled and zero-tick complete journals retain distinct meanings without eager reads 17ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > odd-start domain and batch history equals the complete direct path journal 42ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > out-and-back paths retain both crossings despite identical final positions 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > falling members remain linear and displaced occupants remain instantaneous relocations 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > all scheduled movement axes parities and diagonal directions survive transport at even and odd ticks 28ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > required paths remain enabled by policy when client capture options are omitted 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > per-tick and cumulative overflow discard prefixes without discarding the committed action 271ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > nested caller mutations cannot alter later reports or their private commit identity 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > copied foreign older restored and closed handles cannot authorize path reads 6ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > ordinary read failure preserves a ready preview and the acknowledged state 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > external revision change rejects a path read while preserving the last confirmed snapshot 2ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > pending paths exclude other reads previews commits and restores 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > read timeout fails closed without retry or an uncertain mutation 6ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > close waits for a pending path read before disposing the endpoint 2ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > cancelled previews cannot publish path prefixes before a replacement commits 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > stamps scope flags missing domains operation order and counts reject malformed complete reports 67ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > wrong parity identity composition segment mode and simultaneous permutations fail closed 26ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > nested accessors sparse arrays and oversized frames reject without evaluating getters 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > frame overhead and per-tick detail budgets are inclusive and cannot omit charged entries 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > valid per-frame paths cannot bypass the shared journal budget by understating total entries 405ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > public decoder still validates complete snapshots while metadata decoder agrees on valid input 1ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > batch transitions and older protocol responses cannot pass path validation 13ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > game v4 retains five immutable fixed impulses and owned normalized commands 3ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > malformed units directions fields and accessors reject without invoking getters 1ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > air accepts one through eight ticks while zero and invalid horizons reject 1ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > invalid local air input preserves a ready prior candidate and committed state 40ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > worker preparation independently rejects zero ticks before spending resources 9ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > preparation stages AP and one intent without moving or publishing actors 11ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > the impulse applies once at the first complete tick then saved gravity continues 28ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > both units and every direction use the same bounded command with one AP cost 132ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > new ceiling geometry clips the first air impulse and clears its vertical velocity 11ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > new wall geometry clips horizontal air assistance before the desired endpoint 12ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > air assistance stops at a teammate without overlapping or moving the teammate 12ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > insufficient AP fails before acquiring a driver or changing live state 7ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > unit range is enforced while self assistance does not require the slab in range 19ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > pending intents cannot be saved committed or overwritten by another prepared action 19ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > v1 and malformed v2 saves reject atomically without replacing the ready candidate 14ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > a malformed staged intent cannot be laundered by clearing it during advancement 9ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > second-tick failure discards private actor motion and staged AP together 12ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > cancellation during advancement cannot publish the pending air cost or unit state 7ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > a changed revision invalidates an otherwise complete air preview 13ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > complete midair saves preserve velocity and exact subsequent continuation 37ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > independent multi-tick previews and commits are exactly identical 188ms
+ ✓ engine/experimental/tactical-slab-air.test.ts > worker-ready air assistance application > air adds to existing velocity rather than resetting movement history 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > prepares only private render coordinates without changing the full snapshot 159ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > validates energy and structure before accepting a snapshot 12ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects accessors without invoking them 11ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > prepares a completed preview with its full candidate identity 25ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects incomplete preview horizons and changed rule identities 16ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects old committed observations and preview observations on committed state 20ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > requires complete decoration stamps including geometry domain 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > copies decoration positions and colors into world units 11ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects duplicate ids and over-budget decoration lists 15ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects fractional outside inverted and translucent actor boxes 12ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects sparse arrays and array accessors 11ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > projects shared world coordinates with positive Y downward and zero-to-one depth 1ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > rejects invalid camera bases and projection ranges 1ms
+ ✓ engine/experimental/tactical-renderer.test.ts > isolated tactical presentation > uses the shared camera shader in both drawing pipelines and unchanged mesh rules 0ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > binds common camera depth and opaque actors before depth-tested overlays 13ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > camera-only frames reuse grid mesh instances and indirect arguments 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > new prepared identity rebuilds even when its revision is identical 13ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > rejects a second frame until completion without writes or backlog 11ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > rejects reentrant frame submission from the host callback 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > rejects bad targets before writes and stays usable 11ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > rejects fabricated scenes invalid cameras and device budget excess before work 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > captures target references and camera bytes before deferring encoding 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > retains the last completed stamp on callback failure and drains queued writes 9ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > rejects asynchronous host drawing without an unhandled rejection 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > treats even an undefined thrown value as a frame failure 13ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > observes GPU validation errors after the single completion boundary 9ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > waits for completion even when the error-scope promise rejects 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > fails closed on a completion rejection without a reason 9ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > closes only after pending work completes and never destroys caller resources 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > device loss stops idle rendering without changing its completed identity 10ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > partial cache allocation failure releases temporary buffers then faults 9ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > shader compilation failure balances the setup error scope 1ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > setup validation failure frees all allocated caches 1ms
+ ✓ engine/experimental/tactical-renderer.test.ts > single-flight mock GPU composition > camera drawing and presentation disposal cannot alter authoritative state 11ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > mixed receipts match direct history before and after an acknowledged commit 33ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > odd-start multi-batch histories cover both domains and exact operation order 48ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > intervening heat and resource changes remain visible after exact reversal 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > distant support changes survive coarse zero-run capture without invented detail 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > disabled capture stays explicit and performs no support observations 4ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > empty zero-tick actions have complete empty history despite completion operation 4ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > domain tick overflow removes the entire prefix while preserving observed counts 32ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > caller mutations cannot replace private preview or commit provenance 18ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > foreign copied and absent handles reject locally without dispatch 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > supersession and commit expire preview history access 5ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > new commits and restore expire acknowledged history handles 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > out-of-band revisions reject reads at host without recomputing support 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > pending journal reads exclude all other ordinary requests 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > cancelled ready previews reject an outstanding read in either reply order 194ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > close invalidates pending preview delivery and waits for it to drain 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > close drains an outstanding committed history before disposing transport 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > read exceptions are nonfatal and preserve the ready candidate 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > timeouts retain last confirmed state and never retry or imply an uncertain commit 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > wrong preview target and protocol fail closed without publishing candidate state 9ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > journal stamp and chronology corruption fail closed on committed and preview reads 105ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > domain geometry runs and distant support bounds are checked on every boundary 11ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > receipt versions mappings budgets energy and hold lifetime reject malformed history 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > raw accessor sparse and decorated arrays reject without invoking accessors 5ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > internally balanced forged heat receipts cannot disagree with private accounting 13ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > tick motion coverage identity and complete permutation are validated 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > disabled overflow and coarse statuses cannot carry misleading partial prefixes 9ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > default capture remains explicitly disabled without extra driver reads 10ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > zero-tick public capture returns empty complete motion and a game action journal 4ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > path capture enables motion while retaining session-required paths when omitted 7ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > net-only and journal-only captures retain their distinct scope 4ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > malformed options reject before superseding accepted work or consuming identities 4ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > capture accessors hidden fields prototypes and symbols reject without invoking getters 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > nested capture budgets are detached before a waiting request can execute 2ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > zero and maximum capture budgets retain the existing inclusive limits 3ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > queued observations and complete state equal a direct branch across a batch boundary and reservoir 74ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > return-to-origin execution retains touched identities and both subpass crossings 2ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > falling fragment membership comes from execution and survives commit 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > journal coarse fallback keeps complete change counts rather than partial runs 2ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > path overflow drops all partial paths while retaining an exact commit candidate 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > journal record limits remain bounded across multiple scheduler batches 101ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > reads reject waiting running and cancelled requests without exposing partial history 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > superseded foreign and copied tickets cannot read the latest candidate 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > restore commit cancellation and close revoke read permits without mutating historical copies 4ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > every read owns nested observations and cannot mutate later committed data 2ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > observation reads cannot reenter a staging callback 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > malformed driver observations fail atomically and release owned domain drivers 1ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > capture observation failure rolls back terrain and game and allows a fresh request 2ms
+ ✓ engine/experimental/tactical-preview-capture.test.ts > capture and observation of bounded queued previews > an unrepresentable absolute end tick rejects before replacing accepted work 1ms
+stdout | engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > zero-tick setup omits the second eager coordinate copy and records bounded logical copy evidence
+SNAPSHOT_REUSE_EVIDENCE {"primaryCells":512,"reservoirCells":64,"branches":12,"advances":12,"shared":{"mode":"shared","forks":24,"copiedCellCoordinates":0,"sharedCellCoordinates":41472,"saturated":false},"copy":{"mode":"copy","forks":24,"copiedCellCoordinates":41472,"sharedCellCoordinates":0,"saturated":false},"avoidedCoordinatorCoordinateArrays":144,"physicsTicks":0,"timingMeasured":false}
+
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > shared forks reuse the private root while eager forks own all state coordinates 8ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > verification freezing covers game holds reservoirs accounting and every cell array 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > public sessions expose neither internal modes nor diagnostics and preserve the save schema 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > internal option validation rejects malformed modes and accessors without invoking getters 1ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > creating and discarding branches no longer copies any primary or reservoir coordinates 7ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > zero-tick setup omits the second eager coordinate copy and records bounded logical copy evidence 6ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > siblings retain complete independent state across every edit family and eager-copy comparison 57ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > plain translation remains exact without path capture 3ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > inert multi-domain ticks preserve paths journals holds and game reducers across odd boundaries 23ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > initial and public nested arrays remain mutable copies even when canonical shared nodes are frozen 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > all retained policy arguments are isolated from later canonical state 5ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > translation reducer inputs and receipts cannot mutate source or published matter 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > driver inputs loads and published outputs do not alias canonical state 5ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > a driver that mutates its input and throws cannot corrupt live state or sibling branches 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > support observation receives copies rather than shared canonical endpoints 3ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > commit reports and lazy geometry remain stable after later terrain edits and restore 3ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > invalid late edits and failed game validation preserve every live coordinate in both modes 5ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > malformed restore does not evict a valid shared candidate; valid restore invalidates it 3ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > cancellation waits for private advancement cleanup and preserves shared siblings 5ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > publication from a sibling invalidates an in-flight shared branch without accepting its partial state 2ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > driver cleanup failure cannot publish a completed inert branch in either mode 5ms
+ ✓ engine/experimental/tactical-snapshot-reuse.test.ts > private immutable snapshot reuse > repeated exact save restore continuation matches the eager strategy without a physical replay claim 12ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > a hold preserves every terrain coordinate and is owned portable state 8ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > release preserves permanent anchors, damage, bonds and energy 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > invalid requests make only their candidate terminal 9ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > duplicate IDs, overlapping holds and unknown release are rejected atomically 2ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > malformed hold saves and old envelopes cannot change committed state 3ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > held sources require explicit release even when anchor release was requested 2ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > held broken matter blocks mobile displacement by an unheld source 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > same-material replacement releases only replaced targets and removes empty holds 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > energy, damage, cuts and explicit permanent anchors preserve hold ownership 3ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > absolute expiry overlays exactly the intended mock transitions, including odd ticks 3ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > staggered expirations do not drop another hold or leave an expired pin 2ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > a mocked phase transition releases its target without rebinding or altering energy 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > mock continuation agrees across save/restore and split advancement at expiry 3ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > driver reload failure discards all private changes and cleans up 2ms
+ ✓ engine/experimental/tactical-actions.test.ts > saved temporary holds: edit-only and mock boundary checks > discard during a held mock tick retains the live hold lifetime and ledger 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > opposing heat costs remain visible with zero net energy and unchanged material history 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > positive and negative deltas retain an exact ledger across commit and restore 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > energy limits reject the whole candidate without clamping or partial costs 4ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > duplicate targets, holes, malformed records and accessors are rejected 4ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > empty and zero deltas are explicit no-ops without changing history 1ms
+ ✓ engine/experimental/tactical-actions.test.ts > accounted thermal deltas: zero physical ticks > game policy rejects a combined hold and thermal transaction atomically 1ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > all five query operations match direct fixed-point primary and reservoir reads 19ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > hand-checkable contact retains exact time, hot-cell energy and damaged integrity 3ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > one batch reuses one isolated geometry view per domain and one wire request 6ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > copied requests and returned results cannot mutate committed state 4ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > the inclusive 32-query limit succeeds without truncation 7ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > empty, oversized, sparse and getter-bearing batches reject without sending 3ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > unknown domains, extra fields and unknown kinds reject before dispatch 2ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > invalid geometry rejects the entire read batch but preserves a ready commit 8ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > successful queries keep an existing ready candidate committable 5ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > stale committed bases reject without silently rebasing or changing client state 2ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > pending queries exclude another query, preview, commit and restore 4ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > queries cannot overlap an executing preview request 3ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > close waits for a read reply before disposing the owned endpoint 1ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > read timeout is a failed connection with no uncertain mutation or retry 4ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > reply count, kind, domain and revision corruption fail closed 15ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > cell data in a reply must match the confirmed terrain coordinates 2ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > exposure volume and temperature fractions are validated before publication 4ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > oversized portable responses reject without sending a partial query result 55ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > the old worker protocol cannot be mistaken for a current reply 2ms
+ ✓ engine/experimental/tactical-worker-queries.test.ts > committed worker geometry batches without physical runtime > queries after an acknowledged commit use the new complete revision 5ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 0 sign -1 preserves exact velocity 8ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 0 sign 1 preserves exact velocity 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 1 sign -1 preserves exact velocity 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 1 sign 1 preserves exact velocity 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 2 sign -1 preserves exact velocity 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > unobstructed motion along axis 2 sign 1 preserves exact velocity 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 0 sign -1 catches long movement 3ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 0 sign 1 catches long movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 1 sign -1 catches long movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 1 sign 1 catches long movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 2 sign -1 catches long movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > closed boundary on axis 2 sign 1 catches long movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > creation detects support and stationary gravity preserves the exact floor contact 3ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > removing the supporting voxel causes footing loss and falling on the candidate view 3ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > a falling body lands on a voxel before reaching its requested endpoint 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > ceiling collision clears upward velocity without inventing ground support 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > fractional-size long movement cannot tunnel through a newly added wall 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > frozen X then Z then Y order clips X while allowing tangential Z movement 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > impulse, acceleration and saved gravity apply once without wall-clock input 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > initial embedding reports exposure but leaves every saved body field unchanged 1ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > outside saved placement returns unchanged state and explicitly unknown outside volume 0ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > zero-distance negative-direction contact canonicalizes travel to positive zero 0ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > body saves and output arrays are isolated and resume exactly on the same geometry 3ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > invalid forces, dimensions, counter overflow and malformed arrays reject atomically 2ms
+ ✓ engine/experimental/terrain-body.test.ts > fixed-point bodies on static terrain boundaries > accessor fields, incompatible identities and forged views reject without user callbacks 1ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > partial voxel overlap produces an exact volume-weighted temperature ratio 1ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > material volumes include air, are sorted, and sum to the in-bounds volume 0ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > only liquid runs touching the feet count as immersion, with per-column maximum depth 1ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > fractional feet and top planes bound the reported immersion depth exactly 0ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > outside space has an explicit volume and is never silently treated as air 0ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > large entirely outside boxes retain exact volume beyond safe Number products 0ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > exposure returns isolated values and retained geometry ignores later edits 1ms
+ ✓ engine/experimental/terrain-body.test.ts > exact material and temperature exposure > prospective volume budget rejects an oversized scan before producing partial exposure 84ms
+ ✓ engine/experimental/terrain-body.test.ts > actor/terrain/application transactions with inert material ticks > terrain edits, resolved body and AP publish together after a zero-horizon action 3ms
+ ✓ engine/experimental/terrain-body.test.ts > actor/terrain/application transactions with inert material ticks > a rejected application commit preserves terrain, body state and AP 2ms
+ ✓ engine/experimental/terrain-body.test.ts > actor/terrain/application transactions with inert material ticks > reduceTick supplies the exact edited boundary for atomic per-tick body resolution 4ms
+ ✓ engine/experimental/terrain-body.test.ts > actor/terrain/application transactions with inert material ticks > retained tick query closures own original state and frozen identity after later operations 1ms
+ ✓ engine/experimental/terrain-body.test.ts > actor/terrain/application transactions with inert material ticks > body state cannot cross into a reservoir domain without an explicit game operation 4ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > public zero-horizon preview commits terrain damage heat and AP atomically 10ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > a burst before execution keeps only the newest waiting command 4ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > superseding active work waits for its complete boundary and cleanup 3ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > waiting commands own nested input and retain their submission revision 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > invalid commands do not supersede accepted work or invoke getters 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > invalid horizons preserve the waiting request and its identity sequence 2ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > cancelled waiting work never creates a branch or driver 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > active cancellation cannot publish a partial horizon or partial game state 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > close waits for active cleanup and rejects new work 2ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > ready results remain historical after close and cannot commit 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > a changed world makes waiting work stale without running preparation 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > external revision change during advancement discards the result 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > ready previews require recomputation after any committed revision change 2ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > foreign or copied tickets cannot authorize a commit 2ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > preview mutations cannot change the private commit candidate 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > a horizon crossing the batch boundary runs every inert tick exactly once 5ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > the maximum horizon fits the existing operation and request limits 74ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > preparation failure rolls back its edits and permits a later valid request 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > retained staging editors expire after preparation 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > async preparation is rejected and its rejected promise is observed 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > queue mutation cannot reenter a staging callback 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > cleanup failure closes the queue and prevents the waiting preview from starting 1ms
+ ✓ engine/experimental/tactical-previews.test.ts > supersedable previews with inert drivers > a replacement requested immediately after ready does not leak branch slots 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > grounded actors ride controlled support on all six cardinal axes 30ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > fractional actors are pushed by exact remaining travel in all six directions 12ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > non-power-of-two contact offsets retain an exact reduced rational 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > multi-axis paths carry from intermediate support while retaining original identity 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > an out-and-back platform retains carry history despite equal final positions 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > a transient terrain push survives a return to the original material state 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > all touching controlled supports can jointly authorize a carry 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > mixed fixed and controlled support does not authorize horizontal carry 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > a grounded actor on the closed world floor is not carried by unrelated matter 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > an explicitly airborne actor does not acquire first-pass horizontal carry 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > a platform arriving under an actor can carry it on the next completed pass 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > contact with a fixed side wall constrains carry and can leave the actor unsupported 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > a lifting platform and fixed ceiling produce an explicit opposing-constraint crush 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > closed boundaries participate in push crush without moving the saved actor 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > relocated powder overlapping an actor is endpoint-only unresolved contact 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > liquid and gas movement does not become a blocking force or support 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > solid frozen and powder supports use the same geometric carry contract 5ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > final exposure follows the resolved actor rather than its original coordinates 1ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > initial overlap and outside state fail without altering supplied actor fields 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > incomplete path capture cannot be mistaken for an empty safe translation 1ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > one support identity plus one header consumes exactly two carry entries 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > late carry-detail overflow clears the entire partial result and preserves input 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > contact event and work budgets reject their first unavailable unit 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > invalid options reject accessors without running getters 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > same-looking foreign geometry and copied observations cannot acquire provenance 4ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > public report edits and actor iteration order cannot change private responses 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > results and retained contexts remain isolated after commit edits and restore 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > queries preserve terrain history energy ledger and the supplied saved actor 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > translation policy commits actor terrain and AP as one zero-tick action 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > crush rejection preserves complete live actor terrain AP holds accounting and revision 3ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > saved edit-only actor state continues identically without a physical replay claim 5ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > translation response preserves nonzero saved velocity gravity and actor step 2ms
+ ✓ engine/experimental/translation-displacement.test.ts > exact actors during conservative translations > contact overflow after proposed carry removes all partial diagnostic detail 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > compact memory owns only metadata parcel control and cell witnesses 6ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > stale ticks shapes versions and selected cell history reject 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > malformed memory rejects accessors sparse rows symbols and extra fields 1ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > identity ticks refresh witnesses without applying another transport cycle 10ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > identical steam parcels follow original identities through a complete permutation 5ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > solidification retires control while preserving the resulting material 5ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > condensation retains control velocity and refreshes material witnesses 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > cloned foreign and mixed-boundary observations reject 4ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > mutating public motion reports cannot alter private parcel correspondence 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > double-following rejects the already advanced memory tick 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > material transport memory and complete-tick continuity > disabled and overflow provenance fail the action instead of guessing 5ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > fraction-only preparation publishes saved momentum and AP atomically 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > full transport matches the primitive and retains translation actor policy 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > one multi-axis parcel path uses one translation operation and one game write 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > journal retains complete translation paths and the final game boundary 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > a throwing final game reducer discards the whole translated candidate 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > invalid asynchronous and nonportable game callbacks cannot publish prefixes 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > game reducers cannot reenter commit restore or sibling mutation before costs publish 5ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > guarded game updates own callback inputs and expire with the preview editor 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > late actor rejection discards earlier parcel motion 3ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > operation budget includes game publication and rejects before the first move 15ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > commit validation rejects incorrectly saved memory after successful staging 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > temporary structural holds still block controlled debris transport 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > a new sibling revision invalidates a staged transport preview 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > inert tick failure after transport cannot publish actors AP or terrain 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > serialized continuation preserves memory future transport and complete terrain 8ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > a swallowed helper error inside preview preparation still cannot become ready 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > cancelling an in-flight transport preview preserves the acknowledged state 2ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > preview discard capability expires after preparation 1ms
+ ✓ engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > mocked worker carries transport memory costs and translation journals exactly 10ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > fit permits face contact but detects one quantum of overlap 6ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > closed boundaries reject outside bodies and permit touching the floor 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 0 sign 1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 0 sign -1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 1 sign 1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 1 sign -1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 2 sign 1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweep gives exact contact along axis 2 sign -1 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > sweeps cannot tunnel through a thin obstacle at a nonbinary contact fraction 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > diagonal grazing is clear while one quantum of positive overlap collides 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > endpoint contact is reported but touching while moving away is clear 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > parallel and zero motion do not collide with a merely touching face 2ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > initial overlap is explicit rather than disguised as a normal sweep hit 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > world-wall contacts are exact and diagonal normal ties choose X first 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > equal-time cell contacts choose the lowest x-major index 0ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > outside-camera rays clip into the world from either direction 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 0 sign 1 with exact entry time 0ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 0 sign -1 with exact entry time 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 1 sign 1 with exact entry time 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 1 sign -1 with exact entry time 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 2 sign 1 with exact entry time 0ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray traverses axis 2 sign -1 with exact entry time 0ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > rays cross all tied axes together, skipping edge-only cells 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > grid-plane ray starts select the travel side and canonical zero time 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > ray entry ties choose X before a simultaneous world boundary on Y 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > point rays, parallel outside rays and empty material filters terminate 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > explicit material filters target fluid without changing default body geometry 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > support finds every co-nearest face and its exact footprint area 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > support distinguishes nearest terrain from the closed floor boundary 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > invalid query data rejects without reading accessors or accepting fractional units 2ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > array data is copied without calling inherited iterators or array methods 2ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > fixed-point gameplay geometry, no physical steps > work budget rejects an oversized swept search explicitly 61ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > geometry view identity and isolation > old committed views remain isolated after a newer terrain commit 2ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > geometry view identity and isolation > preview views identify their branch and operation and match committed geometry 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > geometry view identity and isolation > reservoir queries share rules but retain their domain and independent terrain 1ms
+ ✓ engine/experimental/gameplay-geometry.test.ts > geometry view identity and isolation > result and request mutations cannot change retained query geometry or session state 1ms
+ ✓ engine/experimental/path-journal.test.ts > bounded pure path journals > disabled capture is explicit and cannot accept frames 3ms
+ ✓ engine/experimental/path-journal.test.ts > bounded pure path journals > empty frames cost one entry and record 257 clears the entire retained prefix 1ms
+ ✓ engine/experimental/path-journal.test.ts > bounded pure path journals > net and path detail share one exact budget with frame overhead 0ms
+ ✓ engine/experimental/path-journal.test.ts > bounded pure path journals > either incomplete record clears all detail and later frames only increase counts 1ms
+ ✓ engine/experimental/path-journal.test.ts > bounded pure path journals > reads isolate every nested array and freeze full revision identities 3ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > default and net-only branches never request paths 3ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > zero-horizon public branches expose a complete empty path journal without stepping 0ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > capture implies net motion and preserves ordered primary/reservoir and operation identities 5ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > invalid flags, contradictory capture and unsupported detail budgets reject before allocating branches 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > requiresPaths cannot be disabled or changed by later policy mutation 2ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > missing driver support fails atomically and closes every created domain 2ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > malformed reservoir paths cannot publish already staged primary state or invoke the reducer 2ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > valid detail above the requested per-tick budget rejects before publication 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > a declared overflow remains observable without inventing partial paths 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > disabled movement is explicit inside reducers and unknown domains reject 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > all domains validate before exact start/end queries and movement reach the reducer 6ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > retained callbacks keep the original terrain, movement and operation after edits and commit 3ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > long-horizon retention overflow does not remove valid per-tick actor input 56ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > cleanup and reducer failures publish neither journal nor terrain/game state 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > cancellation during asynchronous path retrieval discards private data and cleans the driver 1ms
+ ✓ engine/experimental/path-journal.test.ts > tactical capture with inert domain execution > stale previews reject, while committed journals survive restore and caller mutation 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > empty observations preserve saved state without events or displacement work 11ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > linear terrain pushes fractional bodies by the exact remaining travel on every axis/sign 16ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > fractional contact times retain their exact reduced ratio and integer final coordinates 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > diagonal corner contact chooses X and leaves the tangential coordinate unchanged 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > simultaneous perpendicular pushes combine normal velocities without choosing actor order 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > a transient out-and-back path can displace an actor despite zero final net terrain motion 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > an endpoint touch reports contact without displacing the actor 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > a grounded body follows its falling fragment with no contact impulse or actor step 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > a stationary support prevents automatic carry and loose powder can leave an actor unsupported 3ms
+ ✓ engine/experimental/terrain-displacement.test.ts > causal exact terrain displacement > a moving obstacle vacates space rather than acting as a wall at its old position 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > a pusher reaches an actor first, then crushes it against a wall at the causal time 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > an already touching stationary wall participates in opposing constraints 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > two approaching cells produce an exact opposing-velocity crush witness 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > a later opposing impact retains an odd numerator over doubled relative speed 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > closed boundaries constrain pushes on every axis and sign 8ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > an obstacle moved by an earlier pass constrains a later push at its new position 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > the vacated position of an earlier mover is not a phantom stationary obstacle 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > original identity follows a moving cell through multiple passes 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > relocated occupants are checked at their destination without inventing a push path 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > newly frozen overlap remains explicit rather than inventing a depenetration direction 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > constraints, occupancy and failed responses > fluid and gas transfers affect exposure without imparting solid collision motion 3ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > disabled and overflow captures cannot masquerade as an unobstructed body response 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > work budget is inclusive at the exact completed cost and overflow discards partial response 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > event budget stops before a second collision and never commits the first push 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > contact budget includes the stationary crush witness and clears partial detail 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > zero budgets allow an empty history and reject the first corresponding unit of work 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > invalid options fail before getters can execute 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > geometry must match owned observations, not just identical public stamps 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > public observation mutations and actor iteration order cannot change responses 2ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > retained contexts keep their original state after commit, edits and restore 3ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > querying displacement cannot change terrain, energy accounting or the supplied actor 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > initial overlap and outside placement stay unresolved without changing saved body 1ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > resolved pushes publish actor, terrain and AP atomically 3ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > game rejection of crush preserves actor, terrain, AP and revision 3ms
+ ✓ engine/experimental/terrain-displacement.test.ts > bounded isolated displacement and application transactions > cleanup failure cannot publish an otherwise successful displacement 2ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > a burned fuel cell produces fire then transports its heat upward as smoke 6ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > water moves before freezing and the fresh ice acquires no implicit bonds 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > executed provenance retains an original cell that returns to its start 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > each of twenty-eight advances performs one stage and publishes no prefix 8ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > cancellation at every incomplete boundary preserves committed coordinates 12ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > terminal jobs cannot advance or revoke an already committed result 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > source mutations after construction cannot change later stages 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > result state, movement, reaction reports and progress values are isolated 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > composed stages equal public movement passes followed by the unchanged reaction API 4ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > eight-tick trajectories reproduce complete state and provenance exactly 10ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > JSON restart before each direction and axis rotation retains exact continuation 10ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > odd-tick burning and smoke restart equals uninterrupted execution 2ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > odd rectangular five-cubed fixtures conserve energy through eight moving reactive ticks 214ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > custom fuel combustion and smoke movement compose under one catalog identity 4ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > an untouched bonded damaged region preserves integrity anchors and connections 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > singleton state advances its clock without inventing motion or drift 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > movement maps are bijections and canonical even for displaced gas 3ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > state readers own inputs and never silently import reaction-only saves 3ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > maximum exact tick can be saved but cannot overflow during advancement 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > malformed wrappers and coordinates reject before creating a candidate 1ms
+ ✓ engine/experimental/reactive-evolution.test.ts > complete conservative reactive evolution > getters symbols and inherited fields cannot enter the evolution state 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > the eight-pass order is explicit and immutable 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > each advance completes one pass and no intermediate state is readable 8ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > cancellation at every incomplete boundary discards the entire result 5ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > a completed job cannot execute twice or be cancelled retroactively 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > input mutation between passes cannot alter the owned candidate 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > published state reports and progress values cannot mutate subsequent reads 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > state factories and readers detach all caller coordinates 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > repeat eight-cycle trajectories match every full state and report 7ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > save and restart at every direction rotation equals uninterrupted execution 152ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > restart at odd absolute cycles preserves selection and final state 5ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > the largest exact cycle is serializable but cannot advance past the limit 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > malformed wrapper identities and cycles fail without touching inputs 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > accessors prototypes and symbols are rejected before evaluating values 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > foreign catalog blocks and forged registries cannot authorize a job 2ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > invalid packed or structural coordinates cannot enter staged execution 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > odd line heat uses both parity passes with exact closed-boundary arithmetic 1ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > a small odd rectangular chamber conserves energy for eight local cycles 10ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > inert air-only profiles require no fire smoke or phase destinations 2ms
+ ✓ engine/experimental/reactive-reaction-jobs.test.ts > complete local-cycle publication and continuation > plain material blocks and M5-shaped saves do not masquerade as cycle states 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a one-cell solid rests on the closed floor with balanced load 4ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > air, powder and liquid alone have no structural members or loads 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unsupported solid falls exactly one cell with its damage and energy 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > an anchor prevents unsupported motion without repairing integrity 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unbonded vertical contacts carry weight without creating bonds 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > touching horizontal cells do not gain implicit support or bonds 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > X bonds transmit distant support across the complete bridge 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > Z bonds carry support in an odd rectangular volume 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > Y bonds let an anchored upper cell suspend a lower cell 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > integer remainders go to the smallest global support index 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > custom density and cohesion determine exact supported weight and capacity 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > thermal weakening uses two-stage integer rounding and preserves energy 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > zero thermal capacity fails integrity and retains the explicit anchor 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > overload applies exactly one integer damage increment per solve 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a failed bonded cell prunes both ends without welding surviving neighbors 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a floating bonded fragment retains its internal bonds and damage 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unbonded falling vertical stacks form a conservative cycle, not overlapping swaps 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > falling stone displaces lower-density water and transports both energy values 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > lighter structures rest on denser liquid without artificial structural members 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > noncohesive solid obstacles remain fixed despite their zero structural word 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > noncohesive frozen obstacles remain fixed despite low density 0ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > blocking propagates across multiple touching components and distant bonds 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > cutting the sole anchor moves the entire distant bridge 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > burning a support releases its distant bridge without losing conserved energy 2ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > melting an ice support releases its bridge and conservatively displaces the water 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > complete state and report are independent of work-budget size 5ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > input validation rejects malformed bonds and incompatible catalogs before work 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > complete blocks restart exactly after JSON serialization and a fresh registry 3ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > each advance stays within its work budget and exposes no partial result 6ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > invalid budgets fail without advancing or cancelling the job 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > cancelling at every incomplete work boundary leaves committed input untouched 4ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > caller mutations cannot affect a job after its validated snapshot is captured 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > completed results and progress values are isolated and terminal jobs stay terminal 1ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a dense 5 cubed fixture stays inside the linear work bound 3ms
+ ✓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > all three coordinates follow the reported permutation in an odd mixed block 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > hot damaged slab keeps exact coordinates, internal bonds and displaced hot air 7ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (-1,0,0) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (1,0,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,-1,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,1,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,-1) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,1) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > contact with an intact destination neighbor does not weld 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > external bonds reject by default and explicit cuts update both endpoints without healing 5ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > pins require explicit release and are not carried into the destination 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile water displacement is explicit and conservative through successive steps 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > existing fluid can be selected and moved without manufacturing or cooling it 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile displacement admits broken grains but rejects intact ice and pinned debris 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > an empty endpoint cannot tunnel through an intervening solid 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > late boundary failure rolls back earlier movement, cuts and pin releases 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > selection order and disconnected runs do not change results or receipts 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > malformed, sparse, duplicate, missing and excessive requests never mutate input 8ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > invalid snapshots fail before an operation can publish 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > frozen input is accepted and all result storage is isolated 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > selected matter and displaced steam keep all saved controls and thermal history 12ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > identical steam values exchange identities without guessing from cell values 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > multi-axis paths retain the last destination of each original parcel 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > closed paths restore parcel positions including a displaced occupant 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > sequential translations can be saved and continued with unchanged velocity 7ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > cloned reports and foreign or reversed geometry are rejected 5ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > public path mutations do not rewrite private original provenance 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > wrong cell witnesses reject rather than attaching controls to new matter 2ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > incomplete provenance fails the entire translation candidate 3ms
+ ✓ engine/experimental/material-transport-translation.test.ts > parcel controls through terrain translations > returned memory and observations are isolated from the branch and source 3ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > identity has no invented motion and needs no detail entries 3ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > records a falling two-cell fragment and its displaced occupant despite equal cell values 1ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > correspondence composes later swaps by original identity 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > returning to the original cell retains touched identity 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > nonmoving heat/phase fixture passes preserve correspondence and fragment metadata 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > the exact shared budget boundary is complete, one fewer entry is explicit overflow 1ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > duplicate or out-of-bounds source identity fails before a trace can publish 1ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > fragment roots and closed-floor descent are checked 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > a later fixture cannot silently relocate a structurally intact fragment 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > portable reads own all nested detail arrays 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > malformed metadata, counts, permutations and missing touched identities reject 2ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > portable decoding enforces one shared budget before copying nested fragment runs 1ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > accessors, sparse arrays and invalid limits reject without reading getters 1ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > journal record overflow exposes no seemingly complete prefix 0ms
+ ✓ engine/experimental/motion-trace.test.ts > pure motion recorder and portable trace validation > journal detail budget and incomplete tick traces cause explicit overflow 0ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > disabled capture never asks the driver for motion 4ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > ordered primary/reservoir frames retain operation, tick and committed identities 2ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > retained journals are isolated from callers and subsequent restore 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > requested capture without driver support fails atomically and closes the driver 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > a bad reservoir trace cannot publish a staged primary trace 2ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > driver detail above the requested budget fails before publication 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > a valid overflow trace preserves simulation but reports the journal as incomplete 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > cancellation during trace retrieval discards private frames and cleans the driver 2ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > cleanup failure does not publish an otherwise complete journal or world 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > invalid capture options reject before creating a branch or driver 1ms
+ ✓ engine/experimental/motion-trace.test.ts > motion journals with inert drivers only > stale preview journals reject while a committed zero-tick journal stays bound 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > odd rectangular volumes preserve x then y then z indexing 3ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > singleton and long single-cell axes are supported 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > dimension, volume and extra-field limits reject before constructing a block 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > solid construction has fresh integrity without bonds or anchors 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > custom cohesion governs structural eligibility rather than the builtin table 2ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > fuel placement accounts for chemical and thermal external energy exactly 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > removing fuel debits its complete conserved energy 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > thermal edits preserve damage, anchors, bonds and chemical fuel 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > thermal edits cannot consume chemical energy even after other valid commands 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > chemical floor and maximum energy remain valid without silently transforming material 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > explicit join and cut update both cells and report the actual neighbor reach 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > bonds use all three coordinate axes and reject closed boundaries 3ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > replacement clears reciprocal old bonds and never welds into neighboring terrain 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > zero integrity clears both bond endpoints while retaining explicit anchor state 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > repairs restore integrity without manufacturing bonds 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > joins require both endpoints intact and structurally eligible 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > nonstructural material rejects integrity, anchor and bond edits atomically 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > ordered edits charge the net external change and report canonical unique indices 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > empty and no-op edits still return isolated coordinates and zero receipts 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > JSON continuation preserves full damage, thermal and bond history 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > reads return isolated arrays and cannot alter saved material history 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > wrong schemas, rules, identities and coordinate lengths reject untouched input 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > another validated catalog cannot read the original block 2ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > packed flags, velocity, wrong phase and inactive materials are rejected 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > energy bounds, fuel floor and mismatched thermal views are rejected 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > ineligible, reserved, nonreciprocal and boundary structural words are rejected 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > late invalid commands cannot publish earlier placement or energy edits 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > invalid edits reject unknown tags, fields, coordinates and nonportable optional values 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > accessor commands and coordinate reads fail without executing getters 0ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > null, sparse, decorated, oversized and typed-array edits are rejected 1ms
+ ✓ engine/experimental/reactive-materials.test.ts > reactive material blocks and atomic edits > the block is not silently accepted as an M5 world snapshot 1ms
+
+ Test Files  22 passed (22)
+      Tests  566 passed (566)
+   Start at  16:43:56
+   Duration  15.25s (transform 942ms, setup 0ms, collect 3.46s, tests 4.70s, environment 3ms, prepare 1.84s)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-49-2026-10-17/attempt-11/vitest.json

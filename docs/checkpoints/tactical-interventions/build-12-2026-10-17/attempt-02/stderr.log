@@ -1,0 +1,22 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > cleanup failure after successful carry cannot publish the staged actor
+AssertionError: expected [Function] to throw error matching /close failure/ but got 'Simulation cleanup failed.'
+
+- Expected: 
+/close failure/
+
++ Received: 
+"Simulation cleanup failed."
+
+ ❯ engine/experimental/terrain-motion.test.ts:251:67
+    249|       requiresPaths: true, reduceTick: ({game, beforeQueries, queries,…
+    250|     }, async () => {});
+    251|     const before = s.snapshot(), b = s.branch({horizonTicks: 1}); awai…
+       |                                                                   ^
+    252|   });
+    253| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

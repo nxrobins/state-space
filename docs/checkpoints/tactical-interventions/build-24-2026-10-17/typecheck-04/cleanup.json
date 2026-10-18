@@ -1,0 +1,7 @@
+{
+  "workloadStillRunning": false,
+  "namedJobStillExists": false,
+  "globalHoldAndSourceHashesUnchanged": true,
+  "authorizationConsumed": true,
+  "GPUReplayBenchmarksAllowed": false
+}

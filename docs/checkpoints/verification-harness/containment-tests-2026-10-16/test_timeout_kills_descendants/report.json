@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "id": "1585fdb42dcd452eba7d4334ed187170",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-c",
+    "import subprocess,sys,time; p=subprocess.Popen([sys.executable,\"-c\",\"import time;time.sleep(30)\"]); print(p.pid,flush=True); time.sleep(30)"
+  ],
+  "startedAt": 1792217855.9984963,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 1.0,
+  "stallSeconds": 1.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792217857.0000422,
+      "hostCpuPercent": 0,
+      "freeMemoryMiB": 32768
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 1.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 28076,
+  "lastOutput": "7028",
+  "exitCode": 125,
+  "error": "Independent job deadline expired",
+  "finishedAt": 1792217858.1023464
+}

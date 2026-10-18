@@ -1,0 +1,6 @@
+test_independent_watchdog_survives_blocked_receipt_writer (test_verification_guard.VerificationGuardTests) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.587s
+
+OK

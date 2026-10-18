@@ -1,0 +1,24 @@
+{
+  "recordedAtUTC": "2026-10-18T00:08:20.131265+00:00",
+  "userInstruction": "i'll risk a freeze, let's unblock ourselves here",
+  "scope": "Build 51 bounded reactive transport jobs, atomic session commands, executed paths and actor response; new fixtures at most 125 cells/eight ticks/eight swaps; previous 1570 selected CPU tests, full types, lint, SDK and public integration",
+  "priorMaxHostCpuPercent": 20,
+  "maxHostCpuPercent": 50,
+  "requiredSamples": 10,
+  "minFreeMemoryMiB": 8192,
+  "workloadCpuLimitPercent": 6,
+  "workloadMemoryMiB": 4096,
+  "independentWatchdog": true,
+  "timeoutSeconds": {
+    "tests": 30,
+    "typecheck": 30,
+    "lint": 30,
+    "sdk": 60,
+    "public-entry": 30
+  },
+  "liveHostCpuStopPercent": 85,
+  "globalRuntimeHoldUnchanged": true,
+  "GPUReplayBenchmarksAuthorized": false,
+  "legacyDemos": "quarantined",
+  "rationale": "Continue authorized bounded CPU development; unchanged caps, independent watchdog, runtime hold and legacy quarantine. Native/GPU/replay benchmarks remain held."
+}

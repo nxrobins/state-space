@@ -1,0 +1,15 @@
+test_blocked_pipe_write_returns_by_request_deadline (test_verification_browser.BrowserTransportTests) ... ok
+test_cleanup_failure_does_not_skip_remaining_resources (test_verification_browser.BrowserTransportTests) ... ok
+test_close_kills_helper_before_closing_a_stalled_pipe (test_verification_browser.BrowserTransportTests) ... ok
+test_existing_evidence_is_not_overwritten (test_verification_browser.BrowserTransportTests) ... ok
+test_hard_hold_prevents_even_transport_process (test_verification_browser.BrowserTransportTests) ... ok
+test_persistent_sequence_and_one_outstanding_request (test_verification_browser.BrowserTransportTests) ... ok
+test_timeout_wrong_id_truncated_tail_and_overflow_fail (test_verification_browser.BrowserTransportTests) ... ok
+test_duplicate_skipped_or_wrong_job_sequences_fail (test_verification_browser.DurableProgressTests) ... ok
+test_final_output_is_checked_even_if_child_already_exited (test_verification_browser.DurableProgressTests) ... ok
+test_status_text_and_partial_lines_are_not_progress (test_verification_browser.DurableProgressTests) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.369s
+
+OK

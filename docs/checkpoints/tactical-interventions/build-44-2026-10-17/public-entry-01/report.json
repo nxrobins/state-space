@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "d9686be1f4114c7d8477954c1603e564",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792276341.0782397,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792276342.1293828,
+      "hostCpuPercent": 7.205452775073029,
+      "freeMemoryMiB": 101891.046875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 37260,
+  "lastOutput": "dTicks\":4,\"storedMaterialHistory\":true,\"synchronizedReservoirContinuation\":true,\"reactiveSession\":true,\"sessionRules\":\"reactive-session-1\",\"sessionCells\":8,\"completedSessionTicks\":3,\"sessionContainedWorldTicks\":6,\"atomicGamePhysicsCommit\":true,\"previewContinuation\":true,\"stalePreviewRejected\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792276343.0411665
+}

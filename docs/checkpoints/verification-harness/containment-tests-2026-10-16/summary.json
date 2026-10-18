@@ -1,0 +1,121 @@
+{
+  "scope": "Authorized bounded non-GPU Windows containment tests only",
+  "status": "passed",
+  "recordedAt": "2026-10-17T06:18:37.347458+00:00",
+  "localDate": "2026-10-16",
+  "timezone": "America/Los_Angeles",
+  "testsPassed": 4,
+  "testsFailed": 0,
+  "testsSkipped": 0,
+  "sequential": true,
+  "firstAttemptsOnly": true,
+  "stopOnFirstFailure": true,
+  "fixesNeeded": false,
+  "cases": [
+    {
+      "case": "test_contained_success",
+      "passed": true,
+      "wallSeconds": 2.688,
+      "receipt": "test_contained_success/case.json",
+      "receiptSha256": "a4be6aecf37b4ca56c0ea00997d970545bc5a3ca31c8ddee7dd7de6c8830aa5e",
+      "supervisorExpectedPassed": true,
+      "observedProcesses": [
+        {
+          "pid": 38276,
+          "state": "absent"
+        }
+      ],
+      "observedOutcome": "Workload exited normally"
+    },
+    {
+      "case": "test_second_verification_never_starts",
+      "passed": true,
+      "wallSeconds": 0.688,
+      "receipt": "test_second_verification_never_starts/case.json",
+      "receiptSha256": "3298618e72d7a4d2285827759232c0867d8bce12128245ef8ac574bdb3445736",
+      "supervisorExpectedPassed": false,
+      "observedProcesses": [],
+      "observedOutcome": "RuntimeError('Another State Space verification owns the lease. Wait or cancel that run.')"
+    },
+    {
+      "case": "test_timeout_kills_descendants",
+      "passed": true,
+      "wallSeconds": 2.703,
+      "receipt": "test_timeout_kills_descendants/case.json",
+      "receiptSha256": "a17906e529498b89212d89140b62acf1d44d33242f45dd2d013e01cbc724d0c0",
+      "supervisorExpectedPassed": false,
+      "observedProcesses": [
+        {
+          "pid": 28076,
+          "state": "absent"
+        },
+        {
+          "pid": 7028,
+          "state": "absent"
+        }
+      ],
+      "observedOutcome": "Independent job deadline expired"
+    },
+    {
+      "case": "test_independent_watchdog_survives_blocked_receipt_writer",
+      "passed": true,
+      "wallSeconds": 6.047,
+      "receipt": "test_independent_watchdog_survives_blocked_receipt_writer/case.json",
+      "receiptSha256": "dde65c162df6d73b0cc6bf6760814e5ac6fc37e4b091f208be73c776e63e18c0",
+      "supervisorExpectedPassed": false,
+      "observedProcesses": [
+        {
+          "pid": 40352,
+          "state": "absent"
+        }
+      ],
+      "observedOutcome": "Supervisor heartbeat expired"
+    }
+  ],
+  "observations": {
+    "normalExit": true,
+    "leaseExclusion": true,
+    "absoluteDeadlineCancellation": true,
+    "descendantCleanup": true,
+    "heartbeatCancellationDuringFourSecondWriterStall": true,
+    "noMatchingHelpersAfterward": true,
+    "ownedNamedJobsAbsentAfterward": true
+  },
+  "harnessSourcesStillMatchTestedHashes": true,
+  "protectedFilesUnchanged": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "runtimeHold": {
+    "blockRecovery": true,
+    "recoveryPermitPresent": false
+  },
+  "legacyQuarantine": "unchanged",
+  "m5CompletionStatus": "suspended-after-host-freeze",
+  "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+  "runnerSha256": "168cd360594f304c8ab178379f9bc0ed7f61c02811727ed209b8839f589191e5",
+  "cleanupEvidence": [
+    {
+      "path": "helper-cleanup.json",
+      "sha256": "8ac9df17bb3dd047ce94f6216abe9baaea7b7546a511047d770ff3f3d6782abf"
+    },
+    {
+      "path": "job-cleanup.json",
+      "sha256": "ffe10366e28e2bfe91e39f602ef621bb39cc6dab759783d8dd86b82a76ca7e26"
+    }
+  ],
+  "notRun": [
+    "browser",
+    "GPU workload or telemetry",
+    "builds",
+    "physics replay",
+    "frame benchmarks",
+    "legacy demos"
+  ],
+  "limits": [
+    "Containment payloads only print/sleep; host health uses fixtures.",
+    "Expected fault-injection supervisor receipts report passed=false; the tests pass by verifying cancellation.",
+    "GPU/driver/kernel behavior and whole-host hang recovery remain unverified.",
+    "No runtime recovery permit was issued and the runtime hold remains intact."
+  ]
+}

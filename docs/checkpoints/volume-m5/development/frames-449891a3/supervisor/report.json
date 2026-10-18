@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "id": "fffe1c2b75f04d5c94819de099c63922",
+  "kind": "frames",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\frames-449891a3\\evidence",
+    "--probe",
+    "frames",
+    "--mode",
+    "active",
+    "--size",
+    "128",
+    "--scene",
+    "cut"
+  ],
+  "startedAt": 1792198715.6641977,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('GPU is busy before launch')",
+  "finishedAt": 1792198716.7357724
+}

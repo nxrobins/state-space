@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "id": "be4f7b79f67d415f95486e77022f630e",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.lighting.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\cavern-lighting-cache\\non-gpu-tests-2026-10-17\\attempt-01\\vitest.json"
+  ],
+  "startedAt": 1792222183.9346957,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792222184.941371,
+      "hostCpuPercent": 4.780487804878053,
+      "freeMemoryMiB": 98307.4453125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 28964,
+  "lastHealth": {
+    "host": {
+      "time": 1792222188.5998213,
+      "hostCpuPercent": 16.138059701492537,
+      "freeMemoryMiB": 98047.125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 1.28125,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 189.57421875
+    }
+  },
+  "lastOutput": "JSON report written to D:/state-space/docs/checkpoints/cavern-lighting-cache/non-gpu-tests-2026-10-17/attempt-01/vitest.json",
+  "exitCode": 0,
+  "finishedAt": 1792222189.5131388
+}

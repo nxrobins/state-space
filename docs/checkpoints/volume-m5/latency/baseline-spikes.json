@@ -153,7 +153,7 @@
         "worst": 92.89999999999964
       },
       "missedDeadlines": 58,
-      "lostDisplaySlots": 0,
+      "lostDisplaySlots": 183,
       "groups": [
         {
           "planReused": false,
@@ -241,5 +241,6 @@
         }
       ]
     }
-  ]
+  ],
+  "reportingNote": "Lost display slots recomputed from consecutive measured timestamps; original raw receipts retain the known reporting bug. See ../frame-reporting-fix.json."
 }

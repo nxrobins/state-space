@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "C:\Users\nxrob\AppData\Roaming\uv\python\cpython-3.10.16-windows-x86_64-none\lib\runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "D:\state-space\scripts\verify_volume_m5_browser.py", line 177, in <module>
+    raise SystemExit(main())
+  File "D:\state-space\scripts\verify_volume_m5_browser.py", line 150, in main
+    raise RuntimeError(state['error'])
+RuntimeError: Error: Dispatch-bound regression did not create ice
+    at Module.verifyM5GpuTiny (http://127.0.0.1:58328/dist/volume-m5/structural-probe.js:4396:75)

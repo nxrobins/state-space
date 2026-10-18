@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "id": "2d490b8079744fa8bc13807e161cd635",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.json"
+  ],
+  "startedAt": 1792199363.632266,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792199364.6509552,
+      "hostCpuPercent": 5.258126195028678,
+      "freeMemoryMiB": 84987.19921875
+    },
+    "gpu": null
+  },
+  "childPid": 43768,
+  "lastHealth": {
+    "host": {
+      "time": 1792199369.0399563,
+      "hostCpuPercent": 8.392857142857146,
+      "freeMemoryMiB": 84716.078125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 4.71875,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 246.43359375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792199369.479091
+}

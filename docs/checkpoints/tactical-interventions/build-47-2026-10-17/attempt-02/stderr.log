@@ -1,0 +1,22 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-actors.test.ts > causal response to actual reactive physics > a transient phase overlap is detected before later settlement clears the occupied cell
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ engine/experimental/reactive-actors.test.ts:139:143
+    137|   test('a transient phase overlap is detected before later settlement …
+    138|     const f = fixture([place(0, 1, 0, MAT.MOLTEN_GLASS, 200), place(0,…
+    139|     const a = f.make(vec(0.25, 1.25, 0.25), vec(0.5, 0.5, 0.5)); expec…
+       |                                                                                                                                               ^
+    140|     expect(f.context.resolve(a)).toMatchObject({status: 'embedded', re…
+    141|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,60 @@
+{
+  "purpose": "Build 18 bounded CPU lint",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792237445.4200609,
+      "hostCpuPercent": 8.923375363724539,
+      "freeMemoryMiB": 102664.15234375
+    },
+    {
+      "time": 1792237446.4216642,
+      "hostCpuPercent": 9.86328125,
+      "freeMemoryMiB": 102664.1328125
+    },
+    {
+      "time": 1792237447.4364734,
+      "hostCpuPercent": 11.186113789778208,
+      "freeMemoryMiB": 102664.08203125
+    },
+    {
+      "time": 1792237448.4379525,
+      "hostCpuPercent": 12.84755512943433,
+      "freeMemoryMiB": 102665.3359375
+    },
+    {
+      "time": 1792237449.4524472,
+      "hostCpuPercent": 9.27734375,
+      "freeMemoryMiB": 102668.62890625
+    },
+    {
+      "time": 1792237450.4666035,
+      "hostCpuPercent": 8.365384615384619,
+      "freeMemoryMiB": 102660.34765625
+    },
+    {
+      "time": 1792237451.4699469,
+      "hostCpuPercent": 11.442307692307697,
+      "freeMemoryMiB": 102672.3125
+    },
+    {
+      "time": 1792237452.484655,
+      "hostCpuPercent": 11.964980544747084,
+      "freeMemoryMiB": 102667.69921875
+    },
+    {
+      "time": 1792237453.500138,
+      "hostCpuPercent": 10.348162475822054,
+      "freeMemoryMiB": 102673.3984375
+    },
+    {
+      "time": 1792237454.5149326,
+      "hostCpuPercent": 14.203454894433776,
+      "freeMemoryMiB": 102672.921875
+    }
+  ],
+  "passed": true,
+  "finishedAt": 1792237454.5149326
+}

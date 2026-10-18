@@ -1,0 +1,24 @@
+{
+  "recordedAtUTC": "2026-10-17T21:45:26.880162+00:00",
+  "userInstruction": "i'll risk a freeze, let's unblock ourselves here",
+  "scope": "Build 41 separate core CPU, reactive-world CPU and reactive-translation CPU tests (at most 125 cells and eight path steps/ticks per trajectory), full types, lint, SDK/browser compilation and public integration",
+  "priorMaxHostCpuPercent": 20,
+  "maxHostCpuPercent": 50,
+  "requiredSamples": 10,
+  "minFreeMemoryMiB": 8192,
+  "workloadCpuLimitPercent": 6,
+  "workloadMemoryMiB": 4096,
+  "independentWatchdog": true,
+  "timeoutSeconds": {
+    "tests": 30,
+    "typecheck": 30,
+    "lint": 30,
+    "sdk": 60,
+    "public-entry": 30
+  },
+  "liveHostCpuStopPercent": 85,
+  "globalRuntimeHoldUnchanged": true,
+  "GPUReplayBenchmarksAuthorized": false,
+  "legacyDemos": "quarantined",
+  "rationale": "Continue the user-authorized bounded CPU path by adding state-preserving translation and tiny physical continuation cases. Existing M5/native/GPU and large-world replay remain blocked. Three separate test scopes retain the same 30-second caps; containment, watchdog, protected sources and runtime hold are unchanged."
+}

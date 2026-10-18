@@ -1,0 +1,47 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > default construction and v1 reads preserve the exact unconstrained format 8ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > adding a hold explicitly creates v2 without altering canonical material or time 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > hold expiry constrains the final lifetime tick and allows falling on the next tick 5ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > explicit release removes only the constraint and permits the next ordinary fall 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > temporary holds never leak anchor bits into snapshots or completed block changes 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > a permanent anchor survives expiry and continues supporting the terrain 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > holding one member suspends its damaged bonded slab without healing or cooling 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > thermal damage can destroy integrity while a valid constraint keeps debris stationary 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > already failed cohesive debris can be held without receiving new integrity 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > heat exchange still operates on held material and conserves exact energy 3ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > held ice melts and retires before structural settlement without an anchor residue 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > held fuel burns and releases its distant bridge during the same tick 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > partial transformation retires only the changed members of a hold 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > a hold can both transform and reach its expiry in the same tick with both facts reported 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > identical placement retires held identity even when the block diff is empty 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > energy integrity bonds and permanent-anchor edits preserve held identity 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > a failed late edit cannot retire holds or invalidate prepared work 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > translation cannot release a temporary hold via the permanent-anchor policy 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > unselected held zero-integrity debris blocks mobile displacement 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > unheld translations preserve other saved hold coordinates and lifetime 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > adding or releasing holds makes older tick and translation jobs stale 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > hold additions reads snapshots reports and releases are isolated 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > holds and members are canonically ordered in explicit v2 snapshots 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > empty v2 worlds preserve v1 material state reports and exact physics 3ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > odd-tick JSON restarts preserve remaining lifetime and future complete states 10ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > save restore retains expiry rather than granting a fresh lifetime 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > cancellation at each incomplete boundary publishes neither expired holds nor anchor overlays 23ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > custom cohesion drives hold eligibility and fixed noncohesive solids reject 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > air liquids gases and powder cannot receive structural positional holds 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > invalid identity expiry duplicate membership and overlaps reject atomically 2ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > unknown release and invalid request data do not invalidate a valid prepared tick 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > hold and snapshot accessors reject without invoking user getters 1ms
+ ✓ engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > swallowed reentry poisons a hold operation and preserves a previous candidate 1ms
+ × engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > malformed constrained saves reject without replacing any committed domain 7ms
+   → expected [Function] to throw an error
+ · engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > maximum hold count and lifetime are accepted while one beyond each bound rejects
+ · engine/experimental/reactive-holds.test.ts > reactive hold state and deterministic lifetime > expiry at the largest exact tick cannot overflow and the following tick rejects
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 33 passed (36)
+   Start at  14:59:04
+   Duration  902ms (transform 421ms, setup 0ms, collect 528ms, tests 106ms, environment 0ms, prepare 75ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-42-2026-10-17/attempt-01/vitest.json

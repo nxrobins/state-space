@@ -1,0 +1,20 @@
+{
+  "purpose": "Build 24 bounded CPU typecheck",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792258868.6748097,
+      "hostCpuPercent": 3.0888030888030937,
+      "freeMemoryMiB": 102982.01953125
+    },
+    {
+      "time": 1792258869.6887126,
+      "hostCpuPercent": 30.39309683604986,
+      "freeMemoryMiB": 102947.015625
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792258869.6887126
+}

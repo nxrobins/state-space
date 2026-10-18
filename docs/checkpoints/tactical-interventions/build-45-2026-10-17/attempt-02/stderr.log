@@ -1,0 +1,20 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-geometry.test.ts > reactive gameplay geometry and exact preview boundaries > all five shared queries match the existing M5 adapter for the same complete builtin cells
+Error: Material is not supported by ca-3d-m5.
+ ❯ placement engine/experimental/structural-world-core.ts:37:54
+     35| }
+     36| function placement(id:number,thermal?:number) {
+     37|   if(!Number.isInteger(id)||!supported.has(id))throw Error('Material i…
+       |                                                      ^
+     38|   const record=DEFAULT_REGISTRY.material(id),t=thermal??record.default…
+     39|   checkedInteger(t,0,255,'thermal');
+ ❯ prepareStructuralEdits3D engine/experimental/structural-world-core.ts:51:43
+ ❯ applyStructuralEdits3D engine/experimental/structural-world-core.ts:81:3
+ ❯ CpuStructuralWorld3D.edit engine/experimental/structural-world-core.ts:141:55
+ ❯ CpuStructuralWorld3D.setCell engine/experimental/structural-world-core.ts:142:76
+ ❯ engine/experimental/reactive-geometry.test.ts:50:118
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

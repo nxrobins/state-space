@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "e5e2e41860174177821e73da1952feac",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792276978.3272936,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 81.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792276979.360869,
+      "hostCpuPercent": 4.8828125,
+      "freeMemoryMiB": 101879.83203125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 44456,
+  "lastHealth": {
+    "host": {
+      "time": 1792276991.9095821,
+      "hostCpuPercent": 10.465116279069765,
+      "freeMemoryMiB": 101384.34765625
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 12.203125,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 469.0703125
+    }
+  },
+  "lastOutput": "engine/experimental/reactive-geometry.test.ts(22,118): error TS2542: Index signature in type 'Readonly<Record<string, number>>' only permits reading.",
+  "exitCode": 2,
+  "finishedAt": 1792276992.1821566
+}

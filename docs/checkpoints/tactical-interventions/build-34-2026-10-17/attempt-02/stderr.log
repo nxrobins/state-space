@@ -1,0 +1,16 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > worker-owned drift continues saved momentum after restore
+Error: Expected asynchronous boundary did not arrive.
+ ❯ until engine/experimental/tactical-slab-ui.test.ts:20:127
+     18| afterEach(() => {vi.useRealTimers(); vi.unstubAllGlobals();});
+     19| function deferred<T>() {let resolve!: (v: T) => void; const promise = …
+     20| async function until(test: () => boolean) {for (let i = 0; i < 400; i+…
+       |                                                                                                                               ^
+     21| async function fixture() {
+     22|   let steps = 0;
+ ❯ engine/experimental/tactical-slab-ui.test.ts:50:116
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

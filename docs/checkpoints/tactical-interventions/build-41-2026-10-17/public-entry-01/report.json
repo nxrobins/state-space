@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "7141f6d1ac1e48eebd0bf513079380e1",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792273762.2512274,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 18.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792273763.3183577,
+      "hostCpuPercent": 3.7109375,
+      "freeMemoryMiB": 102412.89453125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 43268,
+  "lastOutput": ":\"reactive-world-1\",\"worldCells\":4,\"completedReactiveWorldTicks\":3,\"atomicWorldPublication\":true,\"revisionBoundCommit\":true,\"worldContinuation\":true,\"reactiveTranslation\":true,\"translationRules\":\"reactive-translation-1\",\"translationCells\":4,\"translationWorldTicks\":2,\"preservesMaterialHistory\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792273764.2593052
+}

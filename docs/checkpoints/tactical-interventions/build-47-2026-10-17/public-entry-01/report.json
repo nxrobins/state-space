@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "db5d499036c743da8b0bcb9ede0371df",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792279027.7600386,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 6.639,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792279028.8220632,
+      "hostCpuPercent": 12.278978388998041,
+      "freeMemoryMiB": 101424.80859375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 28156,
+  "lastOutput": "veMotion\":true,\"motionRules\":\"reactive-motion-1\",\"boundedExecutedPaths\":true,\"capturePhysicsExact\":true,\"reactiveActors\":true,\"bodyRules\":\"reactive-body-1\",\"displacementRules\":\"reactive-displacement-1\",\"actorCells\":4,\"actorSessionTicks\":3,\"causalPlatformCarry\":true,\"actorSnapshotContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792279029.455057
+}

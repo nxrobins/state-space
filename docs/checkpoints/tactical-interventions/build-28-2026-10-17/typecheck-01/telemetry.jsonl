@@ -1,0 +1,10 @@
+{"stage":"preflight","host":{"time":1792264672.3554392,"hostCpuPercent":1.8269230769230815,"freeMemoryMiB":103329.6640625},"gpu":null}
+{"stage":"running","host":{"time":1792264673.9597678,"hostCpuPercent":14.154411764705888,"freeMemoryMiB":103186.03515625},"gpu":null,"job":{"cpuSeconds":1.15625,"activeProcesses":2,"peakMemoryMiB":126.55859375}}
+{"stage":"running","host":{"time":1792264675.050394,"hostCpuPercent":12.857142857142856,"freeMemoryMiB":103083.77734375},"gpu":null,"job":{"cpuSeconds":2.390625,"activeProcesses":2,"peakMemoryMiB":230.61328125}}
+{"stage":"running","host":{"time":1792264676.1423914,"hostCpuPercent":12.33243967828418,"freeMemoryMiB":103048.91015625},"gpu":null,"job":{"cpuSeconds":3.609375,"activeProcesses":2,"peakMemoryMiB":276.12890625}}
+{"stage":"running","host":{"time":1792264677.2348995,"hostCpuPercent":12.042818911685993,"freeMemoryMiB":103026.36328125},"gpu":null,"job":{"cpuSeconds":4.84375,"activeProcesses":2,"peakMemoryMiB":288.18359375}}
+{"stage":"running","host":{"time":1792264678.3307095,"hostCpuPercent":10.892857142857137,"freeMemoryMiB":103017.36328125},"gpu":null,"job":{"cpuSeconds":6.015625,"activeProcesses":2,"peakMemoryMiB":298.3359375}}
+{"stage":"running","host":{"time":1792264679.419158,"hostCpuPercent":10.178571428571425,"freeMemoryMiB":102997.4140625},"gpu":null,"job":{"cpuSeconds":6.9375,"activeProcesses":2,"peakMemoryMiB":306.50390625}}
+{"stage":"running","host":{"time":1792264680.5114374,"hostCpuPercent":9.553571428571427,"freeMemoryMiB":102977.3828125},"gpu":null,"job":{"cpuSeconds":7.9375,"activeProcesses":2,"peakMemoryMiB":324.9296875}}
+{"stage":"running","host":{"time":1792264681.6037545,"hostCpuPercent":11.517857142857146,"freeMemoryMiB":102957.515625},"gpu":null,"job":{"cpuSeconds":9.046875,"activeProcesses":2,"peakMemoryMiB":353.91015625}}
+{"stage":"running","host":{"time":1792264682.694223,"hostCpuPercent":10.96014492753623,"freeMemoryMiB":102942.64453125},"gpu":null,"job":{"cpuSeconds":10.203125,"activeProcesses":2,"peakMemoryMiB":376.24609375}}

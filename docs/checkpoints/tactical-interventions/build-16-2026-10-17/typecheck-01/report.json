@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "201409b1d7b5435bb73ab0c7058057fd",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.json"
+  ],
+  "startedAt": 1792235760.9745305,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792235762.0081577,
+      "hostCpuPercent": 7.295719844357973,
+      "freeMemoryMiB": 102831.6015625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 17224,
+  "lastHealth": {
+    "host": {
+      "time": 1792235771.1915104,
+      "hostCpuPercent": 17.694369973190348,
+      "freeMemoryMiB": 102828.3046875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 8.625,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 339.5234375
+    }
+  },
+  "lastOutput": "        Type 'string' is not assignable to type '\"gameplay-geometry-1\"'.",
+  "exitCode": 2,
+  "finishedAt": 1792235771.2084053
+}

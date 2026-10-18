@@ -1,0 +1,43 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > complete empty motion preserves body state and reports exact boundary exposure 11ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > a falling slab carries its grounded actor exactly one cell without altering velocity or actor step 3ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > a stationary support prevents carry even when another contacted support falls 2ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > separate fragments with the same fall jointly carry a shared actor 4ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > a body with no geometric support is not pulled down by a nearby fragment 2ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > an airborne saved body touching a platform is not attached automatically 2ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > loose powder support moves without carrying and reports lost footing 2ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > the closed world floor remains stationary support 1ms
+ ✓ engine/experimental/terrain-motion.test.ts > grounded actors and moving support > the full carry sweep reports a stationary ledge reached exactly at its endpoint 3ms
+ × engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > incoming linear cells contact a fractional actor on every axis and sign 4ms
+   → Missing synthetic schedule pass
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > diagonal contacts preserve exact fractions and deterministic X-before-Y axis ties
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > a transient round trip hits an actor even when net movement and final overlap are empty
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > a carried body and another falling fragment use relative simultaneous motion
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > simultaneous debris contacts tie by original identity independent of actor iteration order
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > nonblocking water and gas paths never become solid debris contacts
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > endpoint-only touching is reported without inventing penetration
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > synthetic relocated occupants do not produce impacts through intermediate space
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > a relocated solid overlapping the actor at its destination is explicit
+ · engine/experimental/terrain-motion.test.ts > observed debris paths and exact contacts > phase-created solid overlap is explicit and leaves the actor state untouched
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > disabled and overflow observations are incomplete rather than empty movement
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > contact budget overflow discards the complete prefix and cannot carry partially
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > zero contact budget accepts a clean path and rejects the first actual contact
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > invalid options reject without invoking accessors
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > cloned or forged observations cannot impersonate a live session record
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > identical revision text from a different session cannot substitute its geometry
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > wrong-domain or caller-cloned geometry is rejected
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > public report mutations cannot change the private history and returned contacts are owned
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > retained motion contexts preserve their boundary after later edits and restore
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > an initially embedded or outside saved body cannot be silently depenetrated
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > a reducer can atomically publish carried terrain, actor and AP
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > rejecting a debris contact preserves terrain, actor, AP and revision together
+ · engine/experimental/terrain-motion.test.ts > motion provenance, limits and application atomicity > cleanup failure after successful carry cannot publish the staged actor
+
+ Test Files  1 failed (12)
+      Tests  1 failed | 9 passed (32)
+   Start at  03:01:52
+   Duration  845ms (transform 492ms, setup 0ms, collect 578ms, tests 37ms, environment 0ms, prepare 63ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-12-2026-10-17/attempt-01/vitest.json

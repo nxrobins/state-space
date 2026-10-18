@@ -1,0 +1,45 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a one-cell solid rests on the closed floor with balanced load
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > air, powder and liquid alone have no structural members or loads
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unsupported solid falls exactly one cell with its damage and energy
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > an anchor prevents unsupported motion without repairing integrity
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unbonded vertical contacts carry weight without creating bonds
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > touching horizontal cells do not gain implicit support or bonds
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > X bonds transmit distant support across the complete bridge
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > Z bonds carry support in an odd rectangular volume
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > Y bonds let an anchored upper cell suspend a lower cell
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > integer remainders go to the smallest global support index
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > custom density and cohesion determine exact supported weight and capacity
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > thermal weakening uses two-stage integer rounding and preserves energy
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > zero thermal capacity fails integrity and retains the explicit anchor
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > overload applies exactly one integer damage increment per solve
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a failed bonded cell prunes both ends without welding surviving neighbors
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a floating bonded fragment retains its internal bonds and damage
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > unbonded falling vertical stacks form a conservative cycle, not overlapping swaps
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > falling stone displaces lower-density water and transports both energy values
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > lighter structures rest on denser liquid without artificial structural members
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > noncohesive solid obstacles remain fixed despite their zero structural word
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > noncohesive frozen obstacles remain fixed despite low density
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > blocking propagates across multiple touching components and distant bonds
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > cutting the sole anchor moves the entire distant bridge
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > burning a support releases its distant bridge without losing conserved energy
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > melting an ice support releases its bridge and conservatively displaces the water
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > complete state and report are independent of work-budget size
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > input validation rejects malformed bonds and incompatible catalogs before work
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > complete blocks restart exactly after JSON serialization and a fresh registry
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > each advance stays within its work budget and exposes no partial result
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > invalid budgets fail without advancing or cancelling the job
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > cancelling at every incomplete work boundary leaves committed input untouched
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > caller mutations cannot affect a job after its validated snapshot is captured
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > completed results and progress values are isolated and terminal jobs stay terminal
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > a dense 5 cubed fixture stays inside the linear work bound
+ ↓ engine/experimental/reactive-structure.test.ts > reactive structural support and conservative fragments > all three coordinates follow the reported permutation in an odd mixed block
+
+ Test Files  1 failed (1)
+      Tests  35 skipped (35)
+   Start at  14:28:15
+   Duration  753ms (transform 178ms, setup 0ms, collect 486ms, tests 10ms, environment 0ms, prepare 79ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-39-2026-10-17/attempt-02/vitest.json

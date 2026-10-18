@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "ac3d092cc0c5466c8b6960a32e4def56",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792280397.405976,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792280398.4500325,
+      "hostCpuPercent": 4.798464491362764,
+      "freeMemoryMiB": 101243.1953125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 35188,
+  "lastHealth": {
+    "host": {
+      "time": 1792280412.1058245,
+      "hostCpuPercent": 26.339285714285708,
+      "freeMemoryMiB": 100640.03515625
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 12.890625,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 478.83203125
+    }
+  },
+  "lastOutput": "    Type 'null' is not assignable to type 'Game'.",
+  "exitCode": 2,
+  "finishedAt": 1792280412.631685
+}

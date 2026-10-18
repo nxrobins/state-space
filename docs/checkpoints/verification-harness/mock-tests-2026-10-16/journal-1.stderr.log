@@ -1,0 +1,19 @@
+test_blocked_fsync_is_not_acknowledged_or_progress (test_verification_journal.DurableJournalTests) ... ok
+test_hash_chain_and_receipt_must_agree (test_verification_journal.DurableJournalTests) ... ok
+test_size_limits_are_enforced_before_disk_write (test_verification_journal.DurableJournalTests) ... ok
+test_startup_io_failure_is_reported_before_journal_is_returned (test_verification_journal.DurableJournalTests) ... ok
+test_writer_error_and_queue_overflow_fail_closed (test_verification_journal.DurableJournalTests) ... ok
+test_all_660_frames_are_required (test_verification_journal.EventProtocolTests) ... ok
+test_invalid_digest_does_not_complete_tick (test_verification_journal.EventProtocolTests) ... ok
+test_missing_duplicate_or_boolean_sequence (test_verification_journal.EventProtocolTests) ... ok
+test_missing_phase_tick_and_early_completion_rejected (test_verification_journal.EventProtocolTests) ... ok
+test_odd_restart_and_tick_order (test_verification_journal.EventProtocolTests) ... ok
+test_repeated_status_and_heartbeats_are_not_progress (test_verification_journal.EventProtocolTests) ... ok
+test_stage_error_is_not_success (test_verification_journal.EventProtocolTests) ... ok
+test_blocked_supervisor_and_invalid_clock_fail_closed (test_verification_journal.WatchdogPolicyTests) ... ok
+test_heartbeat_cannot_extend_absolute_deadline (test_verification_journal.WatchdogPolicyTests) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 2.116s
+
+OK

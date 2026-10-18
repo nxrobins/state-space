@@ -1,0 +1,27 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/structural-client.test.ts > frame rejection, reset and Play resume ticks with one frame pump 30ms
+ ✓ engine/experimental/structural-client.test.ts > successful checkpoint recovery restarts frames while failed reset stays stopped 5ms
+ ✓ engine/experimental/structural-client.test.ts > HUD follows committed status, including out-of-lane actors and losses 4ms
+ ✓ engine/experimental/structural-client.test.ts > lighting A/B presents the same tick and survives checkpoint restore without stepping 6ms
+ ✓ engine/experimental/structural-client.test.ts > rejected lighting mode change leaves the selected mode and physics untouched 4ms
+ ✓ engine/experimental/structural-client.test.ts > an older SDK can still present reference lighting without the optional cache API 4ms
+ ✓ engine/experimental/lighting-cache.test.ts > rectangular hierarchy has disjoint complete levels and a bounded allocation 3ms
+ ✓ engine/experimental/lighting-cache.test.ts > regional culling never excludes an influencing source across a seam 0ms
+ ✓ engine/experimental/lighting-cache.test.ts > wide lists conservatively cover a 48-cell fog ray plus its source radius 0ms
+ ✓ engine/experimental/lighting-cache.test.ts > cache encoding stays inside the caller submission and never owns physics buffers 3ms
+ ✓ engine/experimental/lighting-cache.test.ts > failed encoding retains a full rebuild and closes the opened pass 1ms
+ ✓ engine/experimental/lighting-cache.test.ts > bind-group failure does not consume invalidation or open a compute pass 1ms
+ ✓ engine/experimental/lighting-cache.test.ts > failed cache compilation destroys its allocations without submitting a workload 1ms
+ ✓ engine/experimental/cavern-appearance.test.ts > reference setup and rendering do not compile, allocate or bind the experimental cache 6ms
+ ✓ engine/experimental/cavern-appearance.test.ts > A/B uses separate pipelines and bindings while sharing the caller submission 3ms
+ ✓ engine/experimental/cavern-appearance.test.ts > failed B compilation releases cache allocations and leaves A usable for retry 2ms
+ ✓ engine/experimental/cavern-appearance.test.ts > closing during cache setup cannot publish or leak a late cache 1ms
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  00:29:47
+   Duration  1.48s (transform 247ms, setup 0ms, collect 273ms, tests 77ms, environment 0ms, prepare 567ms)
+
+JSON report written to D:/state-space/docs/checkpoints/cavern-lighting-cache/non-gpu-tests-2026-10-17/attempt-01/vitest.json

@@ -1,0 +1,67 @@
+{
+  "case": "test_contained_success",
+  "startedAt": "2026-10-17T06:17:18.654494+00:00",
+  "passed": true,
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-B",
+    "D:\\state-space\\docs\\checkpoints\\verification-harness\\containment-tests-2026-10-16\\run_case.py",
+    "--child",
+    "test_contained_success",
+    "D:\\state-space\\docs\\checkpoints\\verification-harness\\containment-tests-2026-10-16\\test_contained_success"
+  ],
+  "sourceHashes": {
+    "scripts/verification_guard.py": "ae10142294b989880adb08a2ced9744972137378ab6be08d1134947a9f44f989",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_health.py": "5edbfc1712c80ca8d5d8db5720b538f4e5114a686dad9deea75c3ab9321434f0",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "tests/test_verification_guard.py": "edf5e48abb5ac19fb4ec500162728a80ad8727aede45e3fd1e74f6eb2c22d7ef"
+  },
+  "protectedBefore": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "wrapperTimeoutSeconds": 25,
+  "testSupervisorTimeoutSeconds": 15,
+  "containmentOptIn": "child-process-only",
+  "legacyOptIn": false,
+  "python": "3.10.16 (main, Mar 17 2025, 20:54:03) [MSC v.1943 64 bit (AMD64)]",
+  "workload": "print/sleep only",
+  "hostHealth": "fixture values; no GPU telemetry",
+  "exitCode": 0,
+  "wallSeconds": 2.688,
+  "protectedAfter": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "protectedUnchanged": true,
+  "supervisor": {
+    "id": "79fc92278d764a8fb3029670d0cda487",
+    "childPid": 38276,
+    "exitCode": 0,
+    "passed": true,
+    "independentWatchdog": {
+      "armed": true,
+      "heartbeatSeconds": 3,
+      "deadlineSeconds": 5.0,
+      "transport": "pagefile-backed mapping"
+    },
+    "startedAt": 1792217839.5048547,
+    "finishedAt": 1792217841.2801805
+  },
+  "observedProcesses": [
+    {
+      "pid": 38276,
+      "state": "absent"
+    }
+  ],
+  "evidenceHashes": {
+    "report.json": "d7a718f71b6fc67f30c8385e7ead45900d007fd899ec7b70d986f1faeb84e659",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.log": "50605ffe16bbf18fe660abf6c92876347b540710acf008d981dbcb2835412678",
+    "telemetry.jsonl": "d0d374c324766cd4f62cd8b04abce4faf3b829b0673dd9c13d90e814f17c9521",
+    "test.stderr.log": "0e9c3a734ba00b902b127633d8b95e6b0a2a876d9f501883d6d096e541314e38",
+    "test.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unittest.json": "75a22c95abbddf748e5d9c4d2cc2dc1bb3ef60683c0bebea3d8e2de58bbb54be"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "id": "a331d82591c64825a4942fc516205f72",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-c",
+    "print(\"must not run\")"
+  ],
+  "startedAt": 1792217852.8478904,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 5.0,
+  "stallSeconds": 5.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('Another State Space verification owns the lease. Wait or cancel that run.')",
+  "finishedAt": 1792217852.8478904
+}

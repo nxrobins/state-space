@@ -1,0 +1,60 @@
+{
+  "purpose": "Fresh CPU gate after reviewing and fixing callback-identity test assertion",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792228788.2610478,
+      "hostCpuPercent": 9.71153846153846,
+      "freeMemoryMiB": 102376.66015625
+    },
+    {
+      "time": 1792228789.2735968,
+      "hostCpuPercent": 2.791145332050049,
+      "freeMemoryMiB": 102384.8359375
+    },
+    {
+      "time": 1792228790.2818346,
+      "hostCpuPercent": 2.40153698366955,
+      "freeMemoryMiB": 102388.1796875
+    },
+    {
+      "time": 1792228791.287777,
+      "hostCpuPercent": 3.7145650048875822,
+      "freeMemoryMiB": 102391.11328125
+    },
+    {
+      "time": 1792228792.2925878,
+      "hostCpuPercent": 3.125,
+      "freeMemoryMiB": 102390.3515625
+    },
+    {
+      "time": 1792228793.3011653,
+      "hostCpuPercent": 2.700096432015431,
+      "freeMemoryMiB": 102360.7421875
+    },
+    {
+      "time": 1792228794.3120723,
+      "hostCpuPercent": 3.11284046692607,
+      "freeMemoryMiB": 102384.4375
+    },
+    {
+      "time": 1792228795.3239274,
+      "hostCpuPercent": 3.4615384615384603,
+      "freeMemoryMiB": 102379.18359375
+    },
+    {
+      "time": 1792228796.329987,
+      "hostCpuPercent": 2.61374636979671,
+      "freeMemoryMiB": 102376.5703125
+    },
+    {
+      "time": 1792228797.3400855,
+      "hostCpuPercent": 7.565470417070808,
+      "freeMemoryMiB": 102383.1484375
+    }
+  ],
+  "passed": true,
+  "workloadLaunched": false
+}

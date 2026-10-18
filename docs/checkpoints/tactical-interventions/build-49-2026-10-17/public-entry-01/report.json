@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "da7d4ac23e6b4024b90744ce27dd6f96",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792280773.0301929,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 18.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792280774.0960722,
+      "hostCpuPercent": 8.097560975609753,
+      "freeMemoryMiB": 101160.7109375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 32332,
+  "lastOutput": "dPolicy\":true,\"controlledCarry\":true,\"commandContinuation\":true,\"reactiveActorGroups\":true,\"actorGroupRules\":\"reactive-actor-group-1\",\"actorMovementRules\":\"reactive-actor-movement-1\",\"groupCells\":16,\"groupSessionTicks\":3,\"peerAwareMovement\":true,\"peerConflictRollback\":true,\"groupContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792280775.0382662
+}

@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "probe": "active-tiny",
+  "scope": "One bounded M5 stage; not complete release acceptance",
+  "hardware": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalProcessors": 16,
+    "gpu": "NVIDIA GeForce RTX 4090, 595.79, 24564"
+  },
+  "observer": {
+    "mode": "cli-poll",
+    "events": []
+  },
+  "error": "Error: Dispatch-bound regression did not create ice\n    at Module.verifyM5GpuTiny (http://127.0.0.1:58328/dist/volume-m5/structural-probe.js:4396:75)"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "time": "2026-10-16T18:54:52.5976069-07:00",
+    "id": 41,
+    "provider": "Microsoft-Windows-Kernel-Power",
+    "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+    "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-Power' Guid='{331c3b3a-2005-44c2-ac5e-77220c37d6b4}'/><EventID>41</EventID><Version>10</Version><Level>1</Level><Task>63</Task><Opcode>0</Opcode><Keywords>0x8000400000000002</Keywords><TimeCreated SystemTime='2026-10-17T01:54:52.5976069Z'/><EventRecordID>54986</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>Nigel</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='BugcheckCode'>0</Data><Data Name='BugcheckParameter1'>0x0</Data><Data Name='BugcheckParameter2'>0x0</Data><Data Name='BugcheckParameter3'>0x0</Data><Data Name='BugcheckParameter4'>0x0</Data><Data Name='SleepInProgress'>0</Data><Data Name='PowerButtonTimestamp'>0</Data><Data Name='BootAppStatus'>0</Data><Data Name='Checkpoint'>0</Data><Data Name='ConnectedStandbyInProgress'>false</Data><Data Name='SystemSleepTransitionsToOn'>0</Data><Data Name='CsEntryScenarioInstanceId'>0</Data><Data Name='BugcheckInfoFromEFI'>false</Data><Data Name='CheckpointStatus'>0</Data><Data Name='CsEntryScenarioInstanceIdV2'>0</Data><Data Name='LongPowerButtonPressDetected'>false</Data><Data Name='LidReliability'>false</Data><Data Name='InputSuppressionState'>0</Data><Data Name='PowerButtonSuppressionState'>0</Data><Data Name='LidState'>3</Data><Data Name='WHEABootErrorCount'>0</Data></EventData></Event>"
+  },
+  {
+    "time": "2026-10-16T18:54:56.8554179-07:00",
+    "id": 6008,
+    "provider": "EventLog",
+    "message": "The previous system shutdown at 5:48:50 PM on ‎10/‎16/‎2026 was unexpected.",
+    "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6008</EventID><Version>0</Version><Level>2</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-10-17T01:54:56.8554179Z'/><EventRecordID>54972</EventRecordID><Correlation/><Execution ProcessID='2468' ThreadID='2524'/><Channel>System</Channel><Computer>Nigel</Computer><Security/></System><EventData><Data>5:48:50 PM</Data><Data>‎10/‎16/‎2026</Data><Data></Data><Data></Data><Data>168013</Data><Data></Data><Data></Data><Binary>EA070A0005001000110030003200BD03EA070A0006001100000030003200BD03600900003C000000010000006009000001000000B00400000000000000000000</Binary></EventData></Event>"
+  }
+]

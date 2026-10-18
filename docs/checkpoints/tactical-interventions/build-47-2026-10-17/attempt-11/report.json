@@ -1,0 +1,78 @@
+{
+  "version": 3,
+  "id": "6e7a3b6a2b5749a99eb11de6644e9e72",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.tactical-session.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\tactical-interventions\\build-47-2026-10-17\\attempt-11\\vitest.json",
+    "engine/experimental/reactive-structure.test.ts",
+    "engine/experimental/reactive-evolution.test.ts",
+    "engine/experimental/reactive-reaction-jobs.test.ts",
+    "engine/experimental/reactive-materials.test.ts",
+    "engine/experimental/material-transport-translation.test.ts",
+    "engine/experimental/material-transport-coupling.test.ts",
+    "engine/experimental/tactical-slab-air.test.ts",
+    "engine/experimental/tactical-snapshot-reuse.test.ts",
+    "engine/experimental/tactical-renderer.test.ts",
+    "engine/experimental/tactical-worker-journal.test.ts",
+    "engine/experimental/tactical-worker-paths.test.ts",
+    "engine/experimental/tactical-preview-capture.test.ts",
+    "engine/experimental/tactical-worker-queries.test.ts",
+    "engine/experimental/tactical-previews.test.ts",
+    "engine/experimental/translation-displacement.test.ts",
+    "engine/experimental/terrain-displacement.test.ts",
+    "engine/experimental/path-journal.test.ts",
+    "engine/experimental/terrain-body.test.ts",
+    "engine/experimental/motion-trace.test.ts",
+    "engine/experimental/gameplay-geometry.test.ts",
+    "engine/experimental/tactical-actions.test.ts",
+    "engine/experimental/interventions.test.ts"
+  ],
+  "startedAt": 1792278850.5950525,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 20.13,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792278851.6292644,
+      "hostCpuPercent": 8.49609375,
+      "freeMemoryMiB": 101454.7734375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 1112,
+  "lastOutput": "JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-47-2026-10-17/attempt-11/vitest.json",
+  "lastHealth": {
+    "host": {
+      "time": 1792278867.450337,
+      "hostCpuPercent": 21.702525724976617,
+      "freeMemoryMiB": 101276.015625
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 15.53125,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 276.328125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792278867.884116
+}

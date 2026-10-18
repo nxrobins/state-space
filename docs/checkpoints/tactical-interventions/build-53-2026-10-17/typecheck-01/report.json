@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "993410afc0c0470da528ef82a58be1d5",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792284299.4059455,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 96.726,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792284300.443545,
+      "hostCpuPercent": 2.463054187192115,
+      "freeMemoryMiB": 100613.58984375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 41964,
+  "lastHealth": {
+    "host": {
+      "time": 1792284314.0744865,
+      "hostCpuPercent": 12.985781990521328,
+      "freeMemoryMiB": 100072.13671875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 13.3125,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 509.5
+    }
+  },
+  "lastOutput": "    Type 'string' is not assignable to type '\"reactive-query-batches-1\"'.",
+  "exitCode": 2,
+  "finishedAt": 1792284314.3150742
+}

@@ -1,0 +1,54 @@
+{
+  "reviewKind": "Manual source inspection with read-only hashes, test-discovery review and whitespace; no runtime or compilation",
+  "reviewedAt": "2026-10-17T08:55:06.764226+00:00",
+  "checks": [
+    {
+      "invariant": "Complete endpoint coverage including remote support changes",
+      "source": "engine/experimental/change-reports.ts",
+      "basis": "No edit-region filter; compare every material/thermal/mechanical/constraint coordinate and every global M5 support distance/load/capacity/reaction"
+    },
+    {
+      "invariant": "No implicit physics or global solve during commit",
+      "source": "engine/experimental/tactical-session-core.ts",
+      "basis": "Commit creates a lazy changes method capturing private original endpoints; only explicit inspection calls the observer; existing solver/schedule sources are unchanged"
+    },
+    {
+      "invariant": "Bounds overflow never masquerades as complete empty changes",
+      "source": "engine/experimental/change-reports.ts",
+      "basis": "Collectors count and extend bounds before checking budget; overflow empties incomplete runs and sets requiresFullRead; shared remaining counter is never replenished"
+    },
+    {
+      "invariant": "Queries do not modify authoritative state",
+      "source": "engine/experimental/tactical-session-core.ts; engine/experimental/change-reports.ts",
+      "basis": "Observer inputs use isolated snapshots and anchor overlays; proposed physical state discarded; copies of report stamps; synchronous reentrancy guard restored in finally"
+    },
+    {
+      "invariant": "Temperature and energy are distinguished using existing integer thermal law",
+      "source": "engine/experimental/change-reports.ts",
+      "basis": "temperatureQ is compared independently of conserved energy and packed thermal byte; no thermal or phase rules rewritten"
+    },
+    {
+      "invariant": "Endpoints are not promoted to trajectories",
+      "source": "engine/experimental/change-reports.ts",
+      "basis": "scope endpoints and motion not-observed require an execution trace even for identical endpoints"
+    },
+    {
+      "invariant": "Real global support fixtures remain excluded from authorized mock testing",
+      "source": "engine/vitest.tactical-session.config.ts; engine/vitest.tactical-reports-runtime.config.ts",
+      "basis": "Mock file traps real step and solve; real cases use runtime-cases.ts filename outside ordinary *.test.ts discovery and a separate explicit held config"
+    }
+  ],
+  "findingsAddressed": [
+    "Avoid per-changed-cell coordinate-vector allocations in bounds collection",
+    "Validate first support observation before requesting the second",
+    "Do not recycle overflowed run capacity or expose truncated lists",
+    "Keep report generation explicit so commit does not gain hidden global work"
+  ],
+  "notProven": [
+    "Compiler/type/lint validity or authored test assertions",
+    "Actual bridge support report correctness under the real solver",
+    "Physical replay, per-tick changes or actual fragment correspondence",
+    "GPU reporting, responsiveness, latency or frame benchmarks"
+  ],
+  "protectedSourcesUnchanged": 96
+}
