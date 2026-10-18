@@ -31,6 +31,8 @@ game prototypes demonstrate how clients can build on it.
 
 ## Try the engine lab
 
+On macOS, start with the [local setup and bounded verification guide](docs/MACOS.md).
+
 Install Python **3.10+**, Node.js/npm, and `uv`. From the repository root:
 
 ```powershell

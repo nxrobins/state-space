@@ -24,7 +24,10 @@
     "prepack": "npm run build:sdk",
     "verify:3d:m3": "npm run build:sdk && node scripts/verify_volume_m3.mjs",
     "verify:3d:m4": "npm run build:sdk && node scripts/verify_volume_m4.mjs",
-    "build:tactical-slab": "node scripts/build_tactical_slab.mjs"
+    "build:tactical-slab": "node scripts/build_tactical_slab.mjs",
+    "lab": "uv run python -m scripts.serve_lab",
+    "pretest:smoke": "npm run build:sdk",
+    "test:smoke": "node scripts/verify_checks.mjs --suite smoke"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
