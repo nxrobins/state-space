@@ -9,7 +9,7 @@ hardware Apple `metal-3` browser adapter.
 | --- | --- | --- |
 | Public 2D CPU / WebGPU / native API | Exact native/CPU corpus and browser SDK parity; installed wheel/npm clients | Public v0.4 API; snapshot versions are strict |
 | M1–M4 material/chunk/active 3D | Tiny pass corpus and earlier checkpoint evidence | Experimental; new qualification below focuses on M5 |
-| M5 structures | 32³ and 64³ CPU/dense/active comparisons, restarts and failure controls | Experimental, with a measured 32³ client baseline |
+| M5 structures | 32³ and 64³ CPU/dense/active comparisons, restarts and failure controls | Experimental; 32³ baseline and optimized 64³ cut-scene 60 Hz measurements |
 | Tactical/reactive APIs | Existing bounded CPU and package checks | Experimental; no new worker/physical-runtime qualification claim |
 
 ## Automated pull-request checks
@@ -76,6 +76,9 @@ Historical bulk evidence is available through the [archive and restoration guide
 Future raw captures belong in release assets, with compact summaries and provenance
 manifests in Git. This does not rewrite historical commits.
 
-Still outside this checkpoint: 128³ qualification, a complete fresh cross-platform
+The subsequent [structural optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md)
+records the worklist change, renewed parity checks and scale measurements.
+
+Still outside the baseline checkpoint above: 128³ qualification, a complete fresh cross-platform
 release gate, the quarantined legacy demo trajectories, and the tactical/reactive
 worker and physical continuation cases identified in their existing checkpoints.

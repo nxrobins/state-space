@@ -1,0 +1,1957 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "hardware": "Apple M3 Ultra / macOS 26.6.2 / Chrome 155 / Apple Metal-3",
+  "fullReleaseAccepted": false,
+  "gameplay": [
+    {
+      "report": "verification/macos-gameplay-64-visible-b121d83e6072/report.json",
+      "sha256": "b879778e0e0f4f7c0ba4cf38095610ca989bcec28cda9222bffc908f06f6f83e",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-visible",
+      "supervisorJob": "4b27e50784bc435bbc6001703ed57d84",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 7.900000286102113,
+        "p50": 10.500000286101567,
+        "p95": 14.500000381469363,
+        "p99": 15.800000190734863,
+        "worst": 18.200000286102295
+      },
+      "missedDeadlines": 4,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.01583055124684,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-cached-visible-fb099c13d743/report.json",
+      "sha256": "a28cc9299e7fede62a414d8c36be24f5a9f40a85041f7c65e7ac95d09d80bb90",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-cached-visible",
+      "supervisorJob": "eb7f4b95839d413f8c4cb3584e305524",
+      "size": 64,
+      "lightingMode": "cached",
+      "completion": {
+        "count": 600,
+        "min": 8.199999904632932,
+        "p50": 10.600000000000364,
+        "p95": 14.700000000000728,
+        "p99": 15.499999809265319,
+        "worst": 17.699999999999818
+      },
+      "missedDeadlines": 1,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.99779640929151,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-visible-2e23d8a7f976/report.json",
+      "sha256": "9fdb38c1947c7ac71f9ba31d82301ff2a98423bbd0ddefb204b15b8a94cd6130",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-visible",
+      "supervisorJob": "ea3602f035f24582b80440b8fcd1d937",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 6.899999618530273,
+        "p50": 9.599999618530092,
+        "p95": 10.799999904633296,
+        "p99": 13.299999618530364,
+        "worst": 15.399999713897614
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.994791772144296,
+      "performancePassed": true,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-cached-visible-3e043fab08c3/report.json",
+      "sha256": "b9927c91a4278c0e79f0585ac48619fd66a896555ddf69c5ac6dc443c4ddd11c",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-cached-visible",
+      "supervisorJob": "b86be348777f4fe8b3bcf9505ea608d0",
+      "size": 64,
+      "lightingMode": "cached",
+      "completion": {
+        "count": 600,
+        "min": 7.099999999999909,
+        "p50": 9.499999904632205,
+        "p95": 11.000000286102477,
+        "p99": 13.200000190734954,
+        "worst": 13.599999999999909
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.0014023705785,
+      "performancePassed": true,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-128-visible-9f3ac75cd9bc/report.json",
+      "sha256": "e8bc69d33e22c246f26eb015a91c1d4d74acae2f49b29f23def4e08129ce9c8c",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-128-visible",
+      "supervisorJob": "2b715fa6ec0a4f8f9db40cb39a130730",
+      "size": 128,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 9.199999904632477,
+        "p50": 13,
+        "p95": 17,
+        "p99": 24.499999904632205,
+        "worst": 34.79999990463239
+      },
+      "missedDeadlines": 37,
+      "lostDisplaySlots": 2,
+      "physicsHz": 59.7768596696506,
+      "performancePassed": false,
+      "finalHash": "7fb493c845ff57a0b643e04c364aa30b96b9ae3f52e8df43a422807927cf7b71",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-visible-3741676688af/report.json",
+      "sha256": "59385c5e7cbad18c63d35c506a38279147e07555ecb039e05f88071f72918d2b",
+      "passed": false,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-visible",
+      "supervisorJob": "1c11ad2c7c914c528f2751580f0176d2",
+      "size": 32,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 4.09999971389766,
+        "p50": 5.799999904632614,
+        "p95": 6.800000095367523,
+        "p99": 7.400000095367432,
+        "worst": 9.299999713897705
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.00440766705168,
+      "performancePassed": true,
+      "finalHash": "b8453f57825ae2280eb0afb94941595e3904cea7f986ffc96821d30c305273a7",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-visible-0389d387572a/report.json",
+      "sha256": "fd1a5c4239216ca8aa23a661b1bea0c51b1a6c3f4c49dcccd95d3f4eaa64da9b",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-visible",
+      "supervisorJob": "4e809a7725764a32a7f701cf58878a1f",
+      "size": 32,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 4.399999713897614,
+        "p50": 5.699999713897341,
+        "p95": 6.899999713898069,
+        "p99": 8.200000095367614,
+        "worst": 9.299999809265046
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.998998347273,
+      "performancePassed": true,
+      "finalHash": "b8453f57825ae2280eb0afb94941595e3904cea7f986ffc96821d30c305273a7",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-cached-visible-b06244f99492/report.json",
+      "sha256": "88361ca1980f751944f8a1b87625d36d0fe9463380ad0e34e2a8b68ef44e13d0",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-cached-visible",
+      "supervisorJob": "61ce796c76344a798a92224a7c7133fa",
+      "size": 32,
+      "lightingMode": "cached",
+      "completion": {
+        "count": 600,
+        "min": 4.000000190734909,
+        "p50": 6.2999999046323865,
+        "p95": 7.2000001907344995,
+        "p99": 9.099999999999909,
+        "worst": 9.700000190734954
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.99719545549355,
+      "performancePassed": true,
+      "finalHash": "b8453f57825ae2280eb0afb94941595e3904cea7f986ffc96821d30c305273a7",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-visible-08ff4cfa8e99/report.json",
+      "sha256": "ac50509c1ee683ee837afec3bb8bcd782e7089adfc17f9047e7c15c67cbf5112",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-64-visible",
+      "supervisorJob": "d74d2e4d423347db982fa13ee5e14784",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 5.000000095367341,
+        "p50": 7.300000000000182,
+        "p95": 10.099999904632568,
+        "p99": 11.000000286102477,
+        "worst": 13.500000286102477
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.01162161563276,
+      "performancePassed": true,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-cached-visible-55c7c1de0afb/report.json",
+      "sha256": "7cda1a7520c67e179ea6be35d8ded5ac9c5ef094bae6ff2f854f8a82b25fd787",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "gameplay-64-cached-visible",
+      "supervisorJob": "59959c0a6812418ab6bdbd69f35bc554",
+      "size": 64,
+      "lightingMode": "cached",
+      "completion": {
+        "count": 600,
+        "min": 5,
+        "p50": 7.500000190734681,
+        "p95": 9.900000381468999,
+        "p99": 10.500000286102477,
+        "worst": 12.900000190734772
+      },
+      "missedDeadlines": 0,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.00200340578984,
+      "performancePassed": true,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      }
+    }
+  ],
+  "replays": [
+    {
+      "report": "verification/macos-replay-64-cut-8ea70b7aa905/report.json",
+      "sha256": "c2c8a598d5b162eba7cb30a79e29e71be0474c5d94ae8d86b3f726699134134e",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "replay-64-cut",
+      "supervisorJob": "8ae074270f8d494a8bd2417ce6f568eb",
+      "size": 64,
+      "scenario": "cut",
+      "ticks": 256,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 540
+    },
+    {
+      "report": "verification/macos-replay-64-cut-long-251c78671c45/report.json",
+      "sha256": "0696c6c422967ce5e7a74227a2604e8a5369c1cc867f56b86d7bfe7687def2f4",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "replay-64-cut-long",
+      "supervisorJob": "35fbb956c9b146d0a9ebcaea73f91ebb",
+      "size": 64,
+      "scenario": "cut",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-64-cut-long-b3d03500c044/report.json",
+      "sha256": "2330e1696c3056a5949efdf08bff88099804443626f3050a3ba68691289b232e",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-64-cut-long",
+      "supervisorJob": "fcefbdb96cd24165b96beaf725a3d3b9",
+      "size": 64,
+      "scenario": "cut",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-64-control-b397ad49d415/report.json",
+      "sha256": "c6e975d7cf15db1637459b6d55354ed01becada66dc0cb0339c99552f049cb29",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-64-control",
+      "supervisorJob": "f9444871ca9e4a0fa3548d39b556e302",
+      "size": 64,
+      "scenario": "control",
+      "ticks": 256,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 540
+    },
+    {
+      "report": "verification/macos-replay-64-heat-bf5bdd05b92c/report.json",
+      "sha256": "0fb4e89ac009cddec8d5fdafee552830d7c9ea3f9f110f65d68999fedab5f8d2",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-64-heat",
+      "supervisorJob": "a1a87af39aa24cb2a536b633787cd66c",
+      "size": 64,
+      "scenario": "heat",
+      "ticks": 256,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 540
+    },
+    {
+      "report": "verification/macos-replay-64-ice-control-6b2a273ba2bf/report.json",
+      "sha256": "fac56bdb9a6a13387f4b076ed93175857588644e58fca878ba1ef90b2beba7cd",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-64-ice-control",
+      "supervisorJob": "7eeda8212e184918be9a08e5bfeb79df",
+      "size": 64,
+      "scenario": "ice-control",
+      "ticks": 256,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 540
+    },
+    {
+      "report": "verification/macos-replay-64-ice-heat-be34af48f74c/report.json",
+      "sha256": "b9ed353ab4a7c743f0edd2b7e5e4b8f80649a8ee58c0949155ed85d438eca924",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-64-ice-heat",
+      "supervisorJob": "7ae482a36cff4152b89a2ced5d141181",
+      "size": 64,
+      "scenario": "ice-heat",
+      "ticks": 256,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 540
+    },
+    {
+      "report": "verification/macos-replay-32-control-6c5e1d1a5585/report.json",
+      "sha256": "fb8a4d9c65b26327470aa6871a44bafbae94dc316e34ec16d0a1ef57992817f9",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-32-control",
+      "supervisorJob": "e509fcd66a4847ed989fd4c24f89b72f",
+      "size": 32,
+      "scenario": "control",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-32-cut-a330b2a0a3bb/report.json",
+      "sha256": "f5af7a71c70c065fe0f8f4735d61e3b54958cb19d4e0d62fd72585deaaeb6e6f",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-32-cut",
+      "supervisorJob": "ee72ce9a3d4d45c1800f481149c11918",
+      "size": 32,
+      "scenario": "cut",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-32-heat-fd3d27c73efd/report.json",
+      "sha256": "47a875f544b7c9576c45b601009f0705a67b19e833d51f4e925d2ce7546c7368",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-32-heat",
+      "supervisorJob": "e38aeacbb0f84ac8b530dd9c35ea6f2f",
+      "size": 32,
+      "scenario": "heat",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-32-ice-control-1cc6cb57eead/report.json",
+      "sha256": "62d3536f1f6a8221f9b197edbf3db657fd7561fcd0b8653f20a88df2aacd9191",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-32-ice-control",
+      "supervisorJob": "c8ed8764013c4344a1f1041c3cf41446",
+      "size": 32,
+      "scenario": "ice-control",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    },
+    {
+      "report": "verification/macos-replay-32-ice-heat-623b494de286/report.json",
+      "sha256": "368976bc6acd5baa034dd041f8bb43741b1e92d97f3b0a3763859fb2d2d22437",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "replay-32-ice-heat",
+      "supervisorJob": "ee1d6bb5553f488483c45dffca2befc3",
+      "size": 32,
+      "scenario": "ice-heat",
+      "ticks": 1024,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "energyDriftQ": "0",
+      "exactComparisons": 2076
+    }
+  ],
+  "otherStages": [
+    {
+      "report": "verification/macos-pilot-70d3965cc15b/report.json",
+      "sha256": "1e0e3bfc44cb254064629c295edcdc8e4f2a94e793bdda1183b690b16d6144e0",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "pilot",
+      "supervisorJob": "e82a8a1fbdbe4a54a1c3caff9f5991f2",
+      "energyDriftQ": "0"
+    },
+    {
+      "report": "verification/macos-pilot-5bc23cf8807f/report.json",
+      "sha256": "b69fc437e9f1c33f879f5be49cddd89b99ea022623df79a2013da724eb8c7356",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "pilot",
+      "supervisorJob": "2d343cb65b8b43809c4e716205fe3125",
+      "energyDriftQ": "0"
+    },
+    {
+      "report": "verification/macos-structural-exact-bad6f39e22cc/report.json",
+      "sha256": "8e12c952291d5933ea75040a0bdf6fcfde1f13689ff40a370e66d59abf71c727",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "structural-exact",
+      "supervisorJob": "38d3ef2640a54aaaa34f282faedacd8e"
+    },
+    {
+      "report": "verification/macos-structural-exact-ee9edf4f0285/report.json",
+      "sha256": "f0f785b2d36af0dd2eb9680d49365ec7303d2c41e7f4deae14e7b89456681571",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "structural-exact",
+      "supervisorJob": "575ddbfdb9e746adb47a2c13cf9fde68",
+      "profileTicksExact": true,
+      "gpuTimestamps": true
+    },
+    {
+      "report": "verification/macos-scale-128-visible-37f1ce27e626/report.json",
+      "sha256": "b3f55ac7d0c8f4a7de6a6fb77e8ef57afd190829a10f662fb16a8d8038616cc3",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": true,
+      "stage": "scale-128-visible",
+      "supervisorJob": "71efc1646e3046538faea69b148f5c05",
+      "frames": [
+        {
+          "tick": 1,
+          "ms": 16.40000009536743,
+          "solve": {
+            "tick": 1,
+            "supportPasses": 11,
+            "loadPasses": 11,
+            "componentPasses": 7,
+            "blockingPasses": 1,
+            "maxDistance": 10,
+            "supportedWeight": 233232,
+            "reactionTotal": 233232,
+            "planReused": false,
+            "planReusable": true,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58308
+          },
+          "latency": {
+            "startedAt": 2998,
+            "preparedAt": 2998.1000003814697,
+            "boundaries": [
+              {
+                "submittedAt": 2998.7000002861023,
+                "validatedAt": 2999.2000002861023,
+                "queueCompletedAt": 3003.7000002861023,
+                "mappedAt": 3003.7000002861023
+              },
+              {
+                "submittedAt": 3004.2000002861023,
+                "validatedAt": 3004.9000000953674,
+                "queueCompletedAt": 3014.2000002861023,
+                "mappedAt": 3014.2000002861023
+              }
+            ],
+            "renderStartedAt": 3004,
+            "renderEncodedAt": 3004.2000002861023,
+            "completedAt": 3014.300000190735
+          }
+        },
+        {
+          "tick": 2,
+          "ms": 10.799999713897705,
+          "solve": {
+            "tick": 2,
+            "supportPasses": 0,
+            "loadPasses": 0,
+            "componentPasses": 0,
+            "blockingPasses": 0,
+            "maxDistance": 10,
+            "supportedWeight": 233232,
+            "reactionTotal": 233232,
+            "planReused": true,
+            "planReusable": true,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58308
+          },
+          "latency": {
+            "startedAt": 3045.1000003814697,
+            "preparedAt": 3045.1000003814697,
+            "boundaries": [
+              {
+                "submittedAt": 3045.5,
+                "validatedAt": 3046,
+                "mappedAt": 3055.800000190735,
+                "queueCompletedAt": 3055.800000190735
+              }
+            ],
+            "renderStartedAt": 3045.300000190735,
+            "renderEncodedAt": 3045.4000000953674,
+            "completedAt": 3055.9000000953674
+          }
+        },
+        {
+          "tick": 3,
+          "ms": 10.900000095367432,
+          "solve": {
+            "tick": 3,
+            "supportPasses": 0,
+            "loadPasses": 0,
+            "componentPasses": 0,
+            "blockingPasses": 0,
+            "maxDistance": 10,
+            "supportedWeight": 233232,
+            "reactionTotal": 233232,
+            "planReused": true,
+            "planReusable": true,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58308
+          },
+          "latency": {
+            "startedAt": 3088.5,
+            "preparedAt": 3088.5,
+            "boundaries": [
+              {
+                "submittedAt": 3088.800000190735,
+                "validatedAt": 3089.4000000953674,
+                "mappedAt": 3099.300000190735,
+                "queueCompletedAt": 3099.300000190735
+              }
+            ],
+            "renderStartedAt": 3088.7000002861023,
+            "renderEncodedAt": 3088.7000002861023,
+            "completedAt": 3099.4000000953674
+          }
+        },
+        {
+          "tick": 4,
+          "ms": 16.5,
+          "solve": {
+            "tick": 4,
+            "supportPasses": 4,
+            "loadPasses": 4,
+            "componentPasses": 8,
+            "blockingPasses": 1,
+            "maxDistance": 3,
+            "supportedWeight": 232972,
+            "reactionTotal": 232972,
+            "planReused": false,
+            "planReusable": false,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58298
+          },
+          "latency": {
+            "startedAt": 3131.9000000953674,
+            "preparedAt": 3131.9000000953674,
+            "boundaries": [
+              {
+                "submittedAt": 3132.2000002861023,
+                "validatedAt": 3132.6000003814697,
+                "queueCompletedAt": 3136.800000190735,
+                "mappedAt": 3136.800000190735
+              },
+              {
+                "submittedAt": 3137.1000003814697,
+                "validatedAt": 3137.7000002861023,
+                "queueCompletedAt": 3148.1000003814697,
+                "mappedAt": 3148.1000003814697
+              }
+            ],
+            "renderStartedAt": 3137,
+            "renderEncodedAt": 3137.1000003814697,
+            "completedAt": 3148.1000003814697
+          }
+        },
+        {
+          "tick": 5,
+          "ms": 16,
+          "solve": {
+            "tick": 5,
+            "supportPasses": 4,
+            "loadPasses": 4,
+            "componentPasses": 8,
+            "blockingPasses": 1,
+            "maxDistance": 3,
+            "supportedWeight": 232568,
+            "reactionTotal": 232568,
+            "planReused": false,
+            "planReusable": false,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58197
+          },
+          "latency": {
+            "startedAt": 3178.5,
+            "preparedAt": 3178.5,
+            "boundaries": [
+              {
+                "submittedAt": 3178.7000002861023,
+                "validatedAt": 3179.1000003814697,
+                "queueCompletedAt": 3183.2000002861023,
+                "mappedAt": 3183.2000002861023
+              },
+              {
+                "submittedAt": 3183.4000000953674,
+                "validatedAt": 3184,
+                "queueCompletedAt": 3194.300000190735,
+                "mappedAt": 3194.300000190735
+              }
+            ],
+            "renderStartedAt": 3183.300000190735,
+            "renderEncodedAt": 3183.4000000953674,
+            "completedAt": 3194.300000190735
+          }
+        },
+        {
+          "tick": 6,
+          "ms": 16.299999713897705,
+          "solve": {
+            "tick": 6,
+            "supportPasses": 4,
+            "loadPasses": 4,
+            "componentPasses": 8,
+            "blockingPasses": 1,
+            "maxDistance": 3,
+            "supportedWeight": 232348,
+            "reactionTotal": 232348,
+            "planReused": false,
+            "planReusable": false,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58142
+          },
+          "latency": {
+            "startedAt": 3226.800000190735,
+            "preparedAt": 3226.800000190735,
+            "boundaries": [
+              {
+                "submittedAt": 3227,
+                "validatedAt": 3227.4000000953674,
+                "queueCompletedAt": 3231.5,
+                "mappedAt": 3231.5
+              },
+              {
+                "submittedAt": 3231.7000002861023,
+                "validatedAt": 3232.300000190735,
+                "queueCompletedAt": 3242.9000000953674,
+                "mappedAt": 3242.9000000953674
+              }
+            ],
+            "renderStartedAt": 3231.6000003814697,
+            "renderEncodedAt": 3231.7000002861023,
+            "completedAt": 3243
+          }
+        },
+        {
+          "tick": 7,
+          "ms": 19.5,
+          "solve": {
+            "tick": 7,
+            "supportPasses": 4,
+            "loadPasses": 4,
+            "componentPasses": 7,
+            "blockingPasses": 1,
+            "maxDistance": 3,
+            "supportedWeight": 232268,
+            "reactionTotal": 232268,
+            "planReused": false,
+            "planReusable": false,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58122
+          },
+          "latency": {
+            "startedAt": 3275.2000002861023,
+            "preparedAt": 3275.2000002861023,
+            "boundaries": [
+              {
+                "submittedAt": 3275.7000002861023,
+                "validatedAt": 3276.5,
+                "queueCompletedAt": 3280.6000003814697,
+                "mappedAt": 3280.6000003814697
+              },
+              {
+                "submittedAt": 3281.2000002861023,
+                "validatedAt": 3283.2000002861023,
+                "queueCompletedAt": 3294.4000000953674,
+                "mappedAt": 3294.4000000953674
+              }
+            ],
+            "renderStartedAt": 3280.800000190735,
+            "renderEncodedAt": 3281.1000003814697,
+            "completedAt": 3294.5
+          }
+        },
+        {
+          "tick": 8,
+          "ms": 19.40000009536743,
+          "solve": {
+            "tick": 8,
+            "supportPasses": 4,
+            "loadPasses": 4,
+            "componentPasses": 8,
+            "blockingPasses": 1,
+            "maxDistance": 3,
+            "supportedWeight": 232252,
+            "reactionTotal": 232252,
+            "planReused": false,
+            "planReusable": false,
+            "batchedSolve": true,
+            "fallbackMask": 0,
+            "listedCells": 58119
+          },
+          "latency": {
+            "startedAt": 3326.300000190735,
+            "preparedAt": 3326.4000000953674,
+            "boundaries": [
+              {
+                "submittedAt": 3326.800000190735,
+                "validatedAt": 3327.9000000953674,
+                "queueCompletedAt": 3332.1000003814697,
+                "mappedAt": 3332.1000003814697
+              },
+              {
+                "submittedAt": 3332.5,
+                "validatedAt": 3334,
+                "queueCompletedAt": 3345.5,
+                "mappedAt": 3345.5
+              }
+            ],
+            "renderStartedAt": 3332.2000002861023,
+            "renderEncodedAt": 3332.4000000953674,
+            "completedAt": 3345.6000003814697
+          }
+        }
+      ],
+      "energyDriftQ": "0"
+    }
+  ],
+  "profiles": [
+    {
+      "report": "verification/macos-gameplay-64-profile-visible-02a9f6083dbd/report.json",
+      "sha256": "8cda2524fc7293c495e90b9cd3735f3b041af452f61186a9265503cf279c07dc",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-profile-visible",
+      "supervisorJob": "6e09a7d19a3e478db5e20bdc5b784ff7",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 8.400000000000091,
+        "p50": 11.599999999999909,
+        "p95": 16.200000095367614,
+        "p99": 18.400000190735227,
+        "worst": 22.49999980926532
+      },
+      "missedDeadlines": 21,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.97136592316083,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "gpuStages": {
+        "applyMotion": {
+          "count": 600,
+          "meanMs": 0.07246267,
+          "p95Ms": 0.077707,
+          "worstMs": 0.080707
+        },
+        "certifyPlan": {
+          "count": 600,
+          "meanMs": 0.019052571666666667,
+          "p95Ms": 0.030249,
+          "worstMs": 0.032207
+        },
+        "collisionCache": {
+          "count": 600,
+          "meanMs": 0.007097448333333333,
+          "p95Ms": 0.010375,
+          "worstMs": 0.011375
+        },
+        "controller": {
+          "count": 600,
+          "meanMs": 0.03908746666666667,
+          "p95Ms": 0.065708,
+          "worstMs": 0.083624
+        },
+        "draw": {
+          "count": 600,
+          "meanMs": 1.821314725,
+          "p95Ms": 2.48092,
+          "worstMs": 9.196484
+        },
+        "editBatch": {
+          "count": 1,
+          "meanMs": 0.030374,
+          "p95Ms": 0.030374,
+          "worstMs": 0.030374
+        },
+        "lighting": {
+          "count": 600,
+          "meanMs": 0.01238217,
+          "p95Ms": 0.018791,
+          "worstMs": 0.019666
+        },
+        "materials": {
+          "count": 600,
+          "meanMs": 5.710219503333334,
+          "p95Ms": 8.502578,
+          "worstMs": 8.865115
+        },
+        "mesh": {
+          "count": 600,
+          "meanMs": 0.18541486333333335,
+          "p95Ms": 0.275912,
+          "worstMs": 0.292453
+        },
+        "structuralSolve": {
+          "count": 32,
+          "meanMs": 1.58271153125,
+          "p95Ms": 2.23034,
+          "worstMs": 2.263299
+        },
+        "toneAndBloom": {
+          "count": 600,
+          "meanMs": 1.2388869733333334,
+          "p95Ms": 1.661475,
+          "worstMs": 1.783265
+        },
+        "tools": {
+          "count": 600,
+          "meanMs": 0.006925181666666667,
+          "p95Ms": 0.009625,
+          "worstMs": 0.094165
+        },
+        "volumetrics": {
+          "count": 600,
+          "meanMs": 1.16375031,
+          "p95Ms": 1.566184,
+          "worstMs": 1.673058
+        }
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-profile-visible-00b61bc6452e/report.json",
+      "sha256": "b9aea827c7be78eec608e8dfd0962abf079449e4d8cc2a95fc6979774ab0eb60",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-profile-visible",
+      "supervisorJob": "ece325ec5cd2457ca0dc727d3e9d6334",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 8.5,
+        "p50": 11.900000000000091,
+        "p95": 16.200000286102295,
+        "p99": 17.50000009536734,
+        "worst": 20.00000009536734
+      },
+      "missedDeadlines": 13,
+      "lostDisplaySlots": 0,
+      "physicsHz": 60.00741327032616,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "gpuStages": {
+        "applyMotion": {
+          "count": 600,
+          "meanMs": 0.07381632,
+          "p95Ms": 0.079707,
+          "worstMs": 0.084582
+        },
+        "certifyLocal": {
+          "count": 600,
+          "meanMs": 0.12212412166666667,
+          "p95Ms": 0.190747,
+          "worstMs": 0.210914
+        },
+        "certifyPlan": {
+          "count": 600,
+          "meanMs": 0.019264065,
+          "p95Ms": 0.030124,
+          "worstMs": 0.032457
+        },
+        "collisionCache": {
+          "count": 600,
+          "meanMs": 0.007386688333333333,
+          "p95Ms": 0.010709,
+          "worstMs": 0.012042
+        },
+        "controller": {
+          "count": 600,
+          "meanMs": 0.039533613333333335,
+          "p95Ms": 0.066374,
+          "worstMs": 0.079748
+        },
+        "draw": {
+          "count": 600,
+          "meanMs": 1.9086655816666667,
+          "p95Ms": 3.650485,
+          "worstMs": 5.279503
+        },
+        "editBatch": {
+          "count": 1,
+          "meanMs": 0.038125,
+          "p95Ms": 0.038125,
+          "worstMs": 0.038125
+        },
+        "lighting": {
+          "count": 600,
+          "meanMs": 0.012334021666666667,
+          "p95Ms": 0.018666,
+          "worstMs": 0.019583
+        },
+        "materials.buoyancy": {
+          "count": 600,
+          "meanMs": 0.40708705,
+          "p95Ms": 0.602199,
+          "worstMs": 0.61645
+        },
+        "materials.diagonal": {
+          "count": 600,
+          "meanMs": 1.6683786416666666,
+          "p95Ms": 2.406713,
+          "worstMs": 2.458213
+        },
+        "materials.gas": {
+          "count": 600,
+          "meanMs": 0.807222465,
+          "p95Ms": 1.195648,
+          "worstMs": 1.22869
+        },
+        "materials.gravity": {
+          "count": 600,
+          "meanMs": 0.42834886,
+          "p95Ms": 0.593282,
+          "worstMs": 0.620366
+        },
+        "materials.heat": {
+          "count": 600,
+          "meanMs": 1.32127534,
+          "p95Ms": 2.046094,
+          "worstMs": 2.250008
+        },
+        "materials.liquid": {
+          "count": 600,
+          "meanMs": 0.81730853,
+          "p95Ms": 1.203399,
+          "worstMs": 1.23094
+        },
+        "materials.phase": {
+          "count": 600,
+          "meanMs": 0.17912517666666666,
+          "p95Ms": 0.267371,
+          "worstMs": 0.275662
+        },
+        "mesh": {
+          "count": 600,
+          "meanMs": 0.18631204333333334,
+          "p95Ms": 0.273246,
+          "worstMs": 0.28062
+        },
+        "normalize": {
+          "count": 600,
+          "meanMs": 0.021549858333333335,
+          "p95Ms": 0.034291,
+          "worstMs": 0.035582
+        },
+        "structuralSolve": {
+          "count": 32,
+          "meanMs": 1.72781740625,
+          "p95Ms": 1.865972,
+          "worstMs": 1.87743
+        },
+        "toneAndBloom": {
+          "count": 600,
+          "meanMs": 1.2480974433333334,
+          "p95Ms": 1.525143,
+          "worstMs": 1.790764
+        },
+        "tools": {
+          "count": 600,
+          "meanMs": 0.006051565,
+          "p95Ms": 0.008292,
+          "worstMs": 0.096999
+        },
+        "volumetrics": {
+          "count": 600,
+          "meanMs": 1.1723776966666666,
+          "p95Ms": 1.432728,
+          "worstMs": 1.682432
+        }
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-profile-visible-5b0c5bb52d42/report.json",
+      "sha256": "7f6f524da9b1d3e0f337dbd873d28a773ba9f6cce4540403896d7ddc42a822b2",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": false,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-profile-visible",
+      "supervisorJob": "4804d0ac8830421db1fd29aa531446af",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 8.800000000000182,
+        "p50": 12.299999809265046,
+        "p95": 16.599999713897887,
+        "p99": 17.5,
+        "worst": 18.19999971389734
+      },
+      "missedDeadlines": 29,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.976169734418754,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "gpuStages": {
+        "applyMotion": {
+          "count": 600,
+          "meanMs": 0.07402225333333333,
+          "p95Ms": 0.080415,
+          "worstMs": 0.089624
+        },
+        "certifyLocal": {
+          "count": 600,
+          "meanMs": 0.12197987166666667,
+          "p95Ms": 0.187956,
+          "worstMs": 0.214704
+        },
+        "certifyPlan": {
+          "count": 600,
+          "meanMs": 0.019008301666666668,
+          "p95Ms": 0.029417,
+          "worstMs": 0.031625
+        },
+        "collectLocal": {
+          "count": 600,
+          "meanMs": 4.822783433333333,
+          "p95Ms": 6.8764769999999995,
+          "worstMs": 6.9823960000000005
+        },
+        "collisionCache": {
+          "count": 600,
+          "meanMs": 0.007215363333333333,
+          "p95Ms": 0.010333,
+          "worstMs": 0.011499
+        },
+        "controller": {
+          "count": 600,
+          "meanMs": 0.03969843,
+          "p95Ms": 0.066915,
+          "worstMs": 0.083624
+        },
+        "draw": {
+          "count": 600,
+          "meanMs": 2.055029955,
+          "p95Ms": 3.916107,
+          "worstMs": 7.061142
+        },
+        "editBatch": {
+          "count": 1,
+          "meanMs": 0.036,
+          "p95Ms": 0.036,
+          "worstMs": 0.036
+        },
+        "lighting": {
+          "count": 600,
+          "meanMs": 0.012254586666666666,
+          "p95Ms": 0.018458,
+          "worstMs": 0.0195
+        },
+        "materials.buoyancy": {
+          "count": 600,
+          "meanMs": 0.055887995,
+          "p95Ms": 0.086916,
+          "worstMs": 0.09979
+        },
+        "materials.diagonal": {
+          "count": 600,
+          "meanMs": 0.23631664333333333,
+          "p95Ms": 0.35886699999999994,
+          "worstMs": 0.39978600000000003
+        },
+        "materials.gas": {
+          "count": 600,
+          "meanMs": 0.110947085,
+          "p95Ms": 0.173872,
+          "worstMs": 0.197081
+        },
+        "materials.gravity": {
+          "count": 600,
+          "meanMs": 0.06589767833333333,
+          "p95Ms": 0.093916,
+          "worstMs": 0.10324900000000001
+        },
+        "materials.heat": {
+          "count": 600,
+          "meanMs": 0.390076955,
+          "p95Ms": 0.699156,
+          "worstMs": 0.909778
+        },
+        "materials.liquid": {
+          "count": 600,
+          "meanMs": 0.11525666,
+          "p95Ms": 0.177998,
+          "worstMs": 0.20404
+        },
+        "materials.phase": {
+          "count": 600,
+          "meanMs": 0.026643976666666666,
+          "p95Ms": 0.040667,
+          "worstMs": 0.049082
+        },
+        "mesh": {
+          "count": 600,
+          "meanMs": 0.18478938166666667,
+          "p95Ms": 0.268746,
+          "worstMs": 0.279453
+        },
+        "normalize": {
+          "count": 600,
+          "meanMs": 0.021648713333333333,
+          "p95Ms": 0.033792,
+          "worstMs": 0.035458
+        },
+        "structuralSolve": {
+          "count": 32,
+          "meanMs": 1.734502,
+          "p95Ms": 1.827888,
+          "worstMs": 1.861304
+        },
+        "toneAndBloom": {
+          "count": 600,
+          "meanMs": 1.247765345,
+          "p95Ms": 1.541643,
+          "worstMs": 1.786848
+        },
+        "tools": {
+          "count": 600,
+          "meanMs": 0.005696583333333333,
+          "p95Ms": 0.007917,
+          "worstMs": 0.011042
+        },
+        "volumetrics": {
+          "count": 600,
+          "meanMs": 1.1724424766666666,
+          "p95Ms": 1.440978,
+          "worstMs": 1.678267
+        }
+      }
+    },
+    {
+      "report": "verification/macos-gameplay-64-profile-visible-a9a811a154a9/report.json",
+      "sha256": "a24a54b6ad95297abb4ef5682889c1108cb7ac7000c933ab2d0e092b8920c1fc",
+      "passed": true,
+      "sourceUnchanged": true,
+      "optimizedWorklist": true,
+      "currentRuntimeSources": false,
+      "stage": "gameplay-64-profile-visible",
+      "supervisorJob": "9b1e09247d444a61a7c6f68b0059029a",
+      "size": 64,
+      "lightingMode": "reference",
+      "completion": {
+        "count": 600,
+        "min": 6.400000286102113,
+        "p50": 9.900000286103023,
+        "p95": 12.399999999999636,
+        "p99": 14.200000190734954,
+        "worst": 17.899999999999636
+      },
+      "missedDeadlines": 2,
+      "lostDisplaySlots": 0,
+      "physicsHz": 59.99659451659955,
+      "performancePassed": false,
+      "finalHash": "db95b4e51ab1e715e186f3a15964ba207a1ac211dd45c86711ace49113cc861d",
+      "energyBalance": {
+        "initialQ": "69888000",
+        "externalQ": "-130",
+        "currentQ": "69887870",
+        "driftQ": "0"
+      },
+      "gpuStages": {
+        "applyMotion": {
+          "count": 600,
+          "meanMs": 0.076982145,
+          "p95Ms": 0.081624,
+          "worstMs": 0.085041
+        },
+        "certifyLocal": {
+          "count": 600,
+          "meanMs": 0.20099945833333333,
+          "p95Ms": 0.317537,
+          "worstMs": 0.349203
+        },
+        "certifyPlan": {
+          "count": 600,
+          "meanMs": 0.026152451666666666,
+          "p95Ms": 0.031124,
+          "worstMs": 0.034167
+        },
+        "collectLocal": {
+          "count": 600,
+          "meanMs": 0.8296124333333333,
+          "p95Ms": 1.1798559999999998,
+          "worstMs": 1.2032779999999998
+        },
+        "collisionCache": {
+          "count": 600,
+          "meanMs": 0.009586331666666666,
+          "p95Ms": 0.011292,
+          "worstMs": 0.014292
+        },
+        "controller": {
+          "count": 600,
+          "meanMs": 0.049477766666666666,
+          "p95Ms": 0.079624,
+          "worstMs": 0.082166
+        },
+        "draw": {
+          "count": 600,
+          "meanMs": 2.278022725,
+          "p95Ms": 2.650544,
+          "worstMs": 9.19511
+        },
+        "editBatch": {
+          "count": 1,
+          "meanMs": 0.040791,
+          "p95Ms": 0.040791,
+          "worstMs": 0.040791
+        },
+        "lighting": {
+          "count": 600,
+          "meanMs": 0.01654114,
+          "p95Ms": 0.019292,
+          "worstMs": 0.022915
+        },
+        "materials.buoyancy": {
+          "count": 600,
+          "meanMs": 0.07937908666666667,
+          "p95Ms": 0.100247,
+          "worstMs": 0.10403899999999999
+        },
+        "materials.diagonal": {
+          "count": 600,
+          "meanMs": 0.3241086833333333,
+          "p95Ms": 0.40511700000000006,
+          "worstMs": 0.42224300000000003
+        },
+        "materials.gas": {
+          "count": 600,
+          "meanMs": 0.15842126666666667,
+          "p95Ms": 0.201455,
+          "worstMs": 0.20891400000000002
+        },
+        "materials.gravity": {
+          "count": 600,
+          "meanMs": 0.08000769666666667,
+          "p95Ms": 0.100748,
+          "worstMs": 0.105582
+        },
+        "materials.heat": {
+          "count": 600,
+          "meanMs": 0.7162477883333334,
+          "p95Ms": 1.125898,
+          "worstMs": 1.2034820000000002
+        },
+        "materials.liquid": {
+          "count": 600,
+          "meanMs": 0.16152584166666667,
+          "p95Ms": 0.20137,
+          "worstMs": 0.209831
+        },
+        "materials.phase": {
+          "count": 600,
+          "meanMs": 0.036280185,
+          "p95Ms": 0.046499,
+          "worstMs": 0.04954
+        },
+        "mesh": {
+          "count": 600,
+          "meanMs": 0.24324977,
+          "p95Ms": 0.279287,
+          "worstMs": 0.29387
+        },
+        "normalize": {
+          "count": 600,
+          "meanMs": 0.029850286666666666,
+          "p95Ms": 0.035834,
+          "worstMs": 0.038499
+        },
+        "structuralSolve": {
+          "count": 32,
+          "meanMs": 1.650099875,
+          "p95Ms": 2.232841,
+          "worstMs": 2.257048
+        },
+        "toneAndBloom": {
+          "count": 600,
+          "meanMs": 1.5775888333333334,
+          "p95Ms": 1.784097,
+          "worstMs": 1.794348
+        },
+        "tools": {
+          "count": 600,
+          "meanMs": 0.007701131666666666,
+          "p95Ms": 0.010375,
+          "worstMs": 0.012709
+        },
+        "volumetrics": {
+          "count": 600,
+          "meanMs": 1.4797997116666666,
+          "p95Ms": 1.6731,
+          "worstMs": 1.685392
+        }
+      }
+    }
+  ],
+  "currentRuntimeReplayComparisons": 14616,
+  "profileBeforeAfterCompleteWorldAndActorExact": true,
+  "current64CompleteWorldAndActorExact": true,
+  "checks": {
+    "ciCommit": "07060c8da01829862e9ee0bf256f96e588c7188c",
+    "ciUrl": "https://github.com/nxrobins/state-space/actions/runs/39164454211",
+    "ciPassed": true,
+    "cpuVitest": 1794,
+    "cpuControllers": 18,
+    "smokeVitest": 46,
+    "smokeNode": 13,
+    "supervisorPassed": 64,
+    "windowsSkipped": 4,
+    "archiveTests": 2,
+    "independentNpmExportConsumers": 13
+  },
+  "limits": [
+    "Scene-specific measurements, not universal frame-rate guarantees",
+    "128\u00b3 performance measurement and energy checks do not establish full replay qualification",
+    "Apple GPU thermal/utilization telemetry unavailable",
+    "Incident holds and legacy-demo quarantine unchanged"
+  ],
+  "artifact": {
+    "url": "https://github.com/nxrobins/state-space/releases/download/macos-optimization-2026-10-18/state-space-macos-optimization-20261018.tar.gz",
+    "sha256": "f39077f64b1d1231e78decd39182ad4f92ee5064020d9c01161127a4f98ab6bb",
+    "bytes": 48926178,
+    "manifestSha256": "8068522c725a4d8279624f57d0908a66d40fc55d0db544fb2c75ab68fc3f7fe4",
+    "files": 804,
+    "containsAllCompletedAttemptsSince": "2026-10-18T20:20:00Z",
+    "sourceSnapshot": "source/",
+    "baselineProfilingCommit": "b83ce96ebee8026516d8ea84e2cb3ce397ad6c43"
+  }
+}
