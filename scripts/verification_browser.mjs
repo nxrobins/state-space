@@ -68,7 +68,7 @@ export async function main(){
   const hold=JSON.parse(await readFile(join(root,'dist/verification/safety-hold.json'),'utf8'));
   if(!hold||typeof hold!=='object'||Array.isArray(hold)||Object.hasOwn(hold,'blockRecovery')&&hold.blockRecovery!==false)throw Error('Runtime verification remains blocked pending review');
  }catch(error){if(error.code!=='ENOENT')throw error;}
- if(process.platform!=='win32'||!/^([0-9a-f]{32})$/.test(process.env.STATE_SPACE_VERIFICATION_JOB??''))throw Error('Persistent browser requires the Windows verification supervisor');
+ if(!(process.platform==='win32'||process.platform==='darwin'&&process.env.STATE_SPACE_VERIFICATION_KIND==='macos-qualification')||!/^([0-9a-f]{32})$/.test(process.env.STATE_SPACE_VERIFICATION_JOB??''))throw Error('Persistent browser requires a Windows or fixed Mac verification supervisor');
  if(typeof WebSocket!=='function')throw Error('Persistent browser requires Node 22 or newer');
  const executable=process.argv[2],output=resolve(process.argv[3]??'');
  if(!executable||!isAbsolute(executable)||!process.argv[3])throw Error('Explicit browser executable and output directory required');

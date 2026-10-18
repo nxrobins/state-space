@@ -50,7 +50,7 @@ class PosixVerificationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             report = json.loads((root / 'run/report.json').read_text())
             self.assertFalse(report['passed'])
-            self.assertIn('Timeout', report['error'])
+            self.assertTrue('Timeout' in report['error'] or 'deadline expired' in report['error'], report['error'])
             with self.assertRaises(ProcessLookupError):
                 os.killpg(report['childPid'], 0)
 
@@ -77,3 +77,40 @@ class PosixVerificationTests(unittest.TestCase):
                     os.killpg(report['childPid'], signal.SIGKILL)
                 except ProcessLookupError:
                     pass
+
+
+@unittest.skipUnless(os.name == 'posix', 'POSIX watchdog')
+class IndependentPosixWatchdogTests(unittest.TestCase):
+    def test_lost_heartbeat_terminates_owned_group_without_supervisor(self):
+        import psutil
+        from scripts.verification_posix_watchdog import PosixWatchdog
+        with tempfile.TemporaryDirectory() as temp:
+            child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(15)'], start_new_session=True)
+            watchdog = PosixWatchdog(child, 10, temp, heartbeat=.4)
+            try:
+                child.wait(timeout=4)
+                self.assertEqual(child.returncode, -signal.SIGKILL)
+                watchdog.process.wait(timeout=3)
+                self.assertIn('heartbeat expired', watchdog.failure_reason())
+            finally:
+                if child.poll() is None:
+                    os.killpg(child.pid, signal.SIGKILL)
+                    child.wait()
+                watchdog.process.stdin.close()
+                self.assertFalse(psutil.pid_exists(child.pid))
+
+    def test_supervisor_pipe_loss_terminates_owned_group(self):
+        from scripts.verification_posix_watchdog import PosixWatchdog
+        with tempfile.TemporaryDirectory() as temp:
+            child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(15)'], start_new_session=True)
+            watchdog = PosixWatchdog(child, 10, temp)
+            try:
+                watchdog.process.stdin.close()
+                child.wait(timeout=4)
+                watchdog.process.wait(timeout=3)
+                self.assertEqual(child.returncode, -signal.SIGKILL)
+                self.assertIn('lost supervisor', watchdog.failure_reason())
+            finally:
+                if child.poll() is None:
+                    os.killpg(child.pid, signal.SIGKILL)
+                    child.wait()

@@ -1,0 +1,62 @@
+name: Engine verification
+on:
+  pull_request:
+  push:
+    branches: [main, 'codex/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: engine-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cpu:
+    name: Bounded CPU and package checks
+    # Public-repository Ubuntu runners provide 16 GB; the existing supervisor
+    # refuses launch below 8 GiB available memory. GPU checks are separate.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.28'
+          enable-cache: true
+      - run: uv sync --locked
+      - run: npm ci
+      - name: Build, types and lint
+        run: |
+          npm run build:sdk
+          npm run typecheck
+          npm run lint
+          uv run ruff check --ignore E701,E702 scripts/verification*.py scripts/verify_macos*.py tests/test_verification*.py
+          uv run ruff check scripts/verification_guard.py scripts/verification_health.py scripts/verification_posix_watchdog.py scripts/verify_packages.py
+      - name: Bounded CPU smoke
+        run: node scripts/verify_checks.mjs --suite smoke
+      - name: Supervisor regressions (no GPU)
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_verification*.py' -v
+      - name: Archive restoration regressions
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 30 -- .venv/bin/python -B -m unittest tests.test_evidence_archive -v
+      - name: Installed CPU package client
+        run: uv run python -m scripts.verify_packages
+      - name: Retain receipts and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: cpu-evidence-${{ github.sha }}
+          path: |
+            dist/verification/
+            dist/packages/*.whl
+            dist/packages/*.tgz
+          retention-days: 14
+          if-no-files-found: warn

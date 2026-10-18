@@ -6,12 +6,18 @@ import {FrameClock} from '../../web/frame-clock.js';
 const $=id=>document.getElementById(id),canvas=$('world'),params=new URLSearchParams(location.search),keys=new Set(),clock=new FrameClock();
 const names=new Map(MATERIALS_3D.map(m=>[m.id,m.name]));
 let field,renderer,driver,level,initial,active=Promise.resolve(),pump,playing=false,exclusive=false,failed=false,pendingEdits=[];
-let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=24,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit;
+let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=24,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
+function controls(){
+ for(const element of document.querySelectorAll('aside button, aside select, aside input'))element.disabled=exclusive||(failed&&element.id!=='reset');
+ $('resume').disabled=exclusive||failed||!remembered;
+}
+function checkpointText(){text('checkpoint-status',remembered?`Remembered tick ${remembered.field.tick}. Restore returns to this world and actor.`:'No remembered checkpoint.');}
+
 $('size').value=params.get('size')??'32';$('scene').value=params.get('scene')??'control';
 function basis(yaw,pitch){const forward=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=[-Math.sin(pitch)*Math.sin(yaw),Math.cos(pitch),-Math.sin(pitch)*Math.cos(yaw)];return{forward,right,up:up.map(v=>-v)};}
 // In a +Y-down world, camera up points toward negative Y.
 function view(){return basis(yaw,pitch);}
-function fail(error){playing=false;failed=true;pump?.stop();keys.clear();$('mode').textContent='PAUSED / ERROR';$('error').hidden=false;$('error').textContent=String(error.stack||error);}
+function fail(error){playing=false;failed=true;pump?.stop();keys.clear();$('mode').textContent='PAUSED / ERROR';$('error').hidden=false;$('error').textContent=String(error.stack||error);controls();}
 function startFrames(){pump?.stop();pump=createFramePump((now,interval)=>{active=frame(now,interval);return active;},{onError:fail});}
 function notify(fn){return Promise.resolve().then(fn).catch(fail);}
 function text(id,value){if($(id).textContent!==value)$(id).textContent=value;}
@@ -58,11 +64,12 @@ async function frame(now,interval){
  const key=[field.tick,yaw,pitch,orbit,orbitYaw,orbitPitch,distance,appearance,lightingMode].join(',');if(key!==lastView){await present();lastView=key;}
 }
 async function exclusiveOperation(fn){
- if(exclusive)throw Error('Another operation is in flight.');exclusive=true;playing=false;keys.clear();
- try{await active.catch(error=>{if(!failed)throw error;});return await fn();}finally{exclusive=false;clock.reset();lastView='';}
+ if(exclusive)throw Error('Another operation is in flight.');exclusive=true;playing=false;keys.clear();controls();
+ try{await active.catch(error=>{if(!failed)throw error;});return await fn();}finally{exclusive=false;clock.reset();lastView='';controls();}
 }
 async function load(){
  driver?.close();renderer?.close();field?.close();field=renderer=driver=undefined;
+ remembered=undefined;checkpointText();
  const size=Number($('size').value),scenario=$('scene').value;level=createStructuralLevel(size,scenario);initial=level.field.snapshot();
  // The setup oracle is not retained alongside the GPU world during play.
  delete level.field;
@@ -89,6 +96,8 @@ $('appearance').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=a
 $('lighting').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=lightingMode==='reference'?'cached':'reference';await applyLightingMode(next);lightingMode=next;text('lighting',next==='cached'?'Lighting B · Cached':'Lighting A · Reference');await present();}));
 $('camera').onclick=()=>{orbit=!orbit;text('camera',orbit?'First-person view':'Orbit view');$('crosshair').hidden=orbit;lastView='';};
 $('inspect').onclick=()=>notify(()=>exclusiveOperation(async()=>{const balance=await field.energyBalance();text('energy',`${balance.driftQ} Q @ ${field.tick}`);}));
+$('remember').onclick=()=>notify(()=>exclusiveOperation(async()=>{remembered=await snapshot();checkpointText();}));
+$('resume').onclick=()=>notify(()=>exclusiveOperation(async()=>{if(!remembered)throw Error('Remember a checkpoint first.');await restore(remembered);checkpointText();}));
 $('export').onclick=()=>notify(()=>exclusiveOperation(async()=>{const value=await snapshot(),url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`m5-${level.scenario}-${field.tick}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}));
 $('import').onclick=()=>$('file').click();$('file').onchange=()=>notify(()=>exclusiveOperation(async()=>{const file=$('file').files[0];if(file)await restore(JSON.parse(await file.text()));$('file').value='';}));
 canvas.addEventListener('click',()=>{if(!orbit)void canvas.requestPointerLock();});

@@ -28,14 +28,15 @@
     "lab": "uv run python -m scripts.serve_lab",
     "pretest:smoke": "npm run build:sdk",
     "test:smoke": "node scripts/verify_checks.mjs --suite smoke",
-    "verify:macos:native": "uv run python -m scripts.verify_macos_native"
+    "verify:macos:native": "uv run python -m scripts.verify_macos_native",
+    "verify:packages": "uv run python -m scripts.verify_packages",
+    "verify:macos": "uv run python -m scripts.verify_macos_qualification"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@webgpu/types": "^0.1.72",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vitest": "^3.1.4"
+    "vitest": "^5.0.5"
   },
   "exports": {
     ".": {
@@ -111,5 +112,8 @@
     "docs/checkpoints/CAVERN_HAZE.md",
     "docs/checkpoints/CAVERN_HEAT.md",
     "docs/checkpoints/TACTICAL_INTERVENTIONS.md"
-  ]
+  ],
+  "dependencies": {
+    "@webgpu/types": "^0.1.72"
+  }
 }

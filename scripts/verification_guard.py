@@ -277,7 +277,7 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding='utf-8', errors='replace')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames', 'metal-smoke'], required=True)
+    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames', 'metal-smoke', 'macos-qualification'], required=True)
     parser.add_argument('--timeout', type=float, default=600)
     parser.add_argument('--stall', type=float, help='Missing-progress deadline; defaults to min(40, timeout)')
     parser.add_argument('--output', type=Path)
@@ -293,6 +293,9 @@ def main():
     if args.kind == 'metal-smoke':
         from scripts.verification_metal import validate_metal_smoke
         metal_scope = validate_metal_smoke(command, args.timeout)
+    if args.kind == 'macos-qualification':
+        from scripts.verification_macos import validate_qualification
+        metal_scope = validate_qualification(command, args.timeout)
     run_id = uuid.uuid4().hex
     out = args.output or ROOT / 'dist/verification' / run_id
     out.mkdir(parents=True, exist_ok=True)
@@ -369,6 +372,14 @@ def main():
                     raise
             else:
                 child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=stdout, stderr=stderr, start_new_session=True)
+                from scripts.verification_posix_watchdog import PosixWatchdog
+                # A very short process may already have exited; no live workload
+                # needs a watchdog, but stop() still cleans up its owned group.
+                if child.poll() is None:
+                    watchdog = PosixWatchdog(child, args.timeout, out, memory_limit)
+                    receipt['independentWatchdog'] = {'armed': True, 'heartbeatSeconds': 3,
+                        'deadlineSeconds': args.timeout, 'sampledRssLimitMiB': memory_limit,
+                        'transport': 'owned pipe', 'kernelMemoryCap': False}
             receipt['childPid'] = child.pid
             save()
             start = last_output = previous = time.monotonic()

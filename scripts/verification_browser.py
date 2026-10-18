@@ -5,6 +5,7 @@ from pathlib import Path
 import queue
 import shutil
 import subprocess
+import sys
 import threading
 import time
 from scripts.verification_guard import ROOT, assert_runtime_not_blocked
@@ -15,8 +16,9 @@ MAX_BYTES = 32 * 1024 * 1024
 class PersistentBrowser:
     def __init__(self, executable, output):
         assert_runtime_not_blocked(ROOT)
-        if os.name != 'nt' or not os.environ.get('STATE_SPACE_VERIFICATION_JOB'):
-            raise RuntimeError('Persistent browser requires supervised Windows containment')
+        mac = sys.platform == 'darwin' and os.environ.get('STATE_SPACE_VERIFICATION_KIND') == 'macos-qualification'
+        if (os.name != 'nt' and not mac) or not os.environ.get('STATE_SPACE_VERIFICATION_JOB'):
+            raise RuntimeError('Persistent browser requires the Windows or fixed Mac qualification supervisor')
         node = shutil.which('node')
         if not node:
             raise RuntimeError('Node 22 or newer is required')
@@ -33,7 +35,7 @@ class PersistentBrowser:
             self.child = subprocess.Popen([node, str(ROOT / 'scripts/verification_browser.mjs'),
                 str(Path(executable).resolve()), str(Path(output).resolve())], cwd=ROOT,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr, bufsize=0,
-                creationflags=subprocess.CREATE_NO_WINDOW)
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
             self.reader = threading.Thread(target=self._read, daemon=True)
             self.reader.start()
             self.writer = threading.Thread(target=self._write, daemon=True)
@@ -58,7 +60,8 @@ class PersistentBrowser:
                 while (end := pending.find(b'\n')) >= 0:
                     if end + 1 > MAX_BYTES:
                         raise RuntimeError('Oversized browser response')
-                    line = bytes(pending[:end]); del pending[:end + 1]
+                    line = bytes(pending[:end])
+                    del pending[:end + 1]
                     self.responses.put_nowait(json.loads(line))
                 if len(pending) >= MAX_BYTES:
                     raise RuntimeError('Oversized browser response')
