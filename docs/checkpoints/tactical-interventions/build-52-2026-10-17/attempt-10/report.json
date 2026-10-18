@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "id": "b5ea7f2bd6974e9bbb1eb911743fe84f",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.reactive-geometry.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\tactical-interventions\\build-52-2026-10-17\\attempt-10\\vitest.json"
+  ],
+  "startedAt": 1792283388.46105,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 11.244,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792283389.497542,
+      "hostCpuPercent": 4.8828125,
+      "freeMemoryMiB": 100912.0546875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 5452,
+  "lastOutput": "JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-52-2026-10-17/attempt-10/vitest.json",
+  "lastHealth": {
+    "host": {
+      "time": 1792283391.7477026,
+      "hostCpuPercent": 22.274881516587676,
+      "freeMemoryMiB": 100794.359375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 2.390625,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 287.640625
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792283392.1932476
+}

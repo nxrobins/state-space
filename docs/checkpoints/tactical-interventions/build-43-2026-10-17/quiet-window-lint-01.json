@@ -1,0 +1,20 @@
+{
+  "purpose": "Build 43 user-authorized CPU resumption lint",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 50,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792275195.7852945,
+      "hostCpuPercent": 16.89453125,
+      "freeMemoryMiB": 99758.15625
+    },
+    {
+      "time": 1792275196.78914,
+      "hostCpuPercent": 51.66015625,
+      "freeMemoryMiB": 101247.6484375
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792275196.78914
+}

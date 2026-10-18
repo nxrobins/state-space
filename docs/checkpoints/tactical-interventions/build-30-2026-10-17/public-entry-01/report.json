@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "a8a5853b547c467a8e0d5994164ec49a",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792266140.044928,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792266141.1007037,
+      "hostCpuPercent": 5.797101449275366,
+      "freeMemoryMiB": 103523.046875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 15984,
+  "lastOutput": "tate-space-engine/experimental/3d/tactical-session\",\"worldCells\":64,\"reservoirCells\":64,\"physicsTicks\":0,\"gpu\":false,\"actorMovement\":true,\"slabReference\":{\"passed\":true,\"worldCells\":512,\"physicsTicks\":0,\"nativeWorker\":false,\"gpu\":false,\"presentation\":true,\"uiCoordinator\":true,\"browserBundles\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792266142.1035118
+}

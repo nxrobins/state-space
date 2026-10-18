@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "971266d9904140e6be70e46d83446e68",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792270865.24553,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792270866.2976565,
+      "hostCpuPercent": 6.316812439261421,
+      "freeMemoryMiB": 102388.2109375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 25576,
+  "lastOutput": "rBundles\":true,\"airPreparation\":true,\"windContinuation\":true},\"reactiveMaterials\":{\"passed\":true,\"entry\":\"state-space-engine/experimental/3d/reactive-materials\",\"cells\":3,\"customMaterial\":200,\"atomicEdits\":true,\"accountedChemicalEnergy\":true,\"portableContinuation\":true,\"physicsTicks\":0,\"gpu\":false}}",
+  "exitCode": 0,
+  "finishedAt": 1792270867.2721481
+}

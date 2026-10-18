@@ -1,0 +1,19 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/material-transport-coupling.test.ts > atomic transport preparation in branches and workers > a throwing final game reducer discards the whole translated candidate
+AssertionError: expected 'failed' to be 'discarded' // Object.is equality
+
+Expected: "discarded"
+Received: "failed"
+
+ ❯ engine/experimental/material-transport-coupling.test.ts:153:63
+    151|     const f = fixture(), before = f.session.snapshot(), b = f.session.…
+    152|     expect(() => prepare(b, before.game.wind, [{id: 'parcel', impulseQ…
+    153|     expect(f.counts().translations).toBe(1); expect(b.status).toBe('di…
+       |                                                               ^
+    154|   });
+    155|   test('invalid asynchronous and nonportable game callbacks cannot pub…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

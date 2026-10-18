@@ -1,0 +1,1 @@
+{"passed":true,"entry":"state-space-engine/experimental/3d/tactical-session","worldCells":64,"reservoirCells":64,"physicsTicks":0,"gpu":false,"slabReference":{"passed":true,"worldCells":512,"physicsTicks":0,"nativeWorker":false,"gpu":false,"presentation":true}}

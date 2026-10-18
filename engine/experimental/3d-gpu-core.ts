@@ -14,7 +14,7 @@ export type { GameplayState3D, GameplayRules3D, GameplayCommand3D, GameplayPrese
 import { LatencyProfiler, type Trace } from './latency.js';
 import type { LatencySnapshot } from './3d-view.js';
 export type { LatencyRecord, LatencySnapshot } from './3d-view.js';
-import { type TerrainCamera, type TerrainRenderer, type TerrainAppearance } from './3d-view.js';
+import { type TerrainCamera, type TerrainRenderer, type TerrainAppearance, type TerrainLightingMode } from './3d-view.js';
 
 export type RegionRequest3D = { origin: readonly number[]; size: readonly number[] };
 export type Region3D = { origin: number[]; size: number[]; grid: Uint32Array; tick: number };
@@ -41,7 +41,7 @@ export interface GpuVolume3D {
   settleLatency(): Promise<void>;
   close(): void;
 }
-export type { TerrainCamera, TerrainRenderer, TerrainAppearance } from './3d-view.js';
+export type { TerrainCamera, TerrainRenderer, TerrainAppearance, TerrainLightingMode } from './3d-view.js';
 const EMPTY_EDITS = new Uint32Array(0);
 const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase'];
 const total = (values: ArrayLike<number>) => { let sum = 0; for (let i = 0; i < values.length; i++) sum += values[i]; return BigInt(sum); };
@@ -396,7 +396,7 @@ class ResidentVolume implements GpuVolume3D {
       this.#activityCache=undefined;
       const renderer=this.#config.chunkSize ? await makeChunkRenderer(this.#device,canvas,()=>({grid:this.#cells[this.#current],shape:[this.width,this.height,this.depth]}),this.#dirty,this.#config.chunkSize,this.#profiler,()=>this.#tick) : await makeTerrainRenderer(this.#device,canvas,()=>({grid:this.#cells[this.#current],shape:[this.width,this.height,this.depth]}),this.#profiler,()=>this.#tick);
       let rendererClosed=false;
-      const wrapped={...(renderer.setHeatDistortion?{setHeatDistortion:(value:boolean)=>this.#run(()=>renderer.setHeatDistortion!(value))}:{}),...(renderer.setAppearance?{setAppearance:(value:TerrainAppearance)=>this.#run(()=>renderer.setAppearance!(value))}:{}),render:(camera:TerrainCamera)=>this.#run(()=>{this.#activityCache=undefined;return renderer.render(camera);}),close:()=>{if(rendererClosed)return;if(this.#busy)throw new Error('Cannot close terrain with an operation in flight.');renderer.close();rendererClosed=true;this.#worldRenderer=false;this.#chunkRenderers.delete(wrapped);},...(renderer.inspectMesh?{inspectMesh:()=>this.#run(()=>renderer.inspectMesh!())}:{})};this.#renderers.push(wrapped);this.#worldRenderer=Boolean(this.#config.chunkSize);if(this.#config.chunkSize)this.#chunkRenderers.set(wrapped,renderer as ResidentChunkRenderer);return wrapped;
+      const wrapped={...(renderer.setLightingMode?{setLightingMode:(value:TerrainLightingMode)=>this.#run(()=>renderer.setLightingMode!(value))}:{}),...(renderer.setHeatDistortion?{setHeatDistortion:(value:boolean)=>this.#run(()=>renderer.setHeatDistortion!(value))}:{}),...(renderer.setAppearance?{setAppearance:(value:TerrainAppearance)=>this.#run(()=>renderer.setAppearance!(value))}:{}),render:(camera:TerrainCamera)=>this.#run(()=>{this.#activityCache=undefined;return renderer.render(camera);}),close:()=>{if(rendererClosed)return;if(this.#busy)throw new Error('Cannot close terrain with an operation in flight.');renderer.close();rendererClosed=true;this.#worldRenderer=false;this.#chunkRenderers.delete(wrapped);},...(renderer.inspectMesh?{inspectMesh:()=>this.#run(()=>renderer.inspectMesh!())}:{})};this.#renderers.push(wrapped);this.#worldRenderer=Boolean(this.#config.chunkSize);if(this.#config.chunkSize)this.#chunkRenderers.set(wrapped,renderer as ResidentChunkRenderer);return wrapped;
     });
   }
   close(){if(this.#closed)return;if(this.#busy)throw new Error('Cannot close a field with an operation in flight.');this.#closed=true;this.#gameplay?.close();this.#renderers.forEach(r=>r.close());this.#profiler.close();this.#buffers.forEach(b=>b.destroy());this.#device.destroy();}

@@ -1,0 +1,19 @@
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-actors.test.ts [ engine/experimental/reactive-actors.test.ts ]
+Error: Invalid material name.
+ ❯ validateCatalog engine/registry.ts:86:90
+     84|     sameKeys(record, ['id', 'name', 'default_thermal', 'color', 'prope…
+     85|     integer(record.id, 0, 255, 'material.id');
+     86|     if (typeof record.name !== 'string' || !/^[a-z][a-z_0-9]*$/.test(r…
+       |                                                                                          ^
+     87|     if (records.has(record.id) || names.has(record.name)) throw new Er…
+     88|     if (typeof record.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(…
+ ❯ createMaterialRegistry engine/registry.ts:181:3
+ ❯ createReactiveMaterialRegistry3D engine/experimental/reactive-registry.ts:65:26
+ ❯ Object.extend engine/experimental/reactive-registry.ts:95:14
+ ❯ engine/experimental/reactive-actors.test.ts:22:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -9,6 +9,8 @@ import { ANCHOR_3D, BONDS_3D, COMPLETE_STRUCTURE_3D, FRESH_3D, INTEGRITY_3D,
   normalizeStructure3D, solveStructure3D, structuralEligible, structuralNeighbor,
   type StructuralGeometry, type StructuralState3D } from './structural-mechanics.js';
 import { executeStructuralMaterialPass } from './structural-material.js';
+import { createMotionRecorder3D, motionEntryLimit3D, type MaterialMotionTrace3D, type MotionTraceOptions3D } from './motion-trace.js';
+import { createMotionPathRecorder3D, motionPathLimits3D, type MaterialMotionPaths3D, type MaterialMotionPathsResult3D, type MotionPathOptions3D } from './motion-paths.js';
 
 export const STRUCTURAL_SCHEMA_VERSION_3D=2;
 export const STRUCTURAL_RULES_VERSION_3D='ca-3d-m5';
@@ -142,21 +144,44 @@ export class CpuStructuralWorld3D {
   setAnchor(x:number,y:number,z:number,anchored:boolean){this.edit([{kind:'anchor',x,y,z,anchored}]);}
   setIntegrity(x:number,y:number,z:number,integrity:number){this.edit([{kind:'integrity',x,y,z,integrity}]);}
   setBond(x:number,y:number,z:number,direction:number,bonded:boolean){this.edit([{kind:'bond',x,y,z,direction,bonded}]);}
-  step(ticks=1,options:StructuralStepOptions3D={}) {
+  step(ticks=1,options:StructuralStepOptions3D={}) {this.#advance(ticks,options);}
+  /** Optional provenance for one complete tick; it is never stored in snapshots. */
+  stepWithMotion(options:MotionTraceOptions3D={}):MaterialMotionTrace3D {
+    return this.#advance(1,{},motionEntryLimit3D(options))!;
+  }
+  /** Observed sub-pass transfers for one tick; capture overflow never changes physics. */
+  stepWithMotionPaths(options:MotionPathOptions3D={}):MaterialMotionPathsResult3D {
+    const limits=motionPathLimits3D(options),capture:{limit:number;result?:MaterialMotionPaths3D}={limit:limits.pathLimit};
+    const motion=this.#advance(1,{},limits.motionLimit,capture)!;
+    return{motion,paths:capture.result!};
+  }
+  #advance(ticks:number,options:StructuralStepOptions3D,captureLimit?:number,pathCapture?:{limit:number;result?:MaterialMotionPaths3D}):MaterialMotionTrace3D|undefined {
     checkedInteger(ticks,0,32,'ticks per request');checkedInteger(this.#tick+ticks,0,Number.MAX_SAFE_INTEGER,'end tick');
     if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='edits'))throw Error('Invalid structural step options.');
     const edited=applyStructuralEdits3D(this.#state,options.edits===undefined?[]:options.edits,this);
     if(!ticks){this.#state=edited.state;this.#external+=edited.externalQ;return;}
-    let input=edited.state;
+    let input=edited.state,lastTrace:MaterialMotionTrace3D|undefined;
     for(let t=0;t<ticks;t++) {
       // A complete tick is staged off-state. Failed solves cannot publish partial damage/motion.
-      let state=solveStructure3D(input,this).state,spare=clone(state);
+      let state:StructuralState3D,recorder:ReturnType<typeof createMotionRecorder3D>|undefined,pathRecorder:ReturnType<typeof createMotionPathRecorder3D>|undefined;
+      if(captureLimit===undefined) state=solveStructure3D(input,this).state;
+      else {
+        const plan=solveStructure3D(input,this);state=plan.state;
+        recorder=createMotionRecorder3D(plan,this,this.#tick,{physicsRulesVersion:STRUCTURAL_RULES_VERSION_3D,materialCatalogHash:MATERIAL_CATALOG_HASH_3D},captureLimit);
+        if(pathCapture){pathRecorder=createMotionPathRecorder3D(plan,this,this.#tick,{physicsRulesVersion:STRUCTURAL_RULES_VERSION_3D,materialCatalogHash:MATERIAL_CATALOG_HASH_3D},pathCapture.limit);recorder.provenance.pathSwap=pathRecorder.swap;}
+      }
+      let spare=clone(state);
       for(const pass of volumeSchedule(this.#tick)) {
-        executeStructuralMaterialPass(state,spare,this.width,this.height,this.depth,this.#tick,pass);[state,spare]=[spare,state];
+        executeStructuralMaterialPass(state,spare,this.width,this.height,this.depth,this.#tick,pass,recorder?.provenance);[state,spare]=[spare,state];
+        pathRecorder?.endPass(pass);
+        recorder?.endPass();
       }
       state.structure=normalizeStructure3D(state.grid,state.structure,this);
+      lastTrace=recorder?.finish();
+      if(pathCapture)pathCapture.result=pathRecorder!.finish(lastTrace!);
       this.#state=state;this.#tick++;if(t===0)this.#external+=edited.externalQ;input=state;
     }
+    return lastTrace;
   }
   sample(x:number,y:number,z:number) {
     const i=position({x,y,z},this),v=this.#state.grid[i],q=this.#state.energyQ[i],s=this.#state.structure[i];

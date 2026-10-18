@@ -1,0 +1,54 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > translation, actors, resources, AP and history publish together after a zero-horizon preview 7ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > accounting survives snapshot branches and records exact edit deltas 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > late invalid edit makes the entire branch terminal without committing earlier work 2ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > invalid final game policy rejects both terrain and game publication 2ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > sibling game-only commit invalidates a preview even when tick is unchanged 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > foreign and forged handles cannot commit even with identical public identity 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > restore preserves accounting and advances revision instead of resurrecting old tokens 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > malformed restore never changes live state or invalidates a usable branch 4ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > all input, preview, committed-result and snapshot storage is isolated 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > portable game values reject cycles, holes, accessors and non-JSON data 44ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > malformed game update closes its branch and preserves the live game 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > publication validation sees copies and cannot reenter a session mutation 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > nonzero mock horizons must finish before commit and reducers see each complete tick 2ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > a later simulation failure cannot commit earlier complete ticks 2ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > cleanup failure prevents branch publication even after successful work 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > invalid mock driver tick output rejects without publication 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > invalid mock driver energy output rejects without publication 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > invalid mock driver rules output rejects without publication 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > throwing and asynchronous reducers cannot leave a committable partial result 295ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > cancellation during in-flight work waits for its safe boundary and cleans once 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > already-aborted requests create no driver and cannot commit 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > an external commit supersedes pending work without overwriting the newer state 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > retained branch count is bounded and discarded work frees capacity 1ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > horizons, advancement sizes and tick overflow reject before simulation 2ms
+ ✓ engine/experimental/tactical-session.test.ts > tactical transactions: real edits and inert advancement only > policy function replacement after creation cannot change branch rules 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > hot damaged slab keeps exact coordinates, internal bonds and displaced hot air 6ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (-1,0,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (1,0,0) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,-1,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,1,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,-1) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,1) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > contact with an intact destination neighbor does not weld 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > external bonds reject by default and explicit cuts update both endpoints without healing 4ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > pins require explicit release and are not carried into the destination 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile water displacement is explicit and conservative through successive steps 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > existing fluid can be selected and moved without manufacturing or cooling it 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile displacement admits broken grains but rejects intact ice and pinned debris 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > an empty endpoint cannot tunnel through an intervening solid 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > late boundary failure rolls back earlier movement, cuts and pin releases 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > selection order and disconnected runs do not change results or receipts 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > malformed, sparse, duplicate, missing and excessive requests never mutate input 8ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > invalid snapshots fail before an operation can publish 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > frozen input is accepted and all result storage is isolated 3ms
+
+ Test Files  2 passed (2)
+      Tests  44 passed (44)
+   Start at  01:08:30
+   Duration  1.25s (transform 143ms, setup 0ms, collect 228ms, tests 429ms, environment 0ms, prepare 298ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-02-2026-10-17/attempt-01/vitest.json

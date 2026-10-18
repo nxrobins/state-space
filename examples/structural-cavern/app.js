@@ -6,15 +6,19 @@ import {FrameClock} from '../../web/frame-clock.js';
 const $=id=>document.getElementById(id),canvas=$('world'),params=new URLSearchParams(location.search),keys=new Set(),clock=new FrameClock();
 const names=new Map(MATERIALS_3D.map(m=>[m.id,m.name]));
 let field,renderer,driver,level,initial,active=Promise.resolve(),pump,playing=false,exclusive=false,failed=false,pendingEdits=[];
-let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=24,drag=null,appearance='naturalistic',lastView='',lastCommit;
+let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=24,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit;
 $('size').value=params.get('size')??'32';$('scene').value=params.get('scene')??'control';
 function basis(yaw,pitch){const forward=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=[-Math.sin(pitch)*Math.sin(yaw),Math.cos(pitch),-Math.sin(pitch)*Math.cos(yaw)];return{forward,right,up:up.map(v=>-v)};}
 // In a +Y-down world, camera up points toward negative Y.
 function view(){return basis(yaw,pitch);}
 function fail(error){playing=false;failed=true;pump?.stop();keys.clear();$('mode').textContent='PAUSED / ERROR';$('error').hidden=false;$('error').textContent=String(error.stack||error);}
 function startFrames(){pump?.stop();pump=createFramePump((now,interval)=>{active=frame(now,interval);return active;},{onError:fail});}
-function notify(fn){void Promise.resolve().then(fn).catch(fail);}
+function notify(fn){return Promise.resolve().then(fn).catch(fail);}
 function text(id,value){if($(id).textContent!==value)$(id).textContent=value;}
+async function applyLightingMode(next){
+ if(renderer.setLightingMode)await renderer.setLightingMode(next);
+ else if(next!=='reference')throw Error('Cached lighting requires an SDK build with lighting-cache support.');
+}
 function hud(ms){
  text('tick',String(field.tick));text('mode',failed?'ERROR':playing?'PLAYING':'PAUSED');text('play',playing?'Pause':'Play');
  if(ms!==undefined)text('frame',`${ms.toFixed(2)} ms`);
@@ -51,7 +55,7 @@ async function frame(now,interval){
   if(scripted){yaw=Math.PI/2;pitch=0;}
   await advance(command,edits);lastView='';return;
  }
- const key=[field.tick,yaw,pitch,orbit,orbitYaw,orbitPitch,distance,appearance].join(',');if(key!==lastView){await present();lastView=key;}
+ const key=[field.tick,yaw,pitch,orbit,orbitYaw,orbitPitch,distance,appearance,lightingMode].join(',');if(key!==lastView){await present();lastView=key;}
 }
 async function exclusiveOperation(fn){
  if(exclusive)throw Error('Another operation is in flight.');exclusive=true;playing=false;keys.clear();
@@ -63,7 +67,8 @@ async function load(){
  // The setup oracle is not retained alongside the GPU world during play.
  delete level.field;
  field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active'});
- await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);
+ await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);await applyLightingMode(lightingMode);
+ $('lighting').disabled=!renderer.setLightingMode; text('lighting',renderer.setLightingMode?(lightingMode==='cached'?'Lighting B · Cached':'Lighting A · Reference'):'Lighting A · SDK update needed for B');
  driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=24;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
  text('dimension',`${size}³`);text('energy','Not inspected');
  text('expectation',scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.');
@@ -80,7 +85,8 @@ $('play').onclick=()=>{if(failed||exclusive)return;playing=!playing;clock.reset(
 $('step').onclick=()=>notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),pendingEdits.splice(0))));
 for(const id of ['reset','scene','size'])$(id)[id==='reset'?'onclick':'onchange']=()=>notify(()=>exclusiveOperation(load));
 for(const action of ['cut','heat','melt'])$(action).onclick=()=>notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),structuralAction(level,action))));
-$('appearance').onclick=()=>notify(()=>exclusiveOperation(async()=>{appearance=appearance==='naturalistic'?'diagnostic':'naturalistic';await renderer.setAppearance(appearance);text('appearance',`A/B · ${appearance==='naturalistic'?'Naturalistic':'Diagnostic'}`);await present();}));
+$('appearance').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=appearance==='naturalistic'?'diagnostic':'naturalistic';await renderer.setAppearance(next);appearance=next;text('appearance',`A/B · ${appearance==='naturalistic'?'Naturalistic':'Diagnostic'}`);await present();}));
+$('lighting').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=lightingMode==='reference'?'cached':'reference';await applyLightingMode(next);lightingMode=next;text('lighting',next==='cached'?'Lighting B · Cached':'Lighting A · Reference');await present();}));
 $('camera').onclick=()=>{orbit=!orbit;text('camera',orbit?'First-person view':'Orbit view');$('crosshair').hidden=orbit;lastView='';};
 $('inspect').onclick=()=>notify(()=>exclusiveOperation(async()=>{const balance=await field.energyBalance();text('energy',`${balance.driftQ} Q @ ${field.tick}`);}));
 $('export').onclick=()=>notify(()=>exclusiveOperation(async()=>{const value=await snapshot(),url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`m5-${level.scenario}-${field.tick}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}));
@@ -91,7 +97,7 @@ window.addEventListener('pointermove',e=>{if(document.pointerLockElement===canva
 canvas.addEventListener('wheel',e=>{if(orbit){e.preventDefault();distance=Math.max(6,Math.min(100,distance+e.deltaY*.025));}},{passive:false});
 window.addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;keys.add(e.code);if(['Space','KeyE'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&!e.repeat&&!exclusive){pendingEdits.push(...targetEdit());if(!playing)notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),pendingEdits.splice(0))));}});
 window.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>{keys.clear();playing=false;clock.reset();});
-const api={get field(){return field;},get renderer(){return renderer;},get driver(){return driver;},get level(){return level;},advance,present,snapshot,restore,
+const api={get lightingMode(){return lightingMode;},get field(){return field;},get renderer(){return renderer;},get driver(){return driver;},get level(){return level;},advance,present,snapshot,restore,
  stop:async()=>{playing=false;pump?.stop();await active;},hud,view,ready:null};window.structuralCavern=api;
 api.runBenchmark=()=>exclusiveOperation(async()=>{const {benchmarkStructuralGameplay}=await import('./benchmark.js');return benchmarkStructuralGameplay(api);});
 api.runScaleProbe=()=>exclusiveOperation(async()=>{const {probeStructuralScale}=await import('./scale-probe.js');return probeStructuralScale(api);});

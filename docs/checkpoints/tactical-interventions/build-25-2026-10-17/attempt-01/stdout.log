@@ -1,0 +1,36 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > mixed receipts match direct history before and after an acknowledged commit 33ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > odd-start multi-batch histories cover both domains and exact operation order 48ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > intervening heat and resource changes remain visible after exact reversal 7ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > distant support changes survive coarse zero-run capture without invented detail 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > disabled capture stays explicit and performs no support observations 5ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > empty zero-tick actions have complete empty history despite completion operation 2ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > domain tick overflow removes the entire prefix while preserving observed counts 34ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > caller mutations cannot replace private preview or commit provenance 15ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > foreign copied and absent handles reject locally without dispatch 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > supersession and commit expire preview history access 5ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > new commits and restore expire acknowledged history handles 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > out-of-band revisions reject reads at host without recomputing support 11ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > pending journal reads exclude all other ordinary requests 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > cancelled ready previews reject an outstanding read in either reply order 13ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > close invalidates pending preview delivery and waits for it to drain 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > close drains an outstanding committed history before disposing transport 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > read exceptions are nonfatal and preserve the ready candidate 10ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > timeouts retain last confirmed state and never retry or imply an uncertain commit 6ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > wrong preview target and protocol fail closed without publishing candidate state 8ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > journal stamp and chronology corruption fail closed on committed and preview reads 263ms
+ ✓ engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > domain geometry runs and distant support bounds are checked on every boundary 10ms
+ × engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > receipt versions mappings budgets energy and hold lifetime reject malformed history 14ms
+   → expected [Function] to throw error matching /budget/ but got 'Invalid bounded action array.'
+ · engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > raw accessor sparse and decorated arrays reject without invoking accessors
+ · engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > tick motion coverage identity and complete permutation are validated
+ · engine/experimental/tactical-worker-journal.test.ts > worker action history with mock transport and inert physics > disabled overflow and coarse statuses cannot carry misleading partial prefixes
+
+ Test Files  1 failed (25)
+      Tests  1 failed | 21 passed (25)
+   Start at  11:34:43
+   Duration  1.64s (transform 536ms, setup 0ms, collect 669ms, tests 530ms, environment 0ms, prepare 259ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-25-2026-10-17/attempt-01/vitest.json

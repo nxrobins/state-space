@@ -1,0 +1,17 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-command-actors.test.ts > atomic command policy and continuation > held cells cannot translate or publish prior game costs
+AssertionError: expected [Function] to throw error matching /held/ but got 'Explicitly release the reactive hold …'
+
+- Expected: 
+/held/
+
++ Received: 
+"Explicitly release the reactive hold before translation."
+
+ ❯ engine/experimental/reactive-command-actors.test.ts:238:149
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

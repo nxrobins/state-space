@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "bf17819a932d4796accd461ed8969e39",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792261128.3539155,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 3.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792261129.4022772,
+      "hostCpuPercent": 3.173076923076923,
+      "freeMemoryMiB": 103548.70703125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 3952,
+  "lastOutput": "Node.js v22.22.3",
+  "exitCode": 1,
+  "finishedAt": 1792261130.155776
+}

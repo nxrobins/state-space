@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "a58cdf604034463a96eb9f5b2e99ec47",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792269659.9121892,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 34.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792269660.9533718,
+      "hostCpuPercent": 1.3461538461538414,
+      "freeMemoryMiB": 102818.26953125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 38424,
+  "lastHealth": {
+    "host": {
+      "time": 1792269672.7996683,
+      "hostCpuPercent": 8.668453976764967,
+      "freeMemoryMiB": 102388.578125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 10.4375,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 415.35546875
+    }
+  },
+  "lastOutput": "  Property 'error' does not exist on type 'Stamp & { status: \"ready\"; preview: TacticalPreview3D<TacticalValue>; }'.",
+  "exitCode": 2,
+  "finishedAt": 1792269673.0539486
+}

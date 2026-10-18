@@ -1,0 +1,2 @@
+{"stage":"preflight","host":{"time":1792272515.4360638,"hostCpuPercent":5.431619786614938,"freeMemoryMiB":102171.546875},"gpu":null}
+{"stage":"running","host":{"time":1792272516.951615,"hostCpuPercent":12.177835051546392,"freeMemoryMiB":102050.58203125},"gpu":null,"job":{"cpuSeconds":1.234375,"activeProcesses":4,"peakMemoryMiB":205.40625}}

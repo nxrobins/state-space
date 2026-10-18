@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "state-space-engine/experimental/3d/tactical-session": ["./experimental/tactical-session.ts"],
+      "state-space-engine/experimental/3d/tactical-renderer": ["./experimental/tactical-renderer.ts"]
+    }
+  }
+}

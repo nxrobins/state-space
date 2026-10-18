@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-10-17T06:18:04.9853049Z",
+  "runIds": [
+    "79fc92278d764a8fb3029670d0cda487",
+    "82d751d810fa4f109fc2153efadadb7b",
+    "a331d82591c64825a4942fc516205f72",
+    "1585fdb42dcd452eba7d4334ed187170"
+  ],
+  "matchingProcesses": [],
+  "passed": true,
+  "operation": "Read-only process inventory matched only these four owned run IDs"
+}

@@ -17,8 +17,88 @@ import sys
 import time
 import uuid
 from scripts.verification_health import HostHealth, GpuMonitor, gpu_sample, health_error, append_sample
+from scripts.verification_watchdog import IndependentWatchdog
+from scripts.verification_journal import durable_json
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+class DurableProgress:
+    """Only consecutive writer acknowledgements count as structured progress."""
+    def __init__(self, job):
+        self.job = job
+        self.sequence = 0
+        self.tail = ''
+
+    def feed(self, data):
+        self.tail += data.decode('utf-8', errors='replace')
+        lines = self.tail.split('\n'); self.tail = lines.pop()
+        if len(self.tail) > 8192 or any(len(line) > 8192 for line in lines):
+            raise RuntimeError('Oversized progress record')
+        changed = False
+        for line in lines:
+            if not line.startswith('STATE_SPACE_PROGRESS '):
+                continue
+            event = json.loads(line[len('STATE_SPACE_PROGRESS '):])
+            if (not isinstance(event, dict) or event.get('job') != self.job
+                    or type(event.get('sequence')) is not int or event['sequence'] != self.sequence + 1):
+                raise RuntimeError('Invalid durable progress sequence')
+            self.sequence = event['sequence']; changed = True
+        return changed
+
+    def finish(self):
+        if not self.sequence or self.tail:
+            raise RuntimeError('Missing or truncated final durable progress')
+
+
+def drain_output(out, offsets, progress=None, *, final=False, watchdog=None):
+    """Bound each read, including output produced immediately before exit."""
+    changed = False
+    last_line = None
+    for i, (name, stream) in enumerate((('stdout.log', sys.stdout), ('stderr.log', sys.stderr))):
+        path = out / name
+        size = path.stat().st_size
+        if size > 64 * 1024 * 1024 or size < offsets[i]:
+            raise RuntimeError('Verification output exceeds its bound or was truncated')
+        with path.open('rb') as reader:
+            reader.seek(offsets[i])
+            while offsets[i] < size:
+                if watchdog:
+                    watchdog.pulse()
+                data = reader.read(min(1024 * 1024, size - offsets[i]))
+                if not data:
+                    raise RuntimeError('Verification output was truncated')
+                offsets[i] += len(data)
+                if progress is None:
+                    changed = True
+                elif i == 0:
+                    changed = progress.feed(data) or changed
+                decoded = data.decode('utf-8', errors='replace')
+                last_line = decoded.splitlines()[-1][-300:]
+                stream.write(decoded); stream.flush()
+                if not final:
+                    break
+    if final and progress:
+        progress.finish()
+    return changed, last_line
+
+
+def assert_recovery_enabled(state):
+    # A new incident can disable even otherwise-valid one-shot permits.
+    # Only an explicit false value re-enables recovery after review.
+    if state.get('blockRecovery', False) is not False:
+        raise RuntimeError('Verification suspended: recovery launches are blocked after a new host freeze. '
+                           'No workload was launched. Review the incident before re-enabling recovery.')
+
+
+def assert_runtime_not_blocked(root=ROOT):
+    """Leaf entries also honor a hard incident block, even inside a job."""
+    hold = root / 'dist/verification/safety-hold.json'
+    if hold.exists():
+        try:
+            assert_recovery_enabled(json.loads(hold.read_text(encoding='utf-8')))
+        except (ValueError, TypeError, AttributeError):
+            raise RuntimeError('Verification suspended: invalid incident hold') from None
 
 
 def assert_verification_allowed(root=ROOT, *, command=None, kind=None, timeout=None):
@@ -35,12 +115,13 @@ def assert_verification_allowed(root=ROOT, *, command=None, kind=None, timeout=N
         # stays in place, including across failures and subsequent reboots.
         try:
             state = json.loads(hold.read_text(encoding='utf-8'))
+            assert_recovery_enabled(state)
             permit = state['recoveryPermit']
             if (command is not None and permit['command'] == command and permit['kind'] == kind
                     and time.time() < permit['expiresAt'] <= time.time() + 600
                     and timeout is not None and timeout <= permit['timeoutSeconds'] <= 1800):
                 state['lastRecovery'] = {**state.pop('recoveryPermit'), 'consumedAt': time.time()}
-                hold.write_text(json.dumps(state, indent=2) + '\n', encoding='utf-8')
+                durable_json(hold, state)
                 return
         except (ValueError, KeyError, TypeError):
             pass
@@ -74,7 +155,7 @@ class Lease:
 
 
 class WindowsJob:
-    def __init__(self, memory_bytes, cpu_percent):
+    def __init__(self, memory_bytes, cpu_percent, name=None):
         k = self.k = ctypes.WinDLL('kernel32', use_last_error=True)
         k.CreateJobObjectW.argtypes = [ctypes.c_void_p, W.LPCWSTR]
         k.CreateJobObjectW.restype = W.HANDLE
@@ -89,7 +170,7 @@ class WindowsJob:
         class Extended(ctypes.Structure):
             _fields_ = [('basic', Basic), ('io', ctypes.c_uint64 * 6), ('processMemory', ctypes.c_size_t),
                         ('jobMemory', ctypes.c_size_t), ('peakProcess', ctypes.c_size_t), ('peakJob', ctypes.c_size_t)]
-        self.handle = k.CreateJobObjectW(None, None)
+        self.handle = k.CreateJobObjectW(None, name)
         if not self.handle:
             raise ctypes.WinError(ctypes.get_last_error())
         info = Extended()
@@ -119,8 +200,12 @@ class WindowsJob:
         if not value:
             raise ctypes.WinError(ctypes.get_last_error())
 
-    def assign_and_resume(self, child):
+    def assign_and_resume(self, child, before_resume=None):
         self.check(self.k.AssignProcessToJobObject(self.handle, W.HANDLE(int(child._handle))))
+        # Creation/assignment can block. Recheck only after assignment so an
+        # expired watchdog can never be followed by resuming an unguarded child.
+        if before_resume:
+            before_resume()
         # Popen closes the original thread handle. The suspended child has exactly
         # one thread; enumerate and resume it only after containment is established.
         class Thread(ctypes.Structure):
@@ -146,6 +231,8 @@ class WindowsJob:
                     thread = k.OpenThread(2, False, row.tid)
                     self.check(thread)
                     try:
+                        if before_resume:
+                            before_resume()
                         if k.ResumeThread(thread) == 0xffffffff:
                             raise ctypes.WinError(ctypes.get_last_error())
                         resumed = True
@@ -159,17 +246,26 @@ class WindowsJob:
 
     def close(self):
         if self.handle:
-            self.k.TerminateJobObject(self.handle, 125)
-            self.k.CloseHandle(self.handle)
-            self.handle = None
+            handle = self.handle
+            try:
+                self.check(self.k.TerminateJobObject(handle, 125))
+            finally:
+                # Kill-on-close is a second containment mechanism. A failed
+                # termination or handle close must still make the receipt fail.
+                if self.k.CloseHandle(handle):
+                    self.handle = None
+                else:
+                    self.check(False)
 
 
-def guarded_entry(kind, timeout=600, *, module=None):
+def guarded_entry(kind, timeout=600, *, module=None, structured_progress=False):
     """Re-enter this Python module under the supervisor when invoked directly."""
+    assert_runtime_not_blocked(ROOT)
     if not os.environ.get('STATE_SPACE_VERIFICATION_JOB'):
         module = module or 'scripts.' + Path(sys.argv[0]).stem
         command = [sys.executable, '-m', 'scripts.verification_guard', '--kind', kind,
-                   '--timeout', str(timeout), '--', sys.executable, '-m', module, *sys.argv[1:]]
+                   '--timeout', str(timeout), *(['--structured-progress'] if structured_progress else []),
+                   '--', sys.executable, '-m', module, *sys.argv[1:]]
         raise SystemExit(subprocess.call(command, cwd=ROOT))
 
 
@@ -181,6 +277,7 @@ def main():
     parser.add_argument('--timeout', type=float, default=600)
     parser.add_argument('--stall', type=float, default=40)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--structured-progress', action='store_true')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
@@ -191,21 +288,25 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     cpu_limit = 6 if args.kind == 'cpu' else 12 if args.kind == 'gpu' else 0
     memory_limit = 4096 if args.kind == 'cpu' else 8192
-    receipt = {'version': 2, 'id': run_id, 'kind': args.kind, 'command': command, 'startedAt': time.time(),
+    receipt = {'version': 3, 'id': run_id, 'kind': args.kind, 'command': command, 'startedAt': time.time(),
                'passed': False, 'memoryLimitMiB': memory_limit, 'cpuLimitPercent': cpu_limit or None,
                'timeoutSeconds': args.timeout, 'stallSeconds': args.stall, 'maxMonitorLagMs': 0,
                'containment': 'Windows job' if os.name == 'nt' else 'POSIX process group'}
-    job = child = gpu_monitor = None
+    job = child = gpu_monitor = watchdog = None
     def save():
         pending = out / 'report.tmp'
         with pending.open('w', encoding='utf-8') as stream:
             stream.write(json.dumps(receipt, indent=2) + '\n'); stream.flush(); os.fsync(stream.fileno())
         pending.replace(out / 'report.json')
     def stop():
-        if job:
-            job.close()
-        elif child and child.poll() is None:
-            os.killpg(child.pid, signal.SIGKILL)
+        try:
+            if job:
+                job.close()
+            elif child and child.poll() is None:
+                os.killpg(child.pid, signal.SIGKILL)
+        except Exception as error:
+            receipt['cleanupError'] = 'Workload termination failed: ' + str(error)
+            receipt['passed'] = False
     try:
         with Lease(), ExitStack() as streams:
             assert_verification_allowed(ROOT, command=command, kind=args.kind, timeout=args.timeout)
@@ -228,13 +329,16 @@ def main():
                    'STATE_SPACE_VERIFY_YIELD_MS': '20', 'PYTHONIOENCODING': 'utf-8',
                    'OMP_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
             if os.name == 'nt':
-                job = WindowsJob(memory_limit * 1024**2, cpu_limit)
+                job = WindowsJob(memory_limit * 1024**2, cpu_limit, 'Local\\StateSpaceVerify-' + run_id)
+                watchdog = IndependentWatchdog(run_id, args.timeout)
+                receipt['independentWatchdog'] = {'armed': True, 'heartbeatSeconds': 3,
+                    'deadlineSeconds': args.timeout, 'transport': 'pagefile-backed mapping'}
                 flags = 4 | subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
                 if args.kind != 'frames':
                     flags |= subprocess.BELOW_NORMAL_PRIORITY_CLASS
                 child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=stdout, stderr=stderr, creationflags=flags)
                 try:
-                    job.assign_and_resume(child)
+                    job.assign_and_resume(child, watchdog.pulse)
                 except BaseException:
                     child.kill()
                     raise
@@ -243,22 +347,23 @@ def main():
             receipt['childPid'] = child.pid
             save()
             start = last_output = previous = time.monotonic()
-            sizes = (0, 0); offsets = [0, 0]
+            offsets = [0, 0]
+            progress = DurableProgress(run_id) if args.structured_progress else None
             last_sample = start; overloaded_since = None
             while child.poll() is None:
+                if watchdog:
+                    watchdog.pulse()
                 time.sleep(.2)
                 now = time.monotonic()
                 lag = max(0, now - previous - .2)
                 receipt['maxMonitorLagMs'] = max(receipt['maxMonitorLagMs'], round(lag * 1000, 3)); previous = now
-                current = tuple((out / p).stat().st_size for p in ['stdout.log', 'stderr.log'])
-                if current != sizes:
-                    last_output = now; sizes = current
-                    for i, (name, stream) in enumerate([('stdout.log', sys.stdout), ('stderr.log', sys.stderr)]):
-                        with (out / name).open('rb') as reader:
-                            reader.seek(offsets[i]); data = reader.read(); offsets[i] += len(data)
-                            if data:
-                                receipt['lastOutput'] = data.decode('utf-8', errors='replace').splitlines()[-1][-300:]
-                                stream.write(data.decode('utf-8', errors='replace')); stream.flush()
+                changed, last_line = drain_output(out, offsets, progress)
+                if changed:
+                    last_output = now
+                if progress:
+                    receipt['durableProgressSequence'] = progress.sequence
+                if last_line is not None:
+                    receipt['lastOutput'] = last_line
                 if now - last_sample >= 1:
                     host = health.sample(); gpu = gpu_monitor.latest if gpu_monitor else None
                     stats = job.statistics() if job else None
@@ -279,12 +384,30 @@ def main():
                     receipt['error'] = 'Host monitor stalled' if lag > 2 else 'Cancelled' if (out / 'cancel').exists() else 'Timeout or missing progress'
                     stop(); break
             receipt['exitCode'] = child.wait(timeout=10)
-            receipt['passed'] = receipt['exitCode'] == 0 and 'error' not in receipt
+            if watchdog:
+                watchdog.pulse()
+            stop()
+            _, last_line = drain_output(out, offsets, progress, final=True, watchdog=watchdog)
+            if last_line is not None:
+                receipt['lastOutput'] = last_line
+            if progress:
+                receipt['durableProgressSequence'] = progress.sequence
+            receipt['passed'] = receipt['exitCode'] == 0 and 'error' not in receipt and 'cleanupError' not in receipt
     except BaseException as error:
         receipt['error'] = repr(error)
         stop()
     finally:
         stop()
+        if watchdog:
+            reason = watchdog.failure_reason()
+            if reason:
+                receipt['error'] = reason
+                receipt['passed'] = False
+            try:
+                watchdog.close(disarm=not job or job.handle is None)
+            except Exception as error:
+                receipt['error'] = 'Independent watchdog cleanup failed: ' + str(error)
+                receipt['passed'] = False
         if gpu_monitor:
             gpu_monitor.close()
         receipt['finishedAt'] = time.time()

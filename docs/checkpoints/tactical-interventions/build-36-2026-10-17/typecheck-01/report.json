@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "baca02055b0240f9b55b69256eb20fa2",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792270523.9376101,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792270524.9818254,
+      "hostCpuPercent": 2.0932445290199775,
+      "freeMemoryMiB": 102430.92578125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 24672,
+  "lastHealth": {
+    "host": {
+      "time": 1792270536.3896003,
+      "hostCpuPercent": 11.785714285714288,
+      "freeMemoryMiB": 102018.28125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 11.015625,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 415.421875
+    }
+  },
+  "lastOutput": "engine/experimental/reactive-registry.ts(69,55): error TS2345: Argument of type 'number' is not assignable to parameter of type '0 | 4 | 1 | 2 | 3 | 6 | 7'.",
+  "exitCode": 2,
+  "finishedAt": 1792270536.891123
+}

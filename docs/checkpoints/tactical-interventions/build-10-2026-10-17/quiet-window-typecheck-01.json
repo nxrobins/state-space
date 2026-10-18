@@ -1,0 +1,35 @@
+{
+  "purpose": "Build 10 bounded CPU typecheck",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792230211.4691331,
+      "hostCpuPercent": 14.615384615384619,
+      "freeMemoryMiB": 105380.59765625
+    },
+    {
+      "time": 1792230212.4837046,
+      "hostCpuPercent": 12.59765625,
+      "freeMemoryMiB": 105394.109375
+    },
+    {
+      "time": 1792230213.4855196,
+      "hostCpuPercent": 15.865384615384615,
+      "freeMemoryMiB": 105490.5625
+    },
+    {
+      "time": 1792230214.4880495,
+      "hostCpuPercent": 12.3046875,
+      "freeMemoryMiB": 105487.60546875
+    },
+    {
+      "time": 1792230215.5015254,
+      "hostCpuPercent": 23.076923076923073,
+      "freeMemoryMiB": 105018.7265625
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792230215.5015254
+}

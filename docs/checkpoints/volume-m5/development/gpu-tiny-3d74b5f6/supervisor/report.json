@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "id": "30bb1eaada32423abcd677890da65a36",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\gpu-tiny-3d74b5f6\\evidence",
+    "--probe",
+    "tiny"
+  ],
+  "startedAt": 1792199028.666175,
+  "passed": false,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "error": "RuntimeError('Host CPU is busy before launch')",
+  "finishedAt": 1792199029.7480237
+}

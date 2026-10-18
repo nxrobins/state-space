@@ -14,7 +14,10 @@ fn opticalRay(origin:vec3f,direction:vec3f)->OpticalRay{
   let c=vec3i(floor(p));if(any(c<vec3i(0))||any(c>=vec3i(SHAPE))){break;}
   let word=cell(c);let m=word&255u;
   if(m!=0u&&m!=9u&&!dielectric(m)){result.point=p;result.word=word;result.hit=true;break;}
-  let boundary=vec3f(c)+select(vec3f(0),vec3f(1),d>=vec3f(0));
+  // Only air/steam blocks may be skipped. Water, ice and glass remain exact
+  // interface candidates even though they do not cast opaque shadows.
+  let span=emptyVisibilitySpan(c,2u);let block=floor(p/f32(span))*f32(span);
+  let boundary=block+select(vec3f(0),vec3f(f32(span)),d>=vec3f(0));
   let safe=select(vec3f(1),d,abs(d)>vec3f(.000001));
   let times=select(vec3f(1e6),max((boundary-p)/safe,vec3f(0)),abs(d)>vec3f(.000001));
   var axis=0u;if(times.y<times.x){axis=1u;}if(times.z<times[axis]){axis=2u;}
@@ -43,7 +46,8 @@ fn rayColor(ray:OpticalRay)->vec3f{
   var irradiance=vec3f(.065,.095,.135)+vec3f(1.,.87,.69)*max(0.,dot(n,normalize(toLamp)))*24./(3.+dot(toLamp,toLamp));
   // Secondary surfaces use bounded unshadowed direct illumination. The ray
   // itself still stops at the first opaque voxel, including offscreen ones.
-  for(var k=0u;k<CHUNKS;k++){
+  for(var slot=0u;slot<regionalCount(p,false);slot++){
+   let k=regionalSource(p,false,slot);
    let light=lights[k];let d=light.position.xyz-p;let d2=dot(d,d);
    if(light.position.w>0.&&d2>.01&&d2<484.){irradiance+=light.color.rgb*max(0.,dot(n,normalize(d)))*pow(1.-d2/484.,2.)/(1.+d2);}
   }

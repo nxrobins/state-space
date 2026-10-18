@@ -307,6 +307,20 @@
       }
     },
     {
+      "id": "cpu-unit-4aacd4a4",
+      "stage": "cpu-unit",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/cpu-unit-4aacd4a4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/cpu-unit-4aacd4a4",
+      "files": {
+        "report.json": "768f5d71e55b4dbbb9557bd67f430df9c1620af9f9916f97e48a3dd349ae96ba",
+        "supervisor/report.json": "973776e7ec1c4ebf41ae84cdffe22e92d87a708d5f453bc84308228b9d2afe10",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9c69b4ceb57f8067865c5fe2c787744557164887a846f5004793e649bf0db65f",
+        "supervisor/telemetry.jsonl": "426120dc320fb048dd231980b31fec7825fee849b0430c916e40edf57a022b79"
+      }
+    },
+    {
       "id": "cpu-unit-5b396bfb",
       "stage": "cpu-unit",
       "passed": false,
@@ -518,6 +532,21 @@
       }
     },
     {
+      "id": "frames-22538e26",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-22538e26",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-22538e26",
+      "files": {
+        "evidence/report.json": "b14c736082856f725ae629e6fcf8754d759a818f92320965afff1948448f6c27",
+        "report.json": "f27a3c4914b2044dcd822d63e680c834b8417670b3779c6f70383d4ba7508634",
+        "supervisor/report.json": "f895fd544be1a4b0215dbcabf9ce0db066f026043cae3376570861456d296278",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "2f3067dd4a96e8b9b2301c1fb4e9f6e2da17760a7edae8ace4f0ec1b19e6a40f",
+        "supervisor/telemetry.jsonl": "c79c4207f508161780046a794bcf0aab712950083f14435e909f1890b639e6be"
+      }
+    },
+    {
       "id": "frames-2579c44a",
       "stage": "frames",
       "passed": true,
@@ -545,6 +574,18 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "a0be7db1b24b309bd178e99fbb31bf23982b014aa3519d6e79d4ce52fc73bb85",
         "supervisor/telemetry.jsonl": "3bafa4b56ffcdfaddd9be7e1a742d1dd943211ca1b089040882d9bed7c7d8250"
+      }
+    },
+    {
+      "id": "frames-449891a3",
+      "stage": "frames",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/frames-449891a3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-449891a3",
+      "files": {
+        "report.json": "373acdddba0995ff1bd708b8aa053d973d9cadc54b05a36f77be74b41735e7a8",
+        "supervisor/report.json": "8cbe98d547124134dcfbb89738206de5c66633063409a1bf465248b4727e0e83",
+        "supervisor/telemetry.jsonl": "84db5675b26f8770702d73109c8a10de192911381430036d63684775ccc3a6fb"
       }
     },
     {
@@ -608,6 +649,21 @@
       }
     },
     {
+      "id": "frames-8fc9689f",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-8fc9689f",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-8fc9689f",
+      "files": {
+        "evidence/report.json": "c7421f93411446315d918885d1e1d84536331c9e559b9235f6bc1156903eacc1",
+        "report.json": "c0141b5c39484d314538796e2ff215587716a254916e3c973aa2e0e7b74a37e5",
+        "supervisor/report.json": "801524d99a631825ff1b0b3c3647c3a26c1646b8ff6c77676142ff6d3fa119b0",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "767c6c5b120172be4e0c9026bb25b7af92a2a7d1b85dd9d0156bc663b90322e5",
+        "supervisor/telemetry.jsonl": "edc8fa7efed65b5c0e6756077439751fc038b2afe8305036275477d1385faafc"
+      }
+    },
+    {
       "id": "frames-98b10264",
       "stage": "frames",
       "passed": true,
@@ -620,6 +676,21 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "13f9b89e406bd7d6bd89bc67fea1f7b4ae5997de6ec93b1870231e90742c0c3c",
         "supervisor/telemetry.jsonl": "31fde1abdeba71ec09be5452e3600504a737dce3e41eccfcb297e6046d29c483"
+      }
+    },
+    {
+      "id": "frames-9c6b4d23",
+      "stage": "frames",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/frames-9c6b4d23",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/frames-9c6b4d23",
+      "files": {
+        "evidence/report.json": "5c42b9e38a336bee63e27cc1f2292b975f1925bd5790bfef5c7eb24d6b1e6062",
+        "report.json": "4906108e382f81d79ad237a957a47e455c8417e5354e7e458519f01cb7c461a7",
+        "supervisor/report.json": "2eedc8c2d6e8f5be3a7bfe4039c46cdd77b224f46ebe3d28673097a308785ae9",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4a16c19307117639c8bec2b7d62daa7a0305fd529079a7b8b8ae3a9e3d3eb7ee",
+        "supervisor/telemetry.jsonl": "1d6a02adc91413a0475a79e6f6e9cf0306cea0190f7b0f0de16f2ce6d9e14db9"
       }
     },
     {
@@ -833,6 +904,36 @@
       }
     },
     {
+      "id": "gpu-active-tiny-60bcbbf0",
+      "stage": "gpu-active-tiny",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-60bcbbf0",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-60bcbbf0",
+      "files": {
+        "evidence/report.json": "a4513b9823ad119d4df1d100ae12d9fda2cbb558989cd18a360a898fc0a1699b",
+        "report.json": "eeec467a25c1406dc471f393a4b00e3edc5ea281e19fc542180abdf6a2a68925",
+        "supervisor/report.json": "4d3a2ca5c9ca608854e4008f15e96cfee0f57330ffec1e97dff2e6a3449c4ba4",
+        "supervisor/stderr.log": "4266dd6faad215feb8ba5ec3341713830fd59684c9f5bfb006d19b659e9bbe76",
+        "supervisor/stdout.log": "f14e8957af7e0e922560d4a71ceb9ec795d4abbfe6f49d24b15314e4b303de89",
+        "supervisor/telemetry.jsonl": "89d85172589a3a44356c6592a2aea5c8e7c630fb0d10ce868bb20e985bbb0c31"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-6ba776b7",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-6ba776b7",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-6ba776b7",
+      "files": {
+        "evidence/report.json": "e66f7573131db84b32ddda406307effa479a03bc9eb9b2fee773afa830303e75",
+        "report.json": "5690671f4709442e5c2de2c11d9dce39d1af3c33c74862721a378acd08b0c013",
+        "supervisor/report.json": "a78f2cb8de463b9d3944753d4cce9854afa05a588ab8e545b8155a788086cb92",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9315f2c3877366f6354bdcb1c306031183ae8d81550560b7bfdf4f5bf240f38f",
+        "supervisor/telemetry.jsonl": "bb17051266bf0807614038c42241ab36cd3f501cdbaac23af6f955c0eebba30c"
+      }
+    },
+    {
       "id": "gpu-active-tiny-6eda6e5d",
       "stage": "gpu-active-tiny",
       "passed": true,
@@ -908,6 +1009,36 @@
       }
     },
     {
+      "id": "gpu-active-tiny-ed08dd92",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-ed08dd92",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-ed08dd92",
+      "files": {
+        "evidence/report.json": "e66f7573131db84b32ddda406307effa479a03bc9eb9b2fee773afa830303e75",
+        "report.json": "571e1f0a246e9ae29fafeaaba074e45cdd5bfb1cd3ba128ae875ad42721447d7",
+        "supervisor/report.json": "57805b4b9ea484c3f8afd4dae6d45518e20197de22a3814d5f99f6379785c1df",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "55fc24eec991ae9295400734acaac4392aefe3589b10fb655bbb0143350851b7",
+        "supervisor/telemetry.jsonl": "d3e41b6e2c9fcbf4ee974d3ed2f44dc09f30890a4deb7d5a9a6d0c6335b48698"
+      }
+    },
+    {
+      "id": "gpu-active-tiny-fd255ec3",
+      "stage": "gpu-active-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-active-tiny-fd255ec3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-active-tiny-fd255ec3",
+      "files": {
+        "evidence/report.json": "80db1a6180dacffae8020055eeda28cc6627d8c6f8209940e36b2b6eeef2bb47",
+        "report.json": "e9d6eedd9b86f5aab113cce83eb88fd351d2f9d9c489a8c28f6c1ac691d8bb45",
+        "supervisor/report.json": "ec864178d3c3ca35f79cfede9f9976b61d7c4dfd424b07fbeace95232a267ad3",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "cff9fb6dd0d7db80d8c6551de05731a6e21cc456c772a24e96527470c61c3b22",
+        "supervisor/telemetry.jsonl": "77d19a12d62caca2f031ce6c84bdbdb61d91eab2929dfaa2a412badaeca1b797"
+      }
+    },
+    {
       "id": "gpu-build-0b48ce18",
       "stage": "gpu-build",
       "passed": true,
@@ -919,6 +1050,20 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "c6696f680a59d9975ef5bd7fe7133b50e5deadc1127ad049dd373bf60c46fb63",
         "supervisor/telemetry.jsonl": "e0f6f24b8ffc979e424ffbde4d02550c6b2f004efe1c5fe6f42670dbf256de30"
+      }
+    },
+    {
+      "id": "gpu-build-0c10957e",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-0c10957e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-0c10957e",
+      "files": {
+        "report.json": "8510035960a99ef1082fa3177b5ad53c1285bed08092187440966d6479005ec3",
+        "supervisor/report.json": "6c243df91e3b3793853ea558c7ab6e35bda38fafc483c46bf069547d24888566",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9e8de1a8c53f194d6dfd471857c602b75dee2c3b899e39af331c7fa6cba198be",
+        "supervisor/telemetry.jsonl": "3c8340f233a1cd415cb63f3be7f69ff60ec0e4bebdb443f430691e1946baabd1"
       }
     },
     {
@@ -947,6 +1092,20 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "b9cce8fed1895668f0ea244f9b5b113ffc12c5a50c907c7e2d6f0a2c5f674a84",
         "supervisor/telemetry.jsonl": "e3db829acb977e448e22a66e91e9cac7aa712a79353656c2d6bb1446198f6a8d"
+      }
+    },
+    {
+      "id": "gpu-build-89c873ac",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-89c873ac",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-89c873ac",
+      "files": {
+        "report.json": "a0e7cd0fcfcdcb5054a30e754b5e1f3eef43ca831615eeb54491cbfa69d23edd",
+        "supervisor/report.json": "75659ebbb1071ae4c007dfb2df15874330025394d566795dbda6629ccf1c964e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "f3258158d4d29a04f575016f69ffe4793221892b68b2c38fcc49e742f2627682",
+        "supervisor/telemetry.jsonl": "36f5228ec1660ba13235190c51f90744b2e6c1bd2be6f9a7c68e3e497d2b0d2b"
       }
     },
     {
@@ -1048,6 +1207,20 @@
       }
     },
     {
+      "id": "gpu-build-da1d79e3",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-da1d79e3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-da1d79e3",
+      "files": {
+        "report.json": "68469b3050da11741be933e7999192f7b7f52d768eaef2ade533e153dfb479d7",
+        "supervisor/report.json": "9a93bab8b328c3f1ba93b8b394578ab522674a9c7a26a2d45df928da607d72ec",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6ab357bc37fdf9a14c15f29b2161d0c0bcd835914d7a94e98482a439c742459d",
+        "supervisor/telemetry.jsonl": "e3eb8e3e4fe807db3326fefd2f0f47ecafe923aef1d5c4796ba8c2551f7bca6a"
+      }
+    },
+    {
       "id": "gpu-build-e3180090",
       "stage": "gpu-build",
       "passed": true,
@@ -1059,6 +1232,20 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "05f1fdd2a53e68c0938624a592f22d396039b5918d9e9ad7b2d3cb2d311da5b9",
         "supervisor/telemetry.jsonl": "808aeea999712cd59df5f5ab61dbc08e5b2a120facf4040a015a87b1d4bd3187"
+      }
+    },
+    {
+      "id": "gpu-build-f1d7e2d5",
+      "stage": "gpu-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-build-f1d7e2d5",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-build-f1d7e2d5",
+      "files": {
+        "report.json": "d993d960f07b330fcce4de61d6814b4a7238c29e363deefc1ab1c0fd1dcfbc48",
+        "supervisor/report.json": "d7c8fe9dc664219ec8a75c01c46b61f9326471892af91fe364d1a4b48c24ba6e",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "6956410570b5b0295ec88092321c654850a11d6b7fb190bb82380f38573f98c0",
+        "supervisor/telemetry.jsonl": "c2f59c4f089154429c233d877a259067358f14ceeb365a299dd708e16da16114"
       }
     },
     {
@@ -1177,6 +1364,36 @@
       }
     },
     {
+      "id": "gpu-order-31e1a689",
+      "stage": "gpu-order",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-order-31e1a689",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-order-31e1a689",
+      "files": {
+        "evidence/report.json": "cd4908c69311d0185d0751052a49541bf6878df2e5fd6da2fff5f5414be41957",
+        "report.json": "f34c366684863b2d78e18106cc9f19756df7a28a9af70120411b3f9c9095ef23",
+        "supervisor/report.json": "b651eafca96c85500014a3940e616baea15759cfd2871f444e413f7d24f47157",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a17a8c97f957c4eb92f9567a51bbfd963c29a61a5a75abc8357a86fe067ba591",
+        "supervisor/telemetry.jsonl": "514c158b9a31af810a9cb3ccc223508ecbe761dfe331d17fc0507a2e2b04eeff"
+      }
+    },
+    {
+      "id": "gpu-order-e9dab1ec",
+      "stage": "gpu-order",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-order-e9dab1ec",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-order-e9dab1ec",
+      "files": {
+        "evidence/report.json": "cd4908c69311d0185d0751052a49541bf6878df2e5fd6da2fff5f5414be41957",
+        "report.json": "38ebb93fa04fe6a07e4c4546f0a65df58b3fa28aab647b69f103405da79b3ecc",
+        "supervisor/report.json": "0e2a1df75717cd2ad9377ab4c04694191da9ce211119fa7ab5edde563466b87c",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "709e95074de8ae2ffd1cc7388865183b555f1a12c721114d29b5c1934ab96089",
+        "supervisor/telemetry.jsonl": "d544a09b82e2c867973ad3a94efa1e44f57982c4e2ff28373a161cc4cc1a0458"
+      }
+    },
+    {
       "id": "gpu-order-fe622442",
       "stage": "gpu-order",
       "passed": true,
@@ -1237,6 +1454,30 @@
       }
     },
     {
+      "id": "gpu-tiny-3d74b5f6",
+      "stage": "gpu-tiny",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-tiny-3d74b5f6",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-tiny-3d74b5f6",
+      "files": {
+        "report.json": "f74a644b3212de23d1ccf3d2995ddc6292d5eb53297aff54ffd6d33359a6ffb2",
+        "supervisor/report.json": "16821503a330b7798e240ed9a43c19507cb02a3c7c9f68b55b6aaa62beb302f0",
+        "supervisor/telemetry.jsonl": "8a8fac21101a23c46aa24b80d15b496f5c7a9374a87403505faefe2456e9c94f"
+      }
+    },
+    {
+      "id": "gpu-tiny-69109946",
+      "stage": "gpu-tiny",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-tiny-69109946",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-tiny-69109946",
+      "files": {
+        "report.json": "e0ea087168f0b5a83a68c9284938955dc3843d4b8cd47fcebea72b3d023e9caa",
+        "supervisor/report.json": "c95b041e4fe1103d2e4120a2623a93b5ec5b3546a17a80f898b35d4176ee3e38",
+        "supervisor/telemetry.jsonl": "bada54d0fc3d89af756130756122db41f46583f67eaaeec7e4b0f80a319cedfe"
+      }
+    },
+    {
       "id": "gpu-tiny-d0cdce17",
       "stage": "gpu-tiny",
       "passed": true,
@@ -1264,6 +1505,21 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "092678c68f91c574a82171c4837fd12dd341fd3b6ec9fad5b338df9b87bde95a",
         "supervisor/telemetry.jsonl": "eb76d84f05b1c1f203ae9e4bcc6421de8fdfa0201b2abcc3304b7a1a059c8085"
+      }
+    },
+    {
+      "id": "gpu-tiny-dde948bd",
+      "stage": "gpu-tiny",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/gpu-tiny-dde948bd",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/gpu-tiny-dde948bd",
+      "files": {
+        "evidence/report.json": "cb50e9b695933dbcf11da43c15cc679747ac89759dbec70c21d64ecfe7db6c05",
+        "report.json": "3df225098353360f58814a8edf0ac75d1c52e5ca127f31d4a20b614ae27f3edc",
+        "supervisor/report.json": "f0e6d428a4533061a5ae47dbd5a9396ab342a764ab78534734f7d81ca02a8aa1",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3072c3504222076cc327c890e0f72dd575c81f4efdc7978d1ff4e248e3744695",
+        "supervisor/telemetry.jsonl": "d9a914c04e268fd6b79b5c5b7b7d57decc68ffa2a914db3f336745ae17a4b919"
       }
     },
     {
@@ -1971,6 +2227,21 @@
       }
     },
     {
+      "id": "level-trajectory-05cbb013",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-05cbb013",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-05cbb013",
+      "files": {
+        "evidence/report.json": "fb79e1e7ae68db6fe71dbbb7e6755d7367a6d08580adf9ea030c01007a31da72",
+        "report.json": "9a7e94df90aafa67320743dca11c034f0730748926bc94238cdc9f6aac1d8340",
+        "supervisor/report.json": "cb15a13eec621883bf85e8a065f0273ff49fe1047e86a2f827015f6c561cd47f",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1b9be876589d3f00f666e7a75b4c2cc46e0bb21e65190ab88d5485f73cf4077d",
+        "supervisor/telemetry.jsonl": "337c975ff9c2ea2a29f11cd1c03e8166fb8636e16cc87b02d8268c54ab5a7031"
+      }
+    },
+    {
       "id": "level-trajectory-36877e9a",
       "stage": "level-trajectory",
       "passed": true,
@@ -2073,6 +2344,36 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "d82fa87b23c6e5cbaa7e95102cbbb7607543dd5e5504bacebbbadf6d14b6b7dc",
         "supervisor/telemetry.jsonl": "e5b8902de30feeebcdaf1665166f7894f74a4a801d11227b97bb3b8249384c1d"
+      }
+    },
+    {
+      "id": "level-trajectory-64c38cfc",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-64c38cfc",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-64c38cfc",
+      "files": {
+        "evidence/report.json": "0e35205f3a135ca5db2552b26049fe0c6dad5becfa2b8211fa31003c210da3f1",
+        "report.json": "7f7ca063f6f6a3e222744964fbb8e440dc8b41cdf7282d30e6bcc9912143c754",
+        "supervisor/report.json": "1812729587a4ab02b102378bb79ec11eac5222a5d5b180f9e77a2004be7a7612",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3cf3cc830dac58a2cdb2b7bcca792242bf2eabcf262854001cf23539be952faf",
+        "supervisor/telemetry.jsonl": "bbb876d31127971678cf3e4f4517a5584d81a87b99dc5055b4c2f8ad2b1218e4"
+      }
+    },
+    {
+      "id": "level-trajectory-67fd3d5e",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-67fd3d5e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-67fd3d5e",
+      "files": {
+        "evidence/report.json": "4237c2af1232728f711f2ecc7f8635132665af778be7b74be5b224fe1d74e1e8",
+        "report.json": "fefd87d10d6baceba8379419e76c54b05a77a9b043b933eb681e3b5d8c9987f5",
+        "supervisor/report.json": "dbcacb6cefa05c9d8d9bfebff3e2e22d8cfacfdb99452e0a8aeb711e4750db65",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a1bd9f26c9d5e53ab5fdea95c83c48015d4fa4584a0ba691891491712c3afdbf",
+        "supervisor/telemetry.jsonl": "082dd79cb7400d8da73aa16ebd33eb37152c5020dfe71b5d2bac66e2cb72f2da"
       }
     },
     {
@@ -2211,6 +2512,20 @@
       }
     },
     {
+      "id": "level-trajectory-b7f83ac4",
+      "stage": "level-trajectory",
+      "passed": false,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-b7f83ac4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-b7f83ac4",
+      "files": {
+        "report.json": "6bee612bb1f0dca34bb6af90a8969e516715224798f9fe2ca24eb2ef643048bc",
+        "supervisor/report.json": "13696cc03191df55aa8642ddc2df0013dd5fde185360636ac6ce71006bf88147",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "013cf72755db1ef086a46d8a209b9ce289054528400eac7c8fd9c7b6702d6148",
+        "supervisor/telemetry.jsonl": "170dc981cf9b738038e7ccf4fcbf0e802f2fe9621260b618669a4c755ee9934c"
+      }
+    },
+    {
       "id": "level-trajectory-b94f9741",
       "stage": "level-trajectory",
       "passed": true,
@@ -2238,6 +2553,21 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "3adb6f5740ab86830e20bc015941002329805edace9a1f504336d7e62e8c7494",
         "supervisor/telemetry.jsonl": "3fdb4fc0f3268b8db84cdc413db1173df255bea88b8c10238af335c104ba702d"
+      }
+    },
+    {
+      "id": "level-trajectory-c256f440",
+      "stage": "level-trajectory",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/level-trajectory-c256f440",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/level-trajectory-c256f440",
+      "files": {
+        "evidence/report.json": "0ba923d5a9497e8a882bdd67d5a269afd743399386d2484fcba624d1f418709e",
+        "report.json": "c3ddec0bb7f814a7b953a9ec50fe52aee36183658ee4e4ae2ae7083dbcef7bff",
+        "supervisor/report.json": "c46e1490cba8f9d6f47cd0a72ac66492c4c2efeab03d1bc2e9c946fbb8779793",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "0af22f1e1c7afd6d10b3e7f9558ba90f5565a6b1ecbf13e1f6732d2932df9304",
+        "supervisor/telemetry.jsonl": "8f6acde221ff43155b3e58271e7768df4b394eb70f9213cb1e746a3b9679dcdc"
       }
     },
     {
@@ -2439,6 +2769,20 @@
       }
     },
     {
+      "id": "probe-build-5f94e842",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-5f94e842",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-5f94e842",
+      "files": {
+        "report.json": "62cd5569e0a78de22fa5b5f859646183ee40c2262bd3c531e1692e7832b8c48e",
+        "supervisor/report.json": "3f417dcffc0dca77f3dffcc14fdca418bc4ba6b3636e80cdff3ac9398053e906",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "3b87bbd81e9af1739727b5999c238f6a699eaef07c200910cbdaac287443e826",
+        "supervisor/telemetry.jsonl": "d7c969d1705d8a002af84bdb9552c4003f22355b8b152c8ea746b62494d2d17a"
+      }
+    },
+    {
       "id": "probe-build-67744a40",
       "stage": "probe-build",
       "passed": true,
@@ -2481,6 +2825,20 @@
       }
     },
     {
+      "id": "probe-build-88c2b651",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-88c2b651",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-88c2b651",
+      "files": {
+        "report.json": "09f15fa26ac194ec4530b21e7691fce63a42f96af57c16c7bd328c617e5b2f6f",
+        "supervisor/report.json": "25a706f38806636f8df546b2a3ea4b8e0370478f2f74cc04aacfe5b63968df91",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "9cab6dace6ba42b4e6ffec9d74b7c1356f1430651ab9807c9583606bce8bb4b5",
+        "supervisor/telemetry.jsonl": "82318a9de6258421f577b414527a3e4fb61fe4dcf0d02b761134e49cd61479ed"
+      }
+    },
+    {
       "id": "probe-build-aaedc3c5",
       "stage": "probe-build",
       "passed": true,
@@ -2495,6 +2853,20 @@
       }
     },
     {
+      "id": "probe-build-ad176eee",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-ad176eee",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-ad176eee",
+      "files": {
+        "report.json": "35b01ed9bff636cfe0276df884d6fbeda9cb4b408a6bdf82d839f0a7ddd0882b",
+        "supervisor/report.json": "5c1fe8cd1aac947400cb1e9b13d8bfd8cfde9efe16e5d30b9024c5620140208d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "49266303712d6225db444117c0e9e5a99e50dbb28f30ce88d97c48f9f83ad51d",
+        "supervisor/telemetry.jsonl": "86a64dc95d3139cec1ee7661622a717293dd8517951a8fff1c0c12b41b0e9d29"
+      }
+    },
+    {
       "id": "probe-build-bffaf5d7",
       "stage": "probe-build",
       "passed": true,
@@ -2506,6 +2878,20 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "985bf27ae89b1deb3418cbce309e873c9ac86582385134655b38a54b973af817",
         "supervisor/telemetry.jsonl": "1172ed7e92a0e6017f939920d6413184a587eb73fa86b8670236f6845f832277"
+      }
+    },
+    {
+      "id": "probe-build-c0f5c5f3",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-c0f5c5f3",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-c0f5c5f3",
+      "files": {
+        "report.json": "3fb4afe24fa863f6c0634c848d55f81028dcd9b463df68a7c6f3f6ec3840ec15",
+        "supervisor/report.json": "4d2105048def960ba8cab4711d49237e8cadff232b8df2e403498577ac0aa747",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "bb4d8aad2ae2c7ee0b449f4cc71d2217a593de3db1d7423bf7dc64eb7f7e5055",
+        "supervisor/telemetry.jsonl": "151e967674e6f750eb0b874dbe7d8396129d86a8e2448a6c0dc978d43a85ce49"
       }
     },
     {
@@ -2562,6 +2948,20 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "d6b098adb6285e0841b1738b9788645097a9148664e5fc3fbc9e2ec3a1809abb",
         "supervisor/telemetry.jsonl": "accb2a0643340450159fe7431b55aeaa4c7429e679b1cf3e86da2b934f150963"
+      }
+    },
+    {
+      "id": "probe-build-fae9edff",
+      "stage": "probe-build",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/probe-build-fae9edff",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/probe-build-fae9edff",
+      "files": {
+        "report.json": "0486163d5084320715667bcb1e52f52da6122ed05a5496a71a1ac0030ab3702d",
+        "supervisor/report.json": "96196f9f65c068b68b8901d0f046917cf2254450971babda3ca1e441ff3414ce",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "4a143cd9019fef8c88b92bbd31f59fcfc3a001041fa86323fe98e4ff3fb96ad2",
+        "supervisor/telemetry.jsonl": "3f725c0a4409d807feb3a296180b313de1b373f5bb495a7ef959d0f9da56553d"
       }
     },
     {
@@ -2622,6 +3022,36 @@
       }
     },
     {
+      "id": "scale-pilot-30c9e4be",
+      "stage": "scale-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/scale-pilot-30c9e4be",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/scale-pilot-30c9e4be",
+      "files": {
+        "evidence/report.json": "c65a36303be40e4dd0a11e00c95576956fdbec71294d04993ffc52fd21e36eb9",
+        "report.json": "c353011de8d3ce703369c7afa0d7013f761d35b663029b27bcd4606f628e0078",
+        "supervisor/report.json": "5c9e53b7777f89357e7af43b3ba3031e1ab094aacb242414ddfa982162fa7333",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1d23eac9eb565f41bc62d9d99fb3441ac445d9ba047dfeb4260640aa5656b2fe",
+        "supervisor/telemetry.jsonl": "df5b547b9e7725ba491181a8aabd8d7650ae5a1dc35bff18d56628fb0328b3e4"
+      }
+    },
+    {
+      "id": "scale-pilot-57c9315e",
+      "stage": "scale-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/scale-pilot-57c9315e",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/scale-pilot-57c9315e",
+      "files": {
+        "evidence/report.json": "41a1a7af47ec308ce414688b287f3673ae4d4be373940d03b5fa857d043438ac",
+        "report.json": "769998f2f4b1003a27f30f4319a7f07164dd0eb0590553bb0116bef45a0e40b0",
+        "supervisor/report.json": "d6ad52f3ca4d75f992d1875a4064815aac6b5a3756b5ce6f29b4aef3c14085e2",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "1d23eac9eb565f41bc62d9d99fb3441ac445d9ba047dfeb4260640aa5656b2fe",
+        "supervisor/telemetry.jsonl": "bc68db6536dddf7609ff356e02bac2a09f239081895a235bd9c1d06ecedf884c"
+      }
+    },
+    {
       "id": "scale-pilot-819add87",
       "stage": "scale-pilot",
       "passed": true,
@@ -2634,6 +3064,21 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "abf9df1efd7b8be272fd28ec5ed0d0029f80c1f3b55c0f6c90792656c4d94f69",
         "supervisor/telemetry.jsonl": "338e6e956e5d1ae40a0f0748f0cdb3de2ed8e56dde23dcd9633fd438b4684c8f"
+      }
+    },
+    {
+      "id": "scale-pilot-93b6373b",
+      "stage": "scale-pilot",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/scale-pilot-93b6373b",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/scale-pilot-93b6373b",
+      "files": {
+        "evidence/report.json": "68ffda0a56fba1b26e5add60c72b7b429db2e8f1bea8b32b28e3c2e733a7aa2f",
+        "report.json": "56badd05aeaae530209879baf53a3e9dde4e16ab6d176e0df13ed5ee1a474ab5",
+        "supervisor/report.json": "345a527da4e4840f0a09ef1784c88dbe9db19671690896a58edf9da003252ecb",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "a1b573e9405f5e2064ff6847ff74d7e2d6ee958d81f5920ffc3ac33783c9ee26",
+        "supervisor/telemetry.jsonl": "d55fa8dfb7390a8656e50c9b55724751618c8810ce940576695aa07afdce1bc4"
       }
     },
     {
@@ -2961,6 +3406,20 @@
       }
     },
     {
+      "id": "typecheck-ac22f08d",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-ac22f08d",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-ac22f08d",
+      "files": {
+        "report.json": "fba7e711dfd9203e9c3abc82621b8c77201872a217edd5ea546bf7b9f2243f64",
+        "supervisor/report.json": "d8e15bd850edae13146c14554671eba75f12ba443a994267ec6cf6997b56b015",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "9312bdd02b8ea1af9a345ef85be0646db0d3967b2643393b223e1db9190fc531"
+      }
+    },
+    {
       "id": "typecheck-ae919e77",
       "stage": "typecheck",
       "passed": true,
@@ -3028,6 +3487,34 @@
         "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "supervisor/telemetry.jsonl": "f044ca5c0d5b2e929802a89f4c8c3e69cc7667ad08c041c6cc9782207a242323"
+      }
+    },
+    {
+      "id": "typecheck-ecd5edab",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-ecd5edab",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-ecd5edab",
+      "files": {
+        "report.json": "dd28c42342b34b3ad4c89367983f901a16de7c0dec7ad0595a1ce542666a8e12",
+        "supervisor/report.json": "9bf84fd5b3f6e8e55ce2789e9f1cfcb11c34fed2b9dcb13c0f920c34993eb30d",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "48bce5e1f4ebe3923bf5cd6e797f2bd577b7e1d4c63c19e2ac61efeb7be8dedf"
+      }
+    },
+    {
+      "id": "typecheck-fbf43fd4",
+      "stage": "typecheck",
+      "passed": true,
+      "originalDirectory": "dist/volume-m5/recovery/typecheck-fbf43fd4",
+      "archivedDirectory": "docs/checkpoints/volume-m5/development/typecheck-fbf43fd4",
+      "files": {
+        "report.json": "eaa56a75a035c1cd018d94f9fe417330d90dede6b9f24b73e86af3d8fb2fec65",
+        "supervisor/report.json": "d6431623732d4f7ef30196e7df7ea05a3f5f3e977dcd95a5ed08c4b1881068fe",
+        "supervisor/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "supervisor/telemetry.jsonl": "ee62ba1f8dc2cc02a9398f13bbd1cfae461912c31fedb14795515353bc195f4b"
       }
     },
     {

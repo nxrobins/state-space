@@ -26,6 +26,14 @@
 # Preserve captured M5 logs and the byte-bound frozen material-law source.
 /docs/checkpoints/volume-m5/**/supervisor/*.log -whitespace
 /engine/experimental/structural-material.ts whitespace=cr-at-eol,-blank-at-eof
+/engine/experimental/structural-material.motion-baseline.ts whitespace=cr-at-eol,-blank-at-eof
+# Keep the already-hashed reference-client documentation byte-for-byte intact.
+/examples/tactical-slab/README.md whitespace=cr-at-eol,-blank-at-eof
+# Retained failures and before-images are evidence, including their whitespace.
+/docs/checkpoints/tactical-interventions/**/*.log -whitespace
+/docs/checkpoints/tactical-interventions/**/*.txt whitespace=cr-at-eol,-blank-at-eof
+/docs/checkpoints/tactical-interventions/build-13-2026-10-17/summarize.py whitespace=cr-at-eol,-blank-at-eof
+/docs/checkpoints/verification-harness/containment-tests-2026-10-16/run_case.py whitespace=cr-at-eol,-blank-at-eof
 /dist/packages/evidence/** linguist-generated=true
 /engine/generated/** linguist-generated=true
 /engine/_generated_schema.py linguist-generated=true

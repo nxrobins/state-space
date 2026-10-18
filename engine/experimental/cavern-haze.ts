@@ -14,6 +14,7 @@ fn density(p:vec3f)->f32{
  return .011+.23*mix(a,b,u.z)*drift;
 }
 fn shadow(origin:vec3f,source:vec3f)->f32{
+ if(optics.z>.5){return hierarchyVisibility(origin,source);}
  let delta=source-origin;let distance=length(delta);let ray=delta/max(distance,.0001);
  var c=vec3i(floor(origin));let end=vec3i(floor(source));let step=vec3i(select(vec3f(-1),vec3f(1),ray>=vec3f(0)));
  let inv=1./max(abs(ray),vec3f(.00001));var next=(select(origin-vec3f(c),vec3f(c)+1.-origin,ray>=vec3f(0)))*inv;
@@ -45,7 +46,10 @@ struct Volume{@location(0) scattering:vec4f,@location(1) distance:f32,@location(
  let distance=min(48.,z/max(dot(ray,camera.forward.xyz),.001));
  var chosen=vec2u(0xffffffffu);var power=vec2f(0);
  // Select two sources once per ray, not once per integration sample.
- for(var k=0u;k<CHUNKS;k++){
+ // A 70-cell regional radius covers the entire 48-cell ray plus the
+ // 22-cell light influence. Overflow/outside-world falls back to all sources.
+ for(var slot=0u;slot<regionalCount(camera.eye.xyz,true);slot++){
+  let k=regionalSource(camera.eye.xyz,true,slot);
   let light=lights[k];if(light.position.w==0.){continue;}
   let along=clamp(dot(light.position.xyz-camera.eye.xyz,ray),0.,distance);
   let delta=light.position.xyz-(camera.eye.xyz+ray*along);let d2=dot(delta,delta);

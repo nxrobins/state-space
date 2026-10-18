@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "f9454727d9e04575b7bd021f9e85048b",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792261304.809517,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792261305.8569455,
+      "hostCpuPercent": 15.192307692307693,
+      "freeMemoryMiB": 103323.9296875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 2236,
+  "lastOutput": "{\"passed\":true,\"entry\":\"state-space-engine/experimental/3d/tactical-session\",\"worldCells\":64,\"reservoirCells\":64,\"physicsTicks\":0,\"gpu\":false}",
+  "exitCode": 0,
+  "finishedAt": 1792261306.6279979
+}

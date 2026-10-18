@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "378b701d329e49488c254ec1efe45df9",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792282688.9302847,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 5.903,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792282689.9861665,
+      "hostCpuPercent": 11.42578125,
+      "freeMemoryMiB": 101216.08203125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 19224,
+  "lastOutput": "ion\":true,\"atomicTransportCommand\":true,\"boundedTransportJobs\":true,\"transportMovementRules\":\"reactive-transport-motion-1\",\"transportActorRules\":\"reactive-transport-displacement-1\",\"transportAbilityCells\":8,\"transportAbilityTicks\":3,\"transportActorRollback\":true,\"transportAbilityContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792282690.8116398
+}

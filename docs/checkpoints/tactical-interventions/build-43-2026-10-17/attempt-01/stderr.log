@@ -1,0 +1,19 @@
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-domains.test.ts [ engine/experimental/reactive-domains.test.ts ]
+Error: Softening requires nonzero cohesion.
+ ❯ validateCatalog engine/registry.ts:94:75
+     92|     if (!(Object.values(catalog.phases) as number[]).includes(record.p…
+     93|     if (![0, 1].includes(record.properties.oxidizer)) throw new Error(…
+     94|     if (record.properties.softening && !record.properties.cohesion) th…
+       |                                                                           ^
+     95|     records.set(record.id, record); names.add(record.name);
+     96|   }
+ ❯ createMaterialRegistry engine/registry.ts:181:3
+ ❯ createReactiveMaterialRegistry3D engine/experimental/reactive-registry.ts:65:26
+ ❯ Object.extend engine/experimental/reactive-registry.ts:95:14
+ ❯ engine/experimental/reactive-domains.test.ts:21:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

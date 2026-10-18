@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "id": "82d751d810fa4f109fc2153efadadb7b",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-c",
+    "import time;print(\"started\",flush=True);time.sleep(30)"
+  ],
+  "startedAt": 1792217862.2200181,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 10.0,
+  "stallSeconds": 10.0,
+  "maxMonitorLagMs": 0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792217863.2225602,
+      "hostCpuPercent": 0,
+      "freeMemoryMiB": 32768
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 10.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 40352,
+  "exitCode": 125,
+  "error": "Supervisor heartbeat expired",
+  "finishedAt": 1792217867.6603048
+}

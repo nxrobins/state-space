@@ -1,0 +1,73 @@
+{
+  "version": 2,
+  "id": "d5fefab14585449981bf369ec6fb3063",
+  "kind": "gpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-m",
+    "scripts.verify_volume_m5_browser",
+    "--browser-cli",
+    "C:\\Users\\nxrob\\AppData\\Local\\npm-cache\\_npx\\ba0727cbf2d10686\\node_modules\\agent-browser\\bin\\agent-browser.js",
+    "--output",
+    "D:\\state-space\\dist\\volume-m5\\recovery\\level-trajectory-c256f440\\evidence",
+    "--probe",
+    "level-trajectory",
+    "--mode",
+    "active",
+    "--size",
+    "64",
+    "--scene",
+    "ice-heat",
+    "--mode",
+    "active",
+    "--reference",
+    "D:\\state-space\\docs\\checkpoints\\volume-m5\\development\\level-pilot-b35044a7\\evidence",
+    "--replay-part",
+    "main"
+  ],
+  "startedAt": 1792199109.7731488,
+  "passed": true,
+  "memoryLimitMiB": 8192,
+  "cpuLimitPercent": 12,
+  "timeoutSeconds": 120.0,
+  "stallSeconds": 15.0,
+  "maxMonitorLagMs": 316.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792199110.7839572,
+      "hostCpuPercent": 37.01171875,
+      "freeMemoryMiB": 84032.96484375
+    },
+    "gpu": {
+      "time": 1792199110.857491,
+      "temperatureC": 42.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 10955.0,
+      "powerW": 63.07
+    }
+  },
+  "childPid": 4948,
+  "lastOutput": "M5 64\u00b3 ice-heat active: main ranges exact",
+  "lastHealth": {
+    "host": {
+      "time": 1792199193.12598,
+      "hostCpuPercent": 19.293478260869566,
+      "freeMemoryMiB": 83698.6875
+    },
+    "gpu": {
+      "time": 1792199191.158073,
+      "temperatureC": 42.0,
+      "utilizationPercent": 2.0,
+      "freeMemoryMiB": 10875.0,
+      "powerW": 63.94
+    },
+    "job": {
+      "cpuSeconds": 90.421875,
+      "activeProcesses": 13,
+      "peakMemoryMiB": 675.12109375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792199193.7388775
+}

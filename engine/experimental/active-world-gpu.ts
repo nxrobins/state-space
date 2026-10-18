@@ -3,7 +3,7 @@ import { checkedInteger } from '../validation.js';
 import { createResidentVolume,type GpuVolume3D } from './3d-gpu-core.js';
 import { activeWorldGeometry,activeReferenceVolume,validateActiveWorldFlat,validateActiveWorldSnapshot,activeChunkSnapshot,
   type ActiveWorldOptions3D,type ActiveWorldSnapshot3D } from './active-world-core.js';
-export type { LatencyRecord, LatencySnapshot, Activity3D, TerrainCamera, TerrainRenderer, TerrainAppearance, RegionRequest3D, Region3D, VolumeEdit3D, GpuStepOptions3D } from './3d-gpu-core.js';
+export type { LatencyRecord, LatencySnapshot, Activity3D, TerrainCamera, TerrainRenderer, TerrainAppearance, TerrainLightingMode, RegionRequest3D, Region3D, VolumeEdit3D, GpuStepOptions3D } from './3d-gpu-core.js';
 export type { GameplayState3D, GameplayRules3D, GameplayCommand3D, GameplayPresentation3D, GameplayCommit3D, ResidentGameplay3D } from './gameplay-view.js';
 export type ActiveGpuWorldOptions3D=ActiveWorldOptions3D&{execution?:'dense'|'sparse';activityReadbackInterval?:number;profiling?:boolean;gpuTiming?:boolean};
 export interface GpuActiveWorld3D extends Omit<GpuVolume3D,'snapshot'|'restore'|'inspectPass'> {

@@ -1,0 +1,57 @@
+{
+  "version": 3,
+  "id": "ec5661fb2c3649ee8f30f0cea666f43d",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.tactical-session.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\tactical-interventions\\build-44-2026-10-17\\attempt-06\\vitest.json"
+  ],
+  "startedAt": 1792276079.9838793,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 237.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792276081.0376215,
+      "hostCpuPercent": 16.015625,
+      "freeMemoryMiB": 101050.70703125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 38136,
+  "lastOutput": " \u2713 engine/experimental/change-reports.test.ts > complete endpoint reports with inert support observations > observation cannot reenter a terrain mutation 2ms",
+  "lastHealth": {
+    "host": {
+      "time": 1792276110.3342159,
+      "hostCpuPercent": 26.76056338028169,
+      "freeMemoryMiB": 100348.4609375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 27.71875,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 278.85546875
+    }
+  },
+  "exitCode": 125,
+  "error": "Independent job deadline expired",
+  "finishedAt": 1792276111.145192
+}

@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "id": "79fc92278d764a8fb3029670d0cda487",
+  "kind": "cpu",
+  "command": [
+    "D:\\state-space\\.venv\\Scripts\\python.exe",
+    "-u",
+    "-c",
+    "print(\"bounded child \" + chr(10003), flush=True)"
+  ],
+  "startedAt": 1792217839.5048547,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 5.0,
+  "stallSeconds": 5.0,
+  "maxMonitorLagMs": 3.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792217840.5188441,
+      "hostCpuPercent": 0,
+      "freeMemoryMiB": 32768
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 5.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 38276,
+  "lastOutput": "bounded child \u2713",
+  "exitCode": 0,
+  "finishedAt": 1792217841.2801805
+}

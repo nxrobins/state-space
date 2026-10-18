@@ -4,9 +4,11 @@ import type { LatencyProfiler, Trace } from './latency.js';
 import { ROCK_TEXTURES } from './rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
 import { CAVERN_HAZE } from './cavern-haze.js';
+import { lightingCacheQueries, makeLightingCache, REFERENCE_LIGHTING_QUERIES } from './lighting-cache.js';
 
-export function cavernShaders(shape:readonly number[],edge:number,capacity:number){
+export function cavernShaders(shape:readonly number[],edge:number,capacity:number,cached=false){
  const chunks=shape.reduce((a,b)=>a*b,1)/edge**3;
+ const queries=cached?lightingCacheQueries(shape):REFERENCE_LIGHTING_QUERIES;
  const common=`
 struct Camera {eye:vec4f,right:vec4f,up:vec4f,forward:vec4f,projection:vec4f,shape:vec4u}
 struct Light {position:vec4f,color:vec4f}
@@ -44,10 +46,12 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
 @group(0) @binding(5) var rockNormal:texture_2d<f32>;
 @group(0) @binding(6) var rockRoughness:texture_2d<f32>;
 @group(0) @binding(7) var rockSampler:sampler;
+${queries}
 struct Out{@builtin(position) position:vec4f,@location(0) world:vec3f,@location(1) normal:vec3f,@location(2) uv:vec2f,@location(3) irradiance:vec3f,@location(4) surface:vec3f,@location(5) @interpolate(flat) word:u32,@location(6) @interpolate(flat) selected:u32}
 // Short bounded voxel rays. Endpoint cells are excluded so emitting lava does
 // not occlude itself. Two receiver rays approximate a finite lamp/source size.
 fn visibility(p:vec3f,source:vec3f)->f32{
+ if(optics.z>.5){return hierarchyVisibility(p,source);}
  let delta=source-p;let distance=length(delta);let steps=min(48u,u32(ceil(distance*1.5)));
  let end=vec3i(floor(source));
  for(var s=1u;s<steps;s++){let q=vec3i(floor(p+delta*(f32(s)/f32(steps))));if(all(q==end)){break;}if(opaque(q)>.5){return 0.;}}
@@ -72,7 +76,7 @@ fn visibility(p:vec3f,source:vec3f)->f32{
  let facing=max(0.,dot(n,normalize(ld)));let cone=.45+.55*pow(max(0.,dot(-normalize(ld),camera.forward.xyz)),2.);
  let lampPower=lampShadow*cone*24./(3.+distance*distance);
  light+=vec3f(1.,.87,.69)*facing*lampPower;
- for(var k=0u;k<CHUNKS;k++){let source=lights[k];if(source.position.w==0.){continue;}let d=source.position.xyz-receiver;let d2=dot(d,d);if(d2>484.||d2<.01){continue;}let cosine=max(0.,dot(n,normalize(d)));if(cosine<=0.){continue;}let shadow=.5*(visibility(receiver,source.position.xyz)+visibility(receiver,source.position.xyz+vec3f(0,-.3,0)));light+=source.color.rgb*cosine*shadow*pow(1.-d2/484.,2.)/(1.+d2);}
+ for(var slot=0u;slot<regionalCount(receiver,false);slot++){let k=regionalSource(receiver,false,slot);let source=lights[k];if(source.position.w==0.){continue;}let d=source.position.xyz-receiver;let d2=dot(d,d);if(d2>484.||d2<.01){continue;}let cosine=max(0.,dot(n,normalize(d)));if(cosine<=0.){continue;}let shadow=.5*(visibility(receiver,source.position.xyz)+visibility(receiver,source.position.xyz+vec3f(0,-.3,0)));light+=source.color.rgb*cosine*shadow*pow(1.-d2/484.,2.)/(1.+d2);}
  out.world=world;out.normal=n;out.uv=uv;out.irradiance=light;out.surface=vec3f(ao,wet,lampPower);out.word=word;let cc=coordinate(i);out.selected=select(0u,1u,cc.x+SHAPE.x*(cc.y+SHAPE.y*cc.z)==camera.shape.w);return out;
 }
 fn hash(p:vec3f)->f32{var q=fract(p*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
@@ -117,7 +121,7 @@ ${CAVERN_OPTICS}
  if(v.selected==1u){let border=select(0.,1.,any(v.uv<vec2f(.025))||any(v.uv>vec2f(.975)));color=mix(color,vec3f(.65,.40,.15),border*.65);}
  return vec4f(color,1.);
 }`;
- return{lights,draw,haze:common+CAVERN_HAZE};
+ return{common,lights,draw,haze:common+CAVERN_HAZE+queries};
 }
 
 const POST=`
@@ -198,24 +202,49 @@ async function loadRockTextures(device:GPUDevice){
  finally{const error=await device.popErrorScope();if(error){textures.forEach(t=>t.destroy());throw new Error(error.message);}}
 }
 
-export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFormat,shape:readonly number[],edge:number,capacity:number,faces:GPUBuffer,uniform:GPUBuffer){
+export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFormat,shape:readonly number[],edge:number,capacity:number,faces:GPUBuffer,uniform:GPUBuffer,rebuilt:GPUBuffer){
  const shaders=cavernShaders(shape,edge,capacity);
  async function module(code:string){const m=device.createShaderModule({code});const errors=(await m.getCompilationInfo()).messages.filter(m=>m.type==='error');if(errors.length)throw Error(errors.map(m=>`${m.lineNum}: ${m.message}`).join('\n'));return m;}
- const lightModule=await module(shaders.lights),drawModule=await module(shaders.draw),postModule=await module(POST),hazeModule=await module(shaders.haze);
+ const lightModule=await module(shaders.lights),postModule=await module(POST);
  const extract=await device.createComputePipelineAsync({layout:'auto',compute:{module:lightModule,entryPoint:'extract'}});
- const draw=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:drawModule,entryPoint:'vertex'},fragment:{module:drawModule,entryPoint:'fragment',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth24plus',depthWriteEnabled:true,depthCompare:'less'}});
+ async function surfacePipeline(code:string){const shader=await module(code);return device.createRenderPipelineAsync({layout:'auto',vertex:{module:shader,entryPoint:'vertex'},fragment:{module:shader,entryPoint:'fragment',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth24plus',depthWriteEnabled:true,depthCompare:'less'}});}
+ async function volumePipeline(code:string){const shader=await module(code);return device.createRenderPipelineAsync({layout:'auto',vertex:{module:shader,entryPoint:'vertex'},fragment:{module:shader,entryPoint:'fragment',targets:[{format:'rgba16float'},{format:'r32float'},{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});}
+ const draw=await surfacePipeline(shaders.draw);
  const post=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:postModule,entryPoint:'vertex'},fragment:{module:postModule,entryPoint:'fragment',targets:[{format}]},primitive:{topology:'triangle-list'}});
- const haze=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:hazeModule,entryPoint:'vertex'},fragment:{module:hazeModule,entryPoint:'fragment',targets:[{format:'rgba16float'},{format:'r32float'},{format:'rgba16float'}]},primitive:{topology:'triangle-list'}});
+ const haze=await volumePipeline(shaders.haze);
  const rock=await loadRockTextures(device);
  const chunks=shape.reduce((a,b)=>a*b,1)/edge**3,lights=device.createBuffer({size:chunks*32,usage:GPUBufferUsage.STORAGE});
+ let cachedAppearance:{cache:Awaited<ReturnType<typeof makeLightingCache>>;draw:GPURenderPipeline;haze:GPURenderPipeline}|undefined;
+ let cacheSetup:Promise<void>|undefined,closed=false,lastCached:boolean|undefined,activeHaze=haze;
  const opticalUniform=device.createBuffer({size:16,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST}),opticalData=new Float32Array(4);
  const bindings=new Map<GPUBuffer,{extract:GPUBindGroup;draw:GPUBindGroup}>();
  let hdr:GPUTexture|undefined,volume:GPUTexture|undefined,volumeDepth:GPUTexture|undefined,distortion:GPUTexture|undefined,postGroup:GPUBindGroup,hazeGroup:GPUBindGroup,width=0,height=0,boundDepth:GPUTexture|undefined;
  const hazeBindings=new Map<GPUBuffer,GPUBindGroup>();
  return{
-  draw,
-  prepare(encoder:GPUCommandEncoder,grid:GPUBuffer,depth:GPUTexture,w:number,h:number,tick:number,heatDistortion:boolean,profiler?:LatencyProfiler,trace?:Trace){
-   opticalData[0]=(tick%36000)/60;opticalData[1]=heatDistortion?1:0;device.queue.writeBuffer(opticalUniform,0,opticalData);
+  async prepareLighting(cached:boolean){
+   if(closed)throw Error('Cavern appearance is closed.');
+   if(!cached||cachedAppearance)return;
+   // Reference rendering never allocates or compiles the experimental cache.
+   // Publish B only after every asynchronous setup operation has succeeded.
+   if(!cacheSetup)cacheSetup=(async()=>{
+    const source=cavernShaders(shape,edge,capacity,true);
+    const nextDraw=await surfacePipeline(source.draw),nextHaze=await volumePipeline(source.haze);
+    if(closed)throw Error('Cavern appearance is closed.');
+    const cache=await makeLightingCache(device,source.common,shape,edge,lights,rebuilt);
+    if(closed){cache.close();throw Error('Cavern appearance is closed.');}
+    cachedAppearance={cache,draw:nextDraw,haze:nextHaze};
+   })().finally(()=>{cacheSetup=undefined;});
+   await cacheSetup;
+  },
+  invalidate:()=>cachedAppearance?.cache.invalidate(),
+  prepare(encoder:GPUCommandEncoder,grid:GPUBuffer,depth:GPUTexture,w:number,h:number,tick:number,heatDistortion:boolean,cached:boolean,profiler?:LatencyProfiler,trace?:Trace){
+   if(closed)throw Error('Cavern appearance is closed.');
+   if(cached&&!cachedAppearance)throw Error('Cached lighting has not been prepared.');
+   const cache=cachedAppearance?.cache,activeDraw=cached?cachedAppearance!.draw:draw;
+   activeHaze=cached?cachedAppearance!.haze:haze;
+   const cacheEntries=cached?[{binding:9,resource:{buffer:cache!.hierarchy}},{binding:10,resource:{buffer:cache!.regions}}]:[];
+   if(lastCached!==cached){bindings.clear();hazeBindings.clear();lastCached=cached;}
+   opticalData[0]=(tick%36000)/60;opticalData[1]=heatDistortion?1:0;opticalData[2]=cached?1:0;device.queue.writeBuffer(opticalUniform,0,opticalData);
    if(!hdr||width!==w||height!==h||boundDepth!==depth){
     hdr?.destroy();volume?.destroy();volumeDepth?.destroy();distortion?.destroy();hazeBindings.clear();width=w;height=h;boundDepth=depth;
     const usage=GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.TEXTURE_BINDING;
@@ -225,13 +254,15 @@ export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFor
     distortion=device.createTexture({size:[Math.ceil(w/4),Math.ceil(h/4)],format:'rgba16float',usage});
     postGroup=device.createBindGroup({layout:post.getBindGroupLayout(0),entries:[{binding:0,resource:hdr.createView()},{binding:1,resource:volume.createView()},{binding:2,resource:volumeDepth.createView()},{binding:3,resource:depth.createView()},{binding:4,resource:{buffer:uniform}},{binding:5,resource:distortion.createView()}]});
    }
-   let volumeGroup=hazeBindings.get(grid);if(!volumeGroup){volumeGroup=device.createBindGroup({layout:haze.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:2,resource:{buffer:uniform}},{binding:3,resource:{buffer:lights}},{binding:4,resource:depth.createView()},{binding:8,resource:{buffer:opticalUniform}}]});hazeBindings.set(grid,volumeGroup);}hazeGroup=volumeGroup;
-   let groups=bindings.get(grid);if(!groups){groups={extract:device.createBindGroup({layout:extract.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:3,resource:{buffer:lights}}]}),draw:device.createBindGroup({layout:draw.getBindGroupLayout(0),entries:[...([grid,faces,uniform,lights].map((buffer,binding)=>({binding,resource:{buffer}}))),...rock.textures.map((t,i)=>({binding:i+4,resource:t.createView()})),{binding:7,resource:rock.sampler},{binding:8,resource:{buffer:opticalUniform}}]})};bindings.set(grid,groups);}
-   const pass=encoder.beginComputePass(profiler?.pass(trace,'lighting'));pass.setPipeline(extract);pass.setBindGroup(0,groups.extract);pass.dispatchWorkgroups(chunks);pass.end();return{view:hdr.createView(),group:groups.draw};
+   let volumeGroup=hazeBindings.get(grid);if(!volumeGroup){volumeGroup=device.createBindGroup({layout:activeHaze.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:2,resource:{buffer:uniform}},{binding:3,resource:{buffer:lights}},{binding:4,resource:depth.createView()},{binding:8,resource:{buffer:opticalUniform}},...cacheEntries]});hazeBindings.set(grid,volumeGroup);}hazeGroup=volumeGroup;
+   let groups=bindings.get(grid);if(!groups){groups={extract:device.createBindGroup({layout:extract.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:3,resource:{buffer:lights}}]}),draw:device.createBindGroup({layout:activeDraw.getBindGroupLayout(0),entries:[...([grid,faces,uniform,lights].map((buffer,binding)=>({binding,resource:{buffer}}))),...rock.textures.map((t,i)=>({binding:i+4,resource:t.createView()})),{binding:7,resource:rock.sampler},{binding:8,resource:{buffer:opticalUniform}},...cacheEntries]})};bindings.set(grid,groups);}
+   if(cached){cache!.encode(encoder,grid,profiler?.pass(trace,'lightingCache'));}
+   else{cache?.invalidate();const pass=encoder.beginComputePass(profiler?.pass(trace,'lighting'));pass.setPipeline(extract);pass.setBindGroup(0,groups.extract);pass.dispatchWorkgroups(chunks);pass.end();}
+   return{view:hdr.createView(),group:groups.draw,draw:activeDraw};
   },
   finish(encoder:GPUCommandEncoder,view:GPUTextureView,profiler?:LatencyProfiler,trace?:Trace){
-   const volumePass=encoder.beginRenderPass({...profiler?.pass(trace,'volumetrics'),colorAttachments:[{view:volume!.createView(),loadOp:'clear',storeOp:'store'},{view:volumeDepth!.createView(),loadOp:'clear',storeOp:'store'},{view:distortion!.createView(),loadOp:'clear',storeOp:'store'}]});volumePass.setPipeline(haze);volumePass.setBindGroup(0,hazeGroup);volumePass.draw(3);volumePass.end();
+   const volumePass=encoder.beginRenderPass({...profiler?.pass(trace,'volumetrics'),colorAttachments:[{view:volume!.createView(),loadOp:'clear',storeOp:'store'},{view:volumeDepth!.createView(),loadOp:'clear',storeOp:'store'},{view:distortion!.createView(),loadOp:'clear',storeOp:'store'}]});volumePass.setPipeline(activeHaze);volumePass.setBindGroup(0,hazeGroup);volumePass.draw(3);volumePass.end();
    const pass=encoder.beginRenderPass({...profiler?.pass(trace,'toneAndBloom'),colorAttachments:[{view,loadOp:'clear',storeOp:'store'}]});pass.setPipeline(post);pass.setBindGroup(0,postGroup);pass.draw(3);pass.end();},
-  close(){hdr?.destroy();volume?.destroy();volumeDepth?.destroy();distortion?.destroy();hazeBindings.clear();lights.destroy();opticalUniform.destroy();rock.textures.forEach(t=>t.destroy());bindings.clear();},
+  close(){if(closed)return;closed=true;hdr?.destroy();volume?.destroy();volumeDepth?.destroy();distortion?.destroy();hazeBindings.clear();cachedAppearance?.cache.close();lights.destroy();opticalUniform.destroy();rock.textures.forEach(t=>t.destroy());bindings.clear();},
  };
 }

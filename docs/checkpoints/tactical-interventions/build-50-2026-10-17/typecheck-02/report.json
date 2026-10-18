@@ -1,0 +1,51 @@
+{
+  "version": 3,
+  "id": "8226e9c74ef94a2fb4000de3e3e3e1b5",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792281584.9433413,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 7.221,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792281585.9779725,
+      "hostCpuPercent": 4.267701260911738,
+      "freeMemoryMiB": 101300.3515625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 43916,
+  "lastHealth": {
+    "host": {
+      "time": 1792281599.5108254,
+      "hostCpuPercent": 15.5893536121673,
+      "freeMemoryMiB": 101299.2578125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 13.453125,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 503.10546875
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792281599.5571673
+}

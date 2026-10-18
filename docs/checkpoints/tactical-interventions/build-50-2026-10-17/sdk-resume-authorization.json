@@ -1,0 +1,24 @@
+{
+  "recordedAtUTC": "2026-10-17T23:53:45.265828+00:00",
+  "userInstruction": "i'll risk a freeze, let's unblock ourselves here",
+  "scope": "Build 50 reactive transport planner and executed continuity; tiny fixtures at most 125 cells/eight ticks/eight path steps; previous 1530 selected CPU tests, full types, lint, SDK and public integration",
+  "priorMaxHostCpuPercent": 20,
+  "maxHostCpuPercent": 50,
+  "requiredSamples": 10,
+  "minFreeMemoryMiB": 8192,
+  "workloadCpuLimitPercent": 6,
+  "workloadMemoryMiB": 4096,
+  "independentWatchdog": true,
+  "timeoutSeconds": {
+    "tests": 30,
+    "typecheck": 30,
+    "lint": 30,
+    "sdk": 60,
+    "public-entry": 30
+  },
+  "liveHostCpuStopPercent": 85,
+  "globalRuntimeHoldUnchanged": true,
+  "GPUReplayBenchmarksAuthorized": false,
+  "legacyDemos": "quarantined",
+  "rationale": "Continue authorized bounded CPU work; unchanged resource caps, watchdog, runtime hold and legacy quarantine. No atomic transport command or native/performance acceptance is implied."
+}

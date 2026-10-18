@@ -1,0 +1,18 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/material-reservoirs.test.ts > conservative reservoirs: real edits, no physical advancement > caller ordering cannot change canonical transfers or receipts
+AssertionError: expected { snapshot: { …(13) }, …(4) } to deeply equal { snapshot: { …(13) }, …(4) }
+
+Compared values have no visual difference.
+
+ ❯ engine/experimental/material-reservoirs.test.ts:148:56
+    146|     const x = a.branch({horizonTicks: 0}), y = b.branch({horizonTicks:…
+    147|     const first = x.transfer({...extract, cells: [[1, 1, 1], [2, 1, 1]…
+    148|     expect(first).toEqual(second); expect(a.commit(x)).toEqual(b.commi…
+       |                                                        ^
+    149|   });
+    150| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

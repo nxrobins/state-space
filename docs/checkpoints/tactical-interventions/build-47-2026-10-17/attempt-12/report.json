@@ -1,0 +1,77 @@
+{
+  "version": 3,
+  "id": "95619cc4ae534384b1b5ef684aca8dd7",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=256",
+    "D:\\state-space\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--config",
+    "engine/vitest.tactical-session.config.ts",
+    "--bail=1",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile.json=D:\\state-space\\docs\\checkpoints\\tactical-interventions\\build-47-2026-10-17\\attempt-12\\vitest.json",
+    "engine/experimental/reactive-movement.test.ts",
+    "engine/experimental/reactive-reactions.test.ts",
+    "engine/experimental/reactive-registry.test.ts",
+    "engine/experimental/terrain-actor-group.test.ts",
+    "engine/experimental/tactical-slab-wind.test.ts",
+    "engine/experimental/material-transport.test.ts",
+    "engine/experimental/actor-movement.test.ts",
+    "engine/experimental/tactical-slab-ui.test.ts",
+    "engine/experimental/tactical-slab.test.ts",
+    "engine/experimental/tactical-worker-preview-queries.test.ts",
+    "engine/experimental/tactical-worker-motion.test.ts",
+    "engine/experimental/tactical-worker-changes.test.ts",
+    "engine/experimental/tactical-worker.test.ts",
+    "engine/experimental/terrain-body-group.test.ts",
+    "engine/experimental/translation-paths.test.ts",
+    "engine/experimental/terrain-motion.test.ts",
+    "engine/experimental/motion-paths.test.ts",
+    "engine/experimental/action-journal.test.ts",
+    "engine/experimental/change-reports.test.ts",
+    "engine/experimental/material-reservoirs.test.ts",
+    "engine/experimental/tactical-session.test.ts"
+  ],
+  "startedAt": 1792278883.4481785,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 91.043,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792278884.4820614,
+      "hostCpuPercent": 10.724637681159422,
+      "freeMemoryMiB": 101388.0546875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 21972,
+  "lastOutput": "JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-47-2026-10-17/attempt-12/vitest.json",
+  "lastHealth": {
+    "host": {
+      "time": 1792278899.3042462,
+      "hostCpuPercent": 16.650987770460958,
+      "freeMemoryMiB": 101289.63671875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 14.328125,
+      "activeProcesses": 4,
+      "peakMemoryMiB": 275.90234375
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792278899.570939
+}

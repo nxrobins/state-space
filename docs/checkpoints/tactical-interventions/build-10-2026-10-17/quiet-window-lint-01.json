@@ -1,0 +1,15 @@
+{
+  "purpose": "Build 10 bounded CPU lint",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792230335.580793,
+      "hostCpuPercent": 26.183574879227056,
+      "freeMemoryMiB": 106101.140625
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792230335.580793
+}

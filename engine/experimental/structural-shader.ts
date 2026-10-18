@@ -1,6 +1,11 @@
 /** M5 integer GPU rules. Global convergence is verified before committing a tick. */
 import { chunkShaders } from './3d-shader.js';
 
+// These stages only inspect intact structure (or its supported-distance DAG).
+// Damage can remove members during a solve, but cannot create new members.
+export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
+export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
+
 export function structuralShaders(edge:number,shape:readonly number[]) {
   const base=chunkShaders(edge).physics;
   const replace=(source:string,from:string,to:string)=>{
@@ -37,7 +42,7 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
 @group(0) @binding(13) var<storage,read_write> queryWords:array<vec4u>;
 @group(0) @binding(14) var<storage,read_write> solveDispatch:array<u32>;
 @compute @workgroup_size(1) fn relaxStart(){
- atomicStore(&work[0],0u);solveDispatch[0]=(p.shape.w+63u)/64u;solveDispatch[1]=1u;solveDispatch[2]=1u;solveDispatch[3]=0u;
+ atomicStore(&work[0],0u);solveDispatch[0]=select(0u,1u,atomicLoad(&work[13])!=0u);solveDispatch[1]=1u;solveDispatch[2]=1u;solveDispatch[3]=0u;
 }
 @compute @workgroup_size(1) fn relaxAdvance(){
  if(solveDispatch[0]!=0u){solveDispatch[3]++;}if(atomicExchange(&work[0],0u)==0u){solveDispatch[0]=0u;}
@@ -100,6 +105,8 @@ fn strength(v:u32,q:u32,s:u32)->u32{
 // thermal damage is provably zero. Any changed dependency invalidates it all.
 @compute @workgroup_size(64) fn certifyPlan(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let s=nextStructures[i];
+ let wasIntact=(structures[i]&INTEGRITY)!=0u;let isIntact=(s&INTEGRITY)!=0u;
+ if(wasIntact!=isIntact){atomicAdd(&work[14],select(0xffffffffu,1u,isIntact));}
  if(structures[i]!=s){atomicStore(&work[6],1u);return;}
  if((s&INTEGRITY)!=0u){
   // Only intact cells contribute weight. Moving fluid elsewhere cannot change
@@ -122,6 +129,9 @@ fn rootSupport(i:u32)->bool{
 @compute @workgroup_size(64) fn supportInit(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}
  var d=INF;if(intact(i)&&rootSupport(i)){d=0u;}planWrite(0u,i,d);planWrite(1u,i,0u);
+ // Every intact cell is appended exactly once. The list remains a superset
+ // after damage; removed cells are rejected by the unchanged stage predicates.
+ if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);}
 }
 @compute @workgroup_size(64) fn supportRelax(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);
@@ -240,6 +250,13 @@ fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))=
  if((cells[i]&255u)!=(cells[source]&255u)){changed(coordinate(i));}
 }
 `;
+  let compact=mechanics;
+  for(const stage of STRUCTURAL_LIST_STAGES){
+    const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
+    const sleeping=(STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'';
+    compact=replace(compact,prefix,prefix.replace('let i=id.x;',
+      sleeping+'let ordinal=id.x;if(ordinal>=atomicLoad(&work[13])){return;}let i=planRead(4u,ordinal);'));
+  }
   const specialize=(source:string)=>`const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a,b)=>a*b,1)}u);\n`+source.replaceAll('p.shape','SHAPE');
-  return{physics:specialize(physics),mechanics:specialize(mechanics)};
+  return{physics:specialize(physics),mechanics:specialize(compact)};
 }

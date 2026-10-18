@@ -1,0 +1,51 @@
+{
+  "version": 3,
+  "id": "c0bf9fc26b414bc390046c8e8c077007",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "run",
+    "build:sdk"
+  ],
+  "startedAt": 1792272656.7669818,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 35.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792272657.8125207,
+      "hostCpuPercent": 4.00390625,
+      "freeMemoryMiB": 102208.01953125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 60.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 38824,
+  "lastOutput": "\u2713 built in 305ms",
+  "lastHealth": {
+    "host": {
+      "time": 1792272679.0050302,
+      "hostCpuPercent": 16.07142857142857,
+      "freeMemoryMiB": 102136.49609375
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 20.59375,
+      "activeProcesses": 0,
+      "peakMemoryMiB": 438.828125
+    }
+  },
+  "exitCode": 0,
+  "finishedAt": 1792272679.0587149
+}

@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-10-17T11:17:18.324477+00:00",
+  "scope": "bounded CPU verification resumption",
+  "tests": {
+    "passed": 458,
+    "failed": 0,
+    "skipped": 0,
+    "executedBeforeTypeOnlyRepair": true
+  },
+  "repair": {
+    "path": "engine/experimental/tactical-session-core.ts",
+    "beforeSHA256": "77a0fec7d2fc024c238cf4a410662339340cfc26acdb46871e8ccb1c0c89e3ff",
+    "afterSHA256": "be77a8715e7fc072dd179ce192df8960c8820aa352dfdfe11a57852be80e9715",
+    "exactTypeOnlySourceComparison": true,
+    "compilerAcceptance": "pending"
+  },
+  "typecheck": "initial compile failed; source repaired; retry gate refused before launch",
+  "lint": "not launched; pending",
+  "SDKChecks": "user-deferred",
+  "physicalGpuReplayBenchmarks": "held",
+  "legacyDemos": "quarantined",
+  "protectedSourcesUnchanged": 96,
+  "fullyAccepted": false,
+  "fullWishlistComplete": false,
+  "runtimeEquivalenceProven": false,
+  "nextAction": "Fresh quiet gate, no-emit type check of the repair, then lint; stop on first failure.",
+  "evidenceSHA256": {
+    "attempt-02/authorization.json": "772e7e72ab622891e20fef1114383074ea8190166ffbbefc34e1ac14449bfdd5",
+    "attempt-02/report.json": "296848d9b88a201b6c0fb0327cdf9b6324457ab3b1f1d31890c77387fdd1ff13",
+    "attempt-02/vitest.json": "029083f9e2dad04906aad81c41c9bfbefdab5a92eb1a126331ce551e4340cb35",
+    "attempt-02/cleanup.json": "c87e9d3560304410507fb664e94c6809aa344ef6e39b18d4096983865630f837",
+    "typecheck-01/authorization.json": "551e149fb231c23b74a41f5ecea3b308e69a37fe6d39c4a92cffd7d401bb85c2",
+    "typecheck-01/report.json": "93b0cfdcdec70308d9c1149bd591f0d81630f50764a6e27d486a763c16f74fb0",
+    "typecheck-01/cleanup.json": "c87e9d3560304410507fb664e94c6809aa344ef6e39b18d4096983865630f837",
+    "quiet-window-attempt-02.json": "88f37dc673c294bcdce92d24ed5e64bc434e1c732db457c380bb592d3007d06e",
+    "quiet-window-typecheck-01.json": "0734e2e933d45a32ab01dc35a6f5bc4b0cd488969bc8db962c71edf883617aca",
+    "quiet-window-typecheck-02.json": "e8d15b3b3a064e55ad810a0d1dbe531fb5c1077f96ca4af304f5a83f5e720362",
+    "tactical-session-core.before-type-fix.ts.txt": "77a0fec7d2fc024c238cf4a410662339340cfc26acdb46871e8ccb1c0c89e3ff",
+    "record_resumption.py": "19f38cd3fdde5c901bea374d38c7c1d32464d59863b0b4c56c2ec5def4dde355"
+  }
+}

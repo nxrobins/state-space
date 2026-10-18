@@ -1,0 +1,60 @@
+{
+  "purpose": "CPU gate for direct static lint only; SDK and runtime remain deferred",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792228892.216441,
+      "hostCpuPercent": 2.83203125,
+      "freeMemoryMiB": 102329.54296875
+    },
+    {
+      "time": 1792228893.2278535,
+      "hostCpuPercent": 3.173076923076923,
+      "freeMemoryMiB": 102327.921875
+    },
+    {
+      "time": 1792228894.2368066,
+      "hostCpuPercent": 2.8846153846153855,
+      "freeMemoryMiB": 102346.1953125
+    },
+    {
+      "time": 1792228895.2477012,
+      "hostCpuPercent": 5.859375,
+      "freeMemoryMiB": 102337.34765625
+    },
+    {
+      "time": 1792228896.2544928,
+      "hostCpuPercent": 2.115384615384619,
+      "freeMemoryMiB": 102339.9296875
+    },
+    {
+      "time": 1792228897.2617261,
+      "hostCpuPercent": 3.61328125,
+      "freeMemoryMiB": 102342.015625
+    },
+    {
+      "time": 1792228898.271439,
+      "hostCpuPercent": 1.9230769230769273,
+      "freeMemoryMiB": 102340.12890625
+    },
+    {
+      "time": 1792228899.283302,
+      "hostCpuPercent": 2.500000000000002,
+      "freeMemoryMiB": 102335.6015625
+    },
+    {
+      "time": 1792228900.2924511,
+      "hostCpuPercent": 4.98046875,
+      "freeMemoryMiB": 102332.16796875
+    },
+    {
+      "time": 1792228901.3027937,
+      "hostCpuPercent": 2.596153846153848,
+      "freeMemoryMiB": 102323.28125
+    }
+  ],
+  "passed": true,
+  "workloadLaunched": false
+}

@@ -1,0 +1,18 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  engine/experimental/reactive-command-actors.test.ts > atomic command policy and continuation > repeated command staging accumulates charges across translations and physical ticks exactly
+Error: Invalid reactive data fields.
+ ❯ reactiveFields3D engine/experimental/reactive-registry.ts:26:111
+     24|   if (!raw || typeof raw !== 'object' || Array.isArray(raw) || ![Objec…
+     25|       required.some(k => !Object.hasOwn(raw, k)) || Reflect.ownKeys(ra…
+     26|       Object.values(Object.getOwnPropertyDescriptors(raw)).some(d => !…
+       |                                                                                                               ^
+     27| }
+     28| export function reactiveArray3D(raw: unknown, maximum: number): unknow…
+ ❯ createReactiveSessionSnapshot3D engine/experimental/reactive-session-state.ts:33:3
+ ❯ createReactiveSession3D engine/experimental/reactive-session.ts:87:14
+ ❯ engine/experimental/reactive-command-actors.test.ts:249:78
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "e7e33ad093394678b559509e1422a7de",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792279907.5955787,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792279908.6549754,
+      "hostCpuPercent": 12.391093901258465,
+      "freeMemoryMiB": 101331.31640625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 43132,
+  "lastOutput": "essionTicks\":3,\"causalPlatformCarry\":true,\"actorSnapshotContinuation\":true,\"reactiveCommandActors\":true,\"translationMotionRules\":\"reactive-translation-motion-1\",\"translationBodyRules\":\"reactive-translation-displacement-1\",\"atomicCommandPolicy\":true,\"controlledCarry\":true,\"commandContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792279909.8149621
+}

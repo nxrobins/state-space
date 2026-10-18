@@ -3,7 +3,7 @@ import { checkedInteger } from '../validation.js';
 import { createResidentVolume, type GpuVolume3D } from './3d-gpu-core.js';
 import { worldGeometry, referenceVolume, validateWorldFlat, validateWorldSnapshot, chunkSnapshot,
   type WorldOptions3D, type WorldSnapshot3D } from './world-core.js';
-export type { LatencyRecord, LatencySnapshot, TerrainCamera, TerrainRenderer, TerrainAppearance, RegionRequest3D, Region3D, VolumeEdit3D, GpuStepOptions3D } from './3d-gpu-core.js';
+export type { LatencyRecord, LatencySnapshot, TerrainCamera, TerrainRenderer, TerrainAppearance, TerrainLightingMode, RegionRequest3D, Region3D, VolumeEdit3D, GpuStepOptions3D } from './3d-gpu-core.js';
 export type { GameplayState3D, GameplayRules3D, GameplayCommand3D, GameplayPresentation3D, GameplayCommit3D, ResidentGameplay3D } from './gameplay-view.js';
 export interface GpuWorld3D extends Omit<GpuVolume3D,'snapshot'|'restore'|'inspectPass'> {
   readonly chunkSize:number;

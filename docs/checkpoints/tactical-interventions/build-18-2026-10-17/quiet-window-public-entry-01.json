@@ -1,0 +1,30 @@
+{
+  "purpose": "Build 18 bounded CPU public-entry",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 20,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792237505.9269507,
+      "hostCpuPercent": 8.03484995159729,
+      "freeMemoryMiB": 102698.1796875
+    },
+    {
+      "time": 1792237506.938243,
+      "hostCpuPercent": 7.499999999999996,
+      "freeMemoryMiB": 102708.3515625
+    },
+    {
+      "time": 1792237507.9529464,
+      "hostCpuPercent": 10.83984375,
+      "freeMemoryMiB": 102702.1640625
+    },
+    {
+      "time": 1792237508.9665227,
+      "hostCpuPercent": 21.153846153846157,
+      "freeMemoryMiB": 102678.8046875
+    }
+  ],
+  "passed": false,
+  "finishedAt": 1792237508.9665227
+}

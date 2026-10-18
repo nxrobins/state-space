@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "553091d47b004f2bb63404dddcd57644",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792269898.724194,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 18.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792269899.772125,
+      "hostCpuPercent": 4.4921875,
+      "freeMemoryMiB": 102828.625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 6132,
+  "lastOutput": "ialTransport\":true,\"transportCoupling\":true,\"terrainPeerContacts\":true,\"peerWorldCells\":512,\"slabReference\":{\"passed\":true,\"worldCells\":512,\"physicsTicks\":0,\"nativeWorker\":false,\"gpu\":false,\"presentation\":true,\"uiCoordinator\":true,\"browserBundles\":true,\"airPreparation\":true,\"windContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792269900.7138155
+}

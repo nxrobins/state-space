@@ -1,0 +1,26 @@
+engine/experimental/tactical-presentation.ts(29,101): error TS7053: Element implicitly has an 'any' type because expression of type '"revision" | "base"' can't be used to index type 'Readonly<GeometryStamp3D>'.
+  Property 'revision' does not exist on type 'Readonly<GeometryStamp3D>'.
+engine/experimental/tactical-presentation.ts(29,109): error TS2345: Argument of type 'string | number | Readonly<TacticalRevision3D> | null' is not assignable to parameter of type 'Readonly<TacticalRevision3D>'.
+  Type 'null' is not assignable to type 'Readonly<TacticalRevision3D>'.
+engine/experimental/tactical-presentation.ts(29,114): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Readonly<GeometryStamp3D>'.
+  No index signature with a parameter of type 'string' was found on type 'Readonly<GeometryStamp3D>'.
+engine/experimental/tactical-presentation.ts(108,81): error TS2345: Argument of type 'Float32Array<ArrayBuffer>' is not assignable to parameter of type 'readonly number[]'.
+  Type 'Float32Array<ArrayBuffer>' is missing the following properties from type 'readonly number[]': concat, flatMap, flat, [Symbol.unscopables]
+engine/experimental/tactical-presentation.ts(110,20): error TS2345: Argument of type 'Float32Array<ArrayBuffer>' is not assignable to parameter of type 'readonly number[]'.
+  Type 'Float32Array<ArrayBuffer>' is missing the following properties from type 'readonly number[]': concat, flatMap, flat, [Symbol.unscopables]
+engine/experimental/tactical-presentation.ts(110,71): error TS2345: Argument of type 'Float32Array<ArrayBuffer>' is not assignable to parameter of type 'readonly number[]'.
+  Type 'Float32Array<ArrayBuffer>' is missing the following properties from type 'readonly number[]': concat, flatMap, flat, [Symbol.unscopables]
+engine/experimental/tactical-renderer.test.ts(71,136): error TS2540: Cannot assign to 'materialCatalogHash' because it is a read-only property.
+engine/experimental/tactical-renderer.test.ts(87,6): error TS2352: Conversion of type 'GeometryVector3D' to type 'number[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The type 'GeometryVector3D' is 'readonly' and cannot be assigned to the mutable type 'number[]'.
+engine/experimental/tactical-renderer.test.ts(87,43): error TS2352: Conversion of type 'readonly [number, number, number, number]' to type 'number[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The type 'readonly [number, number, number, number]' is 'readonly' and cannot be assigned to the mutable type 'number[]'.
+engine/experimental/tactical-renderer.test.ts(98,83): error TS2352: Conversion of type '{ box: { minQ: number[]; maxQ: number[]; }; id: string; color: readonly [number, number, number, number]; } | { color: number[]; id: string; box: GeometryBox3D; }' to type 'TacticalDecoration3D' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ color: number[]; id: string; box: GeometryBox3D; }' is not comparable to type 'TacticalDecoration3D'.
+    Types of property 'color' are incompatible.
+      Type 'number[]' is not comparable to type 'readonly [number, number, number, number]'.
+        Target requires 4 element(s) but source may have fewer.
+engine/experimental/tactical-renderer.test.ts(168,85): error TS2352: Conversion of type 'GeometryVector3D' to type 'number[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The type 'GeometryVector3D' is 'readonly' and cannot be assigned to the mutable type 'number[]'.
+engine/experimental/tactical-renderer.test.ts(202,20): error TS2345: Argument of type '{ message: string; reason: "destroyed"; }' is not assignable to parameter of type 'GPUDeviceLostInfo'.
+  Property '__brand' is missing in type '{ message: string; reason: "destroyed"; }' but required in type 'GPUDeviceLostInfo'.

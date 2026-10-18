@@ -1,0 +1,2 @@
+Starting bounded UI smoke test
+{"cancellationRetained": true, "fileImportAtomic": true, "fileRoundTrip": true, "iceWalk": true, "pausedViewIdle": true, "playPauseStep": true, "routeWonAt": 215, "sameTickRestoreRedraws": true, "softwareErrorRecovery": true}

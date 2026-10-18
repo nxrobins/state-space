@@ -1,0 +1,38 @@
+{
+  "status": "unresolved-runtime-blocked",
+  "method": "Saved log and source inspection only. No builds, tests, replay, browser sessions or benchmarks launched.",
+  "rootCause": "Not established. The evidence cannot distinguish a driver/kernel/hardware stall, blocked I/O, or a transient event missed by sampling.",
+  "observations": [
+    "The interrupted 64-cubed active ice-heat replay did not create a gameplay renderer. Its last progress is tick 464, reported only every 16 ticks; the failing tick and operation are unknown.",
+    "Supervisor and progress records cease about 37 seconds after launch. No exit code, timeout or completed receipt was recorded.",
+    "Event 41 records an unclean restart at 18:54:52 PDT with BugcheckCode 0 and WHEABootErrorCount 0. This does not identify the cause. Event 6008's estimated shutdown precedes valid run logs and is not used as the freeze time.",
+    "The sampled maxima do not show sustained CPU saturation, GPU overheating or memory exhaustion. They cannot exclude unsampled spikes, CPU thermals, power or driver faults.",
+    "Free GPU memory fell about 2.3 GiB during the interrupted run. Allocation ownership was not recorded; attribution to another application or the harness is unsupported.",
+    "An earlier CPU overload was stopped cleanly. A successful comparable replay had a larger recorded monitor lag than the interrupted replay. Neither metric identifies a unique failure signature.",
+    "The October 14 incident stopped during a CPU-only legacy trajectory after native GPU checks. A common cause across the incidents is unproven.",
+    "The latest shader and GPU host differ from the preceding successful full replay. Earlier passes cannot establish that the current optimization is safe."
+  ],
+  "comparison": [
+    {"id":"level-trajectory-12cbb546","complete":false,"observedSeconds":37.16,"hostCpuMaxPercent":41.03,"gpuUtilizationMaxPercent":11,"gpuTempMaxC":42,"jobPeakMiB":654.38,"freeRamMinMiB":83028.97,"freeGpuMinMiB":9009,"monitorLagMaxMs":1378},
+    {"id":"level-trajectory-05cbb013","complete":true,"passed":true,"observedSeconds":68.31,"hostCpuMaxPercent":32.28,"gpuUtilizationMaxPercent":11,"gpuTempMaxC":41,"jobPeakMiB":638.08,"monitorLagMaxMs":1988},
+    {"id":"level-trajectory-b7f83ac4","complete":true,"passed":false,"exitCode":125,"reason":"Host CPU exceeded 85 percent for two seconds","observedSeconds":44.61,"hostCpuMaxPercent":91.61,"gpuTempMaxC":41,"jobPeakMiB":653.62,"monitorLagMaxMs":175},
+    {"id":"level-trajectory-c256f440","complete":true,"passed":true,"observedSeconds":83.97,"hostCpuMaxPercent":75.09,"gpuTempMaxC":44,"jobPeakMiB":675.12,"monitorLagMaxMs":316},
+    {"id":"frames-8fc9689f","complete":true,"performancePassed":false,"observedSeconds":26.77,"hostCpuMaxPercent":42.03,"gpuUtilizationMaxPercent":69,"gpuTempMaxC":45,"jobPeakMiB":1304.03,"monitorLagMaxMs":347}
+  ],
+  "comparisonEvidence": "Interrupted-run files are preserved alongside this file. Other IDs resolve under ../../development/<id>/supervisor/{report.json,telemetry.jsonl}; development/index.json records their hashes. Values above are rounded summaries, not new measurements.",
+  "confirmedHarnessWeaknesses": [
+    {"source":"scripts/verification_guard.py:208","finding":"Synchronous fsync/replace, output forwarding, filesystem stats and OS queries share the deadline loop. Blocking there prevents timely cancellation. This is a design limitation, not proof that a particular call hung."},
+    {"source":"scripts/verify_volume_m5_browser.py:147","finding":"Replay polling launches a CLI subprocess every 0.5 seconds plus call time and prints unchanged status. Any new stdout bytes reset the supervisor's stall timer; it does not measure verified simulation progress. The separate overall deadlines still exist."},
+    {"source":"examples/structural-cavern/replay.js:30","finding":"Each tick performs full readback, unpacking, number-array conversion, canonical-byte allocation and hashing. At 64 cubed this is 3 MiB per state and at least 3 GiB readback over 1024 ticks, excluding extra copies. The explicit 5 ms yield occurs every 16 ticks. Peak job memory does not demonstrate a leak."},
+    {"source":"examples/structural-cavern/replay.js:33","finding":"Detailed digests and durations remain in browser memory until completion. Durable records lack per-tick start and encode/submit/map/hash phases."},
+    {"source":"engine/experimental/structural-world-gpu.ts:125","finding":"The 1500 ms timeout uses a browser-thread timer armed after submission/map calls. It cannot interrupt a blocked native call or guarantee recovery from a driver/kernel hang."},
+    {"source":"scripts/recover_m5_verification.py:118","finding":"The outer source-bound receipt is written after the child exits. The interrupted stage has no durable start manifest; its source binding is inherited from the preceding tiny check and labeled accordingly."}
+  ],
+  "recommendation": "Keep recovery blocked. Review the proposed harness redesign in 3D_M5.md, then use a separate physical GPU test host for hardware reproduction and eventual full verification. Smaller local jobs reduce exposure but cannot establish safety on this workstation.",
+  "runtimeOrSafetyPolicyChangedDuringThisReview": false,
+  "primaryReferences": [
+    "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_cpu_rate_control_information"
+  ]
+}

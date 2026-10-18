@@ -1,0 +1,98 @@
+{
+  "reviewKind": "Manual source inspection and read-only source/hash/whitespace comparison; no compilation or execution",
+  "reviewedAt": "2026-10-17T09:17:59.865583+00:00",
+  "acceptance": [
+    {
+      "criterion": 1,
+      "source": "tactical-session-core.ts change/captureAction and advance tick boundary",
+      "basis": "All seven intervention methods pass a kind; every complete logical tick appends after all domains and game update; zero advance does not append",
+      "coverage": [
+        "mixed operation order",
+        "zero-tick advance",
+        "reversed changes",
+        "stale preview identity"
+      ]
+    },
+    {
+      "criterion": 2,
+      "source": "action-journal.ts and unchanged change-reports.ts",
+      "basis": "Adjacent before/after session snapshots feed full-domain/global-support comparison; event clocks identify that local interval instead of falsely labeling it as a base-to-end diff",
+      "coverage": [
+        "distant support restoration",
+        "hold expiry",
+        "multi-domain ticks",
+        "thermal and game reversal"
+      ]
+    },
+    {
+      "criterion": 3,
+      "source": "action-journal.ts portableAction; tactical-session-core.ts intervention and tickMotion",
+      "basis": "Portable copies retain selected translation routes/cuts/anchors, transfers, energy receipts and holds; complete tick motion required; raw edits/game payloads are not replay commands",
+      "coverage": [
+        "receipt ownership and JSON round trip",
+        "explicit cuts/anchor release",
+        "reservoir handoff",
+        "net-zero motion across two inert ticks"
+      ]
+    },
+    {
+      "criterion": 4,
+      "source": "readActionJournal3D and captured committed journal closure",
+      "basis": "Copied event detail and frozen root stamps; journal absent from session save schema; disabled capture bypasses all report generation",
+      "coverage": [
+        "disabled observer count",
+        "retained journal after restore",
+        "output/receipt mutation"
+      ]
+    },
+    {
+      "criterion": 5,
+      "source": "tactical-session-core.ts change/advance cleanup and guarded captureAction callback",
+      "basis": "Journal arrays staged privately; no assignment to candidate until success; whole advance publishes after cleanup; observers run under mutation guard; failure makes branch terminal",
+      "coverage": [
+        "observation failure",
+        "reentrancy",
+        "second-tick game failure",
+        "cleanup failure",
+        "cancellation",
+        "last-domain invalid motion"
+      ]
+    },
+    {
+      "criterion": 6,
+      "source": "appendActionEvent3D",
+      "basis": "Shared event/domain/detail caps; pre-copy receipt and motion counts; sparse overflow retains bounds as coarse; trace/journal overflow clears all events; known overflow skips report producer",
+      "coverage": [
+        "coarse zero-run report",
+        "trace overflow",
+        "exact detail capacity",
+        "257th boundary",
+        "domain tick cap",
+        "known overflow avoids observation"
+      ]
+    },
+    {
+      "criterion": 7,
+      "source": "action-journal.test.ts; action-journal.runtime-cases.ts; separate configurations",
+      "basis": "27 authored edit/inert cases trap physical stepping and solves; 3 real cases are separately held; SDK assertions are presence only",
+      "coverage": "All execution results pending; this is source evidence only"
+    }
+  ],
+  "findingsAddressed": [
+    "Strip base-to-end report stamps from per-event changes; attach true adjacent boundary sequence/tick identities",
+    "Capture all domains and resulting hold/game changes before appending a tick event",
+    "Guard synchronous support observers during both editing and asynchronous advancement",
+    "Use bounded complete output, conservative coarse bounds or explicit overflow rather than a partial prefix",
+    "Copy receipt detail before returning the original receipt to a caller",
+    "Skip added support observations after journal overflow",
+    "Document exact intermediate-state reads/re-execution for coarse historical reports",
+    "Keep multi-tick atomicity when journal caps are insufficient"
+  ],
+  "notProven": [
+    "Current compiler/lint/SDK validity or authored regression assertions",
+    "Actual physical capture neutrality, distant bridge behavior or restart equality",
+    "Sub-pass trajectories, actor collisions/carry/exposure",
+    "GPU production, cancellation latency, responsiveness or frame performance"
+  ],
+  "protectedSourcesUnchanged": 96
+}

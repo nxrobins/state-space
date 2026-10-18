@@ -17,13 +17,14 @@
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
-    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && vite build --config engine/vite.structural-world.config.ts && vite build --config engine/vite.structural-world-gpu.config.ts && tsc -p engine/tsconfig.sdk.json",
+    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && vite build --config engine/vite.structural-world.config.ts && vite build --config engine/vite.structural-world-gpu.config.ts && vite build --config engine/vite.interventions.config.ts && vite build --config engine/vite.tactical-session.config.ts && vite build --config engine/vite.tactical-renderer.config.ts && vite build --config engine/vite.reactive-materials.config.ts && tsc -p engine/tsconfig.sdk.json",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
     "benchmark:3d": "npm run build:sdk && node scripts/benchmark_volume.mjs",
     "verify:3d:m2": "npm run build:sdk && node scripts/verify_volume_m2.mjs",
     "prepack": "npm run build:sdk",
     "verify:3d:m3": "npm run build:sdk && node scripts/verify_volume_m3.mjs",
-    "verify:3d:m4": "npm run build:sdk && node scripts/verify_volume_m4.mjs"
+    "verify:3d:m4": "npm run build:sdk && node scripts/verify_volume_m4.mjs",
+    "build:tactical-slab": "node scripts/build_tactical_slab.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -68,6 +69,22 @@
     "./experimental/3d/active-world/gpu": {
       "types": "./dist/sdk/types/experimental/active-world-gpu.d.ts",
       "import": "./dist/sdk/state-space-active-world-gpu.js"
+    },
+    "./experimental/3d/interventions": {
+      "types": "./dist/sdk/types/experimental/interventions.d.ts",
+      "import": "./dist/sdk/state-space-interventions.js"
+    },
+    "./experimental/3d/tactical-session": {
+      "types": "./dist/sdk/types/experimental/tactical-session.d.ts",
+      "import": "./dist/sdk/state-space-tactical-session.js"
+    },
+    "./experimental/3d/tactical-renderer": {
+      "types": "./dist/sdk/types/experimental/tactical-renderer.d.ts",
+      "import": "./dist/sdk/state-space-tactical-renderer.js"
+    },
+    "./experimental/3d/reactive-materials": {
+      "types": "./dist/sdk/types/experimental/reactive-materials.d.ts",
+      "import": "./dist/sdk/state-space-reactive-materials.js"
     }
   },
   "files": [
@@ -88,6 +105,7 @@
     "docs/checkpoints/CAVERN_MATERIALS.md",
     "docs/checkpoints/CAVERN_OPTICS.md",
     "docs/checkpoints/CAVERN_HAZE.md",
-    "docs/checkpoints/CAVERN_HEAT.md"
+    "docs/checkpoints/CAVERN_HEAT.md",
+    "docs/checkpoints/TACTICAL_INTERVENTIONS.md"
   ]
 }

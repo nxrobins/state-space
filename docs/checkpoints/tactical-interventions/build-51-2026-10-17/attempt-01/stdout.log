@@ -1,0 +1,53 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > one parcel advances per call and publication is a separate boundary 12ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > cancellation at every incomplete boundary preserves the complete source 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > inputs impulses progress and results cannot mutate an owned job 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > empty and fractional cycles still validate and publish once 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > all axes signs and combined motion match the frozen planner 20ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > bounded transport execution > invalid complete state and late impulses reject before a job escapes 3ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > preview publishes only a complete command and commit does not resimulate 10ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > chained fractional commands select the updated staged control each time 10ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > impulses are applied once to current memory and survive a later command 6ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > preceding translation updates control before transport reads it 8ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > all required application hooks are explicit and missing hooks fail closed 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > a prior game command can acquire control used by the next command 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > selector input and command mutation cannot overwrite staged AP or impulses 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > malformed stale and foreign memory roll back prior AP and energy changes 11ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > late invalid impulse rolls back an earlier completed transport 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > insufficient AP rejects after physical staging without publishing any prefix 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > invalid game and async selector or reducer leave the committed world untouched 232ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > swallowed selector and reducer reentry poison the entire mutation 6ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > policy accessor and malformed command fields reject without invoking getters 3ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > cancelling each partial command discards physical and game changes 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > a competing commit or restore invalidates a partial transport 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > invalid work leaves preparation open and commands seal on first advance 4ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > new holds reject remembered loose debris instead of silently releasing it 4ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > accounted heat survives repeated transport staging and a complete tick 9ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > reservoir controls use their own domain without touching the primary world 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > atomic named transport commands > an unknown control or wrong domain never silently acquires or reseeds it 7ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > capture reconstructs every cell tuple and original identity in canonical swap order 9ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > identical gas swaps stay observable and unrelated controllers follow without an extra cycle 6ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > disabled and overflowed capture cannot change physical or control results 12ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > empty motion can be completely captured with zero entries 4ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > public mutation and serialized lookalikes cannot forge executed transport 6ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > retained receipts views and movement remain historical after commit and restore 5ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > latest transport access clears at the next command or physical tick 12ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > moving failed debris carries a grounded actor and publishes actor AP and terrain together 9ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > carry and pushes use exact fractional geometry on all axes and signs 24ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > a stationary controlled support cannot hitchhike on another parcel motion 4ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > stationary terrain clips carry and opposed constraints reject a crush 8ms
+ ✓ engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > an exact intermediate peer contact rejects all prior game and heat commands 9ms
+ × engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > response budgets return the whole original group and clear incomplete details 16ms
+   → expected { …(15) } to match object { status: 'incomplete', …(3) }
+(31 matching properties omitted from actual)
+ · engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > missing capture with actors rejects the whole transport ability
+ · engine/experimental/reactive-transport-session.test.ts > executed transport paths and actor consequences > saved actor control and accounting continue exactly after an odd-tick restart
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (41)
+   Start at  17:09:32
+   Duration  1.84s (transform 569ms, setup 0ms, collect 1.06s, tests 542ms, environment 0ms, prepare 80ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-51-2026-10-17/attempt-01/vitest.json

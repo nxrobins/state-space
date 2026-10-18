@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-10-18T00:52:09.743601+00:00",
+  "goalComplete": false,
+  "blockedAuditPassed": true,
+  "reason": "The same host CPU saturation blocks mandatory sequential verification across three consecutive goal turns.",
+  "goalTurns": [
+    {
+      "evidence": "progress-01.json",
+      "condition": "67.06% and 100% CPU; preflight refused launch"
+    },
+    {
+      "evidence": "progress-02.json",
+      "condition": "99.90% CPU; Bun sweep attributed as dominant workload"
+    },
+    {
+      "condition": "Same process confirmed alive now with increasing CPU time; 89.03678237226019% of machine CPU over three seconds",
+      "pid": 43536,
+      "processStartedAt": "2026-10-17T17:45:59.0292549-07:00",
+      "observedAtUTC": "2026-10-18T00:51:50.7201058Z",
+      "exited": false
+    }
+  ],
+  "previousTurnClassification": "progress: process attribution changed the next action from retrying verification to awaiting an external job change",
+  "implementationHashesVerified": 305,
+  "protectedHashesVerified": 96,
+  "currentPassedTests": 40,
+  "pendingGates": [
+    "previous selected CPU regressions",
+    "final type check",
+    "lint",
+    "SDK build",
+    "public-package integration"
+  ],
+  "independentWorkReview": "Static review completed; no additional source fix identified. Stepwise verification must finish before the next build.",
+  "resumeCondition": "The separate Bun sweep finishes or is paused, then a fresh bounded CPU quiet gate passes.",
+  "unrelatedProcessControlPerformed": false,
+  "newVerificationWorkloadsLaunched": 0,
+  "runtimeHold": "unchanged",
+  "legacyDemos": "quarantined",
+  "priorProgressSHA256": "506df024646b9e5a32a1e71698a9a8f301f8120e361af418df5f17a55cba0b31"
+}

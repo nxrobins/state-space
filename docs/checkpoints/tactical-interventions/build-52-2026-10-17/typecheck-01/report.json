@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "6fe28f4bfc1d4420827d5fbeff97fd82",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792283061.8113532,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 6.668,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792283062.8570826,
+      "hostCpuPercent": 6.025267249757049,
+      "freeMemoryMiB": 100959.578125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 45924,
+  "lastHealth": {
+    "host": {
+      "time": 1792283076.3969672,
+      "hostCpuPercent": 19.106463878326995,
+      "freeMemoryMiB": 100387.796875
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 13.046875,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 498.16796875
+    }
+  },
+  "lastOutput": "      Type 'null' is not assignable to type 'string | undefined'.",
+  "exitCode": 2,
+  "finishedAt": 1792283077.034664
+}

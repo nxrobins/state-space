@@ -8,13 +8,14 @@ import subprocess
 import sys
 import time
 import uuid
-from scripts.verification_guard import ROOT, Lease
+from scripts.verification_guard import ROOT, Lease, assert_recovery_enabled, assert_runtime_not_blocked
+from scripts.verification_journal import durable_json
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('stage', choices=('typecheck', 'cpu-unit', 'review-unit', 'review-gpu', 'build', 'declarations', 'lint', 'cpu-control', 'cpu-cut', 'cpu-heat', 'cpu-ice', 'gpu-build', 'probe-build', 'shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'level-pilot', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot', 'compatibility-unit', 'sdk-build'))
-    parser.add_argument('--browser-cli', type=Path)
+    parser.add_argument('--browser-executable', type=Path)
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--scene', choices=('control','cut','heat','ice-control','ice-heat'), default='control')
@@ -26,6 +27,8 @@ def main():
     parser.add_argument('--test-file', choices=('contracts', 'cpu_physics', 'fidelity', 'mutations', 'pressure', 'structure_compiled', 'structure_public', 'validation', 'experimental/3d', 'experimental/world', 'experimental/active-world', 'experimental/gameplay', 'experimental/latency'))
     parser.add_argument('--sdk-entry', choices=('sdk', 'volume', 'volume-gpu', 'world', 'world-gpu', 'active-world', 'active-world-gpu'))
     args = parser.parse_args()
+    # Refuse before source hashing, receipt creation, permit issuance or launch.
+    assert_runtime_not_blocked(ROOT)
     if args.size==128 and args.stage not in ('scale-pilot','frames'): parser.error('128^3 requires the scale pilot before frame measurement')
     node = shutil.which('node')
     commands = {
@@ -54,12 +57,12 @@ def main():
             if not (reference/'report.json').is_file(): parser.error('Missing CPU continuation receipt')
             command += ['--resume',str(reference)]
     elif args.stage in ('review-gpu', 'shader-probe', 'gpu-tiny', 'gpu-active-tiny', 'gpu-trajectory', 'gpu-seams', 'gameplay-pilot', 'ui-pilot', 'frames', 'gpu-fallback', 'gpu-order', 'level-trajectory', 'scale-pilot'):
-        if not args.browser_cli or not args.browser_cli.is_file():
-            parser.error('--browser-cli must identify the installed browser CLI')
+        if not args.browser_executable or not args.browser_executable.is_file():
+            parser.error('--browser-executable must identify an installed Chromium or Edge executable')
         # Correctness probes are CPU-capped and below normal priority. Timed
         # display frames use the existing bounded frame policy, as M4 does.
         kind = 'frames' if args.stage=='frames' else 'gpu'
-        command = [sys.executable, '-m', 'scripts.verify_volume_m5_browser', '--browser-cli', str(args.browser_cli.resolve()), '--output', str(out / 'evidence')]
+        command = [sys.executable, '-m', 'scripts.verify_volume_m5_browser', '--browser-executable', str(args.browser_executable.resolve()), '--output', str(out / 'evidence')]
         command += ['--probe', {'review-gpu':'review','shader-probe':'compile','gpu-tiny':'tiny','gpu-active-tiny':'active-tiny','gpu-trajectory':'trajectory','gpu-seams':'seams','gameplay-pilot':'gameplay','ui-pilot':'ui','frames':'frames','gpu-fallback':'fallback','gpu-order':'order','level-trajectory':'level-trajectory','scale-pilot':'scale'}[args.stage]]
         if args.stage in ('gameplay-pilot','ui-pilot','frames','level-trajectory','scale-pilot'):
             command += ['--mode',args.mode,'--size',str(args.size),'--scene',args.scene]
@@ -83,6 +86,9 @@ def main():
         ROOT / 'scripts/verify_volume_m5_cpu.mjs', ROOT / 'scripts/verify_volume_m5_browser.py']
     paths += [p for p in (ROOT/'examples/structural-cavern').glob('*') if p.suffix in ('.js','.html','.css')] + [ROOT/'scripts/verify_volume_m5_level.mjs']
     paths += [ROOT/'examples/structural-cavern/README.md', ROOT/'web/frame-pump.js', ROOT/'web/frame-clock.js']
+    paths += [ROOT/'scripts'/name for name in ('verification_browser.py', 'verification_browser.mjs',
+        'verification_journal.py', 'verification_watchdog.py', 'verification_guard.py',
+        'verification_guard.mjs', 'verification_health.py')]
     if args.stage.startswith('cpu-') and args.stage != 'cpu-unit':
         paths += [ROOT / 'dist/sdk/state-space-structural-world.js']
     if args.stage=='level-pilot':
@@ -109,27 +115,41 @@ def main():
         paths += list(reference.glob('*')) + [reference.parent/'report.json']
     hashes = {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
     out.mkdir(parents=True)
+    start = {'version': 1, 'stage': args.stage, 'status': 'started', 'passed': False,
+             'startedAt': time.time(), 'sourceHashes': hashes, 'command': command,
+             'kind': kind, 'timeoutSeconds': timeout, 'stallSeconds': 15,
+             'browserExecutable': str(args.browser_executable.resolve()) if kind != 'cpu' else None,
+             'configuration': {key: str(value) if isinstance(value, Path) else value for key, value in vars(args).items()},
+             'scope': 'One bounded stage; a start record never establishes completion'}
+    durable_json(out / 'start.json', start)
+    durable_json(out / 'report.json', {**start, 'status': 'incomplete', 'sourceUnchanged': False})
     with Lease():
         hold = ROOT / 'dist/verification/safety-hold.json'
         state = json.loads(hold.read_text(encoding='utf-8'))
+        assert_recovery_enabled(state)
         state['recoveryPermit'] = {'command': command, 'kind': kind, 'timeoutSeconds': timeout,
                                   'expiresAt': time.time() + 60, 'stage': 'm5-' + args.stage,
                                   'reason': 'Bounded M5 development stage; no legacy workload'}
-        hold.write_text(json.dumps(state, indent=2) + '\n', encoding='utf-8')
+        durable_json(hold, state)
     supervisor = out / 'supervisor'
     result = subprocess.run([sys.executable, '-m', 'scripts.verification_guard', '--kind', kind,
-                             '--timeout', str(timeout), '--stall', '15', '--output', str(supervisor), '--', *command], cwd=ROOT)
+                             '--timeout', str(timeout), '--stall', '15', '--output', str(supervisor),
+                             *(['--structured-progress'] if kind != 'cpu' else []), '--', *command], cwd=ROOT)
     report = json.loads((supervisor / 'report.json').read_text(encoding='utf-8'))
     unchanged = all(hashlib.sha256((ROOT / p).read_bytes()).hexdigest() == h for p, h in hashes.items())
     receipt = {'stage': args.stage, 'passed': result.returncode == 0 and report['passed'] and unchanged,
+               'startManifest': 'start.json', 'startManifestSha256': hashlib.sha256((out/'start.json').read_bytes()).hexdigest(),
                'sourceHashes': hashes, 'sourceUnchanged': unchanged,
                'supervisor': str((supervisor / 'report.json').relative_to(ROOT)),
                'holdRemainsActive': hold.exists()}
     evidence = out / 'evidence/report.json'
     if evidence.exists():
         receipt['evidence'] = str(evidence.relative_to(ROOT))
-        receipt['passed'] &= json.loads(evidence.read_text(encoding='utf-8'))['passed']
-    (out / 'report.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+        receipt['passed'] &= json.loads(evidence.read_text(encoding='utf-8')).get('passed') is True
+    elif kind != 'cpu':
+        receipt['passed'] = False
+        receipt['error'] = 'Browser stage did not retain its evidence receipt'
+    durable_json(out / 'report.json', receipt)
     print(json.dumps({k: v for k, v in receipt.items() if k != 'sourceHashes'}), flush=True)
     return int(not receipt['passed'])
 

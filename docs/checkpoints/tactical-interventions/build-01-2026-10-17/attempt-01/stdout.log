@@ -1,0 +1,29 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > hot damaged slab keeps exact coordinates, internal bonds and displaced hot air 7ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (-1,0,0) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (1,0,0) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,-1,0) 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,1,0) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,-1) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > overlapping run preserves all coordinates along direction (0,0,1) 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > contact with an intact destination neighbor does not weld 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > external bonds reject by default and explicit cuts update both endpoints without healing 6ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > pins require explicit release and are not carried into the destination 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile water displacement is explicit and conservative through successive steps 3ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > existing fluid can be selected and moved without manufacturing or cooling it 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > mobile displacement admits broken grains but rejects intact ice and pinned debris 4ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > an empty endpoint cannot tunnel through an intervening solid 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > late boundary failure rolls back earlier movement, cuts and pin releases 1ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > selection order and disconnected runs do not change results or receipts 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > malformed, sparse, duplicate, missing and excessive requests never mutate input 10ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > invalid snapshots fail before an operation can publish 2ms
+ ✓ engine/experimental/interventions.test.ts > conservative translation: CPU edit-only fixtures, zero simulation ticks > frozen input is accepted and all result storage is isolated 3ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  00:57:45
+   Duration  901ms (transform 401ms, setup 0ms, collect 457ms, tests 63ms, environment 0ms, prepare 66ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-01-2026-10-17/attempt-01/vitest.json

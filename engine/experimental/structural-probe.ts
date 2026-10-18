@@ -39,8 +39,32 @@ function equalState(a:StructuralSnapshot3D,b:StructuralSnapshot3D,label:string){
 async function digest(state:StructuralSnapshot3D){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(state)))),v=>v.toString(16).padStart(2,'0')).join('');}
 export async function verifyM5GpuTiny(mode:'dense'|'active'='dense'){
   const gpu=await createStateSpaceStructuralWorld3DGPU({width:8,height:8,depth:8,chunkSize:4,mode});
-  const results=[];
+  const results=[],listCoverage=[];
   try{
+    // Exercise a zero-length list, its full-capacity limit, and rebuilds after
+    // placement/removal. None of these may retain a prior solve's membership.
+    for(const fillMaterial of [MAT.AIR,MAT.STONE]){
+      const cpu=new CpuStructuralWorld3D({width:8,height:8,depth:8,chunkSize:8,fillMaterial});
+      await gpu.restore(cpu.snapshot());
+      for(let tick=1;tick<=4;tick++){
+        const edits:StructuralEdit3D[]=tick===2?[{kind:'material',x:3,y:2,z:3,material:fillMaterial===MAT.AIR?MAT.STONE:MAT.AIR,thermal:0}]:[];
+        cpu.step(1,{edits});await gpu.step(1,{edits});equalState(await gpu.snapshot(),cpu.snapshot(),`Worklist capacity ${fillMaterial}/${tick}`);
+        if(tick===1&&gpu.inspectSolve().listedCells!==(fillMaterial===MAT.AIR?0:512))throw Error('Worklist did not cover precisely the intact cells');
+      }
+      if((await gpu.energyBalance()).driftQ!==0n)throw Error('Worklist capacity energy drift');
+      listCoverage.push({fillMaterial,ticks:4,exact:true});
+    }
+    {
+      const cpu=new CpuStructuralWorld3D({width:8,height:8,depth:8,chunkSize:8});
+      const cold=cpu.snapshot();cold.packedCells=cold.packedCells.map(v=>v&0xffff00ff);cold.energyQ.fill(0);cpu.restore(cold);
+      cpu.setCell(3,7,3,MAT.WATER,0);cpu.setEnergy(3,7,3,0);await gpu.restore(cpu.snapshot());
+      for(let tick=1;tick<=4;tick++){
+        if(tick===3){const edits:StructuralEdit3D[]=[{kind:'material',x:5,y:2,z:5,material:MAT.STONE,thermal:0}];cpu.step(0,{edits});await gpu.edit(edits);}
+        cpu.step();await gpu.step();equalState(await gpu.snapshot(),cpu.snapshot(),`Phase-created structure and edit-only count ${tick}`);
+        if(tick===1&&!cpu.grid.some(v=>(v&255)===MAT.ICE))throw Error('Dispatch-bound regression did not create ice');
+      }
+      if((await gpu.energyBalance()).driftQ!==0n)throw Error('Phase-created structure energy drift');
+    }
     for(const scene of ['control','cut','heat','ice','overload']){
       const cpu=new CpuStructuralWorld3D({width:8,height:8,depth:8,chunkSize:8});
       const cold=cpu.snapshot();cold.packedCells=cold.packedCells.map(v=>v&0xffff00ff);cold.energyQ.fill(0);cpu.restore(cold);
@@ -100,7 +124,7 @@ export async function verifyM5GpuTiny(mode:'dense'|'active'='dense'){
       if(region.grid[to]!==before.packedCells[from]||region.energyQ[to]!==before.energyQ[from]||region.structure[to]!==before.structure[from])throw Error('Cross-seam query differs');
     }
     status('M5 tiny exact replay and edit rollback passed');
-    return{passed:true,scope:`8^3 ${mode} GPU/CPU only; 16 ticks per scenario, restart at 3; not M5 acceptance`,backendInfo:gpu.backendInfo,results,atomicEdits:true,rootPredicateCacheExact:true};
+    return{passed:true,scope:`8^3 ${mode} GPU/CPU only; 16 ticks per scenario, restart at 3; not M5 acceptance`,backendInfo:gpu.backendInfo,results,listCoverage,atomicEdits:true,rootPredicateCacheExact:true};
   }finally{gpu.close();}
 }
 
@@ -194,6 +218,7 @@ export async function verifyM5ProcessingOrder(){
     if(code.includes('fn supportRelax(')){
       const pattern=/let i=id\.x;if\(i([<>]=?)SHAPE\.w/g;
       code=code.replace(pattern,(_match,comparison:string)=>{mechanicsPermutations++;return `let i=SHAPE.w-1u-id.x;if(i${comparison}SHAPE.w`;});
+      code=code.replaceAll('let ordinal=id.x;',()=>{mechanicsPermutations++;return 'let ordinal=atomicLoad(&work[13])-1u-id.x;';});
     }
     if(code.includes('fn collectLocal(')){
       const marker='for(var k=0u;k<M5_CHUNKS;k++){';

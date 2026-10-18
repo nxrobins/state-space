@@ -1,0 +1,72 @@
+
+ RUN  v3.2.7 D:/state-space
+
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > disabled and zero-tick complete journals retain distinct meanings without eager reads 18ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > odd-start domain and batch history equals the complete direct path journal 39ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > out-and-back paths retain both crossings despite identical final positions 231ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > falling members remain linear and displaced occupants remain instantaneous relocations 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > all scheduled movement axes parities and diagonal directions survive transport at even and odd ticks 27ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > required paths remain enabled by policy when client capture options are omitted 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > per-tick and cumulative overflow discard prefixes without discarding the committed action 93ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > nested caller mutations cannot alter later reports or their private commit identity 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > copied foreign older restored and closed handles cannot authorize path reads 5ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > ordinary read failure preserves a ready preview and the acknowledged state 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > external revision change rejects a path read while preserving the last confirmed snapshot 2ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > pending paths exclude other reads previews commits and restores 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > read timeout fails closed without retry or an uncertain mutation 5ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > close waits for a pending path read before disposing the endpoint 4ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > cancelled previews cannot publish path prefixes before a replacement commits 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > stamps scope flags missing domains operation order and counts reject malformed complete reports 72ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > wrong parity identity composition segment mode and simultaneous permutations fail closed 24ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > nested accessors sparse arrays and oversized frames reject without evaluating getters 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > frame overhead and per-tick detail budgets are inclusive and cannot omit charged entries 3ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > valid per-frame paths cannot bypass the shared journal budget by understating total entries 427ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > public decoder still validates complete snapshots while metadata decoder agrees on valid input 1ms
+ ✓ engine/experimental/tactical-worker-paths.test.ts > worker captured path journals > batch transitions and older protocol responses cannot pass path validation 18ms
+ ✓ engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > wind preview and A/B expose saved controls only at the displayed boundary 50ms
+ × engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > worker-owned drift continues saved momentum after restore 44ms
+   → Restore requires an idle worker.
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > initializes from one five-query batch and no physical work
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > zero-tick lift previews changed cover and rider while preserving committed save
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > default horizon requests two exact ticks through the injected inert worker driver
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > air preview uses the worker reducer supports A/B and publishes only after commit acknowledgement
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > zero-tick air and v1 imports retain a current candidate without worker mutations
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > discarding a delayed air result retains acknowledged actors AP and velocity
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > invalid commands and horizons preserve the ready candidate and save
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > coalesces rapid guarded intents to the latest one without dispatching older commands
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > waits for an old query to finish before dispatching its replacement and suppresses stale display
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > discarding a delayed preview never publishes or spends its resources
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > discarding a ready preview rejects later commit
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > publishes commit state only after acknowledgement and rejects overlap
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > lost commit reply reports uncertainty and keeps the last acknowledged save without retry
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > inspection failure after commit retains the acknowledged save and labels the older display
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > invalid saves are atomic and retain a candidate
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > restores a complete save through the worker and invalidates the candidate
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > a reactivated runtime hold blocks commit before transmission and retains the ready candidate
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > close waits through an in-flight query and suppresses its result
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > failed UI cancels active work and resolves the waiting intent
+ · engine/experimental/tactical-slab-ui.test.ts > worker-owned tactical UI state > view inspection and parsed save results cannot mutate stored or rendered state
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > blocks missing unreadable malformed and active runtime holds
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > requires explicit cleared hold and disables HTTP caching
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > bounds hold reads with an abort and clears the timer
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > orbit cameras use the shared projection without modifying simulation
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > coalesces camera invalidations to one pending and one outstanding frame
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > close cancels a scheduled frame without drawing
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > close drains an outstanding frame without scheduling a dirty successor
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > reactivated hold blocks a frame and stops future scheduling
+ · engine/experimental/tactical-slab-ui.test.ts > runtime gate and bounded frame scheduling > a draw error stops the pump even when its error callback throws
+ · engine/experimental/tactical-slab-ui.test.ts > explicit startup and cleanup > held startup acquires neither a device nor a worker
+ · engine/experimental/tactical-slab-ui.test.ts > explicit startup and cleanup > model startup failure cleans the client and owned device
+ · engine/experimental/tactical-slab-ui.test.ts > explicit startup and cleanup > renderer startup failure closes the model and device
+ · engine/experimental/tactical-slab-ui.test.ts > explicit startup and cleanup > cancellation during device acquisition disposes it without starting a worker
+ · engine/experimental/tactical-slab-ui.test.ts > explicit startup and cleanup > close drains both owned components and destroys the device once even on failure
+ · engine/experimental/tactical-slab-ui.test.ts > DOM adapter remains inert behind the hold > air control dispatches selected unit direction and horizon through the existing UI model
+ · engine/experimental/tactical-slab-ui.test.ts > DOM adapter remains inert behind the hold > a canvas observer startup failure disposes partially acquired resources and permits retry
+ · engine/experimental/tactical-slab-ui.test.ts > DOM adapter remains inert behind the hold > mount binds controls without acquisition; blocked Start and teardown leave apps untouched
+
+ Test Files  1 failed | 1 passed (35)
+      Tests  1 failed | 23 passed (61)
+   Start at  13:28:12
+   Duration  2.59s (transform 589ms, setup 0ms, collect 1.01s, tests 1.09s, environment 0ms, prepare 152ms)
+
+JSON report written to D:/state-space/docs/checkpoints/tactical-interventions/build-34-2026-10-17/attempt-01/vitest.json

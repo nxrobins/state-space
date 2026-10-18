@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "13f0aaea462644e88ea311a64fdc705b",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "D:\\state-space\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "engine/tsconfig.tactical-check.json"
+  ],
+  "startedAt": 1792264671.3214593,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 19.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792264672.3554392,
+      "hostCpuPercent": 1.8269230769230815,
+      "freeMemoryMiB": 103329.6640625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 27156,
+  "lastHealth": {
+    "host": {
+      "time": 1792264682.694223,
+      "hostCpuPercent": 10.96014492753623,
+      "freeMemoryMiB": 102942.64453125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 10.203125,
+      "activeProcesses": 2,
+      "peakMemoryMiB": 376.24609375
+    }
+  },
+  "lastOutput": "examples/tactical-slab/ui-model.ts(66,40): error TS2339: Property 'resolve' does not exist on type 'never'.",
+  "exitCode": 2,
+  "finishedAt": 1792264683.387718
+}

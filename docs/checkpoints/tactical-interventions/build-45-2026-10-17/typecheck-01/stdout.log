@@ -1,0 +1,4 @@
+engine/experimental/reactive-geometry.test.ts(21,108): error TS2542: Index signature in type 'Readonly<Record<string, number>>' only permits reading.
+engine/experimental/reactive-geometry.test.ts(22,56): error TS2542: Index signature in type 'Readonly<Record<string, number>>' only permits reading.
+engine/experimental/reactive-geometry.test.ts(22,87): error TS2542: Index signature in type 'Readonly<Record<string, number>>' only permits reading.
+engine/experimental/reactive-geometry.test.ts(22,118): error TS2542: Index signature in type 'Readonly<Record<string, number>>' only permits reading.

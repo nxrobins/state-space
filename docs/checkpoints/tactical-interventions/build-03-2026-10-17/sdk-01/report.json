@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "id": "aff7dc44ec2d4c34b192bba169dde8f9",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "run",
+    "build:sdk"
+  ],
+  "startedAt": 1792225102.3215845,
+  "passed": false,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 60.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 50.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792225103.3392265,
+      "hostCpuPercent": 14.883268482490275,
+      "freeMemoryMiB": 91499.60546875
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 60.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 41544,
+  "lastOutput": "\u2713 built in 2.00s",
+  "lastHealth": {
+    "host": {
+      "time": 1792225109.312277,
+      "hostCpuPercent": 99.55985915492957,
+      "freeMemoryMiB": 91043.51953125
+    },
+    "gpu": null,
+    "job": {
+      "cpuSeconds": 4.390625,
+      "activeProcesses": 5,
+      "peakMemoryMiB": 426.44140625
+    }
+  },
+  "error": "Host CPU exceeded 85 percent for two seconds",
+  "exitCode": 125,
+  "finishedAt": 1792225109.3479412
+}

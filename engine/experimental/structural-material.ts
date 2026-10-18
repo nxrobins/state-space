@@ -2,6 +2,7 @@
 import { MAT, PHASE, PHASE_SHIFT, buildColdTable, COLD_STRIDE, COLD_DENSITY } from '../generated/materials.js';
 import { temperatureQ, exchangeEnergy, thermalView, phaseMaterial, rewriteMaterial } from '../thermal.js';
 import type { VolumePass } from './3d-core.js';
+import type { ProvenancePass3D } from './motion-trace.js';
 import { structuralEligible, INTEGRITY_3D, ANCHOR_3D, FRESH_3D, type StructuralState3D } from './structural-mechanics.js';
 const cold=buildColdTable();
 const material=(v:number)=>v&255;
@@ -16,15 +17,22 @@ function choice(index: number, axis: number, tick: number): boolean {
   return ((h ^ (h >>> 16)) & 1) === 0;
 }
 
-export function executeStructuralMaterialPass(input: StructuralState3D, output: StructuralState3D, w: number, h: number, d: number, tick: number, pass: VolumePass): void {
+export function executeStructuralMaterialPass(input: StructuralState3D, output: StructuralState3D, w: number, h: number, d: number, tick: number, pass: VolumePass, provenance?: ProvenancePass3D): void {
   const aGrid = input.grid, aEnergy = input.energyQ, bGrid = output.grid, bEnergy = output.energyQ;
   bGrid.set(aGrid); bEnergy.set(aEnergy); output.structure.set(input.structure);
+  if (provenance) provenance.output.set(provenance.input);
   const layer = w * h;
   const bound = (index: number) => (input.structure[index] & (INTEGRITY_3D | ANCHOR_3D)) !== 0;
   const canFall = (source: number, target: number) => falling(aGrid[source]) && !bound(source) && !bound(target) && density(aGrid[source]) > density(aGrid[target]);
   const gasRank = (i: number) => Math.floor(temperatureQ(aGrid[i], aEnergy[i], cold) / 256) * 2 - density(aGrid[i]);
   const canRise = (s: number, t: number) => material(aGrid[s]) !== MAT.AIR && gas(aGrid[s]) && gas(aGrid[t]) && gasRank(s) > gasRank(t) + 16;
-  const swap = (s: number, t: number) => { bGrid[s] = aGrid[t]; bGrid[t] = aGrid[s]; bEnergy[s] = aEnergy[t]; bEnergy[t] = aEnergy[s]; output.structure[s] = input.structure[t]; output.structure[t] = input.structure[s]; };
+  const swap = (s: number, t: number) => { bGrid[s] = aGrid[t]; bGrid[t] = aGrid[s]; bEnergy[s] = aEnergy[t]; bEnergy[t] = aEnergy[s]; output.structure[s] = input.structure[t]; output.structure[t] = input.structure[s];
+    if (provenance) {
+      provenance.output[s] = provenance.input[t]; provenance.output[t] = provenance.input[s];
+      provenance.touched[provenance.input[s]] = 1; provenance.touched[provenance.input[t]] = 1;
+      provenance.pathSwap?.(s, t, provenance.input[s], provenance.input[t]);
+    }
+  };
   const hasFall = (i: number, x: number, y: number, z: number) => y + 1 < h && (
     canFall(i, i + w) || (x > 0 && canFall(i, i + w - 1)) || (x + 1 < w && canFall(i, i + w + 1)) ||
     (z > 0 && canFall(i, i + w - layer)) || (z + 1 < d && canFall(i, i + w + layer)));

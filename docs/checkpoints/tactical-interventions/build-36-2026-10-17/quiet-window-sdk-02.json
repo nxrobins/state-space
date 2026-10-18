@@ -1,0 +1,60 @@
+{
+  "purpose": "Build 36 user-authorized CPU resumption sdk",
+  "requiredSamples": 10,
+  "maxHostCpuPercent": 50,
+  "minFreeMemoryMiB": 8192,
+  "samples": [
+    {
+      "time": 1792270816.9022677,
+      "hostCpuPercent": 2.3099133782483183,
+      "freeMemoryMiB": 102467.078125
+    },
+    {
+      "time": 1792270817.9164476,
+      "hostCpuPercent": 1.9212295869356355,
+      "freeMemoryMiB": 102465.73046875
+    },
+    {
+      "time": 1792270818.928643,
+      "hostCpuPercent": 2.350636630754166,
+      "freeMemoryMiB": 102465.69140625
+    },
+    {
+      "time": 1792270819.9362042,
+      "hostCpuPercent": 1.63461538461539,
+      "freeMemoryMiB": 102473.92578125
+    },
+    {
+      "time": 1792270820.9514399,
+      "hostCpuPercent": 1.8251681075888593,
+      "freeMemoryMiB": 102475.8046875
+    },
+    {
+      "time": 1792270821.960119,
+      "hostCpuPercent": 2.2417153996101336,
+      "freeMemoryMiB": 102473.81640625
+    },
+    {
+      "time": 1792270822.9693494,
+      "hostCpuPercent": 2.115384615384619,
+      "freeMemoryMiB": 102471.23046875
+    },
+    {
+      "time": 1792270823.983652,
+      "hostCpuPercent": 1.3461538461538414,
+      "freeMemoryMiB": 102474.71484375
+    },
+    {
+      "time": 1792270824.995958,
+      "hostCpuPercent": 1.2499999999999956,
+      "freeMemoryMiB": 102476.9921875
+    },
+    {
+      "time": 1792270826.0089962,
+      "hostCpuPercent": 0.9615384615384581,
+      "freeMemoryMiB": 102475.19140625
+    }
+  ],
+  "passed": true,
+  "finishedAt": 1792270826.0089962
+}

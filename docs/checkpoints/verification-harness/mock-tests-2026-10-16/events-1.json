@@ -1,0 +1,55 @@
+{
+  "suite": "events",
+  "attempt": "1",
+  "startedAt": "2026-10-17T06:00:05.875733+00:00",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "--max-old-space-size=128",
+    "tests/verification-events.test.mjs"
+  ],
+  "timeoutSeconds": 30,
+  "containmentOptIn": false,
+  "legacyOptIn": false,
+  "pythonProcessNetworkAuditGuard": false,
+  "python": "3.10.16",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "sourceHashes": {
+    "scripts/verification_browser.py": "eec58825654c62bf1fbf0095880c1bae8d8e84cf7ca409b3f570450e4bba8bb8",
+    "scripts/verification_browser.mjs": "fa3020530f892c39bc1f118112ff6805f760bbc62299f47d195f1fed04c160e0",
+    "scripts/verification_guard.py": "ae10142294b989880adb08a2ced9744972137378ab6be08d1134947a9f44f989",
+    "scripts/verification_guard.mjs": "38d91a8b60b1a1ba402400cd4d7c435baa679af4fb15ce44be378a9d43b264d8",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verify_volume_m5_browser.py": "d695079d4a7b50a26af800cf46036f9e1da7830f7baa0c2d57f060b8a9a3d0e4",
+    "scripts/recover_m5_verification.py": "5ef89aee9fa04680f2b75df0ab58b6035480e292cbb618730cded6f6e9e45122",
+    "scripts/recover_m4_verification.py": "693442ed5899b0a126f5882690ab1f6bb3cc380f342173ecf355410e7a8c9d98",
+    "scripts/verification_health.py": "5edbfc1712c80ca8d5d8db5720b538f4e5114a686dad9deea75c3ab9321434f0",
+    "examples/structural-cavern/verification-events.js": "7d3b947dd481c983abb4abbc7c20992797ddefc9565e62557998c0f95255a6da",
+    "tests/test_verification_browser.py": "22a09d8efbca7890d56856fe22a9ed62914a707a05e79491d5026f33a5ab11a4",
+    "tests/test_verification_journal.py": "0bc353034a046e73ac2b290d6267dd3413b60c1bf7456095c1b4e1ecb4798f31",
+    "tests/test_verification_guard.py": "edf5e48abb5ac19fb4ec500162728a80ad8727aede45e3fd1e74f6eb2c22d7ef",
+    "tests/verification-events.test.mjs": "4e00858f223eb5c75041f0e75946b4b8d3eceae501d25191e1a8802cc5de63bd"
+  },
+  "protectedBefore": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "passed": true,
+  "exitCode": 0,
+  "wallSeconds": 0.125,
+  "protectedAfter": {
+    "dist/verification/safety-hold.json": "3444c8e505e3dd47bfacecfcc4411b8ca1196c818600044d375481f235610f5b",
+    "scripts/verify_checks.mjs": "b3ef0acf0af83786865b70664f144adf2f2f65452a7764cadd97a966333bcfaf"
+  },
+  "protectedUnchanged": true,
+  "stdout": {
+    "path": "events-1.stdout.log",
+    "bytes": 1479,
+    "sha256": "0a0f754dae64ef5ab91d0236a27a2dce035912b42e3aad7cec4cd9aaf5516c7c"
+  },
+  "stderr": {
+    "path": "events-1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

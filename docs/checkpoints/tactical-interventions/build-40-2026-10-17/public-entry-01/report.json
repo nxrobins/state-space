@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "id": "40dd7e3db21f4496b8fa0ac8ffa0a190",
+  "kind": "cpu",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--max-old-space-size=512",
+    "scripts/check_tactical_session_sdk.mjs"
+  ],
+  "startedAt": 1792273199.6151192,
+  "passed": true,
+  "memoryLimitMiB": 4096,
+  "cpuLimitPercent": 6,
+  "timeoutSeconds": 30.0,
+  "stallSeconds": 20.0,
+  "maxMonitorLagMs": 18.0,
+  "containment": "Windows job",
+  "preflight": {
+    "host": {
+      "time": 1792273200.6703675,
+      "hostCpuPercent": 5.120772946859908,
+      "freeMemoryMiB": 102056.71484375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 30.0,
+    "transport": "pagefile-backed mapping"
+  },
+  "childPid": 10560,
+  "lastOutput": "\"boundedStructure\":true,\"structureCells\":4,\"structureRules\":\"reactive-structure-1\",\"budgetIndependentStructure\":true,\"reactiveWorld\":true,\"worldRules\":\"reactive-world-1\",\"worldCells\":4,\"completedReactiveWorldTicks\":3,\"atomicWorldPublication\":true,\"revisionBoundCommit\":true,\"worldContinuation\":true}}",
+  "exitCode": 0,
+  "finishedAt": 1792273201.6746955
+}
