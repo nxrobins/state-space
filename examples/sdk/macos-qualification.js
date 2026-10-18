@@ -49,6 +49,39 @@ async function replay(size,scenario,ticks){
  }
  report.energyDriftQ='0';report.invalidRestoreAtomic=true;
 }
+async function structuralExact(){
+ const probe=await import('../../dist/volume-m5/structural-probe.js');report.probes=[];
+ for(const mode of ['dense','active']){
+  progress('Tiny exact probes: '+mode);report.probes.push(await probe.verifyM5GpuTiny(mode));
+  progress('Distant support probes: '+mode);report.probes.push(await probe.verifyM5DistantSupport(mode));
+ }
+ progress('Forced exact fallback');report.probes.push(await probe.verifyM5DistantSupport('active',1));
+ progress('Reversed processing order');report.probes.push(await probe.verifyM5ProcessingOrder());
+ check(report.probes.every(r=>r.passed&&r.backendInfo.isFallbackAdapter===false),'Exact probes require hardware GPU');
+ progress('Profiled presentation, step and edit timestamps');
+ const level=createStructuralLevel(32,'control');
+ const gpu=await createStateSpaceStructuralWorld3DGPU({width:32,height:32,depth:32,chunkSize:4,mode:'active',profiling:true,gpuTiming:true});
+ let renderer,driver;
+ try{
+  await gpu.restore(level.field.snapshot());renderer=await gpu.createRenderer(document.getElementById('world'));
+  driver=await gpu.createGameplay(level.actor,level.rules);
+  const presentation={renderer,camera:{forward:[1,0,0],right:[0,0,-1],up:[0,-1,0]}};
+  await driver.present(presentation);await gpu.settleLatency();
+  let records=gpu.inspectLatency().records;
+  check(records.length>0&&records.every(r=>r.tick===0),'Zero-tick presentation trace differs');
+  let cursor=records.at(-1).id;
+  await driver.step(scriptedInput(level,1),{presentation});await gpu.settleLatency();
+  records=gpu.inspectLatency(cursor).records;
+  check(records.length>0&&records.every(r=>r.tick===1),'Step trace differs');cursor=records.at(-1).id;
+  driver.close();driver=undefined;
+  await gpu.edit([{kind:'energy',x:1,y:1,z:1,energyQ:0}]);await gpu.settleLatency();
+  records=gpu.inspectLatency(cursor).records;
+  check(records.length>0&&records.every(r=>r.tick===1),'Edit-only trace differs');
+  check(gpu.inspectLatency().records.every(r=>['complete','unsupported'].includes(r.gpu.status)),'Incomplete GPU profile');
+  report.profileTicksExact=true;report.gpuTimestamps=gpu.inspectLatency().gpuTimestamps;
+ }finally{driver?.close();renderer?.close();gpu.close();}
+
+}
 async function frames(lightingMode){
  output.style.display='none';
  const size=32,level=createStructuralLevel(size,'cut'),initial=level.field.snapshot();delete level.field;
@@ -105,6 +138,8 @@ window.macQualification={ready:true,run(stage){
  report={stage,passed:false,done:false,releaseAccepted:false,startedAt:new Date().toISOString()};
  void(async()=>{try{
   if(stage==='pilot')await replay(32,'cut',4);
+  else if(stage==='structural-exact')await structuralExact();
+  else if(stage==='replay-64-cut-long')await replay(64,'cut',1024);
   else if(/^replay-(32|64)-(control|cut|heat|ice-control|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
   else if(stage==='lighting')await lighting();
   else if(stage==='frames-reference'||stage==='frames-cached'||stage==='frames-visible')await frames(stage==='frames-visible'?'reference':stage.slice(7));

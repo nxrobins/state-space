@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 from scripts.verification_guard import ROOT, guarded_entry
 from scripts.verification_browser import PersistentBrowser
-from scripts.verification_macos import STAGES
+from scripts.verification_macos import STAGES, require_preceding_stage
 
 
 def main():
@@ -35,6 +35,7 @@ def main():
     paths = [
         *ROOT.glob("engine/experimental/*.ts"),
         *ROOT.glob("dist/sdk/*"),
+        *ROOT.glob("dist/volume-m5/*.js"),
         *ROOT.glob("examples/sdk/*"),
         *ROOT.glob("examples/structural-cavern/*"),
         ROOT / "web/frame-pump.js", ROOT / "web/frame-clock.js",
@@ -63,6 +64,9 @@ def main():
     }
     browser = server = None
     try:
+        report["prerequisite"] = require_preceding_stage(
+            ROOT / "dist/verification", args.stage, before
+        )
         server = ThreadingHTTPServer(
             ("127.0.0.1", 0), partial(SimpleHTTPRequestHandler, directory=str(ROOT))
         )
@@ -74,22 +78,24 @@ def main():
         )
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
-        if args.stage == "client" or is_gameplay:
+        is_scale = args.stage == "scale-128-visible"
+        if args.stage == "client" or is_gameplay or is_scale:
             query = {"lighting": "cached" if "cached" in args.stage else "reference"}
-            if is_gameplay:
-                query.update(
-                    {"scene": "cut", "size": "64" if "-64-" in args.stage else "32"}
-                )
+            if is_gameplay or is_scale:
+                size = "128" if "-128-" in args.stage else "64" if "-64-" in args.stage else "32"
+                query.update({"scene": "cut", "size": size})
+            if "profile" in args.stage:
+                query["profile"] = "gpu"
             page = "examples/structural-cavern/?" + urlencode(query)
         else:
             page = "examples/sdk/macos-qualification.html"
         browser.call("open", url=f"http://127.0.0.1:{server.server_port}/" + page)
-        if args.stage == "client" or is_gameplay:
+        if args.stage == "client" or is_gameplay or is_scale:
             client_module = (
-                "playable-benchmark.js" if is_gameplay else "playable-check.js"
+                "playable-scale.js" if is_scale else "playable-benchmark.js" if is_gameplay else "playable-check.js"
             )
             client_function = (
-                "benchmarkPlayableClient" if is_gameplay else "verifyPlayableClient"
+                "probePlayableScale" if is_scale else "benchmarkPlayableClient" if is_gameplay else "verifyPlayableClient"
             )
             prepare = """void (async()=>{
               try {

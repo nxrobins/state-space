@@ -189,6 +189,10 @@ Timing includes scripted input/edits, simulation, resident actor/collision,
 transfers, mesh invalidation, rendering, the application HUD, validation and GPU
 completion. Initial setup, snapshot compression and OS scanout are excluded.
 
+The following is the pre-optimization baseline. See the
+[worklist optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md) for the
+subsequent exact scheduling change and new measurements.
+
 | World / lighting | Completion p95 | Completion p99 | Worst | Deadline misses | Strict 60 Hz |
 | --- | ---: | ---: | ---: | ---: | --- |
 | 32³ reference | 7.4 ms | 9.7 ms | 11.8 ms | 0 / 600 | Pass |
@@ -219,3 +223,12 @@ See [current validation status](VALIDATION_STATUS.md) and the compact
 [qualification index](checkpoints/MACOS_QUALIFICATION.json) for source-bound raw
 reports, receipts, retained failures and screenshots. These scoped results do not
 clear an incident hold or relax the legacy-demo quarantine.
+
+## Structural optimization follow-up
+
+The active backend now reuses its material worklist until awake membership changes.
+This removes redundant scans between the 27 ordered material passes. Optional GPU
+timestamps expose the solver, collector, material families and rendering costs;
+normal gameplay measurements keep profiling disabled. The
+[optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md) contains the current
+64³ results, exactness coverage and source-bound 128³ progression commands.
