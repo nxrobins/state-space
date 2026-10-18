@@ -3,8 +3,8 @@
 The engine lab runs locally on the JavaScript CPU backend and on browser WebGPU.
 The first macOS validation used Apple Silicon, macOS 26.6.2, Python 3.10.20 and
 an Apple `metal-3` WebGPU adapter. This is a bounded development baseline;
-large 3D worlds, native Python GPU conformance and release benchmarks need
-separate qualification.
+native Python Metal and small 3D CPU/WebGPU comparisons now pass as described
+below. Large-world and frame-rate qualification remain separate.
 
 ## Install and open the lab
 
@@ -39,7 +39,8 @@ workload deadline. Vitest uses one worker and explicit small fixtures: portable
 2D contracts, input validation, pressure controls, tiny 3D material behavior and
 tiny 3D structures. The Node tests then check all five lab scenes, exact
 save/replay, controller behavior and verification transport. The initial macOS
-run passed 39 Vitest tests and 12 Node tests. This command excludes native GPU
+run passed 39 Vitest tests and 12 Node tests. The current suite adds the
+structural probe fixture regression, for 52 tests total. This command excludes native GPU
 fixtures and the quarantined legacy demo trajectories.
 
 Run the host-monitor and supervisor regressions separately:
@@ -50,7 +51,8 @@ uv run python -B -m scripts.verification_guard --kind cpu --timeout 30 -- \
 ```
 
 The initial macOS run passed 52 Python tests, with four Windows-only containment
-tests skipped. The POSIX tests launch only tiny owned print/sleep processes and
+tests skipped. The current harness adds six Metal policy/hold/evidence regressions,
+for 58 passing tests and the same four skipped cases. The POSIX tests launch only tiny owned print/sleep processes and
 check success, timeout, interpreter propagation and cleanup after the process
 group leader exits.
 
@@ -84,9 +86,63 @@ Verified 69 CPU/GPU pass deltas, exact restart, and atomic state access. Energy 
 Browser stepping and save/restore were also exercised in the lab, with no browser
 console warnings or errors. These checks validate the small 2D browser API;
 they do not establish native Python GPU parity, 3D GPU parity or frame-rate claims.
-The existing `gpu` and `frames` supervisor profiles still require NVIDIA telemetry;
-this change does not turn those full release profiles into Apple GPU benchmarks.
+The full `gpu` and `frames` supervisor profiles still require NVIDIA telemetry.
+Use the separate fixed Metal probes below for bounded native development checks.
 
 Local command logs, supervisor receipts and the browser result belong under
 ignored `dist/verification/`. Build and type-check with `npm run build:sdk` before
 `npm run typecheck`, because the example clients use generated package declarations.
+
+## Native Python Metal validation
+
+Run these stages separately, stopping to inspect any failure:
+
+```sh
+npm run verify:macos:native -- --stage adapter
+npm run verify:macos:native -- --stage sdk
+npm run verify:macos:native -- --stage conformance
+```
+
+The adapter stage creates a native Metal device and roundtrips a 16-byte buffer.
+The SDK stage runs the existing 8 by 7 cell custom-material client and compares
+its complete snapshots, 69 pass reports and exact continuation to the JavaScript
+CPU client. The conformance stage runs the existing six conformance tests:
+35 scenes, 4,416 complete-state pass comparisons and 53 pipeline variants.
+The native adapter on the validated machine reports Apple M3 Ultra / Metal.
+
+The new `metal-smoke` supervisor profile accepts only this fixed module and the
+three named stages on macOS. Adapter/SDK runs have 30-second deadlines; the
+conformance run has a 60-second deadline and a 50-second inner reference timeout.
+The corpus is checked before simulation: no more than 40 cases, 24 by 24 cells,
+16 ticks per case or 256 ticks total. The current corpus has 35 cases and 192
+ticks total. Host health checks, process-group cleanup and incident holds apply.
+Reports explicitly record that Apple GPU temperature/utilization telemetry is
+unavailable. This profile does not qualify sustained load or thermal behavior.
+Failed and timed-out reference processes retain their partial stdout/stderr logs.
+
+## Bounded 3D WebGPU validation
+
+Open `/examples/sdk/3d-smoke.html` on the same local server. Run one button at a
+time. A failure disables further probes until it has been inspected and the
+page reloaded. Each probe has a 30-second cooperative deadline; this is not
+independent browser/driver cancellation.
+
+- **Verify material passes:** the existing tiny M2 pass corpus, exposed separately
+  from its long verifier. Five shapes, five absolute ticks (including values above
+  32 bits), and 27 passes produce 675 exact packed-cell and energy comparisons.
+  Inspection must preserve the committed snapshot. The largest grid is 105 cells.
+- **Verify material continuation:** five ticks on a 3 by 5 by 7 world, a positive
+  sand-movement control, odd-tick restart, zero drift and atomic invalid restore.
+- **Verify structural dense / active:** each mode runs six ticks on an 8-cubed
+  world with 4-cubed storage chunks. A four-cell bonded stone plate crosses chunk
+  seams and falls five cells onto a floor. Every completed packed/energy/structure
+  snapshot must match the CPU, then restart from tick three and invalid-restore
+  rollback must match exactly. Both modes require zero energy drift.
+
+The structural fixture uses the materials supported by the M5 contract; metal
+is not a supported M5 material. Its expected fall and exact restart are also
+checked by the CPU smoke suite before GPU validation. The initial rejected
+metal fixture is retained as failed probe-authoring evidence, not an engine
+failure. All four corrected probes passed on the hardware Apple WebGPU adapter.
+These are compute/conservation/replay checks; 32/64/128-cubed long replays,
+rendering, gameplay responsiveness and 60 Hz frame acceptance remain pending.

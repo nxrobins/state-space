@@ -27,7 +27,8 @@
     "build:tactical-slab": "node scripts/build_tactical_slab.mjs",
     "lab": "uv run python -m scripts.serve_lab",
     "pretest:smoke": "npm run build:sdk",
-    "test:smoke": "node scripts/verify_checks.mjs --suite smoke"
+    "test:smoke": "node scripts/verify_checks.mjs --suite smoke",
+    "verify:macos:native": "uv run python -m scripts.verify_macos_native"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

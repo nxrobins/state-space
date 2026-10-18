@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:,"><title>State Space · Bounded 3D verification</title>
+<style>:root{color-scheme:dark;font:16px/1.5 system-ui;background:#12171b;color:#e5edf0}body{max-width:1000px;margin:40px auto;padding:0 24px}button{font:inherit;padding:10px;margin:6px;background:#24323a;color:inherit;border:1px solid #546a76;border-radius:5px}button:disabled{opacity:.45}output{display:block;color:#8ee6c4;margin:24px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}</style></head>
+<body><h1>Bounded 3D verification</h1><p>Run one probe at a time. Material cases use at most 105 cells; structural cases use an 8×8×8 world. These checks cover compute state and replay. Large-world, rendering and frame-rate validation remain separate.</p>
+<nav><button data-stage="passes">Verify material passes</button><button data-stage="continuation">Verify material continuation</button><button data-stage="dense">Verify structural dense</button><button data-stage="active">Verify structural active</button></nav>
+<output id="status" role="status" aria-live="polite">Ready. Each probe has a 30-second cooperative deadline.</output><pre id="report">No probe has run.</pre><script type="module" src="./3d-smoke.js"></script></body></html>

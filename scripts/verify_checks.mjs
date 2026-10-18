@@ -7,7 +7,7 @@ let checks;
 if(suite==='smoke'){
   checks=[
     ['node_modules/vitest/vitest.mjs','run','--config','engine/vitest.smoke.config.ts'],
-    ['--test','--test-concurrency=1','examples/lab/lab.test.mjs','tests/verification-events.test.mjs'],
+    ['--test','--test-concurrency=1','examples/lab/lab.test.mjs','examples/sdk/3d-smoke-probes.test.mjs','tests/verification-events.test.mjs'],
   ];
 }else if(suite==='unit'){
   checks=[

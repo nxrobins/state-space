@@ -277,7 +277,7 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding='utf-8', errors='replace')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames'], required=True)
+    parser.add_argument('--kind', choices=['cpu', 'gpu', 'frames', 'metal-smoke'], required=True)
     parser.add_argument('--timeout', type=float, default=600)
     parser.add_argument('--stall', type=float, help='Missing-progress deadline; defaults to min(40, timeout)')
     parser.add_argument('--output', type=Path)
@@ -289,6 +289,10 @@ def main():
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
     if not command or not 0 < args.timeout <= 1800 or not 0 < args.stall <= args.timeout:
         parser.error('A command and bounded timeout/stall interval are required.')
+    metal_scope = None
+    if args.kind == 'metal-smoke':
+        from scripts.verification_metal import validate_metal_smoke
+        metal_scope = validate_metal_smoke(command, args.timeout)
     run_id = uuid.uuid4().hex
     out = args.output or ROOT / 'dist/verification' / run_id
     out.mkdir(parents=True, exist_ok=True)
@@ -299,6 +303,8 @@ def main():
                'cpuLimitPercent': (cpu_limit or None) if os.name == 'nt' else None,
                'timeoutSeconds': args.timeout, 'stallSeconds': args.stall, 'maxMonitorLagMs': 0,
                'containment': 'Windows job' if os.name == 'nt' else 'POSIX process group'}
+    if metal_scope:
+        receipt['metalSmokeScope'] = metal_scope
     job = child = gpu_monitor = watchdog = None
     posix_stopped = False
     def save():
@@ -344,6 +350,7 @@ def main():
             stderr = streams.enter_context((out / 'stderr.log').open('wb'))
             env = {**os.environ, 'STATE_SPACE_VERIFICATION_JOB': run_id,
                    'STATE_SPACE_PYTHON': os.environ.get('STATE_SPACE_PYTHON', sys.executable),
+                   'STATE_SPACE_VERIFICATION_KIND': args.kind,
                    'STATE_SPACE_VERIFY_YIELD_MS': '20', 'PYTHONIOENCODING': 'utf-8',
                    'OMP_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
             if os.name == 'nt':
