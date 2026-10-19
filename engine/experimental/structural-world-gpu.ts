@@ -34,7 +34,7 @@ const BINDINGS={
   certifyPlan:[0,2,3,4,7,8,9],
   queryCells:[0,1,5,7,13],
   relaxStart:[9,14],relaxAdvance:[9,14],relaxEnd:[5,9,14],
-  loadInit:[0,4,7,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
+  loadInit:[0,4,7,9],loadCachedLevel:[0,4,5,7,9],loadEnd:[5,9],loadSummary:[9],
 } as const;
 type Stage=keyof typeof BINDINGS;
 const listStages=new Set<Stage>(STRUCTURAL_LIST_STAGES);
@@ -58,7 +58,7 @@ export class GpuStructuralWorld3D {
   #solveDispatch:GPUBuffer;
   #solveBatchLimit:number;
   #memberBound=0;#solveGroups=0;
-  #groups=new Map<string,GPUBindGroup>();#params=new Uint32Array(64*64);
+  #groups=new Map<string,GPUBindGroup>();#params=new Uint32Array(128*64);
   #computePass?:GPUComputePassEncoder;
   #busy=false;#closed=false;#fault='';#initial=0n;#external=0n;
   #planReusable=false;
@@ -185,23 +185,29 @@ export class GpuStructuralWorld3D {
       for(const key of ['grid','energyQ','structure'] as const)e.copyBufferToBuffer(this.#banks[this.#current][key],0,this.#banks[a][key],0,this.#banks[a][key].size);
       this.#parameters(0,[0,0,0,0,0,0,commands.length/4]);this.#dispatch(e,'editBatch',this.#current,a,this.#current,0);
     }
+    const loadBudget=Math.min(this.#solveBatchLimit,64);
     this.#compute(e,()=>{
-    const relax=(stage:'supportRelax'|'loadRelax'|'componentRelax'|'blockRelax',structure:number,slot:number)=>{
+    const relax=(stage:'supportRelax'|'componentRelax'|'blockRelax',structure:number,slot:number)=>{
       this.#parameters(slot,[1<<(slot-1),slot,0,0]);this.#dispatch(e,'relaxStart',input,damage);
       // These are attempt budgets, never physical iteration limits. Every
       // exhausted family discards the attempt and invokes complete convergence.
       // Blocking is a fixed-point solve too: four iterations can be exhausted
       // by stacked disconnected components even when the other families fit.
-      const budget=Math.min(this.#solveBatchLimit,stage==='supportRelax'||stage==='loadRelax'?64:32);
+      const budget=Math.min(this.#solveBatchLimit,stage==='supportRelax'?64:32);
       for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure);this.#dispatch(e,'relaxAdvance',input,damage);}
       this.#dispatch(e,'relaxEnd',input,damage,input,slot);
     };
     this.#dispatch(e,'supportInit',input,damage);relax('supportRelax',input,1);
-    this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);relax('loadRelax',input,2);this.#dispatch(e,'loadSummary',input,damage);
+    this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);
+    // The support-distance DAG is fixed. Visit each possible level once, from
+    // children to parents, with immutable per-dispatch uniforms. No load fixed
+    // point iterations are needed; deeper graphs reject this bounded attempt.
+    for(let level=loadBudget-1;level>=0;level--){const slot=5+level;this.#parameters(slot,[0,0,0,0,0,level]);this.#dispatch(e,'loadCachedLevel',input,damage,input,slot);}
+    this.#parameters(2,[loadBudget,0,0,0]);this.#dispatch(e,'loadEnd',input,damage,input,2);this.#dispatch(e,'loadSummary',input,damage);
     this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalize',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
     this.#dispatch(e,'blockInit',input,damage,normalized);relax('blockRelax',normalized,4);
     });
-    this.#writeParameters(5);e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
+    this.#writeParameters(5+loadBudget);e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
     if(edited)e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,commands.length*2);
     const rows=await this.#submit(e,[{buffer:this.#controlRead,bytes:64},...(edited?[{buffer:this.#receiptRead,bytes:commands.length*2}]:[])]),control=rows[0];
     if(control[2])throw Error(`Structural solve rejected scratch state (code ${control[2]}).`);

@@ -279,3 +279,18 @@ export async function verifyM5ParentShares(){
   return{passed:true,cases,parentSets:63,comparedLoads,unbondedDownwardContact:true,backendInfo:gpu.backendInfo};
  }finally{GPUDevice.prototype.createBuffer=original;if(read?.mapState==='mapped')read.unmap();read?.destroy();gpu?.close();}
 }
+
+/** A 61-edge support path exceeds the 32-level batch and must fully converge. */
+export async function verifyM5LoadDepthFallback(){
+ const geometry={width:64,height:4,depth:4,chunkSize:4},cpu=new CpuStructuralWorld3D(geometry);
+ for(let x=1;x<63;x++)cpu.setCell(x,1,1,MAT.STONE,0);cpu.setAnchor(1,1,1,true);
+ const gpu=await createStateSpaceStructuralWorld3DGPU({...geometry,mode:'active',solveBatchLimit:32});
+ try{
+  await gpu.restore(cpu.snapshot());cpu.step();await gpu.step();
+  equalState(await gpu.snapshot(),cpu.snapshot(),'Load sweep depth fallback');
+  const solve=gpu.inspectSolve();
+  if(solve.batchedSolve||!(solve.fallbackMask!&2)||solve.maxDistance!==61)throw Error('Deep support path did not exercise load-depth fallback');
+  if((await gpu.energyBalance()).driftQ!==0n)throw Error('Load depth fallback energy drift');
+  return{passed:true,maxDistance:61,attemptLevels:32,exact:true,solve,backendInfo:gpu.backendInfo};
+ }finally{gpu.close();}
+}
