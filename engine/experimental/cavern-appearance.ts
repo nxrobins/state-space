@@ -1,6 +1,7 @@
 /// <reference types="@webgpu/types" />
 /** Optional presentation only. The physical grid is bound read-only in every pass. */
 import type { LatencyProfiler, Trace } from './latency.js';
+import { makeLightList } from './light-list.js';
 import { ROCK_TEXTURES } from './rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
 import { CAVERN_HAZE } from './cavern-haze.js';
@@ -214,6 +215,7 @@ export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFor
  const haze=await volumePipeline(shaders.haze);
  const rock=await loadRockTextures(device);
  const chunks=shape.reduce((a,b)=>a*b,1)/edge**3,lights=device.createBuffer({size:chunks*32,usage:GPUBufferUsage.STORAGE});
+ const lightList=await makeLightList(device,lights,chunks).catch(error=>{lights.destroy();rock.textures.forEach(t=>t.destroy());throw error;});
  let cachedAppearance:{cache:Awaited<ReturnType<typeof makeLightingCache>>;draw:GPURenderPipeline;haze:GPURenderPipeline}|undefined;
  let cacheSetup:Promise<void>|undefined,closed=false,lastCached:boolean|undefined,activeHaze=haze;
  const opticalUniform=device.createBuffer({size:16,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST}),opticalData=new Float32Array(4);
@@ -242,7 +244,7 @@ export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFor
    if(cached&&!cachedAppearance)throw Error('Cached lighting has not been prepared.');
    const cache=cachedAppearance?.cache,activeDraw=cached?cachedAppearance!.draw:draw;
    activeHaze=cached?cachedAppearance!.haze:haze;
-   const cacheEntries=cached?[{binding:9,resource:{buffer:cache!.hierarchy}},{binding:10,resource:{buffer:cache!.regions}}]:[];
+   const cacheEntries=[{binding:11,resource:{buffer:lightList.buffer}},...(cached?[{binding:9,resource:{buffer:cache!.hierarchy}},{binding:10,resource:{buffer:cache!.regions}}]:[])];
    if(lastCached!==cached){bindings.clear();hazeBindings.clear();lastCached=cached;}
    opticalData[0]=(tick%36000)/60;opticalData[1]=heatDistortion?1:0;opticalData[2]=cached?1:0;device.queue.writeBuffer(opticalUniform,0,opticalData);
    if(!hdr||width!==w||height!==h||boundDepth!==depth){
@@ -256,13 +258,13 @@ export async function makeCavernAppearance(device:GPUDevice,format:GPUTextureFor
    }
    let volumeGroup=hazeBindings.get(grid);if(!volumeGroup){volumeGroup=device.createBindGroup({layout:activeHaze.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:2,resource:{buffer:uniform}},{binding:3,resource:{buffer:lights}},{binding:4,resource:depth.createView()},{binding:8,resource:{buffer:opticalUniform}},...cacheEntries]});hazeBindings.set(grid,volumeGroup);}hazeGroup=volumeGroup;
    let groups=bindings.get(grid);if(!groups){groups={extract:device.createBindGroup({layout:extract.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:grid}},{binding:3,resource:{buffer:lights}}]}),draw:device.createBindGroup({layout:activeDraw.getBindGroupLayout(0),entries:[...([grid,faces,uniform,lights].map((buffer,binding)=>({binding,resource:{buffer}}))),...rock.textures.map((t,i)=>({binding:i+4,resource:t.createView()})),{binding:7,resource:rock.sampler},{binding:8,resource:{buffer:opticalUniform}},...cacheEntries]})};bindings.set(grid,groups);}
-   if(cached){cache!.encode(encoder,grid,profiler?.pass(trace,'lightingCache'));}
-   else{cache?.invalidate();const pass=encoder.beginComputePass(profiler?.pass(trace,'lighting'));pass.setPipeline(extract);pass.setBindGroup(0,groups.extract);pass.dispatchWorkgroups(chunks);pass.end();}
+   if(cached){cache!.encode(encoder,grid,profiler?.pass(trace,'lightingCache'),pass=>lightList.encode(pass));}
+   else{cache?.invalidate();const pass=encoder.beginComputePass(profiler?.pass(trace,'lighting'));pass.setPipeline(extract);pass.setBindGroup(0,groups.extract);pass.dispatchWorkgroups(chunks);lightList.encode(pass);pass.end();}
    return{view:hdr.createView(),group:groups.draw,draw:activeDraw};
   },
   finish(encoder:GPUCommandEncoder,view:GPUTextureView,profiler?:LatencyProfiler,trace?:Trace){
    const volumePass=encoder.beginRenderPass({...profiler?.pass(trace,'volumetrics'),colorAttachments:[{view:volume!.createView(),loadOp:'clear',storeOp:'store'},{view:volumeDepth!.createView(),loadOp:'clear',storeOp:'store'},{view:distortion!.createView(),loadOp:'clear',storeOp:'store'}]});volumePass.setPipeline(activeHaze);volumePass.setBindGroup(0,hazeGroup);volumePass.draw(3);volumePass.end();
    const pass=encoder.beginRenderPass({...profiler?.pass(trace,'toneAndBloom'),colorAttachments:[{view,loadOp:'clear',storeOp:'store'}]});pass.setPipeline(post);pass.setBindGroup(0,postGroup);pass.draw(3);pass.end();},
-  close(){if(closed)return;closed=true;hdr?.destroy();volume?.destroy();volumeDepth?.destroy();distortion?.destroy();hazeBindings.clear();cachedAppearance?.cache.close();lights.destroy();opticalUniform.destroy();rock.textures.forEach(t=>t.destroy());bindings.clear();},
+  close(){if(closed)return;closed=true;hdr?.destroy();volume?.destroy();volumeDepth?.destroy();distortion?.destroy();hazeBindings.clear();cachedAppearance?.cache.close();lights.destroy();lightList.close();opticalUniform.destroy();rock.textures.forEach(t=>t.destroy());bindings.clear();},
  };
 }

@@ -119,6 +119,9 @@ async function frames(lightingMode){
  }finally{driver?.close();renderer?.close();gpu.close();}
 }
 async function lighting(){
+ const probe=await import('../../dist/volume-m5/structural-probe.js');
+ progress('Exact light source worklist');report.lightList=await probe.verifyLightList();
+ progress('Reference versus compact lighting pixels');report.lightImages=await probe.verifyLightImages();
  const level=createStructuralLevel(32,'control'),initial=level.field.snapshot();
  const gpu=await createStateSpaceStructuralWorld3DGPU({width:32,height:32,depth:32,chunkSize:8,mode:'active'});let renderer,driver;
  try{
