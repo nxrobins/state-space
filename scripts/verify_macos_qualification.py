@@ -6,6 +6,7 @@ import hashlib
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import shutil
 from pathlib import Path
 import threading
 import time
@@ -38,6 +39,9 @@ def main():
         *ROOT.glob("dist/volume-m5/*.js"),
         *ROOT.glob("examples/sdk/*"),
         *ROOT.glob("examples/structural-cavern/*"),
+        *ROOT.glob("examples/reactive-chamber/*"),
+        *ROOT.glob("dist/reactive-chamber/*"),
+        ROOT / "scripts/build_reactive_chamber.mjs",
         ROOT / "web/frame-pump.js", ROOT / "web/frame-clock.js",
         *ROOT.glob("scripts/verification*"),
         ROOT / "package.json",
@@ -79,7 +83,9 @@ def main():
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
         is_scale = args.stage == "scale-128-visible"
-        if args.stage == "client" or is_gameplay or is_scale:
+        if args.stage == "chamber-visible":
+            page = "dist/reactive-chamber/"
+        elif args.stage == "client" or is_gameplay or is_scale:
             query = {"lighting": "cached" if "cached" in args.stage else "reference"}
             if is_gameplay or is_scale:
                 size = "128" if "-128-" in args.stage else "64" if "-64-" in args.stage else "32"
@@ -125,6 +131,7 @@ def main():
             expression="window.macQualification.run(" + json.dumps(args.stage) + ")",
         )
         previous = None
+        captured_chamber = False
         while time.monotonic() < deadline:
             state = browser.call(
                 "eval",
@@ -136,6 +143,12 @@ def main():
                 if state.get("progress") != previous:
                     previous = state.get("progress")
                     print(previous, flush=True)
+            if args.stage == "chamber-visible" and state.get("captureReady") and not captured_chamber:
+                browser.call("screenshot")
+                shutil.copyfile(out / "view.png", out / "chamber-view.png")
+                report["viewSha256"] = hashlib.sha256((out / "chamber-view.png").read_bytes()).hexdigest()
+                browser.call("eval", expression="window.chamberCaptureAck = true")
+                captured_chamber = True
             if state.get("done"):
                 break
             time.sleep(0.5)

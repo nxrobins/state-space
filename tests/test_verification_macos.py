@@ -22,8 +22,8 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            self.assertEqual(scope["maxDimension"], 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
-            self.assertEqual(scope["maxFrames"], 8 if stage == "scale-128-visible" else 660)
+            self.assertEqual(scope["maxDimension"], 8 if stage == "chamber-visible" else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
+            self.assertEqual(scope["maxFrames"], 256 if stage == "chamber-visible" else 8 if stage == "scale-128-visible" else 660)
         for timeout in [0, -1, 301, float("nan"), float("inf")]:
             with self.assertRaises(RuntimeError):
                 validate_qualification(command, timeout, platform="darwin")

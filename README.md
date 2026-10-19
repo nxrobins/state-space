@@ -252,6 +252,14 @@ Compact checkpoint reports and provenance manifests are retained in Git. Large
 historical payloads are preserved in a content-verified release archive; see the
 [restoration guide](docs/ARCHIVES.md). Generated evidence is collapsed in review.
 
+## Reactive chamber
+
+The [8³ reactive chamber](examples/reactive-chamber/README.md) combines combustion,
+phase changes, structural collapse, an actor, real-worker previews, and exact
+save/replay. Build it with `npm run build:reactive-chamber` after the SDK, or run
+its bounded native macOS journey with
+`npm run verify:macos -- --stage chamber-visible`.
+
 ## License
 
 [MIT](LICENSE).

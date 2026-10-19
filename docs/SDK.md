@@ -3315,3 +3315,18 @@ air results retire control with an explicit report, while the matter remains in
 terrain. Condensed liquid remains controlled. There is no automatic extra impulse
 or transport cycle. Actual M5 coupling/replay and native worker responsiveness
 remain held acceptance gates; CPU tests use synthetic, complete provenance.
+
+
+## Reactive chamber reference application
+
+The [reactive chamber](../examples/reactive-chamber/README.md) connects the public
+reactive-materials entry point to a real browser Worker, registry-aware WebGPU
+presentation, and versioned command replay. Heating its wooden connector drives
+combustion, platform settlement, and actor footing changes through the existing
+CPU reactive kernels. Preview/discard/commit, exact energy/resource accounting,
+and verified save import share one complete publication boundary.
+
+Build with `npm run build:reactive-chamber` after `npm run build:sdk`. The bounded
+native macOS acceptance stage is `npm run verify:macos -- --stage chamber-visible`.
+This client is 8³ with one actor; it does not extend M5 snapshot schemas or imply
+large-world/GPU reactive physics qualification.
