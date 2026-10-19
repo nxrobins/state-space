@@ -36,7 +36,7 @@ export async function verifyLightImages(){
  for(let y=6;y<10;y++)cpu.setCell(11,y,9,MAT.GLASS,0);
  for(const x of [3,12]){cpu.setCell(x,11,7,MAT.LAVA,255);cpu.setEnergy(x,11,7,1000*256);}
  const initial=cpu.snapshot(),images=new Map<string,Uint8Array>(),results=[];
- const original=GPUDevice.prototype.createShaderModule;let baselineModules=0,baselineCulls=0;
+ const original=GPUDevice.prototype.createShaderModule,write=GPUQueue.prototype.writeBuffer;let baselineModules=0,baselineCulls=0,baselineIndices=0;
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;document.body.append(canvas);
  // Read the actual final render target, independent of compositor discard timing.
  // This owned test canvas uses a persistent output texture with identical format.
@@ -56,6 +56,14 @@ export async function verifyLightImages(){
  };
  try{
   for(const baseline of [true,false]){
+   if(baseline)GPUQueue.prototype.writeBuffer=function(buffer,offset,data,dataOffset,size){
+    if(buffer.label==='chunk-face-indices'){
+     if(!(data instanceof Uint16Array)||dataOffset!==undefined||size!==undefined||offset!==0)throw Error('Unexpected face index upload');
+     const originalFaces=data.slice();for(let k=0;k<originalFaces.length/6;k++)for(let v=0;v<6;v++)originalFaces[k*6+v]=k*6+v;
+     baselineIndices++;return write.call(this,buffer,offset,originalFaces);
+    }
+    return write.call(this,buffer,offset,data,dataOffset,size);
+   };
    if(baseline)GPUDevice.prototype.createShaderModule=function(descriptor:GPUShaderModuleDescriptor){
     let code=descriptor.code;
     if(code.includes(CELL_FRUSTUM_CULL)){code=code.replace(CELL_FRUSTUM_CULL,'');baselineCulls++;}
@@ -96,9 +104,9 @@ export async function verifyLightImages(){
       if(gpu.tick!==0||(await gpu.energyBalance()).driftQ!==0n)throw Error('Presentation changed physical state');
      }
     }
-   }finally{renderer?.close();gpu.close();GPUDevice.prototype.createShaderModule=original;}
+   }finally{renderer?.close();gpu.close();GPUDevice.prototype.createShaderModule=original;GPUQueue.prototype.writeBuffer=write;}
   }
-  if(baselineModules!==4||baselineCulls!==2)throw Error('Image baseline did not cover both lighting modes and shader families');
-  return{passed:true,resolution:[320,180],baselineModules,baselineCulls,comparisons:results};
- }finally{GPUDevice.prototype.createShaderModule=original;output?.destroy();canvas.remove();}
+  if(baselineModules!==4||baselineCulls!==2||baselineIndices!==1)throw Error('Image baseline did not cover both lighting modes and shader families');
+  return{passed:true,resolution:[320,180],baselineModules,baselineCulls,baselineIndices,comparisons:results};
+ }finally{GPUDevice.prototype.createShaderModule=original;GPUQueue.prototype.writeBuffer=write;output?.destroy();canvas.remove();}
 }
