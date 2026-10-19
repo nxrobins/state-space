@@ -4,7 +4,7 @@ import {GEOMETRY_SCALE_3D as Q} from 'state-space-engine/experimental/3d/reactiv
 import type {chamberApp} from './browser-entry.js';
 import {openChamber, type ChamberClient} from './client.js';
 import {createChamber, prepareCommand, finishBranch, SUPPORT, type ChamberCommand, type ChamberSnapshot} from './scenario.js';
-import {canonical} from './recording.js';
+import {canonical, stateHash} from './recording.js';
 import {prepareScene, orbitCamera, projectPoint} from './presentation.js';
 import {createChamberRenderer} from './renderer.js';
 const frame = () => new Promise<number>(resolve => requestAnimationFrame(resolve));
@@ -96,6 +96,25 @@ export async function verifyChamber(app: typeof chamberApp) {
     let uncertain = false; try {await fault.commit();} catch {uncertain = fault.state.uncertain;}
     assert(uncertain && commitsSent === 1, 'Lost acknowledgement did not fail closed without retry.'); equal(fault.exportSave(), acknowledged, 'Uncertain commit changed the acknowledged save.');
     await fault.close().catch(() => {}); fault = null;
+    publish('discard timeout, close during cancellation, and preview ownership');
+    fault = await openChamber({timeoutMs: 250, wrapTransport: transport => ({...transport,
+      subscribe(receive, failed) {return transport.subscribe(value => {if ((value as {kind?: string}).kind !== 'discard') receive(value);}, failed);},
+    })});
+    const beforeCancel = fault.exportSave(), observed: string[] = []; fault.onChange(() => observed.push(fault!.state.status));
+    assert((await fault.preview({kind: 'wait'})).status === 'ready', 'Discard fault fixture did not prepare.');
+    let cancellation = ''; void fault.cancel().then(() => {cancellation = 'resolved';}, error => {cancellation = String(error);});
+    await until(() => cancellation !== '', 1000);
+    assert(/timed out/.test(cancellation) && observed.at(-1) === 'failed' && !fault.state.uncertain, 'Discard timeout did not reject and publish terminal state.');
+    equal(fault.exportSave(), beforeCancel, 'Discard timeout changed the acknowledged save.'); await fault.close().catch(() => {}); fault = null;
+    closing = await openChamber(); const ownedPreview = await closing.preview({kind: 'wait'});
+    assert(ownedPreview.status === 'ready', 'Ownership fixture did not prepare.'); const privatePreview = closing.previewSnapshot();
+    ownedPreview.preview.state.game.remainingQ--; Object.assign(ownedPreview.preview.base, {revision: 99});
+    equal(closing.previewSnapshot(), privatePreview, 'Returned preview mutated the private candidate.');
+    const ownedCommit = await closing.commit(); equal(JSON.parse(closing.exportSave()).steps[0].sha256, await stateHash(ownedCommit), 'Caller mutation corrupted the recording digest.');
+    assert((await closing.preview({kind: 'wait'})).status === 'ready', 'Close fixture did not prepare.');
+    let closeCancellation = ''; void closing.cancel().then(() => {closeCancellation = 'resolved';}, error => {closeCancellation = String(error);});
+    await closing.close(); await until(() => closeCancellation !== '', 1000);
+    assert(/closed/i.test(closeCancellation), 'Closing left cancellation pending.'); closing = null;
     closing = await openChamber(); const running = closing.preview({kind: 'heat', cell: [...SUPPORT]}); await closing.close(); assert((await running).status === 'closed', 'Shutdown did not cancel active preview.'); closing = null;
     publish('native pixels, depth, bounded camera frames, and disposal');
     report.render = await verifyRendering(initial);
@@ -111,7 +130,7 @@ export async function verifyChamber(app: typeof chamberApp) {
     assert(latency.p95Ms <= 250, `Preview p95 ${latency.p95Ms.toFixed(1)}ms exceeds 250ms.`);
     assert(latency.cancellationP95Ms <= 100, 'Cancellation p95 exceeds 100ms.');
     assert(latency.rafWorstGapMs < 100, 'Main-thread camera stalled during preview.');
-    await app.painted(); report.journeys = ['causal-controls', 'direct-worker-equality', 'preview-compare-discard', 'latest-intent', 'cancel-ack', 'save-replay-continuation', 'failed-import-rollback', 'uncertain-commit-no-retry', 'close-during-preview', 'stop-during-startup'];
+    await app.painted(); report.journeys = ['causal-controls', 'direct-worker-equality', 'preview-compare-discard', 'latest-intent', 'cancel-ack', 'save-replay-continuation', 'failed-import-rollback', 'uncertain-commit-no-retry', 'discard-timeout', 'close-during-cancel', 'preview-ownership', 'close-during-preview', 'stop-during-startup'];
     publish('capture-ready'); report.captureReady = true; output.textContent = JSON.stringify(report);
     await until(() => (window as unknown as {chamberCaptureAck?: boolean}).chamberCaptureAck === true);
     report.passed = true;

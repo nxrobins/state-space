@@ -48,7 +48,10 @@ local runtime hold on startup and fails closed on an unreadable existing hold.
 - There is one active intent and one coalesced latest waiting intent. A new valid
   intent supersedes the prior candidate. Only the original latest ready worker
   ticket may commit. Cancellation waits for acknowledgement; it never mutates
-  live state. There is no automatic simulation loop.
+  live state. A lost discard reply or concurrent shutdown rejects cancellation
+  and publishes the terminal state; no waiter is left pending. Returned previews
+  are caller-owned copies and cannot alter the candidate or its saved digest.
+  There is no automatic simulation loop.
 - Rendering and inspection use the same complete, registry-bound scene identity.
   Material colors come from the saved catalog. Rendering has no physics authority,
   permits one outstanding frame, and drains GPU work before disposing resources.
@@ -77,7 +80,9 @@ The digests detect divergence; they are not authenticity signatures.
 causal controls, phase changes, atomic cancellation, stale branches, crushing,
 missing motion capture, rejected edits, finite resources, replay, validation,
 scene isolation and picking. CI builds the browser bundles, checks their types,
-and includes these tests in the bounded CPU suite.
+and includes these tests in the bounded CPU suite. The companion
+`reactive-chamber-client.test.ts` executes the real worker host through a cloned
+asynchronous port to cover discard timeouts, shutdown waiters and preview ownership.
 
 The macOS stage exercises real DOM controls and Workers, direct/worker complete
 state equality, preview comparison, supersession, cancellation, save/load,

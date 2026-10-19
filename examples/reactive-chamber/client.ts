@@ -24,7 +24,8 @@ export async function openChamber(options: ClientOptions = {}) {
     tasks.port1.onmessage = (e: MessageEvent<number>) => {const task = pending.get(e.data); pending.delete(e.data); task?.();};
     const listeners = new Set<() => void>(), notify = () => {for (const fn of listeners) fn();};
     const base = options.wrapTransport?.(reactiveBrowserWorkerTransport3D(worker)) ?? reactiveBrowserWorkerTransport3D(worker);
-    const transport: ReactiveWorkerTransport3D = {send: value => base.send(value), close() {tasks.port1.close(); tasks.port2.close(); pending.clear(); try {base.close();} finally {worker.terminate();}},
+    // Disposal can follow an SDK timeout without any inbound message. Notify after its terminal state is published.
+    const transport: ReactiveWorkerTransport3D = {send: value => base.send(value), close() {tasks.port1.close(); tasks.port2.close(); pending.clear(); try {base.close();} finally {worker.terminate(); queueMicrotask(notify);}},
       subscribe(receive, failed) {return base.subscribe(value => {receive(value); queueMicrotask(notify);}, error => {failed(error); queueMicrotask(notify);});}};
     const client = createReactiveWorkerClient3D<ChamberGame>(transport, registry, {channel: 'chamber', worldId: CHAMBER_WORLD, gameRulesVersion: CHAMBER_RULES,
       timeoutMs: options.timeoutMs ?? 10000, schedule(task) {const id = ++taskSerial; pending.set(id, task); tasks.port2.postMessage(id); return () => {pending.delete(id);};}});
@@ -53,7 +54,7 @@ export async function openChamber(options: ClientOptions = {}) {
         ticket = next; command = owned; candidate = null; notify();
         const outcome = await next.result;
         if (ticket === next) {
-          if (outcome.status === 'ready') {candidate = outcome.preview; metrics.previewsMs.push(performance.now() - start); if (metrics.previewsMs.length > 128) metrics.previewsMs.shift();}
+          if (outcome.status === 'ready') {candidate = structuredClone(outcome.preview); metrics.previewsMs.push(performance.now() - start); if (metrics.previewsMs.length > 128) metrics.previewsMs.shift();}
           else {ticket = null; command = null;}
           notify();
         }
@@ -75,7 +76,7 @@ export async function openChamber(options: ClientOptions = {}) {
       },
       exportSave() {return JSON.stringify({format: SAVE_FORMAT, catalog: registry.toCatalog(), initial, snapshot: client.snapshot(), steps});},
       close() {if (closing) return closing; closed = true; ticket = null; candidate = null;
-        closing = client.close().finally(() => {listeners.clear(); transport.close();}); return closing;},
+        closing = client.close().finally(() => {try {notify();} finally {listeners.clear(); transport.close();}}); return closing;},
     };
     return result;
   } catch (error) {cleanup(); throw error;}
