@@ -26,15 +26,15 @@ export { checkedGameplayState as validateStructuralGameplayState3D } from './gam
 
 const KINDS=['gravity','diagonal','liquid','buoyancy','gas','heat','phase'];
 const BINDINGS={
-  main:[0,1,2,3,4,5,6,7,8], supportInit:[0,4,7,9], supportRelax:[7,9], supportSummary:[0,4,9],
+  main:[0,1,2,3,4,5,6,7,8], supportInit:[0,4,7,9], supportRelax:[7,9,14], supportSummary:[0,4,9],
   loadLevel:[0,4,5,7,9], damage:[0,1,4,7,8,9], normalize:[0,4,7,8], componentInit:[7,9],
-  componentRelax:[7,9], blockInit:[0,4,7,9], blockRelax:[7,9], applyMotion:[0,1,2,3,6,7,8,9],
+  componentRelax:[7,9,14], blockInit:[0,4,7,9], blockRelax:[7,9,14], applyMotion:[0,1,2,3,6,7,8,9],
   editBatch:[2,3,4,5,6,8,9,10,11],
   certifyLocal:[0,1,4,6,7],collectLocal:[6,12],
   certifyPlan:[0,2,3,4,7,8,9],
   queryCells:[0,1,5,7,13],
   relaxStart:[9,14],relaxAdvance:[9,14],relaxEnd:[5,9,14],
-  loadInit:[0,4,9],loadRelax:[0,4,7,9],loadSummary:[9],
+  loadInit:[0,4,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
 } as const;
 type Stage=keyof typeof BINDINGS;
 const listStages=new Set<Stage>(STRUCTURAL_LIST_STAGES);
@@ -78,7 +78,7 @@ export class GpuStructuralWorld3D {
     this.#work=buffer(64+bytes*5,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
     this.#indirect=buffer(12,storage()|GPUBufferUsage.INDIRECT);this.#activityRead=buffer(12,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#queryResult=buffer(4096*16,storage());this.#queryRead=buffer(4096*16,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
-    this.#solveDispatch=buffer(16,storage()|GPUBufferUsage.INDIRECT);
+    this.#solveDispatch=buffer(16,storage());
     this.#uniform=buffer(this.#params.byteLength,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST);
     this.#commands=buffer(65536*16,storage());this.#receipts=buffer(65536*8,storage());
     this.#controlRead=buffer(64,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
@@ -125,11 +125,10 @@ export class GpuStructuralWorld3D {
     const pass=e.beginComputePass(this.#profiler.pass(this.#trace(e),label));this.#computePass=pass;
     try{encode();}finally{pass.end();this.#computePass=undefined;}
   }
-  #dispatch(e:GPUCommandEncoder,stage:Stage,input:number,output:number,structure=input,slot=0,indirectSolve=false){
+  #dispatch(e:GPUCommandEncoder,stage:Stage,input:number,output:number,structure=input,slot=0){
     const shared=this.#computePass,pass=shared??e.beginComputePass(this.#profiler.pass(this.#trace(e),stage==='main'?'materials.'+KINDS[this.#params[slot*64+4]]:stage));pass.setPipeline(this.#pipelines[stage]);
     pass.setBindGroup(0,this.#group(stage,input,output,structure),(BINDINGS[stage] as readonly number[]).includes(5)?[slot*256]:[]);
-    if(indirectSolve)pass.dispatchWorkgroupsIndirect(this.#solveDispatch,0);
-    else if(listStages.has(stage))pass.dispatchWorkgroups(this.#solveGroups);
+    if(listStages.has(stage))pass.dispatchWorkgroups(this.#solveGroups);
     else if(stage==='main'&&this.mode==='active')pass.dispatchWorkgroupsIndirect(this.#indirect,0);
     else pass.dispatchWorkgroups(stage==='editBatch'||stage==='collectLocal'||stage.startsWith('relax')?1:Math.ceil(this.width*this.height*this.depth/64));if(!shared)pass.end();
   }
@@ -193,10 +192,8 @@ export class GpuStructuralWorld3D {
       // exhausted family discards the attempt and invokes complete convergence.
       // Blocking is a fixed-point solve too: four iterations can be exhausted
       // by stacked disconnected components even when the other families fit.
-      // The GPU reduces the dispatch to zero only after a full unchanged pass.
-      // General fallback keeps direct dispatch and its independent host convergence.
       const budget=Math.min(this.#solveBatchLimit,stage==='supportRelax'||stage==='loadRelax'?64:32);
-      for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure,0,true);this.#dispatch(e,'relaxAdvance',input,damage);}
+      for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure);this.#dispatch(e,'relaxAdvance',input,damage);}
       this.#dispatch(e,'relaxEnd',input,damage,input,slot);
     };
     this.#dispatch(e,'supportInit',input,damage);relax('supportRelax',input,1);

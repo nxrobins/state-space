@@ -42,7 +42,7 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
 @group(0) @binding(13) var<storage,read_write> queryWords:array<vec4u>;
 @group(0) @binding(14) var<storage,read_write> solveDispatch:array<u32>;
 @compute @workgroup_size(1) fn relaxStart(){
- atomicStore(&work[0],0u);solveDispatch[0]=(atomicLoad(&work[13])+63u)/64u;solveDispatch[1]=1u;solveDispatch[2]=1u;solveDispatch[3]=0u;
+ atomicStore(&work[0],0u);solveDispatch[0]=select(0u,1u,atomicLoad(&work[13])!=0u);solveDispatch[1]=1u;solveDispatch[2]=1u;solveDispatch[3]=0u;
 }
 @compute @workgroup_size(1) fn relaxAdvance(){
  if(solveDispatch[0]!=0u){solveDispatch[3]++;}if(atomicExchange(&work[0],0u)==0u){solveDispatch[0]=0u;}
@@ -253,8 +253,9 @@ fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))=
   let compact=mechanics;
   for(const stage of STRUCTURAL_LIST_STAGES){
     const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
+    const sleeping=(STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'';
     compact=replace(compact,prefix,prefix.replace('let i=id.x;',
-      'let ordinal=id.x;if(ordinal>=atomicLoad(&work[13])){return;}let i=planRead(4u,ordinal);'));
+      sleeping+'let ordinal=id.x;if(ordinal>=atomicLoad(&work[13])){return;}let i=planRead(4u,ordinal);'));
   }
   const specialize=(source:string)=>`const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a,b)=>a*b,1)}u);\n`+source.replaceAll('p.shape','SHAPE');
   return{physics:specialize(physics),mechanics:specialize(compact)};
