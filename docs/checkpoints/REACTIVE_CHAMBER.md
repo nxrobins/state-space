@@ -1,6 +1,6 @@
 # Reactive chamber: native macOS acceptance
 
-Implementation commit: `b9c15cb6cff52387a9d98490315ae733f474c1f8`. The source hashes in the
+Implementation commit: `e8234c953e2e4e74ba58e6b57ec056ebd8acc801`. The source hashes in the
 [raw report](reactive-chamber-20261019/report.json) were checked against the local
 implementation after the final SDK rebuild. The [evidence index](reactive-chamber-20261019/evidence.json)
 binds the report, screenshot and retained local supervisor receipt by SHA-256.
@@ -16,16 +16,16 @@ no browser console errors, exact energy drift was zero, and cleanup completed.
 
 | Measurement | Result | Acceptance target |
 | --- | ---: | ---: |
-| Two-tick preview p95, 12 samples | 18.1 ms | ≤250 ms |
-| Cancellation acknowledgement p95, 12 samples | 1.3 ms | ≤100 ms |
-| RAF worst gap during previews | 17.8 ms | <100 ms |
-| Camera render p95, 120 measured frames | 1.5 ms | — |
+| Two-tick preview p95, 12 samples | 17.5 ms | ≤250 ms |
+| Cancellation acknowledgement p95, 12 samples | 1.2 ms | ≤100 ms |
+| RAF worst gap during previews | 16.8 ms | <100 ms |
+| Camera render p95, 120 measured frames | 1.4 ms | — |
 | Worst completed camera render | 1.8 ms | ≤16.667 ms |
-| Worst application render, including state changes | 4.0 ms | observed |
+| Worst application render, including state changes | 3.1 ms | observed |
 
 The offscreen camera test used 640×400 targets, ten warm-up frames after its
 initial pixel/depth frame, and 120 measured frames. The real application rendered
-30 additional frames at its capped canvas size. Camera timings include
+32 additional frames at its capped canvas size. Camera timings include
 encoding, submission and GPU completion; they are not simulation tick timings.
 
 ## Executed behavior
@@ -44,17 +44,19 @@ encoding, submission and GPU completion; they are not simulation tick timings.
   preserves the last acknowledged save and sends no retry.
 - Closing an active preview and stopping during startup release their resources.
   The renderer rejects overlapping frames and drains a pending frame on close.
+- Capped Retina sizing preserves the canvas aspect ratio; scripted pointer events
+  select the rendered cell after CSS/backing-store coordinate conversion.
 - Native color/depth readback contains terrain and actor pixels, correct clear
   depth and a visible actor face in front of its projected center.
 
 ## Review and regression checks
 
 Review found and corrected the initial actor-size scale assumption, startup/stop
-races, externally mutable initial-save exposure, and endpoint failure cleanup.
+races, externally mutable initial-save exposure, endpoint failure cleanup, and Retina projection/picking alignment.
 The actor now uses the SDK's 1,024 Q/cell geometry scale; causal, picking and real
 browser checks passed after correction. No unresolved blocking finding remains.
 
-The final implementation passed 1,815 Vitest tests and 18 Node controller tests,
+The final implementation passed 1,817 Vitest tests and 18 Node controller tests,
 46 smoke tests and 13 smoke/transport tests, 64 supervisor tests (four existing
 platform/containment cases skipped), two archive tests, and installed Python/npm
 package checks with all 13 npm entry points. SDK/browser builds, TypeScript,
