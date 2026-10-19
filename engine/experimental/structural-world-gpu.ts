@@ -27,14 +27,14 @@ export { checkedGameplayState as validateStructuralGameplayState3D } from './gam
 const KINDS=['gravity','diagonal','liquid','buoyancy','gas','heat','phase'];
 const BINDINGS={
   main:[0,1,2,3,4,5,6,7,8], supportInit:[0,4,7,9], supportRelax:[7,9,14], supportSummary:[0,4,9],
-  loadLevel:[0,4,5,7,9], damage:[0,1,4,7,8,9], normalize:[0,4,7,8], componentInit:[7,9],
+  loadLevel:[0,4,5,7,9], damage:[0,1,4,7,8,9], normalize:[0,4,7,8],normalizePlan:[0,4,7,8,9], componentInit:[7,9],
   componentRelax:[7,9,14], blockInit:[0,4,7,9], blockRelax:[7,9,14], applyMotion:[0,1,2,3,6,7,8,9],
   editBatch:[2,3,4,5,6,8,9,10,11],
   certifyLocal:[0,1,4,6,7],collectLocal:[6,12],
   certifyPlan:[0,2,3,4,7,8,9],
   queryCells:[0,1,5,7,13],
   relaxStart:[9,14],relaxAdvance:[9,14],relaxEnd:[5,9,14],
-  loadInit:[0,4,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
+  loadInit:[0,4,7,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
 } as const;
 type Stage=keyof typeof BINDINGS;
 const listStages=new Set<Stage>(STRUCTURAL_LIST_STAGES);
@@ -43,7 +43,7 @@ type Pipelines=Record<Stage,GPUComputePipeline>;
 const cold=buildColdTable();
 const total=(values:ArrayLike<number>)=>{let sum=0;for(let i=0;i<values.length;i++)sum+=values[i];return BigInt(sum);};
 const storage=()=>GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST;
-export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number};
+export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number;supportCells?:number;loadCells?:number;supportMovement?:boolean};
 export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number;profiling?:boolean;gpuTiming?:boolean};
 
 export class GpuStructuralWorld3D {
@@ -65,6 +65,7 @@ export class GpuStructuralWorld3D {
   #renderers=new Map<TerrainRenderer,ResidentChunkRenderer>();#gameplay?:StructuralResidentGameplay3D;
   #revision=0;#submissions=0;
   #submitTrace?:StructuralSubmissionTiming3D[];
+  #initializing?:Promise<void>;
   #profiler:LatencyProfiler;#traces=new WeakMap<GPUCommandEncoder,Trace>();
   #stats:StructuralSolveStats3D={tick:0,supportPasses:0,componentPasses:0,blockingPasses:0,maxDistance:0,supportedWeight:0,reactionTotal:0};
   constructor(initial:StructuralSnapshot3D,device:GPUDevice,pipelines:Pipelines,info:Record<string,string|boolean>,mode:'dense'|'active',solveBatchLimit:number,profiling=false,gpuTiming=false) {
@@ -75,7 +76,7 @@ export class GpuStructuralWorld3D {
     const buffer=(size:number,usage:GPUBufferUsageFlags)=>{const b=device.createBuffer({size,usage});this.#owned.push(b);return b;};
     for(let i=0;i<3;i++)this.#banks.push({grid:buffer(bytes,storage()),energyQ:buffer(bytes,storage()),structure:buffer(bytes,storage())});
     this.#cold=buffer(cold.byteLength,storage());device.queue.writeBuffer(this.#cold,0,cold);
-    this.#work=buffer(64+bytes*5,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
+    this.#work=buffer(64+bytes*7,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
     this.#indirect=buffer(12,storage()|GPUBufferUsage.INDIRECT);this.#activityRead=buffer(12,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#queryResult=buffer(4096*16,storage());this.#queryRead=buffer(4096*16,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#solveDispatch=buffer(16,storage());
@@ -89,6 +90,14 @@ export class GpuStructuralWorld3D {
     device.addEventListener('uncapturederror',e=>{this.#fault=e.error.message;});
     void device.lost.then(info=>{this.#fault=info.message||info.reason;});
     for(const key of ['width','height','depth','chunkSize','backendInfo','mode'])Object.defineProperty(this,key,{writable:false,configurable:false});
+    // Prepare the edit pipeline and its buffers before the first interaction.
+    // The empty batch writes no state and never touches the committed bank.
+    // Exercise the receipt map too; creation resolves only after validation.
+    const e=device.createCommandEncoder(),pass=e.beginComputePass();
+    this.#parameters(0,[0,0,0,0,0,0,0]);this.#writeParameters(1);
+    pass.setPipeline(pipelines.editBatch);pass.setBindGroup(0,this.#group('editBatch',0,1),[0]);pass.dispatchWorkgroups(1);pass.end();
+    e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,8);
+    this.#initializing=this.#submit(e,[{buffer:this.#receiptRead,bytes:8}]).then(()=>undefined);
   }
   get tick(){return this.#tick;}
   inspectSolve(){return{...this.#stats};}
@@ -112,7 +121,7 @@ export class GpuStructuralWorld3D {
   #upload(bank:number,state:StructuralState3D){for(const key of ['grid','energyQ','structure'] as const)this.#device.queue.writeBuffer(this.#banks[bank][key],0,this.#pack(state[key]));let count=0;for(const s of state.structure)if(s&INTEGRITY_3D)count++;return count;}
   async #run<T>(operation:()=>Promise<T>):Promise<T>{
     if(this.#closed||this.#fault||this.#busy)throw Error(this.#closed?'Structural world closed.':this.#fault||'Structural operation already in flight.');
-    this.#busy=true;try{return await operation();}catch(error){this.#planReusable=false;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
+    this.#busy=true;try{if(this.#initializing){await this.#initializing;this.#initializing=undefined;}return await operation();}catch(error){this.#planReusable=false;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
   }
   #group(stage:Stage,input:number,output:number,structure=input){
     const key=`${stage}/${input}/${output}/${structure}`;let group=this.#groups.get(key);if(group)return group;
@@ -152,7 +161,7 @@ export class GpuStructuralWorld3D {
       if(this.#fault)throw Error(this.#fault);this.#profiler.mark(trace,'completedAt');return values;
     }finally{if(timer)clearTimeout(timer);}
   }
-  async #control(e:GPUCommandEncoder){e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);const [value]=await this.#submit(e,[{buffer:this.#controlRead,bytes:64}]);if(value[2])throw Error(`Structural solve rejected scratch state (code ${value[2]}).`);if(value[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');return value;}
+  async #control(e:GPUCommandEncoder){e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);const [value]=await this.#submit(e,[{buffer:this.#controlRead,bytes:64}]);if(value[2])throw Error(`Structural solve rejected scratch state (code ${value[2]}).`);if(value[13]>this.#solveGroups*256)throw Error('Structural worklist exceeds certified dispatch coverage.');return value;}
   async #converge(stage:'supportRelax'|'componentRelax'|'blockRelax',input:number,structure:number,deadline:number){
     const max=this.width*this.height*this.depth+4;
     for(let count=0;count<max;count+=4){
@@ -198,14 +207,14 @@ export class GpuStructuralWorld3D {
     };
     this.#dispatch(e,'supportInit',input,damage);relax('supportRelax',input,1);
     this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);relax('loadRelax',input,2);this.#dispatch(e,'loadSummary',input,damage);
-    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalize',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
+    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
     this.#dispatch(e,'blockInit',input,damage,normalized);relax('blockRelax',normalized,4);
     });
     this.#writeParameters(5);e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
     if(edited)e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,commands.length*2);
     const rows=await this.#submit(e,[{buffer:this.#controlRead,bytes:64},...(edited?[{buffer:this.#receiptRead,bytes:commands.length*2}]:[])]),control=rows[0];
     if(control[2])throw Error(`Structural solve rejected scratch state (code ${control[2]}).`);
-    if(control[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');
+    if(control[13]>this.#solveGroups*256)throw Error('Structural worklist exceeds certified dispatch coverage.');
     if(control[8])return{complete:false as const,mask:control[8]};
     if(control[4]!==control[5])throw Error('Structural reactions do not balance supported weight.');
     let external=0n;if(edited)for(let k=0;k<commands.length/4;k++)external+=BigInt(rows[1][k*2+1])-BigInt(rows[1][k*2]);
@@ -215,7 +224,7 @@ export class GpuStructuralWorld3D {
     const deadline=performance.now()+5000,[a,b]=[0,1,2].filter(i=>i!==this.#current),edited=commands.length>0;
     // Each edit can create at most one intact cell. The prior committed count
     // includes all phase changes, and restores count their validated snapshot.
-    this.#solveGroups=Math.ceil(Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4)/64);
+    this.#solveGroups=Math.ceil(Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4)/256);
     if(this.#planReusable&&!edited){
       // The previous completed tick certified both graph equality and zero
       // impending damage. No speculative partial support solve is used.
@@ -231,7 +240,7 @@ export class GpuStructuralWorld3D {
       if(plan.complete){
         const e=this.#device.createCommandEncoder(),current=this.#encodeMotionAndMaterial(e,plan.input,plan.damage,plan.normalized,plan.normalized),control=await(finish?finish(e,current):this.#control(e));
         this.#current=current;this.#tick++;this.#revision++;this.#external+=plan.external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13]};return;
+        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13],supportCells:plan.control[15],loadCells:plan.control[3],supportMovement:plan.control[7]===0};return;
       }
       fallbackMask=plan.mask;
     }
@@ -246,14 +255,14 @@ export class GpuStructuralWorld3D {
       this.#writeParameters(slots);await this.#control(e);
     }
     e=this.#device.createCommandEncoder();this.#dispatch(e,'damage',input,damage);
-    this.#dispatch(e,'normalize',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
+    this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
     if(balanced[4]!==balanced[5])throw Error('Structural reactions do not balance supported weight; tick not committed.');
     const componentPasses=await this.#converge('componentRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();this.#dispatch(e,'blockInit',input,damage,normalized);await this.#control(e);
     const blockingPasses=await this.#converge('blockRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();const current=this.#encodeMotionAndMaterial(e,input,damage,normalized,normalized),control=await(finish?finish(e,current):this.#control(e));
     this.#current=current;this.#tick++;this.#revision++;this.#external+=external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-    this.#stats={tick:this.#tick,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13]};
+    this.#stats={tick:this.#tick,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13],supportMovement:balanced[7]===0};
   }
   #encodeMotionAndMaterial(e:GPUCommandEncoder,input:number,damage:number,normalized:number,structure:number){
     this.#dispatch(e,'applyMotion',input,damage,structure);
@@ -450,6 +459,7 @@ export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpu
       }
     }
     const info=adapter.info;
-    return new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit,profiling,gpuTiming);
+    const world=new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit,profiling,gpuTiming);
+    await world.step(0);return world;
   }catch(error){device.destroy();throw error;}
 }

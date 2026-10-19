@@ -36,7 +36,7 @@ ${mapping}
   let changed=atomicExchange(&dirty[k],0u);rebuild[k]=changed;
   if(changed!=0u){
    work[length]=k;length++;
-   atomicStore(&args[k*4u],6u);atomicStore(&args[k*4u+1u],0u);atomicStore(&args[k*4u+2u],k*6u);atomicStore(&args[k*4u+3u],0u);
+   atomicStore(&args[k*5u],6u);atomicStore(&args[k*5u+1u],0u);atomicStore(&args[k*5u+2u],k*6u);atomicStore(&args[k*5u+3u],0u);atomicStore(&args[k*5u+4u],0u);
   }
  }
  dispatch[0]=${Math.ceil(edge**3/64)}u;dispatch[1]=length;dispatch[2]=1u;
@@ -47,7 +47,7 @@ ${mapping}
  let normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,0),vec3i(0,0,-1),vec3i(0,0,1));
  for(var f=0u;f<6u;f++){let t=c+normals[f];var exposed=true;
   if(m!=9u&&all(t>=vec3i(0))&&all(t<vec3i(camera.shape.xyz))){let n=grid[index(vec3u(t))]&255u;exposed=n==0u||n==9u;}
-  if(exposed){let slot=atomicAdd(&args[k*4u+1u],1u);faces[k*${capacity}u+slot]=i*6u+f;}
+  if(exposed){let slot=atomicAdd(&args[k*5u+1u],1u);faces[k*${capacity}u+slot]=i*6u+f;}
  }
 }`;
   const drawCode=DRAW.replace('const colors=',mapping+'\nconst colors=')
@@ -60,7 +60,13 @@ ${mapping}
   const mesh=await device.createComputePipelineAsync({layout:'auto',compute:{module:meshModule,entryPoint:'mesh'}});
   const draw=await device.createRenderPipelineAsync({layout:'auto',vertex:{module:drawModule,entryPoint:'vertex'},fragment:{module:drawModule,entryPoint:'fragment',targets:[{format}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth24plus',depthWriteEnabled:true,depthCompare:'less'}});
   const buffer=(size:number,usage:number)=>device.createBuffer({size,usage});
-  const faces=buffer(count*24,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),args=buffer(chunks*16,GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_SRC),rebuild=buffer(chunks*4,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),uniform=buffer(96,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST);
+  const faces=buffer(count*24,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),args=buffer(chunks*20,GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_SRC),rebuild=buffer(chunks*4,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),uniform=buffer(96,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST);
+  // Two triangles share corners 0 and 2. Keep the original six-slot vertex
+  // indices so both shaders retain their exact UVs and chunk addressing.
+  const faceIndices=new Uint16Array(chunks*6);
+  for(let k=0;k<chunks;k++)faceIndices.set([0,1,2,0,2,5].map(v=>k*6+v),k*6);
+  const indices=device.createBuffer({label:'chunk-face-indices',size:faceIndices.byteLength,usage:GPUBufferUsage.INDEX|GPUBufferUsage.COPY_DST});
+  device.queue.writeBuffer(indices,0,faceIndices);
   const work=buffer(chunks*4,GPUBufferUsage.STORAGE),dispatch=buffer(12,GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_SRC);
   // Invalidation belongs to each cache. Restrict worlds to one terrain renderer.
   device.queue.writeBuffer(dirty,0,new Uint32Array(chunks).fill(1));
@@ -91,7 +97,7 @@ ${mapping}
       const prepared=beauty?.prepare(encoder,grid,depth,width,height,presentationTick,heatDistortion,lightingMode==='cached',profiler,trace);
       if(!beauty)natural?.invalidate();
       const pass=encoder.beginRenderPass({...profiler?.pass(trace,'draw'),colorAttachments:[{view:prepared?.view??output,clearValue:beauty?[.028,.045,.06,1]:[.065,.10,.15,1],loadOp:'clear',storeOp:'store'}],depthStencilAttachment:{view:depth.createView(),depthClearValue:1,depthLoadOp:'clear',depthStoreOp:'store'}});
-      pass.setPipeline(prepared?.draw??draw);pass.setBindGroup(0,prepared?.group??groups.draw);
+      pass.setPipeline(prepared?.draw??draw);pass.setBindGroup(0,prepared?.group??groups.draw);pass.setIndexBuffer(indices,'uint16');
       // The controller can depenetrate three voxels and move by <=150/256.
       // Cull around the prior committed eye with a conservative four-voxel
       // margin; the draw uses the same-tick GPU eye copied above.
@@ -102,7 +108,7 @@ ${mapping}
         const x=cx*vectors[1][0]+cy*vectors[1][1]+cz*vectors[1][2],y=cx*vectors[2][0]+cy*vectors[2][1]+cz*vectors[2][2];
         // Sphere/frustum test, enlarged plane bounds remain conservative.
         if(z+bound<near||z-bound>far||Math.abs(x)>z*horizontal+horizontalRadius||Math.abs(y)>z*tan+verticalRadius)continue;
-        pass.drawIndirect(args,k*16);
+        pass.drawIndexedIndirect(args,k*20);
       }
       pass.end();
       beauty?.finish(encoder,output,profiler,trace);
@@ -146,13 +152,13 @@ ${mapping}
     },
     async inspectMesh(){
       if(closed)throw new Error('Terrain renderer is closed.');
-      const meshBytes=chunks*20+count*24,bytes=meshBytes+12,read=buffer(bytes,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ),e=device.createCommandEncoder();
-      e.copyBufferToBuffer(args,0,read,0,chunks*16);e.copyBufferToBuffer(rebuild,0,read,chunks*16,chunks*4);e.copyBufferToBuffer(faces,0,read,chunks*20,count*24);e.copyBufferToBuffer(dispatch,0,read,meshBytes,12);device.queue.submit([e.finish()]);
+      const meshBytes=chunks*24+count*24,bytes=meshBytes+12,read=buffer(bytes,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ),e=device.createCommandEncoder();
+      e.copyBufferToBuffer(args,0,read,0,chunks*20);e.copyBufferToBuffer(rebuild,0,read,chunks*20,chunks*4);e.copyBufferToBuffer(faces,0,read,chunks*24,count*24);e.copyBufferToBuffer(dispatch,0,read,meshBytes,12);device.queue.submit([e.finish()]);
       try{await read.mapAsync(GPUMapMode.READ);const words=new Uint32Array(read.getMappedRange()),result:number[][]=[];
-        for(let k=0;k<chunks;k++)result.push(Array.from(words.subarray(chunks*5+k*capacity,chunks*5+k*capacity+words[k*4+1])).sort((a,b)=>a-b));
-        return{faces:result,rebuilt:Array.from(words.subarray(chunks*4,chunks*5)),meshDispatch:Array.from(words.subarray(meshBytes/4,meshBytes/4+3))};
+        for(let k=0;k<chunks;k++)result.push(Array.from(words.subarray(chunks*6+k*capacity,chunks*6+k*capacity+words[k*5+1])).sort((a,b)=>a-b));
+        return{faces:result,rebuilt:Array.from(words.subarray(chunks*5,chunks*6)),meshDispatch:Array.from(words.subarray(meshBytes/4,meshBytes/4+3))};
       }finally{if(read.mapState==='mapped')read.unmap();read.destroy();}
     },
-    close(){if(closed)return;closed=true;natural?.close();depth?.destroy();faces.destroy();args.destroy();rebuild.destroy();uniform.destroy();work.destroy();dispatch.destroy();context.unconfigure();bindings.clear();},
+    close(){if(closed)return;closed=true;natural?.close();depth?.destroy();faces.destroy();args.destroy();indices.destroy();rebuild.destroy();uniform.destroy();work.destroy();dispatch.destroy();context.unconfigure();bindings.clear();},
   };return renderer;
 }

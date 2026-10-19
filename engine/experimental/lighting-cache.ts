@@ -1,5 +1,7 @@
 /// <reference types="@webgpu/types" />
 /** Presentation caches only. The simulation grid and mesh invalidation are read-only. */
+import { LIGHT_LIST_QUERIES } from './light-list.js';
+
 export const LIGHT_REGION_EDGE = 8;
 export const LIGHT_REGION_CAPACITY = 64;
 
@@ -31,17 +33,17 @@ const vector = (values: readonly number[]) => `vec3u(${values.map(n => `${n}u`).
 
 // Keep A independent of experimental cache bindings and traversal code. These
 // functions preserve the existing full-source/cell-by-cell reference paths.
-export const REFERENCE_LIGHTING_QUERIES = `
+export const REFERENCE_LIGHTING_QUERIES = LIGHT_LIST_QUERIES + `
 fn emptyVisibilitySpan(c:vec3i,mask:u32)->u32{return 1u;}
-fn regionalCount(p:vec3f,wide:bool)->u32{return CHUNKS;}
-fn regionalSource(p:vec3f,wide:bool,slot:u32)->u32{return slot;}
+fn regionalCount(p:vec3f,wide:bool)->u32{return allLightCount();}
+fn regionalSource(p:vec3f,wide:bool,slot:u32)->u32{return allLightSource(slot);}
 fn hierarchyVisibility(origin:vec3f,source:vec3f)->f32{return 1.;}
 `;
 
 /** Shared by surface shadows, optical traversal and volumetric shadows. */
 export function lightingCacheQueries(shape: readonly number[]) {
   const layout = lightingCacheLayout(shape), levels = layout.levels;
-  return `
+  return LIGHT_LIST_QUERIES + `
 @group(0) @binding(9) var<storage,read> visibilityNodes:array<u32>;
 @group(0) @binding(10) var<storage,read> regionalLights:array<u32>;
 const VIS_SHAPES=array<vec3u,${levels.length}>(${levels.map(l => vector(l.shape)).join(',')});
@@ -63,14 +65,14 @@ fn regionOffset(p:vec3f,wide:bool)->u32{
  return (q.x+LIGHT_REGIONS.x*(q.y+LIGHT_REGIONS.y*q.z))*${layout.regionStride}u+select(0u,${LIGHT_REGION_CAPACITY + 1}u,wide);
 }
 fn regionalCount(p:vec3f,wide:bool)->u32{
- if(optics.z<.5){return CHUNKS;}let at=regionOffset(p,wide);
- if(at==0xffffffffu){return CHUNKS;}let count=regionalLights[at];
- return select(count,CHUNKS,count>${LIGHT_REGION_CAPACITY}u);
+ if(optics.z<.5){return allLightCount();}let at=regionOffset(p,wide);
+ if(at==0xffffffffu){return allLightCount();}let count=regionalLights[at];
+ return select(count,allLightCount(),count>${LIGHT_REGION_CAPACITY}u);
 }
 fn regionalSource(p:vec3f,wide:bool,slot:u32)->u32{
- if(optics.z<.5){return slot;}let at=regionOffset(p,wide);
- if(at==0xffffffffu){return slot;}
- if(regionalLights[at]>${LIGHT_REGION_CAPACITY}u){return slot;}
+ if(optics.z<.5){return allLightSource(slot);}let at=regionOffset(p,wide);
+ if(at==0xffffffffu){return allLightSource(slot);}
+ if(regionalLights[at]>${LIGHT_REGION_CAPACITY}u){return allLightSource(slot);}
  return regionalLights[at+1u+slot];
 }
 fn visibilityBoundary(p:vec3f,d:vec3f,span:u32)->vec3f{
@@ -227,7 +229,7 @@ export async function makeLightingCache(device: GPUDevice, common: string, shape
     return {
       hierarchy, regions,
       invalidate() { if (closed) throw Error('Lighting cache is closed.'); invalidate = true; },
-      encode(encoder: GPUCommandEncoder, grid: GPUBuffer, descriptor: GPUComputePassDescriptor = {}) {
+      encode(encoder: GPUCommandEncoder, grid: GPUBuffer, descriptor: GPUComputePassDescriptor = {}, after?: (pass: GPUComputePassEncoder) => void) {
         if (closed) throw Error('Lighting cache is closed.');
         const force = invalidate ? forced : steady;
         try {
@@ -244,6 +246,7 @@ export async function makeLightingCache(device: GPUDevice, common: string, shape
           const pass = encoder.beginComputePass(descriptor);
           try {
             stages.forEach((stage, i) => { pass.setPipeline(stage.pipeline); pass.setBindGroup(0, groups[i]); pass.dispatchWorkgroups(stage.dispatch); });
+            after?.(pass);
           } finally { pass.end(); }
           invalidate = false;
         } catch (error) {

@@ -3,7 +3,7 @@ import { chunkShaders } from './3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.
-export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
+export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadRelax','loadSummary','componentInit','componentRelax','blockInit','blockRelax'] as const;
 export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
 
 export function structuralShaders(edge:number,shape:readonly number[]) {
@@ -35,7 +35,9 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
   const prefix=base.slice(0,base.indexOf('@compute'))+mechanical;
   const mechanics=prefix+`
 // Header: changed, maxDistance, error, reserved, supportedWeight, reactionTotal.
-// Planes: support distance, load, component root (canonical), blocked root.
+// Planes: support distance, load, component root, blocked root, all members,
+// non-root support members, and load receivers. Planes 2/3 cache DAG masks
+// during load relaxation; componentInit replaces them for all listed members.
 @group(0) @binding(9) var<storage,read_write> work:array<atomic<u32>>;
 @group(0) @binding(10) var<storage,read> commands:array<vec4u>;
 @group(0) @binding(11) var<storage,read_write> receipts:array<vec2u>;
@@ -94,6 +96,10 @@ fn clearEditedBonds(i:u32){
 fn address(plane:u32,i:u32)->u32{return 16u+plane*p.shape.w+i;}
 fn planRead(plane:u32,i:u32)->u32{return atomicLoad(&work[address(plane,i)]);}
 fn planWrite(plane:u32,i:u32,value:u32){atomicStore(&work[address(plane,i)],value);}
+// Bond reachability plus downward contacts is exactly the component-blocking
+// fixed point when damage/normalization preserve the graph and root predicates.
+fn reachabilityPlan()->bool{return atomicLoad(&work[7])==0u;}
+fn sameSupportGraph(a:u32,b:u32)->bool{return ((a^b)&(ANCHOR|16128u))==0u&&((a&INTEGRITY)==0u)==((b&INTEGRITY)==0u);}
 fn weight(i:u32)->u32{return max(1u,(prop(cells[i],0u)+63u)/64u);}
 fn strength(v:u32,q:u32,s:u32)->u32{
  let nominal=prop(v,22u)*16u;let soft=prop(v,23u);var remaining=16384u;
@@ -131,10 +137,12 @@ fn rootSupport(i:u32)->bool{
  var d=INF;if(intact(i)&&rootSupport(i)){d=0u;}planWrite(0u,i,d);planWrite(1u,i,0u);
  // Every intact cell is appended exactly once. The list remains a superset
  // after damage; removed cells are rejected by the unchanged stage predicates.
- if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);}
+ if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);
+  if(d!=0u){let support=atomicAdd(&work[15],1u);planWrite(5u,support,i);}
+ }
 }
 @compute @workgroup_size(64) fn supportRelax(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);
+ let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);if(best==0u){return;}
  for(var dir=0u;dir<6u;dir++){
   let j=neighbor(i,dir);if(j==INF||!intact(j)){continue;}
   if((structures[i]&bit(dir))!=0u||dir==3u){let d=planRead(0u,j);if(d!=INF){best=min(best,d+1u);}}
@@ -163,22 +171,32 @@ fn rootSupport(i:u32)->bool{
  planWrite(1u,i,load);if(p.tick.y==0u){atomicAdd(&work[5],load);}
 }
 @compute @workgroup_size(64) fn loadInit(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}planWrite(1u,i,select(weight(i),0u,planRead(0u,i)==INF));
+ let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);planWrite(1u,i,select(weight(i),0u,level==INF));
+ // Cache the fixed DAG in scratch planes that componentInit later replaces.
+ // A leaf has its final own weight immediately; it never needs load relaxation.
+ var parents=0u;var children=0u;
+ if(level!=INF){for(var side=0u;side<6u;side++){
+  let other=neighbor(i,side);if(other==INF||!intact(other)){continue;}
+  let distance=planRead(0u,other);let bonded=(structures[i]&bit(side))!=0u;
+  if(level>0u&&distance==level-1u&&(bonded||side==3u)){parents|=1u<<side;}
+  if(distance==level+1u&&(bonded||side==2u)){children|=1u<<side;}
+ }}
+ planWrite(2u,i,parents);planWrite(3u,i,children);
+ if(children!=0u){let receiver=atomicAdd(&work[3],1u);planWrite(6u,receiver,i);}
 }
 // On the fixed support-distance DAG, each predecessor's integer share is
 // monotone in the child's load. Atomic maxima converge to the same exact load
 // as the independent CPU reverse-BFS reduction, regardless of invocation order.
 @compute @workgroup_size(64) fn loadRelax(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);if(level==INF){return;}
- var load=weight(i);let canonical=linear(coordinate(i));
+ let i=id.x;if(i>=p.shape.w){return;}let children=planRead(3u,i);if(children==0u){return;}
+ var load=weight(i);
  for(var dir=0u;dir<6u;dir++){
-  let child=neighbor(i,dir);if(child==INF||!intact(child)||planRead(0u,child)!=level+1u){continue;}
-  if((structures[i]&bit(dir))==0u&&dir!=2u){continue;}
-  var count=0u;var rank=0u;
-  for(var side=0u;side<6u;side++){
-   let parent=neighbor(child,side);if(parent==INF||!intact(parent)||planRead(0u,parent)!=level){continue;}
-   if((structures[child]&bit(side))!=0u||side==3u){count++;if(linear(coordinate(parent))<canonical){rank++;}}
-  }
+  if((children&(1u<<dir))==0u){continue;}let child=neighbor(i,dir);
+  // Canonical order is -Z, -Y, -X, +X, +Y, +Z in every supported shape.
+  // These masks select the parent directions ordered before this receiver.
+  let earlier=array<u32,6>(20u,21u,16u,23u,0u,31u);
+  let parents=planRead(2u,child);let count=countOneBits(parents);
+  let rank=countOneBits(parents&earlier[dir^1u]);
   if(count==0u){atomicStore(&work[2],1u);return;}
   let childLoad=planRead(1u,child);load+=childLoad/count+select(0u,1u,rank<childLoad%count);
  }
@@ -195,10 +213,10 @@ fn rootSupport(i:u32)->bool{
   if(capacity==0u){loss=integrity;}else if(load>capacity){loss=min(integrity,max(1u,(load-capacity)*255u/nominal));}
   result=(s&~INTEGRITY)|(integrity-loss);
  }
- nextStructures[i]=result;
+ if(!sameSupportGraph(s,result)){atomicStore(&work[7],1u);}nextStructures[i]=result;
 }
-@compute @workgroup_size(64) fn normalize(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}var s=0u;
+fn normalizedStructure(i:u32)->u32{
+ var s=0u;
  if(eligible(cells[i])){
   s=structures[i]&(INTEGRITY|ANCHOR);
   if((s&INTEGRITY)!=0u){for(var dir=0u;dir<6u;dir++){
@@ -206,10 +224,17 @@ fn rootSupport(i:u32)->bool{
    if(((structures[i]&bit(dir))!=0u&&(structures[j]&bit(dir^1u))!=0u)||((structures[i]|structures[j])&FRESH)!=0u){s|=bit(dir);}
   }}
  }
- nextStructures[i]=s;
+ return s;
+}
+@compute @workgroup_size(64) fn normalize(@builtin(global_invocation_id) id:vec3u){
+ let i=id.x;if(i>=p.shape.w){return;}nextStructures[i]=normalizedStructure(i);
+}
+@compute @workgroup_size(64) fn normalizePlan(@builtin(global_invocation_id) id:vec3u){
+ let i=id.x;if(i>=p.shape.w){return;}let s=normalizedStructure(i);
+ if(!sameSupportGraph(structures[i],s)){atomicStore(&work[7],1u);}nextStructures[i]=s;
 }
 @compute @workgroup_size(64) fn componentInit(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}planWrite(2u,i,select(INF,linear(coordinate(i)),intact(i)));planWrite(3u,i,0u);
+ let i=id.x;if(i>=p.shape.w||reachabilityPlan()){return;}planWrite(2u,i,select(INF,linear(coordinate(i)),intact(i)));planWrite(3u,i,0u);
 }
 @compute @workgroup_size(64) fn componentRelax(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var root=planRead(2u,i);
@@ -233,7 +258,7 @@ fn rootSupport(i:u32)->bool{
  if(below==INF||!intact(below)){return;}let root=storageOf(planRead(2u,i));let lower=storageOf(planRead(2u,below));
  if(root!=lower&&planRead(3u,lower)!=0u&&atomicOr(&work[address(3u,root)],1u)==0u){atomicStore(&work[0],1u);}
 }
-fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))==0u;}
+fn moving(i:u32)->bool{if(!intact(i)){return false;}if(reachabilityPlan()){return planRead(0u,i)==INF;}return planRead(3u,storageOf(planRead(2u,i)))==0u;}
 @compute @workgroup_size(64) fn applyMotion(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let above=neighbor(i,2u);var source=i;
  if(above!=INF&&moving(above)){source=above;}
@@ -253,9 +278,10 @@ fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))=
   let compact=mechanics;
   for(const stage of STRUCTURAL_LIST_STAGES){
     const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
-    const sleeping=(STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'';
-    compact=replace(compact,prefix,prefix.replace('let i=id.x;',
-      sleeping+'let ordinal=id.x;if(ordinal>=atomicLoad(&work[13])){return;}let i=planRead(4u,ordinal);'));
+    const sleeping=((STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'')+(['componentRelax','blockInit','blockRelax'].includes(stage)?'if(reachabilityPlan()){return;}':'');
+    const [header,plane]=stage==='supportRelax'?[15,5]:stage==='loadRelax'?[3,6]:[13,4];
+    compact=replace(compact,prefix,prefix.replace('@workgroup_size(64)','@workgroup_size(256)').replace('let i=id.x;',
+      sleeping+`let ordinal=id.x;if(ordinal>=atomicLoad(&work[${header}])){return;}let i=planRead(${plane}u,ordinal);`));
   }
   const specialize=(source:string)=>`const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a,b)=>a*b,1)}u);\n`+source.replaceAll('p.shape','SHAPE');
   return{physics:specialize(physics),mechanics:specialize(compact)};
