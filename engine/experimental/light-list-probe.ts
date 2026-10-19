@@ -1,6 +1,7 @@
 /// <reference types="@webgpu/types" />
 /** Internal small GPU probes; not a public runtime option. */
 import {makeLightList,LIGHT_LIST_QUERIES} from './light-list.js';
+import {CELL_FRUSTUM_CULL} from './surface-cull.js';
 import {CpuStructuralWorld3D} from './structural-world-core.js';
 import {createStateSpaceStructuralWorld3DGPU} from './structural-world-gpu.js';
 import {MAT} from '../generated/materials.js';
@@ -35,7 +36,7 @@ export async function verifyLightImages(){
  for(let y=6;y<10;y++)cpu.setCell(11,y,9,MAT.GLASS,0);
  for(const x of [3,12]){cpu.setCell(x,11,7,MAT.LAVA,255);cpu.setEnergy(x,11,7,1000*256);}
  const initial=cpu.snapshot(),images=new Map<string,Uint8Array>(),results=[];
- const original=GPUDevice.prototype.createShaderModule;let baselineModules=0;
+ const original=GPUDevice.prototype.createShaderModule;let baselineModules=0,baselineCulls=0;
  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;document.body.append(canvas);
  // Read the actual final render target, independent of compositor discard timing.
  // This owned test canvas uses a persistent output texture with identical format.
@@ -57,6 +58,7 @@ export async function verifyLightImages(){
   for(const baseline of [true,false]){
    if(baseline)GPUDevice.prototype.createShaderModule=function(descriptor:GPUShaderModuleDescriptor){
     let code=descriptor.code;
+    if(code.includes(CELL_FRUSTUM_CULL)){code=code.replace(CELL_FRUSTUM_CULL,'');baselineCulls++;}
     if(code.includes(LIGHT_LIST_QUERIES)){
      // Exercise the previous complete source enumeration with the same compiled
      // shading functions. The impossible live condition keeps binding 11 valid.
@@ -75,22 +77,28 @@ export async function verifyLightImages(){
      for(const state of ['hot','cooled','moved']){
       if(state==='cooled')await gpu.edit([{kind:'energy',x:3,y:11,z:7,energyQ:0}]);
       if(state==='moved')await gpu.edit([{kind:'material',x:12,y:11,z:7,material:MAT.AIR,thermal:0},{kind:'material',x:8,y:10,z:9,material:MAT.LAVA,thermal:255},{kind:'energy',x:8,y:10,z:9,energyQ:1000*256}]);
-      await renderer.render({eye:[8,8,-2],forward:[0,0,1],right:[1,0,0],up:[0,-1,0]});
-      const pixels=await capture(),key=mode+'/'+state;
+      for(const [view,camera] of [
+       ['front',{eye:[8,8,-2],forward:[0,0,1],right:[1,0,0],up:[0,-1,0]}],
+       ['angled',{eye:[-1,6,3],forward:[Math.SQRT1_2,0,Math.SQRT1_2],right:[Math.SQRT1_2,0,-Math.SQRT1_2],up:[0,-1,0]}],
+       ['edge',{eye:[8,11,4],forward:[1,0,0],right:[0,0,-1],up:[0,-1,0]}],
+      ] as const){
+      await renderer.render(camera);
+      const pixels=await capture(),key=mode+'/'+state+'/'+view;
       if(new Set(pixels.filter((_,i)=>i%4!==3)).size<32)throw Error('Image comparison captured a blank or unrendered frame');
       if(baseline)images.set(key,pixels);
       else{
        const before=images.get(key)!;let changed=0,maxDelta=0;
        for(let i=0;i<pixels.length;i++){const delta=Math.abs(pixels[i]-before[i]);if(delta)changed++;maxDelta=Math.max(maxDelta,delta);}
        if(changed)throw Error(`Compact lighting changed ${key}: ${changed} channels, max ${maxDelta}`);
-       results.push({mode,state,channels:pixels.length,changed,maxDelta});
+       results.push({mode,state,view,channels:pixels.length,changed,maxDelta});
+      }
       }
       if(gpu.tick!==0||(await gpu.energyBalance()).driftQ!==0n)throw Error('Presentation changed physical state');
      }
     }
    }finally{renderer?.close();gpu.close();GPUDevice.prototype.createShaderModule=original;}
   }
-  if(baselineModules!==4)throw Error('Image baseline did not cover both lighting modes and shader families');
-  return{passed:true,resolution:[320,180],baselineModules,comparisons:results};
+  if(baselineModules!==4||baselineCulls!==2)throw Error('Image baseline did not cover both lighting modes and shader families');
+  return{passed:true,resolution:[320,180],baselineModules,baselineCulls,comparisons:results};
  }finally{GPUDevice.prototype.createShaderModule=original;output?.destroy();canvas.remove();}
 }

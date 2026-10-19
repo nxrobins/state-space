@@ -2,6 +2,7 @@
 /** Optional presentation only. The physical grid is bound read-only in every pass. */
 import type { LatencyProfiler, Trace } from './latency.js';
 import { makeLightList } from './light-list.js';
+import { CELL_FRUSTUM_QUERY, CELL_FRUSTUM_CULL } from './surface-cull.js';
 import { ROCK_TEXTURES } from './rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
 import { CAVERN_HAZE } from './cavern-haze.js';
@@ -49,6 +50,7 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
 @group(0) @binding(7) var rockSampler:sampler;
 ${queries}
 struct Out{@builtin(position) position:vec4f,@location(0) world:vec3f,@location(1) normal:vec3f,@location(2) uv:vec2f,@location(3) irradiance:vec3f,@location(4) surface:vec3f,@location(5) @interpolate(flat) word:u32,@location(6) @interpolate(flat) selected:u32}
+${CELL_FRUSTUM_QUERY}
 // Short bounded voxel rays. Endpoint cells are excluded so emitting lava does
 // not occlude itself. Two receiver rays approximate a finite lamp/source size.
 fn visibility(p:vec3f,source:vec3f)->f32{
@@ -60,11 +62,12 @@ fn visibility(p:vec3f,source:vec3f)->f32{
 }
 @vertex fn vertex(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->Out{
  let face=faces[(vertex/6u)*${capacity}u+instance];let i=face/6u;let f=face%6u;let c=vec3f(coordinate(i));
+ var out:Out;${CELL_FRUSTUM_CULL}
  let uvs=array<vec2f,6>(vec2f(0,0),vec2f(1,0),vec2f(1,1),vec2f(0,0),vec2f(1,1),vec2f(0,1));let uv=uvs[vertex%6u];
  var local=vec3f(0);switch f{case 0u:{local=vec3f(0,uv.y,uv.x);}case 1u:{local=vec3f(1,uv.y,1-uv.x);}case 2u:{local=vec3f(uv.x,0,1-uv.y);}case 3u:{local=vec3f(uv.x,1,uv.y);}case 4u:{local=vec3f(1-uv.x,uv.y,0);}default:{local=vec3f(uv.x,uv.y,1);}}
  let word=grid[i];if((word&255u)==9u){local=vec3f(.39)+local*.22;}
  let n=vec3f(normals[f]);let world=c+local;let p=world-camera.eye.xyz;let z=dot(p,camera.forward.xyz);
- var out:Out;out.position=vec4f(dot(p,camera.right.xyz)/camera.projection.x,dot(p,camera.up.xyz)/camera.projection.y,camera.projection.z*z+camera.projection.w,z);
+ out.position=vec4f(dot(p,camera.right.xyz)/camera.projection.x,dot(p,camera.up.xyz)/camera.projection.y,camera.projection.z*z+camera.projection.w,z);
  // Corner occlusion samples the exterior of the face, across chunk seams.
  let outside=vec3i(coordinate(i))+normals[f];let side=vec3i(select(vec3f(-1),vec3f(1),local>vec3f(.5)));
  var a=vec3i(0);var b=vec3i(0);if(f<2u){a.y=side.y;b.z=side.z;}else if(f<4u){a.x=side.x;b.z=side.z;}else{a.x=side.x;b.y=side.y;}
