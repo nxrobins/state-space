@@ -43,6 +43,8 @@ export async function verifyM5GpuTiny(mode:'dense'|'active'='dense'){
   const gpu=await createStateSpaceStructuralWorld3DGPU({width:8,height:8,depth:8,chunkSize:4,mode});
   const results=[],listCoverage=[];
   try{
+    equalState(await gpu.snapshot(),new CpuStructuralWorld3D({width:8,height:8,depth:8,chunkSize:4}).snapshot(),'Initialized world');
+    if(gpu.tick!==0||(await gpu.energyBalance()).driftQ!==0n)throw Error('Initialization changed the world');
     // Exercise a zero-length list, its full-capacity limit, and rebuilds after
     // placement/removal. None of these may retain a prior solve's membership.
     for(const fillMaterial of [MAT.AIR,MAT.STONE]){

@@ -65,6 +65,7 @@ export class GpuStructuralWorld3D {
   #renderers=new Map<TerrainRenderer,ResidentChunkRenderer>();#gameplay?:StructuralResidentGameplay3D;
   #revision=0;#submissions=0;
   #submitTrace?:StructuralSubmissionTiming3D[];
+  #initializing?:Promise<void>;
   #profiler:LatencyProfiler;#traces=new WeakMap<GPUCommandEncoder,Trace>();
   #stats:StructuralSolveStats3D={tick:0,supportPasses:0,componentPasses:0,blockingPasses:0,maxDistance:0,supportedWeight:0,reactionTotal:0};
   constructor(initial:StructuralSnapshot3D,device:GPUDevice,pipelines:Pipelines,info:Record<string,string|boolean>,mode:'dense'|'active',solveBatchLimit:number,profiling=false,gpuTiming=false) {
@@ -89,6 +90,14 @@ export class GpuStructuralWorld3D {
     device.addEventListener('uncapturederror',e=>{this.#fault=e.error.message;});
     void device.lost.then(info=>{this.#fault=info.message||info.reason;});
     for(const key of ['width','height','depth','chunkSize','backendInfo','mode'])Object.defineProperty(this,key,{writable:false,configurable:false});
+    // Prepare the edit pipeline and its buffers before the first interaction.
+    // The empty batch writes no state and never touches the committed bank.
+    // Exercise the receipt map too; creation resolves only after validation.
+    const e=device.createCommandEncoder(),pass=e.beginComputePass();
+    this.#parameters(0,[0,0,0,0,0,0,0]);this.#writeParameters(1);
+    pass.setPipeline(pipelines.editBatch);pass.setBindGroup(0,this.#group('editBatch',0,1),[0]);pass.dispatchWorkgroups(1);pass.end();
+    e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,8);
+    this.#initializing=this.#submit(e,[{buffer:this.#receiptRead,bytes:8}]).then(()=>undefined);
   }
   get tick(){return this.#tick;}
   inspectSolve(){return{...this.#stats};}
@@ -112,7 +121,7 @@ export class GpuStructuralWorld3D {
   #upload(bank:number,state:StructuralState3D){for(const key of ['grid','energyQ','structure'] as const)this.#device.queue.writeBuffer(this.#banks[bank][key],0,this.#pack(state[key]));let count=0;for(const s of state.structure)if(s&INTEGRITY_3D)count++;return count;}
   async #run<T>(operation:()=>Promise<T>):Promise<T>{
     if(this.#closed||this.#fault||this.#busy)throw Error(this.#closed?'Structural world closed.':this.#fault||'Structural operation already in flight.');
-    this.#busy=true;try{return await operation();}catch(error){this.#planReusable=false;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
+    this.#busy=true;try{if(this.#initializing){await this.#initializing;this.#initializing=undefined;}return await operation();}catch(error){this.#planReusable=false;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
   }
   #group(stage:Stage,input:number,output:number,structure=input){
     const key=`${stage}/${input}/${output}/${structure}`;let group=this.#groups.get(key);if(group)return group;
@@ -450,6 +459,7 @@ export async function createStateSpaceStructuralWorld3DGPU(options:StructuralGpu
       }
     }
     const info=adapter.info;
-    return new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit,profiling,gpuTiming);
+    const world=new GpuStructuralWorld3D(initial,device,pipelines,{vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,isFallbackAdapter:info.isFallbackAdapter},mode,solveBatchLimit,profiling,gpuTiming);
+    await world.step(0);return world;
   }catch(error){device.destroy();throw error;}
 }
