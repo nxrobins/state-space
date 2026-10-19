@@ -15,7 +15,7 @@
     "test": "node scripts/verify_checks.mjs",
     "test:native": "node scripts/verify_checks.mjs --suite native",
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
-    "typecheck": "tsc --noEmit -p engine/tsconfig.json",
+    "typecheck": "tsc --noEmit -p engine/tsconfig.json && tsc --noEmit -p examples/reactive-chamber/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
     "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && vite build --config engine/vite.structural-world.config.ts && vite build --config engine/vite.structural-world-gpu.config.ts && vite build --config engine/vite.interventions.config.ts && vite build --config engine/vite.tactical-session.config.ts && vite build --config engine/vite.tactical-renderer.config.ts && vite build --config engine/vite.reactive-materials.config.ts && tsc -p engine/tsconfig.sdk.json",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
@@ -30,7 +30,8 @@
     "test:smoke": "node scripts/verify_checks.mjs --suite smoke",
     "verify:macos:native": "uv run python -m scripts.verify_macos_native",
     "verify:packages": "uv run python -m scripts.verify_packages",
-    "verify:macos": "uv run python -m scripts.verify_macos_qualification"
+    "verify:macos": "uv run python -m scripts.verify_macos_qualification",
+    "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

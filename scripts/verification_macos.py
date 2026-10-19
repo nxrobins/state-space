@@ -13,6 +13,7 @@ REPLAY_STAGES = tuple(
     for case in ("control", "cut", "heat", "ice-control", "ice-heat")
 )
 STAGES = (
+    "chamber-visible",
     "pilot",
     "client",
     "lighting",
@@ -55,9 +56,9 @@ def validate_qualification(command, timeout, *, platform=None, executable=None):
         raise RuntimeError("Mac qualification permits only fixed bounded stages.")
     return {
         "stage": stage,
-        "maxDimension": 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
-        "maxReplayTicks": 1024,
-        "maxFrames": 8 if stage == "scale-128-visible" else 660,
+        "maxDimension": 8 if stage == "chamber-visible" else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
+        "maxReplayTicks": 128 if stage == "chamber-visible" else 1024,
+        "maxFrames": 256 if stage == "chamber-visible" else 8 if stage == "scale-128-visible" else 660,
         "gpuTelemetryAvailable": False,
         "independentWatchdog": True,
         "sampledRssLimitMiB": 8192,

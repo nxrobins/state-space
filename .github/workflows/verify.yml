@@ -37,6 +37,7 @@ jobs:
       - name: Build, types and lint
         run: |
           npm run build:sdk
+          npm run build:reactive-chamber
           npm run typecheck
           npm run lint
           uv run ruff check --ignore E701,E702 scripts/verification*.py scripts/verify_macos*.py tests/test_verification*.py
