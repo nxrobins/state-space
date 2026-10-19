@@ -1,15 +1,15 @@
 {
-  "implementationCommit": "e8234c953e2e4e74ba58e6b57ec056ebd8acc801",
+  "implementationCommit": "41d2e5b1412d79ea3657cfac7f535d4ca7452f69",
   "report": {
     "path": "report.json",
-    "sha256": "0b5ea92d8380c2aa917e3e32ce17e105e605cb9c6628528720d90433d9ce7e2b"
+    "sha256": "11957defab2c7af48dd0c1732ad29e684550dc7736be2afe510e5d6963e194d4"
   },
   "view": {
     "path": "chamber-view.png",
-    "sha256": "4331437e6307581318152811df54d06081fe697ba7ea6c869fdaa854210eaa18"
+    "sha256": "a32228237faf5be29f3454a01a154aff5281c90d1998e545f7d538f11421abe1"
   },
   "supervisor": {
-    "id": "a1776c1287724b989d5c91ce48ca51bb",
+    "id": "b8abc4d24d9542b78360e199b47b30f5",
     "kind": "macos-qualification",
     "passed": true,
     "exitCode": 0,
@@ -26,14 +26,14 @@
     }
   },
   "sourceReceipt": {
-    "path": "dist/verification/a1776c1287724b989d5c91ce48ca51bb/report.json",
-    "sha256": "58d018452bd96d45e3086b1871aa42e907dd854a0af3dcc03777437a9ef699ae"
+    "path": "dist/verification/b8abc4d24d9542b78360e199b47b30f5/report.json",
+    "sha256": "bd1ff92420d7768d8096fa6f6a6dc1224b3a9431a1bc0e303b4d4ed8147ef663"
   },
   "localValidation": {
     "unit": {
-      "vitest": 1817,
+      "vitest": 1820,
       "node": 18,
-      "receipt": "1aaca56063424430b6fa97a72cac64c4"
+      "receipt": "347b6f3c3c74484da7c96c6be087bf4f"
     },
     "smoke": {
       "vitest": 46,
@@ -53,6 +53,11 @@
       "npmEntries": 13,
       "report": "dist/verification/packages-3f9dce7038f0/report.json",
       "receipt": "d3709b84f11e4097b9b19853d6e4c5ea"
+    },
+    "clientRegressions": {
+      "passed": 3,
+      "receipt": "9e74c8df1f3748e2a41a8c147015dd17",
+      "failedBeforeFixReceipt": "380b5d9a0adb476aa1e581483a660b62"
     }
   }
 }
