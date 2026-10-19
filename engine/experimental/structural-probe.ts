@@ -281,3 +281,18 @@ export async function verifyM5ParentShares(){
   return{passed:true,cases,parentSets:63,comparedLoads,unbondedDownwardContact:true,backendInfo:gpu.backendInfo};
  }finally{GPUDevice.prototype.createBuffer=original;if(read?.mapState==='mapped')read.unmap();read?.destroy();gpu?.close();}
 }
+
+/** Keep the complete component/blocking solver as an independent GPU oracle. */
+export async function verifyM5FullComponents(){
+ const original=GPUDevice.prototype.createShaderModule;let forced=0;
+ GPUDevice.prototype.createShaderModule=function(descriptor:GPUShaderModuleDescriptor){
+  const marker='fn reachabilityPlan()->bool{return atomicLoad(&work[7])==0u;}';let code=descriptor.code;
+  if(code.includes(marker)){code=code.replace(marker,'fn reachabilityPlan()->bool{return false;}');forced++;}
+  return original.call(this,{...descriptor,code});
+ };
+ try{
+  const result=await verifyM5GpuTiny('active');
+  if(forced!==1)throw Error('Full component oracle did not override its owned mechanics module');
+  return{...result,forcedFullComponents:true};
+ }finally{GPUDevice.prototype.createShaderModule=original;}
+}

@@ -96,6 +96,10 @@ fn clearEditedBonds(i:u32){
 fn address(plane:u32,i:u32)->u32{return 16u+plane*p.shape.w+i;}
 fn planRead(plane:u32,i:u32)->u32{return atomicLoad(&work[address(plane,i)]);}
 fn planWrite(plane:u32,i:u32,value:u32){atomicStore(&work[address(plane,i)],value);}
+// Bond reachability plus downward contacts is exactly the component-blocking
+// fixed point when damage/normalization preserve the graph and root predicates.
+fn reachabilityPlan()->bool{return atomicLoad(&work[7])==0u;}
+fn sameSupportGraph(a:u32,b:u32)->bool{return ((a^b)&(ANCHOR|16128u))==0u&&((a&INTEGRITY)==0u)==((b&INTEGRITY)==0u);}
 fn weight(i:u32)->u32{return max(1u,(prop(cells[i],0u)+63u)/64u);}
 fn strength(v:u32,q:u32,s:u32)->u32{
  let nominal=prop(v,22u)*16u;let soft=prop(v,23u);var remaining=16384u;
@@ -209,10 +213,10 @@ fn rootSupport(i:u32)->bool{
   if(capacity==0u){loss=integrity;}else if(load>capacity){loss=min(integrity,max(1u,(load-capacity)*255u/nominal));}
   result=(s&~INTEGRITY)|(integrity-loss);
  }
- nextStructures[i]=result;
+ if(!sameSupportGraph(s,result)){atomicStore(&work[7],1u);}nextStructures[i]=result;
 }
-@compute @workgroup_size(64) fn normalize(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}var s=0u;
+fn normalizedStructure(i:u32)->u32{
+ var s=0u;
  if(eligible(cells[i])){
   s=structures[i]&(INTEGRITY|ANCHOR);
   if((s&INTEGRITY)!=0u){for(var dir=0u;dir<6u;dir++){
@@ -220,10 +224,17 @@ fn rootSupport(i:u32)->bool{
    if(((structures[i]&bit(dir))!=0u&&(structures[j]&bit(dir^1u))!=0u)||((structures[i]|structures[j])&FRESH)!=0u){s|=bit(dir);}
   }}
  }
- nextStructures[i]=s;
+ return s;
+}
+@compute @workgroup_size(64) fn normalize(@builtin(global_invocation_id) id:vec3u){
+ let i=id.x;if(i>=p.shape.w){return;}nextStructures[i]=normalizedStructure(i);
+}
+@compute @workgroup_size(64) fn normalizePlan(@builtin(global_invocation_id) id:vec3u){
+ let i=id.x;if(i>=p.shape.w){return;}let s=normalizedStructure(i);
+ if(!sameSupportGraph(structures[i],s)){atomicStore(&work[7],1u);}nextStructures[i]=s;
 }
 @compute @workgroup_size(64) fn componentInit(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}planWrite(2u,i,select(INF,linear(coordinate(i)),intact(i)));planWrite(3u,i,0u);
+ let i=id.x;if(i>=p.shape.w||reachabilityPlan()){return;}planWrite(2u,i,select(INF,linear(coordinate(i)),intact(i)));planWrite(3u,i,0u);
 }
 @compute @workgroup_size(64) fn componentRelax(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var root=planRead(2u,i);
@@ -247,7 +258,7 @@ fn rootSupport(i:u32)->bool{
  if(below==INF||!intact(below)){return;}let root=storageOf(planRead(2u,i));let lower=storageOf(planRead(2u,below));
  if(root!=lower&&planRead(3u,lower)!=0u&&atomicOr(&work[address(3u,root)],1u)==0u){atomicStore(&work[0],1u);}
 }
-fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))==0u;}
+fn moving(i:u32)->bool{if(!intact(i)){return false;}if(reachabilityPlan()){return planRead(0u,i)==INF;}return planRead(3u,storageOf(planRead(2u,i)))==0u;}
 @compute @workgroup_size(64) fn applyMotion(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let above=neighbor(i,2u);var source=i;
  if(above!=INF&&moving(above)){source=above;}
@@ -267,7 +278,7 @@ fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))=
   let compact=mechanics;
   for(const stage of STRUCTURAL_LIST_STAGES){
     const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
-    const sleeping=(STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'';
+    const sleeping=((STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'')+(['componentRelax','blockInit','blockRelax'].includes(stage)?'if(reachabilityPlan()){return;}':'');
     const [header,plane]=stage==='supportRelax'?[15,5]:stage==='loadRelax'?[3,6]:[13,4];
     compact=replace(compact,prefix,prefix.replace('@workgroup_size(64)','@workgroup_size(256)').replace('let i=id.x;',
       sleeping+`let ordinal=id.x;if(ordinal>=atomicLoad(&work[${header}])){return;}let i=planRead(${plane}u,ordinal);`));

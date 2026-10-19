@@ -27,7 +27,7 @@ export { checkedGameplayState as validateStructuralGameplayState3D } from './gam
 const KINDS=['gravity','diagonal','liquid','buoyancy','gas','heat','phase'];
 const BINDINGS={
   main:[0,1,2,3,4,5,6,7,8], supportInit:[0,4,7,9], supportRelax:[7,9,14], supportSummary:[0,4,9],
-  loadLevel:[0,4,5,7,9], damage:[0,1,4,7,8,9], normalize:[0,4,7,8], componentInit:[7,9],
+  loadLevel:[0,4,5,7,9], damage:[0,1,4,7,8,9], normalize:[0,4,7,8],normalizePlan:[0,4,7,8,9], componentInit:[7,9],
   componentRelax:[7,9,14], blockInit:[0,4,7,9], blockRelax:[7,9,14], applyMotion:[0,1,2,3,6,7,8,9],
   editBatch:[2,3,4,5,6,8,9,10,11],
   certifyLocal:[0,1,4,6,7],collectLocal:[6,12],
@@ -43,7 +43,7 @@ type Pipelines=Record<Stage,GPUComputePipeline>;
 const cold=buildColdTable();
 const total=(values:ArrayLike<number>)=>{let sum=0;for(let i=0;i<values.length;i++)sum+=values[i];return BigInt(sum);};
 const storage=()=>GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST;
-export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number;supportCells?:number;loadCells?:number};
+export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number;supportCells?:number;loadCells?:number;supportMovement?:boolean};
 export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number;profiling?:boolean;gpuTiming?:boolean};
 
 export class GpuStructuralWorld3D {
@@ -198,7 +198,7 @@ export class GpuStructuralWorld3D {
     };
     this.#dispatch(e,'supportInit',input,damage);relax('supportRelax',input,1);
     this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);relax('loadRelax',input,2);this.#dispatch(e,'loadSummary',input,damage);
-    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalize',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
+    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
     this.#dispatch(e,'blockInit',input,damage,normalized);relax('blockRelax',normalized,4);
     });
     this.#writeParameters(5);e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
@@ -231,7 +231,7 @@ export class GpuStructuralWorld3D {
       if(plan.complete){
         const e=this.#device.createCommandEncoder(),current=this.#encodeMotionAndMaterial(e,plan.input,plan.damage,plan.normalized,plan.normalized),control=await(finish?finish(e,current):this.#control(e));
         this.#current=current;this.#tick++;this.#revision++;this.#external+=plan.external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13],supportCells:plan.control[15],loadCells:plan.control[3]};return;
+        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13],supportCells:plan.control[15],loadCells:plan.control[3],supportMovement:plan.control[7]===0};return;
       }
       fallbackMask=plan.mask;
     }
@@ -246,14 +246,14 @@ export class GpuStructuralWorld3D {
       this.#writeParameters(slots);await this.#control(e);
     }
     e=this.#device.createCommandEncoder();this.#dispatch(e,'damage',input,damage);
-    this.#dispatch(e,'normalize',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
+    this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
     if(balanced[4]!==balanced[5])throw Error('Structural reactions do not balance supported weight; tick not committed.');
     const componentPasses=await this.#converge('componentRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();this.#dispatch(e,'blockInit',input,damage,normalized);await this.#control(e);
     const blockingPasses=await this.#converge('blockRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();const current=this.#encodeMotionAndMaterial(e,input,damage,normalized,normalized),control=await(finish?finish(e,current):this.#control(e));
     this.#current=current;this.#tick++;this.#revision++;this.#external+=external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-    this.#stats={tick:this.#tick,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13]};
+    this.#stats={tick:this.#tick,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13],supportMovement:balanced[7]===0};
   }
   #encodeMotionAndMaterial(e:GPUCommandEncoder,input:number,damage:number,normalized:number,structure:number){
     this.#dispatch(e,'applyMotion',input,damage,structure);
