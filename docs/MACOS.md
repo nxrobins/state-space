@@ -247,5 +247,5 @@ completion improves from 34.8 to 16.1 ms, and p95 from 17.0 to 10.6–12.1 ms.
 Complete world/player checkpoints match the baseline; all 18 rendered-image
 comparisons are byte-identical. The final 32³/64³ timing and replay regressions
 also pass. The [evidence index](checkpoints/MACOS_128.json) binds the final-source
-results, retained experiments and locally verified archive. This is a scoped Mac
+results, retained experiments and published, verified archive. This is a scoped Mac
 measurement; full 128³ replay and cross-platform qualification remain separate.

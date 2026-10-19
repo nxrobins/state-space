@@ -115,21 +115,42 @@ passes: 1,804 Vitest and 18 controller tests, 46 Vitest and 13 Node smoke checks
 build/types/lint, and fresh installed-wheel/npm clients including 13 independent
 npm export consumers.
 
+## Pre-merge adversarial review
+
+The review of `3a381503..4ce13e84` found no blocking issues. It checked the
+reachability certificate against the complete component/blocking rules, damage
+and normalization invalidation, worklist capacity after edits and phase changes,
+canonical parent remainder order, fallback/rollback, initialization, and both
+rendering paths. The 512-chunk limit also bounds the light list and keeps every
+shared face index within `uint16`.
+
+Fresh `structural-exact` and `lighting` runs passed on the same runtime sources:
+eight structural probes and all 18 byte-identical rendered-image comparisons.
+The raw acceptance samples independently confirm ticks 61–660 in each of the
+three runs, the ten-edit cut at tick 180, and a GPU completion boundary on every
+frame. Both display-timestamp-to-completion and callback-to-completion durations
+stay within 16.667 ms. Report hashes, supervisor receipts, source hashes and
+complete checkpoint bytes were checked again. Existing CI on `4ce13e84` passed;
+the follow-up change only records this review and publishes the evidence link.
+
+These checks retain the fixed-scene and host limits stated above; they do not
+establish full 128³ replay or cross-platform qualification.
+
 ## Evidence
 
 The [compact index](MACOS_128.json) binds 91 measurement reports to their hashes,
 source identities and supervisor receipts. It distinguishes final-source results
-from earlier attempts, including failed and reverted experiments. The local archive
-`dist/state-space-macos-128-20261018.tar.gz` contains the raw reports, receipts,
-final source snapshot and built bundles,
+from earlier attempts, including failed and reverted experiments. The
+[evidence release](https://github.com/nxrobins/state-space/releases/tag/macos-128-2026-10-18)
+contains the raw reports, receipts, final source snapshot and built bundles,
 implementation diff/history, and hosted verification artifacts/logs.
 
 The archive has 1,629 files and 165,163,558 bytes. Its SHA-256 is
 `04f68559c5fe94feb3673df6cc0a94f549d8e077456f048515706e3d215395c2`.
 `validation/verify-archive.py` checks the archive and manifest hashes, unique safe
 member paths, every member's size/hash, and each indexed report. Run it with the
-index and archive paths as its two arguments. The local archive was verified
-with that checker; publication of the full archive is awaiting approval. Intermediate attempts retain measurements; they do not all
+index and archive paths as its two arguments. The published archive was downloaded and verified
+with that checker. Intermediate attempts retain measurements; they do not all
 include separately reconstructable builds.
 
 ## Reproduce the bounded measurement

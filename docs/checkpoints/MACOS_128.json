@@ -9732,7 +9732,7 @@
     "attemptsSince": "2026-10-18T23:49:58+00:00",
     "finalSourceSnapshot": "source/",
     "finalBuiltBundles": "built/",
-    "plannedUrl": "https://github.com/nxrobins/state-space/releases/download/macos-128-2026-10-18/state-space-macos-128-20261018.tar.gz",
-    "publication": "pending approval; archive verified locally"
+    "publication": "published; downloaded archive and all manifest members verified",
+    "url": "https://github.com/nxrobins/state-space/releases/download/macos-128-2026-10-18/state-space-macos-128-20261018.tar.gz"
   }
 }
