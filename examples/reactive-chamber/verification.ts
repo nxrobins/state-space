@@ -1,5 +1,6 @@
 /// <reference types="@webgpu/types" />
 /** Fixed 8-cubed native browser acceptance. Invoked only by the bounded Mac stage. */
+import {GEOMETRY_SCALE_3D as Q} from 'state-space-engine/experimental/3d/reactive-materials';
 import type {chamberApp} from './browser-entry.js';
 import {openChamber, type ChamberClient} from './client.js';
 import {createChamber, prepareCommand, finishBranch, SUPPORT, type ChamberCommand, type ChamberSnapshot} from './scenario.js';
@@ -19,6 +20,23 @@ export async function verifyChamber(app: typeof chamberApp) {
   try {
     click('start'); await until(() => app.running && Boolean(app.scene));
     const direct = await createChamber(), initial = app.client!.snapshot(); equal(initial, direct.session.snapshot(), 'Worker initial state differs.');
+    // Exercise a capped Retina backing store and real pointer coordinate conversion.
+    const nativeRatio = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
+    Object.defineProperty(window, 'devicePixelRatio', {configurable: true, value: 2});
+    app.orbit(-.65); await app.painted();
+    const canvas = document.getElementById('world') as HTMLCanvasElement, rect = canvas.getBoundingClientRect();
+    assert(Math.abs(canvas.width / canvas.height - rect.width / rect.height) < .005, 'Retina canvas changed the viewport aspect ratio.');
+    const retinaTarget = [canvas.width, canvas.height]; click('select-ice'); await app.painted();
+    const point = projectPoint(app.camera, [3 * Q + Q / 2, 4 * Q + Q / 2, 3 * Q + Q / 2], canvas.width, canvas.height)!;
+    const event = {pointerId: 1, clientX: rect.left + point.x * rect.width / canvas.width, clientY: rect.top + point.y * rect.height / canvas.height};
+    // Pointer capture requires a trusted active pointer; the click's picking path does not.
+    const capture = canvas.setPointerCapture; canvas.setPointerCapture = () => {};
+    canvas.dispatchEvent(new PointerEvent('pointerdown', event)); canvas.dispatchEvent(new PointerEvent('pointerup', event)); canvas.setPointerCapture = capture;
+    await app.painted(); equal(app.scene!.selected, [...SUPPORT], 'Retina pointer selected the wrong cell.');
+    if (nativeRatio) Object.defineProperty(window, 'devicePixelRatio', nativeRatio); else delete (window as unknown as {devicePixelRatio?: number}).devicePixelRatio;
+    app.orbit(-.65); await app.painted();
+    report.retinaPicking = {passed: true, target: retinaTarget};
+
     const reference = (command: ChamberCommand) => {const branch = prepareCommand(direct.registry, direct.session, command); const preview = finishBranch(branch); return {branch, preview};};
     publish('real browser preview / discard / compare');
     click('heat'); await until(() => app.client!.state.hasPreview); await app.painted();

@@ -2,7 +2,7 @@
 import {openChamber, loadChamber, type ChamberClient} from './client.js';
 import {CHAMBER, SUPPORT, ICE, type Cell, type ChamberSnapshot} from './scenario.js';
 import {MAX_SAVE_BYTES} from './recording.js';
-import {prepareScene, inspectScene, pickCell, orbitCamera, sceneData, type ChamberScene} from './presentation.js';
+import {prepareScene, inspectScene, pickElementCell, canvasSize, orbitCamera, sceneData, type ChamberScene} from './presentation.js';
 import {createChamberRenderer, type ChamberRenderer} from './renderer.js';
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const button = (id: string) => element<HTMLButtonElement>(id), canvas = element<HTMLCanvasElement>('world');
@@ -27,7 +27,7 @@ function updateInspection() {
 async function draw() {
   if (!scene || !device || !renderer || !context || destroyed) return;
   const captured = scene; dirty = false;
-  const rect = canvas.getBoundingClientRect(), scale = Math.min(devicePixelRatio, 2), width = Math.min(1600, Math.max(1, Math.round(rect.width * scale))), height = Math.min(900, Math.max(1, Math.round(rect.height * scale)));
+  const rect = canvas.getBoundingClientRect(), {width, height} = canvasSize(rect.width, rect.height, devicePixelRatio);
   if (canvas.width !== width || canvas.height !== height || !depth) {
     depth?.destroy(); canvas.width = width; canvas.height = height;
     depth = device.createTexture({size: [width, height], format: 'depth32float', usage: GPUTextureUsage.RENDER_ATTACHMENT});
@@ -131,10 +131,10 @@ let drag: {x: number; y: number; distance: number} | null = null;
 canvas.onpointerdown = event => {drag = {x: event.clientX, y: event.clientY, distance: 0}; canvas.setPointerCapture(event.pointerId);};
 canvas.onpointermove = event => {if (!drag) return; const dx = event.clientX - drag.x, dy = event.clientY - drag.y; drag.distance += Math.abs(dx) + Math.abs(dy); drag.x = event.clientX; drag.y = event.clientY;
   yaw -= dx * .008; pitch = Math.max(.08, Math.min(1.25, pitch + dy * .008)); requestDraw();};
-canvas.onpointerup = event => {if (drag && drag.distance < 4 && displayed) {const rect = canvas.getBoundingClientRect(), hit = pickCell(displayed, orbitCamera(yaw, pitch), event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height); if (hit) {selected = hit; refresh();}} drag = null;};
+canvas.onpointerup = event => {if (drag && drag.distance < 4 && displayed) {const rect = canvas.getBoundingClientRect(), hit = pickElementCell(displayed, orbitCamera(yaw, pitch), event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height, canvas.width, canvas.height); if (hit) {selected = hit; refresh();}} drag = null;};
 canvas.onpointercancel = () => {drag = null;};
 window.addEventListener('pagehide', () => {void stop();}, {once: true});
-export const chamberApp = {start, stop, preview, importSave, get client() {return client;}, get renderer() {return renderer;}, get scene() {return displayed;},
+export const chamberApp = {start, stop, preview, importSave, get client() {return client;}, get renderer() {return renderer;}, get scene() {return displayed;}, get camera() {return orbitCamera(yaw, pitch);},
   async painted() {await new Promise<void>(resolve => requestAnimationFrame(() => resolve())); await drawing;},
   orbit(value: number) {yaw = value; requestDraw();}, get running() {return Boolean(client && device && renderer);}};
 Object.assign(window, {chamberApp});

@@ -64,3 +64,16 @@ export function pickCell(scene: ChamberScene, camera: TacticalCamera3D, x: numbe
 }
 export {projectTacticalPoint3D as projectPoint};
 export type {TacticalCamera3D as ChamberCamera};
+
+/** Preserve the CSS aspect ratio when applying the finite Retina backing-store cap. */
+export function canvasSize(cssWidth: number, cssHeight: number, pixelRatio: number) {
+  if (![cssWidth, cssHeight, pixelRatio].every(Number.isFinite) || cssWidth < 0 || cssHeight < 0 || pixelRatio <= 0) throw Error('Invalid viewport dimensions.');
+  const w = Math.max(1, cssWidth), h = Math.max(1, cssHeight), scale = Math.min(pixelRatio, 2, 1600 / w, 900 / h);
+  return {width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale))};
+}
+/** Pick in the actual backing-store projection, including fractional CSS/DPR rounding. */
+export function pickElementCell(scene: ChamberScene, camera: TacticalCamera3D, x: number, y: number,
+  cssWidth: number, cssHeight: number, targetWidth: number, targetHeight: number): Cell | null {
+  if (cssWidth <= 0 || cssHeight <= 0) return null;
+  return pickCell(scene, camera, x * targetWidth / cssWidth, y * targetHeight / cssHeight, targetWidth, targetHeight);
+}

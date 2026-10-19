@@ -48,7 +48,7 @@ describe('reactive chamber public SDK reference', () => {
 import {createReactiveSession3D, editReactiveMaterialBlock3D} from 'state-space-engine/experimental/3d/reactive-materials';
 import {chamberInitial, chamberPolicy, CHAMBER, readCommand, compileCommand} from '../../examples/reactive-chamber/scenario.js';
 import {SAVE_FORMAT, canonical, parseSave, stateHash, verifyRecording, type ChamberStep} from '../../examples/reactive-chamber/recording.js';
-import {prepareScene, inspectScene, sceneData, orbitCamera, pickCell, projectPoint} from '../../examples/reactive-chamber/presentation.js';
+import {prepareScene, inspectScene, sceneData, orbitCamera, pickCell, pickElementCell, canvasSize, projectPoint} from '../../examples/reactive-chamber/presentation.js';
 
 describe('chamber transaction and durable recording boundaries', () => {
   test('crushing by an actual falling cell rejects the entire candidate', async () => {
@@ -121,5 +121,25 @@ describe('reactive presentation boundaries', () => {
     expect(() => prepareScene(registry, before)).toThrow(); const p = finishBranch(b), scene = prepareScene(registry, p);
     expect(scene.kind).toBe('preview'); expect(scene.identity).not.toBe(prepareScene(registry, session.snapshot()).identity);
     const bad = structuredClone(p); bad.base = {...bad.base, tick: bad.base.tick + 1}; expect(() => prepareScene(registry, bad)).toThrow(); b.discard();
+  });
+});
+
+
+describe('Retina viewport projection', () => {
+  test('a capped backing store preserves the CSS aspect ratio and finite target bounds', () => {
+    for (const [width, height, ratio] of [[1055, 660, 2], [300, 520, 3], [2500, 1400, 2], [500, 300, 1.25]]) {
+      const size = canvasSize(width, height, ratio);
+      expect(size.width).toBeLessThanOrEqual(1600); expect(size.height).toBeLessThanOrEqual(900);
+      expect(Math.abs(size.width / size.height - width / height)).toBeLessThan(.005);
+    }
+    expect(canvasSize(1055, 660, 2)).toEqual({width: 1439, height: 900});
+    expect(() => canvasSize(Infinity, 10, 2)).toThrow(); expect(() => canvasSize(10, 10, 0)).toThrow();
+  });
+  test('pointer coordinates invert the actual rendered projection at capped and rounded resolutions', async () => {
+    const {registry, session} = await createChamber(), scene = prepareScene(registry, session.snapshot()), camera = orbitCamera();
+    for (const [cssWidth, cssHeight, width, height] of [[1055, 660, 1600, 900], [1055, 660, 1439, 900], [377.5, 291.25, 472, 364]]) {
+      const projected = projectPoint(camera, [3 * Q + Q / 2, 4 * Q + Q / 2, 3 * Q + Q / 2], width, height)!;
+      expect(pickElementCell(scene, camera, projected.x * cssWidth / width, projected.y * cssHeight / height, cssWidth, cssHeight, width, height)).toEqual([...SUPPORT]);
+    }
   });
 });
