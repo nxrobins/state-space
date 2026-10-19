@@ -34,6 +34,7 @@ const BINDINGS={
   certifyPlan:[0,2,3,4,7,8,9],
   queryCells:[0,1,5,7,13],
   relaxStart:[9,14],relaxAdvance:[9,14],relaxEnd:[5,9,14],
+  prepareSupport:[9,15],prepareLoad:[9,15],prepareComponents:[9,15],
   loadInit:[0,4,7,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
 } as const;
 type Stage=keyof typeof BINDINGS;
@@ -55,7 +56,7 @@ export class GpuStructuralWorld3D {
   #controlRead:GPUBuffer;#receiptRead:GPUBuffer;#fullRead:GPUBuffer;
   #indirect:GPUBuffer;#activityRead:GPUBuffer;
   #queryResult:GPUBuffer;#queryRead:GPUBuffer;
-  #solveDispatch:GPUBuffer;
+  #solveDispatch:GPUBuffer;#listDispatch:GPUBuffer;
   #solveBatchLimit:number;
   #memberBound=0;#solveGroups=0;
   #groups=new Map<string,GPUBindGroup>();#params=new Uint32Array(64*64);
@@ -78,7 +79,7 @@ export class GpuStructuralWorld3D {
     this.#work=buffer(64+bytes*7,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
     this.#indirect=buffer(12,storage()|GPUBufferUsage.INDIRECT);this.#activityRead=buffer(12,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#queryResult=buffer(4096*16,storage());this.#queryRead=buffer(4096*16,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
-    this.#solveDispatch=buffer(16,storage());
+    this.#solveDispatch=buffer(16,storage());this.#listDispatch=buffer(64,storage()|GPUBufferUsage.INDIRECT);
     this.#uniform=buffer(this.#params.byteLength,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST);
     this.#commands=buffer(65536*16,storage());this.#receipts=buffer(65536*8,storage());
     this.#controlRead=buffer(64,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
@@ -116,7 +117,7 @@ export class GpuStructuralWorld3D {
   }
   #group(stage:Stage,input:number,output:number,structure=input){
     const key=`${stage}/${input}/${output}/${structure}`;let group=this.#groups.get(key);if(group)return group;
-    const a=this.#banks[input],b=this.#banks[output],buffers=[a.grid,a.energyQ,b.grid,b.energyQ,this.#cold,this.#uniform,this.#dirty,this.#banks[structure].structure,b.structure,this.#work,this.#commands,this.#receipts,this.#indirect,this.#queryResult,this.#solveDispatch];
+    const a=this.#banks[input],b=this.#banks[output],buffers=[a.grid,a.energyQ,b.grid,b.energyQ,this.#cold,this.#uniform,this.#dirty,this.#banks[structure].structure,b.structure,this.#work,this.#commands,this.#receipts,this.#indirect,this.#queryResult,this.#solveDispatch,this.#listDispatch];
     group=this.#device.createBindGroup({layout:this.#pipelines[stage].getBindGroupLayout(0),entries:BINDINGS[stage].map(binding=>({binding,resource:{buffer:buffers[binding],...(binding===5?{size:48}:{})}}))});
     this.#groups.set(key,group);return group;
   }
@@ -128,9 +129,9 @@ export class GpuStructuralWorld3D {
   #dispatch(e:GPUCommandEncoder,stage:Stage,input:number,output:number,structure=input,slot=0){
     const shared=this.#computePass,pass=shared??e.beginComputePass(this.#profiler.pass(this.#trace(e),stage==='main'?'materials.'+KINDS[this.#params[slot*64+4]]:stage));pass.setPipeline(this.#pipelines[stage]);
     pass.setBindGroup(0,this.#group(stage,input,output,structure),(BINDINGS[stage] as readonly number[]).includes(5)?[slot*256]:[]);
-    if(listStages.has(stage))pass.dispatchWorkgroups(this.#solveGroups);
+    if(listStages.has(stage))pass.dispatchWorkgroupsIndirect(this.#listDispatch,stage==='supportRelax'?16:stage==='loadRelax'?32:stage.startsWith('component')||stage.startsWith('block')?48:0);
     else if(stage==='main'&&this.mode==='active')pass.dispatchWorkgroupsIndirect(this.#indirect,0);
-    else pass.dispatchWorkgroups(stage==='editBatch'||stage==='collectLocal'||stage.startsWith('relax')?1:Math.ceil(this.width*this.height*this.depth/64));if(!shared)pass.end();
+    else pass.dispatchWorkgroups(stage==='editBatch'||stage==='collectLocal'||stage.startsWith('relax')||stage.startsWith('prepare')?1:Math.ceil(this.width*this.height*this.depth/64));if(!shared)pass.end();
   }
   #parameters(slot:number,values:number[]){this.#params.fill(0,slot*64,(slot+1)*64);this.#params.set(values,slot*64+4);}
   #writeParameters(slots:number){this.#device.queue.writeBuffer(this.#uniform,0,this.#params,0,slots*64);}
@@ -196,9 +197,9 @@ export class GpuStructuralWorld3D {
       for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure);this.#dispatch(e,'relaxAdvance',input,damage);}
       this.#dispatch(e,'relaxEnd',input,damage,input,slot);
     };
-    this.#dispatch(e,'supportInit',input,damage);relax('supportRelax',input,1);
-    this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);relax('loadRelax',input,2);this.#dispatch(e,'loadSummary',input,damage);
-    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
+    this.#dispatch(e,'supportInit',input,damage);this.#dispatch(e,'prepareSupport',input,damage);relax('supportRelax',input,1);
+    this.#dispatch(e,'supportSummary',input,damage);this.#dispatch(e,'loadInit',input,damage);this.#dispatch(e,'prepareLoad',input,damage);relax('loadRelax',input,2);this.#dispatch(e,'loadSummary',input,damage);
+    this.#dispatch(e,'damage',input,damage);this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'prepareComponents',input,damage);this.#dispatch(e,'componentInit',input,damage,normalized);relax('componentRelax',normalized,3);
     this.#dispatch(e,'blockInit',input,damage,normalized);relax('blockRelax',normalized,4);
     });
     this.#writeParameters(5);e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);
@@ -236,7 +237,7 @@ export class GpuStructuralWorld3D {
       fallbackMask=plan.mask;
     }
     const external=await this.#edits(commands,a),input=edited?a:this.#current,damage=edited?b:a,normalized=edited?a:b;
-    let e=this.#device.createCommandEncoder();e.clearBuffer(this.#work,0,64);this.#dispatch(e,'supportInit',input,damage);this.#dispatch(e,'relaxStart',input,damage);await this.#control(e);
+    let e=this.#device.createCommandEncoder();e.clearBuffer(this.#work,0,64);this.#dispatch(e,'supportInit',input,damage);this.#dispatch(e,'prepareSupport',input,damage);this.#dispatch(e,'relaxStart',input,damage);await this.#control(e);
     const supportPasses=await this.#converge('supportRelax',input,input,deadline);
     e=this.#device.createCommandEncoder();this.#dispatch(e,'supportSummary',input,damage);const summary=await this.#control(e),maxDistance=summary[1];
     for(let level=maxDistance;level>=0;){
@@ -246,7 +247,7 @@ export class GpuStructuralWorld3D {
       this.#writeParameters(slots);await this.#control(e);
     }
     e=this.#device.createCommandEncoder();this.#dispatch(e,'damage',input,damage);
-    this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
+    this.#dispatch(e,'normalizePlan',input,normalized,damage);this.#dispatch(e,'prepareComponents',input,damage);this.#dispatch(e,'componentInit',input,damage,normalized);const balanced=await this.#control(e);
     if(balanced[4]!==balanced[5])throw Error('Structural reactions do not balance supported weight; tick not committed.');
     const componentPasses=await this.#converge('componentRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();this.#dispatch(e,'blockInit',input,damage,normalized);await this.#control(e);
