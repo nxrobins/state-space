@@ -163,6 +163,7 @@ Run each stage separately and inspect failures before continuing:
 npm run verify:packages
 uv run python -m scripts.verify_packages --native
 npm run verify:macos -- --stage client
+node node_modules/vite/bin/vite.js build --config engine/vite.structural-probe.config.ts
 npm run verify:macos -- --stage lighting
 npm run verify:macos -- --stage replay-32-cut
 npm run verify:macos -- --stage replay-64-cut
@@ -171,6 +172,10 @@ npm run verify:macos -- --stage gameplay-cached-visible
 npm run verify:macos -- --stage gameplay-64-visible
 npm run verify:macos -- --stage gameplay-64-cached-visible
 ```
+
+The internal probe bundle is required by `lighting` and `structural-exact`; rebuild
+it after engine changes. The lighting stage compares actual GPU output against
+the original source enumeration and face vertex sequence.
 
 Replay stages also accept `control`, `heat`, `ice-control` and `ice-heat` in place
 of `cut`. All five scenarios passed at 32³ for 1,024 ticks and at 64³ for 256 ticks.
@@ -230,5 +235,17 @@ The active backend now reuses its material worklist until awake membership chang
 This removes redundant scans between the 27 ordered material passes. Optional GPU
 timestamps expose the solver, collector, material families and rendering costs;
 normal gameplay measurements keep profiling disabled. The
-[optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md) contains the current
+[optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md) records the first
 64³ results, exactness coverage and source-bound 128³ progression commands.
+
+## 128³ performance follow-up
+
+The [128³ performance checkpoint](checkpoints/MACOS_128.md) closes the fixed-scene
+60 Hz gap on the M3 Ultra host at 1920 × 1080: three consecutive runs complete
+1,800 measured frames with zero missed deadlines or lost display slots. Worst
+completion improves from 34.8 to 16.1 ms, and p95 from 17.0 to 10.6–12.1 ms.
+Complete world/player checkpoints match the baseline; all 18 rendered-image
+comparisons are byte-identical. The final 32³/64³ timing and replay regressions
+also pass. The [evidence index](checkpoints/MACOS_128.json) binds the final-source
+results, retained experiments and locally verified archive. This is a scoped Mac
+measurement; full 128³ replay and cross-platform qualification remain separate.
