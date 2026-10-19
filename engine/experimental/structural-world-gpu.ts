@@ -34,7 +34,7 @@ const BINDINGS={
   certifyPlan:[0,2,3,4,7,8,9],
   queryCells:[0,1,5,7,13],
   relaxStart:[9,14],relaxAdvance:[9,14],relaxEnd:[5,9,14],
-  loadInit:[0,4,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
+  loadInit:[0,4,7,9],loadRelax:[0,4,7,9,14],loadSummary:[9],
 } as const;
 type Stage=keyof typeof BINDINGS;
 const listStages=new Set<Stage>(STRUCTURAL_LIST_STAGES);

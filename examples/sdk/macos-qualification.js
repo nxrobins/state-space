@@ -57,6 +57,7 @@ async function structuralExact(){
  }
  progress('Forced exact fallback');report.probes.push(await probe.verifyM5DistantSupport('active',1));
  progress('Reversed processing order');report.probes.push(await probe.verifyM5ProcessingOrder());
+ progress('All parent-share subsets');report.probes.push(await probe.verifyM5ParentShares());
  check(report.probes.every(r=>r.passed&&r.backendInfo.isFallbackAdapter===false),'Exact probes require hardware GPU');
  progress('Profiled presentation, step and edit timestamps');
  const level=createStructuralLevel(32,'control');

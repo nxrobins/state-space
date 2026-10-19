@@ -5,6 +5,7 @@ import { structuralShaders } from './structural-shader.js';
 import { createStateSpaceStructuralWorld3DGPU } from './structural-world-gpu.js';
 import { CpuStructuralWorld3D, type StructuralEdit3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { MAT } from '../generated/materials.js';
+import { solveStructure3D } from './structural-mechanics.js';
 export async function verifyM5ShaderCompile() {
   if(!navigator.gpu)throw Error('WebGPU unavailable.');
   const adapter=await navigator.gpu.requestAdapter();if(!adapter)throw Error('No WebGPU adapter.');
@@ -233,4 +234,48 @@ export async function verifyM5ProcessingOrder(){
     if(mechanicsPermutations<42||listPermutations!==6)throw Error('Processing-order probe did not permute all three worlds');
     return{...result,scope:'Reversed structural invocation ownership and reversed active worklist; exact CPU state across eight-chunk X/Z failures and odd restart',mechanicsPermutations,listPermutations};
   }finally{GPUDevice.prototype.createShaderModule=original;}
+}
+
+/** Every nonempty six-neighbor parent set, checked against CPU integer loads.
+ * Capture only this owned tiny world's scratch buffer; no runtime inspection API.
+ */
+export async function verifyM5ParentShares(){
+ const original=GPUDevice.prototype.createBuffer,words=8**3;
+ let scratch:GPUBuffer|undefined,device:GPUDevice|undefined,captures=0;
+ GPUDevice.prototype.createBuffer=function(descriptor:GPUBufferDescriptor){
+  const buffer=original.call(this,descriptor);
+  if(descriptor.size===64+words*5*4){scratch=buffer;device=this;captures++;}
+  return buffer;
+ };
+ let gpu:Awaited<ReturnType<typeof createStateSpaceStructuralWorld3DGPU>>|undefined,read:GPUBuffer|undefined;
+ try{
+  gpu=await createStateSpaceStructuralWorld3DGPU({width:8,height:8,depth:8,chunkSize:4,mode:'active'});
+  GPUDevice.prototype.createBuffer=original;
+  if(captures!==1||!scratch||!device)throw Error('Parent-share probe did not capture its unique scratch allocation');
+  read=device.createBuffer({size:words*4,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
+  const directions=[[-1,0,0],[1,0,0],[0,-1,0],[0,1,0],[0,0,-1],[0,0,1]];
+  let cases=0,comparedLoads=0;
+  for(const material of [MAT.STONE,MAT.ICE])for(let mask=1;mask<64;mask++){
+   const cpu=new CpuStructuralWorld3D({width:8,height:8,depth:8,chunkSize:8});
+   const cold=cpu.snapshot();cold.packedCells=cold.packedCells.map(v=>v&0xffff00ff);cold.energyQ.fill(0);cpu.restore(cold);
+   cpu.setCell(3,3,3,material,0);
+   for(let side=0;side<6;side++)if(mask&(1<<side)){
+    const [x,y,z]=directions[side].map(v=>v+3);cpu.setCell(x,y,z,MAT.STONE,0);cpu.setAnchor(x,y,z,true);
+   }
+   // Downward contact remains a parent even without a bond.
+   if(mask&8)cpu.setBond(3,3,3,3,false);
+   const before=cpu.snapshot(),expected=solveStructure3D({grid:Uint32Array.from(before.packedCells),energyQ:Uint32Array.from(before.energyQ),structure:Uint32Array.from(before.structure)},cpu).loads;
+   await gpu.restore(before);cpu.step();await gpu.step();
+   equalState(await gpu.snapshot(),cpu.snapshot(),`Parent-share physical state ${material}/${mask}`);
+   const encoder=device.createCommandEncoder();encoder.copyBufferToBuffer(scratch,64+words*4,read,0,words*4);device.queue.submit([encoder.finish()]);
+   await read.mapAsync(GPUMapMode.READ);const actual=new Uint32Array(read.getMappedRange()).slice();read.unmap();
+   for(let z=0;z<8;z++)for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+    const canonical=x+8*(y+8*z),storage=(Math.floor(x/4)+2*(Math.floor(y/4)+2*Math.floor(z/4)))*64+x%4+4*(y%4+4*(z%4));
+    if(actual[storage]!==expected[canonical])throw Error(`Parent-share integer load differs: ${material}/${mask}/${canonical}`);
+    comparedLoads++;
+   }
+   if((await gpu.energyBalance()).driftQ!==0n)throw Error('Parent-share energy drift');cases++;
+  }
+  return{passed:true,cases,parentSets:63,comparedLoads,unbondedDownwardContact:true,backendInfo:gpu.backendInfo};
+ }finally{GPUDevice.prototype.createBuffer=original;if(read?.mapState==='mapped')read.unmap();read?.destroy();gpu?.close();}
 }

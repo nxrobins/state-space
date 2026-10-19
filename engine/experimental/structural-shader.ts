@@ -163,22 +163,30 @@ fn rootSupport(i:u32)->bool{
  planWrite(1u,i,load);if(p.tick.y==0u){atomicAdd(&work[5],load);}
 }
 @compute @workgroup_size(64) fn loadInit(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}planWrite(1u,i,select(weight(i),0u,planRead(0u,i)==INF));
+ let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);planWrite(1u,i,select(weight(i),0u,level==INF));
+ // The support DAG is fixed throughout load relaxation. Cache its parent set
+ // once in the component-root plane, which componentInit fully replaces later.
+ var parents=0u;
+ if(level!=INF&&level>0u){for(var side=0u;side<6u;side++){
+  let parent=neighbor(i,side);if(parent==INF||!intact(parent)||planRead(0u,parent)!=level-1u){continue;}
+  if((structures[i]&bit(side))!=0u||side==3u){parents|=1u<<side;}
+ }}
+ planWrite(2u,i,parents);
 }
 // On the fixed support-distance DAG, each predecessor's integer share is
 // monotone in the child's load. Atomic maxima converge to the same exact load
 // as the independent CPU reverse-BFS reduction, regardless of invocation order.
 @compute @workgroup_size(64) fn loadRelax(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);if(level==INF){return;}
- var load=weight(i);let canonical=linear(coordinate(i));
+ var load=weight(i);
  for(var dir=0u;dir<6u;dir++){
   let child=neighbor(i,dir);if(child==INF||!intact(child)||planRead(0u,child)!=level+1u){continue;}
   if((structures[i]&bit(dir))==0u&&dir!=2u){continue;}
-  var count=0u;var rank=0u;
-  for(var side=0u;side<6u;side++){
-   let parent=neighbor(child,side);if(parent==INF||!intact(parent)||planRead(0u,parent)!=level){continue;}
-   if((structures[child]&bit(side))!=0u||side==3u){count++;if(linear(coordinate(parent))<canonical){rank++;}}
-  }
+  // Canonical order is -Z, -Y, -X, +X, +Y, +Z in every supported shape.
+  // These masks select the parent directions ordered before this receiver.
+  let earlier=array<u32,6>(20u,21u,16u,23u,0u,31u);
+  let parents=planRead(2u,child);let count=countOneBits(parents);
+  let rank=countOneBits(parents&earlier[dir^1u]);
   if(count==0u){atomicStore(&work[2],1u);return;}
   let childLoad=planRead(1u,child);load+=childLoad/count+select(0u,1u,rank<childLoad%count);
  }
