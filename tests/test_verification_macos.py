@@ -22,7 +22,7 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            self.assertEqual(scope["maxDimension"], 128 if stage in ("scale-128-visible", "gameplay-128-visible") else 64)
+            self.assertEqual(scope["maxDimension"], 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
             self.assertEqual(scope["maxFrames"], 8 if stage == "scale-128-visible" else 660)
         for timeout in [0, -1, 301, float("nan"), float("inf")]:
             with self.assertRaises(RuntimeError):
@@ -52,7 +52,9 @@ class MacScalePrerequisiteTests(unittest.TestCase):
             root = Path(folder)
             hashes = {"physics": "current"}
             self.assertIsNone(require_preceding_stage(root, "pilot", hashes))
-            for target, prior in [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible")]:
+            for target, prior in [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")]:
+                root = Path(folder) / target
+                root.mkdir()
                 with self.assertRaises(RuntimeError):
                     require_preceding_stage(root, target, hashes, now=100000)
                 job = "a" * 32

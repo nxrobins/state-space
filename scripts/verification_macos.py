@@ -20,6 +20,7 @@ STAGES = (
     "replay-64-cut-long",
     "scale-128-visible",
     "gameplay-128-visible",
+    "gameplay-128-profile-visible",
     *REPLAY_STAGES,
     "frames-reference",
     "frames-cached",
@@ -54,7 +55,7 @@ def validate_qualification(command, timeout, *, platform=None, executable=None):
         raise RuntimeError("Mac qualification permits only fixed bounded stages.")
     return {
         "stage": stage,
-        "maxDimension": 128 if stage in ("scale-128-visible", "gameplay-128-visible") else 64,
+        "maxDimension": 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
         "maxReplayTicks": 1024,
         "maxFrames": 8 if stage == "scale-128-visible" else 660,
         "gpuTelemetryAvailable": False,
@@ -68,6 +69,7 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
     required = {
         "scale-128-visible": "replay-64-cut-long",
         "gameplay-128-visible": "scale-128-visible",
+        "gameplay-128-profile-visible": "scale-128-visible",
     }.get(stage)
     if required is None:
         return None
