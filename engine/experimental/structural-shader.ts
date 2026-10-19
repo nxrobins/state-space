@@ -3,8 +3,8 @@ import { chunkShaders } from './3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.
-export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadCachedLevel','loadSummary','componentRelax','blockInit','blockRelax'] as const;
-export const STRUCTURAL_RELAX_STAGES=['supportRelax','componentRelax','blockRelax'] as const;
+export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
+export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
 
 export function structuralShaders(edge:number,shape:readonly number[]) {
   const base=chunkShaders(edge).physics;
@@ -173,9 +173,11 @@ fn rootSupport(i:u32)->bool{
  }}
  planWrite(2u,i,parents);
 }
-// A descending distance sweep gathers already-complete child loads.
-@compute @workgroup_size(64) fn loadCachedLevel(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}let level=p.tick.y;if(planRead(0u,i)!=level){return;}
+// On the fixed support-distance DAG, each predecessor's integer share is
+// monotone in the child's load. Atomic maxima converge to the same exact load
+// as the independent CPU reverse-BFS reduction, regardless of invocation order.
+@compute @workgroup_size(64) fn loadRelax(@builtin(global_invocation_id) id:vec3u){
+ let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);if(level==INF){return;}
  var load=weight(i);
  for(var dir=0u;dir<6u;dir++){
   let child=neighbor(i,dir);if(child==INF||!intact(child)||planRead(0u,child)!=level+1u){continue;}
@@ -188,14 +190,7 @@ fn rootSupport(i:u32)->bool{
   if(count==0u){atomicStore(&work[2],1u);return;}
   let childLoad=planRead(1u,child);load+=childLoad/count+select(0u,1u,rank<childLoad%count);
  }
- planWrite(1u,i,load);
-}
-@compute @workgroup_size(1) fn loadEnd(){
- let levels=select(0u,atomicLoad(&work[1])+1u,atomicLoad(&work[4])!=0u);
- // Level zero is the last encoded dispatch. Any uncovered deeper dependency
- // rejects the entire scratch attempt and uses the independent general solver.
- if(levels>p.rule.x){atomicOr(&work[8],2u);}
- atomicStore(&work[10],levels);
+ if(atomicMax(&work[address(1u,i)],load)<load){atomicStore(&work[0],1u);}
 }
 @compute @workgroup_size(64) fn loadSummary(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i<p.shape.w&&planRead(0u,i)==0u){atomicAdd(&work[5],planRead(1u,i));}
