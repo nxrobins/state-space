@@ -3,7 +3,7 @@ import { chunkShaders } from './3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.
-export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
+export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
 export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
 
 export function structuralShaders(edge:number,shape:readonly number[]) {
@@ -134,7 +134,7 @@ fn rootSupport(i:u32)->bool{
  if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);}
 }
 @compute @workgroup_size(64) fn supportRelax(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);
+ let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);if(best==0u){return;}
  for(var dir=0u;dir<6u;dir++){
   let j=neighbor(i,dir);if(j==INF||!intact(j)){continue;}
   if((structures[i]&bit(dir))!=0u||dir==3u){let d=planRead(0u,j);if(d!=INF){best=min(best,d+1u);}}
@@ -164,24 +164,25 @@ fn rootSupport(i:u32)->bool{
 }
 @compute @workgroup_size(64) fn loadInit(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);planWrite(1u,i,select(weight(i),0u,level==INF));
- // The support DAG is fixed throughout load relaxation. Cache its parent set
- // once in the component-root plane, which componentInit fully replaces later.
- var parents=0u;
- if(level!=INF&&level>0u){for(var side=0u;side<6u;side++){
-  let parent=neighbor(i,side);if(parent==INF||!intact(parent)||planRead(0u,parent)!=level-1u){continue;}
-  if((structures[i]&bit(side))!=0u||side==3u){parents|=1u<<side;}
+ // Cache the fixed DAG in scratch planes that componentInit fully replaces.
+ // A leaf has its final own weight immediately; it never needs load relaxation.
+ var parents=0u;var children=0u;
+ if(level!=INF){for(var side=0u;side<6u;side++){
+  let other=neighbor(i,side);if(other==INF||!intact(other)){continue;}
+  let distance=planRead(0u,other);let bonded=(structures[i]&bit(side))!=0u;
+  if(level>0u&&distance==level-1u&&(bonded||side==3u)){parents|=1u<<side;}
+  if(distance==level+1u&&(bonded||side==2u)){children|=1u<<side;}
  }}
- planWrite(2u,i,parents);
+ planWrite(2u,i,parents);planWrite(3u,i,children);
 }
 // On the fixed support-distance DAG, each predecessor's integer share is
 // monotone in the child's load. Atomic maxima converge to the same exact load
 // as the independent CPU reverse-BFS reduction, regardless of invocation order.
 @compute @workgroup_size(64) fn loadRelax(@builtin(global_invocation_id) id:vec3u){
- let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);if(level==INF){return;}
+ let i=id.x;if(i>=p.shape.w){return;}let children=planRead(3u,i);if(children==0u){return;}
  var load=weight(i);
  for(var dir=0u;dir<6u;dir++){
-  let child=neighbor(i,dir);if(child==INF||!intact(child)||planRead(0u,child)!=level+1u){continue;}
-  if((structures[i]&bit(dir))==0u&&dir!=2u){continue;}
+  if((children&(1u<<dir))==0u){continue;}let child=neighbor(i,dir);
   // Canonical order is -Z, -Y, -X, +X, +Y, +Z in every supported shape.
   // These masks select the parent directions ordered before this receiver.
   let earlier=array<u32,6>(20u,21u,16u,23u,0u,31u);
