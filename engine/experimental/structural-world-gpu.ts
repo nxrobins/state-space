@@ -43,7 +43,7 @@ type Pipelines=Record<Stage,GPUComputePipeline>;
 const cold=buildColdTable();
 const total=(values:ArrayLike<number>)=>{let sum=0;for(let i=0;i<values.length;i++)sum+=values[i];return BigInt(sum);};
 const storage=()=>GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST;
-export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number;attemptPasses?:number};
+export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number};
 export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number;profiling?:boolean;gpuTiming?:boolean};
 
 export class GpuStructuralWorld3D {
@@ -62,7 +62,6 @@ export class GpuStructuralWorld3D {
   #computePass?:GPUComputePassEncoder;
   #busy=false;#closed=false;#fault='';#initial=0n;#external=0n;
   #planReusable=false;
-  #solveHighWaterPasses?:number[];
   #renderers=new Map<TerrainRenderer,ResidentChunkRenderer>();#gameplay?:StructuralResidentGameplay3D;
   #revision=0;#submissions=0;
   #submitTrace?:StructuralSubmissionTiming3D[];
@@ -113,7 +112,7 @@ export class GpuStructuralWorld3D {
   #upload(bank:number,state:StructuralState3D){for(const key of ['grid','energyQ','structure'] as const)this.#device.queue.writeBuffer(this.#banks[bank][key],0,this.#pack(state[key]));let count=0;for(const s of state.structure)if(s&INTEGRITY_3D)count++;return count;}
   async #run<T>(operation:()=>Promise<T>):Promise<T>{
     if(this.#closed||this.#fault||this.#busy)throw Error(this.#closed?'Structural world closed.':this.#fault||'Structural operation already in flight.');
-    this.#busy=true;try{return await operation();}catch(error){this.#planReusable=false;this.#solveHighWaterPasses=undefined;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
+    this.#busy=true;try{return await operation();}catch(error){this.#planReusable=false;throw error;}finally{this.#busy=false;this.#submitTrace=undefined;}
   }
   #group(stage:Stage,input:number,output:number,structure=input){
     const key=`${stage}/${input}/${output}/${structure}`;let group=this.#groups.get(key);if(group)return group;
@@ -180,12 +179,6 @@ export class GpuStructuralWorld3D {
   }
   async #batchedSolve(commands:Uint32Array,a:number,b:number){
     const edited=commands.length>0,input=edited?a:this.#current,damage=edited?b:a,normalized=edited?a:b;
-    // Scheduling estimates only: edits/restores use full default attempts. A
-    // high-water mark of completed solves forecasts the batch with four spare rounds,
-    // rounded up to eight. Exhaustion still discards scratch and fully converges.
-    const budgets=[64,64,32,32].map((cap,i)=>Math.min(this.#solveBatchLimit,
-      edited||!this.#solveHighWaterPasses?cap:Math.min(cap,Math.max(8,Math.ceil((this.#solveHighWaterPasses[i]+4)/8)*8))));
-    const attemptPasses=budgets.reduce((a,b)=>a+b,0);
     const e=this.#device.createCommandEncoder();e.clearBuffer(this.#work,0,64);
     if(edited){
       this.#device.queue.writeBuffer(this.#commands,0,commands);
@@ -199,7 +192,7 @@ export class GpuStructuralWorld3D {
       // exhausted family discards the attempt and invokes complete convergence.
       // Blocking is a fixed-point solve too: four iterations can be exhausted
       // by stacked disconnected components even when the other families fit.
-      const budget=budgets[slot-1];
+      const budget=Math.min(this.#solveBatchLimit,stage==='supportRelax'||stage==='loadRelax'?64:32);
       for(let k=0;k<budget;k++){this.#dispatch(e,stage,input,damage,structure);this.#dispatch(e,'relaxAdvance',input,damage);}
       this.#dispatch(e,'relaxEnd',input,damage,input,slot);
     };
@@ -213,10 +206,10 @@ export class GpuStructuralWorld3D {
     const rows=await this.#submit(e,[{buffer:this.#controlRead,bytes:64},...(edited?[{buffer:this.#receiptRead,bytes:commands.length*2}]:[])]),control=rows[0];
     if(control[2])throw Error(`Structural solve rejected scratch state (code ${control[2]}).`);
     if(control[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');
-    if(control[8])return{complete:false as const,mask:control[8],attemptPasses};
+    if(control[8])return{complete:false as const,mask:control[8]};
     if(control[4]!==control[5])throw Error('Structural reactions do not balance supported weight.');
     let external=0n;if(edited)for(let k=0;k<commands.length/4;k++)external+=BigInt(rows[1][k*2+1])-BigInt(rows[1][k*2]);
-    return{complete:true as const,input,damage,normalized,external,control,attemptPasses};
+    return{complete:true as const,input,damage,normalized,external,control};
   }
   async #tickOnce(commands:Uint32Array,finish?:(e:GPUCommandEncoder,bank:number)=>Promise<Uint32Array>){
     const deadline=performance.now()+5000,[a,b]=[0,1,2].filter(i=>i!==this.#current),edited=commands.length>0;
@@ -232,18 +225,16 @@ export class GpuStructuralWorld3D {
       this.#stats={...this.#stats,tick:this.#tick,supportPasses:0,loadPasses:0,componentPasses:0,blockingPasses:0,planReused:true,planReusable:this.#planReusable};return;
     }
     this.#planReusable=false;
-    let fallbackMask=0,attemptPasses:number|undefined;
+    let fallbackMask=0;
     if(commands.length<=256){
-      const plan=await this.#batchedSolve(commands,a,b);attemptPasses=plan.attemptPasses;
+      const plan=await this.#batchedSolve(commands,a,b);
       if(plan.complete){
         const e=this.#device.createCommandEncoder(),current=this.#encodeMotionAndMaterial(e,plan.input,plan.damage,plan.normalized,plan.normalized),control=await(finish?finish(e,current):this.#control(e));
         this.#current=current;this.#tick++;this.#revision++;this.#external+=plan.external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-        this.#solveHighWaterPasses=Array.from(plan.control.slice(9,13),(passes,i)=>Math.max(passes,this.#solveHighWaterPasses?.[i]??0));
-        this.#stats={tick:this.#tick,attemptPasses,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13]};return;
+        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13]};return;
       }
       fallbackMask=plan.mask;
     }
-    this.#solveHighWaterPasses=undefined;
     const external=await this.#edits(commands,a),input=edited?a:this.#current,damage=edited?b:a,normalized=edited?a:b;
     let e=this.#device.createCommandEncoder();e.clearBuffer(this.#work,0,64);this.#dispatch(e,'supportInit',input,damage);this.#dispatch(e,'relaxStart',input,damage);await this.#control(e);
     const supportPasses=await this.#converge('supportRelax',input,input,deadline);
@@ -262,7 +253,7 @@ export class GpuStructuralWorld3D {
     const blockingPasses=await this.#converge('blockRelax',input,normalized,deadline);
     e=this.#device.createCommandEncoder();const current=this.#encodeMotionAndMaterial(e,input,damage,normalized,normalized),control=await(finish?finish(e,current):this.#control(e));
     this.#current=current;this.#tick++;this.#revision++;this.#external+=external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-    this.#stats={tick:this.#tick,attemptPasses,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13]};
+    this.#stats={tick:this.#tick,supportPasses,componentPasses,blockingPasses,maxDistance,supportedWeight:balanced[4],reactionTotal:balanced[5],planReused:false,planReusable:this.#planReusable,batchedSolve:false,fallbackMask,listedCells:balanced[13]};
   }
   #encodeMotionAndMaterial(e:GPUCommandEncoder,input:number,damage:number,normalized:number,structure:number){
     this.#dispatch(e,'applyMotion',input,damage,structure);
@@ -305,7 +296,7 @@ export class GpuStructuralWorld3D {
     if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>k!=='edits'))throw Error('Invalid structural step options.');
     const commands=prepareStructuralEdits3D(options.edits===undefined?[]:options.edits,this);
     return this.#run(async()=>{
-      if(!ticks&&commands.length){this.#planReusable=false;this.#solveHighWaterPasses=undefined;const bank=(this.#current+1)%3,external=await this.#edits(commands,bank,this.#tick);this.#current=bank;this.#revision++;this.#external+=external;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4);}
+      if(!ticks&&commands.length){this.#planReusable=false;const bank=(this.#current+1)%3,external=await this.#edits(commands,bank,this.#tick);this.#current=bank;this.#revision++;this.#external+=external;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4);}
       for(let t=0;t<ticks;t++)await this.#tickOnce(t?new Uint32Array():commands);
     });
   }
@@ -329,7 +320,7 @@ export class GpuStructuralWorld3D {
   restore(snapshot:StructuralSnapshot3D){
     const state=validateStructuralSnapshot3D(snapshot),tick=snapshot.tick;
     if(snapshot.width!==this.width||snapshot.height!==this.height||snapshot.depth!==this.depth)throw Error('Structural snapshot geometry differs.');
-    return this.#run(async()=>{this.#planReusable=false;this.#solveHighWaterPasses=undefined;const next=(this.#current+1)%3,count=this.#upload(next,state);await this.#submit(this.#device.createCommandEncoder());this.#current=next;this.#memberBound=count;this.#tick=tick;this.#revision++;this.#initial=total(state.energyQ);this.#external=0n;this.#device.queue.writeBuffer(this.#dirty,0,new Uint32Array(this.#dirty.size/4).fill(1));});
+    return this.#run(async()=>{this.#planReusable=false;const next=(this.#current+1)%3,count=this.#upload(next,state);await this.#submit(this.#device.createCommandEncoder());this.#current=next;this.#memberBound=count;this.#tick=tick;this.#revision++;this.#initial=total(state.energyQ);this.#external=0n;this.#device.queue.writeBuffer(this.#dirty,0,new Uint32Array(this.#dirty.size/4).fill(1));});
   }
   queryRegion(request:RegionRequest3D){
     const {origin,size}=checkedActiveWorldRegion(request,this);

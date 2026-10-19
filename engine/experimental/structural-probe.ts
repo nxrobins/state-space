@@ -181,7 +181,7 @@ export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLim
       // contacts. Blocking must converge globally, without welding the stack.
       if(axis==='y')for(let p=1;p<30;p++)cpu.setBond(3,p,3,3,false);
       for(const p of [1,30]){const c=coordinate(p);cpu.setAnchor(c.x,c.y,c.z,true);}
-      await gpu.restore(cpu.snapshot());const checkpoints=new Map<number,StructuralSnapshot3D>();let reuseCount=0,fallbackCount=0;const fallbacks:unknown[]=[];
+      await gpu.restore(cpu.snapshot());const checkpoints=new Map<number,StructuralSnapshot3D>();let reuseCount=0,fallbackCount=0;
       const edits=(tick:number):StructuralEdit3D[]=>tick===9||tick===13?[{kind:'material',...coordinate(tick===9?1:30),material:MAT.AIR,thermal:0}]:[];
       for(let tick=1;tick<=24;tick++){
         cpu.step(1,{edits:edits(tick)});await gpu.step(1,{edits:edits(tick)});const state=await gpu.snapshot();equalState(state,cpu.snapshot(),`${mode} ${axis} distant support ${tick}`);
@@ -189,7 +189,7 @@ export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLim
         if(tick<=13&&cpu.sample(c.x,c.y,c.z).material!==MAT.STONE)throw Error('Distant supported/control failure bound differs');
         if(axis==='y'&&tick===13&&(cpu.sample(3,2,3).material!==MAT.AIR||cpu.sample(3,3,3).material!==MAT.STONE))throw Error('Contact stack did not fall after its lower root was removed');
         if(gpu.inspectSolve().planReused)reuseCount++;
-        else if(gpu.inspectSolve().fallbackMask){fallbackCount++;fallbacks.push(gpu.inspectSolve());}
+        else if(gpu.inspectSolve().fallbackMask)fallbackCount++;
         if([3,12,13,24].includes(tick))checkpoints.set(tick,state);
         if(tick%4===0)status(`M5 ${mode} distant ${axis} support: ${tick}/24`);
       }
@@ -201,7 +201,7 @@ export async function verifyM5DistantSupport(mode:'dense'|'active',solveBatchLim
       if(solveBatchLimit===1&&!fallbackCount)throw Error('Bounded-attempt fallback was not exercised');
       // Removing one end leaves a 29-cell beam supported from its far end.
       // This exceeded the old 16-pass attempt and restarted every solve.
-      if(solveBatchLimit===32&&fallbackCount)throw Error(`Default budget restarted ${mode}/${axis}: ${JSON.stringify(fallbacks)}`);
+      if(solveBatchLimit===32&&fallbackCount)throw Error('Default budget restarted the long-beam solve');
       results.push({axis,geometry,ticks:24,chunksAlongBeam:8,unbondedContactStack:axis==='y',firstSupportRemovedAt:9,stableThrough:12,lastSupportRemovedAt:13,fellAt:13,restart:3,reuseCount,fallbackCount,solveBatchLimit,exact:true,finalHash:await digest(final)});
     }finally{gpu.close();}
   }
