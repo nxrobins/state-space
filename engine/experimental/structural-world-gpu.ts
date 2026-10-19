@@ -43,7 +43,7 @@ type Pipelines=Record<Stage,GPUComputePipeline>;
 const cold=buildColdTable();
 const total=(values:ArrayLike<number>)=>{let sum=0;for(let i=0;i<values.length;i++)sum+=values[i];return BigInt(sum);};
 const storage=()=>GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC|GPUBufferUsage.COPY_DST;
-export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number};
+export type StructuralSolveStats3D={tick:number;supportPasses:number;loadPasses?:number;componentPasses:number;blockingPasses:number;maxDistance:number;supportedWeight:number;reactionTotal:number;planReused?:boolean;planReusable?:boolean;batchedSolve?:boolean;fallbackMask?:number;listedCells?:number;supportCells?:number;loadCells?:number};
 export type StructuralGpuOptions3D=StructuralWorldOptions3D & {mode?:'dense'|'active';solveBatchLimit?:number;profiling?:boolean;gpuTiming?:boolean};
 
 export class GpuStructuralWorld3D {
@@ -75,7 +75,7 @@ export class GpuStructuralWorld3D {
     const buffer=(size:number,usage:GPUBufferUsageFlags)=>{const b=device.createBuffer({size,usage});this.#owned.push(b);return b;};
     for(let i=0;i<3;i++)this.#banks.push({grid:buffer(bytes,storage()),energyQ:buffer(bytes,storage()),structure:buffer(bytes,storage())});
     this.#cold=buffer(cold.byteLength,storage());device.queue.writeBuffer(this.#cold,0,cold);
-    this.#work=buffer(64+bytes*5,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
+    this.#work=buffer(64+bytes*7,storage());this.#dirty=buffer(bytes/this.chunkSize**3*3+16,storage());
     this.#indirect=buffer(12,storage()|GPUBufferUsage.INDIRECT);this.#activityRead=buffer(12,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#queryResult=buffer(4096*16,storage());this.#queryRead=buffer(4096*16,GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ);
     this.#solveDispatch=buffer(16,storage());
@@ -152,7 +152,7 @@ export class GpuStructuralWorld3D {
       if(this.#fault)throw Error(this.#fault);this.#profiler.mark(trace,'completedAt');return values;
     }finally{if(timer)clearTimeout(timer);}
   }
-  async #control(e:GPUCommandEncoder){e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);const [value]=await this.#submit(e,[{buffer:this.#controlRead,bytes:64}]);if(value[2])throw Error(`Structural solve rejected scratch state (code ${value[2]}).`);if(value[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');return value;}
+  async #control(e:GPUCommandEncoder){e.copyBufferToBuffer(this.#work,0,this.#controlRead,0,64);const [value]=await this.#submit(e,[{buffer:this.#controlRead,bytes:64}]);if(value[2])throw Error(`Structural solve rejected scratch state (code ${value[2]}).`);if(value[13]>this.#solveGroups*256)throw Error('Structural worklist exceeds certified dispatch coverage.');return value;}
   async #converge(stage:'supportRelax'|'componentRelax'|'blockRelax',input:number,structure:number,deadline:number){
     const max=this.width*this.height*this.depth+4;
     for(let count=0;count<max;count+=4){
@@ -205,7 +205,7 @@ export class GpuStructuralWorld3D {
     if(edited)e.copyBufferToBuffer(this.#receipts,0,this.#receiptRead,0,commands.length*2);
     const rows=await this.#submit(e,[{buffer:this.#controlRead,bytes:64},...(edited?[{buffer:this.#receiptRead,bytes:commands.length*2}]:[])]),control=rows[0];
     if(control[2])throw Error(`Structural solve rejected scratch state (code ${control[2]}).`);
-    if(control[13]>this.#solveGroups*64)throw Error('Structural worklist exceeds certified dispatch coverage.');
+    if(control[13]>this.#solveGroups*256)throw Error('Structural worklist exceeds certified dispatch coverage.');
     if(control[8])return{complete:false as const,mask:control[8]};
     if(control[4]!==control[5])throw Error('Structural reactions do not balance supported weight.');
     let external=0n;if(edited)for(let k=0;k<commands.length/4;k++)external+=BigInt(rows[1][k*2+1])-BigInt(rows[1][k*2]);
@@ -215,7 +215,7 @@ export class GpuStructuralWorld3D {
     const deadline=performance.now()+5000,[a,b]=[0,1,2].filter(i=>i!==this.#current),edited=commands.length>0;
     // Each edit can create at most one intact cell. The prior committed count
     // includes all phase changes, and restores count their validated snapshot.
-    this.#solveGroups=Math.ceil(Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4)/64);
+    this.#solveGroups=Math.ceil(Math.min(this.width*this.height*this.depth,this.#memberBound+commands.length/4)/256);
     if(this.#planReusable&&!edited){
       // The previous completed tick certified both graph equality and zero
       // impending damage. No speculative partial support solve is used.
@@ -231,7 +231,7 @@ export class GpuStructuralWorld3D {
       if(plan.complete){
         const e=this.#device.createCommandEncoder(),current=this.#encodeMotionAndMaterial(e,plan.input,plan.damage,plan.normalized,plan.normalized),control=await(finish?finish(e,current):this.#control(e));
         this.#current=current;this.#tick++;this.#revision++;this.#external+=plan.external;this.#planReusable=!edited&&control[6]===0;this.#memberBound=Math.min(this.width*this.height*this.depth,this.#memberBound+(control[14]|0));
-        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13]};return;
+        this.#stats={tick:this.#tick,supportPasses:plan.control[9],loadPasses:plan.control[10],componentPasses:plan.control[11],blockingPasses:plan.control[12],maxDistance:plan.control[1],supportedWeight:plan.control[4],reactionTotal:plan.control[5],planReused:false,planReusable:this.#planReusable,batchedSolve:true,fallbackMask:0,listedCells:plan.control[13],supportCells:plan.control[15],loadCells:plan.control[3]};return;
       }
       fallbackMask=plan.mask;
     }

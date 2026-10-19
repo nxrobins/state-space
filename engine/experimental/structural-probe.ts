@@ -220,7 +220,7 @@ export async function verifyM5ProcessingOrder(){
     if(code.includes('fn supportRelax(')){
       const pattern=/let i=id\.x;if\(i([<>]=?)SHAPE\.w/g;
       code=code.replace(pattern,(_match,comparison:string)=>{mechanicsPermutations++;return `let i=SHAPE.w-1u-id.x;if(i${comparison}SHAPE.w`;});
-      code=code.replaceAll('let ordinal=id.x;',()=>{mechanicsPermutations++;return 'let ordinal=atomicLoad(&work[13])-1u-id.x;';});
+      code=code.replace(/let ordinal=id\.x;if\(ordinal>=atomicLoad\(&work\[(\d+)\]\)\)/g,(_match,header:string)=>{mechanicsPermutations++;return `let ordinal=atomicLoad(&work[${header}])-1u-id.x;if(ordinal>=atomicLoad(&work[${header}]))`;});
     }
     if(code.includes('fn collectLocal(')){
       const marker='for(var k=0u;k<M5_CHUNKS;k++){';
@@ -244,7 +244,7 @@ export async function verifyM5ParentShares(){
  let scratch:GPUBuffer|undefined,device:GPUDevice|undefined,captures=0;
  GPUDevice.prototype.createBuffer=function(descriptor:GPUBufferDescriptor){
   const buffer=original.call(this,descriptor);
-  if(descriptor.size===64+words*5*4){scratch=buffer;device=this;captures++;}
+  if(descriptor.size===64+words*7*4){scratch=buffer;device=this;captures++;}
   return buffer;
  };
  let gpu:Awaited<ReturnType<typeof createStateSpaceStructuralWorld3DGPU>>|undefined,read:GPUBuffer|undefined;
@@ -267,6 +267,8 @@ export async function verifyM5ParentShares(){
    const before=cpu.snapshot(),expected=solveStructure3D({grid:Uint32Array.from(before.packedCells),energyQ:Uint32Array.from(before.energyQ),structure:Uint32Array.from(before.structure)},cpu).loads;
    await gpu.restore(before);cpu.step();await gpu.step();
    equalState(await gpu.snapshot(),cpu.snapshot(),`Parent-share physical state ${material}/${mask}`);
+   const solve=gpu.inspectSolve(),parents=directions.filter((_,side)=>mask&(1<<side)).length;
+   if(solve.supportCells!==1||solve.loadCells!==parents)throw Error('Structural frontier lists differ from the parent-share graph');
    const encoder=device.createCommandEncoder();encoder.copyBufferToBuffer(scratch,64+words*4,read,0,words*4);device.queue.submit([encoder.finish()]);
    await read.mapAsync(GPUMapMode.READ);const actual=new Uint32Array(read.getMappedRange()).slice();read.unmap();
    for(let z=0;z<8;z++)for(let y=0;y<8;y++)for(let x=0;x<8;x++){

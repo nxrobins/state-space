@@ -35,7 +35,9 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
   const prefix=base.slice(0,base.indexOf('@compute'))+mechanical;
   const mechanics=prefix+`
 // Header: changed, maxDistance, error, reserved, supportedWeight, reactionTotal.
-// Planes: support distance, load, component root (canonical), blocked root.
+// Planes: support distance, load, component root, blocked root, all members,
+// non-root support members, and load receivers. Planes 2/3 cache DAG masks
+// during load relaxation and are fully replaced by componentInit.
 @group(0) @binding(9) var<storage,read_write> work:array<atomic<u32>>;
 @group(0) @binding(10) var<storage,read> commands:array<vec4u>;
 @group(0) @binding(11) var<storage,read_write> receipts:array<vec2u>;
@@ -131,7 +133,9 @@ fn rootSupport(i:u32)->bool{
  var d=INF;if(intact(i)&&rootSupport(i)){d=0u;}planWrite(0u,i,d);planWrite(1u,i,0u);
  // Every intact cell is appended exactly once. The list remains a superset
  // after damage; removed cells are rejected by the unchanged stage predicates.
- if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);}
+ if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);
+  if(d!=0u){let support=atomicAdd(&work[15],1u);planWrite(5u,support,i);}
+ }
 }
 @compute @workgroup_size(64) fn supportRelax(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w||!intact(i)){return;}var best=planRead(0u,i);if(best==0u){return;}
@@ -174,6 +178,7 @@ fn rootSupport(i:u32)->bool{
   if(distance==level+1u&&(bonded||side==2u)){children|=1u<<side;}
  }}
  planWrite(2u,i,parents);planWrite(3u,i,children);
+ if(children!=0u){let receiver=atomicAdd(&work[3],1u);planWrite(6u,receiver,i);}
 }
 // On the fixed support-distance DAG, each predecessor's integer share is
 // monotone in the child's load. Atomic maxima converge to the same exact load
@@ -263,8 +268,9 @@ fn moving(i:u32)->bool{return intact(i)&&planRead(3u,storageOf(planRead(2u,i)))=
   for(const stage of STRUCTURAL_LIST_STAGES){
     const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
     const sleeping=(STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'';
-    compact=replace(compact,prefix,prefix.replace('let i=id.x;',
-      sleeping+'let ordinal=id.x;if(ordinal>=atomicLoad(&work[13])){return;}let i=planRead(4u,ordinal);'));
+    const [header,plane]=stage==='supportRelax'?[15,5]:stage==='loadRelax'?[3,6]:[13,4];
+    compact=replace(compact,prefix,prefix.replace('@workgroup_size(64)','@workgroup_size(256)').replace('let i=id.x;',
+      sleeping+`let ordinal=id.x;if(ordinal>=atomicLoad(&work[${header}])){return;}let i=planRead(${plane}u,ordinal);`));
   }
   const specialize=(source:string)=>`const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a,b)=>a*b,1)}u);\n`+source.replaceAll('p.shape','SHAPE');
   return{physics:specialize(physics),mechanics:specialize(compact)};
