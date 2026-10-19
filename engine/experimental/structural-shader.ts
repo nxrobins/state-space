@@ -3,7 +3,7 @@ import { chunkShaders } from './3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.
-export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadRelax','loadSummary','componentInit','componentRelax','blockInit','blockRelax'] as const;
+export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadRelax','loadSummary','componentRelax','blockInit','blockRelax'] as const;
 export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
 
 export function structuralShaders(edge:number,shape:readonly number[]) {
@@ -37,20 +37,12 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
 // Header: changed, maxDistance, error, reserved, supportedWeight, reactionTotal.
 // Planes: support distance, load, component root, blocked root, all members,
 // non-root support members, and load receivers. Planes 2/3 cache DAG masks
-// during load relaxation; componentInit replaces them for all listed members.
+// during load relaxation and are fully replaced by componentInit.
 @group(0) @binding(9) var<storage,read_write> work:array<atomic<u32>>;
 @group(0) @binding(10) var<storage,read> commands:array<vec4u>;
 @group(0) @binding(11) var<storage,read_write> receipts:array<vec2u>;
 @group(0) @binding(13) var<storage,read_write> queryWords:array<vec4u>;
 @group(0) @binding(14) var<storage,read_write> solveDispatch:array<u32>;
-// Separate immutable dispatch arguments from the per-iteration convergence flag.
-// Each domain is written once before its loop, avoiding validation of a changing
-// indirect buffer on every iteration. Zero work stays an exact empty dispatch.
-@group(0) @binding(15) var<storage,read_write> listDispatch:array<u32>;
-fn listGroups(at:u32,count:u32){listDispatch[at]=(count+255u)/256u;listDispatch[at+1u]=1u;listDispatch[at+2u]=1u;}
-@compute @workgroup_size(1) fn prepareSupport(){listGroups(0u,atomicLoad(&work[13]));listGroups(4u,atomicLoad(&work[15]));}
-@compute @workgroup_size(1) fn prepareLoad(){listGroups(8u,atomicLoad(&work[3]));}
-@compute @workgroup_size(1) fn prepareComponents(){listGroups(12u,select(atomicLoad(&work[13]),0u,reachabilityPlan()));}
 @compute @workgroup_size(1) fn relaxStart(){
  atomicStore(&work[0],0u);solveDispatch[0]=select(0u,1u,atomicLoad(&work[13])!=0u);solveDispatch[1]=1u;solveDispatch[2]=1u;solveDispatch[3]=0u;
 }
@@ -180,7 +172,7 @@ fn rootSupport(i:u32)->bool{
 }
 @compute @workgroup_size(64) fn loadInit(@builtin(global_invocation_id) id:vec3u){
  let i=id.x;if(i>=p.shape.w){return;}let level=planRead(0u,i);planWrite(1u,i,select(weight(i),0u,level==INF));
- // Cache the fixed DAG in scratch planes that componentInit later replaces.
+ // Cache the fixed DAG in scratch planes that componentInit fully replaces.
  // A leaf has its final own weight immediately; it never needs load relaxation.
  var parents=0u;var children=0u;
  if(level!=INF){for(var side=0u;side<6u;side++){
