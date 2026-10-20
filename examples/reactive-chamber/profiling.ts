@@ -23,7 +23,7 @@ export async function profileChamber(scenario: ScenarioId) {
   const { registry, session } = await createChamber(scenario);
   const command = {
     kind: 'heat',
-    cell: [...(scenario === 'flow' ? SCENARIOS[scenario].ice : SCENARIOS[scenario].support)],
+    cell: [...(scenario === 'flow' ? SCENARIOS[scenario].secondary : SCENARIOS[scenario].primary)],
   };
   const timings: Record<string, Timing> = {};
   const measure = <T>(key: string, action: () => T): T => {

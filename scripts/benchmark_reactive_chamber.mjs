@@ -1,4 +1,4 @@
-// Fixed four-profile, two-tick CPU diagnostic. No browser or GPU workloads.
+// Fixed seven-profile, two-tick CPU diagnostic. No browser or GPU workloads.
 import {build} from 'esbuild';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -11,7 +11,7 @@ const sourceHashes = {};
 for (const path of [...Object.keys(bundle.metafile.inputs), 'scripts/benchmark_reactive_chamber.mjs', 'scripts/verification_guard.mjs'].sort()) sourceHashes[path] = createHash('sha256').update(await readFile(path)).digest('hex');
 const {profileChamber} = await import(`../${root}/profile.mjs`);
 const runs = [];
-for (const scenario of ['chamber', 'collapse', 'flow', 'chain']) {
+for (const scenario of ['chamber', 'collapse', 'flow', 'chain', 'conduction', 'insulation', 'wax']) {
   for (let sample = 0; sample < 3; sample++) {
     console.log(`Profiling ${scenario} sample ${sample + 1}/3`);
     runs.push(await profileChamber(scenario));

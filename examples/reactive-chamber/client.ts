@@ -1,6 +1,5 @@
 /** Browser controller. Latest intent only; all published state follows a worker acknowledgement. */
 import {
-  createReactiveMaterialRegistry3D,
   createReactiveWorkerClient3D,
   reactiveBrowserWorkerTransport3D,
   type ReactiveWorkerTransport3D,
@@ -9,6 +8,7 @@ import {
 } from 'state-space-engine/experimental/3d/reactive-materials';
 import {
   CHAMBER,
+  createChamberRegistry,
   SCENARIOS,
   readScenario,
   type ScenarioId,
@@ -39,7 +39,7 @@ export async function openChamber(options: ClientOptions = {}) {
   const workerUrl = new URL(options.workerUrl ?? new URL('./worker.js', import.meta.url));
   workerUrl.searchParams.set('scenario', scenario);
   workerUrl.searchParams.set('profile', options.profile ? '1' : '0');
-  const registry = await createReactiveMaterialRegistry3D(),
+  const registry = await createChamberRegistry(scenario),
     worker = new Worker(workerUrl, {
       type: 'module',
     });

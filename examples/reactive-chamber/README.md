@@ -1,6 +1,6 @@
 # Reactive sandbox
 
-Three fixed 16³ scenarios and the original 8³ reference chamber, built entirely on the public reactive-materials SDK. CPU physics
+Six fixed 16³ scenarios and the original 8³ reference chamber, built entirely on the public reactive-materials SDK. CPU physics
 runs in a dedicated browser Worker; WebGPU renders the acknowledged terrain and
 actor. It does not convert reactive snapshots into M5 snapshots or change the
 M5 rules, optimized kernels, or existing tactical slab example.
@@ -16,6 +16,9 @@ npm run verify:macos -- --stage chamber-visible
 npm run verify:macos -- --stage sandbox-collapse-visible
 npm run verify:macos -- --stage sandbox-flow-visible
 npm run verify:macos -- --stage sandbox-chain-visible
+npm run verify:macos -- --stage sandbox-conduction-visible
+npm run verify:macos -- --stage sandbox-insulation-visible
+npm run verify:macos -- --stage sandbox-wax-visible
 ```
 
 Each fixed macOS acceptance stage owns its Chrome process, uses the existing
@@ -37,6 +40,15 @@ local runtime hold on startup and fails closed on an unreadable existing hold.
 
 ## Application contract
 
+- **Copper heat path (16³):** heat the copper inlet once, commit, then commit four
+  waits. By tick 10 the distant wax melts and leaves its shelf. A second heat
+  pulse can also melt the copper inlet.
+- **Ceramic heat barrier (16³):** the same geometry and heat pulse, with the middle
+  copper cell replaced by ceramic. Wax remains solid while heat trapped at the
+  inlet melts the copper, which flows away and refreezes.
+- **Wax release valve (16³):** water starts trapped above a solid wax plug. Heat the
+  plug and commit, then wait: water escapes. Choose **Melted wax**, cool and commit
+  to freeze it where it moves. Further heating can ignite wax beside air.
 - **Burning support (16³):** an anchored stone post joins a wooden connector to a
   two-cell platform. Heating it burns fuel, retires bonds, drops the platform and
   removes the actor's footing. Untouched and cooled controls remain supported.
@@ -49,7 +61,8 @@ local runtime hold on startup and fails closed on an unreadable existing hold.
 - **Reference chamber (8³):** the original scene, rules, pulse, initial-state and
   first-commit digests are preserved for regression and old-save compatibility.
 - One command previews exactly two complete reactive ticks. The flow profile uses
-  a 15,360 Q pulse; the other profiles use 60,160 Q. Cooling removes up to the same
+  a 15,360 Q pulse; conduction/insulation use 46,080 Q, wax uses 20,480 Q,
+  and the original burning-support profiles use 60,160 Q. Cooling removes up to the same
   amount, stopping at chemical fuel energy. Both debit their **actual absolute
   external energy** from a finite 481,280 Q resource. Waiting costs no thermal
   resource. No resource is spent until the preview commits.
@@ -81,7 +94,10 @@ including session revision, is covered by a canonical digest.
 
 Import is limited to 1 MiB and 64 commands. It validates the catalog and application
 policy and fixed world identity, then replays in a new private worker and checks every boundary and the
-final snapshot. The saved world identity selects the correct profile, including legacy 8³ saves.
+final snapshot. The saved world identity selects the correct profile, including legacy 8³ saves. The three material scenes select the fixed thermal v1
+catalog; the original four scenes retain their builtin catalog. Definitions from
+an imported catalog must exactly match that profile, so imports cannot silently
+retune physics or introduce arbitrary material packs.
 Only a fully verified worker replaces the visible chamber. A
 failed import leaves the old chamber usable. Exact replay also preserves session
 revision without changing the SDK's deliberately revision-advancing `restore`.
@@ -95,7 +111,10 @@ missing motion capture, rejected edits, finite resources, replay, validation,
 scene isolation and picking. CI builds the browser bundles, checks their types,
 and includes these tests in the bounded CPU suite. The companion
 `reactive-chamber-client.test.ts` executes the real worker host through a cloned
-asynchronous port to cover discard timeouts, shutdown waiters and preview ownership.
+asynchronous port to cover discard timeouts, shutdown waiters, preview ownership
+and exact continuation under both catalogs. The material suites exercise the
+conductor/barrier comparison, wax valve, phase/combustion conservation and catalog
+compatibility. [Pack definitions and SDK use](../../docs/sdk/reactive/materials.md#thermal-material-pack-v1).
 
 The macOS stages exercise real DOM controls and Workers, direct/worker complete
 state equality, preview comparison, supersession, cancellation, save/load,

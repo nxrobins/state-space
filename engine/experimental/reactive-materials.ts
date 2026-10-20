@@ -84,3 +84,4 @@ export { REACTIVE_CHANGE_RULES_3D, REACTIVE_CHANGE_LIMITS_3D, REACTIVE_CHANGE_CH
   type ReactiveChangeJob3D, type ReactiveChangeProgress3D } from './reactive/reactive-changes.js';
 export { REACTIVE_QUERY_RULES_3D, REACTIVE_QUERY_LIMITS_3D,
   type ReactiveWorkerQuery3D, type ReactiveWorkerQueryResult3D, type ReactiveWorkerQueryBatch3D, type ReactiveQueryProgress3D } from './reactive/reactive-worker-queries.js';
+export { createThermalMaterialRegistry3D, THERMAL_MATERIAL_PACK_3D, THERMAL_MAT_3D } from './reactive/thermal-materials.js';

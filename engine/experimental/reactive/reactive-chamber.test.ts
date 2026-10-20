@@ -365,7 +365,7 @@ describe('16³ sandbox profiles', () => {
         const { registry, session } = await createChamber(scenario);
         const branch = prepareCommand(registry, session, {
           kind: 'heat',
-          cell: [...SCENARIOS[scenario].support],
+          cell: [...SCENARIOS[scenario].primary],
         });
         const preview = finishBranch(branch, work);
         expect(preview.state.game.burned).toBeGreaterThan(0);
@@ -397,13 +397,13 @@ describe('16³ sandbox profiles', () => {
       finishBranch(branch);
       return session.commit(branch).snapshot;
     };
-    const melted = apply({ kind: 'heat', cell: [...SCENARIOS.flow.ice] });
+    const melted = apply({ kind: 'heat', cell: [...SCENARIOS.flow.secondary] });
     let water = melted.domains.world.block.packedCells.findIndex((v) => (v & 255) === MAT.WATER);
     expect(water).toBeGreaterThanOrEqual(0);
     const flowed = apply({ kind: 'wait' });
     water = flowed.domains.world.block.packedCells.findIndex((v) => (v & 255) === MAT.WATER);
     expect(water).toBeGreaterThanOrEqual(0);
-    expect(coordinate(water, 16)[1]).toBeGreaterThan(SCENARIOS.flow.ice[1]);
+    expect(coordinate(water, 16)[1]).toBeGreaterThan(SCENARIOS.flow.secondary[1]);
     const frozen = apply({ kind: 'cool', cell: coordinate(water, 16) });
     expect(frozen.domains.world.block.packedCells.some((v) => (v & 255) === MAT.ICE)).toBe(true);
     expect(frozen.game.phaseChanges).toBeGreaterThanOrEqual(2);

@@ -279,6 +279,9 @@ npm run verify:macos -- --stage chamber-visible
 npm run verify:macos -- --stage sandbox-collapse-visible
 npm run verify:macos -- --stage sandbox-flow-visible
 npm run verify:macos -- --stage sandbox-chain-visible
+npm run verify:macos -- --stage sandbox-conduction-visible
+npm run verify:macos -- --stage sandbox-insulation-visible
+npm run verify:macos -- --stage sandbox-wax-visible
 ```
 
 Each 16³ stage requires the completed, source-identical 8³ receipt from the last

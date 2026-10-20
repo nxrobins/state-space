@@ -1,5 +1,4 @@
 /// <reference types="@webgpu/types" />
-import { MAT } from 'state-space-engine/experimental/3d/reactive-materials';
 import { openChamber, loadChamber, type ChamberClient } from './client.js';
 import {
   CHAMBER,
@@ -30,7 +29,7 @@ const button = (id: string) => element<HTMLButtonElement>(id),
 let client: ChamberClient | null = null;
 let scene: ChamberScene | null = null,
   committed: ChamberSnapshot | null = null;
-let selected: Cell = [...SCENARIOS[scenario].support],
+let selected: Cell = [...SCENARIOS[scenario].primary],
   showPreview = true,
   yaw = -0.65,
   pitch = 0.42;
@@ -53,13 +52,18 @@ const notice = (text: string) => {
 };
 function updateInspection() {
   const displayed = lifecycle.current?.host.displayed?.scene;
-  if (!displayed || !client) return;
+  if (
+    !displayed ||
+    !client ||
+    sceneData(displayed).snapshot.worldId !== SCENARIOS[scenario].worldId
+  )
+    return;
   const s = sceneData(displayed).snapshot,
     inspected = displayed.selected ?? selected,
     info = inspectScene(displayed, inspected),
     material = client.registry.material(info.material);
   element('inspection').textContent =
-    `${material.name} · (${inspected.join(', ')}) · energy ${info.energyQ} Q · integrity ${info.integrity}/255`;
+    `${material.name} · (${inspected.join(', ')}) · temperature ${info.thermal} · energy ${info.energyQ} Q · integrity ${info.integrity}/255`;
   element('view-label').textContent =
     displayed.kind === 'preview' ? 'PREVIEW · NOT COMMITTED' : 'COMMITTED WORLD';
   element('view-label').dataset.identity = info.identity;
@@ -127,7 +131,9 @@ function bind(next: ChamberClient) {
   unsubscribe();
   client = next;
   scenario = next.scenario;
-  selected = [...(scenario === 'flow' ? SCENARIOS[scenario].ice : SCENARIOS[scenario].support)];
+  selected = [
+    ...(scenario === 'flow' ? SCENARIOS[scenario].secondary : SCENARIOS[scenario].primary),
+  ];
   describeScenario();
   committed = next.snapshot();
   sceneKey = '';
@@ -214,29 +220,32 @@ button('compare').onclick = () => {
   refresh();
 };
 button('select-support').onclick = () => {
-  selected = [...SCENARIOS[scenario].support];
+  selected = [...SCENARIOS[scenario].primary];
   refresh();
 };
 button('select-ice').onclick = () => {
-  selected = [...SCENARIOS[scenario].ice];
+  selected = [...SCENARIOS[scenario].secondary];
   refresh();
 };
 button('select-water').onclick = () => {
   const displayed = lifecycle.current?.host.displayed?.scene;
   if (!displayed || sceneData(displayed).snapshot.worldId !== SCENARIOS[scenario].worldId) return;
   const block = sceneData(displayed).snapshot.domains.world.block;
-  const water = block.packedCells.findIndex((word) => (word & 255) === MAT.WATER);
-  if (water < 0) {
-    notice('No liquid water in this view.');
+  const liquid = block.packedCells.findIndex((word) => (word & 255) === SCENARIOS[scenario].liquid);
+  if (liquid < 0) {
+    notice(`No ${SCENARIOS[scenario].liquidLabel.toLowerCase()} in this view.`);
     return;
   }
-  selected = coordinate(water, block.width);
+  selected = coordinate(liquid, block.width);
   refresh();
 };
 function describeScenario() {
   const info = SCENARIOS[scenario];
   element<HTMLSelectElement>('scenario').value = scenario;
   element('scenario-description').textContent = info.description;
+  button('select-support').textContent = info.primaryLabel;
+  button('select-ice').textContent = info.secondaryLabel;
+  button('select-water').textContent = info.liquidLabel;
   element('dimensions').textContent = `${info.size} × ${info.size} × ${info.size}`;
 }
 async function selectScenario(value: ScenarioId) {

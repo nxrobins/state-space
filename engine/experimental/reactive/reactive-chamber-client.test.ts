@@ -9,6 +9,7 @@ import {
   type ChamberClient,
 } from '../../../examples/reactive-chamber/client.js';
 import {
+  SCENARIOS,
   createChamber,
   chamberPolicy,
   readScenario,
@@ -155,23 +156,29 @@ describe('chamber client failure and ownership boundaries', () => {
   });
 });
 
-test('16³ saved profile selects its own worker and resumes the same committed history', async () => {
-  const client = await open({ scenario: 'flow' });
-  expect((await client.preview({ kind: 'heat', cell: [8, 6, 8] })).status).toBe('ready');
-  await client.commit();
-  const saved = client.exportSave();
-  const loaded = await loadChamber(saved, { scenario: 'chamber' });
-  clients.push(loaded);
-  expect(loaded.scenario).toBe('flow');
-  expect(loaded.exportSave()).toBe(saved);
-  for (const target of [client, loaded]) {
-    expect((await target.preview({ kind: 'wait' })).status).toBe('ready');
-    await target.commit();
-  }
-  expect(loaded.exportSave()).toBe(client.exportSave());
-});
+test.each(['flow', 'conduction', 'insulation', 'wax'] as const)(
+  '%s save selects its own worker/catalog and resumes the same committed history',
+  async (scenario) => {
+    const client = await open({ scenario });
+    const cell = [
+      ...(scenario === 'flow' ? SCENARIOS.flow.secondary : SCENARIOS[scenario].primary),
+    ] as [number, number, number];
+    expect((await client.preview({ kind: 'heat', cell })).status).toBe('ready');
+    await client.commit();
+    const saved = client.exportSave();
+    const loaded = await loadChamber(saved, { scenario: 'chamber' });
+    clients.push(loaded);
+    expect(loaded.scenario).toBe(scenario);
+    expect(loaded.exportSave()).toBe(saved);
+    for (const target of [client, loaded]) {
+      expect((await target.preview({ kind: 'wait' })).status).toBe('ready');
+      await target.commit();
+    }
+    expect(loaded.exportSave()).toBe(client.exportSave());
+  },
+);
 
-test('water selection ignores a previous world until the replacement frame completes', async () => {
+test('selection and inspection ignore previous dimensions and catalogs until the replacement frame completes', async () => {
   const elements = new Map<string, { disabled: boolean; dataset: object; onclick?: () => void }>();
   const element = (id: string) => {
     if (!elements.has(id)) elements.set(id, { disabled: false, dataset: {} });
@@ -183,12 +190,14 @@ test('water selection ignores a previous world until the replacement frame compl
   type Frame = { scene: ChamberScene; camera: ChamberCamera };
   let displayed: Frame | null = null,
     pending: Frame | null = null;
+  let notifyPaint = () => {};
   vi.mocked(openChamberView).mockImplementation(async (_canvas, options) => ({
     renderer: {} as Awaited<ReturnType<typeof openChamberView>>['renderer'],
     get displayed() {
       return displayed;
     },
     present(scene, camera) {
+      notifyPaint = options.onPaint;
       pending = { scene, camera };
     },
     async painted() {
@@ -222,6 +231,17 @@ test('water selection ignores a previous world until the replacement frame compl
     await app.painted();
     expect(app.scene!.selected).toEqual(SUPPORT);
     expect((await app.preview('heat'))?.status).toBe('ready');
+    await app.selectScenario('conduction');
+    await app.painted();
+    const sample = app.scene!;
+    expect(app.client!.registry.material(32).name).toBe('copper');
+    await app.selectScenario('chamber');
+    expect(app.scene).toBe(sample);
+    // An old completed frame can notify while the new client/catalog is installed.
+    expect(() => notifyPaint()).not.toThrow();
+    expect(() => element('select-water').onclick!()).not.toThrow();
+    await app.painted();
+    expect(app.scene!.selected).toEqual(SUPPORT);
   } finally {
     await app.stop();
     vi.mocked(openChamberView).mockReset();
