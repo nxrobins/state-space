@@ -223,7 +223,7 @@ button('select-ice').onclick = () => {
 };
 button('select-water').onclick = () => {
   const displayed = lifecycle.current?.host.displayed?.scene;
-  if (!displayed) return;
+  if (!displayed || sceneData(displayed).snapshot.worldId !== SCENARIOS[scenario].worldId) return;
   const block = sceneData(displayed).snapshot.domains.world.block;
   const water = block.packedCells.findIndex((word) => (word & 255) === MAT.WATER);
   if (water < 0) {

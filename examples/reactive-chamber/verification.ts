@@ -342,7 +342,8 @@ export async function verifyChamber(app: typeof chamberApp) {
     publish('native pixels, depth, bounded camera frames, and disposal');
     report.render = await verifyRendering(initial);
     const previousFrames = app.renderer!.frameCount,
-      previousTimings = app.renderer!.timings;
+      previousTimings = app.renderer!.timings,
+      previousWorstMs = app.renderer!.worstFrameMs;
     await app.stop();
     const startup = app.start();
     const interrupted = app.stop();
@@ -356,7 +357,9 @@ export async function verifyChamber(app: typeof chamberApp) {
     click('heat');
     await until(() => app.client!.state.hasPreview);
     await app.painted();
+    const worstMs = Math.max(previousWorstMs, app.renderer!.worstFrameMs);
     report.applicationFrames = {
+      worstMs,
       count: previousFrames + app.renderer!.frameCount,
       completedMs: [...previousTimings, ...app.renderer!.timings],
     };
@@ -364,6 +367,7 @@ export async function verifyChamber(app: typeof chamberApp) {
       previousFrames + app.renderer!.frameCount + 132 <= 256,
       'Browser frame budget exceeded.',
     );
+    assert(worstMs <= 16.667, 'Completed application frame exceeds 16.667ms.');
     const latency = report.latency as {
       p95Ms: number;
       cancellationP95Ms: number;
@@ -700,10 +704,11 @@ export async function verifySandbox(app: typeof chamberApp) {
     report.cpu = await profileChamber(scenario);
     report.render = await verifyRendering(initial);
     await app.painted();
-    const completedMs = app.renderer!.timings;
-    report.applicationFrames = { count: app.renderer!.frameCount, completedMs };
+    const completedMs = app.renderer!.timings,
+      worstMs = app.renderer!.worstFrameMs;
+    report.applicationFrames = { count: app.renderer!.frameCount, completedMs, worstMs };
     assert(app.renderer!.frameCount + 132 <= 512, 'Sandbox frame budget exceeded.');
-    assert(Math.max(...completedMs) <= 16.667, 'Completed application frame exceeds 16.667ms.');
+    assert(worstMs <= 16.667, 'Completed application frame exceeds 16.667ms.');
     report.journeys = [
       'scenario-switch-during-frame',
       'stable-control',

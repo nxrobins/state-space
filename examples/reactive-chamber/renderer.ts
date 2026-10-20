@@ -33,6 +33,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     failure: string | null = null;
   let cached: ChamberScene | null = null,
     frames = 0,
+    worstFrameMs = 0,
     setupScope = true;
   const timings: number[] = [];
   device.pushErrorScope('validation');
@@ -81,6 +82,9 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     return {
       get timings() {
         return [...timings];
+      },
+      get worstFrameMs() {
+        return worstFrameMs;
       },
       get frameCount() {
         return frames;
@@ -189,7 +193,9 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
           }
           cached = scene;
           frames++;
-          timings.push(performance.now() - start);
+          const elapsed = performance.now() - start;
+          worstFrameMs = Math.max(worstFrameMs, elapsed);
+          timings.push(elapsed);
           if (timings.length > 256) timings.shift();
           return scene.identity;
         });
