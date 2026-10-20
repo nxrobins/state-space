@@ -40,6 +40,7 @@ def main():
         *ROOT.glob("examples/sdk/*"),
         *ROOT.glob("examples/structural-cavern/*"),
         *ROOT.glob("examples/reactive-chamber/*"),
+        *ROOT.glob("examples/shared/*"),
         *ROOT.glob("dist/reactive-chamber/*"),
         ROOT / "scripts/build_reactive_chamber.mjs",
         ROOT / "web/frame-pump.js", ROOT / "web/frame-clock.js",

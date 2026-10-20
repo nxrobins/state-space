@@ -28,9 +28,21 @@ made private to the new subscriber to prevent rebroadcast loops.
 lint, SDK/browser builds and native acceptance (receipt
 `2a954019ed1f4fef9a415870d3092b84`). No blocking finding remains.
 
+## Stage 3 — lifecycle and presentation ownership
+
+Extracted a DOM-independent lifecycle controller, a canvas/GPU owner, and a
+shared frame pump. Reset and import use one candidate replacement path. Picking
+uses the camera of the completed frame. Slab and chamber keep their distinct
+runtime-hold policies. Review covered stop during both startup phases, failed
+replacement, stop during replacement/old-client disposal, observer exceptions,
+and repeated shutdown. Cleanup must finish before startup can begin again.
+63 focused tests passed (receipt `857ddeb4316b425592cf8aa175385622`), plus types,
+lint and browser build. Native validation found an unbound browser animation
+callback; fixed with explicit wrappers and reran all 13 journeys successfully
+(receipt `e3649c60c53b401bbb75b109d8abe073`). No blocking finding remains.
+
 ## Remaining stages
 
-3. Chamber lifecycle, replacement and presentation coordination.
 4. Neutral bounded-data validation and copying.
 5. SDK entry manifest, shared build configuration and automatic lint coverage.
 6. Deterministic shared fault-injecting test transport.

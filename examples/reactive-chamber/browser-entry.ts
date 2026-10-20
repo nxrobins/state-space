@@ -6,37 +6,39 @@ import {
   prepareScene,
   inspectScene,
   pickElementCell,
-  canvasSize,
   orbitCamera,
   sceneData,
   type ChamberScene,
 } from './presentation.js';
-import { createChamberRenderer, type ChamberRenderer } from './renderer.js';
+import { createChamberLifecycle } from './lifecycle.js';
+import { openChamberView } from './view.js';
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const button = (id: string) => element<HTMLButtonElement>(id),
   canvas = element<HTMLCanvasElement>('world');
-let client: ChamberClient | null = null,
-  device: GPUDevice | null = null,
-  renderer: ChamberRenderer | null = null,
-  context: GPUCanvasContext | null = null;
-let depth: GPUTexture | null = null,
-  scene: ChamberScene | null = null,
+let client: ChamberClient | null = null;
+let scene: ChamberScene | null = null,
   displayed: ChamberScene | null = null,
   committed: ChamberSnapshot | null = null;
 let selected: Cell = [...SUPPORT],
   showPreview = true,
   yaw = -0.65,
-  pitch = 0.42,
-  raf = 0,
-  dirty = false,
-  drawing: Promise<void> | null = null;
-let epoch = 0,
-  stopping: Promise<void> | null = null;
-let switching = false,
-  unsubscribe = () => {},
-  sceneKey = '',
-  resize: ResizeObserver | null = null,
-  destroyed = false;
+  pitch = 0.42;
+let unsubscribe = () => {},
+  sceneKey = '';
+const lifecycle = createChamberLifecycle({
+  openClient: openChamber,
+  openHost: () =>
+    openChamberView(canvas, {
+      onPaint(value) {
+        displayed = value;
+        updateInspection();
+      },
+      onError(message) {
+        notice(message);
+        void lifecycle.stop().catch((error) => notice(errorText(error)));
+      },
+    }),
+});
 const errorText = (error: unknown) => (error instanceof Error ? error.message : 'Chamber failed.');
 const notice = (text: string) => {
   element('notice').textContent = text;
@@ -57,45 +59,12 @@ function updateInspection() {
   element('events').textContent =
     `Fuel cells burned    ${s.game.burned}\nPhase changes        ${s.game.phaseChanges}\nFalling cell steps   ${s.game.fallen}\nLost footing         ${s.game.lostFooting}\nExternal energy      ${s.accounting.externalQ} Q`;
 }
-async function draw() {
-  if (!scene || !device || !renderer || !context || destroyed) return;
-  const captured = scene;
-  dirty = false;
-  const rect = canvas.getBoundingClientRect(),
-    { width, height } = canvasSize(rect.width, rect.height, devicePixelRatio);
-  if (canvas.width !== width || canvas.height !== height || !depth) {
-    depth?.destroy();
-    canvas.width = width;
-    canvas.height = height;
-    depth = device.createTexture({
-      size: [width, height],
-      format: 'depth32float',
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-  }
-  await renderer.render(captured, orbitCamera(yaw, pitch), context.getCurrentTexture(), depth);
-  displayed = captured;
-  updateInspection();
-}
 function requestDraw() {
-  if (!scene || !device || !renderer || destroyed) return;
-  dirty = true;
-  if (raf || drawing) return;
-  raf = requestAnimationFrame(() => {
-    raf = 0;
-    drawing = draw()
-      .catch((error) => {
-        notice(errorText(error));
-        void stop();
-      })
-      .finally(() => {
-        drawing = null;
-        if (dirty && !destroyed) requestDraw();
-      });
-  });
+  if (scene) lifecycle.current?.host.present(scene, orbitCamera(yaw, pitch));
 }
 function refresh() {
   if (!client) return;
+  const switching = lifecycle.status !== 'running';
   const state = client.state,
     candidate = state.hasPreview ? client.previewSnapshot() : null;
   if (state.status === 'ready') committed = client.snapshot();
@@ -151,120 +120,16 @@ function bind(next: ChamberClient) {
   unsubscribe = next.onChange(refresh);
   refresh();
 }
-async function checkRuntimeHold() {
-  const response = await fetch('../verification/safety-hold.json', {
-    cache: 'no-store',
-    signal: AbortSignal.timeout(2000),
-  });
-  if (response.status === 404) return;
-  if (!response.ok) throw Error('Could not check the local runtime hold.');
-  const hold = await response.json();
-  if (
-    !hold ||
-    typeof hold !== 'object' ||
-    Array.isArray(hold) ||
-    (Object.hasOwn(hold, 'blockRecovery') && hold.blockRecovery !== false)
-  )
-    throw Error('Runtime verification is held for incident review.');
-}
-async function start() {
-  if (client || switching) return;
-  const generation = ++epoch;
-  switching = true;
-  destroyed = false;
-  button('start').disabled = true;
-  notice('');
-  let pendingDevice: GPUDevice | null = null,
-    pendingRenderer: ChamberRenderer | null = null,
-    pendingClient: ChamberClient | null = null;
-  try {
-    await checkRuntimeHold();
-    if (!navigator.gpu) throw Error('This chamber needs a browser with WebGPU.');
-    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'low-power' });
-    if (!adapter || adapter.info.isFallbackAdapter)
-      throw Error('A native GPU adapter is required.');
-    pendingDevice = await adapter.requestDevice();
-    const ownedDevice = pendingDevice;
-    void ownedDevice.lost.then((info) => {
-      if (device === ownedDevice && !destroyed) {
-        notice(`Device lost: ${info.message}`);
-        void stop();
-      }
-    });
-    pendingDevice.addEventListener('uncapturederror', (event) => notice(event.error.message));
-    pendingRenderer = await createChamberRenderer(
-      pendingDevice,
-      navigator.gpu.getPreferredCanvasFormat(),
-    );
-    pendingClient = await openChamber();
-    if (generation !== epoch) return;
-    context = canvas.getContext('webgpu');
-    if (!context) throw Error('WebGPU canvas unavailable.');
-    context.configure({
-      device: pendingDevice,
-      format: navigator.gpu.getPreferredCanvasFormat(),
-      alphaMode: 'opaque',
-    });
-    device = pendingDevice;
-    renderer = pendingRenderer;
-    bind(pendingClient);
-    pendingDevice = null;
-    pendingRenderer = null;
-    pendingClient = null;
-    resize = new ResizeObserver(requestDraw);
-    resize.observe(canvas);
-    element('empty').hidden = true;
-    button('stop').disabled = false;
-  } catch (error) {
-    if (generation === epoch) {
-      notice(errorText(error));
-      await stop();
-    }
-  } finally {
-    await pendingClient?.close().catch(() => {});
-    await pendingRenderer?.close();
-    pendingDevice?.destroy();
-    if (generation === epoch) {
-      switching = false;
-      button('start').disabled = false;
-      refresh();
-    }
-  }
-}
-function stop(): Promise<void> {
-  if (stopping) return stopping;
-  epoch++;
-  switching = true;
-  button('start').disabled = true;
-  destroyed = true;
-  if (raf) cancelAnimationFrame(raf);
-  raf = 0;
-  dirty = false;
-  resize?.disconnect();
-  resize = null;
-  unsubscribe();
-  unsubscribe = () => {};
-  const old = client;
-  client = null;
-  stopping = (async () => {
-    try {
-      await old?.close();
-    } catch {
-      /* A failed worker has already terminated. */
-    }
-    await drawing;
-    await renderer?.close();
-    renderer = null;
-    depth?.destroy();
-    depth = null;
-    context?.unconfigure();
-    context = null;
-    device?.destroy();
-    device = null;
+function syncLifecycle() {
+  const current = lifecycle.current;
+  if (current && current.client !== client) bind(current.client);
+  if (!current) {
+    unsubscribe();
+    unsubscribe = () => {};
+    client = null;
     scene = displayed = null;
     committed = null;
     sceneKey = '';
-    element('empty').hidden = false;
     for (const id of [
       'heat',
       'cool',
@@ -277,14 +142,23 @@ function stop(): Promise<void> {
       'stop',
     ])
       button(id).disabled = true;
-    element('status').textContent = 'Stopped';
-  })().finally(() => {
-    stopping = null;
-    switching = false;
-    button('start').disabled = false;
-  });
-  return stopping;
+    element('status').textContent =
+      lifecycle.status === 'stopped'
+        ? 'Stopped'
+        : lifecycle.status === 'starting'
+          ? 'Starting…'
+          : 'Stopping…';
+  }
+  element('empty').hidden = current !== null;
+  button('start').disabled = lifecycle.status !== 'stopped';
+  refresh();
 }
+lifecycle.subscribe(syncLifecycle);
+async function start() {
+  notice('');
+  await lifecycle.start();
+}
+const stop = () => lifecycle.stop();
 async function preview(kind: 'heat' | 'cool' | 'wait') {
   if (!client) return;
   showPreview = true;
@@ -294,30 +168,8 @@ async function preview(kind: 'heat' | 'cool' | 'wait') {
   return result;
 }
 async function importSave(text: string) {
-  if (!client || switching || client.state.busy) throw Error('Chamber is unavailable.');
-  switching = true;
-  const generation = ++epoch,
-    old = client;
-  refresh();
-  try {
-    const next = await loadChamber(text);
-    if (generation !== epoch) {
-      await next.close();
-      return;
-    }
-    await old.close().catch(() => {});
-    if (generation !== epoch) {
-      await next.close();
-      return;
-    }
-    bind(next);
+  if (await lifecycle.replace(() => loadChamber(text)))
     notice('Saved chamber restored. Every recorded boundary matched exactly.');
-  } finally {
-    if (generation === epoch) {
-      switching = false;
-      refresh();
-    }
-  }
 }
 const run = (operation: () => unknown | Promise<unknown>) => {
   void Promise.resolve()
@@ -354,30 +206,7 @@ button('select-ice').onclick = () => {
 };
 button('reset').onclick = () =>
   run(async () => {
-    if (!client || switching) return;
-    switching = true;
-    const generation = ++epoch,
-      old = client;
-    refresh();
-    try {
-      const next = await openChamber();
-      if (generation !== epoch) {
-        await next.close();
-        return;
-      }
-      await old.close().catch(() => {});
-      if (generation !== epoch) {
-        await next.close();
-        return;
-      }
-      bind(next);
-      notice('New chamber.');
-    } finally {
-      if (generation === epoch) {
-        switching = false;
-        refresh();
-      }
-    }
+    if (await lifecycle.replace(() => openChamber())) notice('New chamber.');
   });
 button('save').onclick = () => {
   if (!client) return;
@@ -419,7 +248,7 @@ canvas.onpointerup = (event) => {
     const rect = canvas.getBoundingClientRect(),
       hit = pickElementCell(
         displayed,
-        orbitCamera(yaw, pitch),
+        lifecycle.current?.host.displayed?.camera ?? orbitCamera(yaw, pitch),
         event.clientX - rect.left,
         event.clientY - rect.top,
         rect.width,
@@ -453,7 +282,7 @@ export const chamberApp = {
     return client;
   },
   get renderer() {
-    return renderer;
+    return lifecycle.current?.host.renderer ?? null;
   },
   get scene() {
     return displayed;
@@ -462,15 +291,14 @@ export const chamberApp = {
     return orbitCamera(yaw, pitch);
   },
   async painted() {
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    await drawing;
+    await lifecycle.current?.host.painted();
   },
   orbit(value: number) {
     yaw = value;
     requestDraw();
   },
   get running() {
-    return Boolean(client && device && renderer);
+    return lifecycle.current !== null;
   },
 };
 Object.assign(window, { chamberApp });

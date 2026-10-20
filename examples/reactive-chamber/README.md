@@ -95,3 +95,14 @@ This first build is restricted to 8³ and one actor. GPU reactive physics, 16³
 qualification, pressure, actor force feedback, damage gameplay, and naturalistic
 rendering remain separate work. Existing M5 64³/128³ timing results do not qualify
 this CPU reactive runtime at those sizes.
+
+## Code ownership
+
+`lifecycle.ts` owns startup, shutdown and client replacement without DOM or GPU
+APIs. Import and reset share the same private-candidate swap. Shutdown drains
+pending creation before another host can use the canvas. `view.ts` owns the
+canvas, GPU resources and completed frame/camera; picking uses that completed
+camera. The browser entry binds controls and inspection to these owners. The
+chamber and tactical slab share the bounded frame pump in `examples/shared`;
+each retains its own runtime-hold policy. Lifecycle failure races are also
+exercised with deferred resource factories in CPU tests.
