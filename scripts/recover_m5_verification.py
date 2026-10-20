@@ -36,7 +36,7 @@ def main():
         'cpu-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-world.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
         'review-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
         'build': [node, 'node_modules/vite/bin/vite.js', 'build', '--config', 'engine/vite.structural-world.config.ts'],
-        'declarations': [node, 'node_modules/typescript/bin/tsc', '-p', 'engine/tsconfig.sdk.json'],
+        'declarations': [node, 'scripts/build_sdk.mjs', '--types-only'],
         'lint': [node, 'engine/lint_ts.mjs'],
         'gpu-build': [node, 'node_modules/vite/bin/vite.js', 'build', '--config', 'engine/vite.structural-world-gpu.config.ts'],
         'probe-build': [node, 'node_modules/vite/bin/vite.js', 'build', '--config', 'engine/vite.structural-probe.config.ts'],
@@ -83,6 +83,7 @@ def main():
     timeout = 120 if args.stage in ('gpu-trajectory','level-trajectory','level-pilot','frames') or args.stage.startswith('cpu-') and args.stage != 'cpu-unit' else 60
     paths = list((ROOT / 'engine').rglob('*.ts')) + [Path(__file__).resolve(), ROOT / 'package.json',
         ROOT / 'engine/lint_ts.mjs', ROOT / 'engine/tsconfig.json', ROOT / 'engine/tsconfig.sdk.json',
+        ROOT / 'engine/sdk-build.mjs', ROOT / 'scripts/build_sdk.mjs',
         ROOT / 'scripts/verify_volume_m5_cpu.mjs', ROOT / 'scripts/verify_volume_m5_browser.py']
     paths += [p for p in (ROOT/'examples/structural-cavern').glob('*') if p.suffix in ('.js','.html','.css')] + [ROOT/'scripts/verify_volume_m5_level.mjs']
     paths += [ROOT/'examples/structural-cavern/README.md', ROOT/'web/frame-pump.js', ROOT/'web/frame-clock.js']

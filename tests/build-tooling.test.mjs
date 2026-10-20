@@ -1,27 +1,64 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, readFileSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, readFileSync, copyFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
-import {SDK_ENTRIES, sdkConfig, sdkExports, validateSdkMetadata} from '../engine/sdk-build.mjs';
+import {SDK_ENTRIES, sdkConfig, sdkEntries} from '../engine/sdk-build.mjs';
 import {lintProject, lintSource} from '../engine/lint_ts.mjs';
 
-test('all declared SDK entries have checked exports, types and independent output configs', () => {
-  const declarations = JSON.parse(readFileSync(new URL('../engine/tsconfig.sdk.json', import.meta.url)));
+test('package exports drive independent SDK bundles with their existing targets', () => {
   const packageData = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
-  validateSdkMetadata(packageData, declarations);
+  assert.equal(SDK_ENTRIES.length, Object.keys(packageData.exports).length);
+  assert.equal(SDK_ENTRIES[0].key, '.');
   for (const entry of SDK_ENTRIES) {
-    const config = sdkConfig(entry.key);
-    assert.equal(config.build.lib.fileName(), entry.filename);
+    const config = sdkConfig(entry.key), exported = packageData.exports[entry.key];
+    assert.equal('./dist/sdk/' + config.build.lib.fileName(), exported.import);
+    assert.equal('./dist/sdk/types/' + entry.source.slice('engine/'.length).replace(/\.ts$/, '.d.ts'), exported.types);
     assert.equal(config.build.emptyOutDir, entry.key === '.');
     assert.deepEqual(config.build.lib.formats, ['es']);
-    assert.equal(config.build.target, entry.target);
+    const legacyTarget = ['.', './experimental/3d', './experimental/3d/gpu', './experimental/3d/world', './experimental/3d/world/gpu'].includes(entry.key);
+    assert.equal(config.build.target, legacyTarget ? 'es2022' : undefined);
   }
   assert.throws(() => sdkConfig('missing'), /Unknown/);
-  assert.throws(() => validateSdkMetadata({exports: {}}, declarations), /exports differ/);
-  assert.throws(() => validateSdkMetadata(packageData, {include: []}), /include differs/);
-  assert.throws(() => validateSdkMetadata(packageData, declarations, [...SDK_ENTRIES, SDK_ENTRIES[0]]), /Duplicate/);
-  assert.deepEqual(sdkExports(), packageData.exports);
+});
+
+test('new exports supply source and output paths without another entry list', () => {
+  const root = {types: './dist/sdk/types/index.d.ts', import: './dist/sdk/state-space.js'};
+  const added = {types: './dist/sdk/types/new/module.d.ts', import: './dist/sdk/new-module.js'};
+  const entries = sdkEntries({'./new': added, '.': root});
+  assert.deepEqual(entries.map(({key, source, filename}) => ({key, source, filename})), [
+    {key: '.', source: 'engine/index.ts', filename: 'state-space.js'},
+    {key: './new', source: 'engine/new/module.ts', filename: 'new-module.js'},
+  ]);
+  assert.throws(() => sdkEntries({}), /root SDK/);
+  assert.throws(() => sdkEntries({'.': root, './duplicate': root}), /Duplicate/);
+  assert.throws(() => sdkEntries({'.': root, './duplicate': {...added, import: root.import}}), /Duplicate/);
+  assert.throws(() => sdkEntries({'.': root, './bad': {...added, types: './dist/sdk/types/../outside.d.ts'}}), /Invalid/);
+  assert.throws(() => sdkEntries({'.': {...root, import: './outside.js'}}), /Invalid/);
+});
+
+test('declaration CLI follows new exports, ignores unrelated roots, and fails on type errors', () => {
+  const root = mkdtempSync(join(tmpdir(), 'state-space-sdk-'));
+  try {
+    for (const dir of ['engine', 'scripts']) mkdirSync(join(root, dir));
+    for (const path of ['engine/sdk-build.mjs', 'engine/tsconfig.json', 'engine/tsconfig.sdk.json', 'scripts/build_sdk.mjs'])
+      copyFileSync(new URL('../' + path, import.meta.url), join(root, path));
+    symlinkSync(fileURLToPath(new URL('../node_modules', import.meta.url)), join(root, 'node_modules'), 'dir');
+    writeFileSync(join(root, 'package.json'), JSON.stringify({exports: {
+      '.': {types: './dist/sdk/types/index.d.ts', import: './dist/sdk/state-space.js'},
+      './new': {types: './dist/sdk/types/new.d.ts', import: './dist/sdk/new.js'},
+    }}));
+    writeFileSync(join(root, 'engine/index.ts'), 'export const first = 1;');
+    writeFileSync(join(root, 'engine/new.ts'), 'export const added = 2;');
+    writeFileSync(join(root, 'engine/unrelated.ts'), 'const invalid: string = 3;');
+    const emit = () => spawnSync(process.execPath, [join(root, 'scripts/build_sdk.mjs'), '--types-only'], {cwd: tmpdir(), encoding: 'utf8'});
+    const result = emit(); assert.equal(result.status, 0, result.stderr);
+    assert.equal(readFileSync(join(root, 'dist/sdk/types/new.d.ts'), 'utf8').trim(), 'export declare const added = 2;');
+    writeFileSync(join(root, 'engine/new.ts'), 'export const added: string = 2;');
+    const failed = emit(); assert.equal(failed.status, 1); assert.match(failed.stderr, /TS2322/);
+  } finally {rmSync(root, {recursive: true, force: true});}
 });
 
 test('new nested TS and JS files enter lint automatically; generated trees and links do not', () => {
