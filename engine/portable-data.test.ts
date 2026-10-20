@@ -21,23 +21,26 @@ describe('bounded portable data', () => {
     expect(shared.n).toBe(-0);
     expect(result.z.n).toBe(0);
     expect(copyTacticalValue(input)).toEqual(copy(input));
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    expect(Object.is(copy([-0])[0], -0)).toBe(false);
   });
   it('rejects malformed values without invoking accessors', () => {
     const getter = vi.fn(() => 1),
       cycle: PortableValue[] = [];
     cycle.push(cycle);
+    const objectCycle: Record<string, PortableValue> = {}; objectCycle.self = objectCycle;
     const accessor = Object.defineProperty({}, 'x', { get: getter, enumerable: true });
     const hidden = Object.defineProperty({}, 'x', { value: 1 });
     const arrayAccessor = Object.defineProperty([0], '0', { get: getter });
     for (const bad of [
-      cycle,
+      cycle, objectCycle,
       accessor,
       hidden,
       arrayAccessor,
       [, ,],
       Object.assign([0], { extra: 1 }),
       { [Symbol()]: 0 },
-      new Date(),
+      new Date(), new Map(),
       new Uint8Array(1),
       undefined,
       NaN,
@@ -45,7 +48,7 @@ describe('bounded portable data', () => {
       1n,
       () => {},
     ]) {
-      expect(() => copy(bad as PortableValue)).toThrow();
+      for (const value of [bad, {nested: bad}]) expect(() => copy(value as PortableValue)).toThrow();
     }
     expect(getter).not.toHaveBeenCalled();
   });
@@ -55,6 +58,7 @@ describe('bounded portable data', () => {
   });
   it('enforces exact character, depth and total-node boundaries', () => {
     expect(copy('x'.repeat(limits.characters))).toHaveLength(limits.characters);
+    expect(() => copy('x'.repeat(limits.characters + 1))).toThrow('character budget');
     expect(() => copy({ x: 'y'.repeat(limits.characters) })).toThrow('character budget');
     let nested: PortableValue = 1;
     for (let i = 0; i < limits.depth; i++) nested = [nested];

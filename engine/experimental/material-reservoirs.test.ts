@@ -1,6 +1,7 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import { ANCHOR_3D, BONDS_3D } from './structural-mechanics.js';
+import { BONDS_3D } from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
@@ -8,8 +9,7 @@ import type { TacticalSessionInitial3D, TacticalSessionPolicy3D, TacticalSession
 import type { MaterialReservoir3D, MaterialTransferRequest3D } from './material-reservoirs.js';
 
 // These authored tests are CPU edits and inert drivers only. Runtime remains held.
-const physicalStep = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Physical runtime validation is held.');});
-afterAll(() => {expect(physicalStep).not.toHaveBeenCalled(); physicalStep.mockRestore();});
+holdPhysics('step');
 type Game = {ap: number; turn: number};
 function volume(width = 4) {return new CpuStructuralWorld3D({width, height: 4, depth: 4, chunkSize: 4});}
 function initial(material: number = MAT.WATER): TacticalSessionInitial3D<Game> {

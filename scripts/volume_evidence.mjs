@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const hash = value => createHash('sha256').update(typeof value === 'string' || value instanceof Uint8Array ? value : JSON.stringify(value)).digest('hex');
 export function sources() {
-  const paths = ['engine/sdk-build.mjs','engine/sdk-entries.json','scripts/build_sdk.mjs','engine/portable-data.ts','package.json', 'engine/tsconfig.sdk.json', 'engine/vite.sdk.config.ts', 'engine/vite.volume.config.ts', 'dist/sdk/state-space-3d.js'];
+  const paths = ['engine/sdk-build.mjs','scripts/build_sdk.mjs','engine/portable-data.ts','package.json', 'engine/tsconfig.sdk.json', 'engine/vite.sdk.config.ts', 'engine/vite.volume.config.ts', 'dist/sdk/state-space-3d.js'];
   for (const directory of ['engine/experimental', 'examples/volume-lab']) for (const name of readdirSync(resolve(ROOT, directory))) if (/\.(ts|js|html|css)$/.test(name)) paths.push(`${directory}/${name}`);
   for (const name of ['thermal.ts', 'registry.ts', 'validation.ts', 'materials.json', 'generated/materials.ts']) paths.push(`engine/${name}`);
   for (const name of readdirSync(resolve(ROOT, 'scripts'))) if (/volume.*\.(mjs|py)$/.test(name)) paths.push(`scripts/${name}`);

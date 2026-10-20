@@ -122,7 +122,6 @@ export function createWorkerBus<M extends BusMessage>(maxSteps = 4096) {
     settle,
     receive,
     errors,
-    deliver,
     releaseHeld() {
       const count = held.length;
       tasks.push(...held.splice(0));

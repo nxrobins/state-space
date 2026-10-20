@@ -3347,12 +3347,13 @@ identity. These additive client APIs do not change the `reactive-worker-2` wire 
 
 ### Build metadata and source checks
 
-`engine/sdk-entries.json` owns SDK source entries, output names and existing target
-settings. `npm run build:sdk` checks that package exports and declaration roots
-match that manifest, then builds entries separately through `sdk-build.mjs`.
-Separate bundles retain their private runtime identities. The small existing Vite
-config files remain usable by recovery/evidence tooling. Adding an entry requires
-updating the checked `package.json` and `tsconfig.sdk.json` mirrors too.
+`package.json` exports own SDK entry points. `npm run build:sdk` derives source
+paths, bundle names and declaration roots from those exports; only the five legacy
+ES2022 target exceptions live in `engine/sdk-build.mjs`. Entries build separately
+to retain their private runtime identities. The existing Vite config files remain
+usable by recovery/evidence tooling. `node scripts/build_sdk.mjs --types-only`
+emits declarations using the same derived roots and `engine/tsconfig.sdk.json`
+compiler options. Adding an entry requires no second entry list.
 
 Structural lint discovers TypeScript/JavaScript sources under `engine` and
 `examples`, excluding generated output, dependencies, hidden directories and

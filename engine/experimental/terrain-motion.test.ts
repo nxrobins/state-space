@@ -1,11 +1,11 @@
+import { holdPhysics } from '../test-support/hold-physics.js';
 import { seed, index, factory, type Spec } from './terrain-motion.fixtures.js';
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import { buildColdTable } from '../generated/materials.js';
 import { thermalView } from '../thermal.js';
 import { volumeSchedule } from './3d-core.js';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+
 import { createTacticalSessionCore3D } from './tactical-session-core.js';
 import { createTerrainMotion3D, TERRAIN_MOTION_RULES_3D, type TerrainMotion3D } from './terrain-motion.js';
 import { createTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
@@ -13,9 +13,7 @@ import { createGameplayGeometry3D, GEOMETRY_SCALE_3D as Q, type GameplayGeometry
 import type { TickMovement3D } from './path-journal.js';
 
 // Synthetic executed permutations and static/edit queries only; no M5 solve/tick.
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 async function fixture(terrain = seed(), spec: Spec = {}, capturePaths = true) {
   let context!: TerrainMotion3D, before!: GameplayGeometry3D, after!: GameplayGeometry3D, movement!: TickMovement3D;
   const s = createTacticalSessionCore3D({worldId: 'terrain-motion-world', gameRulesVersion: 'fixture-1', terrain, game: {ap: 2}}, factory(spec), {

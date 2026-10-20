@@ -1,15 +1,9 @@
 import { defineConfig } from 'vitest/config';
-import { fileURLToPath } from 'node:url';
+import { sourceAliases } from './vitest.shared.js';
 
 // Native parity fixtures have their own explicit, single-file entry point.
 export default defineConfig({
-  // Unit fixtures and SDK-backed examples must share private geometry/scene
-  // identities. Built-package integration is verified separately after install.
-  resolve: {alias: [
-    {find: /^state-space-engine\/experimental\/3d\/tactical-renderer$/, replacement: fileURLToPath(new URL('./experimental/tactical-renderer.ts', import.meta.url))},
-    {find: /^state-space-engine\/experimental\/3d\/tactical-session$/, replacement: fileURLToPath(new URL('./experimental/tactical-session.ts', import.meta.url))},
-    {find: /^state-space-engine\/experimental\/3d\/structural-world$/, replacement: fileURLToPath(new URL('./experimental/structural-world.ts', import.meta.url))},
-  ]},
+  resolve: {alias: sourceAliases},
   test: {
     environment: 'node',
     include: ['engine/**/*.test.ts'],

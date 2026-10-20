@@ -1,8 +1,9 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Exact observations on tiny worlds; no old M5 simulation or native runtime. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { CpuVolume } from './3d-core.js';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { createTacticalSession3D } from './tactical-session.js';
 import { assertGameplayGeometry3D, gameplayGeometrySource3D } from './gameplay-geometry.js';
 import { createReactiveGeometry3D } from './reactive-geometry.js';
@@ -11,10 +12,7 @@ import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, cre
   createReactiveSession3D as create, GEOMETRY_SCALE_3D as S, REACTIVE_GEOMETRY_RULES_3D, MAT,
   type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveSessionPolicy3D,
   type ReactiveBranch3D, type ReactiveSessionQueryAccess3D, type GeometryBox3D } from './reactive-materials.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Old physical runtime remains held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
   const c = defaultReactiveMaterialCatalog3D(); for (const m of c.propertiesCatalog.materials) m.properties.conductivity = 0;

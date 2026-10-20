@@ -1,8 +1,10 @@
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Real conservative edits plus inert material provenance; native physics is held. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { createMaterialTransport3D, applyMaterialTransport3D } from './material-transport.js';
 import { captureMaterialTransportMemory3D as capture, restoreMaterialTransportMemory3D as restore,
   followMaterialTransport3D as follow, prepareMaterialTransport3D as prepare, type MaterialTransportMemory3D } from './material-transport-coupling.js';
@@ -10,12 +12,10 @@ import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from '.
 import { createTacticalPreviewQueue3D, type TacticalPreviewEditor3D } from './tactical-previews.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
-import type { TacticalTransport3D } from './tactical-worker-wire.js';
+
 import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
 import { observe, type Spec } from './terrain-motion.fixtures.js';
-const traps = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const t of traps) t.mockImplementation(() => {throw Error('Material runtime remains held.');});
-afterAll(() => {for (const t of traps) {expect(t).not.toHaveBeenCalled(); t.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type Game = {ap: number; rng: number; actor: number; wind: MaterialTransportMemory3D};
 type Command = {impulse: number};
 const copy = <T>(v: T): T => JSON.parse(JSON.stringify(v));
@@ -232,9 +232,7 @@ describe('atomic transport preparation in branches and workers', () => {
     const ticket = queue.request(null, 0); expect((await ticket.result).status).toBe('ready'); expect(() => held.discard()).toThrow(/expired/); queue.commit(ticket); await queue.close();
   });
   test('mocked worker carries transport memory costs and translation journals exactly', async () => {
-    const f = fixture(), receive: ((v: unknown) => void)[] = [() => {}, () => {}], closed = [false, false];
-    const ports: TacticalTransport3D[] = [0, 1].map(side => ({send(v) {const value = structuredClone(v); queueMicrotask(() => {if (!closed[1 - side]) receive[1 - side](value);});},
-      subscribe(fn) {receive[side] = fn; return () => {receive[side] = () => {};};}, close() {closed[side] = true;}}));
+    const f = fixture(), {ports} = createMicrotaskTransport();
     const host = createTacticalWorkerHost3D(ports[1], f.session, stage, 'wind-test');
     const client = createTacticalWorkerClient3D<Game, Command>(ports[0], {channel: 'wind-test', worldId: 'wind-room', gameRulesVersion: 'wind-game-1'}); await client.ready;
     const ticket = client.request({impulse: 1024}, 1, {journal: {maxRuns: 4096}, paths: {maxEntries: 4096}}), outcome = await ticket.result;

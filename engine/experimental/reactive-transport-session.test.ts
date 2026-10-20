@@ -1,21 +1,9 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Tiny executed transport transactions. Old M5/native/GPU workloads remain held. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { CpuVolume } from './3d-core.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
-import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block, editReactiveMaterialBlock3D as edit,
-  createReactiveWorldSnapshot3D as world, createConstrainedReactiveWorldSnapshot3D as heldWorld, createReactiveDomainsSnapshot3D as domains, createReactiveSession3D as session,
-  createReactiveMaterialTransport3D as control, createReactiveMaterialTransportJob3D as job, applyReactiveMaterialTransport3D as plan,
-  captureReactiveMaterialTransportMemory3D as capture, restoreReactiveMaterialTransportMemory3D as restore, followReactiveMaterialTransport3D as follow,
-  createReactiveBody3D as body, createReactiveTransportDisplacement3D as displace, createReactiveTransportedActorGroup3D as group,
-  createReactiveActorGroup3D as tickGroup, createReactiveTranslatedActorGroup3D as translatedGroup,
-  MAT, GEOMETRY_SCALE_3D as Q, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveMaterialParcelSeed3D,
-  type ReactiveMaterialTransportMemory3D, type ReactiveSessionPolicy3D, type ReactiveBranch3D, type ReactiveSessionCommand3D,
-  type NamedReactiveBody3D, type ReactiveTransportCommand3D, type ReactiveActorGroupResult3D, type ReactiveHold3D } from './reactive-materials.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Old runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
+import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block, editReactiveMaterialBlock3D as edit, createReactiveWorldSnapshot3D as world, createConstrainedReactiveWorldSnapshot3D as heldWorld, createReactiveDomainsSnapshot3D as domains, createReactiveSession3D as session, createReactiveMaterialTransport3D as control, createReactiveMaterialTransportJob3D as job, applyReactiveMaterialTransport3D as plan, captureReactiveMaterialTransportMemory3D as capture, restoreReactiveMaterialTransportMemory3D as restore, followReactiveMaterialTransport3D as follow, createReactiveBody3D as body, createReactiveTransportDisplacement3D as displace, createReactiveTransportedActorGroup3D as group, createReactiveActorGroup3D as tickGroup, createReactiveTranslatedActorGroup3D as translatedGroup, MAT, GEOMETRY_SCALE_3D as Q, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveMaterialParcelSeed3D, type ReactiveMaterialTransportMemory3D, type ReactiveSessionPolicy3D, type ReactiveBranch3D, type NamedReactiveBody3D, type ReactiveTransportCommand3D, type ReactiveActorGroupResult3D, type ReactiveHold3D } from './reactive-materials.js';
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
 beforeAll(async () => {const c = defaultReactiveMaterialCatalog3D(); for (const m of c.propertiesCatalog.materials) m.properties.conductivity = 0; r = await createReactiveMaterialRegistry3D(c);});
 type V = [number, number, number];

@@ -1,6 +1,7 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
@@ -11,9 +12,7 @@ import { appendPathFrame3D, createPathJournal3D, readPathJournal3D, type PathJou
 import type { GameplayGeometry3D } from './gameplay-geometry.js';
 
 // Only real edits and inert domain drivers. No production material ticks/solves.
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 const world = () => new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});
 type Game = {ap: number; tick: number};
 function observation(s: StructuralSnapshot3D, swapped = false): {motion: MaterialMotionTrace3D; paths: MaterialMotionPaths3D} {

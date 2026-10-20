@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { volumeSchedule } from './3d-core.js';
@@ -6,9 +7,7 @@ import { createMotionRecorder3D } from './motion-trace.js';
 import { createMotionPathRecorder3D, readMotionPaths3D, motionPathLimits3D, type MaterialMotionPaths3D } from './motion-paths.js';
 
 // Recorder/decoder fixtures only: no material pass or real solve is permitted.
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime is held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 function plan(): mechanics.StructuralPlan3D {
   return {state: {grid: new Uint32Array(64), energyQ: new Uint32Array(64), structure: new Uint32Array(64)},
     sources: Uint32Array.from({length: 64}, (_, i) => i), distances: new Int32Array(64).fill(-1), loads: new Uint32Array(64),

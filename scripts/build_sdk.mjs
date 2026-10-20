@@ -1,12 +1,24 @@
 /** Keep entries separate: each SDK bundle retains its existing private identities. */
-import {readFileSync} from 'node:fs';
-import {spawnSync} from 'node:child_process';
-import {resolve} from 'node:path';
+import {resolve, relative} from 'node:path';
 import {build} from 'vite';
-import {SDK_ROOT, SDK_ENTRIES, sdkConfig, validateSdkMetadata} from '../engine/sdk-build.mjs';
-const read = path => JSON.parse(readFileSync(resolve(SDK_ROOT, path), 'utf8'));
-validateSdkMetadata(read('package.json'), read('engine/tsconfig.sdk.json'));
-for (const entry of SDK_ENTRIES) await build(sdkConfig(entry.key));
-const types = spawnSync(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'engine/tsconfig.sdk.json'], {cwd: SDK_ROOT, stdio: 'inherit'});
-if (types.error) throw types.error;
-if (types.status !== 0) process.exit(types.status ?? 1);
+import ts from 'typescript';
+import {SDK_ROOT, SDK_ENTRIES, sdkConfig} from '../engine/sdk-build.mjs';
+const args = process.argv.slice(2);
+if (args.length && (args.length !== 1 || args[0] !== '--types-only')) throw Error('Usage: build_sdk.mjs [--types-only]');
+const root = resolve(SDK_ROOT, 'engine');
+const config = ts.readConfigFile(resolve(root, 'tsconfig.sdk.json'), ts.sys.readFile);
+const parsed = ts.parseJsonConfigFileContent({...config.config,
+  files: SDK_ENTRIES.map(entry => relative(root, resolve(SDK_ROOT, entry.source))),
+}, ts.sys, root);
+function check(diagnostics) {
+  if (!diagnostics.length) return;
+  process.stderr.write(ts.formatDiagnostics(diagnostics, {
+    getCanonicalFileName: name => name, getCurrentDirectory: () => SDK_ROOT, getNewLine: () => ts.sys.newLine,
+  }));
+  process.exit(1);
+}
+check(config.error ? [config.error] : parsed.errors);
+if (!args.length) for (const entry of SDK_ENTRIES) await build(sdkConfig(entry.key));
+const program = ts.createProgram(parsed.fileNames, parsed.options);
+check(ts.getPreEmitDiagnostics(program));
+check(program.emit().diagnostics);

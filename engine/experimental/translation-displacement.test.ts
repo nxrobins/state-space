@@ -1,7 +1,8 @@
+import { holdPhysics } from '../test-support/hold-physics.js';
 /** Real conservative edits only. Physical stepping and support solves stay trapped. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
@@ -10,9 +11,7 @@ import { GEOMETRY_SCALE_3D as Q } from './gameplay-geometry.js';
 import type { TranslationRequest3D, CellCoordinate3D } from './interventions.js';
 import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 type V = [number, number, number];
 type Cell = [number, number, number, number];
 const index = ([x, y, z]: CellCoordinate3D) => x + 8 * (y + 8 * z);

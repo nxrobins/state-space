@@ -1,13 +1,13 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { MAT } from './3d.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import { copyTacticalValue, createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import type { TacticalSession3D, TacticalSessionInitial3D, TacticalSessionPolicy3D, TacticalPreview3D, TacticalValue } from './tactical-session-view.js';
 
 // A mistaken call to real physics fails immediately. Only inert drivers advance.
-const physicalStep = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Physical runtime validation is held.');});
-afterAll(() => {expect(physicalStep).not.toHaveBeenCalled(); physicalStep.mockRestore();});
+holdPhysics('step');
 type Game = {actors: {id: string; position: number[]}[]; ap: number; resource: number; turn: number; rng: number; history: string[]};
 function initial(): TacticalSessionInitial3D<Game> {
   const world = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});
@@ -58,6 +58,7 @@ describe('tactical transactions: real edits and inert advancement only', () => {
   });
 
   test('accounting survives snapshot branches and records exact edit deltas', () => {
+    expect(() => createTacticalSession3D({...initial(), accounting: null} as never)).toThrow();
     const session = createTacticalSession3D(initial()), before = session.snapshot();
     const branch = session.branch({horizonTicks: 0});
     branch.edit([{kind: 'energy', x: 1, y: 1, z: 1, energyQ: before.terrain.energyQ[21] + 7}]);
@@ -127,19 +128,6 @@ describe('tactical transactions: real edits and inert advancement only', () => {
     const result = session.commit(branch), expected = session.snapshot();
     result.snapshot.game.actors[0].position[0] = 888; result.snapshot.terrain.packedCells.fill(0);
     expect(session.snapshot()).toEqual(expected);
-  });
-
-  test('portable game values reject cycles, holes, accessors and non-JSON data', () => {
-    const cycle: Record<string, unknown> = {}; cycle.self = cycle;
-    const getter = vi.fn(() => 1), accessor = Object.defineProperty({}, 'x', {get: getter, enumerable: true});
-    for (const bad of [cycle, new Array(1), accessor, {x: undefined}, {x: NaN}, {x: Infinity}, {x: () => 1}, new Date(), new Map(), {[Symbol('x')]: 1}, Array(65537).fill(0), 'a'.repeat(1048577)]) {
-      expect(() => copyTacticalValue(bad as TacticalValue)).toThrow();
-    }
-    expect(getter).not.toHaveBeenCalled(); expect(copyTacticalValue([-0])).toEqual([0]);
-    const data = JSON.parse('{"__proto__":{"safe":true}}');
-    expect(Object.hasOwn(copyTacticalValue(data), '__proto__')).toBe(true);
-    expect(({} as Record<string, unknown>).safe).toBeUndefined();
-    expect(() => createTacticalSession3D({...initial(), accounting: null} as never)).toThrow();
   });
 
   test('malformed game update closes its branch and preserves the live game', () => {

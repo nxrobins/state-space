@@ -1,9 +1,8 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 import { createWorkerBus } from '../test-support/worker-bus.js';
 /** Mock ports execute tiny reactive jobs; no native Worker/browser/GPU is launched. */
-import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
-import { CpuVolume } from './3d-core.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
+
 import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D, editReactiveMaterialBlock3D,
   createReactiveWorldSnapshot3D, createReactiveDomainsSnapshot3D, createReactiveSession3D, createReactiveMaterialTransport3D,
   captureReactiveMaterialTransportMemory3D, followReactiveMaterialTransport3D, createReactiveBody3D, createReactiveTransportedActorGroup3D,
@@ -11,10 +10,7 @@ import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, cre
   MAT, type ReactiveMaterialRegistry3D, type ReactiveSessionPolicy3D, type ReactiveSessionCommand3D, type ReactiveSessionInitial3D,
   type ReactiveMaterialTransportMemory3D, type NamedReactiveBody3D, type ReactiveWorkerClientOptions3D } from './reactive-materials.js';
 import { workerMessage, REACTIVE_WORKER_PROTOCOL_3D, type ReactiveWorkerWire3D } from './reactive-worker-wire.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Old runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let registry: ReactiveMaterialRegistry3D;
 beforeAll(async () => {const catalog = defaultReactiveMaterialCatalog3D(); for (const m of catalog.propertiesCatalog.materials) m.properties.conductivity = 0;
   registry = await createReactiveMaterialRegistry3D(catalog);});
@@ -265,7 +261,6 @@ describe('bounded reactive worker authority', () => {
     expect(discard).toBeLessThan(starts[1]); expect(f.client.snapshot().game.memory.cycle).toBe(0); expect(f.b.maximum()).toBe(1); await done(f);
   });
 });
-
 
 describe('worker state observations and completion', () => {
   test('publishes initial, progress, acknowledged and terminal states without inline callbacks', async () => {

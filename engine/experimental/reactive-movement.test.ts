@@ -1,15 +1,11 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Tiny conservative passes only; old world stepping and global mechanics are trapped. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import { CpuVolume } from './3d-core.js';
+import { beforeAll, describe, expect, test } from 'vitest';
+
 import { createReactiveMaterialRegistry3D, createReactiveMaterialBlock3D as block, editReactiveMaterialBlock3D as edit,
   MAT, PHASE, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D } from './reactive-materials.js';
 import { reactiveMovementSchedule3D as schedule, runReactiveMovementPass3D as run, type ReactiveMovementPass3D } from './reactive-movement.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('World runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
 beforeAll(async () => {r = await createReactiveMaterialRegistry3D();});
 const at = {x: 0, y: 0, z: 0};

@@ -1,17 +1,13 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Tiny new CPU graph kernel only. Existing M5/global-world execution stays trapped. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import { CpuVolume } from './3d-core.js';
+import { beforeAll, describe, expect, test } from 'vitest';
+
 import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block,
   editReactiveMaterialBlock3D as edit, readReactiveMaterialBlock3D as read, createReactiveReactionState3D,
   advanceReactiveReactions3D, MAT, PHASE, BONDS_3D, ANCHOR_3D, type ReactiveMaterialRegistry3D,
   type ReactiveMaterialBlock3D, type ReactiveMaterialEdit3D } from './reactive-materials.js';
 import { createReactiveStructureJob3D as job } from './reactive-structure.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('World runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, custom: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
   const catalog = defaultReactiveMaterialCatalog3D(); for (const m of catalog.propertiesCatalog.materials) m.properties.conductivity = 0;

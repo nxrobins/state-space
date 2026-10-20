@@ -1,16 +1,15 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Pure actor/geometry checks. No material tick or structural solve is authorized. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { moveTerrainActors3D, ACTOR_MOVEMENT_RULES_3D, type ActorMovementCommand3D } from './actor-movement.js';
 import { createTerrainBody3D, stepTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
 import type { NamedTerrainBody3D } from './terrain-body-group.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { MAT } from './3d.js';
 import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from './gameplay-geometry.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime remains held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type V = [number, number, number];
 const world = () => new CpuStructuralWorld3D({width: 8, height: 8, depth: 8, chunkSize: 4});
 const session = (w = world()) => createTacticalSession3D({worldId: 'air-room', gameRulesVersion: 'air-game-1', terrain: w.snapshot(), game: null});

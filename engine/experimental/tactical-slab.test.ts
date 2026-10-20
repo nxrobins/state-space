@@ -1,8 +1,8 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** SDK reference integration: real edits, inert tick fixtures, no native worker. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createSlabController } from '../../examples/tactical-slab/controller.js';
-import { createSlabInitial, createSlabPolicy, createSlabSession, inspectSlab, prepareSlabCommand, readSlabCommand,
-  SLAB_HOLD, SLAB_LIMITS, type SlabGame, type SlabSnapshot } from '../../examples/tactical-slab/scenario.js';
+import { createSlabInitial, createSlabPolicy, createSlabSession, inspectSlab, readSlabCommand, SLAB_HOLD, SLAB_LIMITS, type SlabGame, type SlabSnapshot } from '../../examples/tactical-slab/scenario.js';
 import { installSlabWorker } from '../../examples/tactical-slab/worker.js';
 import { MAT } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
@@ -11,9 +11,7 @@ import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from '.
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
 import { observe } from './terrain-motion.fixtures.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime remains held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 const index = (x: number, y: number, z: number) => x + 8 * (y + 8 * z);
 function fixture(initial = createSlabInitial(), tick?: (s: StructuralSnapshot3D) => StructuralSnapshot3D) {
   let steps = 0, made = 0, closed = 0;

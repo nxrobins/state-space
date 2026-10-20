@@ -1,6 +1,7 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
@@ -8,10 +9,7 @@ import { createTerrainBody3D, readTerrainBody3D, stepTerrainBody3D, TERRAIN_BODY
 import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from './gameplay-geometry.js';
 
 // Pure body/geometry calculations on edited/static snapshots, never M5 ticks/solves.
-const step = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('M5 runtime held.');});
-const tracked = vi.spyOn(CpuStructuralWorld3D.prototype, 'stepWithMotion').mockImplementation(() => {throw Error('M5 runtime held.');});
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('M5 runtime held.');});
-afterAll(() => {for (const spy of [step, tracked, solve]) {expect(spy).not.toHaveBeenCalled(); spy.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion');
 const world = (size = 4) => new CpuStructuralWorld3D({width: size, height: size, depth: size, chunkSize: 4});
 function session(w = world(), worldId = 'body-world') {
   return createTacticalSession3D({worldId, gameRulesVersion: 'body-game-1', terrain: w.snapshot(), game: {ap: 2}});

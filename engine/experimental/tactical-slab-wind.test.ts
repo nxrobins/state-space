@@ -1,16 +1,15 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Chamber wind interventions on real edit geometry with inert material steps. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createSlabInitial, createSlabPolicy, createSlabSession, prepareSlabCommand, readSlabCommand, inspectSlab, SLAB_RULES } from '../../examples/tactical-slab/scenario.js';
 import { createSlabController } from '../../examples/tactical-slab/controller.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { captureMaterialTransportMemory3D as capture, restoreMaterialTransportMemory3D as restore } from './material-transport-coupling.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { observe } from './terrain-motion.fixtures.js';
 import { MAT } from './3d.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 const wind = {kind: 'wind', parcel: 'steam', direction: 'east'} as const;
 function fixture(initial = createSlabInitial(), fail = false) {
   let steps = 0, closed = 0, made = 0;
