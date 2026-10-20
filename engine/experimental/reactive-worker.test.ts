@@ -283,3 +283,50 @@ describe('bounded reactive worker authority', () => {
     expect(discard).toBeLessThan(starts[1]); expect(f.client.snapshot().game.memory.cycle).toBe(0); expect(f.b.maximum()).toBe(1); await done(f);
   });
 });
+
+
+describe('worker state observations and completion', () => {
+  test('publishes initial, progress, acknowledged and terminal states without inline callbacks', async () => {
+    const f = fixture(), states: string[] = [];
+    f.client.subscribe(state => states.push(state.status)); expect(states).toEqual([]);
+    await ready(f); await Promise.resolve(); expect(states).toContain('connecting'); expect(states).toContain('ready');
+    const ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    expect(states).toContain('working'); expect(states.at(-1)).toBe('ready');
+    await done(f); await Promise.resolve(); expect(states).toContain('closing'); expect(states.at(-1)).toBe('closed');
+  });
+  test('isolates observer errors and state copies, and supports unsubscribe', async () => {
+    const f = await ready(fixture()), discarded = vi.fn(); const remove = f.client.subscribe(discarded); remove();
+    f.client.subscribe(() => {throw Error('Observer failure');});
+    f.client.subscribe(state => {if (state.progress) state.progress.completedTicks = 999;});
+    const seen: number[] = []; f.client.subscribe(state => {if (state.progress) seen.push(state.progress.completedTicks);});
+    const ticket = f.client.request([], options); expect((await f.b.settle(ticket.result)).status).toBe('ready');
+    expect(discarded).not.toHaveBeenCalled(); expect(seen.length).toBeGreaterThan(0); expect(seen).not.toContain(999);
+    expect(f.client.state.progress?.completedTicks).toBe(1); await done(f);
+  });
+  test('waiting for idle waits for discard acknowledgement, then permits a new command', async () => {
+    const f = await ready(fixture()), ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    ticket.cancel(); let settled = false; const idle = f.client.whenIdle().then(() => {settled = true;});
+    await Promise.resolve(); expect(settled).toBe(false); await f.b.settle(idle);
+    expect(f.client.state.activeId).toBeNull(); const next = f.client.request([], {horizonTicks: 0}); await f.b.settle(next.result); await done(f);
+  });
+  test('timeout wakes idle waiters and observers even without an inbound event', async () => {
+    vi.useFakeTimers(); const f = await ready(fixture(policy, initial(), {timeoutMs: 20}));
+    const ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    const states: string[] = []; f.client.subscribe(state => states.push(state.status)); f.b.config.mapReply = m => m.kind === 'discard' ? null : m;
+    ticket.cancel(); const idle = f.client.whenIdle(); const rejected = expect(idle).rejects.toThrow(/timed out/);
+    await f.b.until(() => f.b.sent[1].some(m => m.kind === 'discard')); await vi.advanceTimersByTimeAsync(21); await rejected;
+    expect(states.at(-1)).toBe('failed'); expect(f.client.state.uncertain).toBe(false);
+  });
+  test('shutdown rejects idle waiters and late subscribers receive the terminal state once', async () => {
+    const f = await ready(fixture()), ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    ticket.cancel(); const waiting = expect(f.client.whenIdle()).rejects.toThrow(/closed/); await done(f); await waiting;
+    const late = vi.fn(); f.client.subscribe(late); await Promise.resolve(); expect(late).toHaveBeenCalledOnce(); expect(late.mock.calls[0][0].status).toBe('closed');
+    await f.client.close(); await Promise.resolve(); expect(late).toHaveBeenCalledOnce();
+  });
+  test('subscribing from an observer does not rebroadcast to existing observers', async () => {
+    const f = await ready(fixture()); let calls = 0; const peer = vi.fn();
+    const remove = f.client.subscribe(() => {calls++; if (calls === 1) f.client.subscribe(peer);});
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    expect(calls).toBe(1); expect(peer).toHaveBeenCalledOnce(); remove(); await done(f);
+  });
+});

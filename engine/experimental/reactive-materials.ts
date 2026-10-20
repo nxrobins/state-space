@@ -78,7 +78,7 @@ export type { ReactiveTransportCommand3D, ReactiveTransportCommandResult3D, Reac
 export { REACTIVE_WORKER_PROTOCOL_3D, REACTIVE_WORKER_LIMITS_3D, type ReactiveWorkerTransport3D, type ReactiveWorkerPreviewOptions3D } from './reactive-worker-wire.js';
 export { createReactiveWorkerHost3D } from './reactive-worker-host.js';
 export { createReactiveWorkerClient3D, reactiveBrowserWorkerTransport3D,
-  type ReactiveWorkerClient3D, type ReactiveWorkerClientOptions3D, type ReactiveWorkerTicket3D, type ReactiveWorkerOutcome3D, type ReactiveWorkerInspectionProgress3D } from './reactive-worker-client.js';
+  type ReactiveWorkerClient3D, type ReactiveWorkerState3D, type ReactiveWorkerClientOptions3D, type ReactiveWorkerTicket3D, type ReactiveWorkerOutcome3D, type ReactiveWorkerInspectionProgress3D } from './reactive-worker-client.js';
 export { REACTIVE_CHANGE_RULES_3D, REACTIVE_CHANGE_LIMITS_3D, REACTIVE_CHANGE_CHANNELS_3D, createReactiveChangeJob3D,
   type ReactiveChangeOptions3D, type ReactiveChangeReport3D, type ReactiveChangeChannel3D, type ReactiveChangedCells3D,
   type ReactiveChangeJob3D, type ReactiveChangeProgress3D } from './reactive-changes.js';

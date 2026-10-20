@@ -83,7 +83,6 @@ export async function openChamber(options: ClientOptions = {}) {
     const base =
       options.wrapTransport?.(reactiveBrowserWorkerTransport3D(worker)) ??
       reactiveBrowserWorkerTransport3D(worker);
-    // Disposal can follow an SDK timeout without any inbound message. Notify after its terminal state is published.
     const transport: ReactiveWorkerTransport3D = {
       send: (value) => base.send(value),
       close() {
@@ -94,21 +93,9 @@ export async function openChamber(options: ClientOptions = {}) {
           base.close();
         } finally {
           worker.terminate();
-          queueMicrotask(notify);
         }
       },
-      subscribe(receive, failed) {
-        return base.subscribe(
-          (value) => {
-            receive(value);
-            queueMicrotask(notify);
-          },
-          (error) => {
-            failed(error);
-            queueMicrotask(notify);
-          },
-        );
-      },
+      subscribe: (receive, failed) => base.subscribe(receive, failed),
     };
     const client = createReactiveWorkerClient3D<ChamberGame>(transport, registry, {
       channel: 'chamber',
@@ -139,21 +126,7 @@ export async function openChamber(options: ClientOptions = {}) {
       closed = false,
       closing: Promise<void> | null = null;
     const metrics = { previewsMs: [] as number[], cancellationsMs: [] as number[] };
-    const idle = () =>
-      new Promise<void>((resolve, reject) => {
-        const check = () => {
-          const state = client.state;
-          if (state.status === 'failed' || state.status === 'closed') {
-            listeners.delete(check);
-            reject(Error(state.error ?? 'Worker closed.'));
-          } else if (state.status === 'ready') {
-            listeners.delete(check);
-            resolve();
-          }
-        };
-        listeners.add(check);
-        check();
-      });
+    const unsubscribeState = client.subscribe(notify);
     const result = {
       registry,
       get initial() {
@@ -210,7 +183,7 @@ export async function openChamber(options: ClientOptions = {}) {
         command = null;
         candidate = null;
         notify();
-        await idle();
+        await client.whenIdle();
         metrics.cancellationsMs.push(performance.now() - start);
         if (metrics.cancellationsMs.length > 128) metrics.cancellationsMs.shift();
         notify();
@@ -255,6 +228,7 @@ export async function openChamber(options: ClientOptions = {}) {
           try {
             notify();
           } finally {
+            unsubscribeState();
             listeners.clear();
             transport.close();
           }

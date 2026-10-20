@@ -67,17 +67,23 @@ export type ReactiveWorkerClientOptions3D = {
 export type ReactiveWorkerInspectionProgress3D =
   | { kind: 'queries'; value: ReactiveQueryProgress3D }
   | { kind: 'changes'; value: ReactiveChangeProgress3D };
+export type ReactiveWorkerState3D = Readonly<{
+  status: 'connecting' | 'ready' | 'working' | 'closing' | 'closed' | 'failed';
+  activeId: number | null;
+  waitingId: number | null;
+  progress: ReactiveBranchProgress3D | null;
+  inspection: ReactiveWorkerInspectionProgress3D | null;
+  uncertain: boolean;
+  error: string | null;
+}>;
+
 export interface ReactiveWorkerClient3D<T extends ReactiveGameValue3D> {
   readonly ready: Promise<void>;
-  readonly state: Readonly<{
-    status: 'connecting' | 'ready' | 'working' | 'closing' | 'closed' | 'failed';
-    activeId: number | null;
-    waitingId: number | null;
-    progress: ReactiveBranchProgress3D | null;
-    inspection: ReactiveWorkerInspectionProgress3D | null;
-    uncertain: boolean;
-    error: string | null;
-  }>;
+  readonly state: ReactiveWorkerState3D;
+  /** Coalesced microtask notifications, including the initial and final state. Observer errors are isolated. */
+  subscribe(listener: (state: ReactiveWorkerState3D) => void): () => void;
+  /** Await an idle complete boundary; rejects on failure or shutdown. Call after ticket.cancel() to await discard. */
+  whenIdle(): Promise<void>;
   snapshot(): ReactiveSessionSnapshot3D<T>;
   query(requests: readonly ReactiveWorkerQuery3D[]): Promise<ReactiveWorkerQueryBatch3D>;
   queryPreview(
@@ -186,6 +192,50 @@ export function createReactiveWorkerClient3D<T extends ReactiveGameValue3D>(
     accept(value: unknown): void;
     reject(error: Error): void;
   } | null = null;
+  const listeners = new Set<{ listener: (state: ReactiveWorkerState3D) => void }>();
+  let notificationQueued = false;
+  function readState(): ReactiveWorkerState3D {
+    return Object.freeze({
+      status: failed
+        ? 'failed'
+        : closed
+          ? 'closed'
+          : closing
+            ? 'closing'
+            : !confirmed
+              ? 'connecting'
+              : flight || inspection || waiting || (active && !active.candidate)
+                ? 'working'
+                : 'ready',
+      activeId: active?.id ?? null,
+      waitingId: waiting?.id ?? null,
+      progress: active?.progress ? { ...active.progress } : null,
+      inspection: structuredClone(inspection?.progress ?? null),
+      uncertain,
+      error: failed,
+    });
+  }
+  function deliver(
+    token: { listener: (state: ReactiveWorkerState3D) => void },
+    state: ReactiveWorkerState3D,
+  ) {
+    if (!listeners.has(token)) return;
+    try {
+      token.listener(Object.freeze(structuredClone(state)));
+    } catch {
+      /* Observers cannot interrupt protocol processing or strand other observers. */
+    }
+    if (state.status === 'failed' || state.status === 'closed') listeners.delete(token);
+  }
+  function changed() {
+    if (notificationQueued || !listeners.size) return;
+    notificationQueued = true;
+    queueMicrotask(() => {
+      notificationQueued = false;
+      const state = readState();
+      for (const token of [...listeners]) deliver(token, state);
+    });
+  }
   const current = () => {
     if (!confirmed) throw Error('Reactive worker is not ready.');
     return confirmed;
@@ -238,6 +288,8 @@ export function createReactiveWorkerClient3D<T extends ReactiveGameValue3D>(
       dispose();
     } catch {
       /* terminal; keep the last acknowledged save */
+    } finally {
+      changed();
     }
   }
   function send(
@@ -252,6 +304,7 @@ export function createReactiveWorkerClient3D<T extends ReactiveGameValue3D>(
     sequence = seq;
     const timer = setTimeout(() => fail(Error('Reactive worker request timed out.')), timeout);
     flight = { seq, kind, timer, accept, reject, mutation };
+    changed();
     try {
       transport.send(workerMessage(channel, seq, kind, payload));
     } catch (error) {
@@ -443,6 +496,7 @@ export function createReactiveWorkerClient3D<T extends ReactiveGameValue3D>(
     );
   }
   function pump() {
+    changed();
     if (flight || cancelTask || failed || closed || !confirmed) return;
     try {
       if (inspection) {
@@ -562,29 +616,44 @@ export function createReactiveWorkerClient3D<T extends ReactiveGameValue3D>(
       later();
     } catch (error) {
       fail(error);
+    } finally {
+      changed();
     }
   }
   const client = Object.freeze<ReactiveWorkerClient3D<T>>({
     ready,
     get state() {
-      return Object.freeze({
-        status: failed
-          ? 'failed'
-          : closed
-            ? 'closed'
-            : closing
-              ? 'closing'
-              : !confirmed
-                ? 'connecting'
-                : flight || inspection || waiting || (active && !active.candidate)
-                  ? 'working'
-                  : 'ready',
-        activeId: active?.id ?? null,
-        waitingId: waiting?.id ?? null,
-        progress: active?.progress ? { ...active.progress } : null,
-        inspection: structuredClone(inspection?.progress ?? null),
-        uncertain,
-        error: failed,
+      return readState();
+    },
+    subscribe(listener) {
+      if (typeof listener !== 'function') throw Error('Expected a worker state listener.');
+      // Each subscription owns its own token, including repeated subscriptions of one callback.
+      const token = { listener };
+      listeners.add(token);
+      // Initial delivery targets this subscription only; subscribing must not rebroadcast to peers.
+      queueMicrotask(() => deliver(token, readState()));
+      return () => {
+        listeners.delete(token);
+      };
+    },
+    whenIdle() {
+      return new Promise<void>((resolve, reject) => {
+        let remove = () => {};
+        const check = (state: ReactiveWorkerState3D) => {
+          if (
+            state.status === 'failed' ||
+            state.status === 'closed' ||
+            state.status === 'closing'
+          ) {
+            remove();
+            reject(Error(state.error ?? 'Reactive worker is closed.'));
+          } else if (state.status === 'ready') {
+            remove();
+            resolve();
+          }
+        };
+        remove = client.subscribe(check);
+        check(readState());
       });
     },
     snapshot: () => structuredClone(current()),

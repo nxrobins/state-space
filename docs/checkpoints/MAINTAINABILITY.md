@@ -16,9 +16,20 @@ Types, structural lint, browser build and 100 worker/chamber tests passed
 passed all 13 journeys (receipt `d4a5ff3c0ffe43278a4b5d8340e6145f`), including
 HTML controls, pixels, saves, fault handling and shutdown. No blocking finding remains.
 
+## 2. Worker state authority
+
+Added isolated asynchronous SDK state subscriptions and `whenIdle()`. The chamber
+now observes the SDK directly instead of inferring terminal events from transport
+messages. Wire format and physical scheduling are unchanged. Adversarial review
+covered timer-only failure, rejected sends, observer exceptions/mutation,
+unsubscribe, shutdown, and callback reentrancy. Initial subscription delivery was
+made private to the new subscriber to prevent rebroadcast loops.
+106 focused tests passed (receipt `a3a8a5e6f1724e63a6526d829cc3c792`), as did types,
+lint, SDK/browser builds and native acceptance (receipt
+`2a954019ed1f4fef9a415870d3092b84`). No blocking finding remains.
+
 ## Remaining stages
 
-2. SDK state subscriptions and cancellation completion.
 3. Chamber lifecycle, replacement and presentation coordination.
 4. Neutral bounded-data validation and copying.
 5. SDK entry manifest, shared build configuration and automatic lint coverage.
