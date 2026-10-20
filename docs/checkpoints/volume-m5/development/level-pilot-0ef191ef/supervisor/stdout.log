@@ -1,5 +1,0 @@
-32^3 ice-control: 8/32; fall null; melt null
-32^3 ice-control: 16/32; fall null; melt null
-32^3 ice-control: 24/32; fall null; melt null
-32^3 ice-control: 32/32; fall null; melt null
-{"passed":true,"size":32,"scenario":"ice-control","firstFall":null,"supportMelt":null,"meanTickMs":15.275253125}

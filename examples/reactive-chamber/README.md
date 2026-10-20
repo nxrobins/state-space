@@ -76,7 +76,7 @@ The digests detect divergence; they are not authenticity signatures.
 
 ## Verification and limits
 
-`engine/experimental/reactive-chamber.test.ts` executes public SDK behavior:
+`engine/experimental/reactive/reactive-chamber.test.ts` executes public SDK behavior:
 causal controls, phase changes, atomic cancellation, stale branches, crushing,
 missing motion capture, rejected edits, finite resources, replay, validation,
 scene isolation and picking. CI builds the browser bundles, checks their types,

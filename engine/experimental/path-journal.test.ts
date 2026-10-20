@@ -3,9 +3,9 @@ import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 import { MOTION_TRACE_RULES_3D, type MaterialMotionTrace3D } from './motion-trace.js';
 import { MOTION_PATH_RULES_3D, type MaterialMotionPaths3D } from './motion-paths.js';
 import { appendPathFrame3D, createPathJournal3D, readPathJournal3D, type PathJournalFrame3D, type TickMovement3D } from './path-journal.js';

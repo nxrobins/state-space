@@ -95,18 +95,18 @@ def main():
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--paths", type=Path)
+    parser.add_argument("--release", default="historical-evidence-2026-10-18")
     args = parser.parse_args()
     if args.action == "build":
         paths = sorted(json.loads(args.paths.read_text()))
         manifest = {
             "version": 1,
             "sourceCommit": subprocess.check_output(
-                ["git", "rev-parse", "origin/main"], cwd=ROOT, text=True
+                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip(),
             "archive": {
                 "name": args.archive.name,
-                "url": "https://github.com/nxrobins/state-space/releases/download/historical-evidence-2026-10-18/"
-                + args.archive.name,
+                "url": f"https://github.com/nxrobins/state-space/releases/download/{args.release}/{args.archive.name}",
             },
             "files": [
                 {
@@ -153,13 +153,20 @@ def main():
                 raise ValueError("Evidence changed before pruning: " + row["path"])
         for row in manifest["files"]:
             (ROOT / row["path"]).unlink()
-        (ROOT / "docs/checkpoints/.gitignore").write_text(
-            "# Archived payloads restore locally; keep new runtime evidence under dist/.\n"
-            + "\n".join(
-                "/" + row["path"][len("docs/checkpoints/") :]
-                for row in manifest["files"]
+        ignore = ROOT / "docs/checkpoints/.gitignore"
+        previous = (
+            ignore.read_text()
+            if ignore.exists()
+            else (
+                "# Archived payloads restore locally; keep new runtime evidence under dist/.\n"
             )
-            + "\n"
+        )
+        patterns = {
+            "/" + row["path"][len("docs/checkpoints/") :] for row in manifest["files"]
+        }
+        additions = sorted(patterns - set(previous.splitlines()))
+        ignore.write_text(
+            previous.rstrip("\n") + "\n" + "".join(p + "\n" for p in additions)
         )
     print(json.dumps(result))
 

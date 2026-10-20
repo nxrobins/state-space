@@ -1,9 +1,0 @@
-{"time": 1791958389.6246016, "event": "started", "session": "volume-m2-c613ed9a9d23"}
-{"time": 1791958392.283776, "event": "progress", "done": false, "status": "Carve the dam ahead and left, then cool the channel. Watch the route for a complete demonstration."}
-{"time": 1791958394.5386932, "event": "progress", "done": false, "status": "Exact pass conformance: 1\u00d77\u00d71"}
-{"time": 1791958396.8069787, "event": "progress", "done": false, "status": "flow: 1024 GPU ticks and both restarts exact"}
-{"time": 1791958399.0703459, "event": "progress", "done": false, "status": "melt: 1024 GPU ticks and both restarts exact"}
-{"time": 1791958403.591412, "event": "progress", "done": false, "status": "Player + terrain restart 3: exact"}
-{"time": 1791958405.8427668, "event": "progress", "done": false, "status": "Player + terrain restart 157: exact"}
-{"time": 1791958408.0891054, "event": "progress", "done": true, "status": "All GPU physics, gameplay and restart checks passed."}
-{"time": 1791958408.9028592, "event": "completed", "passed": true, "performancePassed": null}

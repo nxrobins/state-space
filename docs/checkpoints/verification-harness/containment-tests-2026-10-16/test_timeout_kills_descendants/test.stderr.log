@@ -1,6 +1,0 @@
-test_timeout_kills_descendants (test_verification_guard.VerificationGuardTests) ... ok
-
-----------------------------------------------------------------------
-Ran 1 test in 2.248s
-
-OK

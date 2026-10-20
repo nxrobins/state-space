@@ -2,8 +2,8 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Pure actor/geometry checks. No material tick or structural solve is authorized. */
 import { describe, expect, test, vi } from 'vitest';
 import { moveTerrainActors3D, ACTOR_MOVEMENT_RULES_3D, type ActorMovementCommand3D } from './actor-movement.js';
-import { createTerrainBody3D, stepTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
-import type { NamedTerrainBody3D } from './terrain-body-group.js';
+import { createTerrainBody3D, stepTerrainBody3D, type TerrainBodyState3D } from './terrain/terrain-body.js';
+import type { NamedTerrainBody3D } from './terrain/terrain-body-group.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 

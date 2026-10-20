@@ -1,84 +1,61 @@
 # Current validation and support status
 
-State Space has a public v0.4 (`ca-v4`) 2D API and separately versioned experimental
-3D APIs. Passing a development check does not replace the complete release gate.
-The latest macOS work uses an Apple M3 Ultra, macOS 26.6.2, native Metal and a
-hardware Apple `metal-3` browser adapter.
+This page summarizes the latest retained evidence as of 2026-10-20. State Space
+has a public v0.4 (`ca-v4`) 2D API and separately versioned experimental 3D APIs.
+Qualification belongs to the recorded source, host and workload. Passing current
+CPU checks does not replace a fresh native or whole-product release gate.
 
-| Surface | Current evidence | Support boundary |
+| Surface | Latest retained evidence | Support boundary |
 | --- | --- | --- |
-| Public 2D CPU / WebGPU / native API | Exact native/CPU corpus and browser SDK parity; installed wheel/npm clients | Public v0.4 API; snapshot versions are strict |
-| M1–M4 material/chunk/active 3D | Tiny pass corpus and earlier checkpoint evidence | Experimental; new qualification below focuses on M5 |
-| M5 structures | 32³ and 64³ CPU/dense/active comparisons, restarts and failure controls | Experimental; 32³ baseline and optimized 64³ cut-scene 60 Hz measurements |
-| Tactical/reactive APIs | Existing bounded CPU and package checks | Experimental; no new worker/physical-runtime qualification claim |
+| Public 2D CPU / WebGPU / native | [C7 reference release](checkpoints/C7.md), subsequent ca-v4 checkpoints, and current installed-package checks | Public v0.4 contract; no new complete cross-platform release claim |
+| M1–M4 material/chunk/active 3D | [M1](checkpoints/3D_M1.md), [M2](checkpoints/3D_M2.md), [M3](checkpoints/3D_M3.md), [M4](checkpoints/3D_M4.md) | Experimental, separately versioned APIs; historical qualification is source-bound |
+| M5 structures at 32³/64³ | [Final replay and timing regressions](checkpoints/MACOS_128.md) compare CPU/dense/active state and restarts | Exactness covers the recorded scenarios and tick ranges; not arbitrary-world qualification |
+| M5 fixed 128³ cut scene | [Three consecutive strict 60 Hz runs](checkpoints/MACOS_128.md), 1,800 measured frames total, zero deadline misses or energy drift | M3 Ultra, visible Chrome, 1920×1080; bounded state/continuation checks, not full 128³ replay or a universal frame-rate guarantee |
+| Reactive chamber | [Native acceptance](checkpoints/REACTIVE_CHAMBER.md): real Worker CPU evolution, WebGPU pixels/depth, previews, cancellation, save/replay and resource cleanup | One 8³ chamber, one actor and the tested Mac host; not GPU reactive physics, 16³ or cross-platform qualification |
+| Other tactical/reactive surfaces | Bounded CPU/mock contracts and installed SDK checks; [original acceptance history](checkpoints/TACTICAL_INTERVENTIONS.md) | The chamber result does not clear the separate tactical slab, held physical/replay fixtures or every worker API |
 
 ## Automated pull-request checks
 
-[Engine verification](../.github/workflows/verify.yml) runs on pull requests and
-main/`codex/**` pushes. It builds all SDK entries and declarations, checks types
-and structural lint, runs small sequential CPU fixtures, exercises supervisor
-failure paths, tests archive restoration, and installs the npm/wheel artifacts
-in an independent temporary project. Receipts and package artifacts are retained
-for 14 days, including on failure. There is no GPU workload on hosted CI.
+[Engine verification](../.github/workflows/verify.yml) builds SDK bundles and
+declarations, builds the reactive chamber, checks types/lint/formatting, runs
+sequential CPU and controller suites, exercises supervisor failure paths, checks
+archive restoration, and installs npm/wheel artifacts in independent projects.
+All 13 npm entry points and their public declarations are checked. CI retains
+receipts and package artifacts for 14 days, including failures. Hosted CI runs no
+GPU workloads.
 
-The workflow uses the public-repository Ubuntu 24.04 runner and the existing
-8 GiB available-memory preflight. A smaller runner is refused rather than silently
-reducing the host safety threshold. Legacy Python multi-statement formatting is
-excluded from the broad harness syntax/error lint; the new supervisor/package
-files also receive strict Ruff checks. Windows real containment tests remain
-platform-specific.
+CI uses Node.js 22 and Ubuntu 24.04 with the existing 8 GiB available-memory
+preflight. Windows containment checks remain platform-specific. See the
+[contributor workflow](../CONTRIBUTING.md) for the local build/check order.
 
-## Mac qualification
+## Native acceptance and remaining scope
 
-Use [the macOS guide](MACOS.md) for setup, bounded commands and the complete
-current result table. Each hardware stage has a fresh evidence directory and
-source hashes under `dist/verification/`. Qualification covers complete packed
-cells, exact energy, structural state, absolute ticks and compatible snapshot
-metadata. Dense and active modes also use different storage partitions.
+The retained Mac results use an Apple M3 Ultra, macOS 26.6.2, native Metal and a
+hardware Apple browser adapter. Use the [macOS guide](MACOS.md) for the explicit
+bounded stages. Each run retains source hashes, its report and a supervisor
+receipt under ignored `dist/verification/`.
 
-The Mac supervisor now has an independent process watching a bounded pipe,
-absolute deadline and sampled process-tree RSS. Lost heartbeat, lost supervisor
-and excessive RSS are covered by tiny owned-process failure tests. These are
-userspace controls; sampled RSS is not a kernel memory cap, and no userspace
-watchdog can recover an OS/GPU-driver hang. Apple GPU thermal/utilization sensors
-are unavailable. Existing incident holds and the legacy demo quarantine remain.
+The independent watchdog checks heartbeat, deadline and sampled process-tree RSS.
+These are userspace controls, not a kernel memory cap or protection from an
+OS/GPU-driver hang. Existing incident holds and the legacy demo quarantine remain.
+CPU mocks do not establish native responsiveness, shader compilation or pixels.
 
-The main fixes found by validation were missing WebGPU types in installed package
-consumers and a reserved WGSL identifier in the experimental lighting cache. The
-cache now compiles and renders on real hardware, with exact presentation/state
-isolation. The test runner and its transitive dependencies were updated; the root
-npm audit reports zero advisories at this checkpoint.
+Remaining scope includes a complete fresh cross-platform release gate, full 128³
+replay qualification, larger reactive chambers, GPU reactive physics, and the
+specific tactical/physical continuation cases still held in their checkpoints.
+The fixed 128³ frame result and 8³ chamber acceptance must not be generalized to
+those workloads.
 
-## Local packages and the playable client
+## Choose a runnable client
 
-```sh
-npm run build:sdk
-npm run verify:packages
-uv run python -m scripts.verify_packages --native  # fixed Mac Metal profile
-npm run lab -- --port 0
-```
+- [Reactive chamber](../examples/reactive-chamber/README.md): the bounded 8³ real
+  Worker application with its fixed native acceptance stage.
+- [Structural cavern](../examples/structural-cavern/README.md): the M5 reference
+  client; its Mac baseline starts paused at 32³.
+- [SDK installation](sdk/core.md): external Python/JavaScript consumers and local
+  package verification. Packages are local artifacts; no npm/PyPI publication is enabled.
 
-The package verifier builds a wheel and npm tarball, creates a fresh Python
-environment and independent JavaScript project, imports all 13 public entry
-points and compiles all their exported declarations. It checks tiny 2D pass
-reports and structural falling/replay/invalid-restore behavior. Native mode
-compares the installed Metal client to the installed JavaScript CPU client.
-Packages remain local artifacts; no npm/PyPI publication is enabled.
-
-Open `/examples/structural-cavern/` on the printed origin. The client starts paused
-at 32³. Cross the bridge, cut or heat its supports, compare presentation modes,
-and remember/restore the exact world and actor in memory. Reset restores the
-initial first-person view; orbit distance stays inside the chamber. UI verification
-covers one-tick stepping, checkpoint controls, atomic continuation, zero drift,
-presentation isolation and a successful crossing. Larger sizes remain experimental.
-
-Historical bulk evidence is available through the [archive and restoration guide](ARCHIVES.md).
-Future raw captures belong in release assets, with compact summaries and provenance
-manifests in Git. This does not rewrite historical commits.
-
-The subsequent [structural optimization checkpoint](checkpoints/MACOS_OPTIMIZATION.md)
-records the worklist change, renewed parity checks and scale measurements.
-
-Still outside the baseline checkpoint above: 128³ qualification, a complete fresh cross-platform
-release gate, the quarantined legacy demo trajectories, and the tactical/reactive
-worker and physical continuation cases identified in their existing checkpoints.
+[Checkpoint summaries](checkpoints/README.md) retain earlier measurements and
+limits. [Historical archives](ARCHIVES.md) preserve bulk evidence, including
+failed runs. New raw captures belong in release assets with compact provenance
+manifests in Git; the repository's history is not rewritten.

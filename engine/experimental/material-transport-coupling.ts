@@ -5,9 +5,9 @@ import { applyMaterialTransport3D, readMaterialTransport3D, materialTransportCel
 import { gameplayGeometrySource3D, type GameplayGeometry3D } from './gameplay-geometry.js';
 import { tickMovementSource3D, type TickMovement3D } from './path-journal.js';
 import { translationMovementSource3D, type TranslationMovement3D } from './translation-paths.js';
-import { TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
-import type { TacticalPreviewEditor3D } from './tactical-previews.js';
-import type { TacticalValue } from './tactical-session-view.js';
+import { TACTICAL_SESSION_LIMITS_3D } from './tactical/tactical-session-core.js';
+import type { TacticalPreviewEditor3D } from './tactical/tactical-previews.js';
+import type { TacticalValue } from './tactical/tactical-session-view.js';
 import type { StructuralSnapshot3D } from './structural-world-core.js';
 
 export const MATERIAL_TRANSPORT_MEMORY_RULES_3D = 'material-transport-memory-1';

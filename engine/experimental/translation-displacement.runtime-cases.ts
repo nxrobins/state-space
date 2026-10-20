@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D, createTerrainBody3D, createTerrainDisplacement3D, createTranslationDisplacement3D } from './tactical-session.js';
-import type { TerrainBodyState3D } from './terrain-body.js';
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TerrainBodyState3D } from './terrain/terrain-body.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 
 type Game = {body: TerrainBodyState3D; ap: number};
 function initial() {

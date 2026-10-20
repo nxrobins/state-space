@@ -1,5 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {sources as volumeSources} from '../scripts/volume_evidence.mjs';
+import {sources as volumeM2Sources} from '../scripts/volume_m2_evidence.mjs';
 import {mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, readFileSync, copyFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
@@ -73,4 +76,16 @@ test('lint distinguishes browser module URLs and tooling tests from application 
   assert.deepEqual(lintSource("import './view.js?revision=1#render';", 'examples/app.js'), []);
   assert.ok(lintSource("import '../../engine/internal.js';", 'examples/lab/app.js').some(error => error.startsWith('SS046')));
   assert.deepEqual(lintSource("import '../../engine/lint_ts.mjs';", 'examples/lab/lab.test.mjs'), []);
+});
+
+// Source-hash reports are retained evidence: nested implementation inputs must remain bound.
+test('volume evidence hashes include moved modules', () => {
+  for (const capture of [volumeSources, volumeM2Sources]) {
+    const report = capture();
+    for (const path of ['reactive/reactive-session.ts', 'tactical/tactical-session-core.ts', 'terrain/terrain-motion.ts']) {
+      const source = 'engine/experimental/' + path;
+      const expected = createHash('sha256').update(readFileSync(new URL('../' + source, import.meta.url))).digest('hex');
+      assert.equal(report[source], expected, source);
+    }
+  }
 });

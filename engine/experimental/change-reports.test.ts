@@ -3,8 +3,8 @@ import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
-import type { TacticalSessionInitial3D } from './tactical-session-view.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
+import type { TacticalSessionInitial3D } from './tactical/tactical-session-view.js';
 import type { SupportObservation3D, SupportObserver3D } from './change-reports.js';
 
 // Selected suite: real edits, inert support observations, no physical solve/tick.

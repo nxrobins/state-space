@@ -30,7 +30,7 @@ def main():
     parser.add_argument('--node-report', type=Path, default=Path('dist/volume-m4/node128/report.json'))
     parser.add_argument('--output', type=Path, default=ROOT / 'dist/volume-m4/probe')
     args = parser.parse_args(); args.output.mkdir(parents=True, exist_ok=True)
-    paths = sorted({p.relative_to(ROOT).as_posix() for pattern in ['engine/experimental/*.ts','examples/active-cavern/*','examples/cavern/*','examples/first-person/*','examples/volume-lab/*.js','web/frame-*.js','scripts/*volume_m4*','dist/sdk/*.js'] for p in ROOT.glob(pattern) if p.is_file()} | {'package.json', 'scripts/volume_latency_report.py'})
+    paths = sorted({p.relative_to(ROOT).as_posix() for pattern in ['engine/experimental/**/*.ts','examples/active-cavern/*','examples/cavern/*','examples/first-person/*','examples/volume-lab/*.js','web/frame-*.js','scripts/*volume_m4*','dist/sdk/*.js'] for p in ROOT.glob(pattern) if p.is_file()} | {'package.json', 'scripts/volume_latency_report.py'})
     hashes = {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths}
     references = {}; node = None
     if args.phase in ('frames128beauty', 'appearance-replay', 'frames128', 'frames128gpu', 'gameplay128', 'continuation128'):

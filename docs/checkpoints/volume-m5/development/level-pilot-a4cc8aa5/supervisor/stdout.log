@@ -1,5 +1,0 @@
-32^3 ice-heat: 8/32; fall null; melt null
-32^3 ice-heat: 16/32; fall null; melt 16
-32^3 ice-heat: 24/32; fall 17; melt 16
-32^3 ice-heat: 32/32; fall 17; melt 16
-{"passed":true,"size":32,"scenario":"ice-heat","firstFall":17,"supportMelt":16,"meanTickMs":26.89397187499999}

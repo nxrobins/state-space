@@ -1,8 +1,0 @@
-<canvas id="canvas" width="1920" height="1080"></canvas><p id="status"></p><script type="module">
-import { benchmarkFrames } from './stages-benchmark.js';
-window.probe={done:false}; window.stageTraces=[];
-try {
- const result=await benchmarkFrames(document.getElementById('canvas'),label=>{window.profileLabel=label;document.getElementById('status').textContent=label;});
- window.probe={done:true,result,traces:window.stageTraces};
-} catch(error) {window.probe={done:true,error:String(error.stack),traces:window.stageTraces};}
-</script>

@@ -1,5 +1,20 @@
 # Checkpoint evidence
 
+For current support, start with [validation status](../VALIDATION_STATUS.md).
+Reports below preserve the implementation and host measured at their checkpoint.
+
+| Evidence | Scope |
+| --- | --- |
+| [Reactive chamber](REACTIVE_CHAMBER.md) | 8³ real Worker, CPU reactive evolution, WebGPU presentation and save/replay |
+| [Mac 128³ performance](MACOS_128.md) | Fixed cut-scene frame budget and bounded exactness checks |
+| [Mac optimization](MACOS_OPTIMIZATION.md) | Structural worklist optimization and 32³/64³ comparisons |
+| [Tactical/reactive history](TACTICAL_INTERVENTIONS.md) | Original build-by-build API development and runtime limits |
+| [Maintainability](MAINTAINABILITY.md) | Ownership, tooling and validation refinements |
+| [C7](C7.md) | Original 2D reference-release aggregate |
+
+Use [archive restoration](../ARCHIVES.md) when an older audit requires bulk
+payloads. A historical pass does not establish qualification for a changed source.
+
 Each completed checkpoint records its requirements, implemented changes,
 commands/results, targeted sweep scope, reproduced bugs, fixes, prevention rules,
 and remaining limitations. Evidence must distinguish tests of the checker from

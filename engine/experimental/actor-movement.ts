@@ -2,8 +2,8 @@ import { moveActorsKernel3D } from './actor-movement-kernel.js';
 /** Serial fixed-point actor movement. Does not step or modify material physics. */
 import { assertGameplayGeometry3D, type GameplayGeometry3D, type GeometryStamp3D, type GeometryContact3D,
   type GeometryTime3D, type GeometryExposure3D } from './gameplay-geometry.js';
-import { readTerrainBody3D, type TerrainBodyState3D, type BodySupport3D } from './terrain-body.js';
-import type { NamedTerrainBody3D } from './terrain-body-group.js';
+import { readTerrainBody3D, type TerrainBodyState3D, type BodySupport3D } from './terrain/terrain-body.js';
+import type { NamedTerrainBody3D } from './terrain/terrain-body-group.js';
 
 export const ACTOR_MOVEMENT_RULES_3D = 'actor-movement-1';
 export const ACTOR_MOVEMENT_LIMITS_3D = Object.freeze({bodies: 64, commands: 64});

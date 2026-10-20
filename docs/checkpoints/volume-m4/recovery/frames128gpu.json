@@ -1,9 +1,0 @@
-{
-  "stage": "frames128gpu",
-  "passed": true,
-  "performancePassed": true,
-  "supervisor": "dist\\volume-m4\\recovery\\frames128gpu-8804afda\\supervisor\\report.json",
-  "supervisorSha256": "e4a47d1e89850ee0ef6c633345e621bf1f7a0d61fc8a0598ab0a95659cec570a",
-  "evidence": "dist\\volume-m4\\recovery\\frames128gpu-8804afda\\evidence\\report.json",
-  "holdRemainsActive": true
-}

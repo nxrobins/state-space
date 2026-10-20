@@ -1,1 +1,0 @@
-examples/tactical-slab/scenario.ts(5,3): error TS2724: '"state-space-engine/experimental/3d/tactical-session"' has no exported member named 'followTranslatedMaterialTransport3D'. Did you mean 'followMaterialTransport3D'?

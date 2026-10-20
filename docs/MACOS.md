@@ -1,5 +1,11 @@
 # Run and verify State Space on macOS
 
+For the latest scope, see the [current support matrix](VALIDATION_STATUS.md).
+The results below retain dated baseline measurements followed by their updates:
+the [128³ fixed-scene follow-up](#128³-performance-follow-up) supersedes the older
+frame timings, and the [8³ reactive chamber](checkpoints/REACTIVE_CHAMBER.md) has
+its own native acceptance stage. Neither establishes a whole-product release.
+
 The engine lab runs locally on the JavaScript CPU backend and on browser WebGPU.
 The first macOS validation used Apple Silicon, macOS 26.6.2, Python 3.10.20 and
 an Apple `metal-3` WebGPU adapter. This is a bounded development baseline;

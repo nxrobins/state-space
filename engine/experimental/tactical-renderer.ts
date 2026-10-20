@@ -1,12 +1,12 @@
 /// <reference types="@webgpu/types" preserve="true" />
 /// <reference types="@webgpu/types" />
-import { cameraData, copyStamp, sceneData, TACTICAL_RENDER_LIMITS_3D, type TacticalCamera3D, type TacticalScene3D } from './tactical-presentation.js';
-import { TACTICAL_MESH, TACTICAL_TERRAIN, TACTICAL_BOXES } from './tactical-render-shaders.js';
+import { cameraData, copyStamp, sceneData, TACTICAL_RENDER_LIMITS_3D, type TacticalCamera3D, type TacticalScene3D } from './tactical/tactical-presentation.js';
+import { TACTICAL_MESH, TACTICAL_TERRAIN, TACTICAL_BOXES } from './tactical/tactical-render-shaders.js';
 import type { GeometryStamp3D } from './gameplay-geometry.js';
-import { fields } from './tactical-worker-wire.js';
-export { prepareTacticalScene3D, projectTacticalPoint3D, TACTICAL_RENDER_CONTRACT_3D, TACTICAL_RENDER_LIMITS_3D, TACTICAL_RENDER_COORDINATES_3D } from './tactical-presentation.js';
-export type { TacticalScene3D, TacticalCamera3D, TacticalDecoration3D, TacticalDecorations3D } from './tactical-presentation.js';
-export { TACTICAL_CAMERA_WGSL_3D } from './tactical-render-shaders.js';
+import { fields } from './tactical/tactical-worker-wire.js';
+export { prepareTacticalScene3D, projectTacticalPoint3D, TACTICAL_RENDER_CONTRACT_3D, TACTICAL_RENDER_LIMITS_3D, TACTICAL_RENDER_COORDINATES_3D } from './tactical/tactical-presentation.js';
+export type { TacticalScene3D, TacticalCamera3D, TacticalDecoration3D, TacticalDecorations3D } from './tactical/tactical-presentation.js';
+export { TACTICAL_CAMERA_WGSL_3D } from './tactical/tactical-render-shaders.js';
 
 export type TacticalRenderOptions3D = {colorFormat: 'rgba8unorm' | 'bgra8unorm' | 'rgba16float'; depthFormat: 'depth24plus' | 'depth32float'};
 export type TacticalRenderTargets3D = {color: GPUTexture; depth: GPUTexture};

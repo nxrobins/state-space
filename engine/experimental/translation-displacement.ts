@@ -2,8 +2,8 @@
 import { PHASE, PHASE_SHIFT } from '../generated/materials.js';
 import { gameplayGeometrySource3D, GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D, type GeometryStamp3D } from './gameplay-geometry.js';
 import { translationMovementSource3D, type TranslationMovement3D } from './translation-paths.js';
-import { createDisplacementCore3D, forwardDisplacementTrace3D, DISPLACEMENT_LIMITS_3D, type DisplacementOptions3D, type DisplacementResult3D } from './terrain-displacement-core.js';
-import type { TerrainBodyState3D } from './terrain-body.js';
+import { createDisplacementCore3D, forwardDisplacementTrace3D, DISPLACEMENT_LIMITS_3D, type DisplacementOptions3D, type DisplacementResult3D } from './terrain/terrain-displacement-core.js';
+import type { TerrainBodyState3D } from './terrain/terrain-body.js';
 
 export const TRANSLATION_DISPLACEMENT_RULES_3D = 'translation-displacement-1';
 export const TRANSLATION_DISPLACEMENT_LIMITS_3D = Object.freeze({...DISPLACEMENT_LIMITS_3D, defaultCarryEntries: 4096, carryEntries: 65536});
