@@ -1,17 +1,16 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Exact storage-strategy comparisons. Physical steps/support solves remain held. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalSnapshotReuse3D, inspectTacticalSnapshotReuse3D, type TacticalSnapshotReuseOptions3D } from './tactical-snapshot-reuse.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import type { SupportObserver3D } from './change-reports.js';
 import type { TacticalBranch3D, TacticalSessionInitial3D, TacticalSessionPolicy3D } from './tactical-session-view.js';
 import { MAT } from './3d.js';
 import { observe } from './terrain-motion.fixtures.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime remains held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type Game = {ap: number; turn: number; rng: number; actors: {id: string; cell: number}[]; log: string[]};
 function initial(tick = 0): TacticalSessionInitial3D<Game> {
   const world = new CpuStructuralWorld3D({width: 8, height: 8, depth: 8, chunkSize: 4}), flask = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});

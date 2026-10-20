@@ -1,14 +1,12 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { appendMotionFrame3D, createMotionRecorder3D, motionEntryLimit3D, motionJournal3D, readMotionTrace3D, MOTION_TRACE_RULES_3D,
   type MaterialMotionTrace3D, type MotionJournalData3D } from './motion-trace.js';
 
-const step = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Runtime is held.');});
-const tracked = vi.spyOn(CpuStructuralWorld3D.prototype, 'stepWithMotion').mockImplementation(() => {throw Error('Runtime is held.');});
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Runtime is held.');});
-afterAll(() => {for (const spy of [step, tracked, solve]) {expect(spy).not.toHaveBeenCalled(); spy.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion');
 const world = () => new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});
 function plan(): mechanics.StructuralPlan3D {
   return {state: {grid: new Uint32Array(64), energyQ: new Uint32Array(64), structure: new Uint32Array(64)},

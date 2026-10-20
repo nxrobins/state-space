@@ -1,16 +1,15 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Actual conservative edits and bound geometry; no material runtime. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { createTacticalSession3D } from './tactical-session.js';
 import { createMaterialTransport3D } from './material-transport.js';
 import { captureMaterialTransportMemory3D as capture, restoreMaterialTransportMemory3D as restore,
   followTranslatedMaterialTransport3D as follow } from './material-transport-coupling.js';
 import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 function fixture(identical = false) {
   const w = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});
   w.setCell(1, 1, 1, identical ? MAT.STEAM : MAT.SAND, identical ? 110 : 20); w.setCell(2, 1, 1, MAT.STEAM, 110);

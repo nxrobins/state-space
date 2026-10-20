@@ -1,11 +1,11 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { GEOMETRY_SCALE_3D as S, type GeometryBox3D } from './gameplay-geometry.js';
 
-const physicalStep = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Physical runtime validation is held.');});
-afterAll(() => {expect(physicalStep).not.toHaveBeenCalled(); physicalStep.mockRestore();});
+holdPhysics('step');
 const vec = (x: number, y: number, z: number): [number, number, number] => [x * S, y * S, z * S];
 const body = (min: [number, number, number], max: [number, number, number]): GeometryBox3D => ({minQ: vec(...min), maxQ: vec(...max)});
 function world() {return new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});}

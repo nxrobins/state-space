@@ -1,7 +1,8 @@
+import { holdPhysics } from '../test-support/hold-physics.js';
 /** Real edits and inert tick observations only; no physical execution. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import * as translations from './translation-displacement.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
@@ -14,9 +15,7 @@ import type { TranslationRequest3D } from './interventions.js';
 import type { TickMovement3D } from './path-journal.js';
 import type { GameplayGeometry3D } from './gameplay-geometry.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 const request: TranslationRequest3D = {cells: [[1, 3, 3], [3, 3, 3]], path: [[0, -1, 0]]};
 function fixture(ceiling = false) {
   const w = new CpuStructuralWorld3D({width: 8, height: 8, depth: 8, chunkSize: 4}); w.setCell(1, 3, 3, MAT.STONE); w.setCell(3, 3, 3, MAT.STONE);

@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
@@ -8,10 +9,7 @@ import { MOTION_TRACE_RULES_3D, type MaterialMotionTrace3D } from './motion-trac
 import type { GameplayChangeReport3D, SupportObserver3D } from './change-reports.js';
 import type { TacticalSessionInitial3D, TacticalSessionPolicy3D } from './tactical-session-view.js';
 
-const step = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Runtime held.');});
-const tracked = vi.spyOn(CpuStructuralWorld3D.prototype, 'stepWithMotion').mockImplementation(() => {throw Error('Runtime held.');});
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Runtime held.');});
-afterAll(() => {for (const spy of [step, tracked, solve]) {expect(spy).not.toHaveBeenCalled(); spy.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion');
 const world = () => new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});
 function initial(): TacticalSessionInitial3D<{ap: number}> {
   const w = world(); w.setCell(1, 1, 1, MAT.STONE, 100); w.setIntegrity(1, 1, 1, 73);

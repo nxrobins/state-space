@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT, buildColdTable, PHASE_SHIFT } from '../generated/materials.js';
 import { DEFAULT_REGISTRY } from '../registry.js';
 import { MAX_ENERGY_Q, thermalView } from '../thermal.js';
@@ -8,8 +9,7 @@ import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import type { TacticalSessionInitial3D, TacticalSessionPolicy3D } from './tactical-session-view.js';
 
-const physicalStep = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Physical runtime validation is held.');});
-afterAll(() => {expect(physicalStep).not.toHaveBeenCalled(); physicalStep.mockRestore();});
+holdPhysics('step');
 type Game = {ap: number; turns: number};
 function initial(tick = 0): TacticalSessionInitial3D<Game> {
   const world = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});

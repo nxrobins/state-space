@@ -1,5 +1,6 @@
+import { holdPhysics } from '../test-support/hold-physics.js';
 /** Edit-only regressions. All real material steps and support solves are trapped. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT, ENERGY_SCALE } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
 import * as interventions from './interventions.js';
@@ -13,9 +14,7 @@ import type { TranslationAction3D, TranslationMovement3D } from './translation-p
 import type { TacticalSessionPolicy3D, TacticalBranch3D } from './tactical-session-view.js';
 import type { SupportObserver3D } from './change-reports.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 const world = () => new CpuStructuralWorld3D({width: 8, height: 8, depth: 8, chunkSize: 4});
 const index = ([x, y, z]: CellCoordinate3D) => x + 8 * (y + 8 * z);
 const request: TranslationRequest3D = {cells: [[3, 3, 3]], path: [[1, 0, 0]]};

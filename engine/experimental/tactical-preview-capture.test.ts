@@ -1,8 +1,9 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Queue observations use synthetic permutations, never production physics. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+
+import { type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalPreviewQueue3D, type TacticalPreviewCapture3D, type TacticalPreviewQueue3D, type TacticalPreviewTicket3D } from './tactical-previews.js';
@@ -10,10 +11,7 @@ import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
 import { observe, seed, index, type Spec } from './terrain-motion.fixtures.js';
 import type { SupportObserver3D } from './change-reports.js';
 
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Structural solves are held.');});
-afterAll(() => {for (const trap of [...traps, solve]) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type Game = {ap: number};
 const all: TacticalPreviewCapture3D = {motion: {}, paths: {}, journal: {}};
 const inertSupport: SupportObserver3D = s => ({distances: new Int32Array(s.packedCells.length).fill(-1),
