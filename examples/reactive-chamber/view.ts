@@ -93,10 +93,7 @@ export async function openChamberView(
         latest = { scene, camera: structuredClone(camera) };
         pump.invalidate();
       },
-      async painted() {
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        await pump.settled();
-      },
+      painted: pump.settled,
       close() {
         if (closing) return closing;
         resize.disconnect();

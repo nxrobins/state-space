@@ -173,19 +173,54 @@ describe('runtime gate and bounded frame scheduling', () => {
     for (let i = 0; i < 20; i++) f.pump.invalidate(); expect(f.callbacks.size).toBe(1); f.fire(); await until(() => f.draw.mock.calls.length === 1);
     for (let i = 0; i < 20; i++) f.pump.invalidate(); expect(f.callbacks.size).toBe(0); done.resolve(); await until(() => f.callbacks.size === 1); f.fire(); await until(() => f.draw.mock.calls.length === 2); await f.pump.close();
   });
+  test('settled waits for a scheduled frame and its draw completion', async () => {
+    const f = frameFixture(), done = deferred<void>(); f.draw.mockReturnValueOnce(done.promise);
+    f.pump.invalidate(); let settled = false; const waiting = f.pump.settled().then(() => {settled = true;});
+    await Promise.resolve(); await Promise.resolve(); expect(settled).toBe(false);
+    f.fire(); await until(() => f.draw.mock.calls.length === 1); expect(settled).toBe(false);
+    done.resolve(); await waiting; await f.pump.close();
+  });
+  test('settled includes the dirty successor but does not chase later invalidations', async () => {
+    const f = frameFixture(), first = deferred<void>(), second = deferred<void>();
+    f.draw.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    f.pump.invalidate(); f.fire(); await until(() => f.draw.mock.calls.length === 1);
+    f.pump.invalidate(); let settled = false; const waiting = f.pump.settled().then(() => {settled = true;});
+    first.resolve(); await until(() => f.callbacks.size === 1); await Promise.resolve(); expect(settled).toBe(false);
+    f.fire(); await until(() => f.draw.mock.calls.length === 2); expect(settled).toBe(false);
+    f.pump.invalidate(); second.resolve(); await waiting;
+    expect(f.draw).toHaveBeenCalledTimes(2); await f.pump.close();
+  });
+  test('close rejects completion waits for cancelled frames', async () => {
+    const f = frameFixture(); f.pump.invalidate(); const waiting = expect(f.pump.settled()).rejects.toThrow(/closed/);
+    await f.pump.close(); await waiting; await expect(f.pump.settled()).rejects.toThrow(/closed/);
+  });
+  test('draw failure rejects both active and queued completion waits', async () => {
+    const f = frameFixture(), done = deferred<void>(); f.draw.mockImplementation(async () => {await done.promise; throw Error('draw failed');});
+    f.pump.invalidate(); f.fire(); await until(() => f.draw.mock.calls.length === 1);
+    const active = expect(f.pump.settled()).rejects.toThrow('draw failed');
+    f.pump.invalidate(); const queued = expect(f.pump.settled()).rejects.toThrow('draw failed');
+    done.resolve(); await Promise.all([active, queued]); await f.pump.close();
+  });
   test('close cancels a scheduled frame without drawing', async () => {
     const f = frameFixture(); f.pump.invalidate(); await f.pump.close(); expect(f.callbacks.size).toBe(0); expect(f.draw).not.toHaveBeenCalled(); f.pump.invalidate(); expect(f.callbacks.size).toBe(0);
   });
   test('close drains an outstanding frame without scheduling a dirty successor', async () => {
     const f = frameFixture(), done = deferred<void>(); f.draw.mockReturnValue(done.promise); f.pump.invalidate(); f.fire(); await until(() => f.draw.mock.calls.length === 1); f.pump.invalidate();
-    let closed = false; const pending = f.pump.close().then(() => {closed = true;}); await Promise.resolve(); expect(closed).toBe(false); done.resolve(); await pending; expect(f.callbacks.size).toBe(0);
+    const cancelled = expect(f.pump.settled()).rejects.toThrow(/closed/);
+    let closed = false; const pending = f.pump.close().then(() => {closed = true;}); await Promise.resolve(); expect(closed).toBe(false); done.resolve(); await pending; await cancelled; expect(f.callbacks.size).toBe(0);
+  });
+  test('close during the guard cancels completion without starting a draw', async () => {
+    const f = frameFixture(), gate = deferred<void>(); f.guard.mockReturnValue(gate.promise);
+    await f.pump.settled(); f.pump.invalidate(); f.fire(); await until(() => f.guard.mock.calls.length === 1);
+    const cancelled = expect(f.pump.settled()).rejects.toThrow(/closed/), closed = f.pump.close();
+    gate.resolve(); await closed; await cancelled; expect(f.draw).not.toHaveBeenCalled();
   });
   test('reactivated hold blocks a frame and stops future scheduling', async () => {
     const f = frameFixture(); f.guard.mockRejectedValue(Error('held')); f.pump.invalidate(); f.fire(); await until(() => f.error.mock.calls.length === 1);
     expect(f.draw).not.toHaveBeenCalled(); f.pump.invalidate(); expect(f.callbacks.size).toBe(0); await f.pump.close();
   });
-  test('a draw error stops the pump even when its error callback throws', async () => {
-    const f = frameFixture(); f.draw.mockRejectedValue(undefined); f.error.mockImplementation(() => {throw Error('callback');}); f.pump.invalidate(); f.fire(); await until(() => f.error.mock.calls.length === 1);
+  test.each([undefined, Error('')])('a draw error stops the pump even when its error callback throws: %s', async failure => {
+    const f = frameFixture(); f.draw.mockRejectedValue(failure); f.error.mockImplementation(() => {throw Error('callback');}); f.pump.invalidate(); f.fire(); await until(() => f.error.mock.calls.length === 1);
     expect(f.pump.state().error).toBe('Frame failed.'); f.pump.invalidate(); expect(f.callbacks.size).toBe(0); await f.pump.close();
   });
 });

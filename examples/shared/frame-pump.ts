@@ -8,14 +8,19 @@ export function createFramePump(options: {
 }) {
   let scheduled: number | undefined,
     flight: Promise<void> | undefined,
-    dirty = false,
     closed = false,
     error: string | null = null;
+  let pending: { promise: Promise<void>; resolve: () => void } | undefined;
+  const cancelPending = () => {
+    pending?.resolve();
+    pending = undefined;
+  };
   const schedule = () => {
-    if (closed || error || !dirty || scheduled !== undefined || flight) return;
+    if (closed || error || !pending || scheduled !== undefined || flight) return;
     scheduled = options.requestFrame(() => {
       scheduled = undefined;
-      dirty = false;
+      const completion = pending!;
+      pending = undefined;
       if (closed || error) return;
       flight = Promise.resolve()
         .then(async () => {
@@ -23,8 +28,8 @@ export function createFramePump(options: {
           if (!closed) await options.draw();
         })
         .catch((e) => {
-          error = e instanceof Error ? e.message : 'Frame failed.';
-          dirty = false;
+          error = e instanceof Error && e.message ? e.message : 'Frame failed.';
+          cancelPending();
           try {
             options.onError(error);
           } catch {
@@ -33,6 +38,7 @@ export function createFramePump(options: {
         })
         .finally(() => {
           flight = undefined;
+          completion.resolve();
           schedule();
         });
     });
@@ -40,17 +46,32 @@ export function createFramePump(options: {
   return Object.freeze({
     invalidate() {
       if (!closed && !error) {
-        dirty = true;
+        if (!pending) {
+          let resolve!: () => void;
+          const promise = new Promise<void>((done) => {
+            resolve = done;
+          });
+          pending = { promise, resolve };
+        }
         schedule();
       }
     },
-    state: () => ({ scheduled: scheduled !== undefined, inFlight: !!flight, dirty, closed, error }),
+    state: () => ({
+      scheduled: scheduled !== undefined,
+      inFlight: !!flight,
+      dirty: !!pending,
+      closed,
+      error,
+    }),
+    /** Wait for the latest requested frame at this call, including a queued successor. */
     async settled() {
-      await flight;
+      await (pending?.promise ?? flight);
+      if (error) throw Error(error);
+      if (closed) throw Error('Frame pump closed.');
     },
     async close() {
       closed = true;
-      dirty = false;
+      cancelPending();
       if (scheduled !== undefined) {
         options.cancelFrame(scheduled);
         scheduled = undefined;
