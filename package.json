@@ -31,10 +31,13 @@
     "verify:macos:native": "uv run python -m scripts.verify_macos_native",
     "verify:packages": "uv run python -m scripts.verify_packages",
     "verify:macos": "uv run python -m scripts.verify_macos_qualification",
-    "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs"
+    "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs",
+    "format:chamber": "prettier --write \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive-worker-client.ts\" \"engine/experimental/reactive-chamber*.test.ts\"",
+    "format:check": "prettier --check \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive-worker-client.ts\" \"engine/experimental/reactive-chamber*.test.ts\""
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "prettier": "3.8.3",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "^5.0.5"
