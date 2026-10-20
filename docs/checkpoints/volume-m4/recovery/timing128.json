@@ -1,9 +1,0 @@
-{
-  "stage": "timing128",
-  "passed": true,
-  "performancePassed": true,
-  "supervisor": "dist\\volume-m4\\recovery\\timing128-338cda1f\\supervisor\\report.json",
-  "supervisorSha256": "4546c4415ac88e4ef748af37f22c4a890f6cb01e27a45e1d504352462a0ee7d5",
-  "evidence": "dist\\volume-m4\\recovery\\timing128-338cda1f\\evidence\\report.json",
-  "holdRemainsActive": true
-}

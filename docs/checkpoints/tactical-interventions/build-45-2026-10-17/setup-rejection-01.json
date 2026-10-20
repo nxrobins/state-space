@@ -1,7 +1,0 @@
-{
-  "stage": "prepare tests attempt-01 focus-geometry",
-  "error": "Reviewed runner changed",
-  "cause": "Text copying changed runner line endings; restored byte-identical copies before authorization",
-  "workloadLaunched": false,
-  "authorizationCreated": false
-}

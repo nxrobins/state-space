@@ -1,9 +1,0 @@
-{
-  "stage": "unit",
-  "passed": true,
-  "performancePassed": null,
-  "supervisor": "dist\\volume-m4\\recovery\\unit-151f1a7d\\supervisor\\report.json",
-  "supervisorSha256": "82e6a96cf2cb860a68c50cd2541a613f676d0d29f9ab0e0b3f68191d182fa89d",
-  "evidence": null,
-  "holdRemainsActive": true
-}

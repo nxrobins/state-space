@@ -1,5 +1,0 @@
-32^3 cut: 8/32; fall null; melt null
-32^3 cut: 16/32; fall 16; melt null
-32^3 cut: 24/32; fall 16; melt null
-32^3 cut: 32/32; fall 16; melt null
-{"passed":true,"size":32,"scenario":"cut","firstFall":16,"supportMelt":null,"meanTickMs":25.372465625000007}

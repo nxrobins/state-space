@@ -1,9 +1,0 @@
-{
-  "stage": "typecheck",
-  "passed": true,
-  "performancePassed": null,
-  "supervisor": "dist\\volume-m4\\recovery\\typecheck-0572d8e2\\supervisor\\report.json",
-  "supervisorSha256": "f5c8889aa25ffeca7f26b46c04aebb699207a6d48b0fde62cb2a0ebfac46d162",
-  "evidence": null,
-  "holdRemainsActive": true
-}

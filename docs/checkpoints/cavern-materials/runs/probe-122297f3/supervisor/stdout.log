@@ -1,9 +1,0 @@
-M4 probe: starting isolated hardware session
-Starting bounded M4 verification
-Kernel pass conformance: 1×1×1 volume
-Kernel pass conformance: 3×5×7 volume
-Kernel pass conformance: 8×8×8 dense
-Kernel pass conformance: 8×8×8 sparse
-Tiny mixed materials: dense/sparse/CPU exact
-Activity piggyback readback is isolated and invalidates on render/edit/restore
-M4 probe: passed=True

@@ -1,6 +1,0 @@
-M4 probe: starting isolated hardware session
-Starting bounded M4 verification
-Tiny mixed materials: dense/sparse/CPU exact
-Indirect dirty-chunk meshes match the full face oracle
-Activity piggyback readback is isolated and invalidates on render/edit/restore
-M4 probe: passed=True

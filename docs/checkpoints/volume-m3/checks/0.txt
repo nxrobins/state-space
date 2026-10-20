@@ -1,8 +1,0 @@
-test_contained_success (tests.test_verification_guard.VerificationGuardTests) ... ok
-test_second_verification_never_starts (tests.test_verification_guard.VerificationGuardTests) ... ok
-test_timeout_kills_descendants (tests.test_verification_guard.VerificationGuardTests) ... ok
-
-----------------------------------------------------------------------
-Ran 3 tests in 2.125s
-
-OK

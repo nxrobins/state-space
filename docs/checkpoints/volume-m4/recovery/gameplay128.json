@@ -1,9 +1,0 @@
-{
-  "stage": "gameplay128",
-  "passed": true,
-  "performancePassed": null,
-  "supervisor": "dist\\volume-m4\\recovery\\gameplay128-a4b07f66\\supervisor\\report.json",
-  "supervisorSha256": "864362653654623d29aee047ecbde552a51f5f3834c8f10f4ac68158791c6c75",
-  "evidence": "dist\\volume-m4\\recovery\\gameplay128-a4b07f66\\evidence\\report.json",
-  "holdRemainsActive": true
-}

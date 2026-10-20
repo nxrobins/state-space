@@ -1,4 +1,0 @@
-engine/experimental/terrain-actor-group.test.ts(140,57): error TS2339: Property 'error' does not exist on type 'TacticalPreviewOutcome3D<SlabGame>'.
-  Property 'error' does not exist on type 'Stamp & { status: "ready"; preview: TacticalPreview3D<SlabGame>; }'.
-engine/experimental/terrain-actor-group.test.ts(146,125): error TS2339: Property 'error' does not exist on type 'TacticalPreviewOutcome3D<TacticalValue>'.
-  Property 'error' does not exist on type 'Stamp & { status: "ready"; preview: TacticalPreview3D<TacticalValue>; }'.

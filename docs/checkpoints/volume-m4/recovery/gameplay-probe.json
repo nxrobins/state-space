@@ -1,9 +1,0 @@
-{
-  "stage": "gameplay-probe",
-  "passed": true,
-  "performancePassed": null,
-  "supervisor": "dist\\volume-m4\\recovery\\gameplay-probe-5680f921\\supervisor\\report.json",
-  "supervisorSha256": "a16834aab3e299fa8b861a5ae48bdc677e1c6185f0a6189bb9094d109703a651",
-  "evidence": "dist\\volume-m4\\recovery\\gameplay-probe-5680f921\\evidence\\report.json",
-  "holdRemainsActive": true
-}

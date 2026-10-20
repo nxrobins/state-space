@@ -1,9 +1,0 @@
-{
-  "stage": "lint",
-  "passed": true,
-  "performancePassed": null,
-  "supervisor": "dist\\volume-m4\\recovery\\lint-355fb143\\supervisor\\report.json",
-  "supervisorSha256": "50f2007215d3bcf80d7b4456e64aaa04fe4392ad9a6e3c95f0fcb51146f896a3",
-  "evidence": null,
-  "holdRemainsActive": true
-}

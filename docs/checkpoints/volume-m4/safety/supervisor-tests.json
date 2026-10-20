@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "tests": 13,
-  "failures": 0,
-  "errors": 0,
-  "sourceSha256": "017d7dfb94c9ab2422f2b449d86c6c02bc0b6e8edccdc0e1543c60477202e922",
-  "scope": "Print/sleep containment with stubbed host readings; hold, permit, health and stale-prerequisite checks use no GPU context or simulation.",
-  "log": "docs/checkpoints/volume-m4/safety/supervisor-tests.log"
-}
