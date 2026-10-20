@@ -55,7 +55,24 @@ getters, hidden/symbol fields and prototype-looking keys. All 1,839 CPU tests an
 types, lint and native journeys (receipt `da1af33dbe46420c9cf7cb5dc335cdf5`). Source
 evidence now includes all engine TS. No blocking finding remains.
 
+## Stage 5 — SDK build metadata and automatic lint coverage
+
+A single entry manifest drives a shared build factory. Package exports and
+TypeScript declaration roots are checked mirrors; stale/missing exports fail the
+build before output deletion. Existing per-entry Vite commands remain compatible.
+Entries keep their target settings and separate bundle identities. Lint discovers
+all engine/example TS/JS sources, including new nested files, with file-attributed
+diagnostics; CI checks formatting too.
+Adversarial review exercised missing/duplicate metadata, new-file lint discovery,
+symlink loops, generated output exclusion, module URL queries and application
+import boundaries. Previously unlinted test import extensions were corrected.
+A stale pre-formatting artifact initially differed; rebuilding the same source
+with old and new configs proved all 15 JS outputs byte-identical. Installed
+package verification passed all 13 export declarations (receipt
+`450652297d6a48749f0f596c0f1941fe`), along with both examples, full CPU/controller
+tests, types/lint/format and native acceptance (receipt
+`46709fbbe817444cb3ac2b0ea0104dbd`). No blocking finding remains.
+
 ## Remaining stages
 
-5. SDK entry manifest, shared build configuration and automatic lint coverage.
 6. Deterministic shared fault-injecting test transport.

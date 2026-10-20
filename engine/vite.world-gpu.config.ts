@@ -1,4 +1,2 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
-export default defineConfig({ build: { target: 'es2022', outDir: resolve('dist/sdk'), emptyOutDir: false, minify: false,
-  lib: { entry: resolve('engine/experimental/world-gpu.ts'), formats: ['es'], fileName: () => 'state-space-world-gpu.js' } } });
+import { sdkConfig } from './sdk-build.mjs';
+export default sdkConfig("./experimental/3d/world/gpu");

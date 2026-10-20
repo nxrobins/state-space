@@ -1,0 +1,72 @@
+[
+  {
+    "key": ".",
+    "source": "engine/index.ts",
+    "filename": "state-space.js",
+    "target": "es2022"
+  },
+  {
+    "key": "./experimental/3d",
+    "source": "engine/experimental/3d.ts",
+    "filename": "state-space-3d.js",
+    "target": "es2022"
+  },
+  {
+    "key": "./experimental/3d/gpu",
+    "source": "engine/experimental/3d-gpu.ts",
+    "filename": "state-space-3d-gpu.js",
+    "target": "es2022"
+  },
+  {
+    "key": "./experimental/3d/world",
+    "source": "engine/experimental/world.ts",
+    "filename": "state-space-world.js",
+    "target": "es2022"
+  },
+  {
+    "key": "./experimental/3d/world/gpu",
+    "source": "engine/experimental/world-gpu.ts",
+    "filename": "state-space-world-gpu.js",
+    "target": "es2022"
+  },
+  {
+    "key": "./experimental/3d/active-world",
+    "source": "engine/experimental/active-world.ts",
+    "filename": "state-space-active-world.js"
+  },
+  {
+    "key": "./experimental/3d/active-world/gpu",
+    "source": "engine/experimental/active-world-gpu.ts",
+    "filename": "state-space-active-world-gpu.js"
+  },
+  {
+    "key": "./experimental/3d/structural-world",
+    "source": "engine/experimental/structural-world.ts",
+    "filename": "state-space-structural-world.js"
+  },
+  {
+    "key": "./experimental/3d/structural-world/gpu",
+    "source": "engine/experimental/structural-world-gpu.ts",
+    "filename": "state-space-structural-world-gpu.js"
+  },
+  {
+    "key": "./experimental/3d/interventions",
+    "source": "engine/experimental/interventions.ts",
+    "filename": "state-space-interventions.js"
+  },
+  {
+    "key": "./experimental/3d/tactical-session",
+    "source": "engine/experimental/tactical-session.ts",
+    "filename": "state-space-tactical-session.js"
+  },
+  {
+    "key": "./experimental/3d/tactical-renderer",
+    "source": "engine/experimental/tactical-renderer.ts",
+    "filename": "state-space-tactical-renderer.js"
+  },
+  {
+    "key": "./experimental/3d/reactive-materials",
+    "source": "engine/experimental/reactive-materials.ts",
+    "filename": "state-space-reactive-materials.js"
+  }
+]

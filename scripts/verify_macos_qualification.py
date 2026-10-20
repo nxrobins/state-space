@@ -35,6 +35,9 @@ def main():
     out.mkdir(parents=True)
     paths = [
         *(ROOT / "engine").rglob("*.ts"),
+        ROOT / "engine/sdk-build.mjs",
+        ROOT / "engine/sdk-entries.json",
+        ROOT / "scripts/build_sdk.mjs",
         *ROOT.glob("dist/sdk/*"),
         *ROOT.glob("dist/volume-m5/*.js"),
         *ROOT.glob("examples/sdk/*"),

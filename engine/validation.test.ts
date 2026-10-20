@@ -3,17 +3,17 @@ import { validatePackedCells } from './validation.js';
 
 describe('packed-state validation', () => {
   it('copies typed unsigned storage, including maximum values, without invoking its iterator', () => {
-    const input = Uint32Array.of(0, 0xffffffff);
-    input[Symbol.iterator] = () => { throw new Error('Caller iterator must not run.'); };
-    const output = validatePackedCells(input, 2);
+    const values = Uint32Array.of(0, 0xffffffff);
+    values[Symbol.iterator] = () => { throw new Error('Caller iterator must not run.'); };
+    const output = validatePackedCells(values, 2);
     expect([...output]).toEqual([0, 0xffffffff]);
-    input.fill(7);
+    values.fill(7);
     expect([...output]).toEqual([0, 0xffffffff]);
   });
 
   it('rejects coercion, holes and malformed lengths in ordinary inputs', () => {
-    for (const input of [[-1], [0x100000000], [0.5], [NaN], [Infinity], ['1'], [undefined], new Array(1)]) {
-      expect(() => validatePackedCells(input as number[], 1)).toThrow();
+    for (const values of [[-1], [0x100000000], [0.5], [NaN], [Infinity], ['1'], [undefined], new Array(1)]) {
+      expect(() => validatePackedCells(values as number[], 1)).toThrow();
     }
     expect(() => validatePackedCells(Uint32Array.of(1), 2)).toThrow();
     expect([...validatePackedCells([0, 0xffffffff], 2)]).toEqual([0, 0xffffffff]);
