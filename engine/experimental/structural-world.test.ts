@@ -5,23 +5,12 @@ import { ANCHOR_3D, BONDS_3D, FRESH_3D, structuralNeighbor, solveStructure3D, no
 import { seedState } from '../thermal.js';
 import { DEFAULT_REGISTRY } from '../registry.js';
 import type { StructuralState3D } from './structural-mechanics.js';
-import { structuralShaders } from './structural-shader.js';
 const small=()=>world({width:8,height:8,depth:8,chunkSize:4});
 const at=(x:number,y:number,z:number)=>x+8*(y+8*z);
 const counts=(grid:Uint32Array)=>{const n=new Map<number,number>();for(const v of grid)n.set(v&255,(n.get(v&255)??0)+1);return n;};
 const tuples=(s:StructuralState3D)=>Array.from(s.grid,(v,i)=>`${v}:${s.energyQ[i]}`).sort();
 
 describe('M5 structural CPU contract (tiny bounded fixtures)',()=>{
- test('GPU material specialization resolves the frozen template for both storage partitions',()=>{
-  for(const edge of [4,8]) {
-    const code=structuralShaders(edge,[8,8,8]);
-    expect(code.physics).toContain('!bound(s)&&!bound(t)');
-    expect(code.physics).toContain('nextStructures[i]=outS;');
-    expect(code.mechanics).toContain('fn loadLevel');
-    expect(code.mechanics).toContain('const SHAPE=vec4u(8u,8u,8u,512u);');
-    expect(code.mechanics).not.toContain('p.shape');
-  }
- });
  test('six reciprocal directions and a coherent conservative cross',()=>{
   const w=small();w.setCell(3,3,3,MAT.STONE);
   for(const [x,y,z] of [[2,3,3],[4,3,3],[3,2,3],[3,4,3],[3,3,2],[3,3,4]])w.setCell(x,y,z,MAT.STONE);

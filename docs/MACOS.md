@@ -52,8 +52,8 @@ uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
   --config engine/vitest.bounded.config.ts
 ```
 
-This retains one worker, a two-second test limit, and failure on the first failing
-suite. Native fixtures and `.runtime-cases.ts` remain separate explicit gates.
+This retains one worker, a two-second test limit, and stopping after the first
+failure. Native fixtures and `.runtime-cases.ts` remain separate explicit gates.
 
 Run the host-monitor and supervisor regressions separately:
 

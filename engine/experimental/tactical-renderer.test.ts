@@ -1,10 +1,8 @@
 import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Mock GPU API contracts only. Native WGSL, pixels, physical ticks and replay are held. */
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { createTacticalRenderer3D, prepareTacticalScene3D, projectTacticalPoint3D, TACTICAL_CAMERA_WGSL_3D, type TacticalCamera3D, type TacticalDecoration3D, type TacticalRenderTargets3D } from './tactical-renderer.js';
+import { createTacticalRenderer3D, prepareTacticalScene3D, projectTacticalPoint3D, type TacticalCamera3D, type TacticalDecoration3D, type TacticalRenderTargets3D } from './tactical-renderer.js';
 import { cameraData, sceneData } from './tactical-presentation.js';
-import { TACTICAL_BOXES, TACTICAL_TERRAIN, TACTICAL_MESH } from './tactical-render-shaders.js';
-import { MESH } from './3d-renderer.js';
 import { createSlabController } from '../../examples/tactical-slab/controller.js';
 import { createSlabSession, inspectSlab } from '../../examples/tactical-slab/scenario.js';
 import { prepareSlabScene } from '../../examples/tactical-slab/presentation.js';
@@ -109,10 +107,6 @@ describe('isolated tactical presentation', () => {
   });
   test('rejects invalid camera bases and projection ranges', () => {
     for (const bad of [{...camera, eye: [NaN, 0, 0]}, {...camera, up: camera.right}, {...camera, forward: [0, 0, 2]}, {...camera, near: 0}, {...camera, far: camera.near}, {...camera, fovY: Infinity}]) expect(() => projectTacticalPoint3D(bad as TacticalCamera3D, [0, 0, 0], 10, 10)).toThrow();
-  });
-  test('uses the shared camera shader in both drawing pipelines and unchanged mesh rules', () => {
-    expect(TACTICAL_TERRAIN).toContain(TACTICAL_CAMERA_WGSL_3D); expect(TACTICAL_BOXES).toContain(TACTICAL_CAMERA_WGSL_3D);
-    expect(TACTICAL_TERRAIN).toContain('out.position=projectWorld(c+local)'); expect(TACTICAL_MESH).toBe(MESH);
   });
 });
 

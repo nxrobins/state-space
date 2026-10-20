@@ -6,7 +6,7 @@ import * as mechanics from '../experimental/structural-mechanics.js';
 export const STRUCTURAL_CALLS = ['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const;
 type PhysicalCall = typeof STRUCTURAL_CALLS[number] | 'volumeStep' | 'solveStructure3D';
 
-/** Fail immediately on held physics, and also catch calls swallowed by application code. */
+/** Keep caught attempts visible across Vitest's per-test clearing of mock call history. */
 export function holdPhysics(...calls: PhysicalCall[]) {
   const attempted = new Set<PhysicalCall>();
   const guards = calls.map(call => {
