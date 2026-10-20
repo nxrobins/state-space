@@ -1,7 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createReactiveWorkerHost3D } from 'state-space-engine/experimental/3d/reactive-materials';
-import { openChamber, type ChamberClient } from '../../../examples/reactive-chamber/client.js';
-import { createChamber, chamberPolicy } from '../../../examples/reactive-chamber/scenario.js';
+import {
+  openChamber,
+  loadChamber,
+  type ChamberClient,
+} from '../../../examples/reactive-chamber/client.js';
+import {
+  createChamber,
+  chamberPolicy,
+  readScenario,
+} from '../../../examples/reactive-chamber/scenario.js';
 import { stateHash } from '../../../examples/reactive-chamber/recording.js';
 
 // Execute the real host and physics through an asynchronous structured-clone port.
@@ -10,9 +18,10 @@ class LocalWorker extends EventTarget {
   private receive = (_value: unknown) => {};
   private host: ReturnType<typeof createReactiveWorkerHost3D> | null = null;
   private terminated = false;
-  constructor() {
+  constructor(url: URL) {
     super();
-    void createChamber()
+    const scenario = readScenario(url.searchParams.get('scenario') ?? 'chamber');
+    void createChamber(scenario)
       .then(({ registry, initial }) => {
         if (this.terminated) return;
         this.host = createReactiveWorkerHost3D(
@@ -31,7 +40,7 @@ class LocalWorker extends EventTarget {
           chamberPolicy(registry),
           { channel: 'chamber', work: 256 },
         );
-        this.emit({ kind: 'chamber-ready', catalogHash: registry.hash });
+        this.emit({ kind: 'chamber-ready', catalogHash: registry.hash, scenario });
       })
       .catch(() => this.dispatchEvent(new Event('error')));
   }
@@ -132,4 +141,20 @@ describe('chamber client failure and ownership boundaries', () => {
     expect(save.snapshot).toEqual(committed);
     expect(save.steps[0].sha256).toBe(await stateHash(committed));
   });
+});
+
+test('16³ saved profile selects its own worker and resumes the same committed history', async () => {
+  const client = await open({ scenario: 'flow' });
+  expect((await client.preview({ kind: 'heat', cell: [8, 6, 8] })).status).toBe('ready');
+  await client.commit();
+  const saved = client.exportSave();
+  const loaded = await loadChamber(saved, { scenario: 'chamber' });
+  clients.push(loaded);
+  expect(loaded.scenario).toBe('flow');
+  expect(loaded.exportSave()).toBe(saved);
+  for (const target of [client, loaded]) {
+    expect((await target.preview({ kind: 'wait' })).status).toBe('ready');
+    await target.commit();
+  }
+  expect(loaded.exportSave()).toBe(client.exportSave());
 });

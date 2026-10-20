@@ -12,7 +12,9 @@ REPLAY_STAGES = tuple(
     for size in (32, 64)
     for case in ("control", "cut", "heat", "ice-control", "ice-heat")
 )
+SANDBOX_STAGES = tuple(f"sandbox-{scene}-visible" for scene in ("collapse", "flow", "chain"))
 STAGES = (
+    *SANDBOX_STAGES,
     "chamber-visible",
     "pilot",
     "client",
@@ -56,9 +58,9 @@ def validate_qualification(command, timeout, *, platform=None, executable=None):
         raise RuntimeError("Mac qualification permits only fixed bounded stages.")
     return {
         "stage": stage,
-        "maxDimension": 8 if stage == "chamber-visible" else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
-        "maxReplayTicks": 128 if stage == "chamber-visible" else 1024,
-        "maxFrames": 256 if stage == "chamber-visible" else 8 if stage == "scale-128-visible" else 660,
+        "maxDimension": 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
+        "maxReplayTicks": 128 if stage == "chamber-visible" or stage in SANDBOX_STAGES else 1024,
+        "maxFrames": 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660,
         "gpuTelemetryAvailable": False,
         "independentWatchdog": True,
         "sampledRssLimitMiB": 8192,
@@ -66,12 +68,12 @@ def validate_qualification(command, timeout, *, platform=None, executable=None):
 
 
 def require_preceding_stage(root, stage, source_hashes, *, now=None):
-    """Bind 128-cubed work to a recent completed, source-identical prior stage."""
+    """Bind scale increases to a recent completed, source-identical prior stage."""
     required = {
         "scale-128-visible": "replay-64-cut-long",
         "gameplay-128-visible": "scale-128-visible",
         "gameplay-128-profile-visible": "scale-128-visible",
-    }.get(stage)
+    }.get(stage, "chamber-visible" if stage in SANDBOX_STAGES else None)
     if required is None:
         return None
     now = time.time() if now is None else now
@@ -92,7 +94,7 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
                 and result.get("passed") is True
                 and result.get("done") is True
                 and result.get("energyDriftQ") == "0"
-                and result.get("backendInfo", {}).get("isFallbackAdapter") is False
+                and result.get("backendInfo", result.get("render", {}).get("backendInfo", {})).get("isFallbackAdapter") is False
                 and receipt.get("passed") is True
                 and receipt.get("id") == job
                 and receipt.get("kind") == "macos-qualification"
@@ -109,6 +111,9 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
                     for mode in ("dense", "active")
                 ):
                     continue
+            elif required == "chamber-visible":
+                if result.get("size") != 8 or len(result.get("journeys", [])) != 13 or len(result.get("render", {}).get("frames", [])) != 120:
+                    continue
             elif result.get("size") != 128 or result.get("scenario") != "cut" or len(result.get("frames", [])) != 8:
                 continue
             return {
@@ -118,6 +123,6 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
                 "receipt": str(receipt_path.relative_to(root)),
                 "receiptSha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
             }
-        except (OSError, ValueError, KeyError, TypeError):
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
             continue
     raise RuntimeError(f"{stage} requires a passing {required} receipt from the same sources within 24 hours.")

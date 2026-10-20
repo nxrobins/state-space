@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 
 from scripts.verification_guard import ROOT, guarded_entry
 from scripts.verification_browser import PersistentBrowser
-from scripts.verification_macos import STAGES, require_preceding_stage
+from scripts.verification_macos import STAGES, SANDBOX_STAGES, require_preceding_stage
 
 
 def main():
@@ -86,8 +86,9 @@ def main():
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
         is_scale = args.stage == "scale-128-visible"
-        if args.stage == "chamber-visible":
-            page = "dist/reactive-chamber/"
+        if args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
+            scenario = "chamber" if args.stage == "chamber-visible" else args.stage.split("-")[1]
+            page = "dist/reactive-chamber/?" + urlencode({"scenario": scenario, "profile": "1"})
         elif args.stage == "client" or is_gameplay or is_scale:
             query = {"lighting": "cached" if "cached" in args.stage else "reference"}
             if is_gameplay or is_scale:
@@ -146,7 +147,7 @@ def main():
                 if state.get("progress") != previous:
                     previous = state.get("progress")
                     print(previous, flush=True)
-            if args.stage == "chamber-visible" and state.get("captureReady") and not captured_chamber:
+            if (args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES) and state.get("captureReady") and not captured_chamber:
                 browser.call("screenshot")
                 shutil.copyfile(out / "view.png", out / "chamber-view.png")
                 report["viewSha256"] = hashlib.sha256((out / "chamber-view.png").read_bytes()).hexdigest()

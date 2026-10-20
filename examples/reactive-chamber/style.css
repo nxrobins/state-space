@@ -223,6 +223,9 @@ button:disabled {
   width: 100%;
   margin-top: 12px;
 }
+.panel .row {
+  flex-wrap: wrap;
+}
 .panel .row > * {
   flex: 1;
 }
@@ -342,4 +345,15 @@ pre {
     max-width: 130px;
     text-align: right;
   }
+}
+
+select {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: #162023;
+  color: #e9f3ef;
+  border: 1px solid #344744;
+  border-radius: 5px;
+  font: inherit;
 }

@@ -65,7 +65,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     const solid = await pipeline('solid', false),
       outline = await pipeline('outline', true);
     const uniform = buffer(96, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST),
-      boxes = buffer(513 * 48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST),
+      boxes = buffer(4097 * 48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST),
       selection = buffer(48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
     const bind = (layout: GPUBindGroupLayout, resource: GPUBuffer) =>
       device.createBindGroup({ layout, entries: [{ binding: 0, resource: { buffer: resource } }] });
@@ -106,7 +106,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
           throw Error(failure ?? 'Renderer unavailable or a frame is already outstanding.');
         const data = sceneData(scene);
         if (
-          scene.count > 513 ||
+          scene.count > 4097 ||
           color.width !== depth.width ||
           color.height !== depth.height ||
           color.format !== format ||

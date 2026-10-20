@@ -1,6 +1,15 @@
 /// <reference types="@webgpu/types" />
+import { MAT } from 'state-space-engine/experimental/3d/reactive-materials';
 import { openChamber, loadChamber, type ChamberClient } from './client.js';
-import { CHAMBER, SUPPORT, ICE, type Cell, type ChamberSnapshot } from './scenario.js';
+import {
+  CHAMBER,
+  SCENARIOS,
+  readScenario,
+  coordinate,
+  type ScenarioId,
+  type Cell,
+  type ChamberSnapshot,
+} from './scenario.js';
 import { MAX_SAVE_BYTES } from './recording.js';
 import {
   prepareScene,
@@ -13,19 +22,22 @@ import {
 import { createChamberLifecycle } from './lifecycle.js';
 import { openChamberView } from './view.js';
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+const parameters = new URL(location.href).searchParams;
+const profile = parameters.get('profile') === '1';
+let scenario: ScenarioId = readScenario(parameters.get('scenario') ?? 'collapse');
 const button = (id: string) => element<HTMLButtonElement>(id),
   canvas = element<HTMLCanvasElement>('world');
 let client: ChamberClient | null = null;
 let scene: ChamberScene | null = null,
   committed: ChamberSnapshot | null = null;
-let selected: Cell = [...SUPPORT],
+let selected: Cell = [...SCENARIOS[scenario].support],
   showPreview = true,
   yaw = -0.65,
   pitch = 0.42;
 let unsubscribe = () => {},
   sceneKey = '';
 const lifecycle = createChamberLifecycle({
-  openClient: openChamber,
+  openClient: () => openChamber({ scenario, profile }),
   openHost: () =>
     openChamberView(canvas, {
       onPaint: updateInspection,
@@ -43,10 +55,11 @@ function updateInspection() {
   const displayed = lifecycle.current?.host.displayed?.scene;
   if (!displayed || !client) return;
   const s = sceneData(displayed).snapshot,
-    info = inspectScene(displayed, selected),
+    inspected = displayed.selected ?? selected,
+    info = inspectScene(displayed, inspected),
     material = client.registry.material(info.material);
   element('inspection').textContent =
-    `${material.name} · (${selected.join(', ')}) · energy ${info.energyQ} Q · integrity ${info.integrity}/255`;
+    `${material.name} · (${inspected.join(', ')}) · energy ${info.energyQ} Q · integrity ${info.integrity}/255`;
   element('view-label').textContent =
     displayed.kind === 'preview' ? 'PREVIEW · NOT COMMITTED' : 'COMMITTED WORLD';
   element('view-label').dataset.identity = info.identity;
@@ -57,7 +70,8 @@ function updateInspection() {
     `Fuel cells burned    ${s.game.burned}\nPhase changes        ${s.game.phaseChanges}\nFalling cell steps   ${s.game.fallen}\nLost footing         ${s.game.lostFooting}\nExternal energy      ${s.accounting.externalQ} Q`;
 }
 function requestDraw() {
-  if (scene) lifecycle.current?.host.present(scene, orbitCamera(yaw, pitch));
+  if (scene)
+    lifecycle.current?.host.present(scene, orbitCamera(yaw, pitch, SCENARIOS[scenario].size));
 }
 function refresh() {
   if (!client) return;
@@ -101,6 +115,7 @@ function refresh() {
   button('save').disabled = switching;
   button('reset').disabled = switching || state.busy;
   button('stop').disabled = switching || state.busy;
+  element<HTMLSelectElement>('scenario').disabled = switching || state.busy;
   button('compare').textContent = showPreview ? 'Show committed' : 'Show preview';
   if (state.uncertain)
     notice(
@@ -111,6 +126,9 @@ function refresh() {
 function bind(next: ChamberClient) {
   unsubscribe();
   client = next;
+  scenario = next.scenario;
+  selected = [...(scenario === 'flow' ? SCENARIOS[scenario].ice : SCENARIOS[scenario].support)];
+  describeScenario();
   committed = next.snapshot();
   sceneKey = '';
   showPreview = true;
@@ -147,6 +165,8 @@ function syncLifecycle() {
           : 'Stopping…';
   }
   element('empty').hidden = current !== null;
+  element<HTMLSelectElement>('scenario').disabled =
+    lifecycle.status !== 'running' && lifecycle.status !== 'stopped';
   button('start').disabled = lifecycle.status !== 'stopped';
   refresh();
 }
@@ -165,7 +185,7 @@ async function preview(kind: 'heat' | 'cool' | 'wait') {
   return result;
 }
 async function importSave(text: string) {
-  if (await lifecycle.replace(() => loadChamber(text)))
+  if (await lifecycle.replace(() => loadChamber(text, { profile })))
     notice('Saved chamber restored. Every recorded boundary matched exactly.');
 }
 const run = (operation: () => unknown | Promise<unknown>) => {
@@ -194,16 +214,50 @@ button('compare').onclick = () => {
   refresh();
 };
 button('select-support').onclick = () => {
-  selected = [...SUPPORT];
+  selected = [...SCENARIOS[scenario].support];
   refresh();
 };
 button('select-ice').onclick = () => {
-  selected = [...ICE];
+  selected = [...SCENARIOS[scenario].ice];
   refresh();
 };
+button('select-water').onclick = () => {
+  const displayed = lifecycle.current?.host.displayed?.scene;
+  if (!displayed) return;
+  const block = sceneData(displayed).snapshot.domains.world.block;
+  const water = block.packedCells.findIndex((word) => (word & 255) === MAT.WATER);
+  if (water < 0) {
+    notice('No liquid water in this view.');
+    return;
+  }
+  selected = coordinate(water, block.width);
+  refresh();
+};
+function describeScenario() {
+  const info = SCENARIOS[scenario];
+  element<HTMLSelectElement>('scenario').value = scenario;
+  element('scenario-description').textContent = info.description;
+  element('dimensions').textContent = `${info.size} × ${info.size} × ${info.size}`;
+}
+async function selectScenario(value: ScenarioId) {
+  const next = readScenario(value);
+  if (lifecycle.status === 'stopped') {
+    scenario = next;
+    describeScenario();
+  } else {
+    try {
+      await lifecycle.replace(() => openChamber({ scenario: next, profile }));
+    } finally {
+      describeScenario();
+    }
+  }
+}
+element<HTMLSelectElement>('scenario').onchange = (event) =>
+  run(() => selectScenario(readScenario((event.target as HTMLSelectElement).value)));
+describeScenario();
 button('reset').onclick = () =>
   run(async () => {
-    if (await lifecycle.replace(() => openChamber())) notice('New chamber.');
+    if (await lifecycle.replace(() => openChamber({ scenario, profile }))) notice('New chamber.');
   });
 button('save').onclick = () => {
   if (!client) return;
@@ -242,7 +296,12 @@ canvas.onpointermove = (event) => {
 };
 canvas.onpointerup = (event) => {
   const displayed = lifecycle.current?.host.displayed;
-  if (drag && drag.distance < 4 && displayed) {
+  if (
+    drag &&
+    drag.distance < 4 &&
+    displayed &&
+    sceneData(displayed.scene).snapshot.worldId === SCENARIOS[scenario].worldId
+  ) {
     const rect = canvas.getBoundingClientRect(),
       hit = pickElementCell(
         displayed.scene,
@@ -274,6 +333,7 @@ window.addEventListener(
 export const chamberApp = {
   start,
   stop,
+  selectScenario,
   preview,
   importSave,
   get client() {
@@ -286,7 +346,7 @@ export const chamberApp = {
     return lifecycle.current?.host.displayed?.scene ?? null;
   },
   get camera() {
-    return orbitCamera(yaw, pitch);
+    return orbitCamera(yaw, pitch, SCENARIOS[scenario].size);
   },
   async painted() {
     await lifecycle.current?.host.painted();
@@ -303,8 +363,10 @@ Object.assign(window, { chamberApp });
 Object.assign(window, {
   macQualification: {
     ready: true,
-    run() {
-      void import('./verification.js').then((m) => m.verifyChamber(chamberApp));
+    run(stage: string) {
+      void import('./verification.js').then((m) =>
+        stage === 'chamber-visible' ? m.verifyChamber(chamberApp) : m.verifySandbox(chamberApp),
+      );
       return true;
     },
   },
