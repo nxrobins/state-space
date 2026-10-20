@@ -11,7 +11,7 @@ CPU checks does not replace a fresh native or whole-product release gate.
 | M1–M4 material/chunk/active 3D | [M1](checkpoints/3D_M1.md), [M2](checkpoints/3D_M2.md), [M3](checkpoints/3D_M3.md), [M4](checkpoints/3D_M4.md) | Experimental, separately versioned APIs; historical qualification is source-bound |
 | M5 structures at 32³/64³ | [Final replay and timing regressions](checkpoints/MACOS_128.md) compare CPU/dense/active state and restarts | Exactness covers the recorded scenarios and tick ranges; not arbitrary-world qualification |
 | M5 fixed 128³ cut scene | [Three consecutive strict 60 Hz runs](checkpoints/MACOS_128.md), 1,800 measured frames total, zero deadline misses or energy drift | M3 Ultra, visible Chrome, 1920×1080; bounded state/continuation checks, not full 128³ replay or a universal frame-rate guarantee |
-| Reactive sandbox | [16³ native acceptance](checkpoints/REACTIVE_SANDBOX.md): three scenarios, real Worker evolution, native presentation, cancellation, exact replay and the 8³ regression | Fixed sparse 8³/16³ scenes, one actor and the tested Mac host; not arbitrary dense worlds, larger reactive sizes or cross-platform qualification |
+| Reactive sandbox | [Thermal pack and 16³ native acceptance](checkpoints/THERMAL_MATERIALS.md): six scenarios, real Worker evolution, native presentation, cancellation, exact replay and the 8³ regression | Fixed sparse 8³/16³ scenes, one actor and the tested Mac host; not arbitrary dense worlds, larger reactive sizes or cross-platform qualification |
 | Other tactical/reactive surfaces | Bounded CPU/mock contracts and installed SDK checks; [original acceptance history](checkpoints/TACTICAL_INTERVENTIONS.md) | The chamber result does not clear the separate tactical slab, held physical/replay fixtures or every worker API |
 
 ## Automated pull-request checks
@@ -48,7 +48,7 @@ those workloads.
 
 ## Choose a runnable client
 
-- [Reactive sandbox](../examples/reactive-chamber/README.md): three bounded 16³
+- [Reactive sandbox](../examples/reactive-chamber/README.md): six bounded 16³
   real Worker scenarios and the original 8³ regression chamber.
 - [Structural cavern](../examples/structural-cavern/README.md): the M5 reference
   client; its Mac baseline starts paused at 32³.

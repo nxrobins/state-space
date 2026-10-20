@@ -1,0 +1,70 @@
+{
+  "implementationCommit": "0d0780bcf5a0a20b3ca3b288360a6e3330e2ed8a",
+  "materialPack": "reactive-thermal-materials-1",
+  "catalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+  "evidenceRoot": "dist/verification",
+  "retention": "local; raw reports, screenshots and logs are not published",
+  "sourceHashSetSha256": "c671188d28a64059e7474fd19520d59921a475d27b7cb776a34aea89583e1c49",
+  "sourceHashSetEncoding": "JSON sourceHashes with sorted keys, compact separators, UTF-8",
+  "nativeRuns": [
+    {
+      "stage": "chamber-visible",
+      "report": "macos-chamber-visible-faacdf0a92e0/report.json",
+      "reportSha256": "393765c50ada8d56c555fe8093a183de8dcbc6a7dc85ef8bf3c5502a18982262",
+      "receipt": "4cdf9ff3187d4965b02eb058b0453901/report.json",
+      "receiptSha256": "8e071ffbe8b7ad1ec04eecde99fe0dfc7b700f46003d61bc3d4016ec77581d83"
+    },
+    {
+      "stage": "sandbox-conduction-visible",
+      "report": "macos-sandbox-conduction-visible-f50cc5dbfddc/report.json",
+      "reportSha256": "bc5a12b1fc8379e6fc7d5cc50e7d84bbf9b4d53fd21bd9abe54d846156113769",
+      "receipt": "4356f62e06b943ac81d66d817014f78f/report.json",
+      "receiptSha256": "6023c11ec3502076bc1c9dcd176145275c3f6e13e932bd47245bbe40e8101fe7"
+    },
+    {
+      "stage": "sandbox-insulation-visible",
+      "report": "macos-sandbox-insulation-visible-51d305f4845f/report.json",
+      "reportSha256": "fcec4f9ad22d88db45b304de55aa510f1fa1cac050ff78225dc4d597b117c1f6",
+      "receipt": "ab82b500c4574f9b8f314940766068a9/report.json",
+      "receiptSha256": "d3b156a71b0d9e4a05f8bb6b8ac2b4333e0d3c8a39bf82f4b27377b909bea9b1"
+    },
+    {
+      "stage": "sandbox-wax-visible",
+      "report": "macos-sandbox-wax-visible-403501160882/report.json",
+      "reportSha256": "0dfef0b05dee395e505e38a5e999bff9ba443be5d9afa69b4f790a2d797506ff",
+      "receipt": "4f69c2fbf6904c93a4fc1d1b47fe1e04/report.json",
+      "receiptSha256": "00c642effea38e5d74454818a5e7e819ec0255386b3952b28397bdeb9b110381"
+    },
+    {
+      "stage": "sandbox-collapse-visible",
+      "report": "macos-sandbox-collapse-visible-cd8bcfd8ee59/report.json",
+      "reportSha256": "94fa26078552d9f1fb8a149cf63d5c7710270b2be16e3de5d6f0e85445d00b61",
+      "receipt": "e0c998b5b8f34c3fb48f4010176b15b7/report.json",
+      "receiptSha256": "ae8bc6dd95d122df289a045b370a451f5ecd0477a327355377114416c1893cd2"
+    },
+    {
+      "stage": "sandbox-flow-visible",
+      "report": "macos-sandbox-flow-visible-b7c388e19530/report.json",
+      "reportSha256": "2586b068acbd46ebbf3253dd0ca76a80c913bbc4a4ab2b147f1fd9f3700afcd8",
+      "receipt": "c904329dafb5465f8c7affe19a508123/report.json",
+      "receiptSha256": "5763e292c2dca4ac0dd3cc74dbd009034c1dcf52ece2020130bcb7ed673e116d"
+    },
+    {
+      "stage": "sandbox-chain-visible",
+      "report": "macos-sandbox-chain-visible-f4ce4bd61c33/report.json",
+      "reportSha256": "76027e2e643aff1a5b942b4e9dd6205013d468484e089ce92c9908d6fdb0ec4c",
+      "receipt": "0fa289629fb74acdb7f01792fb0c464d/report.json",
+      "receiptSha256": "3c435a255177dcdb6157dadc495d9d5446b298b56a47f90b2786e4c83c19e6d4"
+    }
+  ],
+  "validationReceipts": {
+    "unit": "63706ee3eaee41d6a7c3bb665bc18176/report.json",
+    "smoke": "8d83798641264eacadc1ba5945b4bce1/report.json",
+    "supervisor": "935693da1ef94b818c4e95a9a659cd0c/report.json",
+    "installedPackages": "6a83ef0f80af47f3b7a4a730ff9668e4/report.json"
+  },
+  "retainedFailures": {
+    "catalogFrameRegressionWithoutFix": "daa39c836cba469a8877c125aba670c1/report.json",
+    "browserStartup": "macos-sandbox-collapse-visible-53e052e3665d/report.json"
+  }
+}
