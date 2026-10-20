@@ -34,7 +34,7 @@ def main():
     )
     out.mkdir(parents=True)
     paths = [
-        *ROOT.glob("engine/experimental/*.ts"),
+        *(ROOT / "engine").rglob("*.ts"),
         *ROOT.glob("dist/sdk/*"),
         *ROOT.glob("dist/volume-m5/*.js"),
         *ROOT.glob("examples/sdk/*"),

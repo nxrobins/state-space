@@ -1,6 +1,6 @@
 /** Validate portable endpoint reports without re-running a structural solve. */
 import { CHANGE_REPORT_RULES_VERSION_3D, CHANGE_REPORT_LIMITS_3D, type ChangeReportOptions3D, type GameplayChangeReport3D } from './change-reports.js';
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { checkedInteger } from '../validation.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';
 import type { TacticalRevision3D, TacticalSessionSnapshot3D, TacticalValue } from './tactical-session-view.js';
@@ -11,11 +11,11 @@ export function changeOptionsData(value: ChangeReportOptions3D = {}): {maxRuns: 
   return {maxRuns: checkedInteger(value.maxRuns === undefined ? CHANGE_REPORT_LIMITS_3D.defaultRuns : value.maxRuns, 0, CHANGE_REPORT_LIMITS_3D.maxRuns, 'change report run budget')};
 }
 export function portableChanges(value: GameplayChangeReport3D): GameplayChangeReport3D {
-  return copyTacticalValue(value as unknown as TacticalValue) as unknown as GameplayChangeReport3D;
+  return copyPortableValue(value as unknown as TacticalValue) as unknown as GameplayChangeReport3D;
 }
 function integer(value: unknown, min: number, max: number) {return checkedInteger(value as number, min, max, 'worker change report');}
 export function changeReportData(raw: unknown, from: Readonly<TacticalRevision3D>, to: Readonly<TacticalRevision3D>, snapshot: TacticalSessionSnapshot3D<TacticalValue>, maxRuns: number): GameplayChangeReport3D {
-  const report = copyTacticalValue(raw as TacticalValue);
+  const report = copyPortableValue(raw as TacticalValue);
   fields(report, ['rulesVersion', 'scope', 'from', 'to', 'domains', 'gameChanged', 'accountingChanged', 'supportMeaning', 'motion', 'runBudget']);
   fields(report.to, ['kind', 'revision']); fields(report.motion, ['status', 'reason', 'requiresExecutionTrace']);
   if (report.rulesVersion !== CHANGE_REPORT_RULES_VERSION_3D || report.scope !== 'endpoints' || !sameRevision(report.from, from) ||
@@ -27,7 +27,7 @@ export function changeReportData(raw: unknown, from: Readonly<TacticalRevision3D
 }
 /** Shared bounded shape validation; does not recompute support or endpoint state. */
 export function boundaryChangesData(raw: unknown, snapshot: TacticalSessionSnapshot3D<TacticalValue>, fromTick: number, toTick: number, maxRuns: number) {
-  const value = copyTacticalValue(raw as TacticalValue);
+  const value = copyPortableValue(raw as TacticalValue);
   fields(value, ['domains', 'gameChanged', 'accountingChanged', 'supportMeaning']);
   if (typeof value.gameChanged !== 'boolean' || typeof value.accountingChanged !== 'boolean' || value.supportMeaning !== 'global-endpoint-assessment') throw Error('Invalid action change metadata.');
   validateDomains(value.domains, snapshot, fromTick, toTick, maxRuns);

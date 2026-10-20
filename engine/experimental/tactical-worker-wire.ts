@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Data-only transport framing and complete-state validation; no physical steps. */
 import { createTacticalSessionCore3D, TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
 import { compatibleReservoirs3D } from './material-reservoirs.js';
@@ -15,9 +16,7 @@ export interface TacticalTransport3D {
 }
 export type Wire = {protocol: typeof TACTICAL_WORKER_PROTOCOL_3D; channel: string; seq: number; kind: string; payload: unknown};
 export function fields(value: unknown, required: readonly string[], optional: readonly string[] = []): asserts value is Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid worker message fields.');
+  assertRecordFields(value, required, optional, 'Invalid worker message fields.');
 }
 export function channelName(value: string) {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$/.test(value)) throw Error('Invalid worker channel.');

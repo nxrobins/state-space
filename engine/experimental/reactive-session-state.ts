@@ -1,10 +1,10 @@
 /** Complete reactive/game save boundary; no simulation or policy execution. */
 import { MAX_ENERGY_Q } from '../thermal.js';
-import { copyTacticalValue } from './tactical-session-core.js';
-import type { TacticalValue } from './tactical-session-view.js';
+import { copyPortableValue } from '../portable-data.js';
+import type { PortableValue } from '../portable-data.js';
 import { reactiveFields3D, reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { readReactiveDomainsSnapshot3D, reactiveDomainsEnergyQ3D, REACTIVE_DOMAINS_LIMITS_3D, type ReactiveDomainsSnapshot3D } from './reactive-domain-state.js';
-export type ReactiveGameValue3D = TacticalValue;
+export type ReactiveGameValue3D = PortableValue;
 export const REACTIVE_SESSION_RULES_3D = 'reactive-session-1';
 export const REACTIVE_SESSION_SCHEMA_3D = 1;
 export const REACTIVE_SESSION_LIMITS_3D = Object.freeze({branches: 4, horizonTicks: 64, operations: 256, commandNodes: 65536, commandCharacters: 1048576});
@@ -23,7 +23,7 @@ export function readReactiveSessionSnapshot3D<T extends ReactiveGameValue3D>(reg
   reactiveFields3D(raw, ['schemaVersion', 'rulesVersion', 'worldId', 'gameRulesVersion', 'revision', 'domains', 'game', 'accounting']);
   if (raw.schemaVersion !== 1 || raw.rulesVersion !== REACTIVE_SESSION_RULES_3D) throw Error('Incompatible reactive session snapshot.');
   const worldId = id(raw.worldId), gameRulesVersion = id(raw.gameRulesVersion), revision = reactiveInteger3D(raw.revision, 0, Number.MAX_SAFE_INTEGER);
-  const domains = readReactiveDomainsSnapshot3D(registry, raw.domains), game = copyTacticalValue(raw.game as T);
+  const domains = readReactiveDomainsSnapshot3D(registry, raw.domains), game = copyPortableValue(raw.game as T);
   reactiveFields3D(raw.accounting, ['initialQ', 'externalQ']); const initialQ = quantity(raw.accounting.initialQ), externalQ = quantity(raw.accounting.externalQ);
   if (initialQ < 0n || initialQ + externalQ !== reactiveDomainsEnergyQ3D(domains)) throw Error('Reactive session accounting does not balance.');
   return {schemaVersion: 1, rulesVersion: REACTIVE_SESSION_RULES_3D, worldId, gameRulesVersion, revision, domains, game,

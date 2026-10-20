@@ -1,5 +1,5 @@
 /** Catalog-aware data queries, one existing geometry operation per advancement. */
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { reactiveArray3D, reactiveFields3D, reactiveRegistrySource3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { reactiveDomain3D, reactiveDomainId3D, type ReactiveDomainId3D } from './reactive-domain-state.js';
 import { reactiveGeometrySource3D, REACTIVE_GEOMETRY_RULES_3D, type ReactiveGameplayGeometry3D, type ReactiveGeometryStamp3D } from './reactive-geometry.js';
@@ -15,7 +15,7 @@ export type ReactiveWorkerQueryResult3D = {[K in Kind]: {kind: K; domain: Reacti
 export type ReactiveWorkerQueryBatch3D = {rulesVersion: typeof REACTIVE_QUERY_RULES_3D; results: ReactiveWorkerQueryResult3D[]};
 export type ReactiveQueryProgress3D = {status: 'running' | 'complete' | 'cancelled'; completedQueries: number; totalQueries: number};
 export interface ReactiveQueryJob3D {advance(): ReactiveQueryProgress3D; progress(): ReactiveQueryProgress3D; cancel(): boolean; result(): ReactiveWorkerQueryBatch3D;}
-export const reactivePortable3D = <T>(raw: T): T => copyTacticalValue(raw as unknown as ReactiveGameValue3D) as unknown as T;
+export const reactivePortable3D = <T>(raw: T): T => copyPortableValue(raw as unknown as ReactiveGameValue3D) as unknown as T;
 export function readReactiveQueries3D(raw: unknown, snapshot: ReactiveSessionSnapshot3D<ReactiveGameValue3D>): ReactiveWorkerQuery3D[] {
   const rows = reactiveArray3D(raw, REACTIVE_QUERY_LIMITS_3D.queries); if (!rows.length) throw Error('A reactive query batch cannot be empty.');
   const owned = reactivePortable3D(rows);

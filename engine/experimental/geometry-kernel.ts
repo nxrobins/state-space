@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Shared fixed-point queries over already validated, privately owned cells. */
 import { PHASE, PHASE_SHIFT } from '../generated/materials.js';
 
@@ -37,9 +38,7 @@ type Fraction = {n: number; d: number};
 type Budget = {cells: number};
 const ZERO = {n: 0, d: 1}, ONE = {n: 1, d: 1}, S = GEOMETRY_SCALE_3D;
 function fields(value: object, required: string[], optional: string[] = []): void {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) || required.some(k => !Object.hasOwn(value, k)) ||
-      Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid geometry query fields.');
+  assertRecordFields(value, required, optional, 'Invalid geometry query fields.');
 }
 function dense<T>(value: readonly T[], max: number): T[] {
   if (!Array.isArray(value) || value.length > max || Reflect.ownKeys(value).length !== value.length + 1) throw Error('Invalid geometry array.');

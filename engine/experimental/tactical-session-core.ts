@@ -1,3 +1,4 @@
+import { copyPortableValue as copyTacticalValue, PORTABLE_VALUE_LIMITS } from '../portable-data.js';
 /** Snapshot transaction coordinator. Native execution is supplied by the public entry. */
 import { createGameplayGeometry3D, GEOMETRY_RULES_VERSION_3D, type GeometryStamp3D } from './gameplay-geometry.js';
 import { readMotionPaths3D, motionPathLimits3D, type MaterialMotionPaths3D } from './motion-paths.js';
@@ -18,7 +19,7 @@ import type {
 } from './tactical-session-view.js';
 
 export const TACTICAL_SESSION_RULES_VERSION_3D = 'tactical-session-3';
-export const TACTICAL_SESSION_LIMITS_3D = Object.freeze({branches: 4, horizonTicks: 1024, requestTicks: 32, operations: 256, gameNodes: 65536, gameDepth: 32, gameCharacters: 1048576});
+export const TACTICAL_SESSION_LIMITS_3D = Object.freeze({branches: 4, horizonTicks: 1024, requestTicks: 32, operations: 256, gameNodes: PORTABLE_VALUE_LIMITS.nodes, gameDepth: PORTABLE_VALUE_LIMITS.depth, gameCharacters: PORTABLE_VALUE_LIMITS.characters});
 
 /** Internal seam for inert scheduling tests, not a public alternative physics API. */
 export type TacticalSimulationDriver3D = {
@@ -43,51 +44,7 @@ function identity(value: string): string {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,127}$/.test(value)) throw Error('Invalid tactical identity.');
   return value;
 }
-/** Portable JSON values only: reject accessors, hidden fields, cycles and holes. */
-export function copyTacticalValue<T extends TacticalValue>(value: T): T {
-  let nodes = 0, characters = 0;
-  const ancestors = new Set<object>();
-  function copy(v: TacticalValue, depth: number): TacticalValue {
-    if (++nodes > TACTICAL_SESSION_LIMITS_3D.gameNodes || depth > TACTICAL_SESSION_LIMITS_3D.gameDepth) throw Error('Game state exceeds the bounded value budget.');
-    if (v === null || typeof v === 'boolean') return v;
-    if (typeof v === 'number') {
-      if (!Number.isFinite(v)) throw Error('Game state numbers must be finite.');
-      return Object.is(v, -0) ? 0 : v;
-    }
-    if (typeof v === 'string') {
-      characters += v.length;
-      if (characters > TACTICAL_SESSION_LIMITS_3D.gameCharacters) throw Error('Game state exceeds the character budget.');
-      return v;
-    }
-    if (!v || typeof v !== 'object' || ancestors.has(v)) throw Error('Game state must be acyclic portable data.');
-    const array = Array.isArray(v);
-    if (!array && Object.getPrototypeOf(v) !== Object.prototype && Object.getPrototypeOf(v) !== null) throw Error('Game state must contain plain objects.');
-    ancestors.add(v);
-    const descriptors = Object.getOwnPropertyDescriptors(v), keys = Reflect.ownKeys(v);
-    if (keys.some(k => typeof k !== 'string') || Object.entries(descriptors).some(([key, d]) =>
-      !(array && key === 'length') && (!('value' in d) || !d.enumerable))) throw Error('Game state contains hidden fields or accessors.');
-    let out: TacticalValue;
-    if (array) {
-      if (v.length > TACTICAL_SESSION_LIMITS_3D.gameNodes || keys.length !== v.length + 1) throw Error('Game arrays must be dense with no extra fields.');
-      const values: TacticalValue[] = [];
-      for (let i = 0; i < v.length; i++) {
-        if (!Object.hasOwn(descriptors, String(i))) throw Error('Sparse game array.');
-        values.push(copy(descriptors[String(i)].value, depth + 1));
-      }
-      out = values;
-    } else {
-      const values: {[key: string]: TacticalValue} = {};
-      for (const key of (keys as string[]).sort()) {
-        characters += key.length;
-        if (characters > TACTICAL_SESSION_LIMITS_3D.gameCharacters) throw Error('Game state exceeds the character budget.');
-        Object.defineProperty(values, key, {value: copy(descriptors[key].value, depth + 1), enumerable: true, writable: true, configurable: true});
-      }
-      out = values;
-    }
-    ancestors.delete(v); return out;
-  }
-  return copy(value, 0) as T;
-}
+export { copyPortableValue as copyTacticalValue } from '../portable-data.js';
 function copyTerrain(terrain: StructuralSnapshot3D): StructuralSnapshot3D {
   return {...terrain, packedCells: terrain.packedCells.slice(), energyQ: terrain.energyQ.slice(), structure: terrain.structure.slice()};
 }

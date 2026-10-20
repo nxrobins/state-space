@@ -41,8 +41,21 @@ lint and browser build. Native validation found an unbound browser animation
 callback; fixed with explicit wrappers and reran all 13 journeys successfully
 (receipt `e3649c60c53b401bbb75b109d8abe073`). No blocking finding remains.
 
+## Stage 4 — neutral bounded data
+
+Moved bounded portable copying and strict record-field validation into a neutral
+module, removed reactive dependencies on the tactical coordinator, and retained
+the old copy export and diagnostics. Eight record validators delegate to the
+shared rule. Catalog copying, array prototype policies and the legacy tactical
+record policy remain separate because their accepted inputs differ.
+Adversarial review compared 115 executable outcomes against the previous copier;
+all matched. Boundary tests cover node/depth/character limits, aliases, cycles,
+getters, hidden/symbol fields and prototype-looking keys. All 1,839 CPU tests and
+18 controller tests passed (receipt `9e480e0a2d7542bc8f9d03a2cffacb64`), plus builds,
+types, lint and native journeys (receipt `da1af33dbe46420c9cf7cb5dc335cdf5`). Source
+evidence now includes all engine TS. No blocking finding remains.
+
 ## Remaining stages
 
-4. Neutral bounded-data validation and copying.
 5. SDK entry manifest, shared build configuration and automatic lint coverage.
 6. Deterministic shared fault-injecting test transport.

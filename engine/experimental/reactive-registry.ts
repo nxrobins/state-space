@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Versioned reactive 3D material definitions; never starts a simulation. */
 import { DEFAULT_REGISTRY, createMaterialRegistry, type MaterialRegistry, type MaterialCatalog, type MaterialDefinition } from '../registry.js';
 import { MAT, PHASE, COLD_STRIDE } from '../generated/materials.js';
@@ -21,9 +22,7 @@ export function reactiveRegistrySource3D(registry: ReactiveMaterialRegistry3D): 
   const source = sources.get(registry); if (!source) throw Error('A validated reactive 3D registry is required.'); return source;
 }
 export function reactiveFields3D(raw: unknown, required: readonly string[], optional: readonly string[] = []): asserts raw is Record<string, unknown> {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || ![Object.prototype, null].includes(Object.getPrototypeOf(raw)) ||
-      required.some(k => !Object.hasOwn(raw, k)) || Reflect.ownKeys(raw).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(raw)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid reactive data fields.');
+  assertRecordFields(raw, required, optional, 'Invalid reactive data fields.');
 }
 export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   if (!Array.isArray(raw) || Object.getPrototypeOf(raw) !== Array.prototype || raw.length > maximum || Reflect.ownKeys(raw).length !== raw.length + 1) throw Error('Invalid reactive array.');

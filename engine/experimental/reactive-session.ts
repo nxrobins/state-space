@@ -1,5 +1,5 @@
 /** Snapshot-backed speculative abilities. Only complete same-revision commits publish. */
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { reactiveFields3D, reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { compatibleReactiveDomains3D, reactiveDomainsEnergyQ3D, reactiveDomain3D, reactiveDomainId3D, replaceReactiveDomain3D, type ReactiveDomainId3D, type ReactiveDomainsSnapshot3D } from './reactive-domain-state.js';
 import { createReactiveGeometry3D, type ReactiveGeometryIdentity3D, type ReactiveGameplayGeometry3D } from './reactive-geometry.js';
@@ -80,7 +80,7 @@ function synchronous<T>(value: T): T {
   } return value;
 }
 function commandData<T extends ReactiveGameValue3D>(raw: ReactiveSessionCommand3D<T>) {
-  const copied = copyTacticalValue(raw as unknown as ReactiveGameValue3D);
+  const copied = copyPortableValue(raw as unknown as ReactiveGameValue3D);
   if (!copied || typeof copied !== 'object' || Array.isArray(copied) || typeof copied.kind !== 'string') throw Error('Invalid reactive session command.');
   const fields = {transport: ['domain', 'control'], edit: ['domain', 'edits'], translate: ['domain', 'request'], transfer: ['request'], hold: ['domain', 'request'], releaseHold: ['domain', 'id'], game: ['game']} as const;
   if (!Object.hasOwn(fields, copied.kind)) throw Error('Unknown reactive session command.');
@@ -117,7 +117,7 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(registry:
   const progress = (r: BranchRecord<T>): ReactiveBranchProgress3D => ({status: r.status,
     phase: r.status === 'preparing' ? 'preparing' : r.status !== 'running' ? 'terminal' : r.completedCommands < r.totalCommands ? 'commands' : r.completedTicks < r.horizon ? 'ticks' : 'finalize',
     completedCommands: r.completedCommands, totalCommands: r.totalCommands, completedTicks: r.completedTicks, horizonTicks: r.horizon});
-  const draft = (r: BranchRecord<T>): ReactiveSessionSnapshot3D<T> => ({...live, revision: r.base.revision, domains: r.field!.snapshot(), game: copyTacticalValue(r.game as T),
+  const draft = (r: BranchRecord<T>): ReactiveSessionSnapshot3D<T> => ({...live, revision: r.base.revision, domains: r.field!.snapshot(), game: copyPortableValue(r.game as T),
     accounting: {initialQ: r.accounting.initialQ, externalQ: (BigInt(r.accounting.externalQ) + r.field!.energyBalance().externalQ).toString()}});
   const previewIdentity = (r: BranchRecord<T>, completedTicks = r.completedTicks, completedCommands = r.completedCommands): Omit<Extract<ReactiveGeometryIdentity3D, {kind: 'preview'}>, 'domain'> => ({
     kind: 'preview', base: r.base, branchId: r.id, completedCommands, completedTicks, horizonTicks: r.horizon});
@@ -138,8 +138,8 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(registry:
       ? createReactiveTransportMovementAccess3D(beforeQueries(command.domain), queries(command.domain), transported.receipt, r.transportOptions) : null;
     const transport: ReactiveSessionTransportAccess3D = () => command.kind === 'transport' && transported && transportMovement
       ? {domain: command.domain, control: command.control, receipt: structuredClone(transported.receipt), memory: structuredClone(transported.memory), movement: transportMovement()} : null;
-    let game = command.kind === 'game' ? copyTacticalValue(command.game) : r.game as T;
-    if (reduceCommand) game = copyTacticalValue(synchronous(reduceCommand({game: copyTacticalValue(game), command: structuredClone(command), receipt: structuredClone(receipt), beforeQueries, queries, translation, transport})));
+    let game = command.kind === 'game' ? copyPortableValue(command.game) : r.game as T;
+    if (reduceCommand) game = copyPortableValue(synchronous(reduceCommand({game: copyPortableValue(game), command: structuredClone(command), receipt: structuredClone(receipt), beforeQueries, queries, translation, transport})));
     // The staged field has a fresh local accounting baseline. Fold previous charges
     // into the session ledger before replacing it; this is not an external reset.
     const externalQ = (BigInt(r.accounting.externalQ) + r.field!.energyBalance().externalQ).toString();
@@ -163,7 +163,7 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(registry:
       reactiveInteger3D(live.revision + 1, 0, Number.MAX_SAFE_INTEGER);
       if (active.size >= REACTIVE_SESSION_LIMITS_3D.branches) throw Error('Reactive branch capacity exhausted.');
       const id = reactiveInteger3D(nextId + 1, 1, Number.MAX_SAFE_INTEGER), field = createReactiveDomainSet3D(registry, live.domains.world, live.domains.reservoirs);
-      const r: BranchRecord<T> = {base: reactiveSessionRevision3D(live), id, horizon, field, game: copyTacticalValue(live.game), accounting: {...live.accounting}, status: 'preparing',
+      const r: BranchRecord<T> = {base: reactiveSessionRevision3D(live), id, horizon, field, game: copyPortableValue(live.game), accounting: {...live.accounting}, status: 'preparing',
         commands: [], totalCommands: 0, completedCommands: 0, completedTicks: 0, nodes: 0, characters: 0, active: null, tickJob: null, last: null,
         motionOptions: capture.enabled ? {motion: {maxEntries: capture.maxEntries}} : {}, lastMotion: null, translationOptions, lastTranslation: null, transportOptions, lastTransport: null};
       const branch: ReactiveBranch3D<T> = Object.freeze({base: r.base, branchId: id,
@@ -201,7 +201,7 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(registry:
                 if (c.kind === 'transport') {
                   if (!readTransport || !reduceCommand) throw Error('Reactive transport requires a memory selector and command reducer.');
                   const queries = queryAccess(before, previewIdentity(r));
-                  const memory = copyTacticalValue(synchronous(readTransport({game: copyTacticalValue(r.game as T), command: structuredClone(c), queries})));
+                  const memory = copyPortableValue(synchronous(readTransport({game: copyPortableValue(r.game as T), command: structuredClone(c), queries})));
                   const state = restoreReactiveMaterialTransportMemory3D(registry, queries(c.domain), memory);
                   const job = createReactiveMaterialTransportJob3D(registry, state, c.impulses); check();
                   r.active = {...stage, kind: 'transport', job};
@@ -221,7 +221,7 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(registry:
                 const observed = r.tickJob.motion();
                 const movement: ReactiveSessionMovementAccess3D = (domain = null) => bindReactiveTickMovement3D(beforeQueries(domain), queries(domain), observed.status,
                   observed.domains.find(d => d.id === domain)?.motion ?? null);
-                const game = reduceTick ? copyTacticalValue(synchronous(reduceTick({game: copyTacticalValue(r.game as T), domains: structuredClone(out.state), report: structuredClone(out.report),
+                const game = reduceTick ? copyPortableValue(synchronous(reduceTick({game: copyPortableValue(r.game as T), domains: structuredClone(out.state), report: structuredClone(out.report),
                   beforeQueries, queries, movement}))) : r.game as T;
                 check(); const {receipt} = field.commitTick(r.tickJob); r.game = game; r.tickJob = null; r.completedTicks++; r.lastMotion = movement; r.lastTranslation = null; r.lastTransport = null;
                 r.last = {sequence: r.completedCommands + r.completedTicks, tick: field.tick, kind: 'tick', report: receipt};

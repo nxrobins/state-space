@@ -1,11 +1,10 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Shared defensive validation of bounded geometry answers; no query execution. */
 import { checkedInteger } from '../validation.js';
 import { GEOMETRY_LIMITS_3D, EXPOSURE_RULES_VERSION_3D } from './geometry-kernel.js';
 export type GeometryQueryCells3D = {width: number; height: number; packedCells: readonly number[]; energyQ: readonly number[]; structure: readonly number[]};
 function fields(value: unknown, required: readonly string[], optional: readonly string[] = []): asserts value is Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid worker message fields.');
+  assertRecordFields(value, required, optional, 'Invalid worker message fields.');
 }
 function integer(value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER) {return checkedInteger(value as number, min, max, 'worker query result');}
 function boolean(value: unknown) {if (typeof value !== 'boolean') throw Error('Invalid worker query boolean.'); return value;}
