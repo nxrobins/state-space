@@ -250,6 +250,7 @@
     "3556e035d8254206b639da4a932c2c02",
     "5d04f4e923ea4c6ca38086da4b9324c9"
   ],
+  "publicationStatus": "pending-user-approval",
   "members": [
     {"path":"dist/reactive-chamber/app.js","bytes":416883,"sha256":"dadb0a13599c790b1ed981d1c54dcaae4ec98ccb77d62eed95b7367646de6799"},
     {"path":"dist/reactive-chamber/bundle-inputs.json","bytes":10623,"sha256":"0847122a152fd906810e6b15d9e8df9ee5c3715ebec639100c143218db8bf870"},

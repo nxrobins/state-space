@@ -2,9 +2,10 @@
 
 Implementation: `b439c36aa7834f9236c73959f9d4bc022681f46d`.
 The [evidence manifest](REACTIVE_SANDBOX.json) binds the execution inputs,
-reports, screenshots, supervisor receipts and CPU profiles. The
-[verification archive](https://github.com/nxrobins/state-space/releases/tag/reactive-sandbox-2026-10-20)
-retains passing and failed runs; raw captures remain outside Git.
+reports, screenshots, supervisor receipts and CPU profiles. The prepared archive at
+`dist/verification/reactive-sandbox-evidence-2026-10-20.zip` retains passing and
+failed runs locally. GitHub release publication is pending explicit approval;
+raw captures remain outside Git.
 
 Three fixed 16³ scenarios passed on the Apple M3 Ultra / macOS 26.6.2 / Chrome 155
 reference host, using CPU reactive physics in a real Worker and native Apple
