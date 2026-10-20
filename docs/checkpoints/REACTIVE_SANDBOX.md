@@ -1,10 +1,11 @@
 # Reactive sandbox: 16³ macOS qualification
 
-Implementation: `b439c36aa7834f9236c73959f9d4bc022681f46d`.
+Implementation: `d560e293d53b615ab2ef613525adb786aa03c34a`.
 The [evidence manifest](REACTIVE_SANDBOX.json) binds the execution inputs,
 reports, screenshots, supervisor receipts and CPU profiles. The prepared archive at
-`dist/verification/reactive-sandbox-evidence-2026-10-20.zip` retains passing and
-failed runs locally. GitHub release publication is pending explicit approval;
+`dist/verification/reactive-sandbox-evidence-2026-10-20-review-fixes.zip` retains passing and
+failed runs locally, including the original archive inside the updated bundle.
+GitHub release publication is pending explicit approval;
 raw captures remain outside Git.
 
 Three fixed 16³ scenarios passed on the Apple M3 Ultra / macOS 26.6.2 / Chrome 155
@@ -15,17 +16,19 @@ energy drift were zero; every owned browser and GPU resource closed successfully
 
 | Scenario | Two-tick preview p95 | Active cancel p95 | Worst camera render | Worst application frame | Peak process-tree RSS |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 8³ reference | 18.9 ms | 1.6 ms¹ | 1.2 ms | 3.2 ms | 1,836 MiB |
-| 16³ burning support | 113.2 ms | 2.3 ms | 1.7 ms | 10.6 ms | 1,955 MiB |
-| 16³ melt / flow / freeze | 111.1 ms | 1.3 ms | 1.5 ms | 10.8 ms | 1,964 MiB |
-| 16³ distant collapse | 110.3 ms | 0.9 ms | 1.3 ms | 10.2 ms | 1,963 MiB |
+| 8³ reference | 18.0 ms | 1.5 ms¹ | 1.5 ms | 4.1 ms | 1,843 MiB |
+| 16³ burning support | 110.5 ms | 0.9 ms | 2.1 ms | 8.3 ms | 1,955 MiB |
+| 16³ melt / flow / freeze | 110.4 ms | 0.8 ms | 1.8 ms | 9.9 ms | 1,963 MiB |
+| 16³ distant collapse | 109.6 ms | 1.1 ms | 2.0 ms | 5.9 ms | 1,949 MiB |
 
 Targets remain preview p95 ≤250 ms, cancellation p95 ≤100 ms, and completed
 camera/application frames ≤16.667 ms. Each latency percentile uses 12 samples,
 including the first cold preview. Rendering uses 120 measured 640×400 camera
 frames after ten warm-up frames, plus the actual application canvas and controls.
-The 16³ camera RAF worst gaps during previews were 18.1–18.2 ms, below the separate
+The 16³ camera RAF worst gaps during previews were 18.2–18.4 ms, below the separate
 100 ms stall limit. These render timings include GPU completion, not OS scanout.
+Application acceptance uses the maximum across every completed frame, including frames evicted from the
+bounded 256-sample history and frames before the 8³ stop/restart journey.
 
 ¹ The retained 8³ latency loop measures ready-preview discard acknowledgements;
 it also tests active cancellation separately. The 16³ loop measures cancellation
@@ -65,7 +68,7 @@ unchanged.
 In the three-sample Node diagnostic, collapse finalization fell from a median
 8.60 to 6.30 ms and commit from 9.24 to 7.36 ms. These are diagnostic observations,
 not a controlled universal speedup claim. The final native profiles observed a
-maximum Worker command handler of 12.0 ms. Public-job phase timings separately
+maximum Worker command handler of 11.6 ms. Public-job phase timings separately
 record preparation, evolution, structure, publication, result copying, session
 boundaries and presentation preparation. World-only and full-session profiles are
 separate executions and must not be summed as one preview.
@@ -81,7 +84,14 @@ limits, worker acknowledgement/ownership, replacement races, display identity an
 the qualification gates. It found and corrected selection inspection against an
 old frame during a size switch, kept the flow pulse bounded in the actual policy,
 and preserved strict import/replay validation around the optimized callback.
-No blocking finding remains in the reviewed scope.
+A subsequent adversarial review reproduced two further failures: water selection
+could use a stale 16³ frame after the 8³ client was installed, and a slow frame
+could disappear from acceptance after 256 newer renders. Water selection now
+checks the displayed world identity. The renderer retains a lifetime maximum,
+and 8³/16³ native acceptance enforces it independently of sample eviction.
+Both regressions failed before their fixes and passed afterward; the focused
+suite passes all 32 tests. Manual re-review found no remaining blocking issue in
+these changes.
 
 The first flow fixture failed its water assertion: its pulse did not preserve the
 intended liquid phase. A finite thermal probe established a 15,360 Q pulse, and
@@ -92,12 +102,14 @@ reference. The original failures are retained; neither frame thresholds nor
 physics were relaxed. Final native acceptance passed with all execution-input
 hashes matching the implementation commit.
 
-Validation passed 1,855 engine tests, 24 Node controller/tooling tests, 45 engine
+Validation passed 1,857 engine tests, 24 Node controller/tooling tests, 45 engine
 smoke tests, 13 smoke/transport tests, 68 supervisor tests with four existing
 containment/platform skips, three archive tests, and independently installed
 Python/npm package clients including all 13 npm entry points. SDK/browser builds,
 TypeScript, lint and formatting passed. The no-mistakes executable was unavailable;
-review, checks, publication and CI were handled manually.
+review, checks, publication and CI were handled manually. The full CPU suite and
+all four native stages were rerun after the review fixes; earlier receipts remain
+bound to their original implementation.
 
 ## Scope and reproduction
 
