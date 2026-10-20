@@ -1,7 +1,8 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Exact edit geometry and synthetic tick observations; no material execution. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTerrainBody3D } from './terrain-body.js';
@@ -16,9 +17,7 @@ import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
 import type { TacticalTransport3D } from './tactical-worker-wire.js';
 import type { TranslationRequest3D } from './interventions.js';
 import type { TerrainActorGroup3D } from './terrain-actor-group.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type V = [number, number, number];
 const Q = 1024;
 const platform: TranslationRequest3D = {cells: [[2, 4, 3]], path: [[1, 0, 0]]};

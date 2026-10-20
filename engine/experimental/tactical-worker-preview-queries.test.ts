@@ -1,21 +1,20 @@
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Preview geometry via cloned mock messages; real physics and native workers held. */
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalPreviewQueue3D, type TacticalPreviewEditor3D, type TacticalPreviewTicket3D } from './tactical-previews.js';
 import type { TacticalBranch3D, TacticalQueryOptions3D } from './tactical-session-view.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
-import type { TacticalTransport3D, Wire } from './tactical-worker-wire.js';
+import type { Wire } from './tactical-worker-wire.js';
 import { TACTICAL_PREVIEW_QUERY_BATCH_RULES_3D, type TacticalWorkerQuery3D, type TacticalWorkerPreviewQueryBatch3D } from './tactical-worker-queries.js';
 import type { GameplayGeometry3D } from './gameplay-geometry.js';
 
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Support capacity is held.');});
-afterAll(() => {for (const trap of [...traps, solve]) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());
 type Game = {ap: number};
 type Command = {store?: boolean};
@@ -45,12 +44,8 @@ function fixture(options: {tick?: number; timeout?: number; beforeStep?: () => P
   };};
   const session = createTacticalSessionCore3D({worldId: 'preview-world', gameRulesVersion: 'preview-game', terrain,
     reservoirs: [{id: 'flask', terrain: reservoir}], game: {ap: 2}}, factory, {}, async () => {});
-  const callbacks: ((value: unknown) => void)[] = [() => {}, () => {}], closed = [false, false], sent: Wire[][] = [[], []];
-  let intercept: ((m: Wire, side: number) => Wire | null) | undefined, oversized = false, latest: TacticalBranch3D<Game>;
-  const ports: TacticalTransport3D[] = [0, 1].map(side => ({send(value) {
-    const m = structuredClone(value) as Wire; sent[side].push(structuredClone(m)); const next = intercept ? intercept(m, side) : m;
-    if (next) queueMicrotask(() => {if (!closed[1 - side]) callbacks[1 - side](structuredClone(next));});
-  }, subscribe(receive) {callbacks[side] = receive; return () => {callbacks[side] = () => {};};}, close() {closed[side] = true;}}));
+  const {ports, sent, closed, setRewrite: intercept, deliver} = createMicrotaskTransport<Wire>();
+  let oversized = false, latest: TacticalBranch3D<Game>;
   const host = createTacticalWorkerHost3D(ports[1], {...session, get revision() {return session.revision;}, branch(options) {
     const branch = session.branch(options); latest = branch;
     return {...branch, get status() {return branch.status;}, get progress() {return branch.progress;}, queries(options?: TacticalQueryOptions3D) {
@@ -61,7 +56,7 @@ function fixture(options: {tick?: number; timeout?: number; beforeStep?: () => P
   }, commit() {return session.commit(latest);}}, stage, 'preview-channel');
   const client = createTacticalWorkerClient3D<Game, Command>(ports[0], {channel: 'preview-channel', worldId: 'preview-world', gameRulesVersion: 'preview-game', timeoutMs: options.timeout});
   return {session, host, client, made, stepped, cleaned, views, sent, closed, latest: () => latest,
-    intercept: (fn: typeof intercept) => {intercept = fn;}, deliver: (m: Wire) => callbacks[0](structuredClone(m)), oversized: () => {oversized = true;}};
+    intercept, deliver: (m: Wire) => deliver(0, m), oversized: () => {oversized = true;}};
 }
 async function ready(f: ReturnType<typeof fixture>, horizon = 0, command: Command = {}) {
   await f.client.ready; const ticket = f.client.request(command, horizon); expect((await ticket.result).status).toBe('ready'); return ticket;

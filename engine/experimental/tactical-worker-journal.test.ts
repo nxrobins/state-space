@@ -1,6 +1,8 @@
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
@@ -12,12 +14,9 @@ import type { ActionJournal3D } from './action-journal.js';
 import type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
 import type { TacticalPreviewTicket3D } from './tactical-previews.js';
 import type { TacticalBranch3D, TacticalCommit3D } from './tactical-session-view.js';
-import type { TacticalTransport3D, Wire } from './tactical-worker-wire.js';
+import type { Wire } from './tactical-worker-wire.js';
 
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Support solves are held.');});
-afterAll(() => {for (const trap of [...traps, solve]) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());
 type Game = {ap: number};
 type Command = {kind: string};
@@ -43,12 +42,7 @@ function fixture(timeoutMs = 10000) {
   const session = createTacticalSessionCore3D({worldId: 'journal-world', gameRulesVersion: 'journal-game', terrain, game: {ap: 2},
     reservoirs: [{id: 'flask', terrain: reservoir}]}, factory, {}, async () => {}, observer);
   let branch: TacticalBranch3D<Game> | undefined, latest: TacticalCommit3D<Game> | undefined;
-  const receive: ((v: unknown) => void)[] = [() => {}, () => {}], sent: Wire[][] = [[], []], closed = [false, false];
-  let intercept: ((m: Wire, side: number) => Wire | null) | undefined;
-  const ports: TacticalTransport3D[] = [0, 1].map(side => ({send(value) {
-    const message = structuredClone(value) as Wire; sent[side].push(structuredClone(message)); const next = intercept ? intercept(message, side) : message;
-    if (next) queueMicrotask(() => {if (!closed[1 - side]) receive[1 - side](structuredClone(next));});
-  }, subscribe(fn) {receive[side] = fn; return () => {receive[side] = () => {};};}, close() {closed[side] = true;}}));
+  const {ports, sent, closed, setRewrite: intercept, deliver} = createMicrotaskTransport<Wire>();
   const host = createTacticalWorkerHost3D(ports[1], {...session, get revision() {return session.revision;},
     branch(options) {branch = session.branch(options); return branch;}, commit(b) {latest = session.commit(b); return latest;}}, (editor, command: Command) => {
     if (command.kind === 'mixed') {
@@ -66,7 +60,7 @@ function fixture(timeoutMs = 10000) {
   }, 'journal-channel');
   const client = createTacticalWorkerClient3D<Game, Command>(ports[0], {channel: 'journal-channel', worldId: 'journal-world', gameRulesVersion: 'journal-game', timeoutMs});
   return {client, host, session, observer, sent, closed, branch: () => branch!, latest: () => latest!, counts: () => ({steps, drivers, disposed}),
-    intercept: (fn: typeof intercept) => {intercept = fn;}, deliver: (side: number, m: unknown) => receive[side](structuredClone(m))};
+    intercept, deliver};
 }
 async function ready(f: ReturnType<typeof fixture>, kind = 'mixed', horizon = 0, capture: TacticalPreviewCapture3D = {journal: {}}) {
   const ticket = f.client.request({kind}, horizon, capture); expect((await ticket.result).status).toBe('ready'); return ticket;

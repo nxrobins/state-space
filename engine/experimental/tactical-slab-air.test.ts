@@ -1,16 +1,15 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Air application rules on inert material ticks; actual actor geometry resolution. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createSlabInitial, createSlabPolicy, createSlabSession, prepareSlabCommand, readSlabCommand, readSlabRequest,
   SLAB_RULES, SLAB_AIR_IMPULSES, type SlabAirCommand } from '../../examples/tactical-slab/scenario.js';
 import { createSlabController } from '../../examples/tactical-slab/controller.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { observe } from './terrain-motion.fixtures.js';
 import { MAT } from './3d.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime remains held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 const Q = 1024, air: SlabAirCommand = {kind: 'air', unit: 'scout', direction: 'up'};
 function fixture(initial = createSlabInitial(), options: {pause?: Promise<void>; failTick?: number} = {}) {
   let steps = 0, made = 0, closed = 0;

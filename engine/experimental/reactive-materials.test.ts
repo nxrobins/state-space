@@ -1,13 +1,12 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Data/edits only; any material step or support solve fails this suite. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import * as mechanics from './structural-mechanics.js';
+import { beforeAll, describe, expect, test } from 'vitest';
+
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createReactiveMaterialRegistry3D, createReactiveMaterialBlock3D as create, readReactiveMaterialBlock3D as read,
   editReactiveMaterialBlock3D as edit, reactiveMaterialEnergyLedger3D as ledger, MAT, PHASE, ENERGY_SCALE,
   INTEGRITY_3D, ANCHOR_3D, BONDS_3D, MAX_ENERGY_Q, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D } from './reactive-materials.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 let registry: ReactiveMaterialRegistry3D;
 beforeAll(async () => {registry = await createReactiveMaterialRegistry3D();});
 const dimensions = {width: 3, height: 1, depth: 1}, at = {x: 0, y: 0, z: 0};

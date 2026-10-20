@@ -1,17 +1,17 @@
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Worker geometry contract over structured-clone mocks; no real physics or Worker. */
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D } from './tactical-session-core.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
 import { TACTICAL_QUERY_BATCH_RULES_3D, type TacticalWorkerQuery3D, type TacticalWorkerQueryBatch3D } from './tactical-worker-queries.js';
-import type { TacticalTransport3D, Wire } from './tactical-worker-wire.js';
+import type { Wire } from './tactical-worker-wire.js';
 import type { GeometryCell3D } from './gameplay-geometry.js';
 
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-afterAll(() => {for (const trap of traps) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics(...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());
 const body = {minQ: [1024, 0, 1024], maxQ: [2048, 1024, 2048]} as const;
 const solid = {minQ: [1024, 1024, 1024], maxQ: [2048, 2048, 2048]} as const;
@@ -35,19 +35,11 @@ function fixture(options: {timeoutMs?: number; oversized?: boolean} = {}) {
       const result = view.support(request); return {...result, surfaces: Array.from({length: 6000}, () => result.surfaces[0])};
     }};
   });
-  const received: ((value: unknown) => void)[] = [() => {}, () => {}], sent: Wire[][] = [[], []], closed = [false, false];
-  let intercept: ((message: Wire, side: number) => Wire | null) | undefined;
-  const ports: TacticalTransport3D[] = [0, 1].map(side => ({
-    send(value) {
-      const m = structuredClone(value) as Wire; sent[side].push(structuredClone(m)); const next = intercept ? intercept(m, side) : m;
-      if (next) queueMicrotask(() => {if (!closed[1 - side]) received[1 - side](structuredClone(next));});
-    },
-    subscribe(receive) {received[side] = receive; return () => {received[side] = () => {};};}, close() {closed[side] = true;},
-  }));
+  const {ports, sent, closed, setRewrite: intercept, deliver} = createMicrotaskTransport<Wire>();
   const host = createTacticalWorkerHost3D(ports[1], {...session, get revision() {return session.revision;}, queries},
     (editor, command: {ap: number}) => editor.setGame(command), 'query-channel');
   const client = createTacticalWorkerClient3D<{ap: number}, {ap: number}>(ports[0], {channel: 'query-channel', worldId: 'query-world', gameRulesVersion: 'query-game', timeoutMs: options.timeoutMs});
-  return {client, host, session, queries, sent, closed, intercept: (fn: typeof intercept) => {intercept = fn;}, deliver: (side: number, value: unknown) => received[side](structuredClone(value))};
+  return {client, host, session, queries, sent, closed, intercept, deliver};
 }
 async function finish(f: ReturnType<typeof fixture>) {if (f.client.state.status !== 'failed') await f.client.close(); await f.host.close();}
 function direct(f: ReturnType<typeof fixture>, item: TacticalWorkerQuery3D) {

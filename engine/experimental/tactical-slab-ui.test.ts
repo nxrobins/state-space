@@ -1,5 +1,6 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** UI/transport scheduling with inert drivers and mock DOM/GPU ports only. */
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createSlabUIModel, parseSlabSave, type SlabUIModel } from '../../examples/tactical-slab/ui-model.js';
 import { createSlabFramePump, createSlabRuntimeGuard, slabOrbitCamera } from '../../examples/tactical-slab/ui-runtime.js';
 import * as hostPorts from '../../examples/tactical-slab/ui-host.js';
@@ -9,12 +10,9 @@ import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from '.
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { projectTacticalPoint3D, type TacticalRenderer3D } from './tactical-renderer.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { observe } from './terrain-motion.fixtures.js';
-const traps = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const trap of traps) trap.mockImplementation(() => {throw Error('Physical execution is held.');});
-afterAll(() => {for (const trap of traps) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => {vi.useRealTimers(); vi.unstubAllGlobals();});
 function deferred<T>() {let resolve!: (v: T) => void; const promise = new Promise<T>(r => {resolve = r;}); return {promise, resolve};}
 async function until(test: () => boolean) {for (let i = 0; i < 400; i++) {if (test()) return; await Promise.resolve();} throw Error('Expected asynchronous boundary did not arrive.');}

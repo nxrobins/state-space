@@ -1,18 +1,17 @@
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Real endpoint comparison, inert support observations and clone-isolated transport. */
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSessionCore3D } from './tactical-session-core.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { createTacticalWorkerClient3D, type TacticalWorkerCommit3D } from './tactical-worker-client.js';
 import type { TacticalCommit3D } from './tactical-session-view.js';
 import type { GameplayChangeReport3D, SupportObserver3D } from './change-reports.js';
-import type { TacticalTransport3D, Wire } from './tactical-worker-wire.js';
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-const solve = vi.spyOn(mechanics, 'solveStructure3D').mockImplementation(() => {throw Error('Structural solves are held.');});
-afterAll(() => {for (const trap of [...traps, solve]) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+import type { Wire } from './tactical-worker-wire.js';
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());
 function observed(s: StructuralSnapshot3D) {
   const n = s.packedCells.length, result = {distances: new Int32Array(n).fill(-1), loads: new Uint32Array(n), capacities: new Uint32Array(n), reactions: new Uint32Array(n)};
@@ -28,13 +27,7 @@ function fixture(observe: SupportObserver3D = observed, timeoutMs = 10000) {
   const session = createTacticalSessionCore3D({worldId: 'report-world', gameRulesVersion: 'report-game', terrain: world.snapshot(),
     game: {ap: 2}, reservoirs: [{id: 'flask', terrain: flask.snapshot()}]}, () => {throw Error('No physical driver');}, {}, async () => {}, observer);
   let latest: TacticalCommit3D<Game> | undefined;
-  const callbacks: ((value: unknown) => void)[] = [() => {}, () => {}], sent: Wire[][] = [[], []], closed = [false, false];
-  let intercept: ((m: Wire, side: number) => Wire | null) | undefined;
-  const ports: TacticalTransport3D[] = [0, 1].map(side => ({send(value) {
-    const m = structuredClone(value) as Wire; sent[side].push(structuredClone(m)); const next = intercept ? intercept(m, side) : m;
-    if (next) queueMicrotask(() => {if (!closed[1 - side]) callbacks[1 - side](structuredClone(next));});
-  }, subscribe(receive) {callbacks[side] = receive; return () => {callbacks[side] = () => {};};}, close() {closed[side] = true;}}));
-  const host = createTacticalWorkerHost3D(ports[1], {...session, get revision() {return session.revision;}, commit(branch) {latest = session.commit(branch); return latest;}}, (editor, command: Command) => {
+  const {ports, sent, closed, setRewrite: intercept, deliver} = createMicrotaskTransport<Wire>();  const host = createTacticalWorkerHost3D(ports[1], {...session, get revision() {return session.revision;}, commit(branch) {latest = session.commit(branch); return latest;}}, (editor, command: Command) => {
     if (command.kind === 'damage') editor.edit([{kind: 'integrity', x: 1, y: 1, z: 1, integrity: 200}]);
     else if (command.kind === 'heat') editor.addEnergy([{x: 1, y: 1, z: 1, deltaQ: 1}]);
     else if (command.kind === 'transfer') editor.transfer({from: null, to: 'flask', cells: [[1, 1, 1]], offset: [0, 0, 0]});
@@ -47,7 +40,7 @@ function fixture(observe: SupportObserver3D = observed, timeoutMs = 10000) {
     editor.setGame({ap: 1});
   }, 'report-channel');
   const client = createTacticalWorkerClient3D<Game, Command>(ports[0], {channel: 'report-channel', worldId: 'report-world', gameRulesVersion: 'report-game', timeoutMs});
-  return {client, host, session, observer, sent, closed, latest: () => latest!, intercept: (fn: typeof intercept) => {intercept = fn;}, deliver: (side: number, value: unknown) => callbacks[side](structuredClone(value))};
+  return {client, host, session, observer, sent, closed, latest: () => latest!, intercept, deliver};
 }
 async function commit(f: ReturnType<typeof fixture>, kind = 'damage') {const ticket = f.client.request({kind}, 0); expect((await ticket.result).status).toBe('ready'); return f.client.commit(ticket);}
 async function finish(f: ReturnType<typeof fixture>) {if (f.client.state.status !== 'failed') await f.client.close(); await f.host.close();}

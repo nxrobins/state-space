@@ -1,5 +1,6 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Mock GPU API contracts only. Native WGSL, pixels, physical ticks and replay are held. */
-import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createTacticalRenderer3D, prepareTacticalScene3D, projectTacticalPoint3D, TACTICAL_CAMERA_WGSL_3D, type TacticalCamera3D, type TacticalDecoration3D, type TacticalRenderTargets3D } from './tactical-renderer.js';
 import { cameraData, sceneData } from './tactical-presentation.js';
 import { TACTICAL_BOXES, TACTICAL_TERRAIN, TACTICAL_MESH } from './tactical-render-shaders.js';
@@ -7,12 +8,8 @@ import { MESH } from './3d-renderer.js';
 import { createSlabController } from '../../examples/tactical-slab/controller.js';
 import { createSlabSession, inspectSlab } from '../../examples/tactical-slab/scenario.js';
 import { prepareSlabScene } from '../../examples/tactical-slab/presentation.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime remains held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 beforeEach(() => {
   vi.stubGlobal('GPUBufferUsage', {UNIFORM: 1, COPY_DST: 2, STORAGE: 4, INDIRECT: 8});
   vi.stubGlobal('GPUTextureUsage', {RENDER_ATTACHMENT: 16}); vi.stubGlobal('GPUShaderStage', {VERTEX: 1});

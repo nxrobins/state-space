@@ -1,20 +1,14 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Tiny physical contacts only. Old M5/native/GPU runtime stays trapped. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { CpuVolume } from './3d-core.js';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
 import { CpuStructuralWorld3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { createTerrainBody3D, stepTerrainBody3D } from './terrain-body.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { displacementTrace3D } from './displacement-kernel.js';
-import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block, editReactiveMaterialBlock3D as edit,
-  createReactiveWorldSnapshot3D as world, createReactiveDomainsSnapshot3D as domains, createReactiveSession3D as session,
-  createReactiveBody3D as body, readReactiveBody3D as read, stepReactiveBody3D as step, createReactiveDisplacement3D as displace,
-  GEOMETRY_SCALE_3D as Q, MAT, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveBody3D, type ReactiveBranch3D,
-  type ReactiveSessionPolicy3D, type ReactiveGameplayGeometry3D, type ReactiveTickMovement3D, type ReactiveDisplacement3D } from './reactive-materials.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Old physical runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block, editReactiveMaterialBlock3D as edit, createReactiveWorldSnapshot3D as world, createReactiveDomainsSnapshot3D as domains, createReactiveSession3D as session, createReactiveBody3D as body, readReactiveBody3D as read, stepReactiveBody3D as step, createReactiveDisplacement3D as displace, GEOMETRY_SCALE_3D as Q, MAT, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveBranch3D, type ReactiveSessionPolicy3D, type ReactiveGameplayGeometry3D, type ReactiveTickMovement3D, type ReactiveDisplacement3D } from './reactive-materials.js';
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, warm: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
   warm = await createReactiveMaterialRegistry3D(); const c = defaultReactiveMaterialCatalog3D(); for (const m of c.propertiesCatalog.materials) m.properties.conductivity = 0;

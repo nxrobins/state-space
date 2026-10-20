@@ -1,18 +1,14 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Tiny controlled-matter paths and reactive continuation; M5 stepping remains trapped. */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import { CpuVolume } from './3d-core.js';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
 import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, createReactiveMaterialBlock3D as block,
   editReactiveMaterialBlock3D as edit, createReactiveWorldSnapshot3D as state, readReactiveWorldSnapshot3D as read,
   createReactiveWorld3D as world, createReactiveTranslationJob3D as job, REACTIVE_TRANSLATION_LIMITS_3D,
   MAT, PHASE, ANCHOR_3D, BONDS_3D, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D,
   type ReactiveWorldSnapshot3D, type ReactiveTranslationRequest3D, type ReactiveTranslationJob3D, type ReactiveWorld3D,
   type ReactiveTranslationCoordinate3D, type ReactiveWorldTickJob3D } from './reactive-materials.js';
-const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
-  ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Existing world runtime held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, custom: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
   const c = defaultReactiveMaterialCatalog3D(); for (const m of c.propertiesCatalog.materials) m.properties.conductivity = 0;

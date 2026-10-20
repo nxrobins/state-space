@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { MAT } from './3d.js';
 import { createTacticalSession3D } from './tactical-session.js';
@@ -6,8 +7,7 @@ import { copyTacticalValue, createTacticalSessionCore3D, type TacticalSimulation
 import type { TacticalSession3D, TacticalSessionInitial3D, TacticalSessionPolicy3D, TacticalPreview3D, TacticalValue } from './tactical-session-view.js';
 
 // A mistaken call to real physics fails immediately. Only inert drivers advance.
-const physicalStep = vi.spyOn(CpuStructuralWorld3D.prototype, 'step').mockImplementation(() => {throw Error('Physical runtime validation is held.');});
-afterAll(() => {expect(physicalStep).not.toHaveBeenCalled(); physicalStep.mockRestore();});
+holdPhysics('step');
 type Game = {actors: {id: string; position: number[]}[]; ap: number; resource: number; turn: number; rng: number; history: string[]};
 function initial(): TacticalSessionInitial3D<Game> {
   const world = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});

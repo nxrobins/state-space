@@ -1,5 +1,7 @@
+import { createMicrotaskTransport } from '../test-support/microtask-transport.js';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Real host/client framing through isolated structured-clone messages; inert ticks only. */
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { MAT } from './3d.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
@@ -9,9 +11,7 @@ import type { TacticalTransport3D, Wire } from './tactical-worker-wire.js';
 import type { TacticalPreviewEditor3D, TacticalPreviewOutcome3D } from './tactical-previews.js';
 import type { TacticalSessionSnapshot3D } from './tactical-session-view.js';
 
-const traps = (['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const)
-  .map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-afterAll(() => {for (const trap of traps) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics(...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());
 type Game = {ap: number; label: string; ticks: number};
 type Command = {label: string};
@@ -26,24 +26,8 @@ function stage(editor: TacticalPreviewEditor3D<Game>, command: Command) {
   editor.setGame({...editor.inspect().game, ap: 1, label: command.label});
 }
 function deferred() {let resolve!: () => void; return {promise: new Promise<void>(done => {resolve = done;}), resolve: () => resolve()};}
-function link() {
-  const sent: Wire[][] = [[], []], callbacks: ((value: unknown) => void)[] = [() => {}, () => {}], faults: ((error: Error) => void)[] = [() => {}, () => {}];
-  const closed = [false, false], held: Wire[] = [];
-  let rewrite: ((m: Wire, side: number) => Wire | null) | undefined;
-  const ports: TacticalTransport3D[] = [0, 1].map(side => ({
-    send(value) {
-      if (closed[side]) throw Error('Mock endpoint closed');
-      const m = structuredClone(value) as Wire; sent[side].push(structuredClone(m));
-      const output = rewrite ? rewrite(m, side) : m; if (output !== null) queueMicrotask(() => {if (!closed[1 - side]) callbacks[1 - side](structuredClone(output));});
-    },
-    subscribe(receive, failed) {callbacks[side] = receive; faults[side] = failed; return () => {callbacks[side] = () => {}; faults[side] = () => {};};},
-    close() {closed[side] = true;},
-  }));
-  return {ports, sent, held, closed, setRewrite: (fn: typeof rewrite) => {rewrite = fn;},
-    deliver: (side: number, value: unknown) => callbacks[side](structuredClone(value)), fault: (side: number) => faults[side](Error('Disconnected'))};
-}
 function fixture(overrides: {step?: (s: StructuralSnapshot3D) => void | Promise<void>; close?: () => void | Promise<void>; rejectCommit?: boolean; timeoutMs?: number; reservoir?: boolean; hostCleanupThrows?: boolean} = {}) {
-  const messages = link(), stepped = vi.fn(), made = vi.fn(), cleaned = vi.fn();
+  const messages = {...createMicrotaskTransport<Wire>(), held: [] as Wire[]}, stepped = vi.fn(), made = vi.fn(), cleaned = vi.fn();
   const factory: TacticalSimulationFactory3D = snapshot => {made(); let s = structuredClone(snapshot); return {
     load(value) {s = structuredClone(value);}, async step() {stepped(); await overrides.step?.(s); s.tick++;},
     snapshot: () => s, async close() {cleaned(); await overrides.close?.();},
@@ -250,13 +234,13 @@ describe('worker framing with mock transport and inert simulation', () => {
     expect((await t.result).status).toBe('failed'); expect(f.client.snapshot()).toEqual(before); expect(f.client.state.uncertain).toBe(false); await finish(f);
   });
   test('handshake identity mismatch is rejected before exposing a snapshot', async () => {
-    const messages = link(); messages.setRewrite((m, side) => {if (side === 1 && m.kind === 'hello') (m.payload as {worldId: string}).worldId = 'wrong-world'; return m;});
+    const messages = createMicrotaskTransport<Wire>(); messages.setRewrite((m, side) => {if (side === 1 && m.kind === 'hello') (m.payload as {worldId: string}).worldId = 'wrong-world'; return m;});
     const session = createTacticalSessionCore3D(initial(), () => {throw Error('No ticks');}), host = createTacticalWorkerHost3D(messages.ports[1], session, stage, options.channel);
     const client = createTacticalWorkerClient3D<Game, Command>(messages.ports[0], options); await expect(client.ready).rejects.toThrow(/identity/);
     expect(() => client.snapshot()).toThrow(/handshake/); await host.close();
   });
   test('handshake timeout terminates its owned endpoint', async () => {
-    vi.useFakeTimers(); const messages = link(), client = createTacticalWorkerClient3D<Game, Command>(messages.ports[0], {...options, timeoutMs: 20});
+    vi.useFakeTimers(); const messages = createMicrotaskTransport<Wire>(), client = createTacticalWorkerClient3D<Game, Command>(messages.ports[0], {...options, timeoutMs: 20});
     const failed = expect(client.ready).rejects.toThrow(/timed out/); await vi.advanceTimersByTimeAsync(21); await failed; expect(messages.closed[0]).toBe(true);
   });
   test('worker cleanup failure prevents the next queued command', async () => {
@@ -290,7 +274,7 @@ describe('worker framing with mock transport and inert simulation', () => {
     handlers.get('messageerror')!({}); expect(failed).toHaveBeenCalledTimes(1); unsubscribe(); expect(handlers.size).toBe(0); port.close(); expect(terminate).toHaveBeenCalledTimes(1);
   });
   test('subscription cleanup failure still disposes the endpoint and rejects close', async () => {
-    const messages = link(), subscribe = messages.ports[0].subscribe;
+    const messages = createMicrotaskTransport<Wire>(), subscribe = messages.ports[0].subscribe;
     messages.ports[0].subscribe = (receive, failed) => {
       const remove = subscribe(receive, failed); return () => {remove(); throw Error('unsubscribe failed');};
     };

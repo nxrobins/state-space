@@ -1,13 +1,12 @@
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Conservative edit checks only; real M5 ticks and support solves remain held. */
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createMaterialTransport3D as create, readMaterialTransport3D as read, applyMaterialTransport3D as apply,
   MATERIAL_TRANSPORT_LIMITS_3D as LIMITS, type MaterialTransportState3D, type MaterialParcelSeed3D } from './material-transport.js';
 import { CpuStructuralWorld3D, validateStructuralSnapshot3D } from './structural-world-core.js';
-import * as mechanics from './structural-mechanics.js';
+
 import { MAT } from './3d.js';
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
-for (const g of guards) g.mockImplementation(() => {throw Error('Material runtime remains held.');});
-afterAll(() => {for (const g of guards) {expect(g).not.toHaveBeenCalled(); g.mockRestore();}});
+holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type V = [number, number, number];
 const Q = LIMITS.scale;
 const volume = (width = 8, height = 8, depth = 8) => new CpuStructuralWorld3D({width, height, depth, chunkSize: 4});

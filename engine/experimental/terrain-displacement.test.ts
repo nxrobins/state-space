@@ -1,8 +1,8 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import { volumeSchedule } from './3d-core.js';
-import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+
 import { createTacticalSessionCore3D } from './tactical-session-core.js';
 import { createTerrainDisplacement3D, TERRAIN_DISPLACEMENT_RULES_3D, type TerrainDisplacement3D } from './terrain-displacement.js';
 import { createTerrainBody3D } from './terrain-body.js';
@@ -12,9 +12,7 @@ import { seed, index, factory, type Spec } from './terrain-motion.fixtures.js';
 import { thermalView } from '../thermal.js';
 import { buildColdTable } from '../generated/materials.js';
 
-const guards = [vi.spyOn(mechanics, 'solveStructure3D'), ...(['step', 'stepWithMotion', 'stepWithMotionPaths'] as const).map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name))];
-for (const guard of guards) guard.mockImplementation(() => {throw Error('Physical runtime held.');});
-afterAll(() => {for (const guard of guards) {expect(guard).not.toHaveBeenCalled(); guard.mockRestore();}});
+holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 type V = [number, number, number];
 const xpass = (parity: number) => volumeSchedule(0).findIndex(p => p.kind === 'liquid' && p.axis === 0 && p.parity === parity) + 1;
 async function fixture(terrain = seed(), spec: Spec = {}, capturePaths = true) {

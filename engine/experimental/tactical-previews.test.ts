@@ -1,14 +1,12 @@
-import { afterAll, describe, expect, test, vi } from 'vitest';
+import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
+import { describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { MAT } from './3d.js';
 import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { createTacticalPreviewQueue3D, TACTICAL_PREVIEW_LIMITS_3D, type TacticalPreviewEditor3D, type TacticalPreviewTicket3D, type TacticalPreviewQueue3D } from './tactical-previews.js';
 
-const physical = ['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const;
-// No production tick or support solve is permitted by this test selection.
-const traps = physical.map(name => vi.spyOn(CpuStructuralWorld3D.prototype, name).mockImplementation(() => {throw Error('Physical runtime is held.');}));
-afterAll(() => {for (const trap of traps) {expect(trap).not.toHaveBeenCalled(); trap.mockRestore();}});
+holdPhysics(...STRUCTURAL_CALLS);
 type Game = {ap: number; label: string; ticks: number; data: number[]};
 type Command = {label: string; data: number[]};
 const command = (label: string): Command => ({label, data: [7]});
