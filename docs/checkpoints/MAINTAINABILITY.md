@@ -73,6 +73,27 @@ package verification passed all 13 export declarations (receipt
 tests, types/lint/format and native acceptance (receipt
 `46709fbbe817444cb3ac2b0ea0104dbd`). No blocking finding remains.
 
-## Remaining stages
+## Stage 6 — shared deterministic worker test transport
 
-6. Deterministic shared fault-injecting test transport.
+Both reactive worker suites use one test-only manual bus. It supports held,
+reordered, dropped, duplicated and corrupted replies, endpoint/send/scheduler
+failures, isolated sent logs and bounded progress. Tests retain their own domain
+fixtures and assertions. Microtask-based tactical and browser Worker adapters
+remain separate because they exercise different scheduling contracts.
+Adversarial self-tests exposed the old helpers' falsy rejection bug; the shared
+settler now distinguishes rejection from its reason. Duplicate replies count a
+request only once, and fault injection cannot mutate the original sent log.
+A real SDK test holds a commit acknowledgement and proves cached state stays at
+the acknowledged boundary until delivery. Initial focused coverage passed 96
+tests; final full validation passed 1,846 Vitest and 21 Node tests (receipt
+`521685e80e50421f8d2a391a66e25b53`). Types, lint, formatting and native acceptance
+passed (receipt `667ae38b1f0c4b569b8f5b44dadfbfd3`). No blocking finding remains.
+
+## Final verification
+
+All six stages completed with review and validation before advancing. The final
+8³ macOS/Metal run passed all 13 browser journeys, with zero energy drift:
+preview p95 17.5 ms, cancellation p95 1.3 ms, render p95 1.5 ms (worst 2.2 ms).
+These measurements describe the bounded chamber acceptance workload. They do
+not requalify larger simulation workloads. Retained evidence is in
+`maintainability-20261020/`. CI status is reported on the pull request.

@@ -1,3 +1,4 @@
+import { createWorkerBus } from '../test-support/worker-bus.js';
 /** Exact tiny observations and mock ports; old M5/native execution remains held. */
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 import { CpuVolume } from './3d-core.js';
@@ -7,7 +8,7 @@ import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, cre
   createReactiveWorldSnapshot3D as world, createReactiveDomainsSnapshot3D as domains, createReactiveSession3D as session,
   createReactiveChangeJob3D as changes, createReactiveWorkerHost3D as host, createReactiveWorkerClient3D as client,
   MAT, type ReactiveMaterialRegistry3D, type ReactiveMaterialEdit3D, type ReactiveSessionCommand3D, type ReactiveWorkerQuery3D,
-  type ReactiveChangeJob3D, type ReactiveChangeReport3D, type ReactiveWorkerTransport3D, type ReactiveGameplayGeometry3D } from './reactive-materials.js';
+  type ReactiveChangeJob3D, type ReactiveChangeReport3D, type ReactiveGameplayGeometry3D } from './reactive-materials.js';
 import { readReactiveChangeReport3D } from './reactive-worker-changes.js';
 import { reactiveWorkerGeometryStamp3D } from './reactive-worker-queries.js';
 import type { ReactiveWorkerWire3D } from './reactive-worker-wire.js';
@@ -36,21 +37,12 @@ function endpoints(command: ReactiveSessionCommand3D<Game> = cut, init = initial
   return {s, before, after: branch.queries(), branch, saved, preview: branch.inspect()};
 }
 function fixture(init = initial()) {
-  const tasks: {kind: string; run(): void}[] = [], sent: ReactiveWorkerWire3D[][] = [[], []], receive: ((v: unknown) => void)[] = [() => {}, () => {}], errors: ((e: Error) => void)[] = [() => {}, () => {}];
-  const closed = [false, false]; let inFlight = 0, maximum = 0;
-  const config = {reply: (m: ReactiveWorkerWire3D): ReactiveWorkerWire3D | null => m};
-  const ports = [0, 1].map(side => ({send(raw: unknown) {const message = structuredClone(raw) as ReactiveWorkerWire3D; sent[side].push(message);
-    if (!side) {inFlight++; maximum = Math.max(maximum, inFlight);} const value = side ? config.reply(message) : message;
-    if (value) tasks.push({kind: side ? 'reply' : 'host', run() {if (side) inFlight--; receive[1 - side](structuredClone(value));}});
-  }, subscribe(fn: (v: unknown) => void, fail: (e: Error) => void) {receive[side] = fn; errors[side] = fail; return () => {receive[side] = () => {};};}, close() {closed[side] = true;}} satisfies ReactiveWorkerTransport3D));
-  const h = host(ports[1], r, init, {}, {channel: 'observe', work: 4});
-  const c = client<Game>(ports[0], r, {channel: 'observe', worldId: init.worldId, gameRulesVersion: init.gameRulesVersion, timeoutMs: 10000,
-    schedule(fn) {let cancelled = false; tasks.push({kind: 'slice', run() {if (!cancelled) fn();}}); return () => {cancelled = true;};}});
-  const until = async (done: () => boolean) => {for (let n = 0; n < 20000; n++) {if (done()) return; const next = tasks.shift(); next?.run(); await Promise.resolve(); if (!next && !done()) throw Error('Mock stalled');} throw Error('Mock bound');};
-  const settle = async <T>(p: Promise<T>): Promise<T> => {let done = false, result!: T, error: unknown; p.then(v => {result = v; done = true;}, e => {error = e; done = true;});
-    await until(() => done); if (error) throw error; return result;};
-  resources.push(() => {errors[0](Error('cleanup')); h.close();});
-  return {c, h, sent, tasks, config, until, settle, init, closed, maximum: () => maximum};
+  const bus = createWorkerBus<ReactiveWorkerWire3D>(20000);
+  const h = host(bus.ports[1], r, init, {}, {channel: 'observe', work: 4});
+  const c = client<Game>(bus.ports[0], r, {channel: 'observe', worldId: init.worldId, gameRulesVersion: init.gameRulesVersion,
+    timeoutMs: 10000, schedule: bus.schedule});
+  resources.push(() => {bus.errors[0](Error('cleanup')); h.close();});
+  return {...bus, c, h, init};
 }
 const resources: (() => void)[] = []; afterEach(() => {for (const release of resources.splice(0)) release(); vi.useRealTimers();});
 async function ready(init = initial()) {const f = fixture(init); await f.settle(f.c.ready); return f;}
@@ -216,17 +208,17 @@ describe('reactive worker observations', () => {
     await f.settle(f.c.close()); await rejection; expect(f.c.snapshot()).toEqual(before); expect(f.closed).toEqual([true, true]);
   });
   test('wrong domain stamps in geometry replies fail closed', async () => {
-    const f = await ready(), before = f.c.snapshot(); f.config.reply = m => {const p = m.payload as {result?: {results?: {value: {stamp: {domain: string | null}}}[]}};
+    const f = await ready(), before = f.c.snapshot(); f.config.mapReply = m => {const p = m.payload as {result?: {results?: {value: {stamp: {domain: string | null}}}[]}};
       if (m.kind === 'inspect-advance' && p.result?.results) p.result.results[0].value.stamp.domain = 'flask'; return m;};
     await expect(f.settle(f.c.query([fit]))).rejects.toThrow(/stamp/); expect(f.c.snapshot()).toEqual(before); expect(f.c.state.uncertain).toBe(false);
   });
   test('wrong queried cell contents are rejected without a committed mutation', async () => {
-    const f = await ready(); f.config.reply = m => {const p = m.payload as {result?: {results?: {value: {blocker: {energyQ: number}}}[]}};
+    const f = await ready(); f.config.mapReply = m => {const p = m.payload as {result?: {results?: {value: {blocker: {energyQ: number}}}[]}};
       if (m.kind === 'inspect-advance' && p.result?.results) p.result.results[0].value.blocker.energyQ++; return m;};
     await expect(f.settle(f.c.query([fit]))).rejects.toThrow(/cell differs/); expect(f.c.snapshot().revision).toBe(0);
   });
   test('partial inspection payloads are never accepted', async () => {
-    const f = await ready(); f.config.reply = m => {if (m.kind === 'inspect-start') (m.payload as {result: unknown}).result = {}; return m;};
+    const f = await ready(); f.config.mapReply = m => {if (m.kind === 'inspect-start') (m.payload as {result: unknown}).result = {}; return m;};
     await expect(f.settle(f.c.query([fit]))).rejects.toThrow(/partial/); expect(f.c.state.status).toBe('failed');
   });
   test('malformed support counts bounds and range budgets are rejected', () => {
@@ -245,12 +237,12 @@ describe('reactive worker observations', () => {
     expect(() => readReactiveChangeReport3D(r, raw, f.saved, f.preview.state, f.before.stamp, f.after.stamp, 256)).toThrow(/did not change/);
   });
   test('a truncated report cannot claim complete runs', async () => {
-    const f = await ready(), t = await preview(f); f.config.reply = m => {const p = m.payload as {result?: ReactiveChangeReport3D};
+    const f = await ready(), t = await preview(f); f.config.mapReply = m => {const p = m.payload as {result?: ReactiveChangeReport3D};
       if (m.kind === 'inspect-advance' && p.result?.channels) p.result.channels.support.requiresFullRead = false; return m;};
     await expect(f.settle(f.c.changesPreview(t, null, {maxRuns: 0}))).rejects.toThrow(/Partial/); expect(f.c.state.uncertain).toBe(false);
   });
   test('inspection timeout fails closed but does not claim an uncertain mutation', async () => {
-    vi.useFakeTimers(); const f = await ready(); f.config.reply = m => m.kind === 'inspect-start' ? null : m;
+    vi.useFakeTimers(); const f = await ready(); f.config.mapReply = m => m.kind === 'inspect-start' ? null : m;
     const pending = f.c.query([fit]), rejection = expect(pending).rejects.toThrow(/timed out/); await vi.advanceTimersByTimeAsync(10001); await rejection;
     expect(f.c.state.uncertain).toBe(false); expect(f.c.snapshot().revision).toBe(0);
   });
