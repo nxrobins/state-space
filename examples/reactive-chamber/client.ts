@@ -9,7 +9,9 @@ import {
 } from 'state-space-engine/experimental/3d/reactive-materials';
 import {
   CHAMBER,
-  CHAMBER_WORLD,
+  SCENARIOS,
+  readScenario,
+  type ScenarioId,
   CHAMBER_RULES,
   compileCommand,
   readCommand,
@@ -20,18 +22,25 @@ import {
   SAVE_FORMAT,
   canonical,
   parseSave,
+  readSaveScenario,
   stateHash,
   verifyRecording,
   type ChamberStep,
 } from './recording.js';
 export type ClientOptions = {
+  scenario?: ScenarioId;
+  profile?: boolean;
   workerUrl?: URL;
   timeoutMs?: number;
   wrapTransport?: (transport: ReactiveWorkerTransport3D) => ReactiveWorkerTransport3D;
 };
 export async function openChamber(options: ClientOptions = {}) {
+  const scenario = readScenario(options.scenario ?? 'chamber');
+  const workerUrl = new URL(options.workerUrl ?? new URL('./worker.js', import.meta.url));
+  workerUrl.searchParams.set('scenario', scenario);
+  workerUrl.searchParams.set('profile', options.profile ? '1' : '0');
   const registry = await createReactiveMaterialRegistry3D(),
-    worker = new Worker(options.workerUrl ?? new URL('./worker.js', import.meta.url), {
+    worker = new Worker(workerUrl, {
       type: 'module',
     });
   let cleanup = () => worker.terminate();
@@ -47,7 +56,11 @@ export async function openChamber(options: ClientOptions = {}) {
       };
       const message = (event: MessageEvent) => {
         cleanup();
-        if (event.data?.kind === 'chamber-ready' && event.data.catalogHash === registry.hash)
+        if (
+          event.data?.kind === 'chamber-ready' &&
+          event.data.catalogHash === registry.hash &&
+          event.data.scenario === scenario
+        )
           resolve();
         else reject(Error(event.data?.error ?? 'Chamber worker catalog differs.'));
       };
@@ -80,9 +93,62 @@ export async function openChamber(options: ClientOptions = {}) {
       notify = () => {
         for (const fn of listeners) fn();
       };
-    const base =
-      options.wrapTransport?.(reactiveBrowserWorkerTransport3D(worker)) ??
-      reactiveBrowserWorkerTransport3D(worker);
+    const runtime: Record<
+      string,
+      {
+        calls: number;
+        workerMs: number;
+        roundTripMs: number;
+        mainMs: number;
+        worstWorkerMs: number;
+        worstMainMs: number;
+      }
+    > = {};
+    const port = reactiveBrowserWorkerTransport3D(worker);
+    let sentAt = 0;
+    const measured: ReactiveWorkerTransport3D = {
+      ...port,
+      send(value) {
+        sentAt = performance.now();
+        port.send(value);
+      },
+      subscribe(receive, failed) {
+        return port.subscribe((raw) => {
+          if (!options.profile) {
+            receive(raw);
+            return;
+          }
+          const envelope = raw as { kind: string; message: { kind: string }; workMs: number };
+          if (
+            envelope?.kind !== 'chamber-profile' ||
+            !Number.isFinite(envelope.workMs) ||
+            envelope.workMs < 0
+          ) {
+            failed(Error('Invalid worker profile envelope.'));
+            return;
+          }
+          const start = performance.now(),
+            trip = start - sentAt;
+          receive(envelope.message);
+          const elapsed = performance.now() - start;
+          const row = (runtime[envelope.message.kind] ??= {
+            calls: 0,
+            workerMs: 0,
+            roundTripMs: 0,
+            mainMs: 0,
+            worstWorkerMs: 0,
+            worstMainMs: 0,
+          });
+          row.calls++;
+          row.workerMs += envelope.workMs;
+          row.roundTripMs += trip;
+          row.mainMs += elapsed;
+          row.worstWorkerMs = Math.max(row.worstWorkerMs, envelope.workMs);
+          row.worstMainMs = Math.max(row.worstMainMs, elapsed);
+        }, failed);
+      },
+    };
+    const base = options.wrapTransport?.(measured) ?? measured;
     const transport: ReactiveWorkerTransport3D = {
       send: (value) => base.send(value),
       close() {
@@ -99,7 +165,7 @@ export async function openChamber(options: ClientOptions = {}) {
     };
     const client = createReactiveWorkerClient3D<ChamberGame>(transport, registry, {
       channel: 'chamber',
-      worldId: CHAMBER_WORLD,
+      worldId: SCENARIOS[scenario].worldId,
       gameRulesVersion: CHAMBER_RULES,
       timeoutMs: options.timeoutMs ?? 10000,
       schedule(task) {
@@ -129,11 +195,12 @@ export async function openChamber(options: ClientOptions = {}) {
     const unsubscribeState = client.subscribe(notify);
     const result = {
       registry,
+      scenario,
       get initial() {
         return structuredClone(initial);
       },
       get metrics() {
-        return structuredClone(metrics);
+        return structuredClone({ ...metrics, runtime });
       },
       get state() {
         return { ...client.state, busy, hasPreview: candidate !== null };
@@ -149,7 +216,7 @@ export async function openChamber(options: ClientOptions = {}) {
       async preview(raw: unknown) {
         if (busy || closed || steps.length >= CHAMBER.maxCommands)
           throw Error('Chamber is busy, closed, or at its command limit.');
-        const owned = readCommand(raw),
+        const owned = readCommand(raw, scenario),
           start = performance.now(),
           commands = compileCommand(registry, client.snapshot(), owned);
         const next = client.request(commands, {
@@ -248,7 +315,7 @@ export async function loadChamber(
   text: string,
   options: ClientOptions = {},
 ): Promise<ChamberClient> {
-  const client = await openChamber(options),
+  const client = await openChamber({ ...options, scenario: readSaveScenario(text) }),
     timer = setTimeout(() => {
       void client.close().catch(() => {});
     }, 60000);

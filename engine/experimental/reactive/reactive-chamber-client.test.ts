@@ -1,8 +1,28 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { createReactiveWorkerHost3D } from 'state-space-engine/experimental/3d/reactive-materials';
-import { openChamber, type ChamberClient } from '../../../examples/reactive-chamber/client.js';
-import { createChamber, chamberPolicy } from '../../../examples/reactive-chamber/scenario.js';
+import {
+  MAT,
+  createReactiveWorkerHost3D,
+} from 'state-space-engine/experimental/3d/reactive-materials';
+import {
+  openChamber,
+  loadChamber,
+  type ChamberClient,
+} from '../../../examples/reactive-chamber/client.js';
+import {
+  createChamber,
+  chamberPolicy,
+  readScenario,
+  coordinate,
+  SUPPORT,
+} from '../../../examples/reactive-chamber/scenario.js';
 import { stateHash } from '../../../examples/reactive-chamber/recording.js';
+import { openChamberView } from '../../../examples/reactive-chamber/view.js';
+import {
+  sceneData,
+  type ChamberScene,
+  type ChamberCamera,
+} from '../../../examples/reactive-chamber/presentation.js';
+vi.mock('../../../examples/reactive-chamber/view.js', () => ({ openChamberView: vi.fn() }));
 
 // Execute the real host and physics through an asynchronous structured-clone port.
 // Only the browser Worker shell is replaced; dropped replies use the public transport hook.
@@ -10,9 +30,10 @@ class LocalWorker extends EventTarget {
   private receive = (_value: unknown) => {};
   private host: ReturnType<typeof createReactiveWorkerHost3D> | null = null;
   private terminated = false;
-  constructor() {
+  constructor(url: URL) {
     super();
-    void createChamber()
+    const scenario = readScenario(url.searchParams.get('scenario') ?? 'chamber');
+    void createChamber(scenario)
       .then(({ registry, initial }) => {
         if (this.terminated) return;
         this.host = createReactiveWorkerHost3D(
@@ -31,7 +52,7 @@ class LocalWorker extends EventTarget {
           chamberPolicy(registry),
           { channel: 'chamber', work: 256 },
         );
-        this.emit({ kind: 'chamber-ready', catalogHash: registry.hash });
+        this.emit({ kind: 'chamber-ready', catalogHash: registry.hash, scenario });
       })
       .catch(() => this.dispatchEvent(new Event('error')));
   }
@@ -132,4 +153,77 @@ describe('chamber client failure and ownership boundaries', () => {
     expect(save.snapshot).toEqual(committed);
     expect(save.steps[0].sha256).toBe(await stateHash(committed));
   });
+});
+
+test('16³ saved profile selects its own worker and resumes the same committed history', async () => {
+  const client = await open({ scenario: 'flow' });
+  expect((await client.preview({ kind: 'heat', cell: [8, 6, 8] })).status).toBe('ready');
+  await client.commit();
+  const saved = client.exportSave();
+  const loaded = await loadChamber(saved, { scenario: 'chamber' });
+  clients.push(loaded);
+  expect(loaded.scenario).toBe('flow');
+  expect(loaded.exportSave()).toBe(saved);
+  for (const target of [client, loaded]) {
+    expect((await target.preview({ kind: 'wait' })).status).toBe('ready');
+    await target.commit();
+  }
+  expect(loaded.exportSave()).toBe(client.exportSave());
+});
+
+test('water selection ignores a previous world until the replacement frame completes', async () => {
+  const elements = new Map<string, { disabled: boolean; dataset: object; onclick?: () => void }>();
+  const element = (id: string) => {
+    if (!elements.has(id)) elements.set(id, { disabled: false, dataset: {} });
+    return elements.get(id)!;
+  };
+  vi.stubGlobal('document', { getElementById: element });
+  vi.stubGlobal('window', { addEventListener() {} });
+  vi.stubGlobal('location', { href: 'http://localhost/?scenario=flow' });
+  type Frame = { scene: ChamberScene; camera: ChamberCamera };
+  let displayed: Frame | null = null,
+    pending: Frame | null = null;
+  vi.mocked(openChamberView).mockImplementation(async (_canvas, options) => ({
+    renderer: {} as Awaited<ReturnType<typeof openChamberView>>['renderer'],
+    get displayed() {
+      return displayed;
+    },
+    present(scene, camera) {
+      pending = { scene, camera };
+    },
+    async painted() {
+      displayed = pending;
+      options.onPaint();
+    },
+    async close() {},
+  }));
+  const { chamberApp: app } = await import('../../../examples/reactive-chamber/browser-entry.js');
+  try {
+    await app.start();
+    for (const kind of ['heat', 'wait'] as const) {
+      expect((await app.preview(kind))?.status).toBe('ready');
+      await app.client!.commit();
+    }
+    await app.painted();
+    const block = app.client!.snapshot().domains.world.block;
+    const water = coordinate(
+      block.packedCells.findIndex((v) => (v & 255) === MAT.WATER),
+      16,
+    );
+    expect(water.some((v) => v >= 8)).toBe(true);
+    element('select-water').onclick!();
+    await app.painted();
+    expect(app.scene!.selected).toEqual(water);
+
+    await app.selectScenario('chamber');
+    expect(app.client!.scenario).toBe('chamber');
+    expect(sceneData(app.scene!).snapshot.worldId).toBe('reactive-sandbox-flow-1');
+    expect(() => element('select-water').onclick!()).not.toThrow();
+    await app.painted();
+    expect(app.scene!.selected).toEqual(SUPPORT);
+    expect((await app.preview('heat'))?.status).toBe('ready');
+  } finally {
+    await app.stop();
+    vi.mocked(openChamberView).mockReset();
+  }
 });

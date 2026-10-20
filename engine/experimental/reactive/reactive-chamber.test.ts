@@ -22,6 +22,14 @@ describe('reactive chamber public SDK reference', () => {
       const preview = finishBranch(branch);
       expect(session.snapshot()).toEqual(before);
       const out = session.commit(branch).snapshot;
+      // Complete-state digests derived from main before introducing larger profiles.
+      expect(await stateHash(before)).toBe(
+        'e98926dbd11df4d9e73f9cafff57c1c65207a2df0d4fabe4ce63013154b2c90c',
+      );
+      if (kind === 'heat')
+        expect(await stateHash(out)).toBe(
+          'cd822f4d4f1873e68bab5b74f997395034c51f598a49795d0ab8a42892f40036',
+        );
       expect(session.energyBalance().driftQ).toBe(0n);
       expect(out.game.tick).toBe(2);
       expect(out.game.actor.step).toBe(2);
@@ -333,5 +341,84 @@ describe('Retina viewport projection', () => {
         ),
       ).toEqual([...SUPPORT]);
     }
+  });
+});
+
+import {
+  SCENARIOS,
+  coordinate,
+  readChamberSnapshot,
+} from '../../../examples/reactive-chamber/scenario.js';
+
+describe('16³ sandbox profiles', () => {
+  test.each(['collapse', 'chain'] as const)(
+    '%s has a stable control and heat causes distant falling with budget-independent results',
+    async (scenario) => {
+      const control = await createChamber(scenario);
+      const wait = prepareCommand(control.registry, control.session, { kind: 'wait' });
+      finishBranch(wait);
+      const untouched = control.session.commit(wait).snapshot;
+      expect(untouched.game.fallen).toBe(0);
+      expect(untouched.game.actor.minQ).toEqual(control.initial.game.actor.minQ);
+      const snapshots = [];
+      for (const work of [64, 256]) {
+        const { registry, session } = await createChamber(scenario);
+        const branch = prepareCommand(registry, session, {
+          kind: 'heat',
+          cell: [...SCENARIOS[scenario].support],
+        });
+        const preview = finishBranch(branch, work);
+        expect(preview.state.game.burned).toBeGreaterThan(0);
+        expect(preview.state.game.fallen).toBeGreaterThan(0);
+        expect(preview.state.game.actor.minQ[1]).toBeGreaterThan(untouched.game.actor.minQ[1]);
+        if (scenario === 'chain') {
+          const block = preview.state.domains.world.block;
+          expect(block.packedCells[index([12, 6, 7], 16)] & 255).toBe(MAT.AIR);
+          expect(block.packedCells[index([12, 8, 7], 16)] & 255).toBe(MAT.STONE);
+        }
+        snapshots.push(session.commit(branch).snapshot);
+        expect(session.energyBalance().driftQ).toBe(0n);
+      }
+      expect(snapshots[0]).toEqual(snapshots[1]);
+    },
+  );
+  test('ice melts, water leaves its shelf, and cooling freezes it at its new location', async () => {
+    const { registry, session } = await createChamber('flow');
+    const invalid = session.branch({ horizonTicks: 0 });
+    invalid.enqueue({
+      kind: 'edit',
+      domain: null,
+      edits: [{ kind: 'energy', x: 0, y: 0, z: 0, energyQ: CHAMBER.pulseQ }],
+    });
+    expect(() => finishBranch(invalid)).toThrow(/pulse/);
+    expect(session.snapshot().revision).toBe(0);
+    const apply = (command: unknown) => {
+      const branch = prepareCommand(registry, session, command);
+      finishBranch(branch);
+      return session.commit(branch).snapshot;
+    };
+    const melted = apply({ kind: 'heat', cell: [...SCENARIOS.flow.ice] });
+    let water = melted.domains.world.block.packedCells.findIndex((v) => (v & 255) === MAT.WATER);
+    expect(water).toBeGreaterThanOrEqual(0);
+    const flowed = apply({ kind: 'wait' });
+    water = flowed.domains.world.block.packedCells.findIndex((v) => (v & 255) === MAT.WATER);
+    expect(water).toBeGreaterThanOrEqual(0);
+    expect(coordinate(water, 16)[1]).toBeGreaterThan(SCENARIOS.flow.ice[1]);
+    const frozen = apply({ kind: 'cool', cell: coordinate(water, 16) });
+    expect(frozen.domains.world.block.packedCells.some((v) => (v & 255) === MAT.ICE)).toBe(true);
+    expect(frozen.game.phaseChanges).toBeGreaterThanOrEqual(2);
+    expect(session.energyBalance().driftQ).toBe(0n);
+  });
+  test('profile identity rejects mismatched dimensions and bounds commands and presentation to the larger world', async () => {
+    const { registry, session } = await createChamber('collapse');
+    const snapshot = session.snapshot();
+    expect(() =>
+      readChamberSnapshot(registry, { ...snapshot, worldId: 'reactive-chamber' }),
+    ).toThrow();
+    expect(() => readCommand({ kind: 'heat', cell: [16, 0, 0] }, 'collapse')).toThrow();
+    const scene = prepareScene(registry, snapshot, [15, 15, 15]);
+    expect(inspectScene(scene, [15, 15, 15]).material).toBe(MAT.STONE);
+    expect(sceneData(scene).boxes.length).toBe(scene.count * 12);
+    expect(() => inspectScene(scene, [16, 0, 0])).toThrow();
   });
 });

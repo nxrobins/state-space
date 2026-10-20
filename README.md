@@ -33,12 +33,12 @@ game prototypes demonstrate how clients can build on it.
 - **Inspectable and extensible.** Edit and sample fields, inspect individual
   passes, and define custom materials through validated registries.
 
-## Reactive chamber
+## Reactive sandbox
 
-The [8³ reactive chamber](examples/reactive-chamber/README.md) combines combustion,
-phase changes, structural collapse, an actor, real-worker previews, and exact
-save/replay. Build it with `npm run build:reactive-chamber` after the SDK, or run
-its bounded native macOS journey with
+The [16³ reactive sandbox](examples/reactive-chamber/README.md) offers burning-support, melt/flow/freeze and distant-collapse scenarios with an
+actor, real-worker previews, and exact save/replay. The original 8³ chamber remains
+available as the regression baseline. Build it with `npm run build:reactive-chamber` after the SDK, or run
+the prerequisite 8³ native macOS journey with
 `npm run verify:macos -- --stage chamber-visible`.
 
 

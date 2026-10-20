@@ -5,6 +5,7 @@ Reports below preserve the implementation and host measured at their checkpoint.
 
 | Evidence | Scope |
 | --- | --- |
+| [Reactive sandbox](REACTIVE_SANDBOX.md) | Three 16³ scenarios, measured responsiveness, exact Worker/replay agreement and the retained 8³ regression |
 | [Reactive chamber](REACTIVE_CHAMBER.md) | 8³ real Worker, CPU reactive evolution, WebGPU presentation and save/replay |
 | [Mac 128³ performance](MACOS_128.md) | Fixed cut-scene frame budget and bounded exactness checks |
 | [Mac optimization](MACOS_OPTIMIZATION.md) | Structural worklist optimization and 32³/64³ comparisons |

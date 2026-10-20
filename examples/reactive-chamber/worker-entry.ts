@@ -3,7 +3,7 @@ import {
   createReactiveWorkerHost3D,
   type ReactiveWorkerTransport3D,
 } from 'state-space-engine/experimental/3d/reactive-materials';
-import { createChamber, chamberPolicy } from './scenario.js';
+import { createChamber, chamberPolicy, readScenario } from './scenario.js';
 const endpoint = globalThis as unknown as {
   postMessage(value: unknown): void;
   close(): void;
@@ -12,12 +12,24 @@ const endpoint = globalThis as unknown as {
 };
 void (async () => {
   try {
-    const { registry, initial } = await createChamber();
+    const params = new URL(import.meta.url).searchParams;
+    const scenario = readScenario(params.get('scenario') ?? 'chamber');
+    const profile = params.get('profile') === '1';
+    const { registry, initial } = await createChamber(scenario);
+    let started = 0;
     const transport: ReactiveWorkerTransport3D = {
-      send: (value) => endpoint.postMessage(value),
+      send: (value) =>
+        endpoint.postMessage(
+          profile
+            ? { kind: 'chamber-profile', message: value, workMs: performance.now() - started }
+            : value,
+        ),
       close: () => endpoint.close(),
       subscribe(receive, failed) {
-        const message = (event: MessageEvent) => receive(event.data),
+        const message = (event: MessageEvent) => {
+            started = performance.now();
+            receive(event.data);
+          },
           error = () => failed(Error('Worker message could not be decoded.'));
         endpoint.addEventListener('message', message);
         endpoint.addEventListener('messageerror', error);
@@ -31,7 +43,7 @@ void (async () => {
       channel: 'chamber',
       work: 256,
     });
-    endpoint.postMessage({ kind: 'chamber-ready', catalogHash: registry.hash });
+    endpoint.postMessage({ kind: 'chamber-ready', catalogHash: registry.hash, scenario });
   } catch (error) {
     endpoint.postMessage({
       kind: 'chamber-start-failed',

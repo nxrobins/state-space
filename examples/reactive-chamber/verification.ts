@@ -1,16 +1,20 @@
 /// <reference types="@webgpu/types" />
 /** Fixed 8-cubed native browser acceptance. Invoked only by the bounded Mac stage. */
-import { GEOMETRY_SCALE_3D as Q } from 'state-space-engine/experimental/3d/reactive-materials';
+import { MAT, GEOMETRY_SCALE_3D as Q } from 'state-space-engine/experimental/3d/reactive-materials';
 import type { chamberApp } from './browser-entry.js';
 import { openChamber, type ChamberClient } from './client.js';
 import {
   createChamber,
+  SCENARIOS,
+  coordinate,
+  snapshotScenario,
   prepareCommand,
   finishBranch,
   SUPPORT,
   type ChamberCommand,
   type ChamberSnapshot,
 } from './scenario.js';
+import { profileChamber } from './profiling.js';
 import { canonical, stateHash } from './recording.js';
 import { prepareScene, orbitCamera, projectPoint } from './presentation.js';
 import { createChamberRenderer } from './renderer.js';
@@ -338,7 +342,8 @@ export async function verifyChamber(app: typeof chamberApp) {
     publish('native pixels, depth, bounded camera frames, and disposal');
     report.render = await verifyRendering(initial);
     const previousFrames = app.renderer!.frameCount,
-      previousTimings = app.renderer!.timings;
+      previousTimings = app.renderer!.timings,
+      previousWorstMs = app.renderer!.worstFrameMs;
     await app.stop();
     const startup = app.start();
     const interrupted = app.stop();
@@ -352,7 +357,9 @@ export async function verifyChamber(app: typeof chamberApp) {
     click('heat');
     await until(() => app.client!.state.hasPreview);
     await app.painted();
+    const worstMs = Math.max(previousWorstMs, app.renderer!.worstFrameMs);
     report.applicationFrames = {
+      worstMs,
       count: previousFrames + app.renderer!.frameCount,
       completedMs: [...previousTimings, ...app.renderer!.timings],
     };
@@ -360,6 +367,7 @@ export async function verifyChamber(app: typeof chamberApp) {
       previousFrames + app.renderer!.frameCount + 132 <= 256,
       'Browser frame budget exceeded.',
     );
+    assert(worstMs <= 16.667, 'Completed application frame exceeds 16.667ms.');
     const latency = report.latency as {
       p95Ms: number;
       cancellationP95Ms: number;
@@ -430,7 +438,7 @@ async function verifyRendering(snapshot: ChamberSnapshot) {
   try {
     const { registry } = await createChamber(),
       scene = prepareScene(registry, snapshot),
-      camera = orbitCamera();
+      camera = orbitCamera(-0.65, 0.42, snapshot.domains.world.block.width);
     const promise = renderer.render(scene, camera, color, depth);
     let overlapRejected = false;
     try {
@@ -461,7 +469,7 @@ async function verifyRendering(snapshot: ChamberSnapshot) {
       if (rgba[i * 4 + 1] > 120 && rgba[i * 4 + 2] > 140 && rgba[i * 4] < 100) actorPixels++;
     }
     assert(
-      terrainPixels > 5000 && actorPixels > 20,
+      terrainPixels > 5000 && actorPixels > (snapshot.domains.world.block.width === 8 ? 20 : 5),
       'Expected terrain and actor pixels were not rendered.',
     );
     const actor = snapshot.game.actor,
@@ -476,7 +484,12 @@ async function verifyRendering(snapshot: ChamberSnapshot) {
     depths.unmap();
     for (let i = 0; i < 130; i++) {
       await frame();
-      await renderer.render(scene, orbitCamera(-0.65 + i * 0.006), color, depth);
+      await renderer.render(
+        scene,
+        orbitCamera(-0.65 + i * 0.006, 0.42, snapshot.domains.world.block.width),
+        color,
+        depth,
+      );
     }
     const frames = renderer.timings.slice(11),
       worstMs = Math.max(...frames);
@@ -510,5 +523,215 @@ async function verifyRendering(snapshot: ChamberSnapshot) {
     color.destroy();
     depth.destroy();
     device.destroy();
+  }
+}
+
+/** One explicitly selected 16³ profile per supervised stage; no unbounded loop. */
+export async function verifySandbox(app: typeof chamberApp) {
+  const output = document.getElementById('report')!;
+  const report: Record<string, unknown> = { passed: false, done: false, size: 16 };
+  const publish = (progress: string) => {
+    report.progress = progress;
+    output.textContent = JSON.stringify(report);
+  };
+  try {
+    publish('start 16³ worker and native view');
+    click('start');
+    await until(() => app.running && Boolean(app.scene));
+    const initial = app.client!.snapshot(),
+      scenario = snapshotScenario(initial);
+    assert(scenario !== 'chamber', '16³ stage requires a sandbox profile.');
+    report.scenario = scenario;
+    // Replace across dimensions while a camera frame is pending, through the actual selector.
+    for (const next of ['chamber', scenario] as const) {
+      app.orbit(-0.5);
+      const select = document.getElementById('scenario') as HTMLSelectElement;
+      select.value = next;
+      select.dispatchEvent(new Event('change'));
+      await until(() => app.client?.scenario === next);
+      await app.painted();
+      equal(
+        app.scene!.selected,
+        [...(next === 'flow' ? SCENARIOS[next].ice : SCENARIOS[next].support)],
+        'Scenario switch lost the selection.',
+      );
+      assert(app.running, 'Scenario replacement stopped the renderer.');
+    }
+    const direct = await createChamber(scenario);
+    equal(initial, direct.session.snapshot(), 'Initial Worker state differs.');
+    const cell = [
+      ...(scenario === 'flow' ? SCENARIOS[scenario].ice : SCENARIOS[scenario].support),
+    ] as [number, number, number];
+    const heat: ChamberCommand = { kind: 'heat', cell };
+    publish('preview latency, active cancellation, and camera responsiveness');
+    const previews: number[] = [],
+      cancellations: number[] = [],
+      rafGaps: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const pending = app.client!.preview(heat);
+      let complete = false;
+      void pending.then(() => {
+        complete = true;
+      });
+      let previous = await frame();
+      while (!complete) {
+        assert(app.renderer!.frameCount < 300, 'Preview exceeded the finite camera frame budget.');
+        app.orbit(-0.65 + 0.1 * Math.sin(i));
+        const now = await frame();
+        rafGaps.push(now - previous);
+        previous = now;
+      }
+      assert((await pending).status === 'ready', 'Measured preview failed.');
+      previews.push(app.client!.metrics.previewsMs.at(-1)!);
+      await app.client!.cancel();
+      const active = app.client!.preview(heat);
+      await until(() => app.client!.state.progress?.phase === 'ticks');
+      const started = performance.now();
+      await app.client!.cancel();
+      cancellations.push(performance.now() - started);
+      assert((await active).status === 'cancelled', 'Active cancellation failed.');
+      equal(app.client!.snapshot(), initial, 'Cancellation published state or charged resource.');
+    }
+    report.latency = {
+      samples: previews,
+      p95Ms: percentile(previews, 0.95),
+      cancellations,
+      cancellationP95Ms: percentile(cancellations, 0.95),
+      rafWorstGapMs: Math.max(...rafGaps),
+    };
+    assert(
+      percentile(previews, 0.95) <= 250,
+      `16³ preview p95 ${percentile(previews, 0.95).toFixed(1)}ms exceeds 250ms.`,
+    );
+    assert(percentile(cancellations, 0.95) <= 100, '16³ cancellation p95 exceeds 100ms.');
+    assert(Math.max(...rafGaps) < 100, 'Camera stalled during worker preview.');
+    report.worker = app.client!.metrics.runtime;
+    publish('controls, preview comparison, commit, save, reload, and exact continuation');
+    const apply = async (command: ChamberCommand) => {
+      // Keep synchronous CPU-oracle work outside real application frame measurements.
+      await app.painted();
+      const branch = prepareCommand(direct.registry, direct.session, command);
+      const expected = finishBranch(branch, 64);
+      if (command.kind === 'cool') {
+        click('select-water');
+        await app.painted();
+        equal(
+          app.scene!.selected,
+          command.cell,
+          'Water selector did not follow the flowed material.',
+        );
+      }
+      click(command.kind);
+      await until(() => app.client!.state.hasPreview);
+      equal(
+        app.client!.previewSnapshot()!.state,
+        expected.state,
+        'Direct and Worker preview differ.',
+      );
+      await app.painted();
+      click('compare');
+      await app.painted();
+      equal(app.scene!.kind, 'committed', 'Comparison lost committed scene.');
+      click('compare');
+      await app.painted();
+      equal(app.scene!.kind, 'preview', 'Comparison lost candidate scene.');
+      const revision = app.client!.snapshot().revision;
+      click('commit');
+      await until(
+        () => app.client!.snapshot().revision === revision + 1 && !app.client!.state.busy,
+      );
+      await app.painted();
+      const committed = app.client!.snapshot();
+      equal(committed, direct.session.commit(branch).snapshot, 'Direct and Worker commit differ.');
+      return committed;
+    };
+    // A control preview must leave the supported actor at the original position.
+    const control = await app.client!.preview({ kind: 'wait' });
+    assert(control.status === 'ready', 'Control failed.');
+    equal(
+      control.preview.state.game.actor.minQ,
+      initial.game.actor.minQ,
+      'Untouched support fell.',
+    );
+    await app.client!.cancel();
+    const changed = await apply(heat);
+    if (scenario === 'flow') {
+      assert(
+        changed.domains.world.block.packedCells.some((v) => (v & 255) === MAT.WATER),
+        'Ice did not melt.',
+      );
+    } else {
+      assert(
+        changed.game.burned > 0 &&
+          changed.game.fallen > 0 &&
+          changed.game.actor.minQ[1] > initial.game.actor.minQ[1],
+        'Burning support did not displace the actor.',
+      );
+    }
+    const saved = app.client!.exportSave();
+    await app.importSave(saved);
+    equal(app.client!.snapshot(), changed, 'Reload changed complete state.');
+    const continued = await apply({ kind: 'wait' });
+    if (scenario === 'flow') {
+      const water = continued.domains.world.block.packedCells.findIndex(
+        (v) => (v & 255) === MAT.WATER,
+      );
+      assert(
+        water >= 0 && coordinate(water, 16)[1] > SCENARIOS.flow.ice[1],
+        'Melted water did not flow off the shelf.',
+      );
+      const frozen = await apply({ kind: 'cool', cell: coordinate(water, 16) });
+      assert(
+        frozen.domains.world.block.packedCells.some((v) => (v & 255) === MAT.ICE),
+        'Flowed water did not freeze.',
+      );
+    }
+    const beforeBad = app.client!.snapshot(),
+      bad = JSON.parse(app.client!.exportSave());
+    bad.initial.worldId = SCENARIOS.chamber.worldId;
+    let rejected = false;
+    try {
+      await app.importSave(JSON.stringify(bad));
+    } catch {
+      rejected = true;
+    }
+    assert(rejected, 'Cross-profile save was accepted.');
+    equal(app.client!.snapshot(), beforeBad, 'Failed import replaced the working sandbox.');
+    report.energyDriftQ = direct.session.energyBalance().driftQ.toString();
+    assert(report.energyDriftQ === '0', 'Energy drift.');
+    publish('public-job phase timings and native completed camera frames');
+    await app.painted();
+    report.cpu = await profileChamber(scenario);
+    report.render = await verifyRendering(initial);
+    await app.painted();
+    const completedMs = app.renderer!.timings,
+      worstMs = app.renderer!.worstFrameMs;
+    report.applicationFrames = { count: app.renderer!.frameCount, completedMs, worstMs };
+    assert(app.renderer!.frameCount + 132 <= 512, 'Sandbox frame budget exceeded.');
+    assert(worstMs <= 16.667, 'Completed application frame exceeds 16.667ms.');
+    report.journeys = [
+      'scenario-switch-during-frame',
+      'stable-control',
+      'causal-outcome',
+      'direct-worker-budget-equality',
+      'preview-compare',
+      'active-cancel',
+      'commit',
+      'save-replay-continuation',
+      'cross-profile-import-rollback',
+    ];
+    publish('capture-ready');
+    report.captureReady = true;
+    output.textContent = JSON.stringify(report);
+    await until(
+      () => (window as unknown as { chamberCaptureAck?: boolean }).chamberCaptureAck === true,
+    );
+    report.passed = true;
+  } catch (error) {
+    report.error = error instanceof Error ? error.message : String(error);
+  } finally {
+    await app.stop();
+    report.done = true;
+    publish(report.passed ? 'complete' : 'failed');
   }
 }

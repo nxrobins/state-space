@@ -11,7 +11,7 @@ CPU checks does not replace a fresh native or whole-product release gate.
 | M1–M4 material/chunk/active 3D | [M1](checkpoints/3D_M1.md), [M2](checkpoints/3D_M2.md), [M3](checkpoints/3D_M3.md), [M4](checkpoints/3D_M4.md) | Experimental, separately versioned APIs; historical qualification is source-bound |
 | M5 structures at 32³/64³ | [Final replay and timing regressions](checkpoints/MACOS_128.md) compare CPU/dense/active state and restarts | Exactness covers the recorded scenarios and tick ranges; not arbitrary-world qualification |
 | M5 fixed 128³ cut scene | [Three consecutive strict 60 Hz runs](checkpoints/MACOS_128.md), 1,800 measured frames total, zero deadline misses or energy drift | M3 Ultra, visible Chrome, 1920×1080; bounded state/continuation checks, not full 128³ replay or a universal frame-rate guarantee |
-| Reactive chamber | [Native acceptance](checkpoints/REACTIVE_CHAMBER.md): real Worker CPU evolution, WebGPU pixels/depth, previews, cancellation, save/replay and resource cleanup | One 8³ chamber, one actor and the tested Mac host; not GPU reactive physics, 16³ or cross-platform qualification |
+| Reactive sandbox | [16³ native acceptance](checkpoints/REACTIVE_SANDBOX.md): three scenarios, real Worker evolution, native presentation, cancellation, exact replay and the 8³ regression | Fixed sparse 8³/16³ scenes, one actor and the tested Mac host; not arbitrary dense worlds, larger reactive sizes or cross-platform qualification |
 | Other tactical/reactive surfaces | Bounded CPU/mock contracts and installed SDK checks; [original acceptance history](checkpoints/TACTICAL_INTERVENTIONS.md) | The chamber result does not clear the separate tactical slab, held physical/replay fixtures or every worker API |
 
 ## Automated pull-request checks
@@ -41,15 +41,15 @@ OS/GPU-driver hang. Existing incident holds and the legacy demo quarantine remai
 CPU mocks do not establish native responsiveness, shader compilation or pixels.
 
 Remaining scope includes a complete fresh cross-platform release gate, full 128³
-replay qualification, larger reactive chambers, GPU reactive physics, and the
+replay qualification, reactive worlds beyond the qualified 16³ scenes, GPU reactive physics, and the
 specific tactical/physical continuation cases still held in their checkpoints.
-The fixed 128³ frame result and 8³ chamber acceptance must not be generalized to
+The fixed 128³ frame result and bounded 8³/16³ reactive acceptance must not be generalized to
 those workloads.
 
 ## Choose a runnable client
 
-- [Reactive chamber](../examples/reactive-chamber/README.md): the bounded 8³ real
-  Worker application with its fixed native acceptance stage.
+- [Reactive sandbox](../examples/reactive-chamber/README.md): three bounded 16³
+  real Worker scenarios and the original 8³ regression chamber.
 - [Structural cavern](../examples/structural-cavern/README.md): the M5 reference
   client; its Mac baseline starts paused at 32³.
 - [SDK installation](sdk/core.md): external Python/JavaScript consumers and local

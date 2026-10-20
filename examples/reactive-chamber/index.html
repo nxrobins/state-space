@@ -16,9 +16,9 @@
         <span class="status" id="status" role="status">Ready to start</span>
       </header>
       <div class="intro">
-        <p class="eyebrow">THE REACTIVE CHAMBER</p>
+        <p class="eyebrow">THE REACTIVE SANDBOX</p>
         <h1>One change. Every consequence.</h1>
-        <p>
+        <p id="scenario-description">
           Heat the wooden connector. Watch combustion release a platform and remove the actor’s
           footing. Compare the outcome before you commit.
         </p>
@@ -35,7 +35,7 @@
             aria-label="Interactive three dimensional reactive chamber"
           ></canvas>
           <div class="empty" id="empty">
-            <span>8 × 8 × 8</span>
+            <span id="dimensions">16 × 16 × 16</span>
             <p>A small world with real consequences.</p>
             <button id="start" class="primary">Start chamber</button>
           </div>
@@ -47,11 +47,21 @@
         </section>
         <aside>
           <div class="panel">
+            <label for="scenario">Scenario</label>
+            <select id="scenario">
+              <option value="collapse">16³ burning support</option>
+              <option value="flow">16³ melt, flow, freeze</option>
+              <option value="chain">16³ distant collapse</option>
+              <option value="chamber">8³ reference chamber</option>
+            </select>
+          </div>
+          <div class="panel">
             <p class="eyebrow">01 / SELECT</p>
             <h2>Choose a material</h2>
             <div class="row">
               <button id="select-support">Wood connector</button
-              ><button id="select-ice">Ice sample</button>
+              ><button id="select-ice">Ice sample</button
+              ><button id="select-water">Flowing water</button>
             </div>
             <p id="inspection" class="details">Select a cell to inspect its material and energy.</p>
           </div>

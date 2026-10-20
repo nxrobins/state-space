@@ -5,6 +5,7 @@ import {
 } from 'state-space-engine/experimental/3d/reactive-materials';
 import {
   CHAMBER,
+  snapshotScenario,
   fields,
   readCommand,
   readChamberSnapshot,
@@ -41,11 +42,7 @@ export async function stateHash(snapshot: ChamberSnapshot): Promise<string> {
   );
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
-export function parseSave(
-  registry: ReactiveMaterialRegistry3D,
-  text: string,
-  initial: ChamberSnapshot,
-): ChamberSave {
+function readSave(text: string) {
   if (
     typeof text !== 'string' ||
     text.length > MAX_SAVE_BYTES ||
@@ -54,11 +51,25 @@ export function parseSave(
     throw Error('Save exceeds the 1 MiB limit.');
   const raw: unknown = JSON.parse(text);
   fields(raw, ['format', 'catalog', 'initial', 'snapshot', 'steps']);
+  return raw;
+}
+export function readSaveScenario(text: string) {
+  const raw = readSave(text);
+  if (raw.format !== SAVE_FORMAT || !raw.initial || typeof raw.initial !== 'object')
+    throw Error('Save application version differs.');
+  return snapshotScenario(raw.initial as ChamberSnapshot);
+}
+export function parseSave(
+  registry: ReactiveMaterialRegistry3D,
+  text: string,
+  initial: ChamberSnapshot,
+): ChamberSave {
+  const raw = readSave(text);
   if (raw.format !== SAVE_FORMAT || canonical(raw.catalog) !== canonical(registry.toCatalog()))
     throw Error('Save catalog or application version differs.');
   const origin = readChamberSnapshot(registry, raw.initial),
     snapshot = readChamberSnapshot(registry, raw.snapshot);
-  if (canonical(origin) !== canonical(initial))
+  if (snapshot.worldId !== origin.worldId || canonical(origin) !== canonical(initial))
     throw Error('Save does not begin at the chamber reference state.');
   if (
     !Array.isArray(raw.steps) ||
@@ -71,7 +82,7 @@ export function parseSave(
     fields(row, ['command', 'sha256']);
     if (typeof row.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(row.sha256))
       throw Error('Invalid boundary digest.');
-    return { command: readCommand(row.command), sha256: row.sha256 };
+    return { command: readCommand(row.command, snapshotScenario(initial)), sha256: row.sha256 };
   });
   return { format: SAVE_FORMAT, catalog: registry.toCatalog(), initial: origin, snapshot, steps };
 }

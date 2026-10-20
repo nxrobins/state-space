@@ -3,8 +3,8 @@
 For the latest scope, see the [current support matrix](VALIDATION_STATUS.md).
 The results below retain dated baseline measurements followed by their updates:
 the [128³ fixed-scene follow-up](#128³-performance-follow-up) supersedes the older
-frame timings, and the [8³ reactive chamber](checkpoints/REACTIVE_CHAMBER.md) has
-its own native acceptance stage. Neither establishes a whole-product release.
+frame timings, and the [8³ chamber and 16³ sandbox](checkpoints/REACTIVE_SANDBOX.md) have
+their own native acceptance stages. Neither establishes a whole-product release.
 
 The engine lab runs locally on the JavaScript CPU backend and on browser WebGPU.
 The first macOS validation used Apple Silicon, macOS 26.6.2, Python 3.10.20 and
@@ -54,7 +54,7 @@ For a focused CPU/mock suite, use a file filter with the shared bounded config
 
 ```sh
 uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
-  node node_modules/vitest/vitest.mjs run engine/experimental/reactive-session.test.ts \
+  node node_modules/vitest/vitest.mjs run engine/experimental/reactive/reactive-session.test.ts \
   --config engine/vitest.bounded.config.ts
 ```
 
@@ -267,3 +267,25 @@ comparisons are byte-identical. The final 32³/64³ timing and replay regression
 also pass. The [evidence index](checkpoints/MACOS_128.json) binds the final-source
 results, retained experiments and published, verified archive. This is a scoped Mac
 measurement; full 128³ replay and cross-platform qualification remain separate.
+
+## Reactive sandbox
+
+Build the SDK and chamber bundles, then run the fixed stages separately:
+
+```sh
+npm run build:sdk
+npm run build:reactive-chamber
+npm run verify:macos -- --stage chamber-visible
+npm run verify:macos -- --stage sandbox-collapse-visible
+npm run verify:macos -- --stage sandbox-flow-visible
+npm run verify:macos -- --stage sandbox-chain-visible
+```
+
+Each 16³ stage requires the completed, source-identical 8³ receipt from the last
+24 hours. It runs one fixed scenario, real Worker previews, active cancellation,
+DOM comparison/commit controls, save/replay, cross-size scene replacement and
+native color/depth checks. The stage retains the 300-second watchdog deadline,
+128-tick recording limit and 8 GiB sampled process-tree RSS budget, with at most
+512 completed camera frames. The 8³ stage retains its 256-frame limit.
+See [run instructions](../examples/reactive-chamber/README.md) and the
+[measurements and scope](checkpoints/REACTIVE_SANDBOX.md).

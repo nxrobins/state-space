@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from scripts.verification_macos import STAGES, require_preceding_stage, validate_qualification
+from scripts.verification_macos import STAGES, SANDBOX_STAGES, require_preceding_stage, validate_qualification
 
 
 class MacQualificationPolicyTests(unittest.TestCase):
@@ -22,8 +22,8 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            self.assertEqual(scope["maxDimension"], 8 if stage == "chamber-visible" else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
-            self.assertEqual(scope["maxFrames"], 256 if stage == "chamber-visible" else 8 if stage == "scale-128-visible" else 660)
+            self.assertEqual(scope["maxDimension"], 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
+            self.assertEqual(scope["maxFrames"], 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660)
         for timeout in [0, -1, 301, float("nan"), float("inf")]:
             with self.assertRaises(RuntimeError):
                 validate_qualification(command, timeout, platform="darwin")
@@ -52,7 +52,7 @@ class MacScalePrerequisiteTests(unittest.TestCase):
             root = Path(folder)
             hashes = {"physics": "current"}
             self.assertIsNone(require_preceding_stage(root, "pilot", hashes))
-            for target, prior in [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")]:
+            for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")]:
                 root = Path(folder) / target
                 root.mkdir()
                 with self.assertRaises(RuntimeError):
@@ -63,7 +63,9 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                 receipt_path = root / job / "report.json"
                 receipt_path.parent.mkdir(exist_ok=True)
                 result = {"passed": True, "done": True, "energyDriftQ": "0", "backendInfo": {"isFallbackAdapter": False}, "scenario": "cut"}
-                if target == "scale-128-visible":
+                if prior == "chamber-visible":
+                    result.update(size=8, journeys=[str(i) for i in range(13)], render={"frames": [1] * 120})
+                elif target == "scale-128-visible":
                     result.update(size=64, ticks=1024, runs=[{"mode": mode, "start": 0, "end": 1024, "exact": True} for mode in ("dense", "active")])
                 else:
                     result.update(size=128, frames=[{}] * 8)
@@ -82,7 +84,7 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                     (report, path, "sourceUnchanged", False),
                     (report, path, "supervisorJob", "../outside"),
                     (report, path, "result", {**result, "energyDriftQ": "1"}),
-                    (report, path, "result", {**result, "runs": [], "frames": []}),
+                    (report, path, "result", {**result, "runs": [], "frames": [], "journeys": []}),
                     (receipt, receipt_path, "passed", False),
                     (receipt, receipt_path, "exitCode", 1),
                 ]:

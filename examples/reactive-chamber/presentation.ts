@@ -36,9 +36,9 @@ export function sceneData(scene: ChamberScene): Data {
 }
 export function inspectScene(scene: ChamberScene, cell: Cell) {
   const { snapshot: s } = sceneData(scene),
-    i = index(cell),
-    b = s.domains.world.block;
-  if (cell.some((v) => !Number.isInteger(v) || v < 0 || v > 7))
+    b = s.domains.world.block,
+    i = index(cell, b.width);
+  if (cell.some((v) => !Number.isInteger(v) || v < 0 || v >= s.domains.world.block.width))
     throw Error('Cell is outside the chamber.');
   return {
     identity: scene.identity,
@@ -76,7 +76,10 @@ export function prepareScene(
   }
   if (
     selected &&
-    (selected.length !== 3 || selected.some((v) => !Number.isInteger(v) || v < 0 || v > 7))
+    (selected.length !== 3 ||
+      selected.some(
+        (v) => !Number.isInteger(v) || v < 0 || v >= snapshot.domains.world.block.width,
+      ))
   )
     throw Error('Selection is outside the chamber.');
   const b = snapshot.domains.world.block,
@@ -87,7 +90,7 @@ export function prepareScene(
     if (id === MAT.AIR) continue;
     const color = registry.material(id).color,
       rgb = [1, 3, 5].map((at) => parseInt(color.slice(at, at + 2), 16) / 255);
-    const pos = coordinate(i),
+    const pos = coordinate(i, b.width),
       gas = ((word >>> 24) & 15) === PHASE.GAS,
       size = gas ? 0.45 : 1,
       offset = (1 - size) / 2;
@@ -146,9 +149,9 @@ const cross = (a: Cell, b: Cell): Cell => [
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-export function orbitCamera(yaw = -0.65, pitch = 0.42): TacticalCamera3D {
-  const center = [4, 4.3, 4],
-    radius = 13,
+export function orbitCamera(yaw = -0.65, pitch = 0.42, size = 8): TacticalCamera3D {
+  const center = [size / 2, (size * 4.3) / 8, size / 2],
+    radius = (size * 13) / 8,
     eye: Cell = [
       center[0] + radius * Math.cos(pitch) * Math.sin(yaw),
       center[1] - radius * Math.sin(pitch),
@@ -176,7 +179,7 @@ export function pickCell(
     hit: Cell | null = null;
   for (const [i, word] of sceneData(scene).snapshot.domains.world.block.packedCells.entries()) {
     if ((word & 255) === MAT.AIR) continue;
-    const cell = coordinate(i);
+    const cell = coordinate(i, sceneData(scene).snapshot.domains.world.block.width);
     let lo = 0,
       hi = Infinity;
     for (let a = 0; a < 3; a++) {

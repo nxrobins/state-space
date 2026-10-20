@@ -33,6 +33,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     failure: string | null = null;
   let cached: ChamberScene | null = null,
     frames = 0,
+    worstFrameMs = 0,
     setupScope = true;
   const timings: number[] = [];
   device.pushErrorScope('validation');
@@ -65,7 +66,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     const solid = await pipeline('solid', false),
       outline = await pipeline('outline', true);
     const uniform = buffer(96, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST),
-      boxes = buffer(513 * 48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST),
+      boxes = buffer(4097 * 48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST),
       selection = buffer(48, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
     const bind = (layout: GPUBindGroupLayout, resource: GPUBuffer) =>
       device.createBindGroup({ layout, entries: [{ binding: 0, resource: { buffer: resource } }] });
@@ -81,6 +82,9 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
     return {
       get timings() {
         return [...timings];
+      },
+      get worstFrameMs() {
+        return worstFrameMs;
       },
       get frameCount() {
         return frames;
@@ -106,7 +110,7 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
           throw Error(failure ?? 'Renderer unavailable or a frame is already outstanding.');
         const data = sceneData(scene);
         if (
-          scene.count > 513 ||
+          scene.count > 4097 ||
           color.width !== depth.width ||
           color.height !== depth.height ||
           color.format !== format ||
@@ -189,7 +193,9 @@ export async function createChamberRenderer(device: GPUDevice, format: GPUTextur
           }
           cached = scene;
           frames++;
-          timings.push(performance.now() - start);
+          const elapsed = performance.now() - start;
+          worstFrameMs = Math.max(worstFrameMs, elapsed);
+          timings.push(elapsed);
           if (timings.length > 256) timings.shift();
           return scene.identity;
         });
