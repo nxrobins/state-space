@@ -112,7 +112,10 @@ describe('chamber client failure and ownership boundaries', () => {
       () => 'resolved',
       (error) => String(error),
     );
-    await client.close();
+    const closing = client.close();
+    expect(client.close()).toBe(closing);
+    await closing;
+    expect(client.close()).toBe(closing);
     expect(await bounded(cancelled)).toMatch(/closed/i);
     expect(client.state.status).toBe('closed');
   });

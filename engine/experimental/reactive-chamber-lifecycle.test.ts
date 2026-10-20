@@ -8,8 +8,12 @@ function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
-const client = () => ({ state: { busy: false }, close: vi.fn(async () => {}) });
-const host = () => ({ close: vi.fn(async () => {}) });
+const host = () => {
+  const dispose = vi.fn(async () => {});
+  let closing: Promise<void> | undefined;
+  return { dispose, close: () => (closing ??= Promise.resolve().then(dispose)) };
+};
+const client = () => ({ state: { busy: false }, ...host() });
 function fixture() {
   const first = client(),
     view = host(),
@@ -30,8 +34,8 @@ describe('chamber resource lifecycle', () => {
     expect(f.lifecycle.status).toBe('running');
     const next = client();
     expect(await f.lifecycle.replace(async () => next)).toBe(true);
-    expect(f.first.close).toHaveBeenCalledOnce();
-    expect(f.view.close).not.toHaveBeenCalled();
+    expect(f.first.dispose).toHaveBeenCalledOnce();
+    expect(f.view.dispose).not.toHaveBeenCalled();
     expect(f.lifecycle.current?.client).toBe(next);
     const a = f.lifecycle.stop(),
       b = f.lifecycle.stop();
@@ -39,8 +43,8 @@ describe('chamber resource lifecycle', () => {
     await a;
     expect(f.lifecycle.status).toBe('stopped');
     expect(f.lifecycle.current).toBeNull();
-    expect(next.close).toHaveBeenCalledOnce();
-    expect(f.view.close).toHaveBeenCalledOnce();
+    expect(next.dispose).toHaveBeenCalledOnce();
+    expect(f.view.dispose).toHaveBeenCalledOnce();
   });
   test('stop drains pending host creation and prevents overlapping restarts', async () => {
     const f = fixture(),
@@ -54,7 +58,7 @@ describe('chamber resource lifecycle', () => {
     gate.resolve(f.view);
     await Promise.all([start, stop]);
     expect(f.openClient).not.toHaveBeenCalled();
-    expect(f.view.close).toHaveBeenCalledOnce();
+    expect(f.view.dispose).toHaveBeenCalledOnce();
     expect(f.lifecycle.current).toBeNull();
   });
   test('stop during client creation disposes the unpublished client and host', async () => {
@@ -66,8 +70,8 @@ describe('chamber resource lifecycle', () => {
     const stop = f.lifecycle.stop();
     gate.resolve(f.first);
     await Promise.all([start, stop]);
-    expect(f.first.close).toHaveBeenCalledOnce();
-    expect(f.view.close).toHaveBeenCalledOnce();
+    expect(f.first.dispose).toHaveBeenCalledOnce();
+    expect(f.view.dispose).toHaveBeenCalledOnce();
     expect(f.lifecycle.status).toBe('stopped');
   });
   test('failed import preserves the old client and host', async () => {
@@ -80,7 +84,7 @@ describe('chamber resource lifecycle', () => {
     ).rejects.toThrow('Invalid recording');
     expect(f.lifecycle.current?.client).toBe(f.first);
     expect(f.lifecycle.status).toBe('running');
-    expect(f.first.close).not.toHaveBeenCalled();
+    expect(f.first.dispose).not.toHaveBeenCalled();
     await f.lifecycle.stop();
   });
   test('stop during replacement prevents late publication and drains both clients', async () => {
@@ -93,28 +97,32 @@ describe('chamber resource lifecycle', () => {
     gate.resolve(next);
     expect(await replace).toBe(false);
     await stop;
-    expect(next.close).toHaveBeenCalledOnce();
-    expect(f.first.close).toHaveBeenCalledOnce();
-    expect(f.view.close).toHaveBeenCalledOnce();
+    expect(next.dispose).toHaveBeenCalledOnce();
+    expect(f.first.dispose).toHaveBeenCalledOnce();
+    expect(f.view.dispose).toHaveBeenCalledOnce();
     expect(f.lifecycle.current).toBeNull();
   });
-  test('stop while the previous client closes cannot install its replacement', async () => {
-    const f = fixture(),
-      gate = deferred<void>(),
-      next = client();
-    await f.lifecycle.start();
-    f.first.close.mockImplementation(() => gate.promise);
-    const replacing = f.lifecycle.replace(async () => next);
-    await Promise.resolve();
-    await Promise.resolve();
-    const stop = f.lifecycle.stop();
-    gate.resolve();
-    expect(await replacing).toBe(false);
-    await stop;
-    expect(f.first.close).toHaveBeenCalledOnce();
-    expect(next.close).toHaveBeenCalledOnce();
-    expect(f.lifecycle.current).toBeNull();
-  });
+  test.each([false, true])(
+    'stop while the previous client closes cannot install its replacement (failure: %s)',
+    async (fails) => {
+      const f = fixture(),
+        gate = deferred<void>(),
+        next = client();
+      await f.lifecycle.start();
+      f.first.dispose.mockImplementation(() => gate.promise);
+      const replacing = f.lifecycle.replace(async () => next);
+      await Promise.resolve();
+      await Promise.resolve();
+      const stop = f.lifecycle.stop();
+      if (fails) gate.reject(Error('Client failed'));
+      else gate.resolve();
+      expect(await replacing).toBe(false);
+      await stop;
+      expect(f.first.dispose).toHaveBeenCalledOnce();
+      expect(next.dispose).toHaveBeenCalledOnce();
+      expect(f.lifecycle.current).toBeNull();
+    },
+  );
   test('busy and overlapping replacements are rejected before opening another client', async () => {
     const f = fixture(),
       next = vi.fn(async () => client());
@@ -134,7 +142,7 @@ describe('chamber resource lifecycle', () => {
   test('startup failure drains the host before allowing another start and isolates observers', async () => {
     const f = fixture(),
       gate = deferred<void>();
-    f.view.close.mockImplementation(() => gate.promise);
+    f.view.dispose.mockImplementation(() => gate.promise);
     f.openClient.mockRejectedValue(Error('Worker failed'));
     f.lifecycle.subscribe(() => {
       throw Error('Observer failed');

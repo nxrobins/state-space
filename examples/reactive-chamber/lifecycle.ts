@@ -1,4 +1,5 @@
 /** Owns application resources and replacement races, independently of DOM or GPU APIs. */
+/** Resources cache their disposal promise; repeated close calls share completion or failure. */
 export type Closable = { close(): Promise<void> };
 export type LifecycleClient = Closable & { readonly state: { readonly busy: boolean } };
 type Resources<C, H> = { client: C; host: H };
@@ -27,17 +28,12 @@ export function createChamberLifecycle<C extends LifecycleClient, H extends Clos
         }
       }
     });
-  const releases = new WeakMap<C, Promise<void>>();
-  const releaseClient = (client: C | null): Promise<void> => {
-    if (!client) return Promise.resolve();
-    let release = releases.get(client);
-    if (!release) {
-      release = Promise.resolve()
-        .then(() => client.close())
-        .catch(() => {});
-      releases.set(client, release);
+  const releaseClient = async (client: C | null): Promise<void> => {
+    try {
+      await client?.close();
+    } catch {
+      /* A failed client must not prevent host cleanup. */
     }
-    return release;
   };
   return {
     get status() {
