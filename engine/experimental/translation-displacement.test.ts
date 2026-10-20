@@ -5,11 +5,11 @@ import { MAT } from './3d.js';
 
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import { createTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
+import { createTerrainBody3D, type TerrainBodyState3D } from './terrain/terrain-body.js';
 import { createTranslationDisplacement3D } from './translation-displacement.js';
 import { GEOMETRY_SCALE_3D as Q } from './gameplay-geometry.js';
 import type { TranslationRequest3D, CellCoordinate3D } from './interventions.js';
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 type V = [number, number, number];

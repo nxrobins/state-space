@@ -3,11 +3,11 @@ import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
 import { appendActionEvent3D, createActionJournal3D, ACTION_JOURNAL_LIMITS_3D, type RawAction3D } from './action-journal.js';
 import { MOTION_TRACE_RULES_3D, type MaterialMotionTrace3D } from './motion-trace.js';
 import type { GameplayChangeReport3D, SupportObserver3D } from './change-reports.js';
-import type { TacticalSessionInitial3D, TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TacticalSessionInitial3D, TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion');
 const world = () => new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});

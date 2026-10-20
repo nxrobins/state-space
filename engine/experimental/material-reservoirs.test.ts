@@ -4,8 +4,8 @@ import { MAT } from './3d.js';
 import { BONDS_3D } from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
-import type { TacticalSessionInitial3D, TacticalSessionPolicy3D, TacticalSessionSnapshot3D } from './tactical-session-view.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
+import type { TacticalSessionInitial3D, TacticalSessionPolicy3D, TacticalSessionSnapshot3D } from './tactical/tactical-session-view.js';
 import type { MaterialReservoir3D, MaterialTransferRequest3D } from './material-reservoirs.js';
 
 // These authored tests are CPU edits and inert drivers only. Runtime remains held.

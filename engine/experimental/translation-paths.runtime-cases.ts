@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
 import { CpuStructuralWorld3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 
 function initial() {
   const w = new CpuStructuralWorld3D({width: 8, height: 8, depth: 8, chunkSize: 4});

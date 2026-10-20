@@ -5,7 +5,7 @@ import {
   PORTABLE_VALUE_LIMITS as limits,
   type PortableValue,
 } from './portable-data.js';
-import { copyTacticalValue } from './experimental/tactical-session-core.js';
+import { copyTacticalValue } from './experimental/tactical/tactical-session-core.js';
 
 describe('bounded portable data', () => {
   it('copies aliases independently, sorts keys and keeps prototype-looking keys inert', () => {

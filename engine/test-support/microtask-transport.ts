@@ -1,4 +1,4 @@
-import type { TacticalTransport3D } from '../experimental/tactical-worker-wire.js';
+import type { TacticalTransport3D } from '../experimental/tactical/tactical-worker-wire.js';
 
 /** Automatic microtask delivery; the reactive worker bus deliberately uses manual tasks. */
 export function createMicrotaskTransport<M>() {

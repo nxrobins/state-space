@@ -401,8 +401,8 @@ All 699 selected edit/inert cases, types, lint, SDK packaging and built-public-e
 integration passed under the bounded CPU harness. The reference package check
 exercised lift/preview/commit/save/restore/heat at zero physical ticks. Four authored
 physical scene cases remain held; no physical support outcome, native Worker,
-visual result, replay or frame latency is claimed by these gates. General swept
-continuous actor collision and external loads remain outside this reference.
+visual result, replay or frame latency is claimed by these gates. Continuous
+actor collision and external loads remain outside this reference.
 Discrete peer contacts are described in the [geometry guide](geometry.md).
 
 The tactical chamber application now uses `hot-slab-game-2`: its worker-owned

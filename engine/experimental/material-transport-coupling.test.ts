@@ -8,13 +8,13 @@ import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-wo
 import { createMaterialTransport3D, applyMaterialTransport3D } from './material-transport.js';
 import { captureMaterialTransportMemory3D as capture, restoreMaterialTransportMemory3D as restore,
   followMaterialTransport3D as follow, prepareMaterialTransport3D as prepare, type MaterialTransportMemory3D } from './material-transport-coupling.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
-import { createTacticalPreviewQueue3D, type TacticalPreviewEditor3D } from './tactical-previews.js';
-import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
-import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
+import { createTacticalPreviewQueue3D, type TacticalPreviewEditor3D } from './tactical/tactical-previews.js';
+import { createTacticalWorkerHost3D } from './tactical/tactical-worker-host.js';
+import { createTacticalWorkerClient3D } from './tactical/tactical-worker-client.js';
 
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
-import { observe, type Spec } from './terrain-motion.fixtures.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
+import { observe, type Spec } from './terrain/terrain-motion.fixtures.js';
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type Game = {ap: number; rng: number; actor: number; wind: MaterialTransportMemory3D};
 type Command = {impulse: number};

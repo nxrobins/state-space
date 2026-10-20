@@ -3,7 +3,7 @@ import { buildColdTable } from '../generated/materials.js';
 import { temperatureQ } from '../thermal.js';
 import { MATERIALS_3D } from './3d.js';
 import { validateStructuralSnapshot3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import type { TacticalRevision3D } from './tactical-session-view.js';
+import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
 import { createGeometryKernel3D, type GeometryKernel3D, type KernelExposure3D } from './geometry-kernel.js';
 export { GEOMETRY_SCALE_3D, GEOMETRY_LIMITS_3D, EXPOSURE_RULES_VERSION_3D } from './geometry-kernel.js';
 export type { GeometryVector3D, GeometryBox3D, GeometryTime3D, GeometryCell3D, GeometryContact3D, GeometryFilter3D, MaterialExposure3D } from './geometry-kernel.js';

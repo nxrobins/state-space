@@ -1,7 +1,7 @@
 /** Bounded tactical path observations. Disposable, never authoritative saves. */
 import { copyMotionPaths3D, type MaterialMotionPaths3D } from './motion-paths.js';
 import { copyMotionTrace3D, motionTraceEntries3D, type MaterialMotionTrace3D } from './motion-trace.js';
-import type { TacticalRevision3D } from './tactical-session-view.js';
+import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
 import type { ChangeTarget3D } from './change-reports.js';
 import type { GeometryStamp3D } from './gameplay-geometry.js';
 

@@ -8,7 +8,7 @@ import { createTacticalSession3D } from './tactical-session.js';
 import { createMaterialTransport3D } from './material-transport.js';
 import { captureMaterialTransportMemory3D as capture, restoreMaterialTransportMemory3D as restore,
   followTranslatedMaterialTransport3D as follow } from './material-transport-coupling.js';
-import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
+import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 function fixture(identical = false) {
   const w = new CpuStructuralWorld3D({width: 4, height: 4, depth: 4, chunkSize: 4});

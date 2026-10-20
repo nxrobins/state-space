@@ -5,8 +5,8 @@ This is an evidence archive, not an engine release or a new qualification claim.
 It preserves failed and interrupted runs as well as passing results.
 
 Each manifest lists original paths, byte counts and SHA-256 hashes, together with
-its compressed archive hash and source commit. These archives are cumulative;
-restore each one needed by a historical audit.
+its compressed archive hash and source commit. The batches contain different
+files; restore each batch needed by a historical audit.
 
 | Release | Manifest | Files | Uncompressed bytes |
 | --- | --- | ---: | ---: |

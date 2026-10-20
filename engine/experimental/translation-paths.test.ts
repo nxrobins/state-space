@@ -7,11 +7,11 @@ import * as interventions from './interventions.js';
 import * as paths from './translation-paths.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
 import { gameplayGeometrySource3D } from './gameplay-geometry.js';
 import type { CellCoordinate3D, TranslationRequest3D } from './interventions.js';
 import type { TranslationAction3D, TranslationMovement3D } from './translation-paths.js';
-import type { TacticalSessionPolicy3D, TacticalBranch3D } from './tactical-session-view.js';
+import type { TacticalSessionPolicy3D, TacticalBranch3D } from './tactical/tactical-session-view.js';
 import type { SupportObserver3D } from './change-reports.js';
 
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');

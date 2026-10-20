@@ -3,8 +3,8 @@ import { CHANGE_REPORT_LIMITS_3D, type GameplayChangeReport3D, type ChangeTarget
 import { copyMotionTrace3D, motionTraceEntries3D, type MaterialMotionTrace3D } from './motion-trace.js';
 import type { TranslationReceipt3D } from './interventions.js';
 import type { MaterialTransferReceipt3D } from './material-reservoirs.js';
-import type { TemporaryHold3D, ThermalInterventionReceipt3D } from './tactical-actions.js';
-import type { TacticalRevision3D } from './tactical-session-view.js';
+import type { TemporaryHold3D, ThermalInterventionReceipt3D } from './tactical/tactical-actions.js';
+import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
 
 export const ACTION_JOURNAL_RULES_3D = 'action-boundaries-1';
 export const ACTION_JOURNAL_LIMITS_3D = Object.freeze({events: 256, domainTicks: 256, entries: 65536});

@@ -8,6 +8,9 @@ a new package structure.
 | --- | --- |
 | `engine/` | Public Python and TypeScript 2D engine, catalogs, state, physics, renderers and build configuration |
 | `engine/experimental/` | Separately versioned 3D, structural, tactical and reactive APIs; public entry modules stay at this boundary |
+| `engine/experimental/reactive/` | Reactive catalogs, evolution, sessions, transport and worker internals, with their tests |
+| `engine/experimental/tactical/` | Tactical session internals, previews, rendering and worker protocol, with their tests and held runtime cases |
+| `engine/experimental/terrain/` | Terrain body/group motion and displacement, with their tests and held runtime cases |
 | `engine/generated/`, `engine/kernels/`, `engine/_generated_schema.py` | Generated catalog/runtime definitions and kernels; follow `engine/generate.py` rather than editing generated copies |
 | `engine/test-support/` | Test-only physics guards and transport fixtures |
 | `examples/` | Public-SDK clients, including the lab, cavern series, tactical slab and reactive chamber; `shared/` owns shared client utilities |
@@ -19,6 +22,12 @@ a new package structure.
 | Root `evolve_ss.py`, `ss_program.md`, `winner_phase_*.json`, evolution logs | Original research workflow and recorded results; not the SDK entry point |
 | `docs/` | Current guides, contracts, support status and checkpoint summaries |
 | `dist/` | Local generated output; the tracked `dist/packages/evidence/` files are historical package evidence |
+
+The experimental root retains public entry modules, shared geometry/transport
+kernels, and the 3D/M5 backends. The three largest cohesive families have their own
+folders; this is an incremental split, not a new dependency or packaging layer.
+The byte-bound `structural-material.ts` and motion baseline stay in place. Historical
+checkpoint paths refer to their recorded source commits; they are not renamed.
 
 ## Runtime boundaries
 

@@ -2,9 +2,9 @@
 import { PHASE_SHIFT, buildColdTable } from '../generated/materials.js';
 import { temperatureQ } from '../thermal.js';
 import { ANCHOR_3D, solveStructure3D } from './structural-mechanics.js';
-import { overlayHolds3D, type TemporaryHold3D } from './tactical-actions.js';
+import { overlayHolds3D, type TemporaryHold3D } from './tactical/tactical-actions.js';
 import type { StructuralSnapshot3D } from './structural-world-core.js';
-import type { TacticalRevision3D, TacticalSessionSnapshot3D, TacticalValue } from './tactical-session-view.js';
+import type { TacticalRevision3D, TacticalSessionSnapshot3D, TacticalValue } from './tactical/tactical-session-view.js';
 
 export const CHANGE_REPORT_RULES_VERSION_3D = 'gameplay-changes-1';
 export const CHANGE_REPORT_LIMITS_3D = Object.freeze({defaultRuns: 2048, maxRuns: 4096});

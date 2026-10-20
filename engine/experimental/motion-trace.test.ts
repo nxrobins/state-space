@@ -2,7 +2,7 @@ import { holdPhysics } from '../test-support/hold-physics.js';
 import { describe, expect, test, vi } from 'vitest';
 import * as mechanics from './structural-mechanics.js';
 import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
-import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical-session-core.js';
+import { createTacticalSessionCore3D, type TacticalSimulationFactory3D } from './tactical/tactical-session-core.js';
 import { appendMotionFrame3D, createMotionRecorder3D, motionEntryLimit3D, motionJournal3D, readMotionTrace3D, MOTION_TRACE_RULES_3D,
   type MaterialMotionTrace3D, type MotionJournalData3D } from './motion-trace.js';
 
