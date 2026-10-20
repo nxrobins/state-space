@@ -1,5 +1,6 @@
 /** Latest-request scheduling over exact, revision-bound tactical branches. */
-import { copyTacticalValue, TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
+import { TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
 import { checkedInteger } from '../validation.js';
 import { previewCaptureOptions3D, type TacticalPreviewCapture3D } from './tactical-preview-capture.js';
 export type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
@@ -146,7 +147,7 @@ export function createTacticalPreviewQueue3D<T extends TacticalValue, C extends 
     request(command, horizonTicks, capture = {}) {
       unlocked(); if (closed) throw Error('Preview queue is closed.');
       checkedInteger(horizonTicks, 0, TACTICAL_PREVIEW_LIMITS_3D.horizonTicks, 'preview horizon');
-      const parsedCapture = previewCaptureOptions3D(capture), copied = copyTacticalValue(command), id = checkedInteger(serial + 1, 1, Number.MAX_SAFE_INTEGER, 'preview identity');
+      const parsedCapture = previewCaptureOptions3D(capture), copied = copyPortableValue(command), id = checkedInteger(serial + 1, 1, Number.MAX_SAFE_INTEGER, 'preview identity');
       const base = Object.freeze({...session.revision});
       checkedInteger(base.tick + horizonTicks, 0, Number.MAX_SAFE_INTEGER, 'preview end tick');
       invalidate(waiting, 'superseded'); invalidate(active, 'superseded'); invalidate(ready, 'superseded');

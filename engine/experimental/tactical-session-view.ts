@@ -1,3 +1,4 @@
+import type { PortableValue } from '../portable-data.js';
 import type { MotionJournal3D } from './motion-trace.js';
 import type { PathJournal3D, TickMovement3D } from './path-journal.js';
 import type { ActionJournal3D } from './action-journal.js';
@@ -11,7 +12,7 @@ import type { TranslationAction3D, TranslationMovement3D, TranslationPathOptions
 
 export type TacticalQueryOptions3D = {domain?: string | null};
 export type TacticalBranchOptions3D = {horizonTicks: number; captureMotion?: boolean; motionMaxEntries?: number; captureJournal?: boolean; journalMaxRuns?: number; capturePaths?: boolean; pathMaxEntries?: number};
-export type TacticalValue = null | boolean | number | string | TacticalValue[] | {[key: string]: TacticalValue};
+export type TacticalValue = PortableValue;
 export type ThermalAccounting3D = { initialQ: string; externalQ: string };
 export type TacticalSessionInitial3D<T extends TacticalValue> = {
   worldId: string; gameRulesVersion: string; terrain: StructuralSnapshot3D; game: T;

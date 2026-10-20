@@ -1,5 +1,5 @@
 /** Data-only reactive transport. No browser, worker or physical work starts here. */
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { reactiveArray3D, reactiveFields3D as fields, reactiveInteger3D as integer, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { compatibleReactiveDomains3D } from './reactive-domain-state.js';
 import { readReactiveTickOptions3D } from './reactive-motion-capture.js';
@@ -35,7 +35,7 @@ export function workerSameRevision(value: unknown, expected: Readonly<ReactiveSe
 }
 export function workerRequest<T extends ReactiveGameValue3D>(commands: readonly ReactiveSessionCommand3D<T>[], options: ReactiveWorkerPreviewOptions3D) {
   const list = reactiveArray3D(commands, REACTIVE_SESSION_LIMITS_3D.operations);
-  const copied = copyTacticalValue(list as ReactiveGameValue3D) as unknown as ReactiveSessionCommand3D<T>[];
+  const copied = copyPortableValue(list as ReactiveGameValue3D) as unknown as ReactiveSessionCommand3D<T>[];
   fields(options, ['horizonTicks'], ['motion', 'translation', 'transport', 'maxSlices']);
   const horizonTicks = integer(options.horizonTicks, 0, REACTIVE_SESSION_LIMITS_3D.horizonTicks);
   const maxSlices = Object.hasOwn(options, 'maxSlices') ? integer(options.maxSlices, 1, REACTIVE_WORKER_LIMITS_3D.slices) : REACTIVE_WORKER_LIMITS_3D.defaultSlices;

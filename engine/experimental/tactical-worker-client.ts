@@ -1,5 +1,5 @@
 /** Bounded asynchronous client; only acknowledged commits replace cached state. */
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { queryRequestsData, queryBatchData, previewQueryBatchData, type TacticalWorkerQuery3D, type TacticalWorkerQueryBatch3D, type TacticalWorkerPreviewQueryBatch3D } from './tactical-worker-queries.js';
 import { changeOptionsData, changeReportData } from './tactical-worker-changes.js';
 import { captureData, motionJournalData } from './tactical-worker-motion.js';
@@ -253,7 +253,7 @@ export function createTacticalWorkerClient3D<T extends TacticalValue, C extends 
     request(command, horizonTicks, capture = {}) {
       usable(); if (flight && flight.kind !== 'preview') throw Error('Worker mutation is in flight.');
       checkedInteger(horizonTicks, 0, TACTICAL_PREVIEW_LIMITS_3D.horizonTicks, 'preview horizon');
-      const parsed = captureData(capture), copied = copyTacticalValue(command), id = checkedInteger(requestSerial + 1, 1, Number.MAX_SAFE_INTEGER, 'preview identity');
+      const parsed = captureData(capture), copied = copyPortableValue(command), id = checkedInteger(requestSerial + 1, 1, Number.MAX_SAFE_INTEGER, 'preview identity');
       checkedInteger(current().terrain.tick + horizonTicks, 0, Number.MAX_SAFE_INTEGER, 'preview end tick');
       if (waiting) invalidate(waiting, 'superseded'); if (active) invalidate(active, 'superseded'); if (readyRecord) invalidate(readyRecord, 'superseded');
       let resolve!: Request<T, C>['resolve']; const result = new Promise<TacticalPreviewOutcome3D<T>>(done => {resolve = done;});

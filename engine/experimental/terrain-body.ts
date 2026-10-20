@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 import { stepBodyKernel3D } from './body-kernel.js';
 /** Fixed-point kinematic body resolution against one immutable terrain boundary. */
 import { assertGameplayGeometry3D, GEOMETRY_RULES_VERSION_3D, GEOMETRY_LIMITS_3D, GEOMETRY_SCALE_3D,
@@ -23,9 +24,7 @@ export type TerrainBodyResolution3D = {
   supportBefore: BodySupport3D | null; supportAfter: BodySupport3D | null; exposure: GeometryExposure3D;
 };
 function fields(value: object, required: readonly string[], optional: readonly string[] = []): void {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid terrain body fields.');
+  assertRecordFields(value, required, optional, 'Invalid terrain body fields.');
 }
 function integer(value: number, min: number, max: number): number {
   if (!Number.isSafeInteger(value) || value < min || value > max) throw Error('Invalid terrain body integer.'); return value === 0 ? 0 : value;

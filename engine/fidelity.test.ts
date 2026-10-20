@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createStateSpaceField, MAT } from './browser_state_space';
-import { MAX_ENERGY_Q } from './thermal';
+import { createStateSpaceField, MAT } from './browser_state_space.js';
+import { MAX_ENERGY_Q } from './thermal.js';
 
 describe('ca-v2 public energy state', () => {
   it('roundtrips fractional and latent state through ordinary JSON', () => {

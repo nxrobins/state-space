@@ -2,9 +2,9 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { createStateSpaceField, packVoxel, unpackVoxel } from './browser_state_space';
-import { validateDimensions, validatePackedCells, validateSnapshot } from './contracts';
-import { MAT, MATERIAL_CATALOG_HASH, RULES_VERSION, SCHEMA_VERSION, buildColdTable } from './generated/materials';
+import { createStateSpaceField, packVoxel, unpackVoxel } from './browser_state_space.js';
+import { validateDimensions, validatePackedCells, validateSnapshot } from './contracts.js';
+import { MAT, MATERIAL_CATALOG_HASH, RULES_VERSION, SCHEMA_VERSION, buildColdTable } from './generated/materials.js';
 
 describe('portable engine contracts', () => {
   it('matches every Python cold-table slot, including optical and reserved data', () => {

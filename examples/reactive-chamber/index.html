@@ -1,12 +1,99 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Reactive Chamber · State Space</title><link rel="stylesheet" href="./style.css"></head>
-<body><main>
-<header><div class="wordmark"><span class="mark">▦</span> STATE SPACE <span class="tag">EXPERIMENT 01</span></div><span class="status" id="status" role="status">Ready to start</span></header>
-<div class="intro"><p class="eyebrow">THE REACTIVE CHAMBER</p><h1>One change. Every consequence.</h1><p>Heat the wooden connector. Watch combustion release a platform and remove the actor’s footing. Compare the outcome before you commit.</p></div>
-<div class="workspace"><section class="viewport"><div class="viewbar"><span id="view-label">COMMITTED WORLD</span><span id="tick-label">TICK 0</span></div><canvas id="world" width="1100" height="680" aria-label="Interactive three dimensional reactive chamber"></canvas><div class="empty" id="empty"><span>8 × 8 × 8</span><p>A small world with real consequences.</p><button id="start" class="primary">Start chamber</button></div><div class="legend"><span><i class="cyan"></i>Actor</span><span><i class="wood"></i>Wooden connector</span><span><i class="ice"></i>Ice sample</span><span class="gesture">Drag to orbit · Click to inspect</span></div></section>
-<aside><div class="panel"><p class="eyebrow">01 / SELECT</p><h2>Choose a material</h2><div class="row"><button id="select-support">Wood connector</button><button id="select-ice">Ice sample</button></div><p id="inspection" class="details">Select a cell to inspect its material and energy.</p></div>
-<div class="panel"><p class="eyebrow">02 / EXPLORE</p><h2>Preview two ticks</h2><div class="row"><button id="heat" disabled>Heat +</button><button id="cool" disabled>Cool −</button><button id="wait" disabled>Wait</button></div><p class="details">Heat and cooling draw from a finite resource. A preview leaves the committed world untouched.</p><div class="resource"><span>Thermal resource</span><strong id="resource">—</strong></div><progress id="resource-bar" value="1" max="1"></progress></div>
-<div class="panel"><p class="eyebrow">03 / DECIDE</p><div class="row"><button id="compare" disabled>Show committed</button><button id="discard" disabled>Discard</button></div><button id="commit" class="primary wide" disabled>Commit this outcome</button><div id="events" class="events">No changes committed.</div></div></aside></div>
-<footer><div class="row"><button id="save" disabled>Save chamber</button><label class="file-button">Load save<input id="load" type="file" accept="application/json,.json"></label><button id="reset" disabled>New chamber</button><button id="stop" disabled>Stop</button></div><span>Reactive physics · Exact energy accounting · Local worker</span></footer>
-<p id="notice" role="alert"></p><pre id="report" hidden></pre>
-</main><script type="module" src="./app.js"></script></body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Reactive Chamber · State Space</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="wordmark">
+          <span class="mark">▦</span> STATE SPACE <span class="tag">EXPERIMENT 01</span>
+        </div>
+        <span class="status" id="status" role="status">Ready to start</span>
+      </header>
+      <div class="intro">
+        <p class="eyebrow">THE REACTIVE CHAMBER</p>
+        <h1>One change. Every consequence.</h1>
+        <p>
+          Heat the wooden connector. Watch combustion release a platform and remove the actor’s
+          footing. Compare the outcome before you commit.
+        </p>
+      </div>
+      <div class="workspace">
+        <section class="viewport">
+          <div class="viewbar">
+            <span id="view-label">COMMITTED WORLD</span><span id="tick-label">TICK 0</span>
+          </div>
+          <canvas
+            id="world"
+            width="1100"
+            height="680"
+            aria-label="Interactive three dimensional reactive chamber"
+          ></canvas>
+          <div class="empty" id="empty">
+            <span>8 × 8 × 8</span>
+            <p>A small world with real consequences.</p>
+            <button id="start" class="primary">Start chamber</button>
+          </div>
+          <div class="legend">
+            <span><i class="cyan"></i>Actor</span><span><i class="wood"></i>Wooden connector</span
+            ><span><i class="ice"></i>Ice sample</span
+            ><span class="gesture">Drag to orbit · Click to inspect</span>
+          </div>
+        </section>
+        <aside>
+          <div class="panel">
+            <p class="eyebrow">01 / SELECT</p>
+            <h2>Choose a material</h2>
+            <div class="row">
+              <button id="select-support">Wood connector</button
+              ><button id="select-ice">Ice sample</button>
+            </div>
+            <p id="inspection" class="details">Select a cell to inspect its material and energy.</p>
+          </div>
+          <div class="panel">
+            <p class="eyebrow">02 / EXPLORE</p>
+            <h2>Preview two ticks</h2>
+            <div class="row">
+              <button id="heat" disabled>Heat +</button><button id="cool" disabled>Cool −</button
+              ><button id="wait" disabled>Wait</button>
+            </div>
+            <p class="details">
+              Heat and cooling draw from a finite resource. A preview leaves the committed world
+              untouched.
+            </p>
+            <div class="resource">
+              <span>Thermal resource</span><strong id="resource">—</strong>
+            </div>
+            <progress id="resource-bar" value="1" max="1"></progress>
+          </div>
+          <div class="panel">
+            <p class="eyebrow">03 / DECIDE</p>
+            <div class="row">
+              <button id="compare" disabled>Show committed</button
+              ><button id="discard" disabled>Discard</button>
+            </div>
+            <button id="commit" class="primary wide" disabled>Commit this outcome</button>
+            <div id="events" class="events">No changes committed.</div>
+          </div>
+        </aside>
+      </div>
+      <footer>
+        <div class="row">
+          <button id="save" disabled>Save chamber</button
+          ><label class="file-button"
+            >Load save<input id="load" type="file" accept="application/json,.json" /></label
+          ><button id="reset" disabled>New chamber</button><button id="stop" disabled>Stop</button>
+        </div>
+        <span>Reactive physics · Exact energy accounting · Local worker</span>
+      </footer>
+      <p id="notice" role="alert"></p>
+      <pre id="report" hidden></pre>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

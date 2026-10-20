@@ -3,12 +3,12 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
-import { MAT, buildColdTable } from './generated/materials';
-import { packVoxel } from './browser_state_space';
-import { type PhysicsState } from './thermal';
+import { MAT, buildColdTable } from './generated/materials.js';
+import { packVoxel } from './browser_state_space.js';
+import { type PhysicsState } from './thermal.js';
 import { createPhysicsState } from './structure.js';
 import { DEFAULT_REGISTRY } from './registry.js';
-import * as original from './cpu_physics';
+import * as original from './cpu_physics.js';
 
 // Load mutated copies in memory; working-tree source and module cache stay intact.
 function mutatedBackend(before: string, after: string): typeof original {

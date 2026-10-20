@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Shared serial fixed-point movement against terrain and named actor volumes. */
 import { BODY_LIMITS_3D, type KinematicBody3D } from './body-kernel.js';
 import type { GeometryKernel3D, GeometryContact3D, GeometryTime3D, KernelExposure3D } from './geometry-kernel.js';
@@ -17,9 +18,7 @@ export type ActorMovementKernelResult3D<R extends string, S, B extends Kinematic
   failure: {id: string; kind: 'outside' | 'embedded' | 'actor-overlap'; actor: string | null} | null;
 };
 function fields(value: object, required: readonly string[], optional: readonly string[] = []) {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid actor movement fields.');
+  assertRecordFields(value, required, optional, 'Invalid actor movement fields.');
 }
 function dense<T>(value: readonly T[], maximum: number): T[] {
   if (!Array.isArray(value) || value.length > maximum || Reflect.ownKeys(value).length !== value.length + 1) throw Error('Invalid actor movement array.');

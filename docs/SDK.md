@@ -3330,3 +3330,32 @@ Build with `npm run build:reactive-chamber` after `npm run build:sdk`. The bound
 native macOS acceptance stage is `npm run verify:macos -- --stage chamber-visible`.
 This client is 8³ with one actor; it does not extend M5 snapshot schemas or imply
 large-world/GPU reactive physics qualification.
+
+### Reactive worker state observation
+
+`client.subscribe(listener)` delivers an initial state and coalesced state updates
+in microtasks, including timeout, send-failure and shutdown transitions. Each
+listener receives an isolated state copy. Unsubscribe with the returned function;
+terminal delivery releases the subscription. Observer exceptions cannot interrupt
+protocol processing. Subscriptions observe state; physical slices still yield tasks.
+
+After `ticket.cancel()`, await `client.whenIdle()` to wait for the discard
+acknowledgement and any queued work. It resolves at an idle complete boundary
+(a ready preview is idle) and rejects on failure or shutdown. It does not promise
+that a particular superseded ticket is still current; commit still checks ticket
+identity. These additive client APIs do not change the `reactive-worker-2` wire format.
+
+### Build metadata and source checks
+
+`engine/sdk-entries.json` owns SDK source entries, output names and existing target
+settings. `npm run build:sdk` checks that package exports and declaration roots
+match that manifest, then builds entries separately through `sdk-build.mjs`.
+Separate bundles retain their private runtime identities. The small existing Vite
+config files remain usable by recovery/evidence tooling. Adding an entry requires
+updating the checked `package.json` and `tsconfig.sdk.json` mirrors too.
+
+Structural lint discovers TypeScript/JavaScript sources under `engine` and
+`examples`, excluding generated output, dependencies, hidden directories and
+symlinks. New files no longer require a manual lint-list entry. CI also checks the
+chamber formatter. Test-only fault harnesses belong under `engine/test-support`;
+application examples continue to consume the public SDK.

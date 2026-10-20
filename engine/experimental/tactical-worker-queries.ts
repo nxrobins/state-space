@@ -1,5 +1,5 @@
 /** Data-only batches of existing geometry queries; no physical advancement. */
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { validateGeometryQueryResults3D } from './geometry-query-wire.js';
 import { MATERIALS_3D } from './3d.js';
 import { GEOMETRY_RULES_VERSION_3D, GEOMETRY_LIMITS_3D, type GameplayGeometry3D } from './gameplay-geometry.js';
@@ -18,7 +18,7 @@ export type TacticalWorkerPreviewQueryBatch3D = {rulesVersion: typeof TACTICAL_P
   target: number; preview: TacticalPreview3D<TacticalValue>['preview']; results: TacticalWorkerQueryResult3D[]};
 const kinds: readonly string[] = ['fit', 'support', 'raycast', 'sweep', 'exposure'];
 const materials = new Set(MATERIALS_3D.map(m => m.id));
-function portable<T>(value: T): T {return copyTacticalValue(value as unknown as TacticalValue) as unknown as T;}
+function portable<T>(value: T): T {return copyPortableValue(value as unknown as TacticalValue) as unknown as T;}
 function domain(snapshot: Pick<TacticalSessionSnapshot3D<TacticalValue>, 'terrain' | 'reservoirs'>, id: string | null): StructuralSnapshot3D {
   if (id === null) return snapshot.terrain;
   const found = snapshot.reservoirs.find(r => r.id === id); if (!found) throw Error('Unknown worker query domain.'); return found.terrain;

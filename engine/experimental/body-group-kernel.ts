@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Shared bounded group orchestration over trusted body-response adapters. */
 import type { KinematicBody3D } from './body-kernel.js';
 import type { GeometryKernel3D } from './geometry-kernel.js';
@@ -17,9 +18,7 @@ export interface BodyGroupKernel3D<R extends string, S, B extends KinematicBody3
   resolve(bodies: readonly NamedBody3D<B>[], options?: BodyGroupOptions3D): BodyGroupResult3D<R, S, B, T, C>;
 }
 function fields(value: object, required: readonly string[], optional: readonly string[] = []) {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid actor group fields.');
+  assertRecordFields(value, required, optional, 'Invalid actor group fields.');
 }
 function options(value: BodyGroupOptions3D) {
   fields(value, [], ['maxWork', 'maxEvents', 'maxContacts', 'maxCarryEntries']);

@@ -17,7 +17,7 @@
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
     "typecheck": "tsc --noEmit -p engine/tsconfig.json && tsc --noEmit -p examples/reactive-chamber/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
-    "build:sdk": "vite build --config engine/vite.sdk.config.ts && vite build --config engine/vite.volume.config.ts && vite build --config engine/vite.volume-gpu.config.ts && vite build --config engine/vite.world.config.ts && vite build --config engine/vite.world-gpu.config.ts && vite build --config engine/vite.active-world.config.ts && vite build --config engine/vite.active-world-gpu.config.ts && vite build --config engine/vite.structural-world.config.ts && vite build --config engine/vite.structural-world-gpu.config.ts && vite build --config engine/vite.interventions.config.ts && vite build --config engine/vite.tactical-session.config.ts && vite build --config engine/vite.tactical-renderer.config.ts && vite build --config engine/vite.reactive-materials.config.ts && tsc -p engine/tsconfig.sdk.json",
+    "build:sdk": "node scripts/build_sdk.mjs",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
     "benchmark:3d": "npm run build:sdk && node scripts/benchmark_volume.mjs",
     "verify:3d:m2": "npm run build:sdk && node scripts/verify_volume_m2.mjs",
@@ -31,10 +31,13 @@
     "verify:macos:native": "uv run python -m scripts.verify_macos_native",
     "verify:packages": "uv run python -m scripts.verify_packages",
     "verify:macos": "uv run python -m scripts.verify_macos_qualification",
-    "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs"
+    "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs",
+    "format:chamber": "prettier --write \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive-worker-client.ts\" \"engine/experimental/reactive-chamber*.test.ts\" \"examples/shared/**/*.ts\"",
+    "format:check": "prettier --check \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive-worker-client.ts\" \"engine/experimental/reactive-chamber*.test.ts\" \"examples/shared/**/*.ts\""
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "prettier": "3.8.3",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "^5.0.5"

@@ -1,3 +1,4 @@
+import { createWorkerBus } from '../test-support/worker-bus.js';
 /** Mock ports execute tiny reactive jobs; no native Worker/browser/GPU is launched. */
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 import { CpuVolume } from './3d-core.js';
@@ -8,7 +9,7 @@ import { createReactiveMaterialRegistry3D, defaultReactiveMaterialCatalog3D, cre
   captureReactiveMaterialTransportMemory3D, followReactiveMaterialTransport3D, createReactiveBody3D, createReactiveTransportedActorGroup3D,
   createReactiveActorGroup3D, createReactiveWorkerHost3D, createReactiveWorkerClient3D, reactiveBrowserWorkerTransport3D,
   MAT, type ReactiveMaterialRegistry3D, type ReactiveSessionPolicy3D, type ReactiveSessionCommand3D, type ReactiveSessionInitial3D,
-  type ReactiveMaterialTransportMemory3D, type NamedReactiveBody3D, type ReactiveWorkerTransport3D, type ReactiveWorkerClientOptions3D } from './reactive-materials.js';
+  type ReactiveMaterialTransportMemory3D, type NamedReactiveBody3D, type ReactiveWorkerClientOptions3D } from './reactive-materials.js';
 import { workerMessage, REACTIVE_WORKER_PROTOCOL_3D, type ReactiveWorkerWire3D } from './reactive-worker-wire.js';
 const guards = [vi.spyOn(CpuVolume.prototype, 'step'), vi.spyOn(mechanics, 'solveStructure3D'),
   ...(['step', 'stepWithMotion', 'stepWithMotionPaths', 'inspectStructure'] as const).map(k => vi.spyOn(CpuStructuralWorld3D.prototype, k))];
@@ -35,26 +36,7 @@ function initial(): ReactiveSessionInitial3D<Game> {
   return {worldId: 'worker-world', gameRulesVersion: 'worker-game-1', domains,
     game: {ap: 4, label: 'original', memory, units: [{id: 'rider', body: createReactiveBody3D(view, {minQ: [256, 512, 256], sizeQ: [512, 512, 512], gravityQ: 0})}]}};
 }
-function bus() {
-  const tasks: {kind: string; run(): void}[] = [], sent: ReactiveWorkerWire3D[][] = [[], []];
-  const receive: ((v: unknown) => void)[] = [() => {}, () => {}], errors: ((e: Error) => void)[] = [() => {}, () => {}];
-  const closed = [false, false], removed = [false, false]; let inFlight = 0, maximum = 0;
-  const config = {mapReply: (m: ReactiveWorkerWire3D): ReactiveWorkerWire3D | null => m, sendFailure: '', scheduleFailure: false};
-  const ports = [0, 1].map(side => ({send(value: unknown) {
-    const m = structuredClone(value) as ReactiveWorkerWire3D; if (closed[side] || config.sendFailure === m.kind) throw Error('Mock send failed'); sent[side].push(m);
-    if (side === 0) {inFlight++; maximum = Math.max(maximum, inFlight);}
-    const output = side ? config.mapReply(m) : m; if (!output) return;
-    tasks.push({kind: side ? 'reply' : 'host', run() {if (side) inFlight--; receive[1 - side](structuredClone(output));}});
-  }, subscribe(next: (v: unknown) => void, failed: (e: Error) => void) {receive[side] = next; errors[side] = failed; return () => {removed[side] = true; receive[side] = () => {};};},
-  close() {closed[side] = true;}} satisfies ReactiveWorkerTransport3D));
-  const schedule = (task: () => void) => {if (config.scheduleFailure) throw Error('Scheduler failed'); let cancelled = false;
-    tasks.push({kind: 'slice', run() {if (!cancelled) task();}}); return () => {cancelled = true;};};
-  const until = async (done: () => boolean) => {for (let n = 0; n < 4096; n++) {if (done()) return; const task = tasks.shift();
-    if (task) task.run(); await Promise.resolve(); if (!task && !done()) throw Error('Mock transport stalled');} throw Error('Mock slice limit');};
-  const settle = async <T>(p: Promise<T>): Promise<T> => {let done = false, value!: T, error: unknown; p.then(v => {value = v; done = true;}, e => {error = e; done = true;});
-    await until(() => done); if (error) throw error; return value;};
-  return {ports, tasks, sent, closed, removed, config, schedule, until, settle, receive, errors, maximum: () => maximum};
-}
+const bus = () => createWorkerBus<ReactiveWorkerWire3D>();
 const resources: (() => void)[] = [];
 afterEach(() => {for (const cleanup of resources.splice(0)) cleanup(); vi.useRealTimers();});
 function fixture(p = policy, init = initial(), clientOptions: Partial<ReactiveWorkerClientOptions3D> = {}, work = 64) {
@@ -282,4 +264,68 @@ describe('bounded reactive worker authority', () => {
     const messages = f.b.sent[0], discard = messages.findIndex(m => m.kind === 'discard'), starts = messages.map((m, i) => m.kind === 'start' ? i : -1).filter(i => i >= 0);
     expect(discard).toBeLessThan(starts[1]); expect(f.client.snapshot().game.memory.cycle).toBe(0); expect(f.b.maximum()).toBe(1); await done(f);
   });
+});
+
+
+describe('worker state observations and completion', () => {
+  test('publishes initial, progress, acknowledged and terminal states without inline callbacks', async () => {
+    const f = fixture(), states: string[] = [];
+    f.client.subscribe(state => states.push(state.status)); expect(states).toEqual([]);
+    await ready(f); await Promise.resolve(); expect(states).toContain('connecting'); expect(states).toContain('ready');
+    const ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    expect(states).toContain('working'); expect(states.at(-1)).toBe('ready');
+    await done(f); await Promise.resolve(); expect(states).toContain('closing'); expect(states.at(-1)).toBe('closed');
+  });
+  test('isolates observer errors and state copies, and supports unsubscribe', async () => {
+    const f = await ready(fixture()), discarded = vi.fn(); const remove = f.client.subscribe(discarded); remove();
+    f.client.subscribe(() => {throw Error('Observer failure');});
+    f.client.subscribe(state => {if (state.progress) state.progress.completedTicks = 999;});
+    const seen: number[] = []; f.client.subscribe(state => {if (state.progress) seen.push(state.progress.completedTicks);});
+    const ticket = f.client.request([], options); expect((await f.b.settle(ticket.result)).status).toBe('ready');
+    expect(discarded).not.toHaveBeenCalled(); expect(seen.length).toBeGreaterThan(0); expect(seen).not.toContain(999);
+    expect(f.client.state.progress?.completedTicks).toBe(1); await done(f);
+  });
+  test('waiting for idle waits for discard acknowledgement, then permits a new command', async () => {
+    const f = await ready(fixture()), ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    ticket.cancel(); let settled = false; const idle = f.client.whenIdle().then(() => {settled = true;});
+    await Promise.resolve(); expect(settled).toBe(false); await f.b.settle(idle);
+    expect(f.client.state.activeId).toBeNull(); const next = f.client.request([], {horizonTicks: 0}); await f.b.settle(next.result); await done(f);
+  });
+  test('timeout wakes idle waiters and observers even without an inbound event', async () => {
+    vi.useFakeTimers(); const f = await ready(fixture(policy, initial(), {timeoutMs: 20}));
+    const ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    const states: string[] = []; f.client.subscribe(state => states.push(state.status)); f.b.config.mapReply = m => m.kind === 'discard' ? null : m;
+    ticket.cancel(); const idle = f.client.whenIdle(); const rejected = expect(idle).rejects.toThrow(/timed out/);
+    await f.b.until(() => f.b.sent[1].some(m => m.kind === 'discard')); await vi.advanceTimersByTimeAsync(21); await rejected;
+    expect(states.at(-1)).toBe('failed'); expect(f.client.state.uncertain).toBe(false);
+  });
+  test('shutdown rejects idle waiters and late subscribers receive the terminal state once', async () => {
+    const f = await ready(fixture()), ticket = f.client.request([], {horizonTicks: 0}); await f.b.settle(ticket.result);
+    ticket.cancel(); const waiting = expect(f.client.whenIdle()).rejects.toThrow(/closed/); await done(f); await waiting;
+    const late = vi.fn(); f.client.subscribe(late); await Promise.resolve(); expect(late).toHaveBeenCalledOnce(); expect(late.mock.calls[0][0].status).toBe('closed');
+    await f.client.close(); await Promise.resolve(); expect(late).toHaveBeenCalledOnce();
+  });
+  test('subscribing from an observer does not rebroadcast to existing observers', async () => {
+    const f = await ready(fixture()); let calls = 0; const peer = vi.fn();
+    const remove = f.client.subscribe(() => {calls++; if (calls === 1) f.client.subscribe(peer);});
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    expect(calls).toBe(1); expect(peer).toHaveBeenCalledOnce(); remove(); await done(f);
+  });
+});
+
+test('held commit acknowledgements keep cached state private until explicitly delivered', async () => {
+  const f = await ready(fixture()), before = f.client.snapshot();
+  const ticket = f.client.request([{kind: 'game', game: {...f.init.game, label: 'acknowledged'}}], {horizonTicks: 0});
+  expect((await f.b.settle(ticket.result)).status).toBe('ready');
+  f.b.config.hold = (message, side) => side === 1 && message.kind === 'commit';
+  const commit = f.client.commit(ticket);
+  await f.b.until(() => f.b.held.length === 1);
+  expect(f.client.snapshot()).toEqual(before);
+  expect(f.client.state.status).toBe('working');
+  expect(f.b.sent[0].filter(message => message.kind === 'commit')).toHaveLength(1);
+  f.b.releaseHeld();
+  expect((await f.b.settle(commit)).snapshot.game.label).toBe('acknowledged');
+  expect(f.client.snapshot().revision).toBe(before.revision + 1);
+  expect(f.b.maximum()).toBe(1);
+  await done(f);
 });

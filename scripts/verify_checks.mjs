@@ -12,7 +12,7 @@ if(suite==='smoke'){
 }else if(suite==='unit'){
   checks=[
     ['node_modules/vitest/vitest.mjs','run','--config','engine/vitest.cpu.config.ts'],
-    ['--test','--test-concurrency=1','web/rendering.test.mjs','examples/first-person/game.test.mjs','examples/cavern/game.test.mjs','examples/active-cavern/game.test.mjs'],
+    ['--test','--test-concurrency=1','tests/build-tooling.test.mjs','web/rendering.test.mjs','examples/first-person/game.test.mjs','examples/cavern/game.test.mjs','examples/active-cavern/game.test.mjs'],
   ];
 }else if(suite==='native'){
   const file=process.argv[process.argv.indexOf('--file')+1];

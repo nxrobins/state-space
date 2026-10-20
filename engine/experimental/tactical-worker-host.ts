@@ -1,6 +1,6 @@
 /** Worker-owned tactical authority. Callbacks stay in the worker module. */
 import { createTacticalPreviewQueue3D, TACTICAL_PREVIEW_LIMITS_3D, type TacticalPreviewEditor3D, type TacticalPreviewTicket3D } from './tactical-previews.js';
-import { copyTacticalValue } from './tactical-session-core.js';
+import { copyPortableValue } from '../portable-data.js';
 import { queryRequestsData, executeQueryBatch, executePreviewQueryBatch } from './tactical-worker-queries.js';
 import { changeOptionsData, portableChanges } from './tactical-worker-changes.js';
 import { captureData } from './tactical-worker-motion.js';
@@ -103,7 +103,7 @@ export function createTacticalWorkerHost3D<T extends TacticalValue, C extends Ta
       if (m.kind === 'preview') {
         fields(m.payload, ['base', 'command', 'horizonTicks', 'capture']);
         if (current && !current.complete) throw Error('A preview is already in flight.');
-        const command = copyTacticalValue(m.payload.command as C), capture = captureData(m.payload.capture);
+        const command = copyPortableValue(m.payload.command as C), capture = captureData(m.payload.capture);
         const horizon = checkedInteger(m.payload.horizonTicks as number, 0, TACTICAL_PREVIEW_LIMITS_3D.horizonTicks, 'preview horizon');
         if (!sameRevision(m.payload.base, session.revision)) {
           reply(seq, 'preview', {id: seq, base: m.payload.base, horizonTicks: horizon, status: 'stale', error: null}); return;

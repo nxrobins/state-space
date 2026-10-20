@@ -1,3 +1,4 @@
+import { assertRecordFields } from '../portable-data.js';
 /** Shared fixed-point body arithmetic. Adapters own identity and geometry provenance. */
 import { GEOMETRY_LIMITS_3D, GEOMETRY_SCALE_3D, type GeometryKernel3D, type GeometryContact3D, type KernelExposure3D } from './geometry-kernel.js';
 export const BODY_LIMITS_3D = Object.freeze({sizeQ: 8 * GEOMETRY_SCALE_3D, velocityQ: 32 * GEOMETRY_SCALE_3D, gravityQ: GEOMETRY_SCALE_3D, defaultGravityQ: 64});
@@ -12,9 +13,7 @@ export type BodyKernelResult3D<R extends string, S, B extends KinematicBody3D> =
 };
 type Vector = BodyVector3D;
 export function bodyFields3D(value: object, required: readonly string[], optional: readonly string[] = []): void {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) ||
-      required.some(k => !Object.hasOwn(value, k)) || Reflect.ownKeys(value).some(k => typeof k !== 'string' || ![...required, ...optional].includes(k)) ||
-      Object.values(Object.getOwnPropertyDescriptors(value)).some(d => !('value' in d) || !d.enumerable)) throw Error('Invalid terrain body fields.');
+  assertRecordFields(value, required, optional, 'Invalid terrain body fields.');
 }
 export function bodyInteger3D(value: number, min: number, max: number): number {
   if (!Number.isSafeInteger(value) || value < min || value > max) throw Error('Invalid terrain body integer.'); return value === 0 ? 0 : value;
