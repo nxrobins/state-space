@@ -43,6 +43,18 @@ run passed 39 Vitest tests and 12 Node tests. The current suite adds the
 structural probe fixture regression, for 52 tests at that checkpoint; the current suite adds seven lighting-cache tests. This command excludes native GPU
 fixtures and the quarantined legacy demo trajectories.
 
+For a focused CPU/mock suite, use a file filter with the shared bounded config
+(replacing the old per-feature `vitest.reactive-*.config.ts` and interventions configs):
+
+```sh
+uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
+  node node_modules/vitest/vitest.mjs run engine/experimental/reactive-session.test.ts \
+  --config engine/vitest.bounded.config.ts
+```
+
+This retains one worker, a two-second test limit, and failure on the first failing
+suite. Native fixtures and `.runtime-cases.ts` remain separate explicit gates.
+
 Run the host-monitor and supervisor regressions separately:
 
 ```sh
