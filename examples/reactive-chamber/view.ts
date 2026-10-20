@@ -23,7 +23,7 @@ export async function checkRuntimeHold() {
 export async function openChamberView(
   canvas: HTMLCanvasElement,
   options: {
-    onPaint(scene: ChamberScene): void;
+    onPaint(): void;
     onError(error: string): void;
   },
 ) {
@@ -73,7 +73,7 @@ export async function openChamberView(
           depth,
         );
         displayed = captured;
-        options.onPaint(captured.scene);
+        options.onPaint();
       },
     });
     const resize = new ResizeObserver(() => pump.invalidate());

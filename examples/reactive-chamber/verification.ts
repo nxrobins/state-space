@@ -74,6 +74,8 @@ export async function verifyChamber(app: typeof chamberApp) {
       clientX: rect.left + (point.x * rect.width) / canvas.width,
       clientY: rect.top + (point.y * rect.height) / canvas.height,
     };
+    // The pending camera must not replace the camera of the pixels being picked.
+    app.orbit(0.65);
     // Pointer capture requires a trusted active pointer; the click's picking path does not.
     const capture = canvas.setPointerCapture;
     canvas.setPointerCapture = () => {};
@@ -81,7 +83,7 @@ export async function verifyChamber(app: typeof chamberApp) {
     canvas.dispatchEvent(new PointerEvent('pointerup', event));
     canvas.setPointerCapture = capture;
     await app.painted();
-    equal(app.scene!.selected, [...SUPPORT], 'Retina pointer selected the wrong cell.');
+    equal(app.scene!.selected, [...SUPPORT], 'Retina pointer did not use the completed frame.');
     if (nativeRatio) Object.defineProperty(window, 'devicePixelRatio', nativeRatio);
     else delete (window as unknown as { devicePixelRatio?: number }).devicePixelRatio;
     app.orbit(-0.65);

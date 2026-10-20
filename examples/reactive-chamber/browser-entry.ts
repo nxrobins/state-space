@@ -17,7 +17,6 @@ const button = (id: string) => element<HTMLButtonElement>(id),
   canvas = element<HTMLCanvasElement>('world');
 let client: ChamberClient | null = null;
 let scene: ChamberScene | null = null,
-  displayed: ChamberScene | null = null,
   committed: ChamberSnapshot | null = null;
 let selected: Cell = [...SUPPORT],
   showPreview = true,
@@ -29,10 +28,7 @@ const lifecycle = createChamberLifecycle({
   openClient: openChamber,
   openHost: () =>
     openChamberView(canvas, {
-      onPaint(value) {
-        displayed = value;
-        updateInspection();
-      },
+      onPaint: updateInspection,
       onError(message) {
         notice(message);
         void lifecycle.stop().catch((error) => notice(errorText(error)));
@@ -44,6 +40,7 @@ const notice = (text: string) => {
   element('notice').textContent = text;
 };
 function updateInspection() {
+  const displayed = lifecycle.current?.host.displayed?.scene;
   if (!displayed || !client) return;
   const s = sceneData(displayed).snapshot,
     info = inspectScene(displayed, selected),
@@ -127,7 +124,7 @@ function syncLifecycle() {
     unsubscribe();
     unsubscribe = () => {};
     client = null;
-    scene = displayed = null;
+    scene = null;
     committed = null;
     sceneKey = '';
     for (const id of [
@@ -244,11 +241,12 @@ canvas.onpointermove = (event) => {
   requestDraw();
 };
 canvas.onpointerup = (event) => {
+  const displayed = lifecycle.current?.host.displayed;
   if (drag && drag.distance < 4 && displayed) {
     const rect = canvas.getBoundingClientRect(),
       hit = pickElementCell(
-        displayed,
-        lifecycle.current?.host.displayed?.camera ?? orbitCamera(yaw, pitch),
+        displayed.scene,
+        displayed.camera,
         event.clientX - rect.left,
         event.clientY - rect.top,
         rect.width,
@@ -285,7 +283,7 @@ export const chamberApp = {
     return lifecycle.current?.host.renderer ?? null;
   },
   get scene() {
-    return displayed;
+    return lifecycle.current?.host.displayed?.scene ?? null;
   },
   get camera() {
     return orbitCamera(yaw, pitch);
