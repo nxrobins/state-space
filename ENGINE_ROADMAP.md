@@ -1,5 +1,9 @@
 # State Space engine roadmap
 
+This is the historical C1–C7 reference-release roadmap. For current qualification
+and remaining scope, use [validation status](docs/VALIDATION_STATUS.md); for
+contributor orientation, use the [architecture map](docs/ARCHITECTURE.md).
+
 The engine is the product. Games are integration probes. The target is a
 deterministic, composable material simulator with convincing interacting
 phenomena, measured scalability, and a supported extension workflow.
