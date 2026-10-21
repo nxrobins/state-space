@@ -4,8 +4,10 @@ import numpy as np
 
 from engine import MaterialRenderer, create_field
 from engine.schema import MAT_AIR, MAT_FIRE, MAT_GLASS, MAT_LAVA, MAT_METAL, MAT_SMOKE, MAT_STEAM, MAT_STONE, MAT_WATER
+from gpu_support import requires_gpu
 
 
+@requires_gpu
 class RenderingTests(unittest.TestCase):
     @staticmethod
     def image(renderer):

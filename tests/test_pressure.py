@@ -12,6 +12,7 @@ from engine.state import seed_state
 from engine.structure import plan_structure, validate_structure
 from engine.structure_bulk import plan_structure_bulk
 from engine.structure_compiled import plan_structure_compiled, validate_structure_compiled
+from gpu_support import requires_gpu
 
 
 
@@ -84,6 +85,7 @@ class PressureProperties(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate(*state[:2], words, 24, 24, DEFAULT_REGISTRY._structure)
 
+    @requires_gpu
     def test_native_breach_flow_replay_and_energy(self):
         with CompositionEngine() as engine:
             for kind in ('dam', 'boiler'):
@@ -109,6 +111,7 @@ class PressureProperties(unittest.TestCase):
                 control_material = 5 if kind == 'dam' else 11
                 self.assertFalse(np.any(((held['final_grid'] & 255) == control_material) & ((held['final_structure'] & 255) == 0)), kind)
 
+    @requires_gpu
     def test_executed_pressure_noop_and_impulse_noop_are_detected(self):
         from unittest.mock import patch
         from engine.sources import ShaderBundle

@@ -7,8 +7,10 @@ import numpy as np
 
 from engine import create_field, MaterialRenderer
 from engine.compositor import CompositionEngine
+from gpu_support import requires_gpu
 
 
+@requires_gpu
 class GpuWorkspaceReuse(unittest.TestCase):
     def test_close_retires_owned_devices_without_invalidating_another_field(self):
         with create_field(3, 3) as active:
