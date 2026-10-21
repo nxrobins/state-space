@@ -2,13 +2,18 @@
 /** Independent global support solver and persistent ca-v3 fragment state.
  * See docs/STRUCTURES.md for the approximation and diagnostic coordinates.
  */
-import { PHASE_SOLID, PHASE_FROZEN, STRUCTURE_INTEGRITY_MASK, STRUCTURE_BOND_LEFT_MASK, STRUCTURE_BOND_RIGHT_MASK, STRUCTURE_BOND_UP_MASK, STRUCTURE_BOND_DOWN_MASK, STRUCTURE_ANCHOR_MASK, STRUCTURE_FRESH_MASK, STRUCTURE_COMPLETE_MASK, STRUCTURE_INTERNAL_MASK } from './materials.generated.js';
+import { PHASE_SOLID, PHASE_FROZEN, STRUCTURE_INTEGRITY_MASK, STRUCTURE_BOND_LEFT_MASK, STRUCTURE_BOND_RIGHT_MASK, STRUCTURE_BOND_UP_MASK, STRUCTURE_BOND_DOWN_MASK, STRUCTURE_ANCHOR_MASK, STRUCTURE_FRESH_MASK, STRUCTURE_COMPLETE_MASK, STRUCTURE_INTERNAL_MASK, } from './materials.generated.js';
 import { PRESSURE_MASK, MOVED, fluidKind, updatePressure, pressureLoad } from './pressure.generated.js';
 import { requireRegistry } from './registry.generated.js';
-import { ENERGY_SCALE, temperatureQ, validateEnergyState, seedState } from './thermal.generated.js';
+import { ENERGY_SCALE, temperatureQ, validateEnergyState, seedState, } from './thermal.generated.js';
 import { checkedInteger, validateDimensions, validatePackedCells } from './validation.generated.js';
 export const INTEGRITY_MASK = STRUCTURE_INTEGRITY_MASK;
-export const BOND_BITS = Object.freeze([STRUCTURE_BOND_LEFT_MASK, STRUCTURE_BOND_RIGHT_MASK, STRUCTURE_BOND_UP_MASK, STRUCTURE_BOND_DOWN_MASK]);
+export const BOND_BITS = Object.freeze([
+    STRUCTURE_BOND_LEFT_MASK,
+    STRUCTURE_BOND_RIGHT_MASK,
+    STRUCTURE_BOND_UP_MASK,
+    STRUCTURE_BOND_DOWN_MASK,
+]);
 export const ANCHOR = STRUCTURE_ANCHOR_MASK;
 export const FRESH = STRUCTURE_FRESH_MASK;
 const COMPLETE_MASK = STRUCTURE_COMPLETE_MASK, INTERNAL_MASK = STRUCTURE_INTERNAL_MASK;
@@ -18,7 +23,7 @@ export function rulesForRegistry(registry) {
     requireRegistry(registry);
     let rules = registryRules.get(registry);
     if (!rules) {
-        rules = new StructuralRules(registry.materialIds.map(id => {
+        rules = new StructuralRules(registry.materialIds.map((id) => {
             const p = registry.material(id).properties;
             return { id, density: p.density, cohesion: p.cohesion, softening: p.softening };
         }), registry);
@@ -29,7 +34,10 @@ export function rulesForRegistry(registry) {
 /** Explicit creation from packed heat doses, never an implicit continuation. */
 export function createPhysicsState(cells, width, height, registry) {
     const state = seedState(validatePackedCells(cells, validateDimensions(width, height)), registry.coldTable(), registry);
-    return { ...state, structure: seedStructure(state.grid, width, height, rulesForRegistry(registry)) };
+    return {
+        ...state,
+        structure: seedStructure(state.grid, width, height, rulesForRegistry(registry)),
+    };
 }
 /** Explicit initial creation when the complete energy coordinate is supplied. */
 export function seedStructureState(state, width, height, registry) {
@@ -39,10 +47,16 @@ export function seedStructureState(state, width, height, registry) {
 export function rewrittenStructure(before, after, word, rules) {
     if (!rules.eligible(after))
         return fluidKind(after) ? (word & PRESSURE_MASK) >>> 0 : 0;
-    return !rules.eligible(before) || (before & 255) !== (after & 255) ? INTEGRITY_MASK | FRESH : word;
+    return !rules.eligible(before) || (before & 255) !== (after & 255)
+        ? INTEGRITY_MASK | FRESH
+        : word;
 }
 export function cloneStructure(state) {
-    return { grid: state.grid.slice(), energyQ: state.energyQ.slice(), structure: state.structure.slice() };
+    return {
+        grid: state.grid.slice(),
+        energyQ: state.energyQ.slice(),
+        structure: state.structure.slice(),
+    };
 }
 export class StructuralRules {
     #records;
@@ -61,9 +75,15 @@ export class StructuralRules {
                 throw new Error('Duplicate structural material ID.');
             if (!row.cohesion && row.softening)
                 throw new Error('Noncohesive material cannot have a softening threshold.');
-            records[row.id] = Object.freeze({ id: row.id, density: row.density, cohesion: row.cohesion, softening: row.softening });
+            records[row.id] = Object.freeze({
+                id: row.id,
+                density: row.density,
+                cohesion: row.cohesion,
+                softening: row.softening,
+            });
         }
-        if (registry.materialIds.length !== materials.length || registry.materialIds.some(id => !Object.hasOwn(records, id))) {
+        if (registry.materialIds.length !== materials.length ||
+            registry.materialIds.some((id) => !Object.hasOwn(records, id))) {
             throw new Error('Structural and thermal registries must contain the same material IDs.');
         }
         this.#records = Object.freeze(records);
@@ -84,12 +104,18 @@ export class StructuralRules {
     validate(cells, energy, count) {
         return validateEnergyState(cells, energy, count, this.#cold, this.#registry);
     }
-    temperature(voxel, energy) { return temperatureQ(voxel, energy, this.#cold); }
+    temperature(voxel, energy) {
+        return temperatureQ(voxel, energy, this.#cold);
+    }
 }
 function neighbors(index, width, height) {
     const x = index % width, y = Math.floor(index / width);
-    return [x ? index - 1 : -1, x + 1 < width ? index + 1 : -1,
-        y ? index - width : -1, y + 1 < height ? index + width : -1];
+    return [
+        x ? index - 1 : -1,
+        x + 1 < width ? index + 1 : -1,
+        y ? index - width : -1,
+        y + 1 < height ? index + width : -1,
+    ];
 }
 export function normalizeBonds(cells, words, width, height, rules) {
     const count = validateDimensions(width, height);
@@ -115,8 +141,8 @@ export function normalizeBonds(cells, words, width, height, rules) {
             const j = adjacent[direction];
             if (j < 0 || !active[j])
                 continue;
-            const reciprocal = (structure[i] & BOND_BITS[direction]) && (structure[j] & BOND_BITS[OPPOSITE[direction]]);
-            if (reciprocal || ((structure[i] | structure[j]) & FRESH)) {
+            const reciprocal = structure[i] & BOND_BITS[direction] && structure[j] & BOND_BITS[OPPOSITE[direction]];
+            if (reciprocal || (structure[i] | structure[j]) & FRESH) {
                 output[i] |= BOND_BITS[direction];
                 output[j] |= BOND_BITS[OPPOSITE[direction]];
             }
@@ -126,7 +152,7 @@ export function normalizeBonds(cells, words, width, height, rules) {
 }
 export function seedStructure(cells, width, height, rules, anchors = []) {
     const grid = validatePackedCells(cells, validateDimensions(width, height));
-    const words = Uint32Array.from(grid, cell => rules.eligible(cell) ? 255 | FRESH : 0);
+    const words = Uint32Array.from(grid, (cell) => (rules.eligible(cell) ? 255 | FRESH : 0));
     for (const value of anchors) {
         const index = checkedInteger(value, 0, grid.length - 1, 'anchor index');
         if (!words[index])
@@ -139,14 +165,15 @@ export function validateStructure(state, width, height, rules, completed = true)
     const count = validateDimensions(width, height);
     const result = rules.validate(state.grid, state.energyQ, count);
     const words = validatePackedCells(state.structure, count);
-    if (words.some(word => (word & ~(completed ? COMPLETE_MASK : INTERNAL_MASK)) !== 0))
+    if (words.some((word) => (word & ~(completed ? COMPLETE_MASK : INTERNAL_MASK)) !== 0))
         throw new Error('Structural state contains reserved or pending bits.');
     if (completed) {
         const normalized = normalizeBonds(result.grid, words, width, height, rules);
         if (normalized.some((word, index) => word !== words[index]))
             throw new Error('Structural bonds must be reciprocal, in bounds, and between intact cohesive cells.');
     }
-    else if (words.some((word, i) => ((word & ~(PRESSURE_MASK | MOVED)) !== 0 && !rules.eligible(result.grid[i])) || ((word & PRESSURE_MASK) !== 0 && !fluidKind(result.grid[i]))))
+    else if (words.some((word, i) => ((word & ~(PRESSURE_MASK | MOVED)) !== 0 && !rules.eligible(result.grid[i])) ||
+        ((word & PRESSURE_MASK) !== 0 && !fluidKind(result.grid[i]))))
         throw new Error('Invalid mechanical state for material phase.');
     return { ...result, structure: words };
 }
@@ -157,15 +184,17 @@ export function planStructure(input, width, height, rules) {
     const { grid, energyQ, structure } = validateStructure(input, width, height, rules);
     const count = grid.length;
     const active = (index, words = structure) => (words[index] & INTEGRITY_MASK) !== 0;
-    const bound = (index, words = structure) => neighbors(index, width, height)
-        .filter((neighbor, direction) => neighbor >= 0 && (words[index] & BOND_BITS[direction]) !== 0);
-    const blockedByGrain = (source, target) => (structure[target] & ANCHOR) !== 0 || rules.material(grid[source]).density <= rules.material(grid[target]).density;
+    const bound = (index, words = structure) => neighbors(index, width, height).filter((neighbor, direction) => neighbor >= 0 && (words[index] & BOND_BITS[direction]) !== 0);
+    const blockedByGrain = (source, target) => (structure[target] & ANCHOR) !== 0 ||
+        rules.material(grid[source]).density <= rules.material(grid[target]).density;
     const distances = Array(count).fill(-1), loads = Array(count).fill(0), reactions = Array(count).fill(0);
     const order = [];
     for (let i = 0; i < count; i += 1) {
         if (!active(i))
             continue;
-        if ((structure[i] & ANCHOR) || i + width >= count || (!active(i + width) && blockedByGrain(i, i + width))) {
+        if (structure[i] & ANCHOR ||
+            i + width >= count ||
+            (!active(i + width) && blockedByGrain(i, i + width))) {
             distances[i] = 0;
             order.push(i);
         }
@@ -196,7 +225,9 @@ export function planStructure(input, width, height, rules) {
         const candidates = new Set(bound(index));
         if (index + width < count && active(index + width))
             candidates.add(index + width);
-        const supports = [...candidates].filter(next => distances[next] === distances[index] - 1).sort((a, b) => a - b);
+        const supports = [...candidates]
+            .filter((next) => distances[next] === distances[index] - 1)
+            .sort((a, b) => a - b);
         if (!supports.length)
             throw new Error('Supported cell has no load predecessor.');
         const share = Math.floor(loads[index] / supports.length), remainder = loads[index] % supports.length;
@@ -210,10 +241,16 @@ export function planStructure(input, width, height, rules) {
         if (!active(i))
             continue;
         const row = rules.material(grid[i]), integrity = structure[i] & INTEGRITY_MASK, nominal = row.cohesion * 16;
-        const remaining = row.softening ? Math.max(0, Math.min(64 * ENERGY_SCALE, (row.softening + 64) * ENERGY_SCALE - rules.temperature(grid[i], energyQ[i]))) : 64 * ENERGY_SCALE;
-        capacities[i] = Math.floor(nominal * integrity * remaining / (255 * 64 * ENERGY_SCALE));
+        const remaining = row.softening
+            ? Math.max(0, Math.min(64 * ENERGY_SCALE, (row.softening + 64) * ENERGY_SCALE - rules.temperature(grid[i], energyQ[i])))
+            : 64 * ENERGY_SCALE;
+        capacities[i] = Math.floor((nominal * integrity * remaining) / (255 * 64 * ENERGY_SCALE));
         const demand = loads[i] + pressureLoad(damaged, i, width);
-        const loss = capacities[i] === 0 ? integrity : demand > capacities[i] ? Math.min(integrity, Math.max(1, Math.floor((demand - capacities[i]) * 255 / nominal))) : 0;
+        const loss = capacities[i] === 0
+            ? integrity
+            : demand > capacities[i]
+                ? Math.min(integrity, Math.max(1, Math.floor(((demand - capacities[i]) * 255) / nominal)))
+                : 0;
         damaged[i] = (damaged[i] & ~INTEGRITY_MASK) | (integrity - loss);
     }
     const repairedEdges = normalizeBonds(grid, damaged, width, height, rules);
@@ -258,7 +295,7 @@ export function planStructure(input, width, height, rules) {
         dependents.set(root, new Set());
     for (const [root, members] of groups) {
         for (const i of members) {
-            if ((repairedEdges[i] & ANCHOR) || i + width >= count) {
+            if (repairedEdges[i] & ANCHOR || i + width >= count) {
                 blocked.add(root);
                 continue;
             }
@@ -287,7 +324,12 @@ export function planStructure(input, width, height, rules) {
         if (falls)
             for (const index of cells)
                 moving[index] = 1;
-        components.push(Object.freeze({ id, cells: Object.freeze(cells), moving: falls, anchored: cells.some(i => (repairedEdges[i] & ANCHOR) !== 0) }));
+        components.push(Object.freeze({
+            id,
+            cells: Object.freeze(cells),
+            moving: falls,
+            anchored: cells.some((i) => (repairedEdges[i] & ANCHOR) !== 0),
+        }));
     }
     const sources = Array.from({ length: count }, (_, index) => index);
     // Rotate each column run in place in the source map, including the displaced
@@ -314,24 +356,36 @@ export function planStructure(input, width, height, rules) {
             throw new Error('Structural transport must be a bijection.');
         visits[source] = 1;
     }
-    const finalWords = sources.map(source => repairedEdges[source]);
-    const normalized = normalizeBonds(sources.map(source => grid[source]), finalWords, width, height, rules);
+    const finalWords = sources.map((source) => repairedEdges[source]);
+    const normalized = normalizeBonds(sources.map((source) => grid[source]), finalWords, width, height, rules);
     if (normalized.some((word, index) => word !== finalWords[index]))
         throw new Error('Structural transport broke reciprocal bonds.');
     // Clone inputs remain inside this closure. Exposed diagnostics are frozen
     // ordinary arrays, so callers cannot mutate the plan through a typed-array view.
-    return Object.freeze({ width, height, sources: Object.freeze(sources), structure: Object.freeze(finalWords),
-        loads: Object.freeze(loads), capacities: Object.freeze(capacities), reactions: Object.freeze(reactions), distances: Object.freeze(distances),
-        components: Object.freeze(components), supportedWeight,
+    return Object.freeze({
+        width,
+        height,
+        sources: Object.freeze(sources),
+        structure: Object.freeze(finalWords),
+        loads: Object.freeze(loads),
+        capacities: Object.freeze(capacities),
+        reactions: Object.freeze(reactions),
+        distances: Object.freeze(distances),
+        components: Object.freeze(components),
+        supportedWeight,
         apply(state, actualWidth, actualHeight) {
             validateDimensions(actualWidth, actualHeight);
             if (actualWidth !== width || actualHeight !== height)
                 throw new Error('Structural plan dimensions changed; recompute for the current geometry.');
-            const current = [state.grid, state.energyQ, state.structure].map(values => validatePackedCells(values, count));
+            const current = [state.grid, state.energyQ, state.structure].map((values) => validatePackedCells(values, count));
             if ([grid, energyQ, structure].some((values, coordinate) => values.some((value, i) => value !== current[coordinate][i]))) {
                 throw new Error('Structural plan input changed; recompute against the current full state.');
             }
-            return { grid: Uint32Array.from(sources, i => grid[i]), energyQ: Uint32Array.from(sources, i => energyQ[i]), structure: Uint32Array.from(finalWords) };
+            return {
+                grid: Uint32Array.from(sources, (i) => grid[i]),
+                energyQ: Uint32Array.from(sources, (i) => energyQ[i]),
+                structure: Uint32Array.from(finalWords),
+            };
         },
     });
 }
