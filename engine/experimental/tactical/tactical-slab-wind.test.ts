@@ -18,7 +18,7 @@ import {
 import {
   captureMaterialTransportMemory3D as capture,
   restoreMaterialTransportMemory3D as restore,
-} from '../material-transport-coupling.js';
+} from '../gameplay/material-transport-coupling.js';
 import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { observe } from '../terrain/terrain-motion.fixtures.js';

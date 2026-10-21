@@ -1,6 +1,6 @@
 /** Exact actor response to serial controlled parcels, not stationary controllers. */
 import type { ReactiveGameplayGeometry3D } from './reactive-geometry.js';
-import { DISPLACEMENT_CARRY_LIMITS_3D } from '../displacement-carry-options.js';
+import { DISPLACEMENT_CARRY_LIMITS_3D } from '../gameplay/displacement-carry-options.js';
 import {
   createReactiveControlledDisplacement3D,
   type ReactiveControlledDisplacement3D,

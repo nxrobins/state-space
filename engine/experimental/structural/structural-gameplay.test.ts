@@ -3,7 +3,7 @@ import { runInNewContext } from 'node:vm';
 import { expect, test } from 'vitest';
 import { commitStructuralGoal } from './structural-gameplay.js';
 import { createStateSpaceStructuralWorld3D } from './structural-world-core.js';
-import type { GameplayCommit3D, GameplayRules3D } from '../gameplay-view.js';
+import type { GameplayCommit3D, GameplayRules3D } from '../gameplay/gameplay-view.js';
 
 const rules: GameplayRules3D = {
   goal: { minX: 2304, maxY: 2048, minZ: 1536, maxZ: 2560 },

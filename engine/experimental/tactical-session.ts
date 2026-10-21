@@ -8,7 +8,7 @@ export {
   prepareMaterialTransport3D,
   MATERIAL_TRANSPORT_MEMORY_RULES_3D,
   type MaterialTransportMemory3D,
-} from './material-transport-coupling.js';
+} from './gameplay/material-transport-coupling.js';
 export {
   createTerrainActorGroup3D,
   createTranslatedActorGroup3D,
@@ -30,7 +30,7 @@ export {
   type MaterialTransportState3D,
   type MaterialImpulse3D,
   type MaterialTransportReceipt3D,
-} from './material-transport.js';
+} from './gameplay/material-transport.js';
 export { createTacticalWorkerHost3D } from './tactical/tactical-worker-host.js';
 export {
   createTacticalWorkerClient3D,
@@ -70,15 +70,19 @@ export type {
   TacticalPreviewCapture3D,
 } from './tactical/tactical-previews.js';
 import type { MaterialMotionTrace3D } from './motion-trace.js';
-import type { MaterialMotionPaths3D } from './motion-paths.js';
-export { PATH_JOURNAL_RULES_3D, PATH_JOURNAL_LIMITS_3D } from './path-journal.js';
-export type { PathJournal3D, PathJournalFrame3D, TickMovement3D } from './path-journal.js';
-export { MOTION_PATH_RULES_3D, MOTION_PATH_LIMITS_3D, readMotionPaths3D } from './motion-paths.js';
+import type { MaterialMotionPaths3D } from './gameplay/motion-paths.js';
+export { PATH_JOURNAL_RULES_3D, PATH_JOURNAL_LIMITS_3D } from './gameplay/path-journal.js';
+export type { PathJournal3D, PathJournalFrame3D, TickMovement3D } from './gameplay/path-journal.js';
+export {
+  MOTION_PATH_RULES_3D,
+  MOTION_PATH_LIMITS_3D,
+  readMotionPaths3D,
+} from './gameplay/motion-paths.js';
 export type {
   MaterialMotionPaths3D,
   MotionPathPass3D,
   MotionPathSegment3D,
-} from './motion-paths.js';
+} from './gameplay/motion-paths.js';
 export {
   MOTION_TRACE_RULES_3D,
   MOTION_JOURNAL_RULES_3D,
@@ -91,7 +95,7 @@ export type {
   MotionJournal3D,
   MotionJournalFrame3D,
 } from './motion-trace.js';
-export { ACTION_JOURNAL_RULES_3D, ACTION_JOURNAL_LIMITS_3D } from './action-journal.js';
+export { ACTION_JOURNAL_RULES_3D, ACTION_JOURNAL_LIMITS_3D } from './gameplay/action-journal.js';
 export type {
   ActionJournal3D,
   ActionJournalEvent3D,
@@ -99,7 +103,7 @@ export type {
   ActionBoundaryChanges3D,
   ActionIntervention3D,
   PortableTranslationReceipt3D,
-} from './action-journal.js';
+} from './gameplay/action-journal.js';
 import { createTacticalSessionCore3D } from './tactical/tactical-session-core.js';
 import type {
   TacticalValue,
@@ -107,7 +111,10 @@ import type {
   TacticalSessionPolicy3D,
   TacticalSession3D,
 } from './tactical/tactical-session-view.js';
-export { CHANGE_REPORT_RULES_VERSION_3D, CHANGE_REPORT_LIMITS_3D } from './change-reports.js';
+export {
+  CHANGE_REPORT_RULES_VERSION_3D,
+  CHANGE_REPORT_LIMITS_3D,
+} from './gameplay/change-reports.js';
 export type {
   GameplayChangeReport3D,
   DomainChangeReport3D,
@@ -115,13 +122,13 @@ export type {
   ChangeChannel3D,
   ChangeReportOptions3D,
   ChangeTarget3D,
-} from './change-reports.js';
+} from './gameplay/change-reports.js';
 export {
   GEOMETRY_RULES_VERSION_3D,
   GEOMETRY_SCALE_3D,
   GEOMETRY_LIMITS_3D,
   EXPOSURE_RULES_VERSION_3D,
-} from './gameplay-geometry.js';
+} from './gameplay/gameplay-geometry.js';
 export type {
   GameplayGeometry3D,
   GeometryVector3D,
@@ -133,7 +140,7 @@ export type {
   GeometryFilter3D,
   GeometryExposure3D,
   MaterialExposure3D,
-} from './gameplay-geometry.js';
+} from './gameplay/gameplay-geometry.js';
 export {
   createTerrainBody3D,
   readTerrainBody3D,
@@ -174,25 +181,25 @@ export {
   translateStructuralRegionWithPaths3D,
   TRANSLATION_PATH_RULES_3D,
   TRANSLATION_PATH_LIMITS_3D,
-} from './translation-paths.js';
+} from './gameplay/translation-paths.js';
 export type {
   TranslationPaths3D,
   TranslationPathsResult3D,
   TranslationPathOptions3D,
   TranslationMovement3D,
   TranslationAction3D,
-} from './translation-paths.js';
+} from './gameplay/translation-paths.js';
 export {
   createTranslationDisplacement3D,
   TRANSLATION_DISPLACEMENT_RULES_3D,
   TRANSLATION_DISPLACEMENT_LIMITS_3D,
-} from './translation-displacement.js';
+} from './gameplay/translation-displacement.js';
 export type {
   TranslationCarry3D,
   TranslationDisplacementOptions3D,
   TranslationDisplacementResult3D,
   TranslationDisplacement3D,
-} from './translation-displacement.js';
+} from './gameplay/translation-displacement.js';
 export {
   createTerrainBodyGroup3D,
   createTranslationBodyGroup3D,
@@ -210,23 +217,23 @@ export {
   moveTerrainActors3D,
   ACTOR_MOVEMENT_RULES_3D,
   ACTOR_MOVEMENT_LIMITS_3D,
-} from './actor-movement.js';
+} from './gameplay/actor-movement.js';
 export type {
   ActorMovementCommand3D,
   ActorMovementResult3D,
   ActorMovementResponse3D,
   ActorMovementContact3D,
   ActorFooting3D,
-} from './actor-movement.js';
+} from './gameplay/actor-movement.js';
 export {
   MATERIAL_RESERVOIR_RULES_VERSION_3D,
   MATERIAL_RESERVOIR_LIMITS_3D,
-} from './material-reservoirs.js';
+} from './gameplay/material-reservoirs.js';
 export type {
   MaterialReservoir3D,
   MaterialTransferRequest3D,
   MaterialTransferReceipt3D,
-} from './material-reservoirs.js';
+} from './gameplay/material-reservoirs.js';
 export {
   TEMPORARY_HOLD_RULES_VERSION_3D,
   THERMAL_INTERVENTION_RULES_VERSION_3D,

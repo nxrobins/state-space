@@ -1,5 +1,5 @@
 /** Game-owned kinematic bodies for catalog-aware reactive boundaries. */
-import { GEOMETRY_LIMITS_3D } from '../geometry-kernel.js';
+import { GEOMETRY_LIMITS_3D } from '../gameplay/geometry-kernel.js';
 import {
   reactiveGeometrySource3D,
   REACTIVE_GEOMETRY_RULES_3D,
@@ -16,7 +16,7 @@ import {
   type KinematicBody3D,
   type BodyCommand3D,
   type BodyKernelResult3D,
-} from '../body-kernel.js';
+} from '../gameplay/body-kernel.js';
 export const REACTIVE_BODY_RULES_3D = 'reactive-body-1';
 export const REACTIVE_BODY_LIMITS_3D = BODY_LIMITS_3D;
 export type ReactiveBody3D = KinematicBody3D & {

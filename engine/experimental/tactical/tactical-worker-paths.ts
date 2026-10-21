@@ -9,13 +9,13 @@ import {
   readMotionPathsDomain3D,
   MOTION_PATH_LIMITS_3D,
   type MaterialMotionPaths3D,
-} from '../motion-paths.js';
+} from '../gameplay/motion-paths.js';
 import {
   motionPathEntries3D,
   PATH_JOURNAL_RULES_3D,
   PATH_JOURNAL_LIMITS_3D,
   type PathJournal3D,
-} from '../path-journal.js';
+} from '../gameplay/path-journal.js';
 import { TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';
 import { checkedInteger } from '../../validation.js';

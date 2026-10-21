@@ -10,8 +10,8 @@ import {
   type TerrainDisplacement3D,
 } from './terrain-displacement.js';
 import { createTerrainBody3D } from './terrain-body.js';
-import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from '../gameplay-geometry.js';
-import type { TickMovement3D } from '../path-journal.js';
+import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from '../gameplay/gameplay-geometry.js';
+import type { TickMovement3D } from '../gameplay/path-journal.js';
 import { seed, index, factory, type Spec } from './terrain-motion.fixtures.js';
 import { thermalView } from '../../thermal.js';
 import { buildColdTable } from '../../generated/materials.js';

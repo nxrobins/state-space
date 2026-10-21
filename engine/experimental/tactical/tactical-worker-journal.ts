@@ -5,7 +5,7 @@ import {
   actionRunLimit3D,
   type ActionJournal3D,
   type ActionJournalEvent3D,
-} from '../action-journal.js';
+} from '../gameplay/action-journal.js';
 import { boundaryChangesData } from './tactical-worker-changes.js';
 import { actionArray, actionInteger, actionReceiptData } from './tactical-worker-action.js';
 import {
@@ -16,7 +16,7 @@ import {
 } from '../motion-trace.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';
 import { TACTICAL_SESSION_LIMITS_3D } from './tactical-session-core.js';
-import type { ChangeTarget3D } from '../change-reports.js';
+import type { ChangeTarget3D } from '../gameplay/change-reports.js';
 import type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
 import type {
   TacticalRevision3D,

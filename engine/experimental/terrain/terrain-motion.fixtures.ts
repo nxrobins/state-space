@@ -6,7 +6,7 @@ import {
   type StructuralSnapshot3D,
 } from '../structural/structural-world-core.js';
 import { createMotionRecorder3D } from '../motion-trace.js';
-import { createMotionPathRecorder3D } from '../motion-paths.js';
+import { createMotionPathRecorder3D } from '../gameplay/motion-paths.js';
 import type { TacticalSimulationFactory3D } from '../tactical/tactical-session-core.js';
 
 export const index = (x: number, y: number, z: number) => x + 4 * (y + 4 * z);

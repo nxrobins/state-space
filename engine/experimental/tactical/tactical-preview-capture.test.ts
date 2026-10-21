@@ -17,7 +17,7 @@ import {
 } from './tactical-previews.js';
 import type { TacticalSessionPolicy3D } from './tactical-session-view.js';
 import { observe, seed, index, type Spec } from '../terrain/terrain-motion.fixtures.js';
-import type { SupportObserver3D } from '../change-reports.js';
+import type { SupportObserver3D } from '../gameplay/change-reports.js';
 
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 type Game = { ap: number };

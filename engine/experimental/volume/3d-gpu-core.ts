@@ -19,14 +19,14 @@ import {
   checkedGameplayState,
   checkedGameplayRules,
   checkedGameplayCommand,
-} from '../gameplay-gpu.js';
+} from '../gameplay/gameplay-gpu.js';
 import type {
   GameplayState3D,
   GameplayRules3D,
   GameplayCommand3D,
   GameplayPresentation3D,
   ResidentGameplay3D,
-} from '../gameplay-view.js';
+} from '../gameplay/gameplay-view.js';
 export type {
   GameplayState3D,
   GameplayRules3D,
@@ -34,7 +34,7 @@ export type {
   GameplayPresentation3D,
   GameplayCommit3D,
   ResidentGameplay3D,
-} from '../gameplay-view.js';
+} from '../gameplay/gameplay-view.js';
 import { LatencyProfiler, type Trace } from './latency.js';
 import type { LatencySnapshot } from './3d-view.js';
 export type { LatencyRecord, LatencySnapshot } from './3d-view.js';

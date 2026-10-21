@@ -1,6 +1,6 @@
 /** Tick adapter for the unchanged terrain-displacement-1 response contract. */
-import type { GameplayGeometry3D, GeometryStamp3D } from '../gameplay-geometry.js';
-import { tickMovementSource3D, type TickMovement3D } from '../path-journal.js';
+import type { GameplayGeometry3D, GeometryStamp3D } from '../gameplay/gameplay-geometry.js';
+import { tickMovementSource3D, type TickMovement3D } from '../gameplay/path-journal.js';
 import type { TerrainBodyState3D } from './terrain-body.js';
 import {
   createDisplacementCore3D,

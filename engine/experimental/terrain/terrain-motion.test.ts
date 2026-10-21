@@ -17,8 +17,8 @@ import {
   createGameplayGeometry3D,
   GEOMETRY_SCALE_3D as Q,
   type GameplayGeometry3D,
-} from '../gameplay-geometry.js';
-import type { TickMovement3D } from '../path-journal.js';
+} from '../gameplay/gameplay-geometry.js';
+import type { TickMovement3D } from '../gameplay/path-journal.js';
 
 // Synthetic executed permutations and static/edit queries only; no M5 solve/tick.
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');

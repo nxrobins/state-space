@@ -2,13 +2,13 @@
 import { MAX_ENERGY_Q } from '../../thermal.js';
 import { checkedInteger } from '../../validation.js';
 import { INTERVENTION_RULES_VERSION_3D, TRANSLATION_LIMITS_3D } from '../interventions.js';
-import { MATERIAL_RESERVOIR_RULES_VERSION_3D } from '../material-reservoirs.js';
+import { MATERIAL_RESERVOIR_RULES_VERSION_3D } from '../gameplay/material-reservoirs.js';
 import {
   TACTICAL_ACTION_LIMITS_3D,
   THERMAL_INTERVENTION_RULES_VERSION_3D,
 } from './tactical-actions.js';
 import { fields } from './tactical-worker-wire.js';
-import type { ActionIntervention3D } from '../action-journal.js';
+import type { ActionIntervention3D } from '../gameplay/action-journal.js';
 import type { StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import type { TacticalSessionSnapshot3D, TacticalValue } from './tactical-session-view.js';
 

@@ -31,7 +31,7 @@ import {
   checkedGameplayState,
   checkedGameplayRules,
   checkedGameplayCommand,
-} from './gameplay-gpu.js';
+} from './gameplay/gameplay-gpu.js';
 import { LatencyProfiler, type Trace } from './volume/latency.js';
 import { commitStructuralGoal } from './structural/structural-gameplay.js';
 import type {
@@ -51,7 +51,7 @@ import type {
   GameplayRules3D,
   GameplayCommand3D,
   GameplayPresentation3D,
-} from './gameplay-view.js';
+} from './gameplay/gameplay-view.js';
 import type {
   StructuralResidentGameplay3D,
   StructuralGameplayOptions3D,
@@ -64,7 +64,7 @@ export type {
   StructuralGameplayOptions3D,
   StructuralGameplayCommit3D,
 } from './structural/structural-view.js';
-export { checkedGameplayState as validateStructuralGameplayState3D } from './gameplay-gpu.js';
+export { checkedGameplayState as validateStructuralGameplayState3D } from './gameplay/gameplay-gpu.js';
 
 const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase'];
 const BINDINGS = {

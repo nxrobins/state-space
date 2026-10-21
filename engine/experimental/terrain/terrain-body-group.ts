@@ -1,4 +1,4 @@
-import { createBodyGroupKernel3D } from '../body-group-kernel.js';
+import { createBodyGroupKernel3D } from '../gameplay/body-group-kernel.js';
 /** Bounded group queries. Terrain and game publication remain session operations. */
 import { readTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
 import {
@@ -9,10 +9,10 @@ import {
   createTranslationDisplacement3D,
   TRANSLATION_DISPLACEMENT_LIMITS_3D,
   type TranslationDisplacementResult3D,
-} from '../translation-displacement.js';
-import type { GameplayGeometry3D, GeometryStamp3D } from '../gameplay-geometry.js';
-import type { TickMovement3D } from '../path-journal.js';
-import type { TranslationMovement3D } from '../translation-paths.js';
+} from '../gameplay/translation-displacement.js';
+import type { GameplayGeometry3D, GeometryStamp3D } from '../gameplay/gameplay-geometry.js';
+import type { TickMovement3D } from '../gameplay/path-journal.js';
+import type { TranslationMovement3D } from '../gameplay/translation-paths.js';
 
 export const TERRAIN_BODY_GROUP_RULES_3D = 'terrain-body-group-1';
 export const TERRAIN_BODY_GROUP_LIMITS_3D = Object.freeze({

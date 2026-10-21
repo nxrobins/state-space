@@ -4,8 +4,11 @@ import {
   reactiveTranslationMovementSource3D,
   type ReactiveTranslationMovement3D,
 } from './reactive-translation-motion.js';
-import { DISPLACEMENT_CARRY_LIMITS_3D } from '../displacement-carry-options.js';
-import type { DisplacementOptions3D, DisplacementResult3D } from '../displacement-kernel.js';
+import { DISPLACEMENT_CARRY_LIMITS_3D } from '../gameplay/displacement-carry-options.js';
+import type {
+  DisplacementOptions3D,
+  DisplacementResult3D,
+} from '../gameplay/displacement-kernel.js';
 import type { ReactiveBody3D } from './reactive-body.js';
 
 import { createReactiveControlledDisplacement3D } from './reactive-controlled-displacement.js';

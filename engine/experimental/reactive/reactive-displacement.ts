@@ -1,6 +1,6 @@
 /** One-way body response to privately bound executed reactive tick boundaries. */
 import { PHASE, PHASE_SHIFT } from '../../generated/materials.js';
-import { GEOMETRY_SCALE_3D as Q } from '../geometry-kernel.js';
+import { GEOMETRY_SCALE_3D as Q } from '../gameplay/geometry-kernel.js';
 import {
   reactiveGeometrySource3D,
   type ReactiveGameplayGeometry3D,
@@ -13,12 +13,12 @@ import {
   forwardDisplacementTrace3D,
   type DisplacementResult3D,
   type DisplacementContact3D,
-} from '../displacement-kernel.js';
+} from '../gameplay/displacement-kernel.js';
 import {
   DISPLACEMENT_CARRY_LIMITS_3D,
   readDisplacementCarryOptions3D,
   type DisplacementCarryOptions3D,
-} from '../displacement-carry-options.js';
+} from '../gameplay/displacement-carry-options.js';
 export const REACTIVE_DISPLACEMENT_RULES_3D = 'reactive-displacement-1';
 export const REACTIVE_DISPLACEMENT_LIMITS_3D = DISPLACEMENT_CARRY_LIMITS_3D;
 export type ReactiveDisplacementOptions3D = DisplacementCarryOptions3D;

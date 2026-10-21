@@ -1,7 +1,7 @@
 /** Queue capture is opt-in; callers cannot disable a session's required paths. */
 import { motionEntryLimit3D } from '../motion-trace.js';
-import { motionPathLimits3D } from '../motion-paths.js';
-import { actionRunLimit3D } from '../action-journal.js';
+import { motionPathLimits3D } from '../gameplay/motion-paths.js';
+import { actionRunLimit3D } from '../gameplay/action-journal.js';
 import type { TacticalBranchOptions3D } from './tactical-session-view.js';
 
 export type TacticalPreviewCapture3D = {

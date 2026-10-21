@@ -5,7 +5,10 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTacticalSession3D } from '../tactical-session.js';
-import { assertGameplayGeometry3D, gameplayGeometrySource3D } from '../gameplay-geometry.js';
+import {
+  assertGameplayGeometry3D,
+  gameplayGeometrySource3D,
+} from '../gameplay/gameplay-geometry.js';
 import { createReactiveGeometry3D } from './reactive-geometry.js';
 import {
   createReactiveMaterialRegistry3D,

@@ -4,7 +4,7 @@ import {
   createTacticalSessionCore3D,
   TACTICAL_SESSION_LIMITS_3D,
 } from './tactical-session-core.js';
-import { compatibleReservoirs3D } from '../material-reservoirs.js';
+import { compatibleReservoirs3D } from '../gameplay/material-reservoirs.js';
 import { checkedInteger } from '../../validation.js';
 import type { TacticalPreviewOutcome3D } from './tactical-previews.js';
 import type {

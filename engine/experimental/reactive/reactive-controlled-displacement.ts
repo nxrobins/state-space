@@ -1,18 +1,18 @@
 /** Shared exact actor response to controlled material paths. Internal adapters supply provenance. */
 import { PHASE, PHASE_SHIFT } from '../../generated/materials.js';
-import { GEOMETRY_SCALE_3D as Q } from '../geometry-kernel.js';
+import { GEOMETRY_SCALE_3D as Q } from '../gameplay/geometry-kernel.js';
 import {
   reactiveGeometrySource3D,
   type ReactiveGameplayGeometry3D,
   type ReactiveGeometryStamp3D,
 } from './reactive-geometry.js';
-import { readDisplacementCarryOptions3D } from '../displacement-carry-options.js';
+import { readDisplacementCarryOptions3D } from '../gameplay/displacement-carry-options.js';
 import {
   createDisplacementKernel3D,
   forwardDisplacementTrace3D,
   type DisplacementOptions3D,
   type DisplacementResult3D,
-} from '../displacement-kernel.js';
+} from '../gameplay/displacement-kernel.js';
 import { readReactiveBody3D, type ReactiveBody3D } from './reactive-body.js';
 import type { ReactiveMotionSegment3D } from './reactive-motion-capture.js';
 type V = [number, number, number];

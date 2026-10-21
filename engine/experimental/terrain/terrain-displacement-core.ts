@@ -3,7 +3,7 @@ import {
   gameplayGeometrySource3D,
   type GameplayGeometry3D,
   type GeometryStamp3D,
-} from '../gameplay-geometry.js';
+} from '../gameplay/gameplay-geometry.js';
 import { readTerrainBody3D, type TerrainBodyState3D } from './terrain-body.js';
 import {
   createDisplacementKernel3D,
@@ -11,18 +11,18 @@ import {
   type DisplacementSource3D as Source,
   type DisplacementResult3D as Result,
   type DisplacementCarry3D as Carry,
-} from '../displacement-kernel.js';
+} from '../gameplay/displacement-kernel.js';
 export {
   DISPLACEMENT_LIMITS_3D,
   displacementTrace3D,
   forwardDisplacementTrace3D,
-} from '../displacement-kernel.js';
+} from '../gameplay/displacement-kernel.js';
 export type {
   DisplacementTraceSegment3D,
   DisplacementContact3D,
   DisplacementOptions3D,
   DisplacementPass3D,
-} from '../displacement-kernel.js';
+} from '../gameplay/displacement-kernel.js';
 export type DisplacementResult3D<R extends string> = Result<
   R,
   Readonly<GeometryStamp3D>,

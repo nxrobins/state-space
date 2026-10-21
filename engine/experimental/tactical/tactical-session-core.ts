@@ -7,12 +7,12 @@ import {
   createGameplayGeometry3D,
   GEOMETRY_RULES_VERSION_3D,
   type GeometryStamp3D,
-} from '../gameplay-geometry.js';
+} from '../gameplay/gameplay-geometry.js';
 import {
   readMotionPaths3D,
   motionPathLimits3D,
   type MaterialMotionPaths3D,
-} from '../motion-paths.js';
+} from '../gameplay/motion-paths.js';
 import {
   createPathJournal3D,
   appendPathFrame3D,
@@ -21,7 +21,7 @@ import {
   tickMovement3D,
   type PathJournalData3D,
   type PathJournalFrame3D,
-} from '../path-journal.js';
+} from '../gameplay/path-journal.js';
 import {
   createActionJournal3D,
   appendActionEvent3D,
@@ -30,14 +30,14 @@ import {
   type ActionJournalData3D,
   type ActionKind3D,
   type RawAction3D,
-} from '../action-journal.js';
+} from '../gameplay/action-journal.js';
 import {
   compareGameplayChanges3D,
   observeSupport3D,
   type SupportObserver3D,
   type ChangeReportOptions3D,
   type ChangeTarget3D,
-} from '../change-reports.js';
+} from '../gameplay/change-reports.js';
 import {
   appendMotionFrame3D,
   readMotionTrace3D,
@@ -56,7 +56,7 @@ import {
   transferMaterial3D,
   type MaterialReservoir3D,
   type MaterialTransferReceipt3D,
-} from '../material-reservoirs.js';
+} from '../gameplay/material-reservoirs.js';
 import {
   TEMPORARY_HOLD_RULES_VERSION_3D,
   copyHolds3D,
@@ -93,7 +93,7 @@ import {
   translationMovement3D,
   type TranslationAction3D,
   type TranslationPathOptions3D,
-} from '../translation-paths.js';
+} from '../gameplay/translation-paths.js';
 import type {
   TacticalValue,
   ThermalAccounting3D,

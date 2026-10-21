@@ -4,6 +4,6 @@ import { boundedTests } from './vitest.shared.js';
 export default defineConfig({
   test: {
     ...boundedTests,
-    include: ['engine/experimental/translation-displacement.runtime-cases.ts'],
+    include: ['engine/experimental/gameplay/translation-displacement.runtime-cases.ts'],
   },
 });

@@ -6,7 +6,7 @@ import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTerrainBody3D, stepTerrainBody3D } from '../terrain/terrain-body.js';
 import { createTacticalSession3D } from '../tactical-session.js';
-import { displacementTrace3D } from '../displacement-kernel.js';
+import { displacementTrace3D } from '../gameplay/displacement-kernel.js';
 import {
   createReactiveMaterialRegistry3D,
   defaultReactiveMaterialCatalog3D,
