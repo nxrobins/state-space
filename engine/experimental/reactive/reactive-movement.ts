@@ -53,6 +53,7 @@ export type ReactiveMovementOutput3D = {block: ReactiveMaterialBlock3D; classes:
 export function executeReactiveMovementPass3D(input: ReactiveMaterialBlock3D, cold: Uint32Array, tick: number, pass: Readonly<ReactiveMovementPass3D>,
   onSwap: (a: number, b: number) => void, inputClasses?: Uint8Array): ReactiveMovementOutput3D {
   const {width: w, height: h, depth: d} = input, layer = w * h, cells = input.packedCells, energy = input.energyQ, structure = input.structure;
+  if (inputClasses && inputClasses.length !== cells.length) throw Error('Reactive movement classes do not match the block.');
   const classes = inputClasses ?? classifyReactiveMovement3D(cells, structure, cold);
   let outCells = cells, outEnergy = energy, outStructure = structure, outClasses = classes;
   const falling = (i: number) => (classes[i] & FALLING) !== 0;

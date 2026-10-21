@@ -65,7 +65,9 @@ function phaseTransitions(cold: Uint32Array): Uint8Array {
   }
   return transitions;
 }
-/** Disjoint parity pairs along one axis. Identical neighbors exchange nothing, so they are skipped exactly. */
+/** Disjoint parity pairs along one axis. A pair whose energies do not change is skipped exactly:
+ * its packed words already equal their thermal views, so the old rewrite was a no-op.
+ */
 function heat(input: ReactiveMaterialBlock3D, cold: Uint32Array, axis: number, parity: number): ReactiveMaterialBlock3D {
   const output = draft(input), w = input.width, h = input.height, d = input.depth, cells = input.packedCells, energy = input.energyQ;
   const step = axis === 0 ? 1 : axis === 1 ? w : w * h, extent = axis === 0 ? w : axis === 1 ? h : d;
@@ -74,9 +76,11 @@ function heat(input: ReactiveMaterialBlock3D, cold: Uint32Array, axis: number, p
     if (coordinate % 2 !== parity || coordinate + 1 >= extent) continue;
     const i = x + w * (y + h * z), j = i + step;
     if (cells[i] === cells[j] && energy[i] === energy[j]) continue;
-    output.own(); [output.energy[i], output.energy[j]] = exchangeEnergy(cells[i], cells[j], energy[i], energy[j], cold);
-    output.cells[i] = thermalView(cells[i], output.energy[i], cold);
-    output.cells[j] = thermalView(cells[j], output.energy[j], cold);
+    const [ei, ej] = exchangeEnergy(cells[i], cells[j], energy[i], energy[j], cold);
+    if (ei === energy[i] && ej === energy[j]) continue;
+    output.own(); output.energy[i] = ei; output.energy[j] = ej;
+    output.cells[i] = thermalView(cells[i], ei, cold);
+    output.cells[j] = thermalView(cells[j], ej, cold);
   }
   return output.block();
 }
