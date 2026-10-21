@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-evolution = ["anthropic>=0.40.0"]
+evolution = ["anthropic>=1.15.0"]
 viewer = ["glfw"]
 
 [tool.hatch.build.targets.wheel]
