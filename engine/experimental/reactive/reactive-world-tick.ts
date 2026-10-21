@@ -1,11 +1,11 @@
 /** One complete movement/reaction/structural tick. No old-world or native execution. */
-import { readReactiveMaterialBlock3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
-import { reactiveFields3D, reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
+import { readReactiveMaterialBlock3D, reactiveEnergyTotalQ3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
+import { reactiveFields3D, reactiveInteger3D, cloneReactiveData3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { REACTIVE_HOLD_RULES_3D, validateReactiveHolds3D, copyReactiveHolds3D, reactiveHeldCells3D, overlayReactiveHolds3D,
   stripReactiveHoldAnchors3D, retireReactiveHolds3D, type ReactiveHold3D, type ReactiveHoldTickReport3D } from './reactive-holds.js';
-import { createReactiveEvolutionState3D, createReactiveEvolutionJob3D, createObservedReactiveEvolutionJob3D, REACTIVE_EVOLUTION_RULES_3D,
-  type ReactiveEvolutionJob3D, type ReactiveEvolutionResult3D, type ReactiveEvolutionReport3D } from './reactive-evolution.js';
-import { createReactiveStructureJob3D, REACTIVE_STRUCTURE_RULES_3D, REACTIVE_STRUCTURE_MAX_WORK_3D,
+import { startReactiveEvolutionJob3D, REACTIVE_EVOLUTION_RULES_3D,
+  type ReactiveEvolutionState3D, type ReactiveEvolutionJob3D, type ReactiveEvolutionResult3D, type ReactiveEvolutionReport3D } from './reactive-evolution.js';
+import { startReactiveStructureJob3D, REACTIVE_STRUCTURE_RULES_3D, REACTIVE_STRUCTURE_MAX_WORK_3D,
   type ReactiveStructureJob3D, type ReactiveStructureProgress3D, type ReactiveStructureResult3D, type ReactiveStructureReport3D } from './reactive-structure.js';
 import { readReactiveTickOptions3D, createReactiveMotionCapture3D, type ReactiveTickOptions3D, type ReactiveMotionReport3D } from './reactive-motion-capture.js';
 
@@ -63,13 +63,14 @@ export function readReactiveWorldSnapshot3D(registry: ReactiveMaterialRegistry3D
   }
   throw Error('Incompatible reactive world snapshot.');
 }
-const total = (block: ReactiveMaterialBlock3D) => block.energyQ.reduce((sum, q) => sum + BigInt(q), 0n);
+const total = (block: ReactiveMaterialBlock3D) => reactiveEnergyTotalQ3D(block.energyQ);
 function compose(before: ReactiveWorldSnapshot3D, evolution: ReactiveEvolutionResult3D, structural: ReactiveStructureResult3D, holdReport?: ReactiveHoldTickReport3D): ReactiveWorldTickResult3D {
   const block = structural.block, n = block.packedCells.length, initialQ = total(before.block), finalQ = total(block);
   if (initialQ !== finalQ || BigInt(evolution.report.reactions.energy.beforeQ) !== initialQ ||
     BigInt(evolution.report.reactions.energy.afterQ) !== initialQ || BigInt(structural.report.energy.beforeQ) !== initialQ ||
     BigInt(structural.report.energy.afterQ) !== initialQ) throw Error('Reactive world tick lost conserved energy.');
-  const evolutionDestinations = Int32Array.from({length: n}, (_, i) => i), structuralDestinations = evolutionDestinations.slice();
+  const evolutionDestinations = new Int32Array(n), structuralDestinations = new Int32Array(n);
+  for (let i = 0; i < n; i++) evolutionDestinations[i] = structuralDestinations[i] = i;
   const origins = new Int32Array(n), touched = new Uint8Array(n), touchedOrigins = new Uint8Array(n);
   for (const move of evolution.report.movement.moves) evolutionDestinations[move.from] = move.to;
   for (let i = 0; i < n; i++) origins[evolutionDestinations[i]] = i;
@@ -93,29 +94,39 @@ function compose(before: ReactiveWorldSnapshot3D, evolution: ReactiveEvolutionRe
   return {state, report};
 }
 
+type EvolutionStage = ReturnType<typeof startReactiveEvolutionJob3D>;
+type StructureStage = ReturnType<typeof startReactiveStructureJob3D>;
 /** One evolution pass, preparation boundary, bounded graph slice, or publication per call.
  * Evolution, allocation, validation and publication are still full-block O(cells).
  */
 export function createReactiveWorldTickJob3D(registry: ReactiveMaterialRegistry3D, raw: ReactiveWorldSnapshot3D, options: ReactiveTickOptions3D = {}): ReactiveWorldTickJob3D {
   const captureOptions = readReactiveTickOptions3D(options);
-  let before: ReactiveWorldSnapshot3D | null = readReactiveWorldSnapshot3D(registry, raw);
+  return worldTickJob(registry, readReactiveWorldSnapshot3D(registry, raw), captureOptions);
+}
+/** Internal only: an owned validated snapshot whose block and holds the job reads without copying. */
+export function startReactiveWorldTickJob3D(registry: ReactiveMaterialRegistry3D, owned: ReactiveWorldSnapshot3D, options: ReactiveTickOptions3D = {}): ReactiveWorldTickJob3D {
+  return worldTickJob(registry, owned, readReactiveTickOptions3D(options));
+}
+function worldTickJob(registry: ReactiveMaterialRegistry3D, owned: ReactiveWorldSnapshot3D, captureOptions: ReturnType<typeof readReactiveTickOptions3D>): ReactiveWorldTickJob3D {
+  let before: ReactiveWorldSnapshot3D | null = owned;
   if (before.tick === Number.MAX_SAFE_INTEGER) throw Error('Reactive world tick would overflow.');
   const initialHolds = copyReactiveHolds3D(reactiveSnapshotHolds3D(before)), movementCells = reactiveHeldCells3D(initialHolds);
   const capture = createReactiveMotionCapture3D(before, captureOptions);
   let structureHolds: ReactiveHold3D[] = [], retired: ReactiveHoldTickReport3D['retired'] = [];
-  const initialEvolution = createReactiveEvolutionState3D(registry, initialHolds.length ? overlayReactiveHolds3D(before.block, initialHolds) : before.block, before.tick);
-  let evolutionJob: ReactiveEvolutionJob3D | null = captureOptions.enabled ? createObservedReactiveEvolutionJob3D(registry, initialEvolution, {
+  const initialEvolution: ReactiveEvolutionState3D = {schemaVersion: 1, rulesVersion: REACTIVE_EVOLUTION_RULES_3D, tick: before.tick,
+    block: initialHolds.length ? overlayReactiveHolds3D(before.block, initialHolds) : before.block};
+  let evolution: EvolutionStage | null = startReactiveEvolutionJob3D(registry, initialEvolution, captureOptions.enabled ? {
     swap: capture.swap, pass: (index, block) => capture.pass(index, capture.recording() && initialHolds.length ? stripReactiveHoldAnchors3D(before!.block, block, initialHolds) : block),
-  }) : createReactiveEvolutionJob3D(registry, initialEvolution);
-  let evolutionResult: ReactiveEvolutionResult3D | null = null, structureJob: ReactiveStructureJob3D | null = null;
+  } : undefined);
+  let evolutionResult: ReactiveEvolutionResult3D | null = null, structure: StructureStage | null = null;
   let result: ReactiveWorldTickResult3D | null = null, structureProgress: ReactiveStructureProgress3D | null = null;
   let motion: ReactiveMotionReport3D | null = null;
   let status: ReactiveWorldTickProgress3D['status'] = 'running', phase: ReactiveWorldTickPhase3D = 'evolution', evolutionPasses = 0;
   const progress = (): ReactiveWorldTickProgress3D => ({status, phase, evolutionPasses, structure: structureProgress ? {...structureProgress} : null});
-  const release = () => {before = null; evolutionJob = null; evolutionResult = null; structureJob = null;};
+  const release = () => {before = null; evolution = null; evolutionResult = null; structure = null;};
   const cancel = () => {
     if (status !== 'running') return false;
-    evolutionJob?.cancel(); structureJob?.cancel(); if (structureJob) structureProgress = structureJob.progress();
+    evolution?.job.cancel(); structure?.job.cancel(); if (structure) structureProgress = structure.job.progress();
     release(); capture.release(); status = 'cancelled'; return true;
   };
   return Object.freeze({progress, cancel,
@@ -124,10 +135,10 @@ export function createReactiveWorldTickJob3D(registry: ReactiveMaterialRegistry3
       if (status !== 'running' || !before) throw Error('Reactive world tick job is no longer running.');
       try {
         if (phase === 'evolution') {
-          evolutionPasses = evolutionJob!.advance().completedPasses;
+          evolutionPasses = evolution!.job.advance().completedPasses;
           if (evolutionPasses === 28) phase = 'structure-prepare';
         } else if (phase === 'structure-prepare') {
-          evolutionResult = evolutionJob!.result(); evolutionJob = null;
+          evolutionResult = evolution!.output(); evolution = null;
           if (initialHolds.length) {
             const touched = new Set(evolutionResult.report.movement.touchedOrigins);
             if (movementCells.some(i => touched.has(i))) throw Error('Held reactive matter moved during evolution.');
@@ -138,11 +149,11 @@ export function createReactiveWorldTickJob3D(registry: ReactiveMaterialRegistry3
             structureHolds = retirement.holds; retired = retirement.retired;
           }
           const structuralInput = structureHolds.length ? overlayReactiveHolds3D(evolutionResult.state.block, structureHolds) : evolutionResult.state.block;
-          structureJob = createReactiveStructureJob3D(registry, structuralInput); structureProgress = structureJob.progress(); phase = 'structure';
+          structure = startReactiveStructureJob3D(registry, structuralInput); structureProgress = structure.job.progress(); phase = 'structure';
         } else if (phase === 'structure') {
-          structureProgress = structureJob!.advance(structuralWork); if (structureProgress.status === 'complete') phase = 'publish';
+          structureProgress = structure!.job.advance(structuralWork); if (structureProgress.status === 'complete') phase = 'publish';
         } else if (phase === 'publish') {
-          const structural = structureJob!.result(), structureCells = reactiveHeldCells3D(structureHolds), moved = new Set(structural.report.moves.map(m => m.from));
+          const structural = structure!.output(), structureCells = reactiveHeldCells3D(structureHolds), moved = new Set(structural.report.moves.map(m => m.from));
           if (structureCells.some(i => moved.has(i))) throw Error('Held reactive matter moved during structural settlement.');
           if (structureHolds.length) structural.block = stripReactiveHoldAnchors3D(evolutionResult!.state.block, structural.block, structureHolds);
           const holdReport: ReactiveHoldTickReport3D | undefined = before.schemaVersion === 2 ? {rulesVersion: REACTIVE_HOLD_RULES_3D,
@@ -151,13 +162,16 @@ export function createReactiveWorldTickJob3D(registry: ReactiveMaterialRegistry3
           const composed = compose(before, evolutionResult!, structural, holdReport);
           if (captureOptions.enabled) {capture.structure(structural.report); capture.pass(28, structural.block);}
           motion = capture.result(); capture.release();
-          result = before.schemaVersion === 2 ? {...composed, state: readReactiveWorldSnapshot3D(registry, composed.state)} : composed;
+          // Surviving holds are validated against the published block before the snapshot is handed over.
+          const state = composed.state;
+          result = state.schemaVersion === 2 ? {...composed, state: {schemaVersion: 2, rulesVersion: REACTIVE_CONSTRAINED_WORLD_RULES_3D, holdRulesVersion: REACTIVE_HOLD_RULES_3D,
+            tick: state.tick, block: state.block, holds: validateReactiveHolds3D(registry, state.holds, state.tick, state.block)}} : composed;
           release(); status = 'complete'; phase = 'complete';
         }
       } catch (error) {cancel(); throw error;}
       return progress();
     },
-    result() {if (!result || status !== 'complete') throw Error('Reactive world tick result is not complete.'); return structuredClone(result);},
-    motion() {if (!motion || status !== 'complete') throw Error('Reactive world motion is not complete.'); return structuredClone(motion);},
+    result() {if (!result || status !== 'complete') throw Error('Reactive world tick result is not complete.'); return cloneReactiveData3D(result);},
+    motion() {if (!motion || status !== 'complete') throw Error('Reactive world motion is not complete.'); return cloneReactiveData3D(motion);},
   });
 }

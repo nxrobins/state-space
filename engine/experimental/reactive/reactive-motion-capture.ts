@@ -1,5 +1,5 @@
 /** Bounded disposable observations of executed reactive passes. No physical decisions. */
-import { reactiveFields3D, reactiveInteger3D } from './reactive-registry.js';
+import { reactiveFields3D, reactiveInteger3D, cloneReactiveData3D } from './reactive-registry.js';
 import type { ReactiveMaterialBlock3D } from './reactive-block.js';
 import type { ReactiveWorldSnapshot3D } from './reactive-world-tick.js';
 import type { ReactiveStructureReport3D } from './reactive-structure.js';
@@ -31,8 +31,11 @@ export function createReactiveMotionCapture3D(before: ReactiveWorldSnapshot3D, o
     status: options.enabled ? 'complete' : 'disabled', requiresReexecution: !options.enabled, maxEntries: options.maxEntries,
     entries: 0, passesObserved: 0, overflowAtPass: null, passes: []};
   let previous: ReactiveMaterialBlock3D | null = options.enabled ? b : null;
-  let origins: Int32Array | null = options.enabled ? Int32Array.from({length: b.packedCells.length}, (_, i) => i) : null;
-  let pending: ReactiveMotionPass3D | null = null;
+  let origins: Int32Array | null = options.enabled ? new Int32Array(b.packedCells.length) : null;
+  if (origins) for (let i = 0; i < origins.length; i++) origins[i] = i;
+  let pending: ReactiveMotionPass3D | null = null, handed = false;
+  // Cells written by the movement pass being observed; a movement pass changes nothing else.
+  const swapped: number[] = [];
   const overflow = (index: number) => {data.status = 'overflow'; data.requiresReexecution = true; data.overflowAtPass = index;
     data.entries = 0; data.passes = []; pending = null; previous = null; origins = null;};
   const spend = (index: number) => {if (data.status !== 'complete') return false; if (data.entries >= data.maxEntries) {overflow(index); return false;} data.entries++; return true;};
@@ -45,7 +48,7 @@ export function createReactiveMotionCapture3D(before: ReactiveWorldSnapshot3D, o
     recording: () => data.status === 'complete',
     swap(index: number, a: number, z: number) {
       if (data.status !== 'complete') return; begin(index); if (!origins) return;
-      const first = origins[a], second = origins[z];
+      const first = origins[a], second = origins[z]; swapped.push(a, z);
       add(index, {origin: first, from: a, to: z, mode: 'linear', component: null});
       add(index, {origin: second, from: z, to: a, mode: 'linear', component: null});
       if (origins) {origins[a] = second; origins[z] = first;}
@@ -53,13 +56,17 @@ export function createReactiveMotionCapture3D(before: ReactiveWorldSnapshot3D, o
     pass(index: number, block: ReactiveMaterialBlock3D) {
       if (!options.enabled) return; begin(index);
       if (data.status === 'complete' && previous && pending) {
-        for (let i = 0; i < block.packedCells.length; i++) if (block.packedCells[i] !== previous.packedCells[i] || block.energyQ[i] !== previous.energyQ[i] || block.structure[i] !== previous.structure[i]) {
-          if (!spend(index)) break;
-          pending!.changes.push({index: i, packed: block.packedCells[i], energyQ: block.energyQ[i], structure: block.structure[i]});
+        const candidates = index < 20 ? [...new Set(swapped)].sort((a, z) => a - z) : null, n = candidates ? candidates.length : block.packedCells.length;
+        for (let k = 0; k < n; k++) {
+          const i = candidates ? candidates[k] : k;
+          if (block.packedCells[i] !== previous.packedCells[i] || block.energyQ[i] !== previous.energyQ[i] || block.structure[i] !== previous.structure[i]) {
+            if (!spend(index)) break;
+            pending!.changes.push({index: i, packed: block.packedCells[i], energyQ: block.energyQ[i], structure: block.structure[i]});
+          }
         }
         if (pending) {pending.segments.sort((a, z) => a.from - z.from); data.passes.push(pending); previous = block; pending = null;}
       }
-      data.passesObserved++;
+      swapped.length = 0; data.passesObserved++;
     },
     structure(report: ReactiveStructureReport3D) {
       if (data.status !== 'complete') return; begin(28); if (!origins) return;
@@ -71,10 +78,11 @@ export function createReactiveMotionCapture3D(before: ReactiveWorldSnapshot3D, o
       }
       if (origins) origins = next;
     },
-    release() {previous = null; origins = null; pending = null; data.passes = []; data.entries = 0;},
+    release() {previous = null; origins = null; pending = null; swapped.length = 0; if (!handed) {data.passes = []; data.entries = 0;}},
+    /** Hands the report over once, uncopied; the owning job copies it for callers. */
     result() {
       if (options.enabled && data.passesObserved !== 29) throw Error('Reactive motion capture is incomplete.');
-      return structuredClone(data);
+      handed = true; return data;
     },
   };
 }
