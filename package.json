@@ -94,6 +94,10 @@
     "./experimental/3d/reactive-materials": {
       "types": "./dist/sdk/types/experimental/reactive-materials.d.ts",
       "import": "./dist/sdk/state-space-reactive-materials.js"
+    },
+    "./experimental/3d/multiphysics": {
+      "types": "./dist/sdk/types/experimental/multiphysics.d.ts",
+      "import": "./dist/sdk/state-space-multiphysics.js"
     }
   },
   "files": [
@@ -119,7 +123,8 @@
     "docs/checkpoints/CAVERN_OPTICS.md",
     "docs/checkpoints/CAVERN_HAZE.md",
     "docs/checkpoints/CAVERN_HEAT.md",
-    "docs/checkpoints/TACTICAL_INTERVENTIONS.md"
+    "docs/checkpoints/TACTICAL_INTERVENTIONS.md",
+    "docs/MULTIPHYSICS.md"
   ],
   "dependencies": {
     "@webgpu/types": "^0.1.72"

@@ -12,6 +12,7 @@ CPU checks does not replace a fresh native or whole-product release gate.
 | M5 structures at 32³/64³ | [Final replay and timing regressions](checkpoints/MACOS_128.md) compare CPU/dense/active state and restarts | Exactness covers the recorded scenarios and tick ranges; not arbitrary-world qualification |
 | M5 fixed 128³ cut scene | [Three consecutive strict 60 Hz runs](checkpoints/MACOS_128.md), 1,800 measured frames total, zero deadline misses or energy drift | M3 Ultra, visible Chrome, 1920×1080; bounded state/continuation checks, not full 128³ replay or a universal frame-rate guarantee |
 | Reactive sandbox | [Thermal pack and 16³ native acceptance](checkpoints/THERMAL_MATERIALS.md): six scenarios, real Worker evolution, native presentation, cancellation, exact replay and the 8³ regression | Fixed sparse 8³/16³ scenes, one actor and the tested Mac host; not arbitrary dense worlds, larger reactive sizes or cross-platform qualification |
+| Multiphysics foundation | Analytical CPU references and installed SDK checks; [contracts](MULTIPHYSICS.md) | No qualified multiphysics world, Worker, builder, or electrical release yet |
 | Other tactical/reactive surfaces | Bounded CPU/mock contracts and installed SDK checks; [original acceptance history](checkpoints/TACTICAL_INTERVENTIONS.md) | The chamber result does not clear the separate tactical slab, held physical/replay fixtures or every worker API |
 
 ## Automated pull-request checks
@@ -20,7 +21,7 @@ CPU checks does not replace a fresh native or whole-product release gate.
 declarations, builds the reactive chamber, checks types/lint/formatting, runs
 sequential CPU and controller suites, exercises supervisor failure paths, checks
 archive restoration, and installs npm/wheel artifacts in independent projects.
-All 13 npm entry points and their public declarations are checked. CI retains
+All 14 npm entry points and their public declarations are checked. CI retains
 receipts and package artifacts for 14 days, including failures. Hosted CI runs no
 GPU workloads.
 
