@@ -33,21 +33,31 @@ export function sdkEntries(exports) {
     ...entries.filter((entry) => entry.key !== '.'),
   ]);
 }
-export const SDK_ENTRIES = sdkEntries(
+// Entries that other bundles import as a sibling file instead of copying into themselves.
+// Today: the embedded rock textures, reached by every GPU world bundle's appearance chunk.
+// They build right after the root entry so a partial build never leaves a chunk pointing at a
+// missing sibling.
+const SHARED_KEYS = new Set(['./experimental/3d/rock-textures']);
+const posixPath = (path) => path.split('\\').join('/');
+const packageEntries = sdkEntries(
   JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).exports,
 );
-// Entries that other bundles import as a sibling file instead of copying into themselves.
-// Today: the embedded rock textures, reached by every GPU world bundle.
+export const SDK_ENTRIES = Object.freeze([
+  ...packageEntries.filter((entry) => entry.key === '.'),
+  ...packageEntries.filter((entry) => SHARED_KEYS.has(entry.key)),
+  ...packageEntries.filter((entry) => entry.key !== '.' && !SHARED_KEYS.has(entry.key)),
+]);
 export const SHARED_ENTRIES = Object.freeze(
-  SDK_ENTRIES.filter((entry) => entry.key === './experimental/3d/rock-textures').map((entry) =>
-    Object.freeze({ ...entry, resolved: resolve(SDK_ROOT, entry.source) }),
+  SDK_ENTRIES.filter((entry) => SHARED_KEYS.has(entry.key)).map((entry) =>
+    Object.freeze({ ...entry, resolved: posixPath(resolve(SDK_ROOT, entry.source)) }),
   ),
 );
 export function sdkConfig(key) {
   const entry = SDK_ENTRIES.find((entry) => entry.key === key);
   if (!entry) throw Error(`Unknown SDK entry: ${key}`);
   const shared = SHARED_ENTRIES.filter((other) => other.key !== entry.key);
-  const sharedFor = (id) => shared.find((other) => other.resolved === id);
+  // Vite hands Rollup a separator-normalized absolute id; compare like with like on Windows too.
+  const sharedFor = (id) => shared.find((other) => other.resolved === posixPath(id));
   return {
     root: SDK_ROOT,
     configFile: false,

@@ -52,7 +52,7 @@ def main():
         assert sha((ROOT/path).read_bytes()) == sha(baseline) == expected, path
     # The mechanical equations remain byte-for-byte the baseline template.
     # Only list construction, final membership counting, and a work flag change.
-    shader_path = 'engine/experimental/structural/structural-shader.ts'
+    shader_path = 'engine/experimental/structural-shader.ts'
     before = subprocess.check_output(['git', 'show', f'{BASELINE}:{shader_path}'], cwd=ROOT).decode().replace('\r\n', '\n')
     after = (ROOT/shader_path).read_text()
     def mechanics(text):
@@ -68,7 +68,7 @@ def main():
         ' // after damage; removed cells are rejected by the unchanged stage predicates.\n'
         ' if(intact(i)){let ordinal=atomicAdd(&work[13],1u);planWrite(4u,ordinal,i);}\n}')
     assert mechanics(after) == expected, 'Mechanical equations changed'
-    allowed = {shader_path, 'engine/experimental/structural-world-gpu.ts', 'engine/experimental/structural/structural-probe.ts'}
+    allowed = {shader_path, 'engine/experimental/structural-world-gpu.ts', 'engine/experimental/structural-probe.ts'}
     changed = subprocess.check_output(['git', 'diff', '--name-only', BASELINE, '--', 'engine'], cwd=ROOT, text=True).splitlines()
     assert set(changed) <= allowed
     required = {'cpu-unit', 'review-unit', 'typecheck', 'declarations', 'lint', 'gpu-build', 'probe-build',
@@ -80,7 +80,7 @@ def main():
             assert len(result['listCoverage']) == 2 and all(r['exact'] for r in result['listCoverage'])
 
     references = {}
-    cpu_paths = ['engine/experimental/structural/structural-world-core.ts', 'engine/experimental/structural-mechanics.ts',
+    cpu_paths = ['engine/experimental/structural-world-core.ts', 'engine/experimental/structural-mechanics.ts',
                  'engine/experimental/structural-material.ts', 'engine/thermal.ts', 'examples/structural-cavern/scene.js',
                  'examples/structural-cavern/state-evidence.js', 'dist/sdk/state-space-structural-world.js']
     for name in spec['references']:

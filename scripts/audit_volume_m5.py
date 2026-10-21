@@ -53,7 +53,7 @@ def main():
             names += [p for p in r['sourceHashes'] if p in ('examples/structural-cavern/app.js', 'examples/structural-cavern/scene.js',
                 'examples/structural-cavern/state-evidence.js', 'examples/structural-cavern/index.html', 'examples/structural-cavern/style.css', 'web/frame-pump.js', 'web/frame-clock.js')]
         if name.startswith(('gpu-tiny-', 'gpu-active-tiny-', 'gpu-order-', 'gpu-fallback-')):
-            names += ['engine/experimental/structural/structural-probe.ts', 'dist/volume-m5/structural-probe.js']
+            names += ['engine/experimental/structural-probe.ts', 'dist/volume-m5/structural-probe.js']
         for path in names:
             # Original receipts remain attached to their measured revision.
             # The review audit above checks the exact allowed source delta and
