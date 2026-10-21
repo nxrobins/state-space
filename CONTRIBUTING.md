@@ -41,7 +41,8 @@ Run `npm run verify:packages` when changing public types, exports, build metadat
 or module placement. It installs both packages in independent projects and checks
 all public npm entries. Rebuild affected examples with `npm run build:reactive-chamber`
 or `npm run build:tactical-slab`. [CI](.github/workflows/verify.yml) also checks the
-supervisor, archive restoration and configured Python lint rules.
+supervisor, archive restoration and the configured Python lint rules with
+`uv run ruff check .`.
 
 Native checks use the explicit bounded stages in the [macOS guide](docs/MACOS.md).
 A passing CPU mock suite does not authorize a held runtime fixture. Keep native
