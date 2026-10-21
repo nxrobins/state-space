@@ -53,6 +53,11 @@ date of the last change in the section.
 - The experimental root is split into `volume/`, `structural/` and
   `gameplay/` folders; SDK entry barrels, the frozen material-law sources
   and the primitives they import stay at the root (#65, #66).
+- Audit housekeeping: two documentation links to unpublished evidence are
+  corrected, the lab, SDK and shared example folders have READMEs, the README
+  and game README use `sh` fences with repository-relative commands, the stale
+  Windows developer files are removed, and the recorded evolution phase winners
+  move from the root into `archive/` (#67).
 
 ### Fixed
 
