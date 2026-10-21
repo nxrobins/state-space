@@ -23,7 +23,7 @@ import {
   type TacticalWorkerQuery3D,
   type TacticalWorkerPreviewQueryBatch3D,
 } from './tactical-worker-queries.js';
-import type { GameplayGeometry3D } from '../gameplay-geometry.js';
+import type { GameplayGeometry3D } from '../gameplay/gameplay-geometry.js';
 
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());

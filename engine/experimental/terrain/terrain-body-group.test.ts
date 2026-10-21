@@ -3,7 +3,7 @@ import { holdPhysics } from '../../test-support/hold-physics.js';
 import { describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
 
-import * as translations from '../translation-displacement.js';
+import * as translations from '../gameplay/translation-displacement.js';
 import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 import { createTacticalSession3D } from '../tactical-session.js';
 import { createTacticalSessionCore3D } from '../tactical/tactical-session-core.js';
@@ -17,8 +17,8 @@ import {
 import { seed as inertSeed, factory as inertFactory } from './terrain-motion.fixtures.js';
 import type { TacticalSessionPolicy3D } from '../tactical/tactical-session-view.js';
 import type { TranslationRequest3D } from '../interventions.js';
-import type { TickMovement3D } from '../path-journal.js';
-import type { GameplayGeometry3D } from '../gameplay-geometry.js';
+import type { TickMovement3D } from '../gameplay/path-journal.js';
+import type { GameplayGeometry3D } from '../gameplay/gameplay-geometry.js';
 
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion', 'stepWithMotionPaths');
 const request: TranslationRequest3D = {

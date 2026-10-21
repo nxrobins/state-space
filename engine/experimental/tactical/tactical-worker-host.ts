@@ -13,7 +13,7 @@ import {
 } from './tactical-worker-queries.js';
 import { changeOptionsData, portableChanges } from './tactical-worker-changes.js';
 import { captureData } from './tactical-worker-motion.js';
-import type { ChangeReportOptions3D } from '../change-reports.js';
+import type { ChangeReportOptions3D } from '../gameplay/change-reports.js';
 import { checkedInteger } from '../../validation.js';
 import {
   channelName,

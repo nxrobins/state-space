@@ -16,7 +16,7 @@ import {
   type StructuralSnapshot3D,
 } from '../structural/structural-world-core.js';
 
-import type { SupportObserver3D } from '../change-reports.js';
+import type { SupportObserver3D } from '../gameplay/change-reports.js';
 import type {
   TacticalBranch3D,
   TacticalSessionInitial3D,

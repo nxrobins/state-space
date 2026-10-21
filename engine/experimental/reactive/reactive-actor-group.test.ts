@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTerrainBody3D } from '../terrain/terrain-body.js';
-import { moveTerrainActors3D } from '../actor-movement.js';
+import { moveTerrainActors3D } from '../gameplay/actor-movement.js';
 import { createTacticalSession3D } from '../tactical-session.js';
 import {
   createReactiveMaterialRegistry3D,

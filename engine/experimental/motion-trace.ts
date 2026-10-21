@@ -2,7 +2,7 @@
 import type { StructuralGeometry, StructuralPlan3D } from './structural-mechanics.js';
 import type { StructuralSnapshot3D } from './structural/structural-world-core.js';
 import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
-import type { ChangeTarget3D } from './change-reports.js';
+import type { ChangeTarget3D } from './gameplay/change-reports.js';
 
 export const MOTION_TRACE_RULES_3D = 'material-motion-1';
 export const MOTION_JOURNAL_RULES_3D = 'motion-journal-1';

@@ -13,7 +13,7 @@ import {
   TACTICAL_TERRAIN,
   TACTICAL_BOXES,
 } from './tactical/tactical-render-shaders.js';
-import type { GeometryStamp3D } from './gameplay-geometry.js';
+import type { GeometryStamp3D } from './gameplay/gameplay-geometry.js';
 import { fields } from './tactical/tactical-worker-wire.js';
 export {
   prepareTacticalScene3D,

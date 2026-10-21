@@ -19,7 +19,7 @@ import {
 import { MOTION_TRACE_RULES_3D, type MaterialMotionTrace3D } from '../motion-trace.js';
 import { actionJournalData } from './tactical-worker-journal.js';
 import { actionReceiptData } from './tactical-worker-action.js';
-import type { ActionJournal3D } from '../action-journal.js';
+import type { ActionJournal3D } from '../gameplay/action-journal.js';
 import type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
 import type { TacticalPreviewTicket3D } from './tactical-previews.js';
 import type { TacticalBranch3D, TacticalCommit3D } from './tactical-session-view.js';

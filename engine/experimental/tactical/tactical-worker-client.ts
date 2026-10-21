@@ -12,11 +12,11 @@ import { changeOptionsData, changeReportData } from './tactical-worker-changes.j
 import { captureData, motionJournalData } from './tactical-worker-motion.js';
 import { pathJournalData } from './tactical-worker-paths.js';
 import { actionJournalData } from './tactical-worker-journal.js';
-import type { ActionJournal3D } from '../action-journal.js';
-import type { PathJournal3D } from '../path-journal.js';
+import type { ActionJournal3D } from '../gameplay/action-journal.js';
+import type { PathJournal3D } from '../gameplay/path-journal.js';
 import type { MotionJournal3D } from '../motion-trace.js';
 import type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
-import type { ChangeReportOptions3D, GameplayChangeReport3D } from '../change-reports.js';
+import type { ChangeReportOptions3D, GameplayChangeReport3D } from '../gameplay/change-reports.js';
 import { checkedInteger } from '../../validation.js';
 import {
   TACTICAL_PREVIEW_LIMITS_3D,

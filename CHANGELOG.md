@@ -45,6 +45,14 @@ date of the last change in the section.
 - Reactive CPU tick: one validation per tick, uncopied hand-offs between
   evolution, reaction and structure stages, copy-on-write passes and an
   explicit structure stepper, with bit-identical results (#62).
+- Prettier formats every hand-written engine, example, script and test
+  source, with generated, vendored, archived and frozen files excluded, and
+  CI checks the whole tree (#63).
+- The rock textures ship once as `experimental/3d/rock-textures`, shared by
+  the four GPU world bundles instead of copied into each (#64).
+- The experimental root is split into `volume/`, `structural/` and
+  `gameplay/` folders; SDK entry barrels, the frozen material-law sources
+  and the primitives they import stay at the root (#65, #66).
 
 ### Fixed
 

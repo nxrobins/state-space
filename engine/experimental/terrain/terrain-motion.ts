@@ -8,10 +8,10 @@ import {
   type GeometryBox3D,
   type GeometryStamp3D,
   type GeometryTime3D,
-} from '../gameplay-geometry.js';
-import { tickMovementSource3D, type TickMovement3D } from '../path-journal.js';
+} from '../gameplay/gameplay-geometry.js';
+import { tickMovementSource3D, type TickMovement3D } from '../gameplay/path-journal.js';
 import { readTerrainBody3D, type TerrainBodyState3D, type BodySupport3D } from './terrain-body.js';
-import type { MotionPathSegment3D } from '../motion-paths.js';
+import type { MotionPathSegment3D } from '../gameplay/motion-paths.js';
 
 export const TERRAIN_MOTION_RULES_3D = 'terrain-body-motion-1';
 export const TERRAIN_MOTION_LIMITS_3D = Object.freeze({

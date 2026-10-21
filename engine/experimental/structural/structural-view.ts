@@ -3,7 +3,7 @@ import type {
   GameplayCommit3D,
   GameplayPresentation3D,
   GameplayState3D,
-} from '../gameplay-view.js';
+} from '../gameplay/gameplay-view.js';
 import type { StructuralEdit3D } from './structural-world-core.js';
 export type StructuralSubmissionTiming3D = {
   submittedAt: number;

@@ -14,7 +14,7 @@ import {
   stepTerrainBody3D,
   TERRAIN_BODY_LIMITS_3D,
 } from './terrain-body.js';
-import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from '../gameplay-geometry.js';
+import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from '../gameplay/gameplay-geometry.js';
 
 // Pure body/geometry calculations on edited/static snapshots, never M5 ticks/solves.
 holdPhysics('solveStructure3D', 'step', 'stepWithMotion');

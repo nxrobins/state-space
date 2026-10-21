@@ -1,14 +1,14 @@
 import type { PortableValue } from '../../portable-data.js';
 import type { MotionJournal3D } from '../motion-trace.js';
-import type { PathJournal3D, TickMovement3D } from '../path-journal.js';
-import type { ActionJournal3D } from '../action-journal.js';
-import type { GameplayChangeReport3D, ChangeReportOptions3D } from '../change-reports.js';
-import type { GameplayGeometry3D } from '../gameplay-geometry.js';
+import type { PathJournal3D, TickMovement3D } from '../gameplay/path-journal.js';
+import type { ActionJournal3D } from '../gameplay/action-journal.js';
+import type { GameplayChangeReport3D, ChangeReportOptions3D } from '../gameplay/change-reports.js';
+import type { GameplayGeometry3D } from '../gameplay/gameplay-geometry.js';
 import type {
   MaterialReservoir3D,
   MaterialTransferRequest3D,
   MaterialTransferReceipt3D,
-} from '../material-reservoirs.js';
+} from '../gameplay/material-reservoirs.js';
 import type {
   StructuralEdit3D,
   StructuralSnapshot3D,
@@ -24,7 +24,7 @@ import type {
   TranslationAction3D,
   TranslationMovement3D,
   TranslationPathOptions3D,
-} from '../translation-paths.js';
+} from '../gameplay/translation-paths.js';
 
 export type TacticalQueryOptions3D = { domain?: string | null };
 export type TacticalBranchOptions3D = {

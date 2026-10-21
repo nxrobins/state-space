@@ -16,9 +16,9 @@ import { createTacticalWorkerClient3D } from './tactical-worker-client.js';
 import type { Wire } from './tactical-worker-wire.js';
 import type { TacticalPreviewCapture3D } from './tactical-preview-capture.js';
 import { pathJournalData } from './tactical-worker-paths.js';
-import { motionPathEntries3D, type PathJournal3D } from '../path-journal.js';
+import { motionPathEntries3D, type PathJournal3D } from '../gameplay/path-journal.js';
 import { motionTraceEntries3D } from '../motion-trace.js';
-import { readMotionPaths3D, readMotionPathsDomain3D } from '../motion-paths.js';
+import { readMotionPaths3D, readMotionPathsDomain3D } from '../gameplay/motion-paths.js';
 import { seed, observe, index, type Spec } from '../terrain/terrain-motion.fixtures.js';
 
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);

@@ -4,7 +4,7 @@ import {
   CHANGE_REPORT_LIMITS_3D,
   type ChangeReportOptions3D,
   type GameplayChangeReport3D,
-} from '../change-reports.js';
+} from '../gameplay/change-reports.js';
 import { copyPortableValue } from '../../portable-data.js';
 import { checkedInteger } from '../../validation.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';

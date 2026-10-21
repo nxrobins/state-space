@@ -4,7 +4,7 @@ import {
   createGeometryKernel3D,
   type GeometryKernel3D,
   type KernelExposure3D,
-} from '../geometry-kernel.js';
+} from '../gameplay/geometry-kernel.js';
 import {
   reactiveRegistrySource3D,
   reactiveInteger3D,

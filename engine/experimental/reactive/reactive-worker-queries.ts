@@ -23,7 +23,7 @@ import {
   type ReactiveSessionSnapshot3D,
 } from './reactive-session-state.js';
 import type { ReactiveSessionPreview3D } from './reactive-session.js';
-import { validateGeometryQueryResults3D } from '../geometry-query-wire.js';
+import { validateGeometryQueryResults3D } from '../gameplay/geometry-query-wire.js';
 import { workerEqual } from './reactive-worker-wire.js';
 export const REACTIVE_QUERY_RULES_3D = 'reactive-query-batches-1';
 export const REACTIVE_QUERY_LIMITS_3D = Object.freeze({ queries: 32 });

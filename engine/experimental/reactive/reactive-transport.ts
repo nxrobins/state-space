@@ -19,13 +19,13 @@ import { reactiveGeometrySource3D, type ReactiveGameplayGeometry3D } from './rea
 import {
   MATERIAL_TRANSPORT_KERNEL_LIMITS_3D,
   createMaterialTransportKernel3D,
-} from '../material-transport-kernel.js';
+} from '../gameplay/material-transport-kernel.js';
 import type {
   MaterialParcel3D,
   MaterialParcelSeed3D,
   MaterialImpulse3D,
   MaterialTransportReceipt3D,
-} from '../material-transport.js';
+} from '../gameplay/material-transport.js';
 
 export const REACTIVE_TRANSPORT_RULES_3D = 'reactive-transport-1';
 export const REACTIVE_TRANSPORT_SCHEMA_3D = 1;

@@ -7,7 +7,7 @@ import {
   type GeometryBox3D,
   type GeometryStamp3D,
   type GeometryVector3D,
-} from '../gameplay-geometry.js';
+} from '../gameplay/gameplay-geometry.js';
 import type {
   TacticalPreview3D,
   TacticalSessionSnapshot3D,

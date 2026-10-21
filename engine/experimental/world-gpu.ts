@@ -30,7 +30,7 @@ export type {
   GameplayPresentation3D,
   GameplayCommit3D,
   ResidentGameplay3D,
-} from './gameplay-view.js';
+} from './gameplay/gameplay-view.js';
 export interface GpuWorld3D extends Omit<GpuVolume3D, 'snapshot' | 'restore' | 'inspectPass'> {
   readonly chunkSize: number;
   snapshot(): Promise<WorldSnapshot3D>;

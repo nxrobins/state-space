@@ -15,7 +15,7 @@ import {
   type TacticalWorkerCommit3D,
 } from './tactical-worker-client.js';
 import type { TacticalCommit3D } from './tactical-session-view.js';
-import type { GameplayChangeReport3D, SupportObserver3D } from '../change-reports.js';
+import type { GameplayChangeReport3D, SupportObserver3D } from '../gameplay/change-reports.js';
 import type { Wire } from './tactical-worker-wire.js';
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());

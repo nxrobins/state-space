@@ -13,7 +13,7 @@ import {
   type TacticalWorkerQueryBatch3D,
 } from './tactical-worker-queries.js';
 import type { Wire } from './tactical-worker-wire.js';
-import type { GeometryCell3D } from '../gameplay-geometry.js';
+import type { GeometryCell3D } from '../gameplay/gameplay-geometry.js';
 
 holdPhysics(...STRUCTURAL_CALLS);
 afterEach(() => vi.useRealTimers());

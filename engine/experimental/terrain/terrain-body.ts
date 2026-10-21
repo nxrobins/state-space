@@ -1,5 +1,5 @@
 import { assertRecordFields } from '../../portable-data.js';
-import { stepBodyKernel3D } from '../body-kernel.js';
+import { stepBodyKernel3D } from '../gameplay/body-kernel.js';
 /** Fixed-point kinematic body resolution against one immutable terrain boundary. */
 import {
   assertGameplayGeometry3D,
@@ -11,7 +11,7 @@ import {
   type GeometryContact3D,
   type GeometryExposure3D,
   type GeometryStamp3D,
-} from '../gameplay-geometry.js';
+} from '../gameplay/gameplay-geometry.js';
 
 export const TERRAIN_BODY_RULES_VERSION_3D = 'terrain-body-1';
 export const TERRAIN_BODY_LIMITS_3D = Object.freeze({

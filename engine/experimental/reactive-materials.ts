@@ -209,7 +209,7 @@ export {
   type GeometryContact3D,
   type GeometryFilter3D,
   type MaterialExposure3D,
-} from './geometry-kernel.js';
+} from './gameplay/geometry-kernel.js';
 export {
   REACTIVE_DOMAINS_RULES_3D,
   REACTIVE_DOMAINS_SCHEMA_3D,

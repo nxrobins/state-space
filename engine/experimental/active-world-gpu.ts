@@ -31,7 +31,7 @@ export type {
   GameplayPresentation3D,
   GameplayCommit3D,
   ResidentGameplay3D,
-} from './gameplay-view.js';
+} from './gameplay/gameplay-view.js';
 export type ActiveGpuWorldOptions3D = ActiveWorldOptions3D & {
   execution?: 'dense' | 'sparse';
   activityReadbackInterval?: number;

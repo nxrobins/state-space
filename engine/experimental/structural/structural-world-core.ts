@@ -38,7 +38,7 @@ import {
   type MaterialMotionPaths3D,
   type MaterialMotionPathsResult3D,
   type MotionPathOptions3D,
-} from '../motion-paths.js';
+} from '../gameplay/motion-paths.js';
 
 export const STRUCTURAL_SCHEMA_VERSION_3D = 2;
 export const STRUCTURAL_RULES_VERSION_3D = 'ca-3d-m5';

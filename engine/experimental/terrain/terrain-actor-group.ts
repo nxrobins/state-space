@@ -1,4 +1,4 @@
-import { createActorGroupKernel3D } from '../actor-group-kernel.js';
+import { createActorGroupKernel3D } from '../gameplay/actor-group-kernel.js';
 /** Exact peer contact detection over the existing one-way terrain responses. */
 import {
   createTerrainBodyGroup3D,
@@ -10,9 +10,9 @@ import {
   type NamedTerrainBody3D,
 } from './terrain-body-group.js';
 import { readTerrainBody3D } from './terrain-body.js';
-import type { GameplayGeometry3D, GeometryTime3D } from '../gameplay-geometry.js';
-import type { TickMovement3D } from '../path-journal.js';
-import type { TranslationMovement3D } from '../translation-paths.js';
+import type { GameplayGeometry3D, GeometryTime3D } from '../gameplay/gameplay-geometry.js';
+import type { TickMovement3D } from '../gameplay/path-journal.js';
+import type { TranslationMovement3D } from '../gameplay/translation-paths.js';
 
 export const TERRAIN_ACTOR_GROUP_RULES_3D = 'terrain-actor-group-1';
 export const TERRAIN_ACTOR_GROUP_LIMITS_3D = TERRAIN_BODY_GROUP_LIMITS_3D;

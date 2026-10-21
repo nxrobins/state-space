@@ -4,13 +4,13 @@ import {
   createBodyGroupKernel3D,
   type NamedBody3D,
   type BodyGroupOptions3D,
-} from '../body-group-kernel.js';
+} from '../gameplay/body-group-kernel.js';
 import {
   createActorGroupKernel3D,
   type ActorPeerContact3D,
   type ActorGroupKernel3D,
   type ActorGroupResult3D,
-} from '../actor-group-kernel.js';
+} from '../gameplay/actor-group-kernel.js';
 import {
   moveActorsKernel3D,
   ACTOR_MOVEMENT_KERNEL_LIMITS_3D,
@@ -19,7 +19,7 @@ import {
   type ActorFootingKernel3D,
   type ActorMovementKernelResponse3D,
   type ActorMovementKernelResult3D,
-} from '../actor-movement-kernel.js';
+} from '../gameplay/actor-movement-kernel.js';
 import {
   reactiveGeometrySource3D,
   type ReactiveGameplayGeometry3D,

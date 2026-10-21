@@ -4,6 +4,6 @@ import { boundedTests } from './vitest.shared.js';
 export default defineConfig({
   test: {
     ...boundedTests,
-    include: ['engine/experimental/material-transport-coupling.runtime-cases.ts'],
+    include: ['engine/experimental/gameplay/material-transport-coupling.runtime-cases.ts'],
   },
 });

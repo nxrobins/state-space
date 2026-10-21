@@ -1,12 +1,12 @@
 /** Data-only batches of existing geometry queries; no physical advancement. */
 import { copyPortableValue } from '../../portable-data.js';
-import { validateGeometryQueryResults3D } from '../geometry-query-wire.js';
+import { validateGeometryQueryResults3D } from '../gameplay/geometry-query-wire.js';
 import { MATERIALS_3D } from '../3d.js';
 import {
   GEOMETRY_RULES_VERSION_3D,
   GEOMETRY_LIMITS_3D,
   type GameplayGeometry3D,
-} from '../gameplay-geometry.js';
+} from '../gameplay/gameplay-geometry.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';
 import type { StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import type {
