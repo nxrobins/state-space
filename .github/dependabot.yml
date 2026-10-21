@@ -1,6 +1,9 @@
 version: 2
-# Weekly dependency update proposals. Each PR runs the normal CI workflow;
-# native GPU checks still happen on the maintainer's hosts before a merge.
+# Weekly dependency update proposals. Each PR runs the Engine verification
+# workflow, which covers the root packages only: the game prototypes install
+# and test separately (README), and hosted CI runs no GPU workload; native
+# stages are the separate gates in docs/MACOS.md. The setup-uv CLI version in
+# verify.yml is not a tracked dependency and stays a manual bump.
 updates:
   - package-ecosystem: npm
     directory: /
@@ -35,7 +38,8 @@ updates:
       interval: weekly
       day: monday
     groups:
-      python-development:
+      # Dependency groups and optional extras; runtime requirements stay individual.
+      python-development-and-extras:
         dependency-type: development
         update-types: [minor, patch]
   - package-ecosystem: github-actions
