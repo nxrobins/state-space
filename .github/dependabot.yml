@@ -1,0 +1,49 @@
+version: 2
+# Weekly dependency update proposals. Each PR runs the Engine verification
+# workflow, which covers the root packages only: the game prototypes install
+# and test separately (README), and hosted CI runs no GPU workload; native
+# stages are the separate gates in docs/MACOS.md. The setup-uv CLI version in
+# verify.yml is not a tracked dependency and stays a manual bump.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      npm-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /game
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      game-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /tower-defense-rogue
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      relic-line-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      # Dependency groups and optional extras; runtime requirements stay individual.
+      python-development-and-extras:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
