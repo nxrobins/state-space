@@ -12,7 +12,7 @@ REPLAY_STAGES = tuple(
     for size in (32, 64)
     for case in ("control", "cut", "heat", "ice-control", "ice-heat")
 )
-SANDBOX_STAGES = tuple(f"sandbox-{scene}-visible" for scene in ("collapse", "flow", "chain"))
+SANDBOX_STAGES = tuple(f"sandbox-{scene}-visible" for scene in ("collapse", "flow", "chain", "conduction", "insulation", "wax"))
 STAGES = (
     *SANDBOX_STAGES,
     "chamber-visible",

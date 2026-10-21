@@ -1,6 +1,7 @@
 /** Chamber application contract. Only public reactive SDK imports; no work at import time. */
 import {
   createReactiveMaterialRegistry3D,
+  createThermalMaterialRegistry3D,
   createReactiveMaterialBlock3D,
   editReactiveMaterialBlock3D,
   createReactiveWorldSnapshot3D,
@@ -25,6 +26,8 @@ import {
   type ReactiveBranch3D,
 } from 'state-space-engine/experimental/3d/reactive-materials';
 
+import { MATERIAL_SCENARIOS, isMaterialScenario, materialSceneEdits } from './material-scenes.js';
+
 export const CHAMBER_RULES = 'reactive-chamber-1';
 export const CHAMBER_WORLD = 'reactive-chamber';
 export const CHAMBER = Object.freeze({
@@ -40,51 +43,63 @@ export const ACTOR_SIZE_Q = (3 * Q) / 4;
 export const SUPPORT = Object.freeze([3, 4, 3] as const);
 export const ICE = Object.freeze([5, 6, 5] as const);
 export type Cell = [number, number, number];
+const builtinMaterials = {
+  pack: null,
+  primaryLabel: 'Wood connector',
+  secondaryLabel: 'Ice sample',
+  liquid: MAT.WATER,
+  liquidLabel: 'Flowing water',
+} as const;
 /** Fixed application profiles, not permission to run an arbitrary larger world. */
 export const SCENARIOS = Object.freeze({
   chamber: {
+    ...builtinMaterials,
     size: 8,
     worldId: CHAMBER_WORLD,
     pulseQ: CHAMBER.pulseQ,
     title: '8³ reference chamber',
     description:
       'Burn the wooden connector to release the platform and remove the actor’s footing.',
-    support: SUPPORT,
-    ice: ICE,
+    primary: SUPPORT,
+    secondary: ICE,
   },
   collapse: {
+    ...builtinMaterials,
     size: 16,
     worldId: 'reactive-sandbox-collapse-1',
     pulseQ: CHAMBER.pulseQ,
     title: '16³ burning support',
     description: 'Heat the wooden connector. Compare the supported platform with its collapse.',
-    support: [5, 8, 6],
-    ice: [11, 14, 11],
+    primary: [5, 8, 6],
+    secondary: [11, 14, 11],
   },
   flow: {
+    ...builtinMaterials,
     size: 16,
     worldId: 'reactive-sandbox-flow-1',
     pulseQ: 60 * ENERGY_SCALE,
     title: '16³ melt, flow, freeze',
     description:
       'Heat the ice on the shelf, commit and wait for water to fall. Select the water and cool it to freeze it again.',
-    support: [3, 12, 3],
-    ice: [8, 6, 8],
+    primary: [3, 12, 3],
+    secondary: [8, 6, 8],
   },
   chain: {
+    ...builtinMaterials,
     size: 16,
     worldId: 'reactive-sandbox-chain-1',
     pulseQ: CHAMBER.pulseQ,
     title: '16³ distant collapse',
     description:
       'Burn the connector at the left end of the bridge. Follow the loss of support to the actor at the far end.',
-    support: [3, 6, 7],
-    ice: [11, 14, 11],
+    primary: [3, 6, 7],
+    secondary: [11, 14, 11],
   },
+  ...MATERIAL_SCENARIOS,
 } as const);
 for (const profile of Object.values(SCENARIOS)) {
-  Object.freeze(profile.support);
-  Object.freeze(profile.ice);
+  Object.freeze(profile.primary);
+  Object.freeze(profile.secondary);
   Object.freeze(profile);
 }
 export type ScenarioId = keyof typeof SCENARIOS;
@@ -307,25 +322,35 @@ export function chamberInitial(
     edits.push({ kind: 'bond', x, y, z, direction, bonded: true });
   const profile = SCENARIOS[readScenario(scenario)],
     size = profile.size;
-  const [sx, sy, sz] = profile.support;
   for (let z = 0; z < size; z++)
     for (let x = 0; x < size; x++) {
       place(x, size - 1, z);
       anchor(x, size - 1, z);
     }
-  for (let y = sy; y < size - 1; y++) {
-    place(sx - 1, y, sz);
-    anchor(sx - 1, y, sz);
-  }
-  place(sx, sy, sz, MAT.WOOD);
-  const end = scenario === 'chain' ? 12 : sx + 2;
-  for (let x = sx + 1; x <= end; x++) place(x, sy, sz);
-  for (let x = sx - 1; x < end; x++) bond(x, sy, sz, 1);
-  place(profile.ice[0], profile.ice[1], profile.ice[2], MAT.ICE, 5);
-  if (scenario === 'flow') {
-    // A one-cell lip supports the ice; melted water can leave its exposed edges.
-    place(8, 7, 8);
-    anchor(8, 7, 8);
+  let actorMinQ: Cell;
+  if (isMaterialScenario(scenario)) {
+    edits.push(...materialSceneEdits(scenario));
+    actorMinQ = [12 * Q + Q / 8, 15 * Q - ACTOR_SIZE_Q, 12 * Q + Q / 8];
+  } else {
+    const [sx, sy, sz] = profile.primary;
+    for (let y = sy; y < size - 1; y++) {
+      place(sx - 1, y, sz);
+      anchor(sx - 1, y, sz);
+    }
+    place(sx, sy, sz, MAT.WOOD);
+    const end = scenario === 'chain' ? 12 : sx + 2;
+    for (let x = sx + 1; x <= end; x++) place(x, sy, sz);
+    for (let x = sx - 1; x < end; x++) bond(x, sy, sz, 1);
+    place(profile.secondary[0], profile.secondary[1], profile.secondary[2], MAT.ICE, 5);
+    if (scenario === 'flow') {
+      place(8, 7, 8);
+      anchor(8, 7, 8);
+    }
+    actorMinQ = [
+      (scenario === 'chain' ? end : sx) * Q + Q / 8,
+      sy * Q - ACTOR_SIZE_Q,
+      sz * Q + Q / 8,
+    ];
   }
   const block = editReactiveMaterialBlock3D(
     registry,
@@ -340,7 +365,7 @@ export function chamberInitial(
   const identity = { worldId: profile.worldId, gameRulesVersion: CHAMBER_RULES, domains };
   const view = createReactiveSession3D(registry, { ...identity, game: {} }).queries();
   const actor = createReactiveBody3D(view, {
-    minQ: [(scenario === 'chain' ? end : sx) * Q + Q / 8, sy * Q - ACTOR_SIZE_Q, sz * Q + Q / 8],
+    minQ: actorMinQ,
     sizeQ: [ACTOR_SIZE_Q, ACTOR_SIZE_Q, ACTOR_SIZE_Q],
     gravityQ: 64,
   });
@@ -361,8 +386,13 @@ export function chamberInitial(
     },
   };
 }
+export function createChamberRegistry(scenario: ScenarioId) {
+  return SCENARIOS[readScenario(scenario)].pack
+    ? createThermalMaterialRegistry3D()
+    : createReactiveMaterialRegistry3D();
+}
 export async function createChamber(scenario: ScenarioId = 'chamber') {
-  const registry = await createReactiveMaterialRegistry3D(),
+  const registry = await createChamberRegistry(scenario),
     initial = chamberInitial(registry, scenario);
   return {
     registry,

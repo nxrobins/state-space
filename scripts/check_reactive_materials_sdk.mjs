@@ -1,6 +1,6 @@
 /** Public data/edit and one tiny local reaction cycle. No M5 steps, worker or GPU. */
 import assert from 'node:assert/strict';
-import { createReactiveMaterialRegistry3D, createReactiveMaterialBlock3D, editReactiveMaterialBlock3D,
+import { createReactiveMaterialRegistry3D, createThermalMaterialRegistry3D, THERMAL_MAT_3D, createReactiveMaterialBlock3D, editReactiveMaterialBlock3D,
   readReactiveMaterialBlock3D, reactiveMaterialEnergyLedger3D, createReactiveReactionState3D, readReactiveReactionState3D,
   createReactiveReactionJob3D, advanceReactiveReactions3D, createReactiveEvolutionState3D, readReactiveEvolutionState3D,
   createReactiveEvolutionJob3D, advanceReactiveEvolution3D, createReactiveStructureJob3D, createReactiveWorld3D,
@@ -12,6 +12,9 @@ import { createReactiveMaterialRegistry3D, createReactiveMaterialBlock3D, editRe
   createReactiveWorkerHost3D, createReactiveWorkerClient3D, createReactiveChangeJob3D,
   defaultReactiveMaterialCatalog3D, BONDS_3D, ANCHOR_3D, MAT } from 'state-space-engine/experimental/3d/reactive-materials';
 export async function checkReactiveMaterialsSdk() {
+  const thermal = await createThermalMaterialRegistry3D();
+  assert.equal(thermal.material(THERMAL_MAT_3D.WAX).name, 'wax');
+  assert.equal((await createReactiveMaterialRegistry3D(thermal.toCatalog())).hash, thermal.hash);
   const base = await createReactiveMaterialRegistry3D();
   const registry = await base.extend([{...structuredClone(base.material(MAT.WOOD)), id: 200, name: 'resin'}]);
   const air = createReactiveMaterialBlock3D(registry, {width: 3, height: 1, depth: 1});

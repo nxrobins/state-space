@@ -151,7 +151,9 @@ and verified save import share one complete publication boundary.
 
 Build with `npm run build:reactive-chamber` after `npm run build:sdk`. The bounded
 native macOS acceptance stage is `npm run verify:macos -- --stage chamber-visible`.
-This client is 8³ with one actor; it does not extend M5 snapshot schemas or imply
+The selector includes the 8³ chamber and six fixed 16³ scenes, including the
+[opt-in thermal material pack](sdk/reactive/materials.md#thermal-material-pack-v1).
+Each has one actor; it does not extend M5 snapshot schemas or imply
 large-world/GPU reactive physics qualification.
 
 For repository ownership, checks and change placement, read the

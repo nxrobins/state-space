@@ -7,6 +7,7 @@ section-specific limits and runtime holds still apply. Historical implementation
 steps and acceptance records remain in the [checkpoint history](../../checkpoints/TACTICAL_INTERVENTIONS.md).
 
 - [Reactive material definitions and portable blocks](#reactive-material-definitions-and-portable-blocks)
+- [Thermal material pack v1](#thermal-material-pack-v1)
 - [Exact local reactive cycles](#exact-local-reactive-cycles)
 - [Conservative reactive movement](#conservative-reactive-movement)
 - [Bounded reactive structural mechanics](#bounded-reactive-structural-mechanics)
@@ -89,6 +90,52 @@ A block is not a simulation save and does not carry an absolute tick. Full react
 world physics, integration and replay require a surrounding versioned solver and
 their own acceptance evidence. Existing M5 and tactical-session readers reject
 these blocks; there is no implicit migration.
+
+## Thermal material pack v1
+
+`createThermalMaterialRegistry3D()` opts into `reactive-thermal-materials-1`
+(`THERMAL_MATERIAL_PACK_3D`). It returns the 17 physical builtins plus five new
+entries, using the existing reaction, movement and structure laws. Default
+registries, builtin definitions and existing saves are unchanged.
+
+```ts
+import {
+  createThermalMaterialRegistry3D, THERMAL_MAT_3D,
+  createReactiveMaterialRegistry3D,
+} from 'state-space-engine/experimental/3d/reactive-materials';
+
+const registry = await createThermalMaterialRegistry3D();
+const wax = registry.material(THERMAL_MAT_3D.WAX);
+// Save the full catalog with the world; restore it before reading that world.
+const restored = await createReactiveMaterialRegistry3D(
+  JSON.parse(JSON.stringify(registry.toCatalog())),
+);
+```
+
+| Material / exported ID | Role | Model thresholds |
+| --- | --- | --- |
+| `COPPER` / 32 | Conductivity 220, cohesive conductor | Melts at 120; latent interval 20 |
+| `MOLTEN_COPPER` / 33 | Moving conductive liquid | Freezes at 100 |
+| `CERAMIC` / 34 | Conductivity 1, cohesive thermal barrier | No modeled phase change or combustion |
+| `WAX` / 35 | Low-temperature solid plug and fuel | Melts at 40; latent interval 10; ignition above 140 |
+| `MOLTEN_WAX` / 36 | Moving fuel, same chemical energy as solid wax | Freezes at 30; ignition above 140 |
+
+Thresholds use model temperature units, not Celsius. A phase transition also
+requires its complete latent energy interval; a displayed threshold alone does
+not imply completion. Both wax phases carry 100 chemical energy units per cell
+and require adjacent oxidizer to burn. Products use the existing ash/fire roles.
+Newly solidified material has no automatic bonds or anchors; cooling does not weld
+it to nearby terrain. Ceramic slows heat transfer; it is not perfect insulation.
+
+IDs 32–36 belong to this pack; the separate SDK teaching examples keep their own
+IDs. The v1 factory is a fixed definition: changing its parameters requires a new
+pack version. Catalog hashes bind the complete definitions, not just names or IDs.
+Save the catalog rather than assuming a future default can read an old world.
+These are reactive CPU materials; this factory does not extend M5/GPU contracts.
+
+The [three material scenes](../../../examples/reactive-chamber/README.md) demonstrate
+conduction, insulation and a wax valve in sparse 16³ worlds. They share the pack
+catalog while the original four chamber profiles retain their builtin catalog.
 
 ## Exact local reactive cycles
 

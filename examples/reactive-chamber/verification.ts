@@ -1,6 +1,10 @@
 /// <reference types="@webgpu/types" />
 /** Fixed 8-cubed native browser acceptance. Invoked only by the bounded Mac stage. */
-import { MAT, GEOMETRY_SCALE_3D as Q } from 'state-space-engine/experimental/3d/reactive-materials';
+import {
+  MAT,
+  THERMAL_MAT_3D as M,
+  GEOMETRY_SCALE_3D as Q,
+} from 'state-space-engine/experimental/3d/reactive-materials';
 import type { chamberApp } from './browser-entry.js';
 import { openChamber, type ChamberClient } from './client.js';
 import {
@@ -14,6 +18,7 @@ import {
   type ChamberCommand,
   type ChamberSnapshot,
 } from './scenario.js';
+import { isMaterialScenario } from './material-scenes.js';
 import { profileChamber } from './profiling.js';
 import { canonical, stateHash } from './recording.js';
 import { prepareScene, orbitCamera, projectPoint } from './presentation.js';
@@ -436,7 +441,7 @@ async function verifyRendering(snapshot: ChamberSnapshot) {
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
   });
   try {
-    const { registry } = await createChamber(),
+    const { registry } = await createChamber(snapshotScenario(snapshot)),
       scene = prepareScene(registry, snapshot),
       camera = orbitCamera(-0.65, 0.42, snapshot.domains.world.block.width);
     const promise = renderer.render(scene, camera, color, depth);
@@ -542,6 +547,8 @@ export async function verifySandbox(app: typeof chamberApp) {
       scenario = snapshotScenario(initial);
     assert(scenario !== 'chamber', '16³ stage requires a sandbox profile.');
     report.scenario = scenario;
+    report.materialCatalogHash = app.client!.registry.hash;
+    report.materialPack = SCENARIOS[scenario].pack;
     // Replace across dimensions while a camera frame is pending, through the actual selector.
     for (const next of ['chamber', scenario] as const) {
       app.orbit(-0.5);
@@ -552,7 +559,7 @@ export async function verifySandbox(app: typeof chamberApp) {
       await app.painted();
       equal(
         app.scene!.selected,
-        [...(next === 'flow' ? SCENARIOS[next].ice : SCENARIOS[next].support)],
+        [...(next === 'flow' ? SCENARIOS[next].secondary : SCENARIOS[next].primary)],
         'Scenario switch lost the selection.',
       );
       assert(app.running, 'Scenario replacement stopped the renderer.');
@@ -560,7 +567,7 @@ export async function verifySandbox(app: typeof chamberApp) {
     const direct = await createChamber(scenario);
     equal(initial, direct.session.snapshot(), 'Initial Worker state differs.');
     const cell = [
-      ...(scenario === 'flow' ? SCENARIOS[scenario].ice : SCENARIOS[scenario].support),
+      ...(scenario === 'flow' ? SCENARIOS[scenario].secondary : SCENARIOS[scenario].primary),
     ] as [number, number, number];
     const heat: ChamberCommand = { kind: 'heat', cell };
     publish('preview latency, active cancellation, and camera responsiveness');
@@ -618,7 +625,7 @@ export async function verifySandbox(app: typeof chamberApp) {
         equal(
           app.scene!.selected,
           command.cell,
-          'Water selector did not follow the flowed material.',
+          'Liquid selector did not follow the flowed material.',
         );
       }
       click(command.kind);
@@ -660,7 +667,12 @@ export async function verifySandbox(app: typeof chamberApp) {
         changed.domains.world.block.packedCells.some((v) => (v & 255) === MAT.WATER),
         'Ice did not melt.',
       );
-    } else {
+    } else if (scenario === 'wax') {
+      assert(
+        changed.domains.world.block.packedCells.some((v) => (v & 255) === M.MOLTEN_WAX),
+        'Wax plug did not melt.',
+      );
+    } else if (!isMaterialScenario(scenario)) {
       assert(
         changed.game.burned > 0 &&
           changed.game.fallen > 0 &&
@@ -677,7 +689,7 @@ export async function verifySandbox(app: typeof chamberApp) {
         (v) => (v & 255) === MAT.WATER,
       );
       assert(
-        water >= 0 && coordinate(water, 16)[1] > SCENARIOS.flow.ice[1],
+        water >= 0 && coordinate(water, 16)[1] > SCENARIOS.flow.secondary[1],
         'Melted water did not flow off the shelf.',
       );
       const frozen = await apply({ kind: 'cool', cell: coordinate(water, 16) });
@@ -685,6 +697,37 @@ export async function verifySandbox(app: typeof chamberApp) {
         frozen.domains.world.block.packedCells.some((v) => (v & 255) === MAT.ICE),
         'Flowed water did not freeze.',
       );
+    }
+    if (scenario === 'wax') {
+      const block = continued.domains.world.block;
+      const water = block.packedCells.findIndex((v) => (v & 255) === MAT.WATER);
+      const wax = block.packedCells.findIndex((v) => (v & 255) === M.MOLTEN_WAX);
+      assert(
+        water >= 0 && coordinate(water, 16)[1] > SCENARIOS.wax.primary[1],
+        'Water stayed trapped behind the melted plug.',
+      );
+      assert(wax >= 0, 'Melted wax missing.');
+      const frozen = await apply({ kind: 'cool', cell: coordinate(wax, 16) });
+      assert(
+        frozen.domains.world.block.packedCells.some((v) => (v & 255) === M.WAX),
+        'Moved wax did not refreeze.',
+      );
+    } else if (scenario === 'conduction' || scenario === 'insulation') {
+      for (let i = 0; i < 3; i++) await apply({ kind: 'wait' });
+      const block = app.client!.snapshot().domains.world.block;
+      if (scenario === 'conduction') {
+        assert(
+          block.packedCells.some((v) => (v & 255) === M.MOLTEN_WAX),
+          'Copper failed to melt the distant wax.',
+        );
+      } else {
+        const target = SCENARIOS.insulation.secondary;
+        const word = block.packedCells[target[0] + 16 * (target[1] + 16 * target[2])];
+        assert(
+          (word & 255) === M.WAX && ((word >>> 8) & 255) <= 21,
+          'Ceramic failed to protect the wax.',
+        );
+      }
     }
     const beforeBad = app.client!.snapshot(),
       bad = JSON.parse(app.client!.exportSave());
