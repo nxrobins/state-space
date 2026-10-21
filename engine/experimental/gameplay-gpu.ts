@@ -3,7 +3,7 @@
 import { checkedInteger } from '../validation.js';
 import { createStateSpaceField3D } from './3d.js';
 import { gameplayShader } from './gameplay-shader.js';
-import type { LatencyProfiler, Trace } from './latency.js';
+import type { LatencyProfiler, Trace } from './volume/latency.js';
 import type {
   GameplayCommand3D,
   GameplayCommit3D,

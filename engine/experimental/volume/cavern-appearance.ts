@@ -3,7 +3,7 @@
 import type { LatencyProfiler, Trace } from './latency.js';
 import { makeLightList } from './light-list.js';
 import { CELL_FRUSTUM_QUERY, CELL_FRUSTUM_CULL } from './surface-cull.js';
-import { ROCK_TEXTURES } from './rock-textures.js';
+import { ROCK_TEXTURES } from '../rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
 import { CAVERN_HAZE } from './cavern-haze.js';
 import {

@@ -8,7 +8,7 @@ import {
   type GameplayGeometry3D,
 } from '../gameplay-geometry.js';
 import { fields, sameRevision } from './tactical-worker-wire.js';
-import type { StructuralSnapshot3D } from '../structural-world-core.js';
+import type { StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import type {
   TacticalPreview3D,
   TacticalRevision3D,

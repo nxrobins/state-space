@@ -5,14 +5,14 @@ export {
   STRUCTURAL_SCHEMA_VERSION_3D,
   STRUCTURAL_RULES_VERSION_3D,
   STRUCTURAL_WORLD_VERSION_3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 export type {
   CpuStructuralWorld3D,
   StructuralWorldOptions3D,
   StructuralSnapshot3D,
   StructuralEdit3D,
   StructuralStepOptions3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 export {
   MAT,
   PHASE,

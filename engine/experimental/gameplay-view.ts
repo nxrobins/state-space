@@ -1,4 +1,4 @@
-import type { TerrainCamera, TerrainRenderer } from './3d-view.js';
+import type { TerrainCamera, TerrainRenderer } from './volume/3d-view.js';
 
 /** Optional fixed-point first-person controller. No GPU handles cross this API. */
 export type GameplayPlayer3D = {

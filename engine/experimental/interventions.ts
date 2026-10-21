@@ -4,7 +4,7 @@ import {
   validateStructuralSnapshot3D,
   validateStructuralState3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import {
   ANCHOR_3D,
   BONDS_3D,

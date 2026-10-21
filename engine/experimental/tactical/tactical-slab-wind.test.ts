@@ -19,7 +19,7 @@ import {
   captureMaterialTransportMemory3D as capture,
   restoreMaterialTransportMemory3D as restore,
 } from '../material-transport-coupling.js';
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { observe } from '../terrain/terrain-motion.fixtures.js';
 import { MAT } from '../3d.js';

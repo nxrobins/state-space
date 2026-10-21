@@ -3,7 +3,7 @@ import { PHASE_SHIFT, buildColdTable } from '../generated/materials.js';
 import { temperatureQ } from '../thermal.js';
 import { ANCHOR_3D, solveStructure3D } from './structural-mechanics.js';
 import { overlayHolds3D, type TemporaryHold3D } from './tactical/tactical-actions.js';
-import type { StructuralSnapshot3D } from './structural-world-core.js';
+import type { StructuralSnapshot3D } from './structural/structural-world-core.js';
 import type {
   TacticalRevision3D,
   TacticalSessionSnapshot3D,

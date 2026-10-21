@@ -3,7 +3,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 /** Worker geometry contract over structured-clone mocks; no real physics or Worker. */
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 import { createTacticalSessionCore3D } from './tactical-session-core.js';
 import { createTacticalWorkerHost3D } from './tactical-worker-host.js';
 import { createTacticalWorkerClient3D } from './tactical-worker-client.js';

@@ -4,7 +4,7 @@ export default defineConfig({
     emptyOutDir: false,
     outDir: 'dist/volume-m5',
     lib: {
-      entry: 'engine/experimental/structural-probe.ts',
+      entry: 'engine/experimental/structural/structural-probe.ts',
       formats: ['es'],
       fileName: () => 'structural-probe.js',
     },

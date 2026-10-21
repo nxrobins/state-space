@@ -1,7 +1,7 @@
 /// <reference types="@webgpu/types" preserve="true" />
 /** M4 resident worlds. Dense execution is an exact diagnostic reference. */
 import { checkedInteger } from '../validation.js';
-import { createResidentVolume, type GpuVolume3D } from './3d-gpu-core.js';
+import { createResidentVolume, type GpuVolume3D } from './volume/3d-gpu-core.js';
 import {
   activeWorldGeometry,
   activeReferenceVolume,
@@ -10,7 +10,7 @@ import {
   activeChunkSnapshot,
   type ActiveWorldOptions3D,
   type ActiveWorldSnapshot3D,
-} from './active-world-core.js';
+} from './volume/active-world-core.js';
 export type {
   LatencyRecord,
   LatencySnapshot,
@@ -23,7 +23,7 @@ export type {
   Region3D,
   VolumeEdit3D,
   GpuStepOptions3D,
-} from './3d-gpu-core.js';
+} from './volume/3d-gpu-core.js';
 export type {
   GameplayState3D,
   GameplayRules3D,

@@ -2,7 +2,10 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 /** Data/edits only; any material step or support solve fails this suite. */
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from '../structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 import {
   createReactiveMaterialRegistry3D,
   createReactiveMaterialBlock3D as create,

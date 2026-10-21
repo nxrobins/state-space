@@ -4,7 +4,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
 
-import { type StructuralSnapshot3D } from '../structural-world-core.js';
+import { type StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import {
   createTacticalSessionCore3D,
   type TacticalSimulationFactory3D,

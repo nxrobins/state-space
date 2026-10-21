@@ -1,7 +1,7 @@
 /// <reference types="@webgpu/types" />
 /** GPU-resident implementation of the unchanged ca-3d-m1 rules. */
-import { buildColdTable } from '../generated/materials.js';
-import { checkedInteger } from '../validation.js';
+import { buildColdTable } from '../../generated/materials.js';
+import { checkedInteger } from '../../validation.js';
 import {
   createStateSpaceField3D,
   validateVolumeSnapshot,
@@ -9,7 +9,7 @@ import {
   MAX_ENERGY_Q,
   type VolumeSnapshot,
   type VolumeSample,
-} from './3d.js';
+} from '../3d.js';
 import { chunkShaders } from './3d-shader.js';
 import { activeShaders } from './active-shader.js';
 import { makeTerrainRenderer } from './3d-renderer.js';
@@ -19,14 +19,14 @@ import {
   checkedGameplayState,
   checkedGameplayRules,
   checkedGameplayCommand,
-} from './gameplay-gpu.js';
+} from '../gameplay-gpu.js';
 import type {
   GameplayState3D,
   GameplayRules3D,
   GameplayCommand3D,
   GameplayPresentation3D,
   ResidentGameplay3D,
-} from './gameplay-view.js';
+} from '../gameplay-view.js';
 export type {
   GameplayState3D,
   GameplayRules3D,
@@ -34,7 +34,7 @@ export type {
   GameplayPresentation3D,
   GameplayCommit3D,
   ResidentGameplay3D,
-} from './gameplay-view.js';
+} from '../gameplay-view.js';
 import { LatencyProfiler, type Trace } from './latency.js';
 import type { LatencySnapshot } from './3d-view.js';
 export type { LatencyRecord, LatencySnapshot } from './3d-view.js';
@@ -1183,7 +1183,7 @@ export type ResidentConfig = {
   chunkSize: number;
   sparse?: boolean;
   activityReadbackInterval?: number;
-  cpu: (w: number, h: number, d: number, fill?: number) => import('./3d.js').StateSpaceField3D;
+  cpu: (w: number, h: number, d: number, fill?: number) => import('../3d.js').StateSpaceField3D;
   validate: typeof validateVolumeSnapshot;
 };
 export async function createResidentVolume(

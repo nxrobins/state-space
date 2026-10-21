@@ -1,9 +1,9 @@
 /** M5 CPU reference and public validation. Older 3D contracts remain unchanged. */
-import { MAT, PHASE_SHIFT, buildColdTable } from '../generated/materials.js';
-import { DEFAULT_REGISTRY } from '../registry.js';
-import { checkedInteger, validatePackedCells, stateCopyTargets } from '../validation.js';
-import { seedState, thermalView, temperatureQ, MAX_ENERGY_Q, energyLedger } from '../thermal.js';
-import { activeWorldGeometry, type ActiveWorldOptions3D } from './active-world-core.js';
+import { MAT, PHASE_SHIFT, buildColdTable } from '../../generated/materials.js';
+import { DEFAULT_REGISTRY } from '../../registry.js';
+import { checkedInteger, validatePackedCells, stateCopyTargets } from '../../validation.js';
+import { seedState, thermalView, temperatureQ, MAX_ENERGY_Q, energyLedger } from '../../thermal.js';
+import { activeWorldGeometry, type ActiveWorldOptions3D } from '../volume/active-world-core.js';
 import {
   MATERIALS_3D,
   SCHEMA_VERSION_3D,
@@ -11,7 +11,7 @@ import {
   MATERIAL_CATALOG_HASH_3D,
   validateVolumeSnapshot,
   volumeSchedule,
-} from './3d-core.js';
+} from '../3d-core.js';
 import {
   ANCHOR_3D,
   BONDS_3D,
@@ -24,21 +24,21 @@ import {
   structuralNeighbor,
   type StructuralGeometry,
   type StructuralState3D,
-} from './structural-mechanics.js';
-import { executeStructuralMaterialPass } from './structural-material.js';
+} from '../structural-mechanics.js';
+import { executeStructuralMaterialPass } from '../structural-material.js';
 import {
   createMotionRecorder3D,
   motionEntryLimit3D,
   type MaterialMotionTrace3D,
   type MotionTraceOptions3D,
-} from './motion-trace.js';
+} from '../motion-trace.js';
 import {
   createMotionPathRecorder3D,
   motionPathLimits3D,
   type MaterialMotionPaths3D,
   type MaterialMotionPathsResult3D,
   type MotionPathOptions3D,
-} from './motion-paths.js';
+} from '../motion-paths.js';
 
 export const STRUCTURAL_SCHEMA_VERSION_3D = 2;
 export const STRUCTURAL_RULES_VERSION_3D = 'ca-3d-m5';

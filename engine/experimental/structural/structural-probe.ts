@@ -1,15 +1,15 @@
-export { verifyLightList, verifyLightImages } from './light-list-probe.js';
+export { verifyLightList, verifyLightImages } from '../volume/light-list-probe.js';
 /// <reference types="@webgpu/types" />
 /** Internal bounded verification bundle, not a public SDK entry or demo. */
 import { structuralShaders } from './structural-shader.js';
-import { createStateSpaceStructuralWorld3DGPU } from './structural-world-gpu.js';
+import { createStateSpaceStructuralWorld3DGPU } from '../structural-world-gpu.js';
 import {
   CpuStructuralWorld3D,
   type StructuralEdit3D,
   type StructuralSnapshot3D,
 } from './structural-world-core.js';
-import { MAT } from '../generated/materials.js';
-import { solveStructure3D } from './structural-mechanics.js';
+import { MAT } from '../../generated/materials.js';
+import { solveStructure3D } from '../structural-mechanics.js';
 export async function verifyM5ShaderCompile() {
   if (!navigator.gpu) throw Error('WebGPU unavailable.');
   const adapter = await navigator.gpu.requestAdapter();

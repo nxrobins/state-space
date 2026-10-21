@@ -3,7 +3,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { makeCavernAppearance } from './cavern-appearance.js';
 
 // Texture decoding/upload is outside this fixture. No fetch or image decoder.
-vi.mock('./rock-textures.js', () => ({ ROCK_TEXTURES: [] }));
+vi.mock('../rock-textures.js', () => ({ ROCK_TEXTURES: [] }));
 afterEach(() => vi.unstubAllGlobals());
 
 function fakeRendererDevice() {

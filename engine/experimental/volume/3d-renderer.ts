@@ -1,6 +1,6 @@
 import { type LatencyProfiler } from './latency.js';
 /// <reference types="@webgpu/types" />
-import { MATERIALS_3D } from './3d.js';
+import { MATERIALS_3D } from '../3d.js';
 import { type TerrainCamera, type TerrainRenderer } from './3d-view.js';
 const palette = Array.from({ length: 18 }, (_, i) => {
   const m = MATERIALS_3D.find((m) => m.id === i);

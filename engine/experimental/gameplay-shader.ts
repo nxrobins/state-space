@@ -1,4 +1,4 @@
-import { VOLUME_SHADER } from './3d-shader.js';
+import { VOLUME_SHADER } from './volume/3d-shader.js';
 import { MAT } from '../generated/materials.js';
 import type { GameplayRules3D } from './gameplay-view.js';
 

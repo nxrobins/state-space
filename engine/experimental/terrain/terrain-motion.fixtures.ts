@@ -1,7 +1,10 @@
 /** Shared synthetic permutation fixtures. Never calls a material tick or support solve. */
 import { volumeSchedule } from '../3d-core.js';
 import type * as mechanics from '../structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from '../structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 import { createMotionRecorder3D } from '../motion-trace.js';
 import { createMotionPathRecorder3D } from '../motion-paths.js';
 import type { TacticalSimulationFactory3D } from '../tactical/tactical-session-core.js';

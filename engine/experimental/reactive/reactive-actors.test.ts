@@ -2,7 +2,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 /** Tiny physical contacts only. Old M5/native/GPU runtime stays trapped. */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTerrainBody3D, stepTerrainBody3D } from '../terrain/terrain-body.js';
 import { createTacticalSession3D } from '../tactical-session.js';

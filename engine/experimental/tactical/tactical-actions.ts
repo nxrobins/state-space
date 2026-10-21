@@ -7,7 +7,7 @@ import {
   validateStructuralSnapshot3D,
   type StructuralEdit3D,
   type StructuralSnapshot3D,
-} from '../structural-world-core.js';
+} from '../structural/structural-world-core.js';
 import type { CellCoordinate3D } from '../interventions.js';
 
 export const TEMPORARY_HOLD_RULES_VERSION_3D = 'temporary-holds-1';

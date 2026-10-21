@@ -80,7 +80,7 @@ import {
   applyStructuralEdits3D,
   validateStructuralSnapshot3D,
   type StructuralSnapshot3D,
-} from '../structural-world-core.js';
+} from '../structural/structural-world-core.js';
 import {
   INTERVENTION_RULES_VERSION_3D,
   translateStructuralRegion3D,

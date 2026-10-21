@@ -1,7 +1,7 @@
 import { holdPhysics } from '../test-support/hold-physics.js';
 import { describe, expect, test, vi } from 'vitest';
 import * as mechanics from './structural-mechanics.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 import { volumeSchedule } from './3d-core.js';
 import { createMotionRecorder3D } from './motion-trace.js';
 import {

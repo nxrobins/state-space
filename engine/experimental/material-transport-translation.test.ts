@@ -2,7 +2,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Actual conservative edits and bound geometry; no material runtime. */
 import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 
 import { createTacticalSession3D } from './tactical-session.js';
 import { createMaterialTransport3D } from './material-transport.js';

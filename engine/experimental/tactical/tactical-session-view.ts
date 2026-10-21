@@ -9,7 +9,10 @@ import type {
   MaterialTransferRequest3D,
   MaterialTransferReceipt3D,
 } from '../material-reservoirs.js';
-import type { StructuralEdit3D, StructuralSnapshot3D } from '../structural-world-core.js';
+import type {
+  StructuralEdit3D,
+  StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 import type {
   TemporaryHold3D,
   TemporaryHoldRequest3D,

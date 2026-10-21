@@ -3,7 +3,10 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../test-support/hold-physics.js';
 /** Real conservative edits plus inert material provenance; native physics is held. */
 import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from './structural/structural-world-core.js';
 
 import { createMaterialTransport3D, applyMaterialTransport3D } from './material-transport.js';
 import {

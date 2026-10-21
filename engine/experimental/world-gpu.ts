@@ -1,7 +1,7 @@
 /// <reference types="@webgpu/types" preserve="true" />
 /** Public finite-world factory. No writable GPU buffers cross this boundary. */
 import { checkedInteger } from '../validation.js';
-import { createResidentVolume, type GpuVolume3D } from './3d-gpu-core.js';
+import { createResidentVolume, type GpuVolume3D } from './volume/3d-gpu-core.js';
 import {
   worldGeometry,
   referenceVolume,
@@ -10,7 +10,7 @@ import {
   chunkSnapshot,
   type WorldOptions3D,
   type WorldSnapshot3D,
-} from './world-core.js';
+} from './volume/world-core.js';
 export type {
   LatencyRecord,
   LatencySnapshot,
@@ -22,7 +22,7 @@ export type {
   Region3D,
   VolumeEdit3D,
   GpuStepOptions3D,
-} from './3d-gpu-core.js';
+} from './volume/3d-gpu-core.js';
 export type {
   GameplayState3D,
   GameplayRules3D,

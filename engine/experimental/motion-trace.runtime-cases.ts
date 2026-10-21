@@ -2,7 +2,10 @@
 import { describe, expect, test } from 'vitest';
 import { MAT, MAX_ENERGY_Q } from './3d.js';
 import { volumeSchedule } from './3d-core.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from './structural/structural-world-core.js';
 import {
   solveStructure3D,
   normalizeStructure3D,

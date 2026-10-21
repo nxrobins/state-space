@@ -6,10 +6,10 @@ import { checkedInteger, stateCopyTargets } from '../validation.js';
 import { energyLedger, temperatureQ } from '../thermal.js';
 import { DEFAULT_REGISTRY } from '../registry.js';
 import { volumeSchedule } from './3d-core.js';
-import { activeWorldGeometry, checkedActiveWorldRegion } from './active-world-core.js';
-import type { RegionRequest3D } from './3d-gpu-core.js';
-import { structuralShaders, STRUCTURAL_LIST_STAGES } from './structural-shader.js';
-import { structuralActivityShaders } from './structural-active-shader.js';
+import { activeWorldGeometry, checkedActiveWorldRegion } from './volume/active-world-core.js';
+import type { RegionRequest3D } from './volume/3d-gpu-core.js';
+import { structuralShaders, STRUCTURAL_LIST_STAGES } from './structural/structural-shader.js';
+import { structuralActivityShaders } from './structural/structural-active-shader.js';
 import {
   CpuStructuralWorld3D,
   prepareStructuralEdits3D,
@@ -18,34 +18,34 @@ import {
   type StructuralSnapshot3D,
   type StructuralEdit3D,
   type StructuralStepOptions3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import {
   BONDS_3D,
   ANCHOR_3D,
   INTEGRITY_3D,
   type StructuralState3D,
 } from './structural-mechanics.js';
-import { makeChunkRenderer, type ResidentChunkRenderer } from './world-renderer.js';
+import { makeChunkRenderer, type ResidentChunkRenderer } from './volume/world-renderer.js';
 import {
   makeGameplayResources,
   checkedGameplayState,
   checkedGameplayRules,
   checkedGameplayCommand,
 } from './gameplay-gpu.js';
-import { LatencyProfiler, type Trace } from './latency.js';
-import { commitStructuralGoal } from './structural-gameplay.js';
+import { LatencyProfiler, type Trace } from './volume/latency.js';
+import { commitStructuralGoal } from './structural/structural-gameplay.js';
 import type {
   TerrainRenderer,
   TerrainCamera,
   TerrainAppearance,
   TerrainLightingMode,
-} from './3d-view.js';
+} from './volume/3d-view.js';
 export type {
   TerrainRenderer,
   TerrainCamera,
   TerrainAppearance,
   TerrainLightingMode,
-} from './3d-view.js';
+} from './volume/3d-view.js';
 import type {
   GameplayState3D,
   GameplayRules3D,
@@ -58,12 +58,12 @@ import type {
   StructuralGameplayCommit3D,
   StructuralSubmissionTiming3D,
   StructuralGameplayLatency3D,
-} from './structural-view.js';
+} from './structural/structural-view.js';
 export type {
   StructuralResidentGameplay3D,
   StructuralGameplayOptions3D,
   StructuralGameplayCommit3D,
-} from './structural-view.js';
+} from './structural/structural-view.js';
 export { checkedGameplayState as validateStructuralGameplayState3D } from './gameplay-gpu.js';
 
 const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase'];

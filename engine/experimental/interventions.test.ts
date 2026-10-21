@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   createStateSpaceStructuralWorld3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import { MAT, ENERGY_SCALE } from './3d.js';
 import { ANCHOR_3D, BONDS_3D, FRESH_3D } from './structural-mechanics.js';
 import {

@@ -2,7 +2,7 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { lightingCacheLayout, lightIntersectsRegion, makeLightingCache } from './lighting-cache.js';
 import { cavernShaders } from './cavern-appearance.js';
-vi.mock('./rock-textures.js', () => ({ ROCK_TEXTURES: [] }));
+vi.mock('../rock-textures.js', () => ({ ROCK_TEXTURES: [] }));
 
 afterEach(() => vi.unstubAllGlobals());
 

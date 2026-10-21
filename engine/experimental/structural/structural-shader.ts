@@ -1,5 +1,5 @@
 /** M5 integer GPU rules. Global convergence is verified before committing a tick. */
-import { chunkShaders } from './3d-shader.js';
+import { chunkShaders } from '../volume/3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.

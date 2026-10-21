@@ -1,4 +1,4 @@
-import { DRAW, MESH } from '../3d-renderer.js';
+import { DRAW, MESH } from '../volume/3d-renderer.js';
 /** Group zero is shared by terrain, decorations and host pipelines. 96-byte uniform. */
 export const TACTICAL_CAMERA_WGSL_3D = `
 struct Camera { eye:vec4f, right:vec4f, up:vec4f, forward:vec4f, projection:vec4f, shape:vec4u }

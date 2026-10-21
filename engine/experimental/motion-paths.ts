@@ -10,7 +10,7 @@ import type { StructuralGeometry, StructuralPlan3D } from './structural-mechanic
 import {
   validateStructuralSnapshot3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 
 export const MOTION_PATH_RULES_3D = 'material-motion-paths-1';
 export const MOTION_PATH_LIMITS_3D = Object.freeze({

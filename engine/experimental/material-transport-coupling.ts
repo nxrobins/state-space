@@ -16,7 +16,7 @@ import { translationMovementSource3D, type TranslationMovement3D } from './trans
 import { TACTICAL_SESSION_LIMITS_3D } from './tactical/tactical-session-core.js';
 import type { TacticalPreviewEditor3D } from './tactical/tactical-previews.js';
 import type { TacticalValue } from './tactical/tactical-session-view.js';
-import type { StructuralSnapshot3D } from './structural-world-core.js';
+import type { StructuralSnapshot3D } from './structural/structural-world-core.js';
 
 export const MATERIAL_TRANSPORT_MEMORY_RULES_3D = 'material-transport-memory-1';
 type TerrainIdentity = Omit<StructuralSnapshot3D, 'packedCells' | 'energyQ' | 'structure'>;
