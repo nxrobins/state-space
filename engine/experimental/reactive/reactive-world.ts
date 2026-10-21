@@ -1,11 +1,11 @@
 /** Owned reactive CPU world: revision-bound complete ticks and accounted atomic edits. */
-import { editReactiveMaterialBlock3D, stageReactiveMaterialEdits3D, reactiveMaterialEnergyLedger3D, type ReactiveMaterialBlock3D, type ReactiveMaterialEdit3D } from './reactive-block.js';
-import { reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
+import { editReactiveMaterialBlock3D, stageReactiveMaterialEdits3D, reactiveMaterialEnergyLedger3D, reactiveEnergyTotalQ3D, type ReactiveMaterialBlock3D, type ReactiveMaterialEdit3D } from './reactive-block.js';
+import { reactiveInteger3D, cloneReactiveData3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import type { ReactiveTickOptions3D } from './reactive-motion-capture.js';
 import { REACTIVE_HOLD_RULES_3D, copyReactiveHolds3D, addReactiveHold3D, removeReactiveHold3D, reactiveHoldsAfterReplacement3D,
   type ReactiveHold3D, type ReactiveHoldRequest3D } from './reactive-holds.js';
 import { createReactiveTranslationJob3D, type ReactiveTranslationJob3D, type ReactiveTranslationRequest3D, type ReactiveTranslationReceipt3D } from './reactive-translation.js';
-import { createReactiveWorldSnapshot3D, createConstrainedReactiveWorldSnapshot3D, reactiveSnapshotHolds3D, readReactiveWorldSnapshot3D, createReactiveWorldTickJob3D,
+import { createReactiveWorldSnapshot3D, createConstrainedReactiveWorldSnapshot3D, reactiveSnapshotHolds3D, readReactiveWorldSnapshot3D, startReactiveWorldTickJob3D,
   type ReactiveWorldSnapshot3D, type ReactiveWorldTickJob3D, type ReactiveWorldTickReport3D } from './reactive-world-tick.js';
 
 export type ReactiveWorldTickCommit3D = {fromRevision: number; toRevision: number; report: ReactiveWorldTickReport3D};
@@ -31,7 +31,7 @@ export interface ReactiveWorld3D {
   energyLedger(): ReturnType<typeof reactiveMaterialEnergyLedger3D>;
   energyBalance(): {initialQ: bigint; externalQ: bigint; currentQ: bigint; driftQ: bigint};
 }
-const total = (block: ReactiveMaterialBlock3D) => block.energyQ.reduce((sum, q) => sum + BigInt(q), 0n);
+const total = (block: ReactiveMaterialBlock3D) => reactiveEnergyTotalQ3D(block.energyQ);
 export function createReactiveWorld3D(registry: ReactiveMaterialRegistry3D, block: ReactiveMaterialBlock3D, tick: number = 0): ReactiveWorld3D {
   let live = createReactiveWorldSnapshot3D(registry, block, tick), revision = 0, initialQ = total(live.block), externalQ = 0n;
   const {width, height, depth} = live.block, prepared = new WeakMap<ReactiveWorldTickJob3D, number>();
@@ -46,7 +46,7 @@ export function createReactiveWorld3D(registry: ReactiveMaterialRegistry3D, bloc
   };
   return Object.freeze({width, height, depth,
     get tick() {return live.tick;}, get revision() {return revision;},
-    snapshot() {return structuredClone(live);},
+    snapshot() {return cloneReactiveData3D(live);},
     edit(edits: readonly ReactiveMaterialEdit3D[]) {
       return mutation(ensureValid => {
         const next = nextRevision(), {block: edited, receipt, replacedCells} = stageReactiveMaterialEdits3D(registry, live.block, edits);
@@ -59,7 +59,8 @@ export function createReactiveWorld3D(registry: ReactiveMaterialRegistry3D, bloc
       });
     },
     prepareTick(options: ReactiveTickOptions3D = {}) {
-      return mutation(ensureValid => {nextRevision(); const job = createReactiveWorldTickJob3D(registry, live, options); ensureValid(); prepared.set(job, revision); return job;});
+      // The live snapshot is always owned and validated, so the tick reads it without a second copy.
+      return mutation(ensureValid => {nextRevision(); const job = startReactiveWorldTickJob3D(registry, live, options); ensureValid(); prepared.set(job, revision); return job;});
     },
     commitTick(job: ReactiveWorldTickJob3D) {
       return mutation(ensureValid => {

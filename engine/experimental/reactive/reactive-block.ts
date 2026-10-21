@@ -3,6 +3,18 @@ import { MAT, PHASE, PHASE_SHIFT, COLD_STRIDE, COLD_COHESION } from '../../gener
 import { seedState, validateEnergyState, thermalView, energyLedger, MAX_ENERGY_Q } from '../../thermal.js';
 import { INTEGRITY_3D, ANCHOR_3D, BONDS_3D, COMPLETE_STRUCTURE_3D, structuralNeighbor } from '../structural-mechanics.js';
 import { reactiveRegistrySource3D, reactiveFields3D, reactiveArray3D, reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
+const BOND_MASK_3D = BONDS_3D.reduce((mask, bit) => mask | bit, 0);
+/** Per-registry material facts the block check needs for every cell; registries are frozen, so these never change. */
+const materialTables = new WeakMap<ReactiveMaterialRegistry3D, {known: Uint8Array; phase: Uint8Array}>();
+function reactiveMaterialTables3D(registry: ReactiveMaterialRegistry3D) {
+  let tables = materialTables.get(registry);
+  if (!tables) {
+    const known = new Uint8Array(256), phase = new Uint8Array(256);
+    for (const id of registry.materialIds) {known[id] = 1; phase[id] = registry.material(id).properties.default_phase;}
+    tables = {known, phase}; materialTables.set(registry, tables);
+  }
+  return tables;
+}
 export const REACTIVE_BLOCK_RULES_3D = 'reactive-material-block-1';
 export const REACTIVE_BLOCK_SCHEMA_3D = 1;
 export const REACTIVE_BLOCK_LIMITS_3D = Object.freeze({cells: 32768, dimension: 128, edits: 4096});
@@ -34,26 +46,42 @@ export function createReactiveMaterialBlock3D(registry: ReactiveMaterialRegistry
 }
 /** Owned complete coordinates. No normalization or repair on malformed input. */
 export function readReactiveMaterialBlock3D(registry: ReactiveMaterialRegistry3D, raw: unknown): ReactiveMaterialBlock3D {
-  const source = reactiveRegistrySource3D(registry);
+  reactiveRegistrySource3D(registry);
   reactiveFields3D(raw, ['schemaVersion', 'rulesVersion', 'materialCatalogHash', 'width', 'height', 'depth', 'packedCells', 'energyQ', 'structure']);
   if (raw.schemaVersion !== REACTIVE_BLOCK_SCHEMA_3D || raw.rulesVersion !== REACTIVE_BLOCK_RULES_3D || raw.materialCatalogHash !== registry.hash) throw Error('Incompatible reactive material block.');
   const dimensions = {width: raw.width, height: raw.height, depth: raw.depth} as Shape, count = shape(dimensions);
-  const arrays = [raw.packedCells, raw.energyQ, raw.structure].map(value => {
+  const [packedCells, energyQ, structure] = [raw.packedCells, raw.energyQ, raw.structure].map(value => {
     const rows = reactiveArray3D(value, count); if (rows.length !== count) throw Error('Reactive coordinate length mismatch.');
     return rows.map(v => reactiveInteger3D(v, 0, 0xffffffff));
   });
-  const [packedCells, energyQ, structure] = arrays;
+  return checkReactiveMaterialBlock3D(registry, {schemaVersion: 1, rulesVersion: REACTIVE_BLOCK_RULES_3D, materialCatalogHash: registry.hash, ...dimensions, packedCells, energyQ, structure});
+}
+/** Internal only: physical invariants of an engine-owned block whose data shape is already trusted.
+ * The public reader copies and checks shape first; this never copies, and returns canonical field order.
+ */
+export function checkReactiveMaterialBlock3D(registry: ReactiveMaterialRegistry3D, block: ReactiveMaterialBlock3D): ReactiveMaterialBlock3D {
+  const source = reactiveRegistrySource3D(registry), {packedCells, energyQ, structure} = block;
+  const dimensions = {width: block.width, height: block.height, depth: block.depth}, count = shape(dimensions);
+  if (packedCells.length !== count || energyQ.length !== count || structure.length !== count) throw Error('Reactive coordinate length mismatch.');
   validateEnergyState(packedCells, energyQ, count, source.cold, source.registry);
+  const {known, phase} = reactiveMaterialTables3D(registry);
   for (let i = 0; i < count; i++) {
     const v = packedCells[i], word = structure[i];
-    if (!registry.has(v & 255) || (v & 0xf0ff0000) !== 0 || (v >>> PHASE_SHIFT & 15) !== registry.material(v & 255).properties.default_phase) throw Error('Invalid reactive packed material.');
+    if (!known[v & 255] || (v & 0xf0ff0000) !== 0 || (v >>> PHASE_SHIFT & 15) !== phase[v & 255]) throw Error('Invalid reactive packed material.');
     if ((word & ~COMPLETE_STRUCTURE_3D) !== 0 || !eligible(v, source.cold) && word !== 0) throw Error('Invalid reactive structural state.');
+    if ((word & BOND_MASK_3D) === 0) continue;
     for (let dir = 0; dir < 6; dir++) if (word & BONDS_3D[dir]) {
       const j = structuralNeighbor(i, dir, dimensions);
       if (j < 0 || !(word & INTEGRITY_3D) || !(structure[j] & INTEGRITY_3D) || !(structure[j] & BONDS_3D[dir ^ 1]) || !eligible(packedCells[j], source.cold)) throw Error('Invalid reactive reciprocal bond or boundary.');
     }
   }
   return {schemaVersion: 1, rulesVersion: REACTIVE_BLOCK_RULES_3D, materialCatalogHash: registry.hash, ...dimensions, packedCells, energyQ, structure};
+}
+/** Exact under REACTIVE_BLOCK_LIMITS_3D: 32768 cells at MAX_ENERGY_Q stay far below 2^53. */
+export function reactiveEnergyTotalQ3D(energyQ: readonly number[]): bigint {
+  let sum = 0; for (let i = 0; i < energyQ.length; i++) sum += energyQ[i];
+  if (!Number.isSafeInteger(sum)) throw Error('Reactive energy total exceeds exact integer range.');
+  return BigInt(sum);
 }
 export function reactiveMaterialEnergyLedger3D(registry: ReactiveMaterialRegistry3D, raw: ReactiveMaterialBlock3D) {
   const block = readReactiveMaterialBlock3D(registry, raw), source = reactiveRegistrySource3D(registry);

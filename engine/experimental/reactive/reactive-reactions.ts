@@ -1,10 +1,10 @@
 /** Bounded local reactive cycles. No movement, global support, Worker or GPU. */
 import { MAT, PHASE, PHASE_SHIFT, COLD_STRIDE, COLD_COHESION, COLD_FUEL_ENERGY, COLD_FLASH_POINT,
-  COLD_OXIDIZER, COLD_BURNS_INTO, COLD_SMOKE_PRODUCT } from '../../generated/materials.js';
+  COLD_OXIDIZER, COLD_BURNS_INTO, COLD_SMOKE_PRODUCT, COLD_MELTS_INTO, COLD_BOILS_INTO, COLD_FREEZES_INTO, COLD_CONDENSES_INTO } from '../../generated/materials.js';
 import { temperatureQ, exchangeEnergy, thermalView, phaseMaterial, rewriteMaterial, MAX_ENERGY_Q, ENERGY_SCALE } from '../../thermal.js';
 import { INTEGRITY_3D, BONDS_3D, structuralNeighbor } from '../structural-mechanics.js';
-import { readReactiveMaterialBlock3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
-import { reactiveRegistrySource3D, reactiveFields3D, reactiveInteger3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
+import { readReactiveMaterialBlock3D, checkReactiveMaterialBlock3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
+import { reactiveRegistrySource3D, reactiveFields3D, reactiveInteger3D, cloneReactiveData3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 
 export const REACTIVE_REACTION_RULES_3D = 'reactive-reactions-1';
 export const REACTIVE_REACTION_SCHEMA_3D = 1;
@@ -36,45 +36,80 @@ export function readReactiveReactionState3D(registry: ReactiveMaterialRegistry3D
   return {schemaVersion: 1, rulesVersion: REACTIVE_REACTION_RULES_3D, cycle, block: readReactiveMaterialBlock3D(registry, raw.block)};
 }
 
-const copy = (block: ReactiveMaterialBlock3D): ReactiveMaterialBlock3D => ({...block, packedCells: block.packedCells.slice(), energyQ: block.energyQ.slice(), structure: block.structure.slice()});
+/** Copy-on-write pass output: the immutable input arrays are shared until the first write. */
+function draft(input: ReactiveMaterialBlock3D) {
+  const cells = input.packedCells, energy = input.energyQ, structure = input.structure;
+  const out = {cells, energy, structure,
+    own() {if (out.cells === cells) {out.cells = cells.slice(); out.energy = energy.slice(); out.structure = structure.slice();}},
+    block: (): ReactiveMaterialBlock3D => out.cells === cells ? {...input} : {...input, packedCells: out.cells, energyQ: out.energy, structure: out.structure}};
+  return out;
+}
 const prop = (word: number, cold: Uint32Array, key: number) => cold[(word & 255) * COLD_STRIDE + key];
-const eligible = (word: number, cold: Uint32Array) => [PHASE.SOLID, PHASE.FROZEN].some(p => p === (word >>> PHASE_SHIFT & 15)) && prop(word, cold, COLD_COHESION) > 0;
+const eligible = (word: number, cold: Uint32Array) => {
+  const p = word >>> PHASE_SHIFT & 15; return (p === PHASE.SOLID || p === PHASE.FROZEN) && prop(word, cold, COLD_COHESION) > 0;
+};
+const BOND_MASK_3D = BONDS_3D.reduce((mask, bit) => mask | bit, 0);
+/** Exact under REACTIVE_BLOCK_LIMITS_3D: chemical energy never exceeds a cell's conserved energy. */
 function totals(block: ReactiveMaterialBlock3D, cold: Uint32Array) {
-  let energyQ = 0n, chemicalQ = 0n;
-  for (let i = 0; i < block.energyQ.length; i++) {energyQ += BigInt(block.energyQ[i]); chemicalQ += BigInt(prop(block.packedCells[i], cold, COLD_FUEL_ENERGY) * ENERGY_SCALE);}
-  return {energyQ, chemicalQ};
+  let energyQ = 0, chemicalQ = 0;
+  for (let i = 0; i < block.energyQ.length; i++) {energyQ += block.energyQ[i]; chemicalQ += prop(block.packedCells[i], cold, COLD_FUEL_ENERGY) * ENERGY_SCALE;}
+  if (!Number.isSafeInteger(energyQ) || !Number.isSafeInteger(chemicalQ)) throw Error('Reactive energy total exceeds exact integer range.');
+  return {energyQ: BigInt(energyQ), chemicalQ: BigInt(chemicalQ)};
 }
+/** Materials without a melt, boil, freeze or condense target never change phase. */
+function phaseTransitions(cold: Uint32Array): Uint8Array {
+  const transitions = new Uint8Array(256);
+  for (let m = 0; m < transitions.length && (m + 1) * COLD_STRIDE <= cold.length; m++) {
+    const at = m * COLD_STRIDE;
+    transitions[m] = cold[at + COLD_MELTS_INTO] || cold[at + COLD_BOILS_INTO] || cold[at + COLD_FREEZES_INTO] || cold[at + COLD_CONDENSES_INTO] ? 1 : 0;
+  }
+  return transitions;
+}
+/** Disjoint parity pairs along one axis. A pair whose energies do not change is skipped exactly:
+ * its packed words already equal their thermal views, so the old rewrite was a no-op.
+ */
 function heat(input: ReactiveMaterialBlock3D, cold: Uint32Array, axis: number, parity: number): ReactiveMaterialBlock3D {
-  const output = copy(input), w = input.width, h = input.height;
-  for (let i = 0; i < input.packedCells.length; i++) {
-    const coordinate = axis === 0 ? i % w : axis === 1 ? Math.floor(i / w) % h : Math.floor(i / (w * h));
-    if (coordinate % 2 !== parity) continue;
-    const j = structuralNeighbor(i, axis * 2 + 1, input); if (j < 0) continue;
-    [output.energyQ[i], output.energyQ[j]] = exchangeEnergy(input.packedCells[i], input.packedCells[j], input.energyQ[i], input.energyQ[j], cold);
-    output.packedCells[i] = thermalView(input.packedCells[i], output.energyQ[i], cold);
-    output.packedCells[j] = thermalView(input.packedCells[j], output.energyQ[j], cold);
+  const output = draft(input), w = input.width, h = input.height, d = input.depth, cells = input.packedCells, energy = input.energyQ;
+  const step = axis === 0 ? 1 : axis === 1 ? w : w * h, extent = axis === 0 ? w : axis === 1 ? h : d;
+  for (let z = 0; z < d; z++) for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const coordinate = axis === 0 ? x : axis === 1 ? y : z;
+    if (coordinate % 2 !== parity || coordinate + 1 >= extent) continue;
+    const i = x + w * (y + h * z), j = i + step;
+    if (cells[i] === cells[j] && energy[i] === energy[j]) continue;
+    const [ei, ej] = exchangeEnergy(cells[i], cells[j], energy[i], energy[j], cold);
+    if (ei === energy[i] && ej === energy[j]) continue;
+    output.own(); output.energy[i] = ei; output.energy[j] = ej;
+    output.cells[i] = thermalView(cells[i], ei, cold);
+    output.cells[j] = thermalView(cells[j], ej, cold);
   }
-  return output;
+  return output.block();
 }
-/** Clear invalid links only. Transformations never silently join neighboring solids. */
-function clearInvalidBonds(block: ReactiveMaterialBlock3D): void {
-  for (let i = 0; i < block.structure.length; i++) for (let dir = 0; dir < 6; dir++) if (block.structure[i] & BONDS_3D[dir]) {
-    const j = structuralNeighbor(i, dir, block);
-    if (!(block.structure[i] & INTEGRITY_3D) || j < 0 || !(block.structure[j] & INTEGRITY_3D) || !(block.structure[j] & BONDS_3D[dir ^ 1])) block.structure[i] &= ~BONDS_3D[dir];
+/** Clear invalid links only. Transformations never silently join neighboring solids.
+ * Reads follow the words already cleared in this sweep; the draft copies its arrays on the first clear.
+ */
+function clearInvalidBonds(output: ReturnType<typeof draft>, geometry: ReactiveMaterialBlock3D): void {
+  for (let i = 0; i < output.structure.length; i++) {
+    if ((output.structure[i] & BOND_MASK_3D) === 0) continue;
+    for (let dir = 0; dir < 6; dir++) if (output.structure[i] & BONDS_3D[dir]) {
+      const j = structuralNeighbor(i, dir, geometry);
+      if (!(output.structure[i] & INTEGRITY_3D) || j < 0 || !(output.structure[j] & INTEGRITY_3D) || !(output.structure[j] & BONDS_3D[dir ^ 1])) {output.own(); output.structure[i] &= ~BONDS_3D[dir];}
+    }
   }
 }
-function phase(input: ReactiveMaterialBlock3D, cold: Uint32Array, changed: number[]): ReactiveMaterialBlock3D {
-  const output = copy(input);
+function phase(input: ReactiveMaterialBlock3D, cold: Uint32Array, transitions: Uint8Array, changed: number[]): ReactiveMaterialBlock3D {
+  const output = draft(input);
   for (let i = 0; i < input.packedCells.length; i++) {
-    const old = input.packedCells[i], next = phaseMaterial(old, input.energyQ[i], cold);
+    const old = input.packedCells[i];
+    if (!transitions[old & 255]) continue;
+    const next = phaseMaterial(old, input.energyQ[i], cold);
     if (next === (old & 255)) continue;
-    changed.push(i); output.packedCells[i] = rewriteMaterial(old, next, input.energyQ[i], cold);
-    output.structure[i] = eligible(output.packedCells[i], cold) ? (eligible(old, cold) ? input.structure[i] : INTEGRITY_3D) : 0;
+    changed.push(i); output.own(); output.cells[i] = rewriteMaterial(old, next, input.energyQ[i], cold);
+    output.structure[i] = eligible(output.cells[i], cold) ? (eligible(old, cold) ? input.structure[i] : INTEGRITY_3D) : 0;
   }
-  clearInvalidBonds(output); return output;
+  clearInvalidBonds(output, input); return output.block();
 }
 function combustion(input: ReactiveMaterialBlock3D, cold: Uint32Array, cycle: number, report: ReactiveReactionReport3D): ReactiveMaterialBlock3D {
-  const output = copy(input), n = input.packedCells.length, proposed = new Int32Array(n).fill(-1), chosen = new Int32Array(n).fill(-1);
+  const output = draft(input), n = input.packedCells.length, proposed = new Int32Array(n).fill(-1), chosen = new Int32Array(n).fill(-1), wanted = new Uint8Array(n);
   const burning = (i: number) => prop(input.packedCells[i], cold, COLD_FUEL_ENERGY) > 0 &&
     temperatureQ(input.packedCells[i], input.energyQ[i], cold) > prop(input.packedCells[i], cold, COLD_FLASH_POINT) * ENERGY_SCALE;
   const neighbors = (i: number): number[] => {
@@ -83,11 +118,15 @@ function combustion(input: ReactiveMaterialBlock3D, cold: Uint32Array, cycle: nu
     for (let k = 0; k < 6; k++) {const j = structuralNeighbor(i, (offset + k) % 6, input); if (j >= 0) result.push(j);}
     return result;
   };
-  for (let i = 0; i < n; i++) if (burning(i)) proposed[i] = neighbors(i).find(j => prop(input.packedCells[j], cold, COLD_OXIDIZER) === 1) ?? -1;
-  for (let i = 0; i < n; i++) if (prop(input.packedCells[i], cold, COLD_OXIDIZER) === 1) chosen[i] = neighbors(i).find(j => proposed[j] === i) ?? -1;
+  for (let i = 0; i < n; i++) if (burning(i)) {
+    const j = neighbors(i).find(k => prop(input.packedCells[k], cold, COLD_OXIDIZER) === 1) ?? -1;
+    proposed[i] = j; if (j >= 0) wanted[j] = 1;
+  }
+  // Only a proposed oxidizer can be chosen, so the neighbor order of every other cell is never needed.
+  for (let i = 0; i < n; i++) if (wanted[i] && prop(input.packedCells[i], cold, COLD_OXIDIZER) === 1) chosen[i] = neighbors(i).find(j => proposed[j] === i) ?? -1;
   const product = (i: number, material: number, energyQ: number) => {
-    output.energyQ[i] = energyQ; output.packedCells[i] = rewriteMaterial(input.packedCells[i], material, energyQ, cold);
-    output.structure[i] = eligible(output.packedCells[i], cold) ? INTEGRITY_3D : 0;
+    output.own(); output.energy[i] = energyQ; output.cells[i] = rewriteMaterial(input.packedCells[i], material, energyQ, cold);
+    output.structure[i] = eligible(output.cells[i], cold) ? INTEGRITY_3D : 0;
   };
   for (let i = 0; i < n; i++) {
     const j = proposed[i];
@@ -104,14 +143,17 @@ function combustion(input: ReactiveMaterialBlock3D, cold: Uint32Array, cycle: nu
       }
     }
   }
-  clearInvalidBonds(output); return output;
+  clearInvalidBonds(output, input); return output.block();
 }
 
-/** Each advance executes one immutable-input pass; partial state never escapes. */
-function reactionJob(registry: ReactiveMaterialRegistry3D, raw: ReactiveReactionState3D, observe?: (index: number, block: ReactiveMaterialBlock3D) => void): ReactiveReactionJob3D {
-  const state = readReactiveReactionState3D(registry, raw), cycle = state.cycle, cold = reactiveRegistrySource3D(registry).cold;
+type Observe = (index: number, block: ReactiveMaterialBlock3D) => void;
+/** Each advance executes one immutable-input pass; partial state never escapes.
+ * Owned validated state only. Public entries validate first and never hand over uncopied results.
+ */
+function reactionJob(registry: ReactiveMaterialRegistry3D, state: ReactiveReactionState3D, observe?: Observe) {
+  const cycle = state.cycle, cold = reactiveRegistrySource3D(registry).cold, transitions = phaseTransitions(cold);
   if (cycle === Number.MAX_SAFE_INTEGER) throw Error('Reactive cycle would overflow.');
-  let before: ReactiveMaterialBlock3D | null = state.block, current: ReactiveMaterialBlock3D | null = copy(before), completedPasses = 0;
+  let before: ReactiveMaterialBlock3D | null = state.block, current: ReactiveMaterialBlock3D | null = before, completedPasses = 0;
   let status: ReactiveReactionProgress3D['status'] = 'running', result: ReactiveReactionResult3D | null = null;
   const initial = totals(before, cold), report: ReactiveReactionReport3D = {
     rulesVersion: REACTIVE_REACTION_RULES_3D, materialCatalogHash: registry.hash, fromCycle: cycle, toCycle: cycle + 1,
@@ -120,19 +162,19 @@ function reactionJob(registry: ReactiveMaterialRegistry3D, raw: ReactiveReaction
       chemicalBeforeQ: initial.chemicalQ.toString(), chemicalAfterQ: initial.chemicalQ.toString()},
   };
   const progress = (): ReactiveReactionProgress3D => ({status, completedPasses, totalPasses: 8});
-  return Object.freeze({
+  const job: ReactiveReactionJob3D = Object.freeze({
     progress,
     advance() {
       if (status !== 'running' || !current || !before) throw Error('Reactive job is no longer running.');
       try {
         if (completedPasses < 6) current = heat(current, cold, Math.floor(completedPasses / 2), completedPasses % 2);
-        else if (completedPasses === 6) current = phase(current, cold, report.phaseChangedCells);
+        else if (completedPasses === 6) current = phase(current, cold, transitions, report.phaseChangedCells);
         else current = combustion(current, cold, cycle, report);
         observe?.(completedPasses, current);
         completedPasses++;
         if (completedPasses === 8) {
           // Validate before publication; source and internal state remain isolated on failure.
-          const block = readReactiveMaterialBlock3D(registry, current), final = totals(block, cold);
+          const block = checkReactiveMaterialBlock3D(registry, current), final = totals(block, cold);
           if (final.energyQ !== initial.energyQ) throw Error('Reactive cycle violated energy conservation.');
           report.energy.afterQ = final.energyQ.toString(); report.energy.chemicalAfterQ = final.chemicalQ.toString();
           for (let i = 0; i < block.packedCells.length; i++) if (block.packedCells[i] !== before.packedCells[i] || block.energyQ[i] !== before.energyQ[i] || block.structure[i] !== before.structure[i]) report.changedCells.push(i);
@@ -143,12 +185,19 @@ function reactionJob(registry: ReactiveMaterialRegistry3D, raw: ReactiveReaction
       return progress();
     },
     cancel() {if (status !== 'running') return false; current = before = null; status = 'cancelled'; return true;},
-    result() {if (!result || status !== 'complete') throw Error('Reactive result is not complete.'); return structuredClone(result);},
+    result() {if (!result || status !== 'complete') throw Error('Reactive result is not complete.'); return cloneReactiveData3D(result);},
   });
+  return {job, output() {if (!result || status !== 'complete') throw Error('Reactive result is not complete.'); return result;}};
 }
-export function createReactiveReactionJob3D(registry: ReactiveMaterialRegistry3D, raw: ReactiveReactionState3D): ReactiveReactionJob3D {return reactionJob(registry, raw);}
-/** Internal capture hook; callers cannot attach callbacks through the public SDK. */
-export function createObservedReactiveReactionJob3D(registry: ReactiveMaterialRegistry3D, raw: ReactiveReactionState3D, observe: (index: number, block: ReactiveMaterialBlock3D) => void): ReactiveReactionJob3D {return reactionJob(registry, raw, observe);}
+export function createReactiveReactionJob3D(registry: ReactiveMaterialRegistry3D, raw: ReactiveReactionState3D): ReactiveReactionJob3D {
+  return reactionJob(registry, readReactiveReactionState3D(registry, raw)).job;
+}
+/** Internal only: owned validated state, an optional capture hook and an uncopied result hand-off.
+ * Callers cannot attach callbacks through the public SDK.
+ */
+export function startReactiveReactionJob3D(registry: ReactiveMaterialRegistry3D, state: ReactiveReactionState3D, observe?: Observe) {
+  return reactionJob(registry, state, observe);
+}
 /** Convenience for a single bounded cycle; does not accept a tick count. */
 export function advanceReactiveReactions3D(registry: ReactiveMaterialRegistry3D, state: ReactiveReactionState3D): ReactiveReactionResult3D {
   const job = createReactiveReactionJob3D(registry, state); for (let i = 0; i < 8; i++) job.advance(); return job.result();

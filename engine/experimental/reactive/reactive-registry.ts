@@ -26,8 +26,36 @@ export function reactiveFields3D(raw: unknown, required: readonly string[], opti
 }
 export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   if (!Array.isArray(raw) || Object.getPrototypeOf(raw) !== Array.prototype || raw.length > maximum || Reflect.ownKeys(raw).length !== raw.length + 1) throw Error('Invalid reactive array.');
-  for (let i = 0; i < raw.length; i++) {const d = Object.getOwnPropertyDescriptor(raw, String(i)); if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');}
+  // A numeric key names the same property as String(i) and skips a string allocation per element.
+  for (let i = 0; i < raw.length; i++) {const d = Object.getOwnPropertyDescriptor(raw, i); if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');}
   return raw;
+}
+/** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
+ * Field order and shared references are kept exactly as structuredClone keeps them, without its serializer cost.
+ * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
+ * Not for caller-supplied data: that goes through the validating readers.
+ */
+export function cloneReactiveData3D<T>(value: T): T {
+  const seen = new Map<object, unknown>();
+  const copy = (v: unknown): unknown => {
+    if (typeof v === 'function' || typeof v === 'symbol') throw Error('Reactive results hold portable data only.');
+    if (typeof v !== 'object' || v === null) return v;
+    const known = seen.get(v); if (known !== undefined) return known;
+    if (Array.isArray(v)) {
+      if (Object.getPrototypeOf(v) !== Array.prototype) return structuredClone(v);
+      let flat = true;
+      for (let i = 0; i < v.length; i++) if (typeof v[i] === 'object' && v[i] !== null) {flat = false; break;}
+      if (flat) {const out = v.slice(); seen.set(v, out); return out;}
+      const out = new Array<unknown>(v.length); seen.set(v, out);
+      for (let i = 0; i < v.length; i++) out[i] = copy(v[i]);
+      return out;
+    }
+    if (Object.getPrototypeOf(v) !== Object.prototype) return structuredClone(v);
+    const out: Record<string, unknown> = {}; seen.set(v, out);
+    for (const key of Object.keys(v)) out[key] = copy((v as Record<string, unknown>)[key]);
+    return out;
+  };
+  return copy(value) as T;
 }
 export function reactiveInteger3D(raw: unknown, min: number, max: number): number {
   if (typeof raw !== 'number' || !Number.isSafeInteger(raw) || raw < min || raw > max) throw Error('Invalid reactive integer.'); return raw === 0 ? 0 : raw;
