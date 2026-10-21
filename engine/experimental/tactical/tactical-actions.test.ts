@@ -4,7 +4,10 @@ import { MAT, buildColdTable, PHASE_SHIFT } from '../../generated/materials.js';
 import { DEFAULT_REGISTRY } from '../../registry.js';
 import { MAX_ENERGY_Q, thermalView } from '../../thermal.js';
 import { ANCHOR_3D } from '../structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from '../structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 import { createTacticalSession3D } from '../tactical-session.js';
 import {
   createTacticalSessionCore3D,

@@ -11,7 +11,7 @@ import {
   validateStructuralSnapshot3D,
   validateStructuralState3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import type { CellCoordinate3D } from './interventions.js';
 
 export const MATERIAL_RESERVOIR_RULES_VERSION_3D = 'material-reservoirs-1';

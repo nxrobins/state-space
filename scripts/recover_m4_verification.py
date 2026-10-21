@@ -17,6 +17,14 @@ import uuid
 from scripts.verification_guard import ROOT, Lease
 
 
+def source_path(name: str) -> str:
+    """Repository-relative path of one experimental source by file name, wherever it lives now."""
+    matches = sorted((ROOT / 'engine/experimental').rglob(name))
+    if not matches:
+        raise RuntimeError(f'Missing experimental source {name}.')
+    return matches[0].relative_to(ROOT).as_posix()
+
+
 STAGES = ('heat-probe', 'haze-probe', 'optics-probe', 'appearance-probe', 'appearance-replay', 'frames128beauty', 'appearance-timing', 'appearance-ui', 'gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'ui-gpu', 'cpu-smoke', 'cpu-reference', 'receipt-tests', 'unit', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128', 'diagnostic128', 'ui', 'lint', 'typecheck', 'build', 'sdk', 'publish')
 
 
@@ -40,7 +48,7 @@ def main():
         if previous in ('heat-probe', 'haze-probe', 'optics-probe', 'appearance-probe', 'appearance-replay', 'probe', 'gate64', 'frames32', 'frames64', 'continuation128', 'frames128', 'gameplay-probe', 'gameplay128'):
             prior = json.loads((ROOT / receipt['evidence']).read_text(encoding='utf-8'))
             for name in ('3d-gpu-core.ts', '3d-shader.ts', 'active-shader.ts', 'world-renderer.ts', 'cavern-appearance.ts', 'cavern-optics.ts', 'cavern-haze.ts', 'rock-textures.ts', '3d-view.ts', 'active-world-gpu.ts', '3d-renderer.ts', 'latency.ts', 'gameplay-gpu.ts', 'gameplay-shader.ts', 'gameplay-view.ts'):
-                path = 'engine/experimental/' + name
+                path = source_path(name)
                 if prior['sourceHashes'].get(path) != hashlib.sha256((ROOT / path).read_bytes()).hexdigest():
                     raise RuntimeError(f'{previous} is stale for {path}; repeat the bounded prerequisite first.')
     out = base / (stage + '-' + uuid.uuid4().hex[:8])

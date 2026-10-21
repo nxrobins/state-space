@@ -9,7 +9,10 @@ import {
   type MaterialTransportState3D,
   type MaterialParcelSeed3D,
 } from './material-transport.js';
-import { CpuStructuralWorld3D, validateStructuralSnapshot3D } from './structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  validateStructuralSnapshot3D,
+} from './structural/structural-world-core.js';
 
 import { MAT } from './3d.js';
 holdPhysics('solveStructure3D', ...STRUCTURAL_CALLS);

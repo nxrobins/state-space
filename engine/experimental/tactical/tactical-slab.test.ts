@@ -16,7 +16,10 @@ import {
 import { installSlabWorker } from '../../../examples/tactical-slab/worker.js';
 import { MAT } from '../3d.js';
 import * as mechanics from '../structural-mechanics.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from '../structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 import {
   createTacticalSessionCore3D,
   type TacticalSimulationFactory3D,

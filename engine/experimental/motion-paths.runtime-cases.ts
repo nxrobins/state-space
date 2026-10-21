@@ -1,7 +1,10 @@
 /** Held real M5 equivalence/continuation cases. Never select in edit/mock checks. */
 import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from './structural/structural-world-core.js';
 import { readMotionPaths3D } from './motion-paths.js';
 
 function seed() {

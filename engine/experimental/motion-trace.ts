@@ -1,6 +1,6 @@
 /** Derived provenance from executed permutations. Never a physical coordinate. */
 import type { StructuralGeometry, StructuralPlan3D } from './structural-mechanics.js';
-import type { StructuralSnapshot3D } from './structural-world-core.js';
+import type { StructuralSnapshot3D } from './structural/structural-world-core.js';
 import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
 import type { ChangeTarget3D } from './change-reports.js';
 

@@ -2,7 +2,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 /** Real tiny reactive paths and shared actor arithmetic; native/M5 stepping held. */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTerrainBody3D } from '../terrain/terrain-body.js';
 import { moveTerrainActors3D } from '../actor-movement.js';

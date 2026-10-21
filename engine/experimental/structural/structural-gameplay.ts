@@ -1,4 +1,4 @@
-import type { GameplayCommit3D, GameplayRules3D } from './gameplay-view.js';
+import type { GameplayCommit3D, GameplayRules3D } from '../gameplay-view.js';
 
 /** M5 has a positional crossing goal; it does not require legacy tool events.
  * Evaluate only a completed tick, after collision/loss resolution. The corrected

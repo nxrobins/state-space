@@ -1,5 +1,5 @@
 /** Portable application transactions around the unchanged M5 CPU rules. */
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 export {
   captureMaterialTransportMemory3D,
   restoreMaterialTransportMemory3D,

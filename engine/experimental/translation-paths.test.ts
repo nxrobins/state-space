@@ -5,7 +5,10 @@ import { MAT, ENERGY_SCALE } from './3d.js';
 import * as mechanics from './structural-mechanics.js';
 import * as interventions from './interventions.js';
 import * as paths from './translation-paths.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from './structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from './structural/structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import {
   createTacticalSessionCore3D,

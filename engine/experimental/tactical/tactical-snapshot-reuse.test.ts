@@ -11,7 +11,10 @@ import {
   inspectTacticalSnapshotReuse3D,
   type TacticalSnapshotReuseOptions3D,
 } from './tactical-snapshot-reuse.js';
-import { CpuStructuralWorld3D, type StructuralSnapshot3D } from '../structural-world-core.js';
+import {
+  CpuStructuralWorld3D,
+  type StructuralSnapshot3D,
+} from '../structural/structural-world-core.js';
 
 import type { SupportObserver3D } from '../change-reports.js';
 import type {

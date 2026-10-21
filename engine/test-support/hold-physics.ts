@@ -1,6 +1,6 @@
 import { afterAll, expect, vi } from 'vitest';
 import { CpuVolume } from '../experimental/3d-core.js';
-import { CpuStructuralWorld3D } from '../experimental/structural-world-core.js';
+import { CpuStructuralWorld3D } from '../experimental/structural/structural-world-core.js';
 import * as mechanics from '../experimental/structural-mechanics.js';
 
 export const STRUCTURAL_CALLS = [

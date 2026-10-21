@@ -3,7 +3,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 import { describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
 
-import { type StructuralSnapshot3D } from '../structural-world-core.js';
+import { type StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import { createTacticalSession3D } from '../tactical-session.js';
 import {
   createTacticalSessionCore3D,

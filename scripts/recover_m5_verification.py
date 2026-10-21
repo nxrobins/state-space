@@ -34,7 +34,7 @@ def main():
     commands = {
         'typecheck': [node, 'node_modules/typescript/bin/tsc', '--noEmit', '-p', 'engine/tsconfig.json'],
         'cpu-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-world.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
-        'review-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
+        'review-unit': [node, 'node_modules/vitest/vitest.mjs', 'run', 'engine/experimental/structural/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts', '--config', 'engine/vitest.cpu.config.ts'],
         'build': [node, 'node_modules/vite/bin/vite.js', 'build', '--config', 'engine/vite.structural-world.config.ts'],
         'declarations': [node, 'scripts/build_sdk.mjs', '--types-only'],
         'lint': [node, 'engine/lint_ts.mjs'],
@@ -109,7 +109,7 @@ def main():
         if not prior.get('passed') or not receipt.get('passed') or not receipt.get('sourceUnchanged'): parser.error('Preceding stage did not pass')
         if args.stage=='scale-pilot' and (prior.get('probe')!='level-trajectory' or result.get('size')!=64 or result.get('part')!='main'): parser.error('Scale pilot requires a passing 64^3 uninterrupted GPU trajectory')
         if args.stage=='frames' and (prior.get('probe')!='scale' or result.get('size')!=128 or result.get('scenario')!=args.scene): parser.error('128^3 frames require the matching eight-frame scale pilot')
-        critical=['engine/experimental/structural-world-gpu.ts','engine/experimental/structural-shader.ts','engine/experimental/structural-active-shader.ts','dist/sdk/state-space-structural-world-gpu.js','examples/structural-cavern/scene.js']
+        critical=['engine/experimental/structural-world-gpu.ts','engine/experimental/structural/structural-shader.ts','engine/experimental/structural/structural-active-shader.ts','dist/sdk/state-space-structural-world-gpu.js','examples/structural-cavern/scene.js']
         if args.stage=='frames': critical += ['examples/structural-cavern/app.js','examples/structural-cavern/benchmark.js','examples/structural-cavern/scale-probe.js']
         for name in critical:
             if hashlib.sha256((ROOT/name).read_bytes()).hexdigest()!=receipt['sourceHashes'].get(name): parser.error('GPU/scene source changed after the preceding scale gate')

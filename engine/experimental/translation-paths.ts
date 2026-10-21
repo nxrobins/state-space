@@ -10,7 +10,7 @@ import {
 import {
   validateStructuralSnapshot3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import { structuralNeighbor, ANCHOR_3D, BONDS_3D } from './structural-mechanics.js';
 import type { MotionPathSegment3D } from './motion-paths.js';
 import type { GameplayGeometry3D, GeometryStamp3D } from './gameplay-geometry.js';

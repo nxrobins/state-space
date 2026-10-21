@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--output', type=Path, default=ROOT / 'dist/volume-m3-edits')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    paths = ['engine/experimental/world-core.ts', 'engine/experimental/world.test.ts',
+    paths = ['engine/experimental/volume/world-core.ts', 'engine/experimental/world.test.ts',
              'examples/cavern/verify.js', 'scripts/verify_volume_m3_edits.py',
              'dist/sdk/state-space-world.js', 'dist/sdk/state-space-world-gpu.js',
              'dist/sdk/state-space-3d.js']

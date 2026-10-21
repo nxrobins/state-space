@@ -5,7 +5,7 @@ import { MATERIALS_3D } from './3d.js';
 import {
   validateStructuralSnapshot3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 import type { TacticalRevision3D } from './tactical/tactical-session-view.js';
 import {
   createGeometryKernel3D,

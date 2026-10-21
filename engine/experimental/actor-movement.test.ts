@@ -13,7 +13,7 @@ import {
 } from './terrain/terrain-body.js';
 import type { NamedTerrainBody3D } from './terrain/terrain-body-group.js';
 import { createTacticalSession3D } from './tactical-session.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 
 import { MAT } from './3d.js';
 import { GEOMETRY_SCALE_3D as Q, type GameplayGeometry3D } from './gameplay-geometry.js';

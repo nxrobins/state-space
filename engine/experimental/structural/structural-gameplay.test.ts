@@ -3,7 +3,7 @@ import { runInNewContext } from 'node:vm';
 import { expect, test } from 'vitest';
 import { commitStructuralGoal } from './structural-gameplay.js';
 import { createStateSpaceStructuralWorld3D } from './structural-world-core.js';
-import type { GameplayCommit3D, GameplayRules3D } from './gameplay-view.js';
+import type { GameplayCommit3D, GameplayRules3D } from '../gameplay-view.js';
 
 const rules: GameplayRules3D = {
   goal: { minX: 2304, maxY: 2048, minZ: 1536, maxZ: 2560 },
@@ -63,7 +63,7 @@ test('all goal bounds are enforced and lost actors cannot win', () => {
 
 test('both constructor expressions in the published quickstart describe a valid 32 cubed world', () => {
   const readme = readFileSync(
-    new URL('../../examples/structural-cavern/README.md', import.meta.url),
+    new URL('../../../examples/structural-cavern/README.md', import.meta.url),
     'utf8',
   );
   const expressions = Array.from(

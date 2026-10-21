@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
 import { volumeSchedule } from '../3d-core.js';
 
-import { type StructuralSnapshot3D } from '../structural-world-core.js';
+import { type StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import {
   createTacticalSessionCore3D,
   type TacticalSimulationFactory3D,

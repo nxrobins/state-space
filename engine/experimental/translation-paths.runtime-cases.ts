@@ -1,7 +1,7 @@
 /** Held actual physics acceptance; never selected by the edit/mock configuration. */
 import { describe, expect, test } from 'vitest';
 import { MAT } from './3d.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import type { TacticalSessionPolicy3D } from './tactical/tactical-session-view.js';
 

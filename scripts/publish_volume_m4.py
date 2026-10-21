@@ -77,8 +77,8 @@ def main():
         retain((base / (stage + '.json')).relative_to(ROOT), f'recovery/{stage}.json')
         if stage in ('gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128'):
             proof = json.loads((ROOT / record['evidence']).read_text(encoding='utf-8'))
-            for path in ('engine/experimental/gameplay-gpu.ts','engine/experimental/gameplay-shader.ts','engine/experimental/gameplay-view.ts','engine/experimental/world-renderer.ts','engine/experimental/3d-gpu-core.ts', 'engine/experimental/3d-shader.ts',
-                         'engine/experimental/active-shader.ts', 'dist/sdk/state-space-3d-gpu.js',
+            for path in ('engine/experimental/gameplay-gpu.ts','engine/experimental/gameplay-shader.ts','engine/experimental/gameplay-view.ts','engine/experimental/volume/world-renderer.ts','engine/experimental/volume/3d-gpu-core.ts', 'engine/experimental/volume/3d-shader.ts',
+                         'engine/experimental/volume/active-shader.ts', 'dist/sdk/state-space-3d-gpu.js',
                          'dist/sdk/state-space-world-gpu.js', 'dist/sdk/state-space-active-world-gpu.js'):
                 if proof['sourceHashes'].get(path) != hashlib.sha256((ROOT / path).read_bytes()).hexdigest():
                     raise ValueError(f'Stale GPU kernel proof: {stage}: {path}')
@@ -127,8 +127,8 @@ def main():
                          for p in ('engine/experimental/3d-core.ts',
                                    'examples/active-cavern/scene.js')},
                       'gpuKernelOptimization': {
-                         'beforeShaderSha256': before['sourceHashes']['engine/experimental/3d-shader.ts'],
-                         'afterShaderSha256': hashlib.sha256((ROOT / 'engine/experimental/3d-shader.ts').read_bytes()).hexdigest(),
+                         'beforeShaderSha256': before['sourceHashes']['engine/experimental/volume/3d-shader.ts'],
+                         'afterShaderSha256': hashlib.sha256((ROOT / 'engine/experimental/volume/3d-shader.ts').read_bytes()).hexdigest(),
                          'proofs': ['recovery/probe.json', 'gate64.json.gz', 'continuation128.json.gz'],
                          'currentKernelHashesVerified': True},
                       'gameSetupRefactor': {'changedInputs': reference.get('changedInputs'),

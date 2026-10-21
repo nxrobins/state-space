@@ -1,7 +1,7 @@
 import { holdPhysics } from '../test-support/hold-physics.js';
 import { describe, expect, test, vi } from 'vitest';
 import { MAT } from './3d.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
+import { CpuStructuralWorld3D } from './structural/structural-world-core.js';
 import { createTacticalSession3D } from './tactical-session.js';
 import { GEOMETRY_SCALE_3D as S, type GeometryBox3D } from './gameplay-geometry.js';
 

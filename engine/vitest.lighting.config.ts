@@ -6,8 +6,8 @@ export default defineConfig({
   test: {
     ...boundedTests,
     include: [
-      'engine/experimental/lighting-cache.test.ts',
-      'engine/experimental/cavern-appearance.test.ts',
+      'engine/experimental/volume/lighting-cache.test.ts',
+      'engine/experimental/volume/cavern-appearance.test.ts',
       'engine/experimental/structural-client.test.ts',
     ],
   },

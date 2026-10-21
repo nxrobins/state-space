@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { MAT } from '../3d.js';
 
 import * as translations from '../translation-displacement.js';
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 import { createTacticalSession3D } from '../tactical-session.js';
 import { createTacticalSessionCore3D } from '../tactical/tactical-session-core.js';
 import { createTerrainBody3D } from './terrain-body.js';

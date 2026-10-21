@@ -186,8 +186,8 @@ class VerificationRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
             hashes={}
-            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
-                path='engine/experimental/'+source.name;target=root/path
+            for source in (recover_m4_verification.ROOT/'engine/experimental').rglob('*.ts'):
+                path=source.relative_to(recover_m4_verification.ROOT).as_posix();target=root/path
                 target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
                 hashes[path]=hashlib.sha256(data).hexdigest()
             (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
@@ -202,8 +202,8 @@ class VerificationRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
             hashes={}
-            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
-                path='engine/experimental/'+source.name;target=root/path
+            for source in (recover_m4_verification.ROOT/'engine/experimental').rglob('*.ts'):
+                path=source.relative_to(recover_m4_verification.ROOT).as_posix();target=root/path
                 target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
                 hashes[path]=hashlib.sha256(data).hexdigest()
             (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
@@ -219,8 +219,8 @@ class VerificationRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
             hashes={}
-            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
-                path='engine/experimental/'+source.name;target=root/path
+            for source in (recover_m4_verification.ROOT/'engine/experimental').rglob('*.ts'):
+                path=source.relative_to(recover_m4_verification.ROOT).as_posix();target=root/path
                 target.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();target.write_bytes(data)
                 hashes[path]=hashlib.sha256(data).hexdigest()
             (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
@@ -237,11 +237,11 @@ class VerificationRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
             hashes={}
-            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
-                relative='engine/experimental/'+source.name;destination=root/relative
+            for source in (recover_m4_verification.ROOT/'engine/experimental').rglob('*.ts'):
+                relative=source.relative_to(recover_m4_verification.ROOT).as_posix();destination=root/relative
                 destination.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();destination.write_bytes(data)
                 hashes[relative]=hashlib.sha256(data).hexdigest()
-            (root/'engine/experimental/cavern-appearance.ts').write_text('changed shading',encoding='utf-8')
+            (root/'engine/experimental/volume/cavern-appearance.ts').write_text('changed shading',encoding='utf-8')
             (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')
             (base/'appearance-replay.json').write_text(json.dumps({'passed':True,'evidence':'evidence.json'}),encoding='utf-8')
             with mock.patch.object(recover_m4_verification,'ROOT',root), mock.patch.object(sys,'argv',['recovery','frames128beauty']), mock.patch.object(subprocess,'run') as child:
@@ -260,10 +260,10 @@ class VerificationRecoveryTests(unittest.TestCase):
     def test_stale_gpu_proof_stops_before_permit_or_child(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); base = root / 'dist/volume-m4/recovery'; base.mkdir(parents=True)
-            source = root / 'engine/experimental/3d-gpu-core.ts'; source.parent.mkdir(parents=True)
+            source = root / 'engine/experimental/volume/3d-gpu-core.ts'; source.parent.mkdir(parents=True)
             source.write_text('changed GPU transport', encoding='utf-8')
             (root / 'evidence.json').write_text(json.dumps({'sourceHashes': {
-                'engine/experimental/3d-gpu-core.ts': 'stale'}}), encoding='utf-8')
+                'engine/experimental/volume/3d-gpu-core.ts': 'stale'}}), encoding='utf-8')
             (base / 'gate64.json').write_text(json.dumps({'passed': True, 'evidence': 'evidence.json'}), encoding='utf-8')
             with mock.patch.object(recover_m4_verification, 'ROOT', root), \
                  mock.patch.object(sys, 'argv', ['recovery', 'frames32']), \
@@ -278,8 +278,8 @@ class VerificationRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);base=root/'dist/volume-m4/recovery';base.mkdir(parents=True)
             hashes={}
-            for source in (recover_m4_verification.ROOT/'engine/experimental').glob('*.ts'):
-                relative='engine/experimental/'+source.name;destination=root/relative
+            for source in (recover_m4_verification.ROOT/'engine/experimental').rglob('*.ts'):
+                relative=source.relative_to(recover_m4_verification.ROOT).as_posix();destination=root/relative
                 destination.parent.mkdir(parents=True,exist_ok=True);data=source.read_bytes();destination.write_bytes(data)
                 hashes[relative]=hashlib.sha256(data).hexdigest()
             (root/'evidence.json').write_text(json.dumps({'sourceHashes':hashes}),encoding='utf-8')

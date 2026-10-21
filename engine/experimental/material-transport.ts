@@ -4,7 +4,7 @@ import { structuralEligible } from './structural-mechanics.js';
 import {
   validateStructuralSnapshot3D,
   type StructuralSnapshot3D,
-} from './structural-world-core.js';
+} from './structural/structural-world-core.js';
 
 import {
   MATERIAL_TRANSPORT_KERNEL_LIMITS_3D,

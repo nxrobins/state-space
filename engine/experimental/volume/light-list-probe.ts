@@ -2,9 +2,9 @@
 /** Internal small GPU probes; not a public runtime option. */
 import { makeLightList, LIGHT_LIST_QUERIES } from './light-list.js';
 import { CELL_FRUSTUM_CULL } from './surface-cull.js';
-import { CpuStructuralWorld3D } from './structural-world-core.js';
-import { createStateSpaceStructuralWorld3DGPU } from './structural-world-gpu.js';
-import { MAT } from '../generated/materials.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
+import { createStateSpaceStructuralWorld3DGPU } from '../structural-world-gpu.js';
+import { MAT } from '../../generated/materials.js';
 
 export async function verifyLightList() {
   const adapter = await navigator.gpu.requestAdapter();

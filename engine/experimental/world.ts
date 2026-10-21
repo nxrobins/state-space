@@ -10,10 +10,10 @@ export {
   createStateSpaceWorld3D,
   validateWorldSnapshot,
   CpuWorld3D,
-} from './world-core.js';
+} from './volume/world-core.js';
 export type {
   WorldOptions3D,
   WorldGeometry3D,
   WorldChunk3D,
   WorldSnapshot3D,
-} from './world-core.js';
+} from './volume/world-core.js';

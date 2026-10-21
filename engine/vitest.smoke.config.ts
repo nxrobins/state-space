@@ -8,7 +8,7 @@ export default defineConfig({
       'engine/contracts.test.ts',
       'engine/validation.test.ts',
       'engine/pressure.test.ts',
-      'engine/experimental/lighting-cache.test.ts',
+      'engine/experimental/volume/lighting-cache.test.ts',
       'engine/experimental/3d.test.ts',
       'engine/experimental/structural-world.test.ts',
     ],

@@ -41,8 +41,8 @@ def audit_review():
                               'const decoded=resources.decode(rows[command?1:0],c.tick),submissions=this.#submissions-start;')
     assert current == baseline(gpu_path).decode().replace('\r\n', '\n'), 'Unexpected GPU tick-path change'
     changed = subprocess.check_output(['git', 'diff', '--name-only', BASELINE, '--', 'engine'], cwd=ROOT, text=True).splitlines()
-    allowed = {gpu_path, 'engine/lint_ts.mjs', 'engine/experimental/structural-gameplay.ts',
-               'engine/experimental/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts'}
+    allowed = {gpu_path, 'engine/lint_ts.mjs', 'engine/experimental/structural/structural-gameplay.ts',
+               'engine/experimental/structural/structural-gameplay.test.ts', 'engine/experimental/structural-client.test.ts'}
     assert set(changed) <= allowed, changed
     # Also cover files added after this audit is first run, before commit.
     additions = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '--', 'engine'], cwd=ROOT, text=True).splitlines()

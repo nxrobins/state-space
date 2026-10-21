@@ -1,7 +1,7 @@
 /// <reference types="@webgpu/types" preserve="true" />
 /** Experimental M2 volume factory; world storage is a separate entry point. */
 import { createStateSpaceField3D, validateVolumeSnapshot } from './3d.js';
-import { createResidentVolume } from './3d-gpu-core.js';
+import { createResidentVolume } from './volume/3d-gpu-core.js';
 export type {
   LatencyRecord,
   LatencySnapshot,
@@ -14,7 +14,7 @@ export type {
   TerrainRenderer,
   TerrainAppearance,
   TerrainLightingMode,
-} from './3d-gpu-core.js';
+} from './volume/3d-gpu-core.js';
 export async function createGpuField3D(
   width: number,
   height: number,

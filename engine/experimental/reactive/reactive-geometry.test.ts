@@ -2,7 +2,7 @@ import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.j
 /** Exact observations on tiny worlds; no old M5 simulation or native runtime. */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 
 import { createTacticalSession3D } from '../tactical-session.js';
 import { assertGameplayGeometry3D, gameplayGeometrySource3D } from '../gameplay-geometry.js';

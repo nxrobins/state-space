@@ -1,25 +1,30 @@
-/** Finite, globally clocked 3D worlds. Chunks are storage, never simulation islands. */
+/** M4 dense CPU oracle and snapshot envelope. Sparse GPU metadata is derived, never saved. */
 import {
   CpuVolume,
   validateVolumeSnapshot as validateFlat,
   type VolumeSnapshot,
   type StateSpaceField3D,
-} from './3d-core.js';
-import { checkedInteger } from '../validation.js';
+} from '../3d-core.js';
+import { checkedInteger } from '../../validation.js';
 import type { GpuStepOptions3D, Region3D, RegionRequest3D, VolumeEdit3D } from './3d-gpu-core.js';
-export { MAT, PHASE, MATERIALS_3D, MAX_ENERGY_Q, RULES_VERSION_3D } from './3d.js';
-export const WORLD_VERSION_3D = 'finite-chunks-1';
-export const MAX_WORLD_CELLS_3D = 64 ** 3;
-export type WorldOptions3D = {
+export { MAT, PHASE, MATERIALS_3D, MAX_ENERGY_Q, RULES_VERSION_3D } from '../3d.js';
+export const ACTIVE_WORLD_VERSION_3D = 'finite-active-1';
+export const MAX_ACTIVE_WORLD_CELLS_3D = 128 ** 3;
+export type ActiveWorldOptions3D = {
   width?: number;
   height?: number;
   depth?: number;
   chunkSize?: number;
   fillMaterial?: number;
 };
-export type WorldGeometry3D = { width: number; height: number; depth: number; chunkSize: number };
-export type WorldChunk3D = { origin: number[]; packedCells: number[]; energyQ: number[] };
-export type WorldSnapshot3D = {
+export type ActiveWorldGeometry3D = {
+  width: number;
+  height: number;
+  depth: number;
+  chunkSize: number;
+};
+export type ActiveWorldChunk3D = { origin: number[]; packedCells: number[]; energyQ: number[] };
+export type ActiveWorldSnapshot3D = {
   schemaVersion: number;
   worldVersion: string;
   rulesVersion: string;
@@ -29,9 +34,9 @@ export type WorldSnapshot3D = {
   depth: number;
   chunkSize: number;
   tick: number;
-  chunks: WorldChunk3D[];
+  chunks: ActiveWorldChunk3D[];
 };
-export function worldGeometry(options: WorldOptions3D = {}): WorldGeometry3D {
+export function activeWorldGeometry(options: ActiveWorldOptions3D = {}): ActiveWorldGeometry3D {
   if (
     !options ||
     typeof options !== 'object' ||
@@ -41,24 +46,32 @@ export function worldGeometry(options: WorldOptions3D = {}): WorldGeometry3D {
     )
   )
     throw new Error('Invalid world options.');
-  const { width = 64, height = 64, depth = 64, chunkSize = 32 } = options;
-  for (const n of [width, height, depth]) checkedInteger(n, 1, 64, 'world dimension');
-  checkedInteger(chunkSize, 1, 32, 'chunk size');
+  const { width = 128, height = 128, depth = 128, chunkSize = 32 } = options;
+  for (const n of [width, height, depth]) checkedInteger(n, 1, 128, 'world dimension');
+  checkedInteger(chunkSize, 4, 32, 'chunk size');
   if (
     chunkSize & (chunkSize - 1) ||
     [width, height, depth].some((n) => n % chunkSize) ||
-    (width * height * depth) / chunkSize ** 3 > 64
+    (width * height * depth) / chunkSize ** 3 > 512
   )
-    throw new Error('World requires power-of-two chunks, complete chunks and at most 64 chunks.');
+    throw new Error('World requires power-of-two chunks, complete chunks and at most 512 chunks.');
   return { width, height, depth, chunkSize };
 }
 /** Internal monolithic oracle uses precisely the shipped volume law and global schedule. */
-export const referenceVolume = (w: number, h: number, d: number, fill = 0): StateSpaceField3D =>
-  new CpuVolume(w, h, d, fill, MAX_WORLD_CELLS_3D);
-export const validateWorldFlat = (value: VolumeSnapshot) => validateFlat(value, MAX_WORLD_CELLS_3D);
-export function chunkSnapshot(flat: VolumeSnapshot, geometry: WorldGeometry3D): WorldSnapshot3D {
+export const activeReferenceVolume = (
+  w: number,
+  h: number,
+  d: number,
+  fill = 0,
+): StateSpaceField3D => new CpuVolume(w, h, d, fill, MAX_ACTIVE_WORLD_CELLS_3D);
+export const validateActiveWorldFlat = (value: VolumeSnapshot) =>
+  validateFlat(value, MAX_ACTIVE_WORLD_CELLS_3D);
+export function activeChunkSnapshot(
+  flat: VolumeSnapshot,
+  geometry: ActiveWorldGeometry3D,
+): ActiveWorldSnapshot3D {
   const { width: w, height: h, depth: d, chunkSize: e } = geometry,
-    chunks: WorldChunk3D[] = [];
+    chunks: ActiveWorldChunk3D[] = [];
   for (let z = 0; z < d; z += e)
     for (let y = 0; y < h; y += e)
       for (let x = 0; x < w; x += e) {
@@ -76,7 +89,7 @@ export function chunkSnapshot(flat: VolumeSnapshot, geometry: WorldGeometry3D): 
   const { schemaVersion, rulesVersion, materialCatalogHash, tick } = flat;
   return {
     schemaVersion,
-    worldVersion: WORLD_VERSION_3D,
+    worldVersion: ACTIVE_WORLD_VERSION_3D,
     rulesVersion,
     materialCatalogHash,
     ...geometry,
@@ -85,30 +98,30 @@ export function chunkSnapshot(flat: VolumeSnapshot, geometry: WorldGeometry3D): 
   };
 }
 /** Returns an owned, canonical monolithic copy, after validating the complete world. */
-export function validateWorldSnapshot(value: WorldSnapshot3D): VolumeSnapshot {
+export function validateActiveWorldSnapshot(value: ActiveWorldSnapshot3D): VolumeSnapshot {
   const keys =
     'chunkSize,chunks,depth,height,materialCatalogHash,rulesVersion,schemaVersion,tick,width,worldVersion';
   if (
     !value ||
     typeof value !== 'object' ||
     Object.keys(value).sort().join(',') !== keys ||
-    value.worldVersion !== WORLD_VERSION_3D
+    value.worldVersion !== ACTIVE_WORLD_VERSION_3D
   )
     throw new Error('Incompatible world snapshot.');
   for (const n of [value.width, value.height, value.depth, value.chunkSize])
-    checkedInteger(n, 1, 64, 'snapshot dimension');
+    checkedInteger(n, 1, 128, 'snapshot dimension');
   const {
     width: w,
     height: h,
     depth: d,
     chunkSize: e,
-  } = worldGeometry({
+  } = activeWorldGeometry({
     width: value.width,
     height: value.height,
     depth: value.depth,
     chunkSize: value.chunkSize,
   });
-  const template = referenceVolume(1, 1, 1).snapshot(),
+  const template = activeReferenceVolume(1, 1, 1).snapshot(),
     packedCells = new Array<number>(w * h * d),
     energyQ = new Array<number>(w * h * d);
   if (!Array.isArray(value.chunks) || value.chunks.length !== (w * h * d) / e ** 3)
@@ -153,12 +166,12 @@ export function validateWorldSnapshot(value: WorldSnapshot3D): VolumeSnapshot {
     packedCells,
     energyQ,
   };
-  validateWorldFlat(flat);
+  validateActiveWorldFlat(flat);
   return flat;
 }
-export function checkedWorldRegion(
+export function checkedActiveWorldRegion(
   request: RegionRequest3D,
-  geometry: WorldGeometry3D,
+  geometry: ActiveWorldGeometry3D,
 ): RegionRequest3D {
   if (
     !request ||
@@ -178,19 +191,19 @@ export function checkedWorldRegion(
   checkedInteger(size[0] * size[1] * size[2], 1, 4096, 'region cell count');
   return { origin, size };
 }
-export class CpuWorld3D {
+export class CpuActiveWorld3D {
   readonly width: number;
   readonly height: number;
   readonly depth: number;
   readonly chunkSize: number;
   #field: StateSpaceField3D;
-  constructor(options: WorldOptions3D = {}) {
-    const g = worldGeometry(options);
+  constructor(options: ActiveWorldOptions3D = {}) {
+    const g = activeWorldGeometry(options);
     this.width = g.width;
     this.height = g.height;
     this.depth = g.depth;
     this.chunkSize = g.chunkSize;
-    this.#field = referenceVolume(this.width, this.height, this.depth, options.fillMaterial);
+    this.#field = activeReferenceVolume(this.width, this.height, this.depth, options.fillMaterial);
     for (const k of ['width', 'height', 'depth', 'chunkSize'])
       Object.defineProperty(this, k, { writable: false, configurable: false });
   }
@@ -222,16 +235,16 @@ export class CpuWorld3D {
     return this.#field.energyBalance();
   }
   snapshot() {
-    return chunkSnapshot(this.#field.snapshot(), this);
+    return activeChunkSnapshot(this.#field.snapshot(), this);
   }
-  restore(value: WorldSnapshot3D) {
-    const flat = validateWorldSnapshot(value);
+  restore(value: ActiveWorldSnapshot3D) {
+    const flat = validateActiveWorldSnapshot(value);
     if (flat.width !== this.width || flat.height !== this.height || flat.depth !== this.depth)
       throw new Error('World geometry differs.');
     this.#field.restore(flat); // Partition can change; the physics cannot.
   }
   queryRegion(request: RegionRequest3D): Region3D {
-    const { origin, size } = checkedWorldRegion(request, this),
+    const { origin, size } = checkedActiveWorldRegion(request, this),
       grid = new Uint32Array(size[0] * size[1] * size[2]),
       source = this.#field.grid;
     let k = 0;
@@ -253,12 +266,12 @@ export class CpuWorld3D {
     )
       throw new Error('Invalid world step options.');
     const region =
-        options.region === undefined ? undefined : checkedWorldRegion(options.region, this),
+        options.region === undefined ? undefined : checkedActiveWorldRegion(options.region, this),
       edits = options.edits === undefined ? [] : options.edits;
     if (!Array.isArray(edits)) throw new Error('Invalid edits.');
     checkedInteger(edits.length, 0, 64, 'edit count');
     const seen = new Set<number>(),
-      seed = referenceVolume(1, 1, 1),
+      seed = activeReferenceVolume(1, 1, 1),
       owned: VolumeEdit3D[] = [];
     for (let k = 0; k < edits.length; k++) {
       const e = edits[k];
@@ -287,6 +300,6 @@ export class CpuWorld3D {
     return region ? this.queryRegion(region) : undefined;
   }
 }
-export function createStateSpaceWorld3D(options: WorldOptions3D = {}) {
-  return new CpuWorld3D(options);
+export function createStateSpaceActiveWorld3D(options: ActiveWorldOptions3D = {}) {
+  return new CpuActiveWorld3D(options);
 }

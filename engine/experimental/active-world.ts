@@ -9,10 +9,10 @@ export {
   createStateSpaceActiveWorld3D,
   validateActiveWorldSnapshot,
   CpuActiveWorld3D,
-} from './active-world-core.js';
+} from './volume/active-world-core.js';
 export type {
   ActiveWorldOptions3D,
   ActiveWorldGeometry3D,
   ActiveWorldChunk3D,
   ActiveWorldSnapshot3D,
-} from './active-world-core.js';
+} from './volume/active-world-core.js';

@@ -9,7 +9,7 @@ import {
 } from './tactical-actions.js';
 import { fields } from './tactical-worker-wire.js';
 import type { ActionIntervention3D } from '../action-journal.js';
-import type { StructuralSnapshot3D } from '../structural-world-core.js';
+import type { StructuralSnapshot3D } from '../structural/structural-world-core.js';
 import type { TacticalSessionSnapshot3D, TacticalValue } from './tactical-session-view.js';
 
 export const actionInteger = (v: unknown, lo: number, hi: number) =>

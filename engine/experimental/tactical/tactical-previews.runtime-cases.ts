@@ -1,6 +1,6 @@
 /** Actual physics acceptance; excluded from the edit/inert selector while held. */
 import { describe, expect, test } from 'vitest';
-import { CpuStructuralWorld3D } from '../structural-world-core.js';
+import { CpuStructuralWorld3D } from '../structural/structural-world-core.js';
 import { MAT } from '../3d.js';
 import {
   createTacticalSession3D,
