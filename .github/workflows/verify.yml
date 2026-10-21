@@ -41,8 +41,7 @@ jobs:
           npm run typecheck
           npm run lint
           npm run format:check
-          uv run ruff check --ignore E701,E702 scripts/verification*.py scripts/verify_macos*.py tests/test_verification*.py
-          uv run ruff check scripts/verification_guard.py scripts/verification_health.py scripts/verification_posix_watchdog.py scripts/verify_packages.py
+          uv run ruff check .
       - name: Bounded CPU smoke
         run: node scripts/verify_checks.mjs --suite smoke
       - name: CPU unit and controller suite

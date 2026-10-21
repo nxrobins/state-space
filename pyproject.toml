@@ -28,6 +28,19 @@ include = ["engine/**/*.py", "eval/**/*.py", "tests/**/*.py", "scripts/verify*.p
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
 
+[tool.ruff.lint.per-file-ignores]
+# These bounded qualification scripts and supervisor tests use a compact one-line
+# style. CI formerly ignored the two rules for them on the command line; the
+# exemption is explicit here so `ruff check .` is the configured rule.
+"scripts/verify_active_cavern_ui.py" = ["E701", "E702"]
+"scripts/verify_cavern_ui.py" = ["E701", "E702"]
+"scripts/verify_volume_m4_browser.py" = ["E701", "E702"]
+"scripts/verify_volume_m5_browser.py" = ["E701", "E702"]
+"tests/test_verification_browser.py" = ["E701", "E702"]
+"tests/test_verification_guard.py" = ["E701", "E702"]
+"tests/test_verification_journal.py" = ["E701", "E702"]
+"tests/test_volume_latency_report.py" = ["E701", "E702"]
+
 [dependency-groups]
 dev = [
     "psutil>=7,<8",
