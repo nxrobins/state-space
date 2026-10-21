@@ -1,0 +1,45 @@
+version: 2
+# Weekly dependency update proposals. Each PR runs the normal CI workflow;
+# native GPU checks still happen on the maintainer's hosts before a merge.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      npm-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /game
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      game-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /tower-defense-rogue
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      relic-line-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      python-development:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
