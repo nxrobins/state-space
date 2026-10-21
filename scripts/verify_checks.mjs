@@ -1,6 +1,7 @@
 import {spawn} from 'node:child_process';
+import {realpathSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import {guardNode} from './verification_guard.mjs';
 export const VITEST='node_modules/vitest/vitest.mjs';
 // The supervisor stops a child that prints nothing for 40 seconds. Vitest's default
@@ -32,7 +33,9 @@ export function selectChecks(suite,argv=process.argv,env=process.env){
   }else throw Error('Unknown verification suite. Choose smoke, unit, native, or demos.');
   return {checks,kind:suite==='native'?'gpu':'cpu',timeout:suite==='smoke'?30:120};
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
+// Node resolves the entry module through symlinks; compare real paths so an
+// invocation through a linked checkout still runs instead of exiting silently.
+if(process.argv[1]&&fileURLToPath(import.meta.url)===realpathSync(resolve(process.argv[1]))){
   const suiteIndex=process.argv.indexOf('--suite');
   const suite=suiteIndex<0?'unit':process.argv[suiteIndex+1];
   const {checks,kind,timeout}=selectChecks(suite);

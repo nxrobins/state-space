@@ -32,9 +32,10 @@ uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
   --config engine/vitest.bounded.config.ts
 ```
 
-Pass `--reporter=dot` to any vitest run under the supervisor. The default reporter
-prints nothing until the run ends when stdout is a pipe, and the supervisor stops a
-child that is silent for 40 seconds. `npm test` already selects that reporter.
+Pass `--reporter=dot` to a focused vitest run under the supervisor. The default
+reporter prints nothing per test when stdout is a pipe, and the supervisor stops a
+child that is silent for 40 seconds. The CPU suites that `npm test` selects already
+use that reporter; the native macOS stages keep their own fixed commands.
 
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
