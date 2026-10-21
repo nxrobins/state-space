@@ -9,8 +9,10 @@ from engine.resources import shader_source
 from engine.structure import plan_structure
 from engine.structure_gpu import StructuralGPUProbe
 from tests.test_structure import rules, scene
+from tests.gpu_support import requires_gpu
 
 
+@requires_gpu
 class StructuralGPUProperties(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

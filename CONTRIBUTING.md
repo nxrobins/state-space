@@ -46,7 +46,10 @@ or `npm run build:tactical-slab`. [CI](.github/workflows/verify.yml) also checks
 supervisor, archive restoration and the configured Python lint rules with
 `uv run ruff check .`.
 
-Native checks use the explicit bounded stages in the [macOS guide](docs/MACOS.md).
+Python tests that need a native adapter skip on hosts without one. Set
+`STATE_SPACE_REQUIRE_GPU=1` on a GPU host so a missing adapter fails instead;
+`python -m engine.verify` sets it. Native checks use the explicit bounded stages
+in the [macOS guide](docs/MACOS.md).
 A passing CPU mock suite does not authorize a held runtime fixture. Keep native
 fixtures and `.runtime-cases.ts` outside the normal CPU selection.
 

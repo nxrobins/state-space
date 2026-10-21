@@ -9,8 +9,10 @@ from engine.compositor import CompositionEngine
 from engine.state import seed_state
 from engine.schema import (DEFAULT_PHASES, DEFAULT_THERMALS, MAT_AIR, MAT_SAND, MAT_WATER,
                            VoxelState, build_cold_table_buffer, pack_voxel)
+from tests.gpu_support import requires_gpu
 
 
+@requires_gpu
 class GpuContractProperties(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
