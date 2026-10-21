@@ -61,4 +61,6 @@ root with:
 python game/scripts/generate_fighter_sprites.py
 ```
 
+The script needs Pillow, which is not part of the root `uv` environment.
+
 The generator keeps the sprite manifest, sheets, per-frame PNGs, preview frame lists, and preview sheets in sync with `game/src/game/sprites.ts`.
