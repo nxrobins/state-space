@@ -32,8 +32,8 @@
     "verify:packages": "uv run python -m scripts.verify_packages",
     "verify:macos": "uv run python -m scripts.verify_macos_qualification",
     "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs",
-    "format:chamber": "prettier --write \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive/reactive-worker-client.ts\" \"engine/experimental/reactive/reactive-chamber*.test.ts\" \"examples/shared/**/*.ts\"",
-    "format:check": "prettier --check \"examples/reactive-chamber/**/*.{ts,html,css,json}\" \"engine/experimental/reactive/reactive-worker-client.ts\" \"engine/experimental/reactive/reactive-chamber*.test.ts\" \"examples/shared/**/*.ts\""
+    "format:check": "prettier --check \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\"",
+    "format": "prettier --write \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\""
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

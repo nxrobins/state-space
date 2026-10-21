@@ -1,6 +1,6 @@
 /** M5 local-pass activity. Structural dependencies solve globally to completion. */
-export function structuralActivityShaders(physics:string,edge:number,chunks:number){
-  const declarations=`
+export function structuralActivityShaders(physics: string, edge: number, chunks: number) {
+  const declarations = `
 const M5_CHUNKS=${chunks}u;
 const M5_AWAKE=M5_CHUNKS;
 const M5_LIST=M5_AWAKE+M5_CHUNKS;
@@ -60,13 +60,20 @@ fn locallyQuiet(i:u32)->bool{
  localDispatch[0]=count*EDGE*EDGE*EDGE/64u;localDispatch[1]=1u;localDispatch[2]=1u;
 }
 `;
-  const marker='@compute @workgroup_size(64) fn main';
-  const prefix=physics.slice(0,physics.indexOf(marker)),planning=prefix+declarations;
-  const body=physics.slice(physics.indexOf(marker))
-    .replace('let i=id.x; if(i>=SHAPE.w){return;}','let i=atomicLoad(&dirty[M5_LIST+id.x/(EDGE*EDGE*EDGE)])*EDGE*EDGE*EDGE+id.x%(EDGE*EDGE*EDGE);')
-    .replace('nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;',
-      'if(v!=outV||q!=outQ||structures[i]!=outS){wakeLocal(coordinate(i));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;');
-  if(!body.includes('let i=atomicLoad'))throw Error('M5 active template differs.');
+  const marker = '@compute @workgroup_size(64) fn main';
+  const prefix = physics.slice(0, physics.indexOf(marker)),
+    planning = prefix + declarations;
+  const body = physics
+    .slice(physics.indexOf(marker))
+    .replace(
+      'let i=id.x; if(i>=SHAPE.w){return;}',
+      'let i=atomicLoad(&dirty[M5_LIST+id.x/(EDGE*EDGE*EDGE)])*EDGE*EDGE*EDGE+id.x%(EDGE*EDGE*EDGE);',
+    )
+    .replace(
+      'nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;',
+      'if(v!=outV||q!=outQ||structures[i]!=outS){wakeLocal(coordinate(i));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;',
+    );
+  if (!body.includes('let i=atomicLoad')) throw Error('M5 active template differs.');
   // Only the planner writes the work list/dispatch. Main wakes the next pass.
-  return{physics:planning+body,planning,edge};
+  return { physics: planning + body, planning, edge };
 }

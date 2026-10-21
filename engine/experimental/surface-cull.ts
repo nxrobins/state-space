@@ -1,5 +1,5 @@
 /** Conservative cube/clip-plane rejection before expensive vertex lighting. */
-export const CELL_FRUSTUM_QUERY=`
+export const CELL_FRUSTUM_QUERY = `
 fn visibleCell(c:vec3f)->bool{
  let center=c+vec3f(.5)-camera.eye.xyz;
  let horizontal=camera.forward.xyz*camera.projection.x;
@@ -12,4 +12,4 @@ fn visibleCell(c:vec3f)->bool{
  return true;
 }
 `;
-export const CELL_FRUSTUM_CULL='if(!visibleCell(c)){out.position=vec4f(2.,2.,2.,1.);return out;}';
+export const CELL_FRUSTUM_CULL = 'if(!visibleCell(c)){out.position=vec4f(2.,2.,2.,1.);return out;}';

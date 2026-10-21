@@ -6,8 +6,9 @@ fn allLightCount()->u32{return lightList[0];}
 fn allLightSource(slot:u32)->u32{return lightList[1u+slot];}
 `;
 
-export function lightListShader(chunks:number){
-  if(!Number.isSafeInteger(chunks)||chunks<1||chunks>512)throw Error('Invalid light-list capacity.');
+export function lightListShader(chunks: number) {
+  if (!Number.isSafeInteger(chunks) || chunks < 1 || chunks > 512)
+    throw Error('Invalid light-list capacity.');
   return `
 struct Light {position:vec4f,color:vec4f}
 @group(0) @binding(3) var<storage,read> lights:array<Light>;
@@ -23,18 +24,43 @@ struct Light {position:vec4f,color:vec4f}
 }`;
 }
 
-export async function makeLightList(device:GPUDevice,lights:GPUBuffer,chunks:number){
-  const module=device.createShaderModule({code:lightListShader(chunks)});
-  const errors=(await module.getCompilationInfo()).messages.filter(m=>m.type==='error');
-  if(errors.length)throw Error(errors.map(m=>`${m.lineNum}: ${m.message}`).join('\n'));
-  const pipeline=await device.createComputePipelineAsync({layout:'auto',compute:{module,entryPoint:'collectLights'}});
-  const buffer=device.createBuffer({size:(chunks+1)*4,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC});
-  try{
-    const group=device.createBindGroup({layout:pipeline.getBindGroupLayout(0),entries:[{binding:3,resource:{buffer:lights}},{binding:11,resource:{buffer}}]});
-    let closed=false;
-    return{buffer,
-      encode(pass:GPUComputePassEncoder){if(closed)throw Error('Light list is closed.');pass.setPipeline(pipeline);pass.setBindGroup(0,group);pass.dispatchWorkgroups(1);},
-      close(){if(closed)return;closed=true;buffer.destroy();},
+export async function makeLightList(device: GPUDevice, lights: GPUBuffer, chunks: number) {
+  const module = device.createShaderModule({ code: lightListShader(chunks) });
+  const errors = (await module.getCompilationInfo()).messages.filter((m) => m.type === 'error');
+  if (errors.length) throw Error(errors.map((m) => `${m.lineNum}: ${m.message}`).join('\n'));
+  const pipeline = await device.createComputePipelineAsync({
+    layout: 'auto',
+    compute: { module, entryPoint: 'collectLights' },
+  });
+  const buffer = device.createBuffer({
+    size: (chunks + 1) * 4,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+  });
+  try {
+    const group = device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 3, resource: { buffer: lights } },
+        { binding: 11, resource: { buffer } },
+      ],
+    });
+    let closed = false;
+    return {
+      buffer,
+      encode(pass: GPUComputePassEncoder) {
+        if (closed) throw Error('Light list is closed.');
+        pass.setPipeline(pipeline);
+        pass.setBindGroup(0, group);
+        pass.dispatchWorkgroups(1);
+      },
+      close() {
+        if (closed) return;
+        closed = true;
+        buffer.destroy();
+      },
     };
-  }catch(error){buffer.destroy();throw error;}
+  } catch (error) {
+    buffer.destroy();
+    throw error;
+  }
 }

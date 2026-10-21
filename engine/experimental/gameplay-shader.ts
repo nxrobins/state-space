@@ -3,10 +3,21 @@ import { MAT } from '../generated/materials.js';
 import type { GameplayRules3D } from './gameplay-view.js';
 
 /** Same integer controller/order as the CPU examples; terrain law is untouched. */
-export function gameplayShader(shape:readonly number[],edge:number,sparse:boolean,rules:GameplayRules3D,air:readonly number[]){
- const [w,h,d]=shape,active=Math.min(edge,8),tiles=w*h*d/active**3;
- const thermal=VOLUME_SHADER.slice(VOLUME_SHADER.indexOf('fn prop('),VOLUME_SHADER.indexOf('fn phase('));
- return `
+export function gameplayShader(
+  shape: readonly number[],
+  edge: number,
+  sparse: boolean,
+  rules: GameplayRules3D,
+  air: readonly number[],
+) {
+  const [w, h, d] = shape,
+    active = Math.min(edge, 8),
+    tiles = (w * h * d) / active ** 3;
+  const thermal = VOLUME_SHADER.slice(
+    VOLUME_SHADER.indexOf('fn prop('),
+    VOLUME_SHADER.indexOf('fn phase('),
+  );
+  return `
 const SHAPE=vec3i(${w},${h},${d});const EDGE=${edge}u;const ACTIVE=${active}u;
 const MAX_Q=0x3fffffffu;
 @group(0) @binding(0) var<storage,read_write> cells:array<u32>;
@@ -19,7 +30,7 @@ const MAX_Q=0x3fffffffu;
 struct Command {controls:vec4i,lookTick:vec4i,view:vec4i}
 @group(0) @binding(6) var<uniform> command:Command;
 @group(0) @binding(7) var<storage,read_write> dirty:array<atomic<u32>>;
-${sparse?'@group(0) @binding(8) var<storage,read_write> activity:array<atomic<u32>>;':''}
+${sparse ? '@group(0) @binding(8) var<storage,read_write> activity:array<atomic<u32>>;' : ''}
 ${thermal}
 fn index(c:vec3i)->u32{let u=vec3u(c);let n=vec3u(SHAPE)/EDGE;let k=u/EDGE;let l=u%EDGE;return (k.x+n.x*(k.y+n.y*k.z))*EDGE*EDGE*EDGE+l.x+EDGE*(l.y+EDGE*l.z);}
 // WGSL signed division truncates; voxel coordinates require mathematical floor.
@@ -73,14 +84,18 @@ fn changed(c:vec3i){
   if(all(t>=vec3i(0))&&all(t<SHAPE)&&(u32(c[a])/EDGE!=u32(t[a])/EDGE)){mark(t);}
  }}
 }
-fn wakeEdit(c:vec3i){${sparse?`
+fn wakeEdit(c:vec3i){${
+    sparse
+      ? `
  let n=SHAPE/i32(ACTIVE);let k=c/i32(ACTIVE);let l=vec3u(c)%ACTIVE;
  let lo=-vec3i(select(vec3u(0),vec3u(1),l<vec3u(2)));let hi=vec3i(select(vec3u(0),vec3u(1),l+vec3u(2)>=vec3u(ACTIVE)));
  atomicStore(&activity[10],1u);
  for(var z=lo.z;z<=hi.z;z++){for(var y=lo.y;y<=hi.y;y++){for(var x=lo.x;x<=hi.x;x++){
-  let t=k+vec3i(x,y,z);if(all(t>=vec3i(0))&&all(t<n)){let j=u32(t.x+n.x*(t.y+n.y*t.z));atomicStore(&activity[16u+j],1u);atomicOr(&activity[${16+3*tiles}u+j],16u);}
+  let t=k+vec3i(x,y,z);if(all(t>=vec3i(0))&&all(t<n)){let j=u32(t.x+n.x*(t.y+n.y*t.z));atomicStore(&activity[16u+j],1u);atomicOr(&activity[${16 + 3 * tiles}u+j],16u);}
  }}}
- `:''}}
+ `
+      : ''
+  }}
 fn beginFrame(){for(var k=0u;k<128u;k++){result[k]=0u;}if(actor[7]>0){actor[7]--;}}
 // A known no-tool command must not acquire write access to the terrain or activity buffers.
 @compute @workgroup_size(1) fn noTools(){beginFrame();}

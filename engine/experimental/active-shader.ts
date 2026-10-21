@@ -1,9 +1,9 @@
 /** Conservative quiescence certificates; the ca-3d-m1 pass body is unchanged. */
 import { chunkShaders } from './3d-shader.js';
 
-export function activeShaders(edge:number,chunks:number,activeEdge=Math.min(edge,8)){
-  const base=chunkShaders(edge);
-  const declarations=`
+export function activeShaders(edge: number, chunks: number, activeEdge = Math.min(edge, 8)) {
+  const base = chunkShaders(edge);
+  const declarations = `
 @group(0) @binding(7) var<storage,read_write> activity:array<atomic<u32>>;
 @group(0) @binding(8) var<storage,read_write> indirect:array<atomic<u32>>;
 @group(0) @binding(9) var<storage,read_write> otherIndirect:array<atomic<u32>>;
@@ -124,16 +124,40 @@ fn dispatchSize(count:u32){
  if(atomicLoad(&activity[AWAKE+k])==0u){atomicAdd(&activity[6],1u);}
 }
 `;
-  function replace(code:string,from:string,to:string){if(code.split(from).length!==2)throw new Error('Sparse shader template differs from ca-3d-m1.');return code.replace(from,to);}
-  let physics=replace(base.physics,'@compute @workgroup_size(64) fn main',declarations+'\n@compute @workgroup_size(64) fn main');
-  physics=replace(physics,'fn main(@builtin(global_invocation_id) id:vec3u)','fn main(@builtin(global_invocation_id) id:vec3u,@builtin(num_workgroups) groups:vec3u)');
+  function replace(code: string, from: string, to: string) {
+    if (code.split(from).length !== 2)
+      throw new Error('Sparse shader template differs from ca-3d-m1.');
+    return code.replace(from, to);
+  }
+  let physics = replace(
+    base.physics,
+    '@compute @workgroup_size(64) fn main',
+    declarations + '\n@compute @workgroup_size(64) fn main',
+  );
+  physics = replace(
+    physics,
+    'fn main(@builtin(global_invocation_id) id:vec3u)',
+    'fn main(@builtin(global_invocation_id) id:vec3u,@builtin(num_workgroups) groups:vec3u)',
+  );
   // Never bind a writable argument buffer as this dispatch's indirect input.
   // Its partner grows monotonically; dispatch dimensions freeze this pass's
   // prefix even while wakes append entries for the next pass.
-  physics=replace(physics,'let i=id.x; if(i>=p.shape.w){return;}','if(id.x==0u){atomicMax(&indirect[0],groups.x);let count=groups.x*64u/WORK_CELLS;atomicAdd(&activity[4],count);atomicMax(&activity[5],count);}\nlet i=workIndex(id.x);');
+  physics = replace(
+    physics,
+    'let i=id.x; if(i>=p.shape.w){return;}',
+    'if(id.x==0u){atomicMax(&indirect[0],groups.x);let count=groups.x*64u/WORK_CELLS;atomicAdd(&activity[4],count);atomicMax(&activity[5],count);}\nlet i=workIndex(id.x);',
+  );
   // Neither side of a movement swap can be fixed. Heat and phase still run;
   // both output coordinates are copied even when movement is impossible.
-  physics=replace(physics,'else {\n    let c=coordinate(i);','else if(kind==5u||!fixed(v)) {\n    let c=coordinate(i);');
-  physics=replace(physics,'nextCells[i]=outV;nextEnergies[i]=outQ;','if(v!=outV||q!=outQ){wake(coordinate(i),select(4u,select(2u,8u,kind==6u),(v&255u)!=(outV&255u)));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;');
-  return {physics,access:base.access};
+  physics = replace(
+    physics,
+    'else {\n    let c=coordinate(i);',
+    'else if(kind==5u||!fixed(v)) {\n    let c=coordinate(i);',
+  );
+  physics = replace(
+    physics,
+    'nextCells[i]=outV;nextEnergies[i]=outQ;',
+    'if(v!=outV||q!=outQ){wake(coordinate(i),select(4u,select(2u,8u,kind==6u),(v&255u)!=(outV&255u)));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;',
+  );
+  return { physics, access: base.access };
 }

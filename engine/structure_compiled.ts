@@ -1,7 +1,13 @@
 /** Exact compiled global transport. Diagnostic planners remain independent. */
 import { STRUCTURE_WASM } from './generated/structure_solver.js';
 import * as C from './generated/materials.js';
-import { planStructure, rulesForRegistry, validateStructure, type StructuralState, type StructuralStateInput } from './structure.js';
+import {
+  planStructure,
+  rulesForRegistry,
+  validateStructure,
+  type StructuralState,
+  type StructuralStateInput,
+} from './structure.js';
 import { requireRegistry, type MaterialRegistry } from './registry.js';
 import { validateDimensions, validatePackedCells } from './validation.js';
 
@@ -12,7 +18,8 @@ interface SolverExports extends WebAssembly.Exports {
   solve(width: number, height: number, base: number): number;
   validate(width: number, height: number, base: number): number;
 }
-const TABLE_WORDS = 256 * (24 + 12), FIELD_COUNT = 15;
+const TABLE_WORDS = 256 * (24 + 12),
+  FIELD_COUNT = 15;
 let solver: SolverExports | undefined;
 let unavailable = false;
 const tables = new WeakMap<MaterialRegistry, Uint32Array>();
@@ -24,17 +31,20 @@ export function solverTables(registry: MaterialRegistry): Uint32Array {
   table = new Uint32Array(TABLE_WORDS);
   table.set(registry.coldTable());
   for (const id of registry.materialIds) {
-    const offset = id * C.COLD_STRIDE, target = 256 * C.COLD_STRIDE + id * 12;
+    const offset = id * C.COLD_STRIDE,
+      target = 256 * C.COLD_STRIDE + id * 12;
     // Thermal slot 0 is a private presence marker; the cold rows stay an exact
     // copy of the registry table, so no physical property has a second meaning.
     table[target] = 1;
     table[target + 1] = table[offset + C.COLD_PHASE_ENERGY] * 256;
     table[target + 2] = table[offset + C.COLD_FUEL_ENERGY] * 256;
-    const boil = table[offset + C.COLD_BOILS_INTO], freeze = table[offset + C.COLD_FREEZES_INTO];
-    table[target + 3] = (boil || table[offset + C.COLD_MELTS_INTO]) || 256;
+    const boil = table[offset + C.COLD_BOILS_INTO],
+      freeze = table[offset + C.COLD_FREEZES_INTO];
+    table[target + 3] = boil || table[offset + C.COLD_MELTS_INTO] || 256;
     table[target + 4] = table[offset + (boil ? C.COLD_BOIL_POINT : C.COLD_MELT_POINT)] * 256;
-    table[target + 5] = (freeze || table[offset + C.COLD_CONDENSES_INTO]) || 256;
-    table[target + 6] = table[offset + (freeze ? C.COLD_FREEZE_POINT : C.COLD_CONDENSE_POINT)] * 256;
+    table[target + 5] = freeze || table[offset + C.COLD_CONDENSES_INTO] || 256;
+    table[target + 6] =
+      table[offset + (freeze ? C.COLD_FREEZE_POINT : C.COLD_CONDENSE_POINT)] * 256;
   }
   tables.set(registry, table);
   return table;
@@ -43,9 +53,10 @@ export function solverTables(registry: MaterialRegistry): Uint32Array {
 function getSolver(): SolverExports | undefined {
   if (!solver && !unavailable) {
     try {
-      const bytes = Uint8Array.from(atob(STRUCTURE_WASM), char => char.charCodeAt(0));
+      const bytes = Uint8Array.from(atob(STRUCTURE_WASM), (char) => char.charCodeAt(0));
       const module = new WebAssembly.Module(bytes);
-      if (WebAssembly.Module.imports(module).length) throw new Error('Structural solver must have no host imports.');
+      if (WebAssembly.Module.imports(module).length)
+        throw new Error('Structural solver must have no host imports.');
       solver = new WebAssembly.Instance(module).exports as SolverExports;
     } catch {
       // CSP can disable Wasm compilation. Preserve exact physics through the
@@ -57,24 +68,42 @@ function getSolver(): SolverExports | undefined {
   return solver;
 }
 
-function validatedWorkspace(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry, ownership: 'public' | 'committed' | 'owned' = 'public'): {
-  state: StructuralState; engine?: SolverExports; storage?: Uint32Array;
+function validatedWorkspace(
+  input: StructuralStateInput,
+  width: number,
+  height: number,
+  registry: MaterialRegistry,
+  ownership: 'public' | 'committed' | 'owned' = 'public',
+): {
+  state: StructuralState;
+  engine?: SolverExports;
+  storage?: Uint32Array;
 } {
   const count = validateDimensions(width, height);
   requireRegistry(registry);
   const engine = getSolver();
-  if (!engine) return { state: validateStructure(input, width, height, rulesForRegistry(registry)) };
+  if (!engine)
+    return { state: validateStructure(input, width, height, rulesForRegistry(registry)) };
   // A field's committed state was validated when it was committed, and every
   // edit preserves validity. Copying it into the workspace is still required.
-  const state = ownership !== 'public' ? input as StructuralState
-    : { grid: validatePackedCells(input.grid, count), energyQ: validatePackedCells(input.energyQ, count), structure: validatePackedCells(input.structure, count) };
+  const state =
+    ownership !== 'public'
+      ? (input as StructuralState)
+      : {
+          grid: validatePackedCells(input.grid, count),
+          energyQ: validatePackedCells(input.energyQ, count),
+          structure: validatePackedCells(input.structure, count),
+        };
   const base = Number(engine.__heap_base.value);
   const needed = base + (TABLE_WORDS + FIELD_COUNT * count) * 4;
   if (needed > 0xffffffff) throw new Error('World exceeds compiled planner linear memory limit.');
-  if (engine.memory.buffer.byteLength < needed) engine.memory.grow(Math.ceil((needed - engine.memory.buffer.byteLength) / 65536));
+  if (engine.memory.buffer.byteLength < needed)
+    engine.memory.grow(Math.ceil((needed - engine.memory.buffer.byteLength) / 65536));
   const storage = new Uint32Array(engine.memory.buffer, base, TABLE_WORDS + FIELD_COUNT * count);
   storage.set(solverTables(registry));
-  storage.set(state.grid, TABLE_WORDS); storage.set(state.energyQ, TABLE_WORDS + count); storage.set(state.structure, TABLE_WORDS + count * 2);
+  storage.set(state.grid, TABLE_WORDS);
+  storage.set(state.energyQ, TABLE_WORDS + count);
+  storage.set(state.structure, TABLE_WORDS + count * 2);
   if (ownership !== 'committed' && engine.validate(width, height, base)) {
     validateStructure(state, width, height, rulesForRegistry(registry));
     throw new Error('Compiled complete-state validator disagrees with the reference.');
@@ -83,25 +112,49 @@ function validatedWorkspace(input: StructuralStateInput, width: number, height: 
 }
 
 /** Copies and checks every coordinate before committing state or planning. */
-export function validateCompiledStructure(input: StructuralStateInput, width: number, height: number, registry: MaterialRegistry): StructuralState {
+export function validateCompiledStructure(
+  input: StructuralStateInput,
+  width: number,
+  height: number,
+  registry: MaterialRegistry,
+): StructuralState {
   return validatedWorkspace(input, width, height, registry).state;
 }
 
 /** Internal GPU readback boundary. These Uint32Arrays are owned by the field;
  * validate every completed state without allocating another three copies.
  * Public inputs must go through validateCompiledStructure instead. */
-export function validateOwnedStructure(input: StructuralState, width: number, height: number, registry: MaterialRegistry): StructuralState {
+export function validateOwnedStructure(
+  input: StructuralState,
+  width: number,
+  height: number,
+  registry: MaterialRegistry,
+): StructuralState {
   return validatedWorkspace(input, width, height, registry, 'owned').state;
 }
 
 /** Internal transport into a field's reusable plan storage. Inputs have already
  * passed completed-state validation; diagnostic/public plans keep owning copies. */
-export function compiledTransportInto(input: StructuralState, width: number, height: number, registry: MaterialRegistry,
-  sources: Uint32Array, structure: Uint32Array): void {
-  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, 'committed');
+export function compiledTransportInto(
+  input: StructuralState,
+  width: number,
+  height: number,
+  registry: MaterialRegistry,
+  sources: Uint32Array,
+  structure: Uint32Array,
+): void {
+  const { state, engine, storage } = validatedWorkspace(
+    input,
+    width,
+    height,
+    registry,
+    'committed',
+  );
   if (!engine || !storage) {
     const plan = planStructure(state, width, height, rulesForRegistry(registry));
-    sources.set(plan.sources); structure.set(plan.structure); return;
+    sources.set(plan.sources);
+    structure.set(plan.structure);
+    return;
   }
   const status = engine.solve(width, height, Number(engine.__heap_base.value));
   if (status) throw new Error(`Global structural solver invariant failed: ${status}`);
@@ -113,20 +166,46 @@ export function compiledTransportInto(input: StructuralState, width: number, hei
 /** Takes ownership through validation, then returns independent output storage.
  * `committed` is only for a field's own committed state, which was validated
  * once at commit; any other input, including GPU readbacks, is validated here. */
-export function compiledStructuralPlan(input: StructuralState, width: number, height: number, registry: MaterialRegistry, committed = false): {
-  sources: Uint32Array; structure: Uint32Array; apply(): StructuralState;
+export function compiledStructuralPlan(
+  input: StructuralState,
+  width: number,
+  height: number,
+  registry: MaterialRegistry,
+  committed = false,
+): {
+  sources: Uint32Array;
+  structure: Uint32Array;
+  apply(): StructuralState;
 } {
-  const { state, engine, storage } = validatedWorkspace(input, width, height, registry, committed ? 'committed' : 'public');
+  const { state, engine, storage } = validatedWorkspace(
+    input,
+    width,
+    height,
+    registry,
+    committed ? 'committed' : 'public',
+  );
   if (!engine || !storage) {
     const plan = planStructure(state, width, height, rulesForRegistry(registry));
-    return { sources: Uint32Array.from(plan.sources), structure: Uint32Array.from(plan.structure), apply: () => plan.apply(state, width, height) };
+    return {
+      sources: Uint32Array.from(plan.sources),
+      structure: Uint32Array.from(plan.structure),
+      apply: () => plan.apply(state, width, height),
+    };
   }
   const count = width * height;
   const status = engine.solve(width, height, Number(engine.__heap_base.value));
   if (status) throw new Error(`Global structural solver invariant failed: ${status}`);
   const sources = storage.slice(TABLE_WORDS + count * 3, TABLE_WORDS + count * 4);
   const structure = storage.slice(TABLE_WORDS + count * 4, TABLE_WORDS + count * 5);
-  return { sources, structure, apply() {
-    return { grid: Uint32Array.from(sources, i => state.grid[i]), energyQ: Uint32Array.from(sources, i => state.energyQ[i]), structure: structure.slice() };
-  } };
+  return {
+    sources,
+    structure,
+    apply() {
+      return {
+        grid: Uint32Array.from(sources, (i) => state.grid[i]),
+        energyQ: Uint32Array.from(sources, (i) => state.energyQ[i]),
+        structure: structure.slice(),
+      };
+    },
+  };
 }

@@ -1,2 +1,2 @@
 import { sdkConfig } from './sdk-build.mjs';
-export default sdkConfig(".");
+export default sdkConfig('.');

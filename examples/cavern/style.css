@@ -1,2 +1,13 @@
-@import url("../first-person/style.css");
-.hud{gap:36px}.eyebrow{color:#e5bd85}h1 span{max-width:270px}.mission{max-width:360px}
+@import url('../first-person/style.css');
+.hud {
+  gap: 36px;
+}
+.eyebrow {
+  color: #e5bd85;
+}
+h1 span {
+  max-width: 270px;
+}
+.mission {
+  max-width: 360px;
+}
