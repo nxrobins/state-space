@@ -10,6 +10,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {join} from 'node:path';
 import {SDK_ENTRIES, sdkConfig, sdkEntries} from '../engine/sdk-build.mjs';
 import {lintProject, lintSource} from '../engine/lint_ts.mjs';
+import {STREAMING_REPORTER, selectChecks} from '../scripts/verify_checks.mjs';
 
 test('SDK entries preserve existing build targets and reject unknown entries', () => {
   for (const entry of SDK_ENTRIES) {
@@ -88,4 +89,18 @@ test('volume evidence hashes include moved modules', () => {
       assert.equal(report[source], expected, source);
     }
   }
+});
+
+test('every supervised vitest check streams progress inside the stall window', () => {
+  for (const suite of ['smoke', 'unit']) {
+    const vitest = selectChecks(suite).checks.filter(args => args[0].endsWith('vitest.mjs'));
+    assert.ok(vitest.length > 0, suite);
+    for (const args of vitest) assert.ok(args.includes(STREAMING_REPORTER), `${suite}: node ${args.join(' ')}`);
+  }
+  const native = selectChecks('native', ['node', 'verify_checks.mjs', '--suite', 'native', '--file', 'engine/sdk.test.ts']);
+  assert.equal(native.kind, 'gpu');
+  assert.ok(native.checks[0].includes(STREAMING_REPORTER));
+  assert.throws(() => selectChecks('native', ['node', 'verify_checks.mjs', '--suite', 'native', '--file', 'engine/nope.test.ts']), /Choose one native fixture/);
+  assert.throws(() => selectChecks('demos', [], {}), /quarantined/);
+  assert.throws(() => selectChecks('bogus'), /Unknown verification suite/);
 });

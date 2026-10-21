@@ -28,9 +28,13 @@ For a focused check, use the file's current path and the bounded CPU config:
 
 ```sh
 uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
-  node node_modules/vitest/vitest.mjs run engine/portable-data.test.ts \
+  node node_modules/vitest/vitest.mjs run --reporter=dot engine/portable-data.test.ts \
   --config engine/vitest.bounded.config.ts
 ```
+
+Pass `--reporter=dot` to any vitest run under the supervisor. The default reporter
+prints nothing until the run ends when stdout is a pipe, and the supervisor stops a
+child that is silent for 40 seconds. `npm test` already selects that reporter.
 
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
