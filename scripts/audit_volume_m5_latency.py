@@ -43,7 +43,7 @@ def main():
         '  // stops at the exact fixed point; exhaustion still runs general convergence.\n'
         "  const {mode='dense',solveBatchLimit=32,...geometry}=options;")
     assert (ROOT/path).read_text() == expected, 'Unexpected runtime change'
-    allowed = {path, 'engine/experimental/structural/structural-probe.ts'}
+    allowed = {path, 'engine/experimental/structural-probe.ts'}
     changed = subprocess.check_output(['git', 'diff', '--name-only', REVISION, '--', 'engine'], cwd=ROOT, text=True).splitlines()
     assert set(changed) <= allowed, changed
     additions = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '--', 'engine'], cwd=ROOT, text=True).splitlines()

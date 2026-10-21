@@ -46,7 +46,9 @@ def main():
     kind = 'cpu'
     if args.stage == 'compatibility-unit':
         if args.test_file is None: parser.error('--test-file is required for one bounded compatibility file')
-        command = [node, 'node_modules/vitest/vitest.mjs', 'run', f'engine/{args.test_file}.test.ts', '--config', 'engine/vitest.cpu.config.ts']
+        # Choice names stay stable; files that moved into family folders map to where they live now.
+        moved = {'experimental/latency': 'engine/experimental/volume/latency.test.ts'}
+        command = [node, 'node_modules/vitest/vitest.mjs', 'run', moved.get(args.test_file, f'engine/{args.test_file}.test.ts'), '--config', 'engine/vitest.cpu.config.ts']
     elif args.stage == 'sdk-build':
         if args.sdk_entry is None: parser.error('--sdk-entry is required for one bounded SDK build')
         command = [node, 'node_modules/vite/bin/vite.js', 'build', '--config', f'engine/vite.{args.sdk_entry}.config.ts']

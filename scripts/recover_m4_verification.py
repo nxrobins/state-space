@@ -20,8 +20,8 @@ from scripts.verification_guard import ROOT, Lease
 def source_path(name: str) -> str:
     """Repository-relative path of one experimental source by file name, wherever it lives now."""
     matches = sorted((ROOT / 'engine/experimental').rglob(name))
-    if not matches:
-        raise RuntimeError(f'Missing experimental source {name}.')
+    if len(matches) != 1:
+        raise RuntimeError(f'Expected one experimental source named {name}, found {len(matches)}.')
     return matches[0].relative_to(ROOT).as_posix()
 
 
