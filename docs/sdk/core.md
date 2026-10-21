@@ -39,8 +39,8 @@ Generation and package building use the development checkout; runtime clients
 do not need Node.js for Python, source WGSL paths, or the generator.
 
 `examples/sdk/native.py` and `examples/sdk/node.mjs`, together with `materials.json`,
-are complete external clients. `python scripts/verify_sdk.py` builds and installs
-both packages into temporary directories outside the checkout, executes the
+are complete external clients. `python scripts/verify_sdk.py` builds both
+packages, installs them into temporary directories outside the checkout, executes the
 clients, compares every reported change and final state, and compiles external
 TypeScript clients with both installed compiler versions.
 

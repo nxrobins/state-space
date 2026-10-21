@@ -19,7 +19,7 @@ a new package structure.
 | `web/` | Earlier browser showcase and its rendering/controller tests |
 | `game/`, `tower-defense-rogue/` | Independent game prototypes and their SDK integration boundaries |
 | `eval/`, `seeds/`, `locked/`, `archive/` | Mutation/evolution evaluation, seeds, frozen references and research history |
-| Root `evolve_ss.py`, `ss_program.md`, `winner_phase_*.json`, evolution logs | Original research workflow and recorded results; not the SDK entry point |
+| Root `evolve_ss.py`, `ss_program.md`, `EVOLUTION_CHRONICLE.md` | Original research workflow and its record; not the SDK entry point. The evolution CLI stays at the root because tests, provenance capture and the release verifier reference it there; the recorded phase winners (`winner_phase_*.json`) live in `archive/` |
 | `docs/` | Current guides, contracts, support status and checkpoint summaries |
 | `dist/` | Local generated output; the tracked `dist/packages/evidence/` files are historical package evidence |
 

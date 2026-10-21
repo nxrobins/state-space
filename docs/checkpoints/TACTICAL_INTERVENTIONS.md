@@ -4844,8 +4844,10 @@ host CPU. A 45-second read-only capture identified a separate Claude-launched
 `bun gpu/season-sweep.ts gangsters full 100 30 52 16 3000` process (PID 43536),
 averaging 85.78% of total machine CPU; the host averaged 98.93%. The collector
 averaged 0.18%. No unrelated process was modified. This is current-load evidence,
-not a diagnosis of earlier freezes. Details and raw samples are in
-[`cpu-attribution-01/findings.md`](tactical-interventions/build-53-2026-10-17/cpu-attribution-01/findings.md).
+not a diagnosis of earlier freezes. Details and raw samples are in the local
+capture `tactical-interventions/build-53-2026-10-17/cpu-attribution-01/findings.md`,
+which is not published because it contains unrelated process inventories; see
+[TACTICAL_SDK_PR.md](TACTICAL_SDK_PR.md).
 
 Static review confirmed the current implementation retains private geometry
 capabilities, global support assessment, the shared report budget, ready-preview

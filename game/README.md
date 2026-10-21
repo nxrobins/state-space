@@ -28,8 +28,10 @@ Engine `player` markers and unknown material IDs become air by default because f
 
 ## Run
 
-```powershell
-cd D:\state-space\game
+From the repository root:
+
+```sh
+cd game
 npm install
 npm run dev
 ```
@@ -38,8 +40,10 @@ Open `http://127.0.0.1:5173/`.
 
 ## Verify
 
-```powershell
-cd D:\state-space\game
+From the repository root:
+
+```sh
+cd game
 npm test
 npm run build
 ```
@@ -50,11 +54,13 @@ Use `?debug=1` or the debug control in-game for match ID, seed, frame stats, mat
 
 Portraits live in `public/assets/fighters/*/portrait.png`. Runtime combat sprites live in `public/assets/sprites/fighters/*` as transparent 96x96 sheets plus individual source frames and preview sheets.
 
-Regenerate the deterministic placeholder combat collection with:
+Regenerate the deterministic placeholder combat collection from the repository
+root with:
 
-```powershell
-cd D:\state-space
-python game\scripts\generate_fighter_sprites.py
+```sh
+python game/scripts/generate_fighter_sprites.py
 ```
+
+The script needs Pillow, which is not part of the root `uv` environment.
 
 The generator keeps the sprite manifest, sheets, per-frame PNGs, preview frame lists, and preview sheets in sync with `game/src/game/sprites.ts`.
