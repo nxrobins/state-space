@@ -53,6 +53,10 @@ jobs:
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 30 -- .venv/bin/python -B -m unittest tests.test_evidence_archive -v
       - name: Installed CPU package client
         run: uv run python -m scripts.verify_packages
+      - name: Floor interpreter import check
+        # Development and CI use the interpreter in .python-version; the package
+        # still declares requires-python >= 3.10, so the floor must keep importing.
+        run: uv run --isolated --locked --python 3.10 python -c "import engine, eval.evaluator; print('floor ok')"
       - name: Retain receipts and failures
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
