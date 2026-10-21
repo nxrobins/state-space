@@ -26,7 +26,13 @@ def adapter_error() -> str | None:
 
 
 def gpu_required() -> bool:
-    return os.environ.get(REQUIRE_GPU_VARIABLE, "").strip() == "1"
+    """1 requires an adapter; 0 or unset allows the skip; any other value fails closed."""
+    value = os.environ.get(REQUIRE_GPU_VARIABLE, "").strip()
+    if value in ("", "0"):
+        return False
+    if value == "1":
+        return True
+    raise RuntimeError(f"{REQUIRE_GPU_VARIABLE} must be 1, 0 or unset, not {value!r}")
 
 
 def requires_gpu(target):
@@ -38,11 +44,3 @@ def requires_gpu(target):
         raise RuntimeError(f"{REQUIRE_GPU_VARIABLE}=1 but no WebGPU adapter is usable: {error}")
     return unittest.skip(f"No WebGPU adapter ({error}); set {REQUIRE_GPU_VARIABLE}=1 to fail instead")(target)
 
-
-def requires_verification_job(target):
-    """Tests that re-enter the supervisor must already run inside a verification job."""
-    if os.environ.get("STATE_SPACE_VERIFICATION_JOB"):
-        return target
-    if gpu_required():
-        raise RuntimeError(f"{REQUIRE_GPU_VARIABLE}=1 but STATE_SPACE_VERIFICATION_JOB is unset; run through scripts.verification_guard")
-    return unittest.skip("Re-enters the verification supervisor; run through scripts.verification_guard")(target)

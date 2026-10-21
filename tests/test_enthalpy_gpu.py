@@ -6,7 +6,7 @@ import unittest
 from engine.enthalpy import ENERGY_SCALE as Q, MAX_ENERGY_Q, Thermodynamics, ThermalMaterial
 from engine.enthalpy_gpu import EnthalpyGPU, PASSES
 from enthalpy_cases import AIR, ICE, WATER, STEAM, METAL, WOOD, OIL, OIL_VAPOR, ASH, SMOKE, LAVA, model
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 @requires_gpu

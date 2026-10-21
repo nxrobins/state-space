@@ -33,7 +33,7 @@ the reason. The release gate (`python -m engine.verify`) and the manual
 [GPU verification workflow](../.github/workflows/gpu-verification.yml) set
 `STATE_SPACE_REQUIRE_GPU=1`, which turns that skip into a failure. The GPU
 workflow runs only on a self-hosted runner with the `gpu` label, a WebGPU
-adapter and NVIDIA telemetry; no such runner is registered yet, so it records
+adapter and NVIDIA telemetry for one GPU; no such runner is registered yet, so it records
 no result until one is.
 
 ## Native acceptance and remaining scope

@@ -12,7 +12,7 @@ from engine.state import seed_state
 from engine.structure import plan_structure, validate_structure
 from engine.structure_bulk import plan_structure_bulk
 from engine.structure_compiled import plan_structure_compiled, validate_structure_compiled
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 

@@ -13,7 +13,7 @@ from engine.structure import ANCHOR, BOND_BITS, FRESH
 from engine.lint import lint_wgsl
 from engine.catalog import load_catalog
 from engine.generate import constants
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 @requires_gpu

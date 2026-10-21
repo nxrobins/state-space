@@ -15,7 +15,7 @@ from engine.schema import (DEFAULT_PHASES, MAT_AIR, MAT_FIRE, MAT_ICE, MAT_LAVA,
                            MAT_OIL, MAT_OIL_VAPOR, MAT_SAND, MAT_SMOKE, MAT_STEAM, MAT_STONE, MAT_WATER,
                            VoxelState, build_cold_table_buffer, pack_voxel)
 from engine.state import seed_state, thermal_view, thermodynamics_from_cold
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 def packed(material, thermal, flags=0):

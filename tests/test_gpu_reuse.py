@@ -7,7 +7,7 @@ import numpy as np
 
 from engine import create_field, MaterialRenderer
 from engine.compositor import CompositionEngine
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 @requires_gpu

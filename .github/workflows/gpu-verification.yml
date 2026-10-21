@@ -1,8 +1,8 @@
 name: GPU verification
 # Hosted runners have no GPU. This workflow targets a self-hosted runner that
-# carries the `gpu` label, a usable WebGPU adapter and NVIDIA telemetry: the
-# `gpu` supervisor kind and `npm run test:native` refuse to launch without
-# nvidia-smi. A Mac host uses the bounded Metal stages in docs/MACOS.md
+# carries the `gpu` label, a usable WebGPU adapter and NVIDIA telemetry for
+# exactly one GPU: the `gpu` supervisor kind and `npm run test:native` refuse
+# to launch without nvidia-smi. A Mac host uses the bounded Metal stages in docs/MACOS.md
 # instead. Register the runner under
 # Settings > Actions > Runners, then run the workflow by hand. Enable the
 # schedule below only after the runner is registered; a scheduled job with no
@@ -46,7 +46,7 @@ jobs:
         # The supervisor applies the same host preflight, deadline and sampled RSS
         # limits as the CPU suites; the gpu kind also samples NVIDIA telemetry when
         # nvidia-smi exists. The runner must be idle when the job starts.
-        run: uv run python -B -m scripts.verification_guard --kind gpu --timeout 600 -- uv run python -B -m unittest discover -s tests -p 'test_*.py' -v
+        run: uv run python -B -m scripts.verification_guard --kind gpu --timeout 600 -- uv run --no-sync python -B -m unittest discover -s tests -p 'test_*.py' -v
       - name: Native conformance fixture
         run: npm run test:native -- --file engine/conformance.test.ts
       - name: Native structure fixture

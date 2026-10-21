@@ -14,7 +14,7 @@ from engine.compositor import CompositionEngine
 from engine.state import seed_state
 from engine.structure_bulk import seed_structure_bulk
 from engine.lint import lint_runtime, lint_example_html
-from gpu_support import requires_gpu
+from tests.gpu_support import requires_gpu
 
 
 def example_registry():

@@ -22,7 +22,7 @@ from eval.policy import TARGETS, EvaluationConfig, acceptance_errors, candidate_
 from eval.provenance import read_immutable, read_json, write_immutable
 from eval.scenes import acceptance_cases, prepared, cell
 from evolve_ss import PHASE_CONFIG, baseline_source, check_hard_constraints
-from gpu_support import requires_gpu, requires_verification_job
+from tests.gpu_support import requires_gpu
 
 
 class EvaluationProperties(unittest.TestCase):
@@ -210,7 +210,6 @@ class EvaluationProperties(unittest.TestCase):
             self.assertIs(report["passed"], False)
             self.assertIn("timed out", report["errors"][0])
 
-    @requires_verification_job
     def test_aggregate_timeout_preserves_partial_evidence_and_fails_closed(self):
         def run(command, **kwargs):
             self.assertGreater(kwargs["timeout"], 0)
@@ -225,7 +224,8 @@ class EvaluationProperties(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "report.json"
             with patch("sys.argv", ["verify", "--report", str(path)]), patch("engine.verify.source_hashes", return_value={}), \
-                 patch("engine.verify.shutil.which", return_value="npm"), patch("engine.verify.subprocess.run", side_effect=run):
+                 patch("engine.verify.shutil.which", return_value="npm"), patch("engine.verify.subprocess.run", side_effect=run), \
+                 patch("scripts.verification_guard.guarded_entry"), patch.dict("os.environ"):
                 self.assertEqual(verify_main(), 1)
             report = read_json(path)
             self.assertIs(report["passed"], False)

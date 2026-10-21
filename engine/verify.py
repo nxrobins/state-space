@@ -34,8 +34,9 @@ def main() -> int:
     parser.add_argument("--report", type=Path, default=ROOT / "docs/checkpoints/latest-verification.json")
     parser.add_argument("--browser-cli", default=os.environ.get("STATE_SPACE_BROWSER_CLI"), help="agent-browser executable or JavaScript launcher; otherwise use PATH")
     args = parser.parse_args()
-    # The release gate runs on a GPU host: a test that cannot find an adapter must fail, never skip.
-    os.environ.setdefault("STATE_SPACE_REQUIRE_GPU", "1")
+    # The release gate runs on a GPU host: a test that cannot find an adapter must fail,
+    # never skip, whatever the caller's shell already held.
+    os.environ["STATE_SPACE_REQUIRE_GPU"] = "1"
     npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm")
     if npm is None:
         raise RuntimeError("npm is required to verify the browser engine and integration clients")
