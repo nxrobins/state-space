@@ -30,13 +30,15 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   for (let i = 0; i < raw.length; i++) {const d = Object.getOwnPropertyDescriptor(raw, i); if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');}
   return raw;
 }
-/** Internal only: copy of engine-produced portable results (plain objects, arrays and primitives).
+/** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
  * Field order and shared references are kept exactly as structuredClone keeps them, without its serializer cost.
- * Anything else falls back to structuredClone.
+ * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
+ * Not for caller-supplied data: that goes through the validating readers.
  */
 export function cloneReactiveData3D<T>(value: T): T {
   const seen = new Map<object, unknown>();
   const copy = (v: unknown): unknown => {
+    if (typeof v === 'function' || typeof v === 'symbol') throw Error('Reactive results hold portable data only.');
     if (typeof v !== 'object' || v === null) return v;
     const known = seen.get(v); if (known !== undefined) return known;
     if (Array.isArray(v)) {

@@ -1,5 +1,5 @@
 /** One complete movement/reaction/structural tick. No old-world or native execution. */
-import { readReactiveMaterialBlock3D, reactiveEnergyTotalQ3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
+import { readReactiveMaterialBlock3D, checkReactiveMaterialBlock3D, reactiveEnergyTotalQ3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
 import { reactiveFields3D, reactiveInteger3D, cloneReactiveData3D, type ReactiveMaterialRegistry3D } from './reactive-registry.js';
 import { REACTIVE_HOLD_RULES_3D, validateReactiveHolds3D, copyReactiveHolds3D, reactiveHeldCells3D, overlayReactiveHolds3D,
   stripReactiveHoldAnchors3D, retireReactiveHolds3D, type ReactiveHold3D, type ReactiveHoldTickReport3D } from './reactive-holds.js';
@@ -156,6 +156,8 @@ function worldTickJob(registry: ReactiveMaterialRegistry3D, owned: ReactiveWorld
           const structural = structure!.output(), structureCells = reactiveHeldCells3D(structureHolds), moved = new Set(structural.report.moves.map(m => m.from));
           if (structureCells.some(i => moved.has(i))) throw Error('Held reactive matter moved during structural settlement.');
           if (structureHolds.length) structural.block = stripReactiveHoldAnchors3D(evolutionResult!.state.block, structural.block, structureHolds);
+          // Fail closed: the published block passes the physical invariants before any snapshot carries it forward.
+          structural.block = checkReactiveMaterialBlock3D(registry, structural.block);
           const holdReport: ReactiveHoldTickReport3D | undefined = before.schemaVersion === 2 ? {rulesVersion: REACTIVE_HOLD_RULES_3D,
             before: initialHolds, after: copyReactiveHolds3D(structureHolds.filter(h => h.expiresAtTick > before!.tick + 1)),
             expired: initialHolds.filter(h => h.expiresAtTick <= before!.tick + 1).map(h => h.id), retired, movementCells, structureCells} : undefined;
