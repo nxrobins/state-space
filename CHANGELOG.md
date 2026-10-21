@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-20)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-21)
 
 ### Added
 
@@ -42,6 +42,9 @@ date of the last change in the section.
 - Ownership, shared validation and SDK tooling refinements (#30, #32);
   SDK guide, evidence archive and experimental module organization (#33).
 - README rewritten around engine setup and measured performance (#9).
+- Reactive CPU tick: one validation per tick, uncopied hand-offs between
+  evolution, reaction and structure stages, copy-on-write passes and an
+  explicit structure stepper, with bit-identical results (#62).
 
 ### Fixed
 
