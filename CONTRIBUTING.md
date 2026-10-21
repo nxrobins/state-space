@@ -7,7 +7,9 @@ to the repository itself.
 
 ## Set up and check a change
 
-Install Node.js (CI uses 22), Python 3.10+ and uv. From the repository root:
+Install Node.js (CI uses 22), Python 3.10+ and uv. `.python-version` selects
+CPython 3.13 for `uv sync` and CI; the package itself still supports 3.10+.
+From the repository root:
 
 ```sh
 uv sync --locked
