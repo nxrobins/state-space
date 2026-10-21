@@ -20,7 +20,7 @@ CPU checks does not replace a fresh native or whole-product release gate.
 declarations, builds the reactive chamber, checks types/lint/formatting, runs
 sequential CPU and controller suites, exercises supervisor failure paths, checks
 archive restoration, and installs npm/wheel artifacts in independent projects.
-All 13 npm entry points and their public declarations are checked. CI retains
+All 14 npm entry points and their public declarations are checked. CI retains
 receipts and package artifacts for 14 days, including failures. Hosted CI runs no
 GPU workloads.
 

@@ -16,7 +16,13 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join } from 'node:path';
-import { SDK_ENTRIES, sdkConfig, sdkEntries } from '../engine/sdk-build.mjs';
+import {
+  SDK_ENTRIES,
+  SDK_ROOT,
+  SHARED_ENTRIES,
+  sdkConfig,
+  sdkEntries,
+} from '../engine/sdk-build.mjs';
 import { lintProject, lintSource } from '../engine/lint_ts.mjs';
 import { STREAMING_REPORTER, VITEST, selectChecks } from '../scripts/verify_checks.mjs';
 
@@ -32,6 +38,25 @@ test('SDK entries preserve existing build targets and reject unknown entries', (
     assert.equal(sdkConfig(entry.key).build.target, legacyTarget ? 'es2022' : undefined);
   }
   assert.throws(() => sdkConfig('missing'), /Unknown/);
+});
+
+test('shared entries build second, stay external to every other bundle and import as siblings', () => {
+  const [shared] = SHARED_ENTRIES;
+  assert.equal(shared.key, './experimental/3d/rock-textures');
+  assert.equal(SDK_ENTRIES[1].key, shared.key);
+  const importer = join(SDK_ROOT, 'engine/experimental/cavern-appearance.ts');
+  const { external, output } = sdkConfig('./experimental/3d/world/gpu').build.rollupOptions;
+  assert.equal(external('./rock-textures.js', importer, false), false);
+  assert.equal(external(shared.resolved, importer, true), true);
+  assert.equal(external(shared.resolved.replaceAll('/', '\\'), importer, true), true);
+  assert.equal(
+    external(join(SDK_ROOT, 'engine/experimental/cavern-haze.ts'), importer, true),
+    false,
+  );
+  assert.equal(output.paths(shared.resolved), './state-space-rock-textures.js');
+  assert.equal(output.paths('/elsewhere/module.ts'), '/elsewhere/module.ts');
+  const own = sdkConfig(shared.key).build.rollupOptions;
+  assert.equal(own.external(shared.resolved, importer, true), false);
 });
 
 test('SDK metadata rejects missing roots, collisions and paths outside the package', () => {
