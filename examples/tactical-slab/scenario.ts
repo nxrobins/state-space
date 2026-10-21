@@ -155,9 +155,11 @@ export function prepareSlabCommand(editor: TacticalPreviewEditor3D<SlabGame>, ra
   const scout = game.units.find(u => u.id === 'scout')!, origin = scout.body.minQ.map(v => Math.floor(v / Q));
   if (['lift', 'release', 'heat'].includes(command.kind) && game.slab.some(i => point(i).reduce((n, v, k) => n + Math.abs(v - origin[k]), 0) > SLAB_LIMITS.rangeCells)) throw Error('Slab is outside control range.');
   if (command.kind === 'wind' || command.kind === 'drift') {
-    const controls = restoreMaterialTransportMemory3D(initial.terrain, game.wind);
-    if (!controls.parcels.length || (command.kind === 'wind' && !controls.parcels.some(p => p.id === command.parcel))) throw Error('That parcel is no longer controllable.');
-    if (controls.parcels.some(p => point(p.cell).reduce((n, v, k) => n + Math.abs(v - origin[k]), 0) > SLAB_LIMITS.rangeCells)) throw Error('Parcel is outside wind range.');
+    const controls = restoreMaterialTransportMemory3D(initial.terrain, game.wind), pushed = command.kind === 'wind' ? controls.parcels.find(p => p.id === command.parcel) : undefined;
+    if (!controls.parcels.length || (command.kind === 'wind' && !pushed)) throw Error('That parcel is no longer controllable.');
+    // Wind reaches only the parcel it pushes. Drift adds no impulse, so a parcel that
+    // physics carried out of range never blocks the remaining controls.
+    if (pushed && point(pushed.cell).reduce((n, v, k) => n + Math.abs(v - origin[k]), 0) > SLAB_LIMITS.rangeCells) throw Error('Parcel is outside wind range.');
     prepareMaterialTransport3D(editor, game.wind, command.kind === 'wind' ? [{id: command.parcel, impulseQ: SLAB_AIR_IMPULSES[command.direction]}] : [],
       ({game: current, memory}) => ({...current, wind: memory, ap: game.ap - cost, turn: game.turn + 1}));
     return;
