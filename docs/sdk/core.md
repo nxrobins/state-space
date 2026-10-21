@@ -19,7 +19,7 @@ format, and pass schedule. The GPU backends require a usable GPU adapter.
 The current bounded external-package check is `npm run verify:packages` after
 `npm run build:sdk`. On macOS, `uv run python -m scripts.verify_packages --native`
 also compares the installed Metal and JavaScript clients. The verifier uses a
-fresh Python environment, imports all 13 npm export paths and checks their public
+fresh Python environment, imports all 14 npm export paths and checks their public
 declarations. WebGPU types are included as a package dependency. See the
 [current support matrix](../VALIDATION_STATUS.md) for experimental boundaries.
 
@@ -201,7 +201,9 @@ Pressure and velocity sampling, version compatibility and model limits are in [P
 `package.json` exports own SDK entry points. `npm run build:sdk` derives source
 paths, bundle names and declaration roots from those exports; only the five legacy
 ES2022 target exceptions live in `engine/sdk-build.mjs`. Entries build separately
-to retain their private runtime identities. The existing Vite config files remain
+to retain their private runtime identities, with one exception: the rock-texture
+entry is external to every other bundle, and the appearance chunk of each GPU
+world bundle imports it as a sibling file. The existing Vite config files remain
 usable by recovery/evidence tooling. `node scripts/build_sdk.mjs --types-only`
 emits declarations using the same derived roots and `engine/tsconfig.sdk.json`
 compiler options. Adding an entry requires no second entry list.

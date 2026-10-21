@@ -1,4 +1,6 @@
-/** Keep entries separate: each SDK bundle retains its existing private identities. */
+/** Keep entries separate: each SDK bundle retains its existing private identities.
+ * Shared entries (see SHARED_ENTRIES) are the one exception; other bundles import them as siblings.
+ */
 import { resolve, relative } from 'node:path';
 import { build } from 'vite';
 import ts from 'typescript';
