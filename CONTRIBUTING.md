@@ -26,6 +26,11 @@ through the public package declarations. Do not run SDK rebuilding concurrently
 with those consumers. `npm test` rebuilds the SDK and runs the supervised CPU
 suite; it does not start native workloads or the quarantined legacy demos.
 
+`npm run format` applies Prettier to the hand-written engine, example, script
+and test sources; `npm run format:check` is the CI gate. `.prettierignore`
+lists what stays byte-exact: generated code, vendored files, built output,
+archived evidence and the frozen material-law sources.
+
 For a focused check, use the file's current path and the bounded CPU config:
 
 ```sh

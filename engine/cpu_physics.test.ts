@@ -20,13 +20,20 @@ describe('CPU tick input boundary', () => {
       { ...initial, energyQ: initial.energyQ.subarray(1) },
       { ...initial, structure: initial.structure.subarray(1) },
       { ...initial, energyQ: initial.energyQ.map(() => 0) },
-      { ...initial, grid: initial.grid.map(value => (value & 0xffffff00) | 254) },
+      { ...initial, grid: initial.grid.map((value) => (value & 0xffffff00) | 254) },
       { ...initial, structure: initial.structure.map(() => 0x80000000) },
-      { ...initial, structure: initial.structure.map((word, index) => index === 4 ? word | FRESH : word) },
+      {
+        ...initial,
+        structure: initial.structure.map((word, index) => (index === 4 ? word | FRESH : word)),
+      },
     ];
     for (const invalid of malformed) {
       let observed = false;
-      expect(() => runCpuTick(invalid, 3, 3, buildColdTable(), 0, () => { observed = true; })).toThrow();
+      expect(() =>
+        runCpuTick(invalid, 3, 3, buildColdTable(), 0, () => {
+          observed = true;
+        }),
+      ).toThrow();
       expect(observed).toBe(false);
     }
     expect(() => runCpuTick(initial, 0, 3, buildColdTable(), 0)).toThrow();
@@ -43,14 +50,19 @@ describe('CPU tick input boundary', () => {
 
   it('isolates tick execution from caller state and cold-table changes in observers', () => {
     const expected = runCpuTick(state(), 3, 3, buildColdTable(), 17);
-    const original = state(), cold = buildColdTable();
+    const original = state(),
+      cold = buildColdTable();
     const observedStates: Uint32Array[] = [];
     const actual = runCpuTick(original, 3, 3, cold, 17, (_id, observed) => {
       // Both aliases are public caller storage; neither may change owned physics.
       cold.fill(0);
-      original.grid.fill(0); original.energyQ.fill(0); original.structure.fill(0);
+      original.grid.fill(0);
+      original.energyQ.fill(0);
+      original.structure.fill(0);
       observedStates.push(observed.grid.slice());
-      observed.grid.fill(0); observed.energyQ.fill(0); observed.structure.fill(0);
+      observed.grid.fill(0);
+      observed.energyQ.fill(0);
+      observed.structure.fill(0);
     });
     expect(actual).toEqual(expected);
     expect(observedStates).toHaveLength(23);

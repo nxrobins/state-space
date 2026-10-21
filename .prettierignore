@@ -1,0 +1,18 @@
+# Prettier covers hand-written engine, example, script and test sources.
+# Everything below is generated, vendored, built, archived evidence, or byte-bound.
+node_modules/
+dist/
+engine/generated/
+engine/kernels/
+**/vendor/
+web/*.generated.js
+web/shaders/
+docs/checkpoints/
+locked/
+game/
+tower-defense-rogue/
+# Frozen material-law sources: their bytes are hashed in recorded evidence.
+engine/experimental/structural-material.ts
+engine/experimental/structural-material.motion-baseline.ts
+# Embedded texture data, not code.
+engine/experimental/rock-textures.ts

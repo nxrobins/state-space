@@ -3,16 +3,33 @@ import { chunkShaders } from './3d-shader.js';
 
 // These stages only inspect intact structure (or its supported-distance DAG).
 // Damage can remove members during a solve, but cannot create new members.
-export const STRUCTURAL_LIST_STAGES=['supportRelax','supportSummary','loadLevel','loadInit','loadRelax','loadSummary','componentInit','componentRelax','blockInit','blockRelax'] as const;
-export const STRUCTURAL_RELAX_STAGES=['supportRelax','loadRelax','componentRelax','blockRelax'] as const;
+export const STRUCTURAL_LIST_STAGES = [
+  'supportRelax',
+  'supportSummary',
+  'loadLevel',
+  'loadInit',
+  'loadRelax',
+  'loadSummary',
+  'componentInit',
+  'componentRelax',
+  'blockInit',
+  'blockRelax',
+] as const;
+export const STRUCTURAL_RELAX_STAGES = [
+  'supportRelax',
+  'loadRelax',
+  'componentRelax',
+  'blockRelax',
+] as const;
 
-export function structuralShaders(edge:number,shape:readonly number[]) {
-  const base=chunkShaders(edge).physics;
-  const replace=(source:string,from:string,to:string)=>{
-    if(source.split(from).length!==2)throw Error('M5 material template differs from the frozen M1 law.');
-    return source.replace(from,to);
+export function structuralShaders(edge: number, shape: readonly number[]) {
+  const base = chunkShaders(edge).physics;
+  const replace = (source: string, from: string, to: string) => {
+    if (source.split(from).length !== 2)
+      throw Error('M5 material template differs from the frozen M1 law.');
+    return source.replace(from, to);
   };
-  const mechanical=`
+  const mechanical = `
 @group(0) @binding(7) var<storage,read> structures:array<u32>;
 @group(0) @binding(8) var<storage,read_write> nextStructures:array<u32>;
 const INTEGRITY=255u;const ANCHOR=16384u;const FRESH=32768u;const INF=0xffffffffu;
@@ -24,16 +41,42 @@ fn bit(dir:u32)->u32{return 1u<<(8u+dir);}
 fn neighbor(i:u32,dir:u32)->u32{let c=coordinate(i)+NORMALS[dir];if(!inside(c)){return INF;}return index(c);}
 fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(canonical/p.shape.x)%p.shape.y,canonical/(p.shape.x*p.shape.y))));}
 `;
-  let physics=replace(base,'@compute @workgroup_size(64) fn main',mechanical+'\n@compute @workgroup_size(64) fn main');
-  physics=replace(physics,'fn falling(v:u32)->bool{return phase(v)==1u||liquid(v);}','fn falling(v:u32)->bool{return phase(v)==1u||liquid(v)||eligible(v);}') ;
-  physics=replace(physics,'!fixed(cells[s])&&!fixed(cells[t])','!bound(s)&&!bound(t)');
-  physics=replace(physics,'var outV=v;var outQ=q;','var outV=v;var outQ=q;var outS=structures[i];');
-  physics=replace(physics,'outV=thermal((v&0xf0ff0000u)|m|(prop(m,20u)<<24u),q);','outV=thermal((v&0xf0ff0000u)|m|(prop(m,20u)<<24u),q);outS=select(0u,INTEGRITY|FRESH,eligible(outV));');
-  physics=replace(physics,'outV=cells[other];outQ=energies[other];','outV=cells[other];outQ=energies[other];outS=structures[other];');
-  physics=replace(physics,'nextCells[i]=outV;nextEnergies[i]=outQ;','nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;');
+  let physics = replace(
+    base,
+    '@compute @workgroup_size(64) fn main',
+    mechanical + '\n@compute @workgroup_size(64) fn main',
+  );
+  physics = replace(
+    physics,
+    'fn falling(v:u32)->bool{return phase(v)==1u||liquid(v);}',
+    'fn falling(v:u32)->bool{return phase(v)==1u||liquid(v)||eligible(v);}',
+  );
+  physics = replace(physics, '!fixed(cells[s])&&!fixed(cells[t])', '!bound(s)&&!bound(t)');
+  physics = replace(
+    physics,
+    'var outV=v;var outQ=q;',
+    'var outV=v;var outQ=q;var outS=structures[i];',
+  );
+  physics = replace(
+    physics,
+    'outV=thermal((v&0xf0ff0000u)|m|(prop(m,20u)<<24u),q);',
+    'outV=thermal((v&0xf0ff0000u)|m|(prop(m,20u)<<24u),q);outS=select(0u,INTEGRITY|FRESH,eligible(outV));',
+  );
+  physics = replace(
+    physics,
+    'outV=cells[other];outQ=energies[other];',
+    'outV=cells[other];outQ=energies[other];outS=structures[other];',
+  );
+  physics = replace(
+    physics,
+    'nextCells[i]=outV;nextEnergies[i]=outQ;',
+    'nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;',
+  );
 
-  const prefix=base.slice(0,base.indexOf('@compute'))+mechanical;
-  const mechanics=prefix+`
+  const prefix = base.slice(0, base.indexOf('@compute')) + mechanical;
+  const mechanics =
+    prefix +
+    `
 // Header: changed, maxDistance, error, reserved, supportedWeight, reactionTotal.
 // Planes: support distance, load, component root, blocked root, all members,
 // non-root support members, and load receivers. Planes 2/3 cache DAG masks
@@ -275,14 +318,32 @@ fn moving(i:u32)->bool{if(!intact(i)){return false;}if(reachabilityPlan()){retur
  if((cells[i]&255u)!=(cells[source]&255u)){changed(coordinate(i));}
 }
 `;
-  let compact=mechanics;
-  for(const stage of STRUCTURAL_LIST_STAGES){
-    const prefix=`@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
-    const sleeping=((STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)?'if(solveDispatch[0]==0u){return;}':'')+(['componentRelax','blockInit','blockRelax'].includes(stage)?'if(reachabilityPlan()){return;}':'');
-    const [header,plane]=stage==='supportRelax'?[15,5]:stage==='loadRelax'?[3,6]:[13,4];
-    compact=replace(compact,prefix,prefix.replace('@workgroup_size(64)','@workgroup_size(256)').replace('let i=id.x;',
-      sleeping+`let ordinal=id.x;if(ordinal>=atomicLoad(&work[${header}])){return;}let i=planRead(${plane}u,ordinal);`));
+  let compact = mechanics;
+  for (const stage of STRUCTURAL_LIST_STAGES) {
+    const prefix = `@compute @workgroup_size(64) fn ${stage}(@builtin(global_invocation_id) id:vec3u){\n let i=id.x;`;
+    const sleeping =
+      ((STRUCTURAL_RELAX_STAGES as readonly string[]).includes(stage)
+        ? 'if(solveDispatch[0]==0u){return;}'
+        : '') +
+      (['componentRelax', 'blockInit', 'blockRelax'].includes(stage)
+        ? 'if(reachabilityPlan()){return;}'
+        : '');
+    const [header, plane] =
+      stage === 'supportRelax' ? [15, 5] : stage === 'loadRelax' ? [3, 6] : [13, 4];
+    compact = replace(
+      compact,
+      prefix,
+      prefix
+        .replace('@workgroup_size(64)', '@workgroup_size(256)')
+        .replace(
+          'let i=id.x;',
+          sleeping +
+            `let ordinal=id.x;if(ordinal>=atomicLoad(&work[${header}])){return;}let i=planRead(${plane}u,ordinal);`,
+        ),
+    );
   }
-  const specialize=(source:string)=>`const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a,b)=>a*b,1)}u);\n`+source.replaceAll('p.shape','SHAPE');
-  return{physics:specialize(physics),mechanics:specialize(compact)};
+  const specialize = (source: string) =>
+    `const SHAPE=vec4u(${shape.join('u,')}u,${shape.reduce((a, b) => a * b, 1)}u);\n` +
+    source.replaceAll('p.shape', 'SHAPE');
+  return { physics: specialize(physics), mechanics: specialize(compact) };
 }

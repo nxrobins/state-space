@@ -6,34 +6,52 @@ export const LIGHT_REGION_EDGE = 8;
 export const LIGHT_REGION_CAPACITY = 64;
 
 export function lightingCacheLayout(shape: readonly number[]) {
-  if (shape.length !== 3 || shape.some(n => !Number.isSafeInteger(n) || n < 1 || n > 128)) {
+  if (shape.length !== 3 || shape.some((n) => !Number.isSafeInteger(n) || n < 1 || n > 128)) {
     throw Error('Lighting cache requires positive integer dimensions within a 128-cubed world.');
   }
   let offset = 0;
-  const levels: {span: number; shape: number[]; offset: number; count: number}[] = [];
+  const levels: { span: number; shape: number[]; offset: number; count: number }[] = [];
   for (let span = 4; ; span *= 2) {
-    const size = shape.map(n => Math.ceil(n / span)), count = size.reduce((a, b) => a * b, 1);
-    levels.push({span, shape: size, offset, count}); offset += count;
+    const size = shape.map((n) => Math.ceil(n / span)),
+      count = size.reduce((a, b) => a * b, 1);
+    levels.push({ span, shape: size, offset, count });
+    offset += count;
     if (count === 1) break;
   }
-  const regionShape = shape.map(n => Math.ceil(n / LIGHT_REGION_EDGE));
-  return {levels, hierarchyWords: offset, regionShape,
-    regionCount: regionShape.reduce((a, b) => a * b, 1), regionStride: 2 * (LIGHT_REGION_CAPACITY + 1)};
+  const regionShape = shape.map((n) => Math.ceil(n / LIGHT_REGION_EDGE));
+  return {
+    levels,
+    hierarchyWords: offset,
+    regionShape,
+    regionCount: regionShape.reduce((a, b) => a * b, 1),
+    regionStride: 2 * (LIGHT_REGION_CAPACITY + 1),
+  };
 }
 
 /** Conservative point/AABB test, also used by the non-GPU regression fixtures. */
-export function lightIntersectsRegion(position: readonly number[], region: readonly number[], radius: number) {
-  return position.reduce((sum, p, axis) => {
-    const low = region[axis] * LIGHT_REGION_EDGE, high = low + LIGHT_REGION_EDGE;
-    const d = Math.max(low - p, 0, p - high); return sum + d * d;
-  }, 0) <= radius * radius;
+export function lightIntersectsRegion(
+  position: readonly number[],
+  region: readonly number[],
+  radius: number,
+) {
+  return (
+    position.reduce((sum, p, axis) => {
+      const low = region[axis] * LIGHT_REGION_EDGE,
+        high = low + LIGHT_REGION_EDGE;
+      const d = Math.max(low - p, 0, p - high);
+      return sum + d * d;
+    }, 0) <=
+    radius * radius
+  );
 }
 
-const vector = (values: readonly number[]) => `vec3u(${values.map(n => `${n}u`).join(',')})`;
+const vector = (values: readonly number[]) => `vec3u(${values.map((n) => `${n}u`).join(',')})`;
 
 // Keep A independent of experimental cache bindings and traversal code. These
 // functions preserve the existing full-source/cell-by-cell reference paths.
-export const REFERENCE_LIGHTING_QUERIES = LIGHT_LIST_QUERIES + `
+export const REFERENCE_LIGHTING_QUERIES =
+  LIGHT_LIST_QUERIES +
+  `
 fn emptyVisibilitySpan(c:vec3i,mask:u32)->u32{return 1u;}
 fn regionalCount(p:vec3f,wide:bool)->u32{return allLightCount();}
 fn regionalSource(p:vec3f,wide:bool,slot:u32)->u32{return allLightSource(slot);}
@@ -42,12 +60,15 @@ fn hierarchyVisibility(origin:vec3f,source:vec3f)->f32{return 1.;}
 
 /** Shared by surface shadows, optical traversal and volumetric shadows. */
 export function lightingCacheQueries(shape: readonly number[]) {
-  const layout = lightingCacheLayout(shape), levels = layout.levels;
-  return LIGHT_LIST_QUERIES + `
+  const layout = lightingCacheLayout(shape),
+    levels = layout.levels;
+  return (
+    LIGHT_LIST_QUERIES +
+    `
 @group(0) @binding(9) var<storage,read> visibilityNodes:array<u32>;
 @group(0) @binding(10) var<storage,read> regionalLights:array<u32>;
-const VIS_SHAPES=array<vec3u,${levels.length}>(${levels.map(l => vector(l.shape)).join(',')});
-const VIS_OFFSETS=array<u32,${levels.length}>(${levels.map(l => `${l.offset}u`).join(',')});
+const VIS_SHAPES=array<vec3u,${levels.length}>(${levels.map((l) => vector(l.shape)).join(',')});
+const VIS_OFFSETS=array<u32,${levels.length}>(${levels.map((l) => `${l.offset}u`).join(',')});
 const LIGHT_REGIONS=${vector(layout.regionShape)};
 // mask 1: shadow occluders; mask 2: anything except air/steam (optical interfaces).
 fn emptyVisibilitySpan(c:vec3i,mask:u32)->u32{
@@ -94,15 +115,26 @@ fn hierarchyVisibility(origin:vec3f,source:vec3f)->f32{
  }
  return 0.;
 }
-`;
+`
+  );
 }
 
 export function lightingCacheCompute(common: string, shape: readonly number[], edge: number) {
-  const layout = lightingCacheLayout(shape), chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3;
-  if (!Number.isSafeInteger(edge) || edge < 1 || edge > 32 || (edge & (edge - 1)) || shape.some(n => n % edge) || chunks > 512) {
+  const layout = lightingCacheLayout(shape),
+    chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3;
+  if (
+    !Number.isSafeInteger(edge) ||
+    edge < 1 ||
+    edge > 32 ||
+    edge & (edge - 1) ||
+    shape.some((n) => n % edge) ||
+    chunks > 512
+  ) {
     throw Error('Invalid lighting cache storage partition.');
   }
-  const declarations = common + `
+  const declarations =
+    common +
+    `
 @group(0) @binding(3) var<storage,read_write> lights:array<Light>;
 @group(0) @binding(4) var<storage,read> rebuilt:array<u32>;
 @group(0) @binding(5) var<storage,read_write> candidates:array<u32>;
@@ -113,7 +145,9 @@ export function lightingCacheCompute(common: string, shape: readonly number[], e
 @group(0) @binding(10) var<storage,read_write> regions:array<u32>;
 fn rebuildChunk(k:u32)->bool{return force.x!=0u||rebuilt[k]!=0u;}
 `;
-  const candidates = declarations + `
+  const candidates =
+    declarations +
+    `
 var<workgroup> candidateLength:atomic<u32>;
 @compute @workgroup_size(64) fn candidatesMain(@builtin(local_invocation_index) lane:u32,@builtin(workgroup_id) group:vec3u){
  let k=group.x;let changed=rebuildChunk(k);
@@ -127,7 +161,9 @@ var<workgroup> candidateLength:atomic<u32>;
  workgroupBarrier();
  if(lane==0u&&changed){atomicStore(&candidateCounts[k],atomicLoad(&candidateLength));}
 }`;
-  const emitters = declarations + `
+  const emitters =
+    declarations +
+    `
 var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgroup> amount:array<u32,64>;
 @compute @workgroup_size(64) fn emittersMain(@builtin(local_invocation_index) lane:u32,@builtin(workgroup_id) group:vec3u){
  let k=group.x;var selected=0xffffffffu;var heat=0u;var count=0u;
@@ -144,7 +180,9 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  }
 }`;
   const leaf = layout.levels[0];
-  const leaves = declarations + `
+  const leaves =
+    declarations +
+    `
 @compute @workgroup_size(64) fn leavesMain(@builtin(global_invocation_id) id:vec3u){
  if(id.x>=${leaf.count}u){return;}let dims=${vector(leaf.shape)};
  let q=vec3u(id.x%dims.x,(id.x/dims.x)%dims.y,id.x/(dims.x*dims.y));let base=q*4u;
@@ -163,7 +201,9 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
 }`;
   const parents = layout.levels.slice(1).map((level, i) => {
     const previous = layout.levels[i];
-    return declarations + `
+    return (
+      declarations +
+      `
 @compute @workgroup_size(64) fn parentsMain(@builtin(global_invocation_id) id:vec3u){
  if(id.x>=${level.count}u||atomicLoad(&cacheFlags[0])==0u){return;}
  let dims=${vector(level.shape)};let prev=${vector(previous.shape)};
@@ -172,9 +212,12 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
   let q=base+vec3u(x,y,z);if(all(q<prev)){mask|=hierarchy[${previous.offset}u+q.x+prev.x*(q.y+prev.y*q.z)];}
  }}}
  hierarchy[${level.offset}u+id.x]=mask;
-}`;
+}`
+    );
   });
-  const regions = declarations + `
+  const regions =
+    declarations +
+    `
 @compute @workgroup_size(64) fn regionsMain(@builtin(global_invocation_id) id:vec3u){
  if(id.x>=${layout.regionCount}u||atomicLoad(&cacheFlags[1])==0u){return;}
  let dims=${vector(layout.regionShape)};let q=vec3u(id.x%dims.x,(id.x/dims.x)%dims.y,id.x/(dims.x*dims.y));
@@ -193,67 +236,155 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  }
  regions[base]=count.x;regions[base+${LIGHT_REGION_CAPACITY + 1}u]=count.y;
 }`;
-  return {candidates, emitters, leaves, parents, regions, layout};
+  return { candidates, emitters, leaves, parents, regions, layout };
 }
 
-export async function makeLightingCache(device: GPUDevice, common: string, shape: readonly number[], edge: number, lights: GPUBuffer, rebuilt: GPUBuffer) {
-  const shader = lightingCacheCompute(common, shape, edge), layout = shader.layout;
-  const chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3, owned: GPUBuffer[] = [];
+export async function makeLightingCache(
+  device: GPUDevice,
+  common: string,
+  shape: readonly number[],
+  edge: number,
+  lights: GPUBuffer,
+  rebuilt: GPUBuffer,
+) {
+  const shader = lightingCacheCompute(common, shape, edge),
+    layout = shader.layout;
+  const chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3,
+    owned: GPUBuffer[] = [];
   const buffer = (size: number, usage: GPUBufferUsageFlags = GPUBufferUsage.STORAGE) => {
-    const b = device.createBuffer({size, usage}); owned.push(b); return b;
+    const b = device.createBuffer({ size, usage });
+    owned.push(b);
+    return b;
   };
   try {
-    const candidates = buffer(chunks * edge ** 3 * 4), counts = buffer(chunks * 4);
+    const candidates = buffer(chunks * edge ** 3 * 4),
+      counts = buffer(chunks * 4);
     const cacheFlags = buffer(8, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
     // Immutable per-mode uniforms: later encodes must not overwrite the force
     // bit seen by an earlier command buffer that has not been submitted yet.
     const steady = buffer(16, GPUBufferUsage.UNIFORM);
     const forced = buffer(16, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
     device.queue.writeBuffer(forced, 0, new Uint32Array([1, 0, 0, 0]));
-    const hierarchy = buffer(layout.hierarchyWords * 4), regions = buffer(layout.regionCount * layout.regionStride * 4);
-    const resources = new Map<number, GPUBuffer>([[3, lights], [4, rebuilt], [5, candidates], [6, counts], [7, cacheFlags], [9, hierarchy], [10, regions]]);
-    async function pipeline(code: string, entryPoint: string, bindings: number[], dispatch: number) {
-      const module = device.createShaderModule({code});
-      const errors = (await module.getCompilationInfo()).messages.filter(m => m.type === 'error');
-      if (errors.length) throw Error(errors.map(m => `${m.lineNum}: ${m.message}`).join('\n'));
-      return {pipeline: await device.createComputePipelineAsync({layout: 'auto', compute: {module, entryPoint}}), bindings, dispatch, groups: new Map<GPUBuffer, Map<GPUBuffer, GPUBindGroup>>()};
+    const hierarchy = buffer(layout.hierarchyWords * 4),
+      regions = buffer(layout.regionCount * layout.regionStride * 4);
+    const resources = new Map<number, GPUBuffer>([
+      [3, lights],
+      [4, rebuilt],
+      [5, candidates],
+      [6, counts],
+      [7, cacheFlags],
+      [9, hierarchy],
+      [10, regions],
+    ]);
+    async function pipeline(
+      code: string,
+      entryPoint: string,
+      bindings: number[],
+      dispatch: number,
+    ) {
+      const module = device.createShaderModule({ code });
+      const errors = (await module.getCompilationInfo()).messages.filter((m) => m.type === 'error');
+      if (errors.length) throw Error(errors.map((m) => `${m.lineNum}: ${m.message}`).join('\n'));
+      return {
+        pipeline: await device.createComputePipelineAsync({
+          layout: 'auto',
+          compute: { module, entryPoint },
+        }),
+        bindings,
+        dispatch,
+        groups: new Map<GPUBuffer, Map<GPUBuffer, GPUBindGroup>>(),
+      };
     }
     const stages = [
       await pipeline(shader.candidates, 'candidatesMain', [0, 4, 5, 6, 8], chunks),
       await pipeline(shader.emitters, 'emittersMain', [0, 3, 5, 6, 7, 8], chunks),
-      await pipeline(shader.leaves, 'leavesMain', [0, 4, 7, 8, 9], Math.ceil(layout.levels[0].count / 64)),
+      await pipeline(
+        shader.leaves,
+        'leavesMain',
+        [0, 4, 7, 8, 9],
+        Math.ceil(layout.levels[0].count / 64),
+      ),
     ];
-    for (let i = 0; i < shader.parents.length; i++) stages.push(await pipeline(shader.parents[i], 'parentsMain', [7, 9], Math.ceil(layout.levels[i + 1].count / 64)));
-    stages.push(await pipeline(shader.regions, 'regionsMain', [3, 7, 10], Math.ceil(layout.regionCount / 64)));
-    let invalidate = true, closed = false;
+    for (let i = 0; i < shader.parents.length; i++)
+      stages.push(
+        await pipeline(
+          shader.parents[i],
+          'parentsMain',
+          [7, 9],
+          Math.ceil(layout.levels[i + 1].count / 64),
+        ),
+      );
+    stages.push(
+      await pipeline(shader.regions, 'regionsMain', [3, 7, 10], Math.ceil(layout.regionCount / 64)),
+    );
+    let invalidate = true,
+      closed = false;
     return {
-      hierarchy, regions,
-      invalidate() { if (closed) throw Error('Lighting cache is closed.'); invalidate = true; },
-      encode(encoder: GPUCommandEncoder, grid: GPUBuffer, descriptor: GPUComputePassDescriptor = {}, after?: (pass: GPUComputePassEncoder) => void) {
+      hierarchy,
+      regions,
+      invalidate() {
+        if (closed) throw Error('Lighting cache is closed.');
+        invalidate = true;
+      },
+      encode(
+        encoder: GPUCommandEncoder,
+        grid: GPUBuffer,
+        descriptor: GPUComputePassDescriptor = {},
+        after?: (pass: GPUComputePassEncoder) => void,
+      ) {
         if (closed) throw Error('Lighting cache is closed.');
         const force = invalidate ? forced : steady;
         try {
           // Construct bind groups before opening the pass; a synchronous setup
           // failure must leave invalidation armed for a retry.
-          const groups = stages.map(stage => {
+          const groups = stages.map((stage) => {
             let byForce = stage.groups.get(grid);
-            if (!byForce) { byForce = new Map(); stage.groups.set(grid, byForce); }
+            if (!byForce) {
+              byForce = new Map();
+              stage.groups.set(grid, byForce);
+            }
             let group = byForce.get(force);
-            if (!group) { group = device.createBindGroup({layout: stage.pipeline.getBindGroupLayout(0), entries: stage.bindings.map(binding => ({binding, resource: {buffer: binding === 0 ? grid : binding === 8 ? force : resources.get(binding)!}}))}); byForce.set(force, group); }
+            if (!group) {
+              group = device.createBindGroup({
+                layout: stage.pipeline.getBindGroupLayout(0),
+                entries: stage.bindings.map((binding) => ({
+                  binding,
+                  resource: {
+                    buffer: binding === 0 ? grid : binding === 8 ? force : resources.get(binding)!,
+                  },
+                })),
+              });
+              byForce.set(force, group);
+            }
             return group;
           });
           encoder.clearBuffer(cacheFlags);
           const pass = encoder.beginComputePass(descriptor);
           try {
-            stages.forEach((stage, i) => { pass.setPipeline(stage.pipeline); pass.setBindGroup(0, groups[i]); pass.dispatchWorkgroups(stage.dispatch); });
+            stages.forEach((stage, i) => {
+              pass.setPipeline(stage.pipeline);
+              pass.setBindGroup(0, groups[i]);
+              pass.dispatchWorkgroups(stage.dispatch);
+            });
             after?.(pass);
-          } finally { pass.end(); }
+          } finally {
+            pass.end();
+          }
           invalidate = false;
         } catch (error) {
-          invalidate = true; throw error;
+          invalidate = true;
+          throw error;
         }
       },
-      close() { if (closed) return; closed = true; owned.forEach(b => b.destroy()); stages.forEach(s => s.groups.clear()); },
+      close() {
+        if (closed) return;
+        closed = true;
+        owned.forEach((b) => b.destroy());
+        stages.forEach((s) => s.groups.clear());
+      },
     };
-  } catch (error) { owned.forEach(b => b.destroy()); throw error; }
+  } catch (error) {
+    owned.forEach((b) => b.destroy());
+    throw error;
+  }
 }

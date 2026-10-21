@@ -1,21 +1,52 @@
 /** CPU backend for the versioned State Space field contract. */
 export * from './generated/materials.js';
 import {
-  MAT, PHASE, MAT_PHASE, MAT_THERMAL, MATERIAL_NAMES, THERMAL_SHIFT,
-  KINETIC_X_SHIFT, KINETIC_Y_SHIFT, PHASE_SHIFT, FLAGS_SHIFT,
-  SCHEMA_VERSION, RULES_VERSION,
+  MAT,
+  PHASE,
+  MAT_PHASE,
+  MAT_THERMAL,
+  MATERIAL_NAMES,
+  THERMAL_SHIFT,
+  KINETIC_X_SHIFT,
+  KINETIC_Y_SHIFT,
+  PHASE_SHIFT,
+  FLAGS_SHIFT,
+  SCHEMA_VERSION,
+  RULES_VERSION,
 } from './generated/materials.js';
 import { runCpuTick } from './cpu_physics.js';
 import { stateCopyTargets } from './validation.js';
-import { seedState, temperatureQ, thermalView, validateEnergyState, MAX_ENERGY_Q, energyLedger as inspectEnergy } from './thermal.js';
-import { ANCHOR, FRESH, INTEGRITY_MASK, BOND_BITS, createPhysicsState, normalizeBonds, rulesForRegistry, planStructure,
-  type StructuralState, type StructuralPlan } from './structure.js';
+import {
+  seedState,
+  temperatureQ,
+  thermalView,
+  validateEnergyState,
+  MAX_ENERGY_Q,
+  energyLedger as inspectEnergy,
+} from './thermal.js';
+import {
+  ANCHOR,
+  FRESH,
+  INTEGRITY_MASK,
+  BOND_BITS,
+  createPhysicsState,
+  normalizeBonds,
+  rulesForRegistry,
+  planStructure,
+  type StructuralState,
+  type StructuralPlan,
+} from './structure.js';
 import { DEFAULT_REGISTRY, requireRegistry, type MaterialRegistry } from './registry.js';
 import { validateCompiledStructure } from './structure_compiled.js';
 import { inspectPass, type PassReport, type StepOptions } from './inspection.js';
 
 export type MaterialId = (typeof MAT)[keyof typeof MAT];
-import { checkedInteger, validateDimensions, validateSnapshot, type PackedSnapshot } from './contracts.js';
+import {
+  checkedInteger,
+  validateDimensions,
+  validateSnapshot,
+  type PackedSnapshot,
+} from './contracts.js';
 
 export interface VoxelState {
   material: number;
@@ -71,7 +102,14 @@ export interface StateSpaceField {
   setAnchor(x: number, y: number, anchored?: boolean): void;
   setIntegrity(x: number, y: number, integrity: number, options?: { weld?: boolean }): void;
   inspectStructure(): StructuralPlan;
-  paintCircle(x: number, y: number, radius: number, material: number, thermal?: number, flags?: number): void;
+  paintCircle(
+    x: number,
+    y: number,
+    radius: number,
+    material: number,
+    thermal?: number,
+    flags?: number,
+  ): void;
   sample(x: number, y: number): FieldSample;
   materialAt(x: number, y: number): number;
   thermalAt(x: number, y: number): number;
@@ -80,7 +118,14 @@ export interface StateSpaceField {
   restore(snapshot: PackedSnapshot): void;
 }
 
-export function packVoxel(material: number, thermal = defaultThermal(material), kineticX = 0, kineticY = 0, phase = defaultPhase(material), flags = 0): number {
+export function packVoxel(
+  material: number,
+  thermal = defaultThermal(material),
+  kineticX = 0,
+  kineticY = 0,
+  phase = defaultPhase(material),
+  flags = 0,
+): number {
   checkedInteger(material, 0, 255, 'material');
   checkedInteger(thermal, 0, 255, 'thermal');
   checkedInteger(kineticX, -8, 7, 'kineticX');
@@ -88,13 +133,14 @@ export function packVoxel(material: number, thermal = defaultThermal(material), 
   checkedInteger(phase, 0, 15, 'phase');
   checkedInteger(flags, 0, 15, 'flags');
   return (
-    (material & 0xff)
-    | ((thermal & 0xff) << THERMAL_SHIFT)
-    | ((kineticX & 0xf) << KINETIC_X_SHIFT)
-    | ((kineticY & 0xf) << KINETIC_Y_SHIFT)
-    | ((phase & 0xf) << PHASE_SHIFT)
-    | ((flags & 0xf) << FLAGS_SHIFT)
-  ) >>> 0;
+    ((material & 0xff) |
+      ((thermal & 0xff) << THERMAL_SHIFT) |
+      ((kineticX & 0xf) << KINETIC_X_SHIFT) |
+      ((kineticY & 0xf) << KINETIC_Y_SHIFT) |
+      ((phase & 0xf) << PHASE_SHIFT) |
+      ((flags & 0xf) << FLAGS_SHIFT)) >>>
+    0
+  );
 }
 
 export function unpackVoxel(packed: number): VoxelState {
@@ -122,7 +168,12 @@ export function materialName(material: number): string {
   return MATERIAL_NAMES[material] ?? `material-${material}`;
 }
 
-export function createStateSpaceField(width: number, height: number, fillMaterial: number = MAT.AIR, registry: MaterialRegistry = DEFAULT_REGISTRY): StateSpaceField {
+export function createStateSpaceField(
+  width: number,
+  height: number,
+  fillMaterial: number = MAT.AIR,
+  registry: MaterialRegistry = DEFAULT_REGISTRY,
+): StateSpaceField {
   return new CpuStateSpaceField(width, height, fillMaterial, registry);
 }
 
@@ -148,7 +199,11 @@ export class FieldState {
     this.width = width;
     this.height = height;
     this.registry = registry;
-    Object.defineProperties(this, { width: { writable: false }, height: { writable: false }, registry: { writable: false } });
+    Object.defineProperties(this, {
+      width: { writable: false },
+      height: { writable: false },
+      registry: { writable: false },
+    });
     this.coldTable = registry.coldTable();
     this.cells = new Uint32Array(width * height);
     this.energies = new Uint32Array(width * height);
@@ -170,9 +225,18 @@ export class FieldState {
     this.closed = true;
   }
 
-  get grid(): Uint32Array { this.ensureAvailable(false); return this.cells.slice(); }
-  get energyQ(): Uint32Array { this.ensureAvailable(false); return this.energies.slice(); }
-  get structure(): Uint32Array { this.ensureAvailable(false); return this.bonds.slice(); }
+  get grid(): Uint32Array {
+    this.ensureAvailable(false);
+    return this.cells.slice();
+  }
+  get energyQ(): Uint32Array {
+    this.ensureAvailable(false);
+    return this.energies.slice();
+  }
+  get structure(): Uint32Array {
+    this.ensureAvailable(false);
+    return this.bonds.slice();
+  }
 
   /** Copy the committed coordinates into independent caller-owned storage. */
   copyStateInto(target: StructuralState): number {
@@ -193,8 +257,12 @@ export class FieldState {
 
   energyBalance() {
     const currentQ = this.energyLedger().totalQ;
-    return { initialQ: this.initialEnergyQ, externalQ: this.editEnergyQ, currentQ,
-      driftQ: currentQ - this.initialEnergyQ - this.editEnergyQ };
+    return {
+      initialQ: this.initialEnergyQ,
+      externalQ: this.editEnergyQ,
+      currentQ,
+      driftQ: currentQ - this.initialEnergyQ - this.editEnergyQ,
+    };
   }
 
   get tick(): number {
@@ -205,7 +273,14 @@ export class FieldState {
   clear(material: number = MAT.AIR): void {
     this.ensureAvailable();
     const record = this.registry.material(material);
-    const state = createPhysicsState(new Uint32Array(this.width * this.height).fill(packVoxel(material, record.default_thermal, 0, 0, record.properties.default_phase)), this.width, this.height, this.registry);
+    const state = createPhysicsState(
+      new Uint32Array(this.width * this.height).fill(
+        packVoxel(material, record.default_thermal, 0, 0, record.properties.default_phase),
+      ),
+      this.width,
+      this.height,
+      this.registry,
+    );
     this.stateChanged();
     this.cells = state.grid;
     this.energies = state.energyQ;
@@ -224,7 +299,11 @@ export class FieldState {
     checkedInteger(dose, 0, 255, 'thermal');
     checkedInteger(flags, 0, 15, 'flags');
     if (!this.inside(x, y)) return;
-    const state = seedState(Uint32Array.of(packVoxel(material, dose, 0, 0, record.properties.default_phase, flags)), this.coldTable, this.registry);
+    const state = seedState(
+      Uint32Array.of(packVoxel(material, dose, 0, 0, record.properties.default_phase, flags)),
+      this.coldTable,
+      this.registry,
+    );
     const index = this.index(x, y);
     this.stateChanged();
     this.editEnergyQ += BigInt(state.energyQ[0]) - BigInt(this.energies[index]);
@@ -261,7 +340,13 @@ export class FieldState {
   }
 
   private normalizeStructure(): void {
-    this.bonds = normalizeBonds(this.cells, this.bonds, this.width, this.height, rulesForRegistry(this.registry));
+    this.bonds = normalizeBonds(
+      this.cells,
+      this.bonds,
+      this.width,
+      this.height,
+      rulesForRegistry(this.registry),
+    );
   }
 
   setAnchor(x: number, y: number, anchored = true): void {
@@ -271,7 +356,8 @@ export class FieldState {
     if (typeof anchored !== 'boolean') throw new Error('anchored must be a boolean.');
     if (!this.inside(x, y)) return;
     const index = this.index(x, y);
-    if (!rulesForRegistry(this.registry).eligible(this.cells[index])) throw new Error('Only cohesive solid/frozen cells can be anchored.');
+    if (!rulesForRegistry(this.registry).eligible(this.cells[index]))
+      throw new Error('Only cohesive solid/frozen cells can be anchored.');
     this.stateChanged();
     this.bonds[index] = (this.bonds[index] & ~ANCHOR) | (anchored ? ANCHOR : 0);
   }
@@ -281,32 +367,69 @@ export class FieldState {
     checkedInteger(x, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 'x');
     checkedInteger(y, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 'y');
     checkedInteger(integrity, 0, INTEGRITY_MASK, 'integrity');
-    if (options.weld !== undefined && typeof options.weld !== 'boolean') throw new Error('weld must be a boolean.');
+    if (options.weld !== undefined && typeof options.weld !== 'boolean')
+      throw new Error('weld must be a boolean.');
     if (!this.inside(x, y)) return;
     const index = this.index(x, y);
-    if (!rulesForRegistry(this.registry).eligible(this.cells[index])) throw new Error('Only cohesive solid/frozen cells can have integrity.');
+    if (!rulesForRegistry(this.registry).eligible(this.cells[index]))
+      throw new Error('Only cohesive solid/frozen cells can have integrity.');
     this.stateChanged();
-    this.bonds[index] = (this.bonds[index] & ~INTEGRITY_MASK) | integrity | (options.weld && integrity ? FRESH : 0);
+    this.bonds[index] =
+      (this.bonds[index] & ~INTEGRITY_MASK) | integrity | (options.weld && integrity ? FRESH : 0);
     this.normalizeStructure();
   }
 
   inspectStructure(): StructuralPlan {
     this.ensureAvailable(false);
-    return planStructure({ grid: this.cells, energyQ: this.energies, structure: this.bonds }, this.width, this.height, rulesForRegistry(this.registry));
+    return planStructure(
+      { grid: this.cells, energyQ: this.energies, structure: this.bonds },
+      this.width,
+      this.height,
+      rulesForRegistry(this.registry),
+    );
   }
 
-  paintCircle(x: number, y: number, radius: number, material: number, thermal?: number, flags = 0): void {
+  paintCircle(
+    x: number,
+    y: number,
+    radius: number,
+    material: number,
+    thermal?: number,
+    flags = 0,
+  ): void {
     this.ensureAvailable();
     for (const value of [x, y, radius]) {
-      if (!Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER) throw new Error('Invalid paint geometry.');
+      if (!Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER)
+        throw new Error('Invalid paint geometry.');
     }
     if (radius < 0) throw new Error('Paint radius must be nonnegative.');
     const record = this.registry.material(material);
-    const state = seedState(Uint32Array.of(packVoxel(material, thermal === undefined ? record.default_thermal : thermal, 0, 0, record.properties.default_phase, flags)), this.coldTable, this.registry);
+    const state = seedState(
+      Uint32Array.of(
+        packVoxel(
+          material,
+          thermal === undefined ? record.default_thermal : thermal,
+          0,
+          0,
+          record.properties.default_phase,
+          flags,
+        ),
+      ),
+      this.coldTable,
+      this.registry,
+    );
     const r2 = radius * radius;
     this.stateChanged();
-    for (let py = Math.max(0, Math.floor(y - radius)); py <= Math.min(this.height - 1, Math.ceil(y + radius)); py += 1) {
-      for (let px = Math.max(0, Math.floor(x - radius)); px <= Math.min(this.width - 1, Math.ceil(x + radius)); px += 1) {
+    for (
+      let py = Math.max(0, Math.floor(y - radius));
+      py <= Math.min(this.height - 1, Math.ceil(y + radius));
+      py += 1
+    ) {
+      for (
+        let px = Math.max(0, Math.floor(x - radius));
+        px <= Math.min(this.width - 1, Math.ceil(x + radius));
+        px += 1
+      ) {
         const dx = px - x;
         const dy = py - y;
         if (dx * dx + dy * dy <= r2) {
@@ -314,7 +437,9 @@ export class FieldState {
           this.editEnergyQ += BigInt(state.energyQ[0]) - BigInt(this.energies[index]);
           this.cells[index] = state.grid[0];
           this.energies[index] = state.energyQ[0];
-          this.bonds[index] = rulesForRegistry(this.registry).eligible(this.cells[index]) ? INTEGRITY_MASK | FRESH : 0;
+          this.bonds[index] = rulesForRegistry(this.registry).eligible(this.cells[index])
+            ? INTEGRITY_MASK | FRESH
+            : 0;
         }
       }
     }
@@ -333,9 +458,13 @@ export class FieldState {
       temperatureQ: temperatureQ(this.cells[index], this.energies[index], this.coldTable),
       phase: voxel.phase,
       flags: voxel.flags,
-      pressureQ: this.bonds[index] >>> 16, velocityX: voxel.kineticX, velocityY: voxel.kineticY,
-      structure: this.bonds[index], integrity: this.bonds[index] & INTEGRITY_MASK,
-      anchored: (this.bonds[index] & ANCHOR) !== 0, bonds: this.bonds[index] & BOND_BITS.reduce((a, b) => a | b, 0),
+      pressureQ: this.bonds[index] >>> 16,
+      velocityX: voxel.kineticX,
+      velocityY: voxel.kineticY,
+      structure: this.bonds[index],
+      integrity: this.bonds[index] & INTEGRITY_MASK,
+      anchored: (this.bonds[index] & ANCHOR) !== 0,
+      bonds: this.bonds[index] & BOND_BITS.reduce((a, b) => a | b, 0),
     };
   }
 
@@ -363,14 +492,24 @@ export class FieldState {
 
   packedSnapshot(): PackedSnapshot {
     this.ensureAvailable(false);
-    return { schemaVersion: SCHEMA_VERSION, rulesVersion: RULES_VERSION, materialCatalogHash: this.registry.hash,
-      width: this.width, height: this.height, tick: this.tickCount, packedCells: Array.from(this.cells), energyQ: Array.from(this.energies), structure: Array.from(this.bonds) };
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      rulesVersion: RULES_VERSION,
+      materialCatalogHash: this.registry.hash,
+      width: this.width,
+      height: this.height,
+      tick: this.tickCount,
+      packedCells: Array.from(this.cells),
+      energyQ: Array.from(this.energies),
+      structure: Array.from(this.bonds),
+    };
   }
 
   restore(snapshot: PackedSnapshot): void {
     this.ensureAvailable();
     const state = validateSnapshot(snapshot, this.registry);
-    if (snapshot.width !== this.width || snapshot.height !== this.height) throw new Error('Snapshot dimensions differ from the field.');
+    if (snapshot.width !== this.width || snapshot.height !== this.height)
+      throw new Error('Snapshot dimensions differ from the field.');
     this.stateChanged();
     this.cells = state.grid;
     this.energies = state.energyQ;
@@ -403,32 +542,47 @@ export class FieldState {
   }
 
   private clampX(x: number): number {
-    if (!Number.isFinite(x) || Math.abs(x) > Number.MAX_SAFE_INTEGER) throw new Error('Sample x must be finite and within the safe numeric range.');
+    if (!Number.isFinite(x) || Math.abs(x) > Number.MAX_SAFE_INTEGER)
+      throw new Error('Sample x must be finite and within the safe numeric range.');
     return Math.max(0, Math.min(this.width - 1, Math.floor(x)));
   }
 
   private clampY(y: number): number {
-    if (!Number.isFinite(y) || Math.abs(y) > Number.MAX_SAFE_INTEGER) throw new Error('Sample y must be finite and within the safe numeric range.');
+    if (!Number.isFinite(y) || Math.abs(y) > Number.MAX_SAFE_INTEGER)
+      throw new Error('Sample y must be finite and within the safe numeric range.');
     return Math.max(0, Math.min(this.height - 1, Math.floor(y)));
   }
-
 }
 
 class CpuStateSpaceField extends FieldState implements StateSpaceField {
   step(ticks = 1, options: StepOptions = {}): readonly PassReport[] {
     this.ensureAvailable();
     checkedInteger(ticks, 0, Number.MAX_SAFE_INTEGER - this.tickCount, 'ticks');
-    if (options.inspect !== undefined && typeof options.inspect !== 'boolean') throw new Error('inspect must be a boolean.');
+    if (options.inspect !== undefined && typeof options.inspect !== 'boolean')
+      throw new Error('inspect must be a boolean.');
     let state = { grid: this.cells, energyQ: this.energies, structure: this.bonds };
     const reports: PassReport[] = [];
     for (let index = 0; index < ticks; index += 1) {
       let before = state;
-      const observer = options.inspect ? (passId: string, after: StructuralState, plan?: StructuralPlan) => {
-        reports.push(inspectPass(before, after, this.coldTable, this.tickCount + index, passId, plan));
-        before = after;
-      } : undefined;
+      const observer = options.inspect
+        ? (passId: string, after: StructuralState, plan?: StructuralPlan) => {
+            reports.push(
+              inspectPass(before, after, this.coldTable, this.tickCount + index, passId, plan),
+            );
+            before = after;
+          }
+        : undefined;
       // Tick 0 reads the committed state; later ticks read unvalidated engine output.
-      state = runCpuTick(state, this.width, this.height, this.coldTable, this.tickCount + index, observer, this.registry, index === 0);
+      state = runCpuTick(
+        state,
+        this.width,
+        this.height,
+        this.coldTable,
+        this.tickCount + index,
+        observer,
+        this.registry,
+        index === 0,
+      );
     }
     this.commitState(state, this.tickCount + ticks);
     return Object.freeze(reports);

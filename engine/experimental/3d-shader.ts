@@ -96,7 +96,9 @@ fn spread(s:u32,t:u32)->bool{return liquid(cells[s])&&gas(cells[t])&&prop(cells[
 `;
 
 /** Bounded edits/readback, separate from the immutable physics passes. */
-export const ACCESS_SHADER = VOLUME_SHADER.slice(0, VOLUME_SHADER.indexOf('@compute')) + `
+export const ACCESS_SHADER =
+  VOLUME_SHADER.slice(0, VOLUME_SHADER.indexOf('@compute')) +
+  `
 @group(0) @binding(6) var<storage, read> edits:array<vec4u>;
 @group(0) @binding(7) var<storage, read_write> results:array<u32>;
 @compute @workgroup_size(64) fn edit(@builtin(global_invocation_id) id:vec3u){
@@ -113,9 +115,9 @@ export const ACCESS_SHADER = VOLUME_SHADER.slice(0, VOLUME_SHADER.indexOf('@comp
 `;
 
 /** Storage partitioning changes addresses only; pair ownership and hashing stay global. */
-export function chunkShaders(edge:number) {
-  if (!edge) return {physics:VOLUME_SHADER,access:ACCESS_SHADER};
-  const mapping=`
+export function chunkShaders(edge: number) {
+  if (!edge) return { physics: VOLUME_SHADER, access: ACCESS_SHADER };
+  const mapping = `
 const EDGE=${edge}u;
 fn linear(c:vec3i)->u32{return u32(c.x)+p.shape.x*(u32(c.y)+p.shape.y*u32(c.z));}
 fn index(c:vec3i)->u32{
@@ -127,12 +129,19 @@ fn coordinate(i:u32)->vec3i{
  return vec3i(vec3u(k%n.x,(k/n.x)%n.y,k/(n.x*n.y))*EDGE+vec3u(local%EDGE,(local/EDGE)%EDGE,local/(EDGE*EDGE)));
 }
 `;
-  const translate=(code:string)=>code
-    .replace('fn index(c:vec3i)->u32{return u32(c.x)+p.shape.x*(u32(c.y)+p.shape.y*u32(c.z));}',mapping)
-    .replace('let c=vec3i(vec3u(i%p.shape.x,(i/p.shape.x)%p.shape.y,i/(p.shape.x*p.shape.y)));','let c=coordinate(i);')
-    .replace('var hash=ai*374761393u','var hash=linear(a)*374761393u')
-    .replace('!rise(s,s-p.shape.x)','!rise(s,index(select(b,a,choose)+vec3i(0,-1,0)))');
-  const dirty=`
+  const translate = (code: string) =>
+    code
+      .replace(
+        'fn index(c:vec3i)->u32{return u32(c.x)+p.shape.x*(u32(c.y)+p.shape.y*u32(c.z));}',
+        mapping,
+      )
+      .replace(
+        'let c=vec3i(vec3u(i%p.shape.x,(i/p.shape.x)%p.shape.y,i/(p.shape.x*p.shape.y)));',
+        'let c=coordinate(i);',
+      )
+      .replace('var hash=ai*374761393u', 'var hash=linear(a)*374761393u')
+      .replace('!rise(s,s-p.shape.x)', '!rise(s,index(select(b,a,choose)+vec3i(0,-1,0)))');
+  const dirty = `
 @group(0) @binding(6) var<storage,read_write> dirty:array<atomic<u32>>;
 fn mark(c:vec3i){
  let n=p.shape.xyz/EDGE;let k=vec3u(c)/EDGE;
@@ -148,7 +157,14 @@ fn changed(c:vec3i){
  }
 }
 `;
-  const physics=translate(VOLUME_SHADER).replace('@compute @workgroup_size(64) fn main',dirty+'\n@compute @workgroup_size(64) fn main')
-    .replace('nextCells[i]=outV;nextEnergies[i]=outQ;','if((v&255u)!=(outV&255u)){changed(coordinate(i));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;');
-  return {physics,access:translate(ACCESS_SHADER)};
+  const physics = translate(VOLUME_SHADER)
+    .replace(
+      '@compute @workgroup_size(64) fn main',
+      dirty + '\n@compute @workgroup_size(64) fn main',
+    )
+    .replace(
+      'nextCells[i]=outV;nextEnergies[i]=outQ;',
+      'if((v&255u)!=(outV&255u)){changed(coordinate(i));}\n  nextCells[i]=outV;nextEnergies[i]=outQ;',
+    );
+  return { physics, access: translate(ACCESS_SHADER) };
 }

@@ -1,253 +1,524 @@
 // Public SDK integration: zero-horizon transactions, no physical ticks.
 import assert from 'node:assert/strict';
-import { createStateSpaceStructuralWorld3D, MAT } from 'state-space-engine/experimental/3d/structural-world';
-import { MOTION_PATH_RULES_3D, MOTION_PATH_LIMITS_3D, readMotionPaths3D } from 'state-space-engine/experimental/3d/structural-world';
-import { createTacticalSession3D, CHANGE_REPORT_RULES_VERSION_3D, MOTION_TRACE_RULES_3D, MOTION_JOURNAL_RULES_3D, MOTION_TRACE_LIMITS_3D, ACTION_JOURNAL_RULES_3D, ACTION_JOURNAL_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTerrainBody3D, readTerrainBody3D, stepTerrainBody3D, TERRAIN_BODY_RULES_VERSION_3D, TERRAIN_BODY_LIMITS_3D, EXPOSURE_RULES_VERSION_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { PATH_JOURNAL_RULES_3D, PATH_JOURNAL_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTerrainMotion3D, TERRAIN_MOTION_RULES_3D, TERRAIN_MOTION_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTerrainDisplacement3D, TERRAIN_DISPLACEMENT_RULES_3D, TERRAIN_DISPLACEMENT_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { translateStructuralRegionWithPaths3D, TRANSLATION_PATH_RULES_3D, TRANSLATION_PATH_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTranslationDisplacement3D, TRANSLATION_DISPLACEMENT_RULES_3D, TRANSLATION_DISPLACEMENT_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTerrainBodyGroup3D, createTranslationBodyGroup3D, TERRAIN_BODY_GROUP_RULES_3D, TERRAIN_BODY_GROUP_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTranslatedActorGroup3D, TERRAIN_ACTOR_GROUP_RULES_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTacticalPreviewQueue3D, TACTICAL_PREVIEW_RULES_3D, TACTICAL_PREVIEW_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createTacticalWorkerHost3D, createTacticalWorkerClient3D, TACTICAL_WORKER_PROTOCOL_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { TACTICAL_QUERY_BATCH_RULES_3D, TACTICAL_QUERY_BATCH_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { moveTerrainActors3D, ACTOR_MOVEMENT_RULES_3D, ACTOR_MOVEMENT_LIMITS_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { createMaterialTransport3D, readMaterialTransport3D, applyMaterialTransport3D, MATERIAL_TRANSPORT_RULES_3D } from 'state-space-engine/experimental/3d/tactical-session';
-import { captureMaterialTransportMemory3D, restoreMaterialTransportMemory3D, prepareMaterialTransport3D } from 'state-space-engine/experimental/3d/tactical-session';
-const world = createStateSpaceStructuralWorld3D({width:4,height:4,depth:4,chunkSize:4});
-world.setCell(1,1,1,MAT.STONE,160); world.setIntegrity(1,1,1,73);
+import {
+  createStateSpaceStructuralWorld3D,
+  MAT,
+} from 'state-space-engine/experimental/3d/structural-world';
+import {
+  MOTION_PATH_RULES_3D,
+  MOTION_PATH_LIMITS_3D,
+  readMotionPaths3D,
+} from 'state-space-engine/experimental/3d/structural-world';
+import {
+  createTacticalSession3D,
+  CHANGE_REPORT_RULES_VERSION_3D,
+  MOTION_TRACE_RULES_3D,
+  MOTION_JOURNAL_RULES_3D,
+  MOTION_TRACE_LIMITS_3D,
+  ACTION_JOURNAL_RULES_3D,
+  ACTION_JOURNAL_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTerrainBody3D,
+  readTerrainBody3D,
+  stepTerrainBody3D,
+  TERRAIN_BODY_RULES_VERSION_3D,
+  TERRAIN_BODY_LIMITS_3D,
+  EXPOSURE_RULES_VERSION_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  PATH_JOURNAL_RULES_3D,
+  PATH_JOURNAL_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTerrainMotion3D,
+  TERRAIN_MOTION_RULES_3D,
+  TERRAIN_MOTION_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTerrainDisplacement3D,
+  TERRAIN_DISPLACEMENT_RULES_3D,
+  TERRAIN_DISPLACEMENT_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  translateStructuralRegionWithPaths3D,
+  TRANSLATION_PATH_RULES_3D,
+  TRANSLATION_PATH_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTranslationDisplacement3D,
+  TRANSLATION_DISPLACEMENT_RULES_3D,
+  TRANSLATION_DISPLACEMENT_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTerrainBodyGroup3D,
+  createTranslationBodyGroup3D,
+  TERRAIN_BODY_GROUP_RULES_3D,
+  TERRAIN_BODY_GROUP_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTranslatedActorGroup3D,
+  TERRAIN_ACTOR_GROUP_RULES_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTacticalPreviewQueue3D,
+  TACTICAL_PREVIEW_RULES_3D,
+  TACTICAL_PREVIEW_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createTacticalWorkerHost3D,
+  createTacticalWorkerClient3D,
+  TACTICAL_WORKER_PROTOCOL_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  TACTICAL_QUERY_BATCH_RULES_3D,
+  TACTICAL_QUERY_BATCH_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  moveTerrainActors3D,
+  ACTOR_MOVEMENT_RULES_3D,
+  ACTOR_MOVEMENT_LIMITS_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  createMaterialTransport3D,
+  readMaterialTransport3D,
+  applyMaterialTransport3D,
+  MATERIAL_TRANSPORT_RULES_3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+import {
+  captureMaterialTransportMemory3D,
+  restoreMaterialTransportMemory3D,
+  prepareMaterialTransport3D,
+} from 'state-space-engine/experimental/3d/tactical-session';
+const world = createStateSpaceStructuralWorld3D({ width: 4, height: 4, depth: 4, chunkSize: 4 });
+world.setCell(1, 1, 1, MAT.STONE, 160);
+world.setIntegrity(1, 1, 1, 73);
 const balance = world.energyBalance();
-const flask = createStateSpaceStructuralWorld3D({width:4,height:4,depth:4,chunkSize:4}), storedBalance = flask.energyBalance();
-const session = createTacticalSession3D({worldId:'sdk-world',gameRulesVersion:'sdk-game-1',terrain:world.snapshot(),game:{ap:2,rng:7},reservoirs:[{id:'flask',terrain:flask.snapshot()}],
-  accounting:{initialQ:(balance.initialQ+storedBalance.initialQ).toString(),externalQ:balance.externalQ.toString()}});
-const before = session.snapshot(), branch = session.branch({horizonTicks:0});
-branch.translate({cells:[[1,1,1]],path:[[1,0,0]]});
-branch.hold({id:'lifted-slab',cells:[[2,1,1]],expiresAtTick:2});
-const thermal = branch.addEnergy([{x:2,y:1,z:1,deltaQ:11}]);
-assert.deepEqual([thermal.suppliedQ,thermal.removedQ,thermal.externalQ],['11','0','11']);
-branch.setGame({ap:1,rng:7});
+const flask = createStateSpaceStructuralWorld3D({ width: 4, height: 4, depth: 4, chunkSize: 4 }),
+  storedBalance = flask.energyBalance();
+const session = createTacticalSession3D({
+  worldId: 'sdk-world',
+  gameRulesVersion: 'sdk-game-1',
+  terrain: world.snapshot(),
+  game: { ap: 2, rng: 7 },
+  reservoirs: [{ id: 'flask', terrain: flask.snapshot() }],
+  accounting: {
+    initialQ: (balance.initialQ + storedBalance.initialQ).toString(),
+    externalQ: balance.externalQ.toString(),
+  },
+});
+const before = session.snapshot(),
+  branch = session.branch({ horizonTicks: 0 });
+branch.translate({ cells: [[1, 1, 1]], path: [[1, 0, 0]] });
+branch.hold({ id: 'lifted-slab', cells: [[2, 1, 1]], expiresAtTick: 2 });
+const thermal = branch.addEnergy([{ x: 2, y: 1, z: 1, deltaQ: 11 }]);
+assert.deepEqual([thermal.suppliedQ, thermal.removedQ, thermal.externalQ], ['11', '0', '11']);
+branch.setGame({ ap: 1, rng: 7 });
 await branch.advance(0);
-assert.deepEqual(session.snapshot(),before);
-const preview = branch.inspect(), result = session.commit(branch);
-const {preview: metadata,...candidate} = preview;
-assert.deepEqual(metadata,{base:branch.base,branchId:1,operation:5,horizonTicks:0,completedTicks:0});
-assert.deepEqual(result.snapshot,{...candidate,revision:1});
-assert.throws(()=>session.restore(preview),/fields/);
-assert.equal(result.snapshot.terrain.structure[22],73);
-assert.equal(result.snapshot.schemaVersion,3);
-assert.equal(result.snapshot.rulesVersion,'tactical-session-3');
-assert.deepEqual(result.snapshot.holds,[{id:'lifted-slab',cells:[22],expiresAtTick:2}]);
-assert.equal(result.snapshot.terrain.energyQ[22],before.terrain.energyQ[21]+11);
-assert.equal(result.snapshot.accounting.initialQ,before.accounting.initialQ);
-assert.equal(BigInt(result.snapshot.accounting.externalQ),BigInt(before.accounting.externalQ)+11n);
+assert.deepEqual(session.snapshot(), before);
+const preview = branch.inspect(),
+  result = session.commit(branch);
+const { preview: metadata, ...candidate } = preview;
+assert.deepEqual(metadata, {
+  base: branch.base,
+  branchId: 1,
+  operation: 5,
+  horizonTicks: 0,
+  completedTicks: 0,
+});
+assert.deepEqual(result.snapshot, { ...candidate, revision: 1 });
+assert.throws(() => session.restore(preview), /fields/);
+assert.equal(result.snapshot.terrain.structure[22], 73);
+assert.equal(result.snapshot.schemaVersion, 3);
+assert.equal(result.snapshot.rulesVersion, 'tactical-session-3');
+assert.deepEqual(result.snapshot.holds, [{ id: 'lifted-slab', cells: [22], expiresAtTick: 2 }]);
+assert.equal(result.snapshot.terrain.energyQ[22], before.terrain.energyQ[21] + 11);
+assert.equal(result.snapshot.accounting.initialQ, before.accounting.initialQ);
+assert.equal(
+  BigInt(result.snapshot.accounting.externalQ),
+  BigInt(before.accounting.externalQ) + 11n,
+);
 const restored = session.restore(JSON.parse(JSON.stringify(result.snapshot)));
-assert.deepEqual(restored.holds,result.snapshot.holds);
-const release = session.branch({horizonTicks:0}); release.releaseHold('lifted-slab');
-assert.deepEqual(session.commit(release).snapshot.holds,[]);
-const storageBefore = session.snapshot(), storage = session.branch({horizonTicks:0});
-const transferred = storage.transfer({from:null,to:'flask',cells:[[2,1,1]],offset:[-1,0,0]});
-assert.equal(transferred.externalEnergyQ,'0');
+assert.deepEqual(restored.holds, result.snapshot.holds);
+const release = session.branch({ horizonTicks: 0 });
+release.releaseHold('lifted-slab');
+assert.deepEqual(session.commit(release).snapshot.holds, []);
+const storageBefore = session.snapshot(),
+  storage = session.branch({ horizonTicks: 0 });
+const transferred = storage.transfer({
+  from: null,
+  to: 'flask',
+  cells: [[2, 1, 1]],
+  offset: [-1, 0, 0],
+});
+assert.equal(transferred.externalEnergyQ, '0');
 const stored = session.commit(storage);
-assert.equal(stored.snapshot.reservoirs[0].terrain.structure[21],73);
-assert.equal(stored.snapshot.reservoirs[0].terrain.energyQ[21],storageBefore.terrain.energyQ[22]);
-assert.deepEqual(stored.snapshot.accounting,storageBefore.accounting);
-const returnMatter = session.branch({horizonTicks:0});
-returnMatter.transfer({from:'flask',to:null,cells:[[1,1,1]],offset:[1,0,0]});
+assert.equal(stored.snapshot.reservoirs[0].terrain.structure[21], 73);
+assert.equal(stored.snapshot.reservoirs[0].terrain.energyQ[21], storageBefore.terrain.energyQ[22]);
+assert.deepEqual(stored.snapshot.accounting, storageBefore.accounting);
+const returnMatter = session.branch({ horizonTicks: 0 });
+returnMatter.transfer({ from: 'flask', to: null, cells: [[1, 1, 1]], offset: [1, 0, 0] });
 const returned = session.commit(returnMatter).snapshot;
-assert.deepEqual(returned.terrain,storageBefore.terrain);
-assert.deepEqual(returned.reservoirs,storageBefore.reservoirs);
+assert.deepEqual(returned.terrain, storageBefore.terrain);
+assert.deepEqual(returned.reservoirs, storageBefore.reservoirs);
 // Shared private branch storage must preserve public ownership and sibling state.
-const reuseBefore = session.snapshot(), reuseSibling = session.branch({horizonTicks:0}), reuseCandidate = session.branch({horizonTicks:0});
+const reuseBefore = session.snapshot(),
+  reuseSibling = session.branch({ horizonTicks: 0 }),
+  reuseCandidate = session.branch({ horizonTicks: 0 });
 const siblingBefore = reuseSibling.inspect();
-reuseCandidate.addEnergy([{x:2,y:1,z:1,deltaQ:1}]);
-reuseCandidate.setGame({...reuseBefore.game,ap:0});
+reuseCandidate.addEnergy([{ x: 2, y: 1, z: 1, deltaQ: 1 }]);
+reuseCandidate.setGame({ ...reuseBefore.game, ap: 0 });
 await reuseCandidate.advance(0);
 const exposed = reuseCandidate.inspect();
-exposed.terrain.energyQ.fill(0); exposed.reservoirs[0].terrain.packedCells.fill(0); exposed.game.ap = 99;
-assert.deepEqual(session.snapshot(),reuseBefore);
-assert.deepEqual(reuseSibling.inspect(),siblingBefore);
-assert.equal(reuseCandidate.inspect().game.ap,0);
-reuseCandidate.discard(); reuseSibling.discard();
-const geometry = session.queries(), hit = geometry.raycast({fromQ:[512,1536,1536],toQ:[3584,1536,1536]}).contact;
-assert.equal(hit.cell.material,MAT.STONE);
-assert.deepEqual(hit.cell.coordinate,[2,1,1]);
-assert.deepEqual(hit.time,{numerator:1,denominator:2});
-assert.equal(geometry.stamp.kind,'committed');
-assert.equal(geometry.stamp.revision.revision,session.revision.revision);
-assert.equal(geometry.fit({box:{minQ:[2048,1024,1024],maxQ:[3072,2048,2048]}}).fits,false);
-assert.equal(CHANGE_REPORT_RULES_VERSION_3D,'gameplay-changes-1');
-assert.equal(typeof result.changes,'function'); // Do not invoke a real support solve under this zero-runtime check.
-assert.equal(MOTION_TRACE_RULES_3D,'material-motion-1');
-assert.equal(MOTION_JOURNAL_RULES_3D,'motion-journal-1');
-assert.equal(MOTION_TRACE_LIMITS_3D.journalRecords,256);
-assert.equal(typeof world.stepWithMotion,'function'); // Presence only: physical stepping remains held.
-assert.equal(typeof world.stepWithMotionPaths,'function'); // Presence only; never step here.
-assert.equal(typeof readMotionPaths3D,'function');
-assert.equal(MOTION_PATH_RULES_3D,'material-motion-paths-1');
-assert.equal(MOTION_PATH_LIMITS_3D.passes,28);
-assert.equal(typeof branch.motion,'function');
-assert.equal(typeof result.motion,'function');
-assert.equal(ACTION_JOURNAL_RULES_3D,'action-boundaries-1');
-assert.equal(ACTION_JOURNAL_LIMITS_3D.events,256);
-assert.equal(typeof branch.journal,'function');
-assert.equal(typeof result.journal,'function');
-assert.equal(typeof branch.paths,'function');
-assert.equal(typeof result.paths,'function');
-assert.equal(PATH_JOURNAL_RULES_3D,'tactical-paths-1');
-assert.equal(PATH_JOURNAL_LIMITS_3D.records,256);
-assert.equal(TERRAIN_MOTION_RULES_3D,'terrain-body-motion-1');
-assert.equal(TERRAIN_MOTION_LIMITS_3D.contacts,4096);
-assert.equal(typeof createTerrainMotion3D,'function');
-assert.equal(typeof createTerrainDisplacement3D,'function');
-assert.equal(typeof translateStructuralRegionWithPaths3D,'function');
-assert.equal(TRANSLATION_PATH_RULES_3D,'translation-paths-1');
-assert.equal(TRANSLATION_PATH_LIMITS_3D.entries,65536);
-assert.equal(typeof branch.translateWithMotion,'function');
-assert.equal(typeof createTranslationDisplacement3D,'function');
-assert.equal(TRANSLATION_DISPLACEMENT_RULES_3D,'translation-displacement-1');
-assert.equal(TRANSLATION_DISPLACEMENT_LIMITS_3D.carryEntries,65536);
-assert.equal(typeof createTerrainBodyGroup3D,'function');
-assert.equal(typeof createTranslationBodyGroup3D,'function');
-assert.equal(TERRAIN_BODY_GROUP_RULES_3D,'terrain-body-group-1');
-assert.equal(TERRAIN_BODY_GROUP_LIMITS_3D.bodies,64);
-assert.equal(TERRAIN_DISPLACEMENT_RULES_3D,'terrain-displacement-1');
-assert.equal(TERRAIN_DISPLACEMENT_LIMITS_3D.work,1048576);
-assert.equal(TERRAIN_BODY_RULES_VERSION_3D,'terrain-body-1');
-assert.equal(EXPOSURE_RULES_VERSION_3D,'terrain-exposure-1');
-assert.equal(TERRAIN_BODY_LIMITS_3D.velocityQ,32768);
-for (const exported of [createTerrainBody3D,readTerrainBody3D,stepTerrainBody3D,geometry.exposure]) assert.equal(typeof exported,'function');
-assert.equal(result.snapshot.game.ap,1);
-assert.throws(()=>session.commit(branch),/committed/);
-assert.equal(TACTICAL_PREVIEW_RULES_3D,'tactical-previews-1');
-assert.equal(TACTICAL_PREVIEW_LIMITS_3D.waiting,1);
-const queue = createTacticalPreviewQueue3D(session,(editor,command)=>editor.setGame({...editor.inspect().game,ap:command.ap}));
-const older = queue.request({ap:9},0), newest = queue.request({ap:0},0,{motion:{},paths:{},journal:{maxRuns:0}});
-assert.equal((await older.result).status,'superseded');
-assert.equal((await newest.result).status,'ready');
-assert.equal(queue.motion(newest).status,'complete');
-assert.equal(queue.queries(newest).stamp.kind,'preview');
-assert.equal(queue.paths(newest).status,'complete');
-assert.deepEqual(queue.paths(newest).frames,[]);
-const queuedJournal=queue.journal(newest);
-assert.equal(queuedJournal.status,'complete');
-assert.deepEqual(queuedJournal.events.map(event=>event.action.kind),['game']);
-const queuedCommit=queue.commit(newest);
-assert.equal(queuedCommit.snapshot.game.ap,0);
-assert.deepEqual(queuedCommit.journal().events,queuedJournal.events);
-assert.throws(()=>queue.paths(newest),/latest ready/);
+exposed.terrain.energyQ.fill(0);
+exposed.reservoirs[0].terrain.packedCells.fill(0);
+exposed.game.ap = 99;
+assert.deepEqual(session.snapshot(), reuseBefore);
+assert.deepEqual(reuseSibling.inspect(), siblingBefore);
+assert.equal(reuseCandidate.inspect().game.ap, 0);
+reuseCandidate.discard();
+reuseSibling.discard();
+const geometry = session.queries(),
+  hit = geometry.raycast({ fromQ: [512, 1536, 1536], toQ: [3584, 1536, 1536] }).contact;
+assert.equal(hit.cell.material, MAT.STONE);
+assert.deepEqual(hit.cell.coordinate, [2, 1, 1]);
+assert.deepEqual(hit.time, { numerator: 1, denominator: 2 });
+assert.equal(geometry.stamp.kind, 'committed');
+assert.equal(geometry.stamp.revision.revision, session.revision.revision);
+assert.equal(
+  geometry.fit({ box: { minQ: [2048, 1024, 1024], maxQ: [3072, 2048, 2048] } }).fits,
+  false,
+);
+assert.equal(CHANGE_REPORT_RULES_VERSION_3D, 'gameplay-changes-1');
+assert.equal(typeof result.changes, 'function'); // Do not invoke a real support solve under this zero-runtime check.
+assert.equal(MOTION_TRACE_RULES_3D, 'material-motion-1');
+assert.equal(MOTION_JOURNAL_RULES_3D, 'motion-journal-1');
+assert.equal(MOTION_TRACE_LIMITS_3D.journalRecords, 256);
+assert.equal(typeof world.stepWithMotion, 'function'); // Presence only: physical stepping remains held.
+assert.equal(typeof world.stepWithMotionPaths, 'function'); // Presence only; never step here.
+assert.equal(typeof readMotionPaths3D, 'function');
+assert.equal(MOTION_PATH_RULES_3D, 'material-motion-paths-1');
+assert.equal(MOTION_PATH_LIMITS_3D.passes, 28);
+assert.equal(typeof branch.motion, 'function');
+assert.equal(typeof result.motion, 'function');
+assert.equal(ACTION_JOURNAL_RULES_3D, 'action-boundaries-1');
+assert.equal(ACTION_JOURNAL_LIMITS_3D.events, 256);
+assert.equal(typeof branch.journal, 'function');
+assert.equal(typeof result.journal, 'function');
+assert.equal(typeof branch.paths, 'function');
+assert.equal(typeof result.paths, 'function');
+assert.equal(PATH_JOURNAL_RULES_3D, 'tactical-paths-1');
+assert.equal(PATH_JOURNAL_LIMITS_3D.records, 256);
+assert.equal(TERRAIN_MOTION_RULES_3D, 'terrain-body-motion-1');
+assert.equal(TERRAIN_MOTION_LIMITS_3D.contacts, 4096);
+assert.equal(typeof createTerrainMotion3D, 'function');
+assert.equal(typeof createTerrainDisplacement3D, 'function');
+assert.equal(typeof translateStructuralRegionWithPaths3D, 'function');
+assert.equal(TRANSLATION_PATH_RULES_3D, 'translation-paths-1');
+assert.equal(TRANSLATION_PATH_LIMITS_3D.entries, 65536);
+assert.equal(typeof branch.translateWithMotion, 'function');
+assert.equal(typeof createTranslationDisplacement3D, 'function');
+assert.equal(TRANSLATION_DISPLACEMENT_RULES_3D, 'translation-displacement-1');
+assert.equal(TRANSLATION_DISPLACEMENT_LIMITS_3D.carryEntries, 65536);
+assert.equal(typeof createTerrainBodyGroup3D, 'function');
+assert.equal(typeof createTranslationBodyGroup3D, 'function');
+assert.equal(TERRAIN_BODY_GROUP_RULES_3D, 'terrain-body-group-1');
+assert.equal(TERRAIN_BODY_GROUP_LIMITS_3D.bodies, 64);
+assert.equal(TERRAIN_DISPLACEMENT_RULES_3D, 'terrain-displacement-1');
+assert.equal(TERRAIN_DISPLACEMENT_LIMITS_3D.work, 1048576);
+assert.equal(TERRAIN_BODY_RULES_VERSION_3D, 'terrain-body-1');
+assert.equal(EXPOSURE_RULES_VERSION_3D, 'terrain-exposure-1');
+assert.equal(TERRAIN_BODY_LIMITS_3D.velocityQ, 32768);
+for (const exported of [
+  createTerrainBody3D,
+  readTerrainBody3D,
+  stepTerrainBody3D,
+  geometry.exposure,
+])
+  assert.equal(typeof exported, 'function');
+assert.equal(result.snapshot.game.ap, 1);
+assert.throws(() => session.commit(branch), /committed/);
+assert.equal(TACTICAL_PREVIEW_RULES_3D, 'tactical-previews-1');
+assert.equal(TACTICAL_PREVIEW_LIMITS_3D.waiting, 1);
+const queue = createTacticalPreviewQueue3D(session, (editor, command) =>
+  editor.setGame({ ...editor.inspect().game, ap: command.ap }),
+);
+const older = queue.request({ ap: 9 }, 0),
+  newest = queue.request({ ap: 0 }, 0, { motion: {}, paths: {}, journal: { maxRuns: 0 } });
+assert.equal((await older.result).status, 'superseded');
+assert.equal((await newest.result).status, 'ready');
+assert.equal(queue.motion(newest).status, 'complete');
+assert.equal(queue.queries(newest).stamp.kind, 'preview');
+assert.equal(queue.paths(newest).status, 'complete');
+assert.deepEqual(queue.paths(newest).frames, []);
+const queuedJournal = queue.journal(newest);
+assert.equal(queuedJournal.status, 'complete');
+assert.deepEqual(
+  queuedJournal.events.map((event) => event.action.kind),
+  ['game'],
+);
+const queuedCommit = queue.commit(newest);
+assert.equal(queuedCommit.snapshot.game.ap, 0);
+assert.deepEqual(queuedCommit.journal().events, queuedJournal.events);
+assert.throws(() => queue.paths(newest), /latest ready/);
 await queue.close();
-assert.equal(TACTICAL_WORKER_PROTOCOL_3D,'tactical-worker-7');
+assert.equal(TACTICAL_WORKER_PROTOCOL_3D, 'tactical-worker-7');
 // A clone-isolated mock channel: no Worker, browser, GPU or physical tick.
-const receivers=[()=>{},()=>{}], endpoints=[0,1].map(side=>({
-  send(value){const copy=structuredClone(value);queueMicrotask(()=>receivers[1-side](copy));},
-  subscribe(receive){receivers[side]=receive;return()=>{receivers[side]=()=>{};};},
-  close(){receivers[side]=()=>{};},
-}));
-const workerHost=createTacticalWorkerHost3D(endpoints[1],session,(editor,command)=>editor.setGame({...editor.inspect().game,ap:command.ap}),'sdk-channel');
-const workerClient=createTacticalWorkerClient3D(endpoints[0],{channel:'sdk-channel',worldId:'sdk-world',gameRulesVersion:'sdk-game-1'});
+const receivers = [() => {}, () => {}],
+  endpoints = [0, 1].map((side) => ({
+    send(value) {
+      const copy = structuredClone(value);
+      queueMicrotask(() => receivers[1 - side](copy));
+    },
+    subscribe(receive) {
+      receivers[side] = receive;
+      return () => {
+        receivers[side] = () => {};
+      };
+    },
+    close() {
+      receivers[side] = () => {};
+    },
+  }));
+const workerHost = createTacticalWorkerHost3D(
+  endpoints[1],
+  session,
+  (editor, command) => editor.setGame({ ...editor.inspect().game, ap: command.ap }),
+  'sdk-channel',
+);
+const workerClient = createTacticalWorkerClient3D(endpoints[0], {
+  channel: 'sdk-channel',
+  worldId: 'sdk-world',
+  gameRulesVersion: 'sdk-game-1',
+});
 await workerClient.ready;
-assert.deepEqual(workerClient.snapshot(),session.snapshot());
-assert.equal(TACTICAL_QUERY_BATCH_RULES_3D,'tactical-query-batches-1');
-assert.equal(TACTICAL_QUERY_BATCH_LIMITS_3D.queries,32);
-const queryRequest={kind:'raycast',request:{fromQ:[512,1536,1536],toQ:[3584,1536,1536]}};
-const queryResult=await workerClient.query([queryRequest]);
-assert.deepEqual(queryResult.base,session.revision);
-assert.deepEqual(queryResult.results,[{kind:'raycast',domain:null,value:session.queries().raycast(queryRequest.request)}]);
-const workerTicket=workerClient.request({ap:3},0,{motion:{maxEntries:0},paths:{maxEntries:0},journal:{maxRuns:0}});
-const workerOutcome=await workerTicket.result;
-assert.equal(workerOutcome.status,'ready');
-const previewQuery=await workerClient.queryPreview(workerTicket,[queryRequest]);
-assert.equal(previewQuery.rulesVersion,'tactical-preview-query-batches-1');
-assert.deepEqual(previewQuery.preview,workerOutcome.preview.preview);
-assert.equal(previewQuery.results[0].value.stamp.kind,'preview');
-assert.deepEqual(previewQuery.results[0].value.contact,queryResult.results[0].value.contact);
-assert.deepEqual(workerClient.snapshot(),session.snapshot());
-const workerPreviewJournal=await workerClient.journalPreview(workerTicket);
-assert.equal(workerPreviewJournal.status,'complete');
-assert.deepEqual(workerPreviewJournal.to,{kind:'preview',...workerOutcome.preview.preview});
-assert.equal(workerPreviewJournal.events.length,1);
-assert.deepEqual(workerPreviewJournal.events[0].action,{kind:'game',externalEnergyQ:'0'});
-const workerCommit=await workerClient.commit(workerTicket);
-assert.equal(workerCommit.snapshot.game.ap,3);
-const workerJournal=await workerClient.journal(workerCommit);
-assert.deepEqual(workerJournal.events,workerPreviewJournal.events);
-assert.deepEqual(workerJournal.to,{kind:'committed',revision:session.revision});
-assert.throws(()=>workerClient.journalPreview(workerTicket),/latest ready/);
-const workerMotion=await workerClient.motion(workerCommit);
-assert.equal(workerMotion.status,'complete');
-assert.equal(workerMotion.recordsObserved,0);
-assert.deepEqual(workerMotion.frames,[]);
-assert.deepEqual(workerMotion.from,workerCommit.receipt.base);
-assert.equal(workerMotion.to.revision.revision,workerCommit.receipt.revision);
-assert.equal(workerMotion.includesInterventions,false);
-assert.equal(workerMotion.includesSubpassPaths,false);
-const workerPaths=await workerClient.paths(workerCommit);
-assert.equal(workerPaths.status,'complete');
-assert.equal(workerPaths.recordsObserved,0);
-assert.equal(workerPaths.entries,0);
-assert.deepEqual(workerPaths.frames,[]);
-assert.deepEqual(workerPaths.from,workerCommit.receipt.base);
-assert.equal(workerPaths.to.revision.revision,workerCommit.receipt.revision);
-assert.equal(workerPaths.includesInterventions,false);
-assert.equal(workerPaths.includesSubpassPaths,true);
+assert.deepEqual(workerClient.snapshot(), session.snapshot());
+assert.equal(TACTICAL_QUERY_BATCH_RULES_3D, 'tactical-query-batches-1');
+assert.equal(TACTICAL_QUERY_BATCH_LIMITS_3D.queries, 32);
+const queryRequest = {
+  kind: 'raycast',
+  request: { fromQ: [512, 1536, 1536], toQ: [3584, 1536, 1536] },
+};
+const queryResult = await workerClient.query([queryRequest]);
+assert.deepEqual(queryResult.base, session.revision);
+assert.deepEqual(queryResult.results, [
+  { kind: 'raycast', domain: null, value: session.queries().raycast(queryRequest.request) },
+]);
+const workerTicket = workerClient.request({ ap: 3 }, 0, {
+  motion: { maxEntries: 0 },
+  paths: { maxEntries: 0 },
+  journal: { maxRuns: 0 },
+});
+const workerOutcome = await workerTicket.result;
+assert.equal(workerOutcome.status, 'ready');
+const previewQuery = await workerClient.queryPreview(workerTicket, [queryRequest]);
+assert.equal(previewQuery.rulesVersion, 'tactical-preview-query-batches-1');
+assert.deepEqual(previewQuery.preview, workerOutcome.preview.preview);
+assert.equal(previewQuery.results[0].value.stamp.kind, 'preview');
+assert.deepEqual(previewQuery.results[0].value.contact, queryResult.results[0].value.contact);
+assert.deepEqual(workerClient.snapshot(), session.snapshot());
+const workerPreviewJournal = await workerClient.journalPreview(workerTicket);
+assert.equal(workerPreviewJournal.status, 'complete');
+assert.deepEqual(workerPreviewJournal.to, { kind: 'preview', ...workerOutcome.preview.preview });
+assert.equal(workerPreviewJournal.events.length, 1);
+assert.deepEqual(workerPreviewJournal.events[0].action, { kind: 'game', externalEnergyQ: '0' });
+const workerCommit = await workerClient.commit(workerTicket);
+assert.equal(workerCommit.snapshot.game.ap, 3);
+const workerJournal = await workerClient.journal(workerCommit);
+assert.deepEqual(workerJournal.events, workerPreviewJournal.events);
+assert.deepEqual(workerJournal.to, { kind: 'committed', revision: session.revision });
+assert.throws(() => workerClient.journalPreview(workerTicket), /latest ready/);
+const workerMotion = await workerClient.motion(workerCommit);
+assert.equal(workerMotion.status, 'complete');
+assert.equal(workerMotion.recordsObserved, 0);
+assert.deepEqual(workerMotion.frames, []);
+assert.deepEqual(workerMotion.from, workerCommit.receipt.base);
+assert.equal(workerMotion.to.revision.revision, workerCommit.receipt.revision);
+assert.equal(workerMotion.includesInterventions, false);
+assert.equal(workerMotion.includesSubpassPaths, false);
+const workerPaths = await workerClient.paths(workerCommit);
+assert.equal(workerPaths.status, 'complete');
+assert.equal(workerPaths.recordsObserved, 0);
+assert.equal(workerPaths.entries, 0);
+assert.deepEqual(workerPaths.frames, []);
+assert.deepEqual(workerPaths.from, workerCommit.receipt.base);
+assert.equal(workerPaths.to.revision.revision, workerCommit.receipt.revision);
+assert.equal(workerPaths.includesInterventions, false);
+assert.equal(workerPaths.includesSubpassPaths, true);
 // This latest commit changes only game state: report evaluation never observes support.
-const workerChanges=await workerClient.changes(workerCommit,{maxRuns:0});
-assert.equal(workerChanges.gameChanged,true);
-assert.equal(workerChanges.accountingChanged,false);
-assert.equal(workerChanges.from.revision,workerCommit.receipt.base.revision);
-assert.equal(workerChanges.to.revision.revision,workerCommit.receipt.revision);
-assert.ok(workerChanges.domains.every(d=>Object.values(d.channels).every(c=>c.count===0)));
-assert.deepEqual(workerClient.snapshot(),session.snapshot());
-await workerClient.close();await workerHost.close();
+const workerChanges = await workerClient.changes(workerCommit, { maxRuns: 0 });
+assert.equal(workerChanges.gameChanged, true);
+assert.equal(workerChanges.accountingChanged, false);
+assert.equal(workerChanges.from.revision, workerCommit.receipt.base.revision);
+assert.equal(workerChanges.to.revision.revision, workerCommit.receipt.revision);
+assert.ok(
+  workerChanges.domains.every((d) => Object.values(d.channels).every((c) => c.count === 0)),
+);
+assert.deepEqual(workerClient.snapshot(), session.snapshot());
+await workerClient.close();
+await workerHost.close();
 // Application-owned air assistance: exact body movement and AP publish together.
-const airWorld=createStateSpaceStructuralWorld3D({width:4,height:4,depth:4,chunkSize:4});
-const airView=createTacticalSession3D({worldId:'sdk-air',gameRulesVersion:'sdk-air-1',terrain:airWorld.snapshot(),game:null}).queries();
-const airUnits=[{id:'air',body:createTerrainBody3D(airView,{minQ:[1024,1024,1024],sizeQ:[512,512,512],gravityQ:0})},
-  {id:'ally',body:createTerrainBody3D(airView,{minQ:[2560,1024,1024],sizeQ:[512,512,512],gravityQ:0})}];
-const airSession=createTacticalSession3D({worldId:'sdk-air',gameRulesVersion:'sdk-air-1',terrain:airWorld.snapshot(),game:{ap:2,rng:7,units:airUnits}});
-const airBefore=airSession.snapshot(), airBranch=airSession.branch({horizonTicks:0});
-const airMove=moveTerrainActors3D(airBranch.queries(),airBefore.game.units,[{id:'air',impulseQ:[2048,0,0]}]);
-assert.equal(ACTOR_MOVEMENT_RULES_3D,'actor-movement-1');assert.equal(ACTOR_MOVEMENT_LIMITS_3D.bodies,64);
-assert.equal(airMove.status,'resolved');assert.deepEqual(airMove.responses[0].movedQ,[1024,0,0]);
-assert.equal(airMove.responses[0].contacts[0].obstacle.id,'ally');
-airBranch.setGame({...airBefore.game,ap:1,units:airMove.bodies});
-assert.deepEqual(airSession.snapshot(),airBefore);
-const airCommitted=airSession.commit(airBranch).snapshot;
-assert.equal(airCommitted.game.ap,1);assert.equal(airCommitted.game.rng,7);assert.deepEqual(airCommitted.terrain,airBefore.terrain);
-const {checkTacticalSlabSdk}=await import('./check_tactical_slab_sdk.mjs');
-const slabReference=await checkTacticalSlabSdk();
+const airWorld = createStateSpaceStructuralWorld3D({ width: 4, height: 4, depth: 4, chunkSize: 4 });
+const airView = createTacticalSession3D({
+  worldId: 'sdk-air',
+  gameRulesVersion: 'sdk-air-1',
+  terrain: airWorld.snapshot(),
+  game: null,
+}).queries();
+const airUnits = [
+  {
+    id: 'air',
+    body: createTerrainBody3D(airView, {
+      minQ: [1024, 1024, 1024],
+      sizeQ: [512, 512, 512],
+      gravityQ: 0,
+    }),
+  },
+  {
+    id: 'ally',
+    body: createTerrainBody3D(airView, {
+      minQ: [2560, 1024, 1024],
+      sizeQ: [512, 512, 512],
+      gravityQ: 0,
+    }),
+  },
+];
+const airSession = createTacticalSession3D({
+  worldId: 'sdk-air',
+  gameRulesVersion: 'sdk-air-1',
+  terrain: airWorld.snapshot(),
+  game: { ap: 2, rng: 7, units: airUnits },
+});
+const airBefore = airSession.snapshot(),
+  airBranch = airSession.branch({ horizonTicks: 0 });
+const airMove = moveTerrainActors3D(airBranch.queries(), airBefore.game.units, [
+  { id: 'air', impulseQ: [2048, 0, 0] },
+]);
+assert.equal(ACTOR_MOVEMENT_RULES_3D, 'actor-movement-1');
+assert.equal(ACTOR_MOVEMENT_LIMITS_3D.bodies, 64);
+assert.equal(airMove.status, 'resolved');
+assert.deepEqual(airMove.responses[0].movedQ, [1024, 0, 0]);
+assert.equal(airMove.responses[0].contacts[0].obstacle.id, 'ally');
+airBranch.setGame({ ...airBefore.game, ap: 1, units: airMove.bodies });
+assert.deepEqual(airSession.snapshot(), airBefore);
+const airCommitted = airSession.commit(airBranch).snapshot;
+assert.equal(airCommitted.game.ap, 1);
+assert.equal(airCommitted.game.rng, 7);
+assert.deepEqual(airCommitted.terrain, airBefore.terrain);
+const { checkTacticalSlabSdk } = await import('./check_tactical_slab_sdk.mjs');
+const slabReference = await checkTacticalSlabSdk();
 // Explicit conservative transport, independent of the M5 tick schedule.
-const transportWorld=createStateSpaceStructuralWorld3D({width:4,height:4,depth:4,chunkSize:4});
-transportWorld.setCell(1,1,1,MAT.WATER,60);transportWorld.setCell(2,1,1,MAT.STEAM,180);
-const transport=createMaterialTransport3D(transportWorld.snapshot(),[{id:'spray',cell:[1,1,1]}]);
-const half=applyMaterialTransport3D(transport,[{id:'spray',impulseQ:[512,0,0]}]);
-const moved=applyMaterialTransport3D(readMaterialTransport3D(JSON.parse(JSON.stringify(half.state))));
-assert.equal(MATERIAL_TRANSPORT_RULES_3D,'material-transport-1');
-assert.equal(half.receipt.swaps.length,0);assert.deepEqual(moved.receipt.swaps,[[21,22]]);
-assert.equal(moved.state.terrain.tick,transport.terrain.tick);assert.equal(moved.state.cycle,2);
-assert.equal(moved.state.terrain.energyQ[22],transport.terrain.energyQ[21]);
-assert.equal(moved.state.terrain.energyQ[21],transport.terrain.energyQ[22]);
-assert.equal(moved.receipt.externalEnergyQ,'0');assert.deepEqual(transport.terrain,transportWorld.snapshot());
-const windSession=createTacticalSession3D({worldId:'sdk-wind',gameRulesVersion:'sdk-wind-1',terrain:transport.terrain,
-  game:{ap:2,wind:captureMaterialTransportMemory3D(transport)}},
-  {validateGame({game,terrain}){restoreMaterialTransportMemory3D(terrain,game.wind);return true;}});
-const windBefore=windSession.snapshot(), windBranch=windSession.branch({horizonTicks:0});
-prepareMaterialTransport3D(windBranch,windBefore.game.wind,[{id:'spray',impulseQ:[1024,0,0]}],({game,memory})=>({...game,ap:game.ap-1,wind:memory}));
-assert.deepEqual(windSession.snapshot(),windBefore);
-const windCommitted=windSession.commit(windBranch).snapshot;
-assert.equal(windCommitted.game.ap,1);assert.equal(windCommitted.game.wind.parcels[0].cell,22);
-assert.equal(windCommitted.game.wind.cycle,1);assert.deepEqual(windCommitted.accounting,windBefore.accounting);
-assert.equal(windCommitted.terrain.energyQ[22],windBefore.terrain.energyQ[21]);
-const peerWorld=createStateSpaceStructuralWorld3D({width:8,height:8,depth:8,chunkSize:4});peerWorld.setCell(2,4,3,MAT.STONE);
-const peerSession=createTacticalSession3D({worldId:'public-peer',gameRulesVersion:'peer-1',terrain:peerWorld.snapshot(),game:null});
-const peerBranch=peerSession.branch({horizonTicks:0}), action=peerBranch.translateWithMotion({cells:[[2,4,3]],path:[[1,0,0],[1,0,0],[1,0,0],[1,0,0]]});
-const units=[[2304,3584,3328],[4352,3328,3328]].map((minQ,i)=>({id:i?'b':'a',body:createTerrainBody3D(action.beforeQueries(),{minQ,sizeQ:[512,512,512]})}));
-const peers=createTranslatedActorGroup3D(action.beforeQueries(),action.queries(),action.movement()).resolve(units);
-assert.equal(peers.rulesVersion,TERRAIN_ACTOR_GROUP_RULES_3D);assert.equal(peers.status,'unresolved');assert.equal(peers.reason,'peer-contact');
-assert.deepEqual(peers.peerContact.time,{numerator:1,denominator:2});assert.equal(peers.peerContact.pass,1);assert.deepEqual(peers.bodies,units);peerBranch.discard();
-const {checkReactiveMaterialsSdk}=await import('./check_reactive_materials_sdk.mjs');
-const reactiveMaterials=await checkReactiveMaterialsSdk();
-console.log(JSON.stringify({passed:true,entry:'state-space-engine/experimental/3d/tactical-session',worldCells:64,reservoirCells:64,physicsTicks:0,gpu:false,actorMovement:true,materialTransport:true,transportCoupling:true,terrainPeerContacts:true,peerWorldCells:512,slabReference,reactiveMaterials}));
+const transportWorld = createStateSpaceStructuralWorld3D({
+  width: 4,
+  height: 4,
+  depth: 4,
+  chunkSize: 4,
+});
+transportWorld.setCell(1, 1, 1, MAT.WATER, 60);
+transportWorld.setCell(2, 1, 1, MAT.STEAM, 180);
+const transport = createMaterialTransport3D(transportWorld.snapshot(), [
+  { id: 'spray', cell: [1, 1, 1] },
+]);
+const half = applyMaterialTransport3D(transport, [{ id: 'spray', impulseQ: [512, 0, 0] }]);
+const moved = applyMaterialTransport3D(
+  readMaterialTransport3D(JSON.parse(JSON.stringify(half.state))),
+);
+assert.equal(MATERIAL_TRANSPORT_RULES_3D, 'material-transport-1');
+assert.equal(half.receipt.swaps.length, 0);
+assert.deepEqual(moved.receipt.swaps, [[21, 22]]);
+assert.equal(moved.state.terrain.tick, transport.terrain.tick);
+assert.equal(moved.state.cycle, 2);
+assert.equal(moved.state.terrain.energyQ[22], transport.terrain.energyQ[21]);
+assert.equal(moved.state.terrain.energyQ[21], transport.terrain.energyQ[22]);
+assert.equal(moved.receipt.externalEnergyQ, '0');
+assert.deepEqual(transport.terrain, transportWorld.snapshot());
+const windSession = createTacticalSession3D(
+  {
+    worldId: 'sdk-wind',
+    gameRulesVersion: 'sdk-wind-1',
+    terrain: transport.terrain,
+    game: { ap: 2, wind: captureMaterialTransportMemory3D(transport) },
+  },
+  {
+    validateGame({ game, terrain }) {
+      restoreMaterialTransportMemory3D(terrain, game.wind);
+      return true;
+    },
+  },
+);
+const windBefore = windSession.snapshot(),
+  windBranch = windSession.branch({ horizonTicks: 0 });
+prepareMaterialTransport3D(
+  windBranch,
+  windBefore.game.wind,
+  [{ id: 'spray', impulseQ: [1024, 0, 0] }],
+  ({ game, memory }) => ({ ...game, ap: game.ap - 1, wind: memory }),
+);
+assert.deepEqual(windSession.snapshot(), windBefore);
+const windCommitted = windSession.commit(windBranch).snapshot;
+assert.equal(windCommitted.game.ap, 1);
+assert.equal(windCommitted.game.wind.parcels[0].cell, 22);
+assert.equal(windCommitted.game.wind.cycle, 1);
+assert.deepEqual(windCommitted.accounting, windBefore.accounting);
+assert.equal(windCommitted.terrain.energyQ[22], windBefore.terrain.energyQ[21]);
+const peerWorld = createStateSpaceStructuralWorld3D({
+  width: 8,
+  height: 8,
+  depth: 8,
+  chunkSize: 4,
+});
+peerWorld.setCell(2, 4, 3, MAT.STONE);
+const peerSession = createTacticalSession3D({
+  worldId: 'public-peer',
+  gameRulesVersion: 'peer-1',
+  terrain: peerWorld.snapshot(),
+  game: null,
+});
+const peerBranch = peerSession.branch({ horizonTicks: 0 }),
+  action = peerBranch.translateWithMotion({
+    cells: [[2, 4, 3]],
+    path: [
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0],
+    ],
+  });
+const units = [
+  [2304, 3584, 3328],
+  [4352, 3328, 3328],
+].map((minQ, i) => ({
+  id: i ? 'b' : 'a',
+  body: createTerrainBody3D(action.beforeQueries(), { minQ, sizeQ: [512, 512, 512] }),
+}));
+const peers = createTranslatedActorGroup3D(
+  action.beforeQueries(),
+  action.queries(),
+  action.movement(),
+).resolve(units);
+assert.equal(peers.rulesVersion, TERRAIN_ACTOR_GROUP_RULES_3D);
+assert.equal(peers.status, 'unresolved');
+assert.equal(peers.reason, 'peer-contact');
+assert.deepEqual(peers.peerContact.time, { numerator: 1, denominator: 2 });
+assert.equal(peers.peerContact.pass, 1);
+assert.deepEqual(peers.bodies, units);
+peerBranch.discard();
+const { checkReactiveMaterialsSdk } = await import('./check_reactive_materials_sdk.mjs');
+const reactiveMaterials = await checkReactiveMaterialsSdk();
+console.log(
+  JSON.stringify({
+    passed: true,
+    entry: 'state-space-engine/experimental/3d/tactical-session',
+    worldCells: 64,
+    reservoirCells: 64,
+    physicsTicks: 0,
+    gpu: false,
+    actorMovement: true,
+    materialTransport: true,
+    transportCoupling: true,
+    terrainPeerContacts: true,
+    peerWorldCells: 512,
+    slabReference,
+    reactiveMaterials,
+  }),
+);

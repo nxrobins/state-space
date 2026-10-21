@@ -10,9 +10,11 @@ const arrayOffset = Object.getOwnPropertyDescriptor(typedArrayPrototype, 'byteOf
 export function stateCopyTargets(target, count) {
     if (!target || typeof target !== 'object')
         throw new Error('State copy requires output storage.');
-    const values = ['grid', 'energyQ', 'structure'].map(key => Object.getOwnPropertyDescriptor(target, key)?.value);
+    const values = ['grid', 'energyQ', 'structure'].map((key) => Object.getOwnPropertyDescriptor(target, key)?.value);
     for (const value of values) {
-        if (!(value instanceof Uint32Array) || typedArrayName.call(value) !== 'Uint32Array' || arrayLength.call(value) !== count) {
+        if (!(value instanceof Uint32Array) ||
+            typedArrayName.call(value) !== 'Uint32Array' ||
+            arrayLength.call(value) !== count) {
             throw new Error('State copy requires three Uint32Arrays of the field cell count.');
         }
     }
