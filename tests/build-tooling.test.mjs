@@ -10,6 +10,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {join} from 'node:path';
 import {SDK_ENTRIES, sdkConfig, sdkEntries} from '../engine/sdk-build.mjs';
 import {lintProject, lintSource} from '../engine/lint_ts.mjs';
+import {STREAMING_REPORTER, VITEST, selectChecks} from '../scripts/verify_checks.mjs';
 
 test('SDK entries preserve existing build targets and reject unknown entries', () => {
   for (const entry of SDK_ENTRIES) {
@@ -88,4 +89,32 @@ test('volume evidence hashes include moved modules', () => {
       assert.equal(report[source], expected, source);
     }
   }
+});
+
+test('supervised vitest checks select a reporter that streams one mark per completed test', () => {
+  for (const suite of ['smoke', 'unit']) {
+    const vitest = selectChecks(suite).checks.filter(args => args[0] === VITEST);
+    assert.ok(vitest.length > 0, suite);
+    for (const args of vitest) assert.ok(args.includes(STREAMING_REPORTER), `${suite}: node ${args.join(' ')}`);
+  }
+  const native = selectChecks('native', ['node', 'verify_checks.mjs', '--suite', 'native', '--file', 'engine/sdk.test.ts']);
+  assert.equal(native.kind, 'gpu');
+  assert.ok(native.checks[0].includes(STREAMING_REPORTER));
+  assert.throws(() => selectChecks('native', ['node', 'verify_checks.mjs', '--suite', 'native', '--file', 'engine/nope.test.ts']), /Choose one native fixture/);
+  assert.throws(() => selectChecks('demos', [], {}), /quarantined/);
+  assert.throws(() => selectChecks('bogus'), /Unknown verification suite/);
+  // The supervisor stops a child that is silent for 40 s and reads it through a pipe.
+  // The selected reporter must emit a progress mark per test before the summary; the
+  // default reporter is the executed negative control and prints none to a pipe.
+  const run = reporter => spawnSync(process.execPath,
+    [VITEST, 'run', ...(reporter ? [reporter] : []), 'engine/validation.test.ts', '--config', 'engine/vitest.bounded.config.ts'],
+    {cwd: fileURLToPath(new URL('..', import.meta.url)), encoding: 'utf8', timeout: 120_000});
+  const marks = output => (output.match(/\u00b7/g) ?? []).length;
+  const streamed = run(STREAMING_REPORTER);
+  assert.equal(streamed.status, 0, streamed.stderr);
+  assert.ok(marks(streamed.stdout) >= 1, streamed.stdout);
+  assert.ok(streamed.stdout.indexOf('\u00b7') < streamed.stdout.indexOf('Test Files'), streamed.stdout);
+  const control = run(null);
+  assert.equal(control.status, 0, control.stderr);
+  assert.equal(marks(control.stdout), 0, control.stdout);
 });

@@ -54,7 +54,7 @@ For a focused CPU/mock suite, use a file filter with the shared bounded config
 
 ```sh
 uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
-  node node_modules/vitest/vitest.mjs run engine/experimental/reactive/reactive-session.test.ts \
+  node node_modules/vitest/vitest.mjs run --reporter=dot engine/experimental/reactive/reactive-session.test.ts \
   --config engine/vitest.bounded.config.ts
 ```
 

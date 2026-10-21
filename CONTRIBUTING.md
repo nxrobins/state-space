@@ -28,9 +28,14 @@ For a focused check, use the file's current path and the bounded CPU config:
 
 ```sh
 uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
-  node node_modules/vitest/vitest.mjs run engine/portable-data.test.ts \
+  node node_modules/vitest/vitest.mjs run --reporter=dot engine/portable-data.test.ts \
   --config engine/vitest.bounded.config.ts
 ```
+
+Pass `--reporter=dot` to a focused vitest run under the supervisor. The default
+reporter prints nothing per test when stdout is a pipe, and the supervisor stops a
+child that is silent for 40 seconds. The CPU suites that `npm test` selects already
+use that reporter; the native macOS stages keep their own fixed commands.
 
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
