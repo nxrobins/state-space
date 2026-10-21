@@ -91,6 +91,13 @@ describe('existing-matter chamber wind', () => {
     const far = withControls(s => {const p = s.parcels[1], target = 0; for (const k of ['packedCells', 'energyQ', 'structure'] as const) [s.terrain[k][p.cell], s.terrain[k][target]] = [s.terrain[k][target], s.terrain[k][p.cell]]; p.cell = target;});
     for (const initial of [far, {...createSlabInitial(), game: {...createSlabInitial().game, ap: 0}}]) {const f = fixture(initial), before = f.session.snapshot(); expect((await f.controller.request(wind, 0).result).status).toBe('failed'); expect(f.session.snapshot()).toEqual(before); await f.close();}
   });
+  test('a parcel carried out of range blocks only wind on itself', async () => {
+    const away = withControls(s => {const p = s.parcels[2], target = 0; for (const k of ['packedCells', 'energyQ', 'structure'] as const) [s.terrain[k][p.cell], s.terrain[k][target]] = [s.terrain[k][target], s.terrain[k][p.cell]]; p.cell = target;});
+    const f = fixture(away), before = f.session.snapshot(), far = await f.controller.request({...wind, parcel: 'water'}, 0).result;
+    expect(far).toMatchObject({status: 'failed', error: 'Parcel is outside wind range.'}); expect(f.session.snapshot()).toEqual(before);
+    f.controller.commit((await ready(f)).ticket); const r = await ready(f, {kind: 'drift'}); expect(r.preview.game.wind.parcels.map(p => p.id)).toEqual(['sand', 'steam', 'water']);
+    expect(r.preview.game.wind.parcels[2].cell).toBe(0); expect(r.preview.game.ap).toBe(1); f.controller.commit(r.ticket); await f.close();
+  });
   test('retired parcel cannot be recreated by its old selector', async () => {
     const f = fixture(withControls(s => {s.parcels = s.parcels.filter(p => p.id !== 'steam');})), before = f.session.snapshot(); expect((await f.controller.request(wind, 0).result).status).toBe('failed'); expect(f.session.snapshot()).toEqual(before); await f.close();
   });
