@@ -36,9 +36,18 @@ export function sdkEntries(exports) {
 export const SDK_ENTRIES = sdkEntries(
   JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).exports,
 );
+// Entries that other bundles import as a sibling file instead of copying into themselves.
+// Today: the embedded rock textures, reached by every GPU world bundle.
+export const SHARED_ENTRIES = Object.freeze(
+  SDK_ENTRIES.filter((entry) => entry.key === './experimental/3d/rock-textures').map((entry) =>
+    Object.freeze({ ...entry, resolved: resolve(SDK_ROOT, entry.source) }),
+  ),
+);
 export function sdkConfig(key) {
   const entry = SDK_ENTRIES.find((entry) => entry.key === key);
   if (!entry) throw Error(`Unknown SDK entry: ${key}`);
+  const shared = SHARED_ENTRIES.filter((other) => other.key !== entry.key);
+  const sharedFor = (id) => shared.find((other) => other.resolved === id);
   return {
     root: SDK_ROOT,
     configFile: false,
@@ -51,6 +60,11 @@ export function sdkConfig(key) {
         entry: resolve(SDK_ROOT, entry.source),
         formats: ['es'],
         fileName: () => entry.filename,
+      },
+      rollupOptions: {
+        // Rollup asks twice: with the specifier as written, then with the resolved file.
+        external: (id, _importer, isResolved) => isResolved && sharedFor(id) !== undefined,
+        output: { paths: (id) => (sharedFor(id) ? `./${sharedFor(id).filename}` : id) },
       },
     },
   };

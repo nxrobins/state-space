@@ -94,6 +94,10 @@
     "./experimental/3d/reactive-materials": {
       "types": "./dist/sdk/types/experimental/reactive-materials.d.ts",
       "import": "./dist/sdk/state-space-reactive-materials.js"
+    },
+    "./experimental/3d/rock-textures": {
+      "types": "./dist/sdk/types/experimental/rock-textures.d.ts",
+      "import": "./dist/sdk/state-space-rock-textures.js"
     }
   },
   "files": [
