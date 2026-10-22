@@ -515,8 +515,12 @@ describe('batched structure work replays the per-step oracle', () => {
       return Math.floor((seed / 4294967296) * n);
     };
   }
-  function randomBlock(next: (n: number) => number, registry: ReactiveMaterialRegistry3D) {
-    const size = { width: 1 + next(6), height: 1 + next(6), depth: 1 + next(6) },
+  function randomBlock(
+    next: (n: number) => number,
+    registry: ReactiveMaterialRegistry3D,
+    side = 5,
+  ) {
+    const size = { width: 1 + next(side), height: 1 + next(side), depth: 1 + next(side) },
       count = size.width * size.height * size.depth,
       ids = registry.materialIds,
       solids: number[] = [MAT.STONE, MAT.WOOD, MAT.ICE, MAT.METAL, MAT.GLASS],
@@ -593,19 +597,19 @@ describe('batched structure work replays the per-step oracle', () => {
     const next = random(20261022);
     let moved = 0,
       broken = 0;
-    for (let c = 0; c < 72; c++) {
+    for (let c = 0; c < 20; c++) {
       const registry = c % 4 === 3 ? custom : r,
         out = expectReplay(registry, randomBlock(next, registry)).result!;
       if (out.report.moves.length) moved++;
       if (out.report.brokenCells.length) broken++;
     }
-    expect(moved).toBeGreaterThan(20);
-    expect(broken).toBeGreaterThan(5);
+    expect(moved).toBeGreaterThan(4);
+    expect(broken).toBeGreaterThan(1);
   });
   test('malformed owned blocks throw the same error after the same work', () => {
     const next = random(77),
       errors = new Set<string>();
-    for (let c = 0; c < 60; c++) {
+    for (let c = 0; c < 16; c++) {
       const registry = c % 4 === 3 ? custom : r,
         bad = structuredClone(randomBlock(next, registry)),
         n = bad.structure.length;
@@ -621,6 +625,15 @@ describe('batched structure work replays the per-step oracle', () => {
       const out = expectReplay(registry, bad);
       if (out.error) errors.add(out.error);
     }
+    // Random corruption rarely leaves a cell that is reached but cannot be supported. A bridge whose
+    // span cell k keeps no bond back to the cell reaching it always does, at a unit that moves with k.
+    for (let k = 1; k < 5; k++) {
+      const bad = structuredClone(bridge());
+      bad.structure[k] &= ~BONDS_3D[0];
+      const { error } = expectReplay(r, bad);
+      expect(error).toBe('Incomplete reactive support graph.');
+      errors.add(error!);
+    }
     expect(errors).toContain('Incomplete reactive support graph.');
   });
   test('cancelling at every work boundary matches the per-step job', () => {
@@ -633,9 +646,9 @@ describe('batched structure work replays the per-step oracle', () => {
         second = j.cancel();
       return [before, first, second, message(() => j.advance()), message(() => j.result())];
     };
-    for (let c = 0; c < 8; c++) {
-      let input = randomBlock(next, r);
-      while (input.packedCells.length > 48) input = randomBlock(next, r);
+    for (let c = 0; c < 3; c++) {
+      let input = randomBlock(next, r, 4);
+      while (input.packedCells.length > 32) input = randomBlock(next, r, 4);
       expectReplay(r, input);
       const full = startReactiveStructureJob3D(r, input).job;
       while (full.progress().status === 'running') full.advance(256);

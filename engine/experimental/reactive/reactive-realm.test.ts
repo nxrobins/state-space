@@ -89,7 +89,7 @@ describe('reactive ticks in a patched realm', () => {
   test('an Array.prototype index accessor never steers a tick to a different state', () => {
     let ticks = 0;
     for (const key of ['0', '1', '2', '5', '17']) {
-      let snapshot = createReactiveWorldSnapshot3D(r, mixed());
+      let snapshot = createReactiveWorldSnapshot3D(r, mixed(6));
       for (let t = 0; t < 3; t++) {
         const clean = createReactiveWorldTickJob3D(r, snapshot),
           patched = createReactiveWorldTickJob3D(r, snapshot);

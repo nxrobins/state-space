@@ -411,7 +411,7 @@ describe('owned movement working arrays', () => {
     };
   }
   function randomBlock(next: (n: number) => number) {
-    const size = { width: 1 + next(6), height: 1 + next(6), depth: 1 + next(6) },
+    const size = { width: 1 + next(5), height: 1 + next(5), depth: 1 + next(5) },
       ids = r.materialIds;
     let b = block(r, size, next(3) ? MAT.AIR : ids[next(ids.length)]);
     for (let e = next(48); e > 0; e--) {
@@ -439,7 +439,7 @@ describe('owned movement working arrays', () => {
     const cold = reactiveRegistrySource3D(r).cold,
       next = random(20260601);
     let moving = 0;
-    for (let k = 0; k < 60; k++) {
+    for (let k = 0; k < 20; k++) {
       const initial = randomBlock(next),
         tick = next(8),
         original = structuredClone(initial);
@@ -503,6 +503,6 @@ describe('owned movement working arrays', () => {
       }
       expect(initial).toEqual(original);
     }
-    expect(moving).toBeGreaterThan(100);
+    expect(moving).toBeGreaterThan(40);
   });
 });

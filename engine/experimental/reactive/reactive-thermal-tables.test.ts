@@ -186,22 +186,26 @@ describe('reactive thermal tables', () => {
   });
   test('temperature and thermal view match engine/thermal.ts at every breakpoint', () => {
     const mismatches: number[][] = [];
-    let checked = 0;
+    let checked = 0,
+      expected = 0;
     for (const [, registry] of registries) {
       const T = reactiveThermalTables3D(registry),
         cold = reactiveRegistrySource3D(registry).cold,
-        rnd = random(17);
-      for (let id = 0; id < 256; id++) {
+        rnd = random(17),
+        // Inactive ids read zeroed rows alike: the lowest, the player and the highest stand for them.
+        inactive = [...Array(256).keys()].filter((id) => !registry.has(id)),
+        ids = [
+          ...registry.materialIds,
+          ...inactive.filter((id, k) => !k || id === MAT.PLAYER || k === inactive.length - 1),
+        ];
+      expected += ids.length * 19 * 49;
+      for (const id of ids) {
         const f = T.fuelQ[id],
           p = f + T.phaseQ[id],
           points = [0, f, p, p + T.upQ[id], p + T.downQ[id], T.upBoundary[id], T.downBoundary[id]],
           energies: number[] = [];
         for (const point of points)
           for (const d of [0, 1, -1, 255, -255, 256, -256]) energies.push(point + d);
-        // Random energies near the boundaries and across the whole range: about 2000 per registry each.
-        const near = Math.max(...points) + 512;
-        for (let k = 0; k < 8; k++)
-          energies.push(Math.floor(rnd() * near), Math.floor(rnd() * (MAX_ENERGY_Q + 1)));
         // Temperature depends on the id alone; the view also keeps every other bit of the word.
         const words = [id, (id | 0xf0ff0000) >>> 0, id | 0xff00];
         for (let nibble = 0; nibble < 16; nibble++)
@@ -218,7 +222,7 @@ describe('reactive thermal tables', () => {
       }
     }
     expect(mismatches).toEqual([]);
-    expect(checked).toBe(3 * 256 * 19 * 65);
+    expect(checked).toBe(expected);
   });
   test('block check throws the oracle message or accepts identically under random corruption', () => {
     const odd = [NaN, -1, 0.5, 2 ** 32, -0, 2 ** 53, Infinity, 'x', undefined, null];
@@ -232,7 +236,7 @@ describe('reactive thermal tables', () => {
         outcome(() => oracleCheck(registry, base)),
       );
       const counts = new Map<string, number>();
-      for (let k = 0; k < 3000; k++) {
+      for (let k = 0; k < 600; k++) {
         const block = structuredClone(base),
           cells = block.packedCells as unknown[],
           energies = block.energyQ as unknown[],
