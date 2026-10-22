@@ -78,8 +78,11 @@ const BOND_MASK_3D = BONDS_3D.reduce((mask, bond) => mask | bond, 0);
  * Allocations and public input validation/copying are O(cells), outside this budget.
  * An explicit stepper: run(budget) executes up to budget steps in phase-local loops, and every former
  * yield is one loop iteration, in the same order. A stage transition is the first action of the step
- * after the exhausted stage and a throwing step is not counted, so any budget schedule sees the same
- * stage and work after each step and the same throw points.
+ * after the exhausted stage; the balance and energy checks run there, uncounted. Steps that can
+ * throw (component adjacency, the floor crossing, the permutation) are counted one at a time and a
+ * throwing one is not counted; the loops that count a whole slice up front hold steps that cannot
+ * throw in an unmodified realm. So any budget schedule sees the same stage and work after each
+ * step and the same throw points. Replaced Array.prototype members are outside that guarantee.
  */
 function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   const { packedCells: grid, energyQ, structure } = input,

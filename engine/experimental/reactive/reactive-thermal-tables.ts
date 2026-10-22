@@ -1,9 +1,12 @@
-/** Per-registry material constants for the reactive thermal and structural kernels. */
+/** Per-registry material constants for the reactive thermal and structural kernels.
+ * The temperature, thermal-view, phase and rewrite helpers below mirror engine/thermal.ts (heat in
+ * reactive-reactions.ts inlines exchangeEnergy); reactive-thermal-tables.test.ts and
+ * reactive-reaction-passes.test.ts compare them with the live thermal.ts functions at every breakpoint.
+ */
 import {
   PHASE,
   PHASE_SHIFT,
   COLD_STRIDE,
-  COLD_DENSITY,
   COLD_CONDUCTIVITY,
   COLD_MELT_POINT,
   COLD_BOIL_POINT,
@@ -36,7 +39,6 @@ export type ReactiveThermalTables3D = Readonly<{
   known: Uint8Array;
   defaultPhase: Uint8Array;
   cohesion: Uint8Array;
-  density: Uint8Array;
   conductivity: Uint8Array;
   fuelQ: Float64Array;
   phaseQ: Float64Array;
@@ -70,7 +72,6 @@ export function reactiveThermalTables3D(
     known = bytes(),
     defaultPhase = bytes(),
     cohesion = bytes(),
-    density = bytes(),
     conductivity = bytes(),
     fuelQ = quanta(),
     phaseQ = quanta(),
@@ -94,7 +95,6 @@ export function reactiveThermalTables3D(
     known[id] = registry.has(id) ? 1 : 0;
     defaultPhase[id] = cold[at + COLD_DEFAULT_PHASE];
     cohesion[id] = cold[at + COLD_COHESION];
-    density[id] = cold[at + COLD_DENSITY];
     conductivity[id] = cold[at + COLD_CONDUCTIVITY];
     fuelQ[id] = cold[at + COLD_FUEL_ENERGY] * ENERGY_SCALE;
     phaseQ[id] = cold[at + COLD_PHASE_ENERGY] * ENERGY_SCALE;
@@ -125,7 +125,6 @@ export function reactiveThermalTables3D(
     known,
     defaultPhase,
     cohesion,
-    density,
     conductivity,
     fuelQ,
     phaseQ,

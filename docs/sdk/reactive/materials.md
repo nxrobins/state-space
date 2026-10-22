@@ -50,6 +50,13 @@ const restoredRegistry = await createReactiveMaterialRegistry3D(decoded.catalog)
 const restoredBlock = readReactiveMaterialBlock3D(restoredRegistry, decoded.block);
 ```
 
+Readers take only plain data. They reject holes, accessors, hidden or extra keys,
+symbols and typed arrays without running caller code, so every result is
+reproducible for any caller data. That guarantee assumes an unmodified JavaScript
+realm: replacing or adding members of `Array.prototype` or `Object.prototype`, or
+`Array[Symbol.species]`, is outside the contract, and errors, progress at a throw
+and outputs may then differ between engine versions.
+
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,
 the entire property catalog and sorted active IDs; `sourceCatalogHash` identifies
