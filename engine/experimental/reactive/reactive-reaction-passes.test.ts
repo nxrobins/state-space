@@ -25,6 +25,7 @@ import { INTEGRITY_3D, BONDS_3D, structuralNeighbor } from '../structural-mechan
 import {
   createReactiveMaterialRegistry3D,
   createThermalMaterialRegistry3D,
+  defaultReactiveMaterialCatalog3D,
   createReactiveMaterialBlock3D,
   editReactiveMaterialBlock3D,
   MAT,
@@ -362,6 +363,34 @@ function nearBreakpoint(registry: ReactiveMaterialRegistry3D, id: number, rnd: (
       : Math.floor((rnd() - 0.5) * 8 * ENERGY_SCALE);
   return clamp(points[Math.floor(rnd() * points.length)] + delta);
 }
+function applyEdits(
+  registry: ReactiveMaterialRegistry3D,
+  block: Block,
+  edits: ReactiveMaterialEdit3D[],
+): Block {
+  for (let k = 0; k < edits.length; k += 4096)
+    block = editReactiveMaterialBlock3D(registry, block, edits.slice(k, k + 4096)).block;
+  return block;
+}
+const xyz = (block: Block, i: number) => ({
+  x: i % block.width,
+  y: Math.floor(i / block.width) % block.height,
+  z: Math.floor(i / (block.width * block.height)),
+});
+/** Random anchors and reciprocal bonds between intact cells. */
+function join(registry: ReactiveMaterialRegistry3D, block: Block, rnd: () => number): Block {
+  const joins: ReactiveMaterialEdit3D[] = [];
+  for (let i = 0; i < block.packedCells.length; i++) {
+    if (!(block.structure[i] & INTEGRITY_3D)) continue;
+    if (rnd() < 0.2) joins.push({ kind: 'anchor', ...xyz(block, i), anchored: true });
+    for (const direction of [1, 3, 5]) {
+      const j = structuralNeighbor(i, direction, block);
+      if (j >= 0 && block.structure[j] & INTEGRITY_3D && rnd() < 0.7)
+        joins.push({ kind: 'bond', ...xyz(block, i), direction, bonded: true });
+    }
+  }
+  return applyEdits(registry, block, joins);
+}
 /** A valid block of random materials near their breakpoints, with anchors and reciprocal bonds. */
 function randomBlock(
   registry: ReactiveMaterialRegistry3D,
@@ -369,14 +398,7 @@ function randomBlock(
   rnd: () => number,
 ): Block {
   const T = reactiveThermalTables3D(registry),
-    ids = registry.materialIds,
-    { width: w, height: h } = shape;
-  const apply = (block: Block, edits: ReactiveMaterialEdit3D[]) => {
-    for (let k = 0; k < edits.length; k += 4096)
-      block = editReactiveMaterialBlock3D(registry, block, edits.slice(k, k + 4096)).block;
-    return block;
-  };
-  const xyz = (i: number) => ({ x: i % w, y: Math.floor(i / w) % h, z: Math.floor(i / (w * h)) });
+    ids = registry.materialIds;
   let block = createReactiveMaterialBlock3D(registry, shape);
   const n = block.packedCells.length,
     places: ReactiveMaterialEdit3D[] = [];
@@ -384,33 +406,69 @@ function randomBlock(
     if (rnd() > 0.25)
       places.push({
         kind: 'place',
-        ...xyz(i),
+        ...xyz(block, i),
         material: ids[Math.floor(rnd() * ids.length)],
         thermal: Math.floor(rnd() * 256),
       });
-  block = apply(block, places);
+  block = applyEdits(registry, block, places);
   const energies: ReactiveMaterialEdit3D[] = [];
   for (let i = 0; i < n; i++) {
     const id = block.packedCells[i] & 255;
     if (rnd() < 0.6)
       energies.push({
         kind: 'energy',
-        ...xyz(i),
+        ...xyz(block, i),
         energyQ: clamp(nearBreakpoint(registry, id, rnd), T.fuelQ[id]),
       });
   }
-  block = apply(block, energies);
-  const joins: ReactiveMaterialEdit3D[] = [];
+  return join(registry, applyEdits(registry, block, energies), rnd);
+}
+/** Fuels mostly just above their flash points among oxidizers, fires on both sides of the
+ * extinguishing temperature next to water, fuel or nothing.
+ */
+function combustionBlock(
+  registry: ReactiveMaterialRegistry3D,
+  shape: { width: number; height: number; depth: number },
+  rnd: () => number,
+): Block {
+  const T = reactiveThermalTables3D(registry),
+    ids = registry.materialIds,
+    fuels = ids.filter((id) => T.fuelQ[id] > 0),
+    oxidizers = ids.filter((id) => T.oxidizer[id] === 1),
+    pick = (list: readonly number[]) => list[Math.floor(rnd() * list.length)];
+  let block = createReactiveMaterialBlock3D(registry, shape);
+  const n = block.packedCells.length,
+    places: ReactiveMaterialEdit3D[] = [];
   for (let i = 0; i < n; i++) {
-    if (!(block.structure[i] & INTEGRITY_3D)) continue;
-    if (rnd() < 0.2) joins.push({ kind: 'anchor', ...xyz(i), anchored: true });
-    for (const direction of [1, 3, 5]) {
-      const j = structuralNeighbor(i, direction, block);
-      if (j >= 0 && block.structure[j] & INTEGRITY_3D && rnd() < 0.7)
-        joins.push({ kind: 'bond', ...xyz(i), direction, bonded: true });
-    }
+    const r = rnd(),
+      material =
+        r < 0.3
+          ? pick(fuels)
+          : r < 0.6
+            ? pick(oxidizers)
+            : r < 0.75
+              ? MAT.FIRE
+              : r < 0.82
+                ? MAT.WATER
+                : pick(ids);
+    places.push({ kind: 'place', ...xyz(block, i), material, thermal: Math.floor(rnd() * 256) });
   }
-  return apply(block, joins);
+  block = applyEdits(registry, block, places);
+  const energies: ReactiveMaterialEdit3D[] = [];
+  for (let i = 0; i < n; i++) {
+    const id = block.packedCells[i] & 255,
+      p = T.fuelQ[id] + T.phaseQ[id],
+      near =
+        rnd() < 0.2 ? Math.floor(rnd() * 3) - 1 : Math.floor((rnd() - 0.3) * 30 * ENERGY_SCALE);
+    const energyQ =
+      T.fuelQ[id] > 0 && rnd() < 0.85
+        ? p + T.flashQ[id] + near
+        : id === MAT.FIRE
+          ? p + 80 * ENERGY_SCALE + near
+          : nearBreakpoint(registry, id, rnd);
+    energies.push({ kind: 'energy', ...xyz(block, i), energyQ: clamp(energyQ, T.fuelQ[id]) });
+  }
+  return join(registry, applyEdits(registry, block, energies), rnd);
 }
 
 describe('reaction passes over thermal tables', () => {
@@ -599,6 +657,92 @@ describe('reaction passes over thermal tables', () => {
     expect(cycles).toBe(3 * 5 * 3);
     for (const count of [phaseChanges, reacted, extinguished, clearedBonds])
       expect(count).toBeGreaterThan(0);
+  });
+  test('combustion elects, burns and extinguishes as before on random small blocks', async () => {
+    const catalogRegistry = async (custom: boolean, conductive: boolean) => {
+      const catalog = defaultReactiveMaterialCatalog3D(),
+        materials = catalog.propertiesCatalog.materials,
+        source = (id: number) => structuredClone(materials.find((m) => m.id === id)!);
+      if (custom) {
+        // A bonded solid oxidizer, and a fuel that leaves solids on both sides.
+        const oxide = source(MAT.STONE),
+          resin = source(MAT.WOOD);
+        materials.push(
+          {
+            ...oxide,
+            id: 202,
+            name: 'oxidizing_stone',
+            properties: { ...oxide.properties, oxidizer: 1, melts_into: 0 },
+          },
+          {
+            ...resin,
+            id: 203,
+            name: 'charring_resin',
+            properties: { ...resin.properties, burns_into: MAT.STONE, smoke_product: MAT.METAL },
+          },
+        );
+        catalog.materialIds.push(202, 203);
+      }
+      // Without conduction the combustion pass sees the energies as placed.
+      if (!conductive) for (const m of materials) m.properties.conductivity = 0;
+      return createReactiveMaterialRegistry3D(catalog);
+    };
+    const cases: [string, ReactiveMaterialRegistry3D][] = [
+      ['still', await catalogRegistry(false, false)],
+      ['still custom', await catalogRegistry(true, false)],
+      ['custom', await catalogRegistry(true, true)],
+      ['thermal', registries[1][1]],
+    ];
+    const seen = { pairs: 0, rejected: 0, cut: 0, extinguished: 0, quenched: 0, kept: 0 },
+      rotations = new Set<number>();
+    for (const [name, registry] of cases) {
+      const cold = reactiveRegistrySource3D(registry).cold,
+        rnd = random(name.length * 1009 + 7);
+      for (let round = 0; round < 72; round++) {
+        const shape = {
+            width: 1 + Math.floor(rnd() * 6),
+            height: 1 + Math.floor(rnd() * 6),
+            depth: 1 + Math.floor(rnd() * 6),
+          },
+          cycle = (round % 12 < 6 ? 0 : 2 ** 40) + (round % 6),
+          { actual, passes } = compareCycle(
+            registry,
+            state(combustionBlock(registry, shape, rnd), cycle),
+          );
+        expect(actual.startsWith('ok')).toBe(true);
+        const { report } = JSON.parse(actual.slice(3)) as ReturnType<typeof oracleCycle>,
+          [input, output] = passes[7],
+          material = (i: number) => input.packedCells[i] & 255,
+          adjacent = (i: number) =>
+            [0, 1, 2, 3, 4, 5]
+              .map((dir) => structuralNeighbor(i, dir, input))
+              .filter((j) => j >= 0),
+          fuels = new Set(report.reactedPairs.map((pair) => pair.fuel));
+        if (fuels.size) rotations.add(cycle % 6);
+        seen.pairs += report.reactedPairs.length;
+        seen.extinguished += report.extinguishedCells.length;
+        seen.quenched += report.extinguishedCells.filter((i) =>
+          adjacent(i).some((j) => material(j) === MAT.WATER),
+        ).length;
+        for (let i = 0; i < input.packedCells.length; i++) {
+          const word = input.packedCells[i];
+          if (material(i) === MAT.FIRE && !report.extinguishedCells.includes(i)) seen.kept++;
+          if (word === output.packedCells[i] && input.structure[i] & ~output.structure[i])
+            seen.cut++;
+          // A burning cell beside an oxidizer that did not react lost its oxidizer to another fuel.
+          if (
+            prop(word, cold, COLD_FUEL_ENERGY) > 0 &&
+            temperatureQ(word, input.energyQ[i], cold) >
+              prop(word, cold, COLD_FLASH_POINT) * ENERGY_SCALE &&
+            !fuels.has(i) &&
+            adjacent(i).some((j) => prop(input.packedCells[j], cold, COLD_OXIDIZER) === 1)
+          )
+            seen.rejected++;
+        }
+      }
+    }
+    expect(rotations.size).toBe(6);
+    for (const count of Object.values(seen)) expect(count).toBeGreaterThan(0);
   });
   test('a one-sided link is cleared on a copy when nothing else changes', () => {
     for (const [, registry] of registries) {

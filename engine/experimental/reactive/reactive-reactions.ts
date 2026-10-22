@@ -1,7 +1,7 @@
 /** Bounded local reactive cycles. No movement, global support, Worker or GPU. */
 import { MAT, PHASE, PHASE_SHIFT } from '../../generated/materials.js';
 import { MAX_ENERGY_Q, ENERGY_SCALE } from '../../thermal.js';
-import { INTEGRITY_3D, BONDS_3D, structuralNeighbor } from '../structural-mechanics.js';
+import { INTEGRITY_3D, BONDS_3D } from '../structural-mechanics.js';
 import {
   readReactiveMaterialBlock3D,
   checkReactiveMaterialBlock3D,
@@ -259,6 +259,24 @@ function heat(
     ? { ...input }
     : { ...input, packedCells: outCells, energyQ: outEnergy };
 }
+/** structuralNeighbor of i in each direction -X,+X,-Y,+Y,-Z,+Z into around, -1 at a closed
+ * boundary. Returns x + 2y + 3z, where the cell's rotated combustion order starts.
+ */
+function neighborsOf(around: number[], i: number, geometry: ReactiveMaterialBlock3D): number {
+  const w = geometry.width,
+    h = geometry.height,
+    layer = w * h,
+    x = i % w,
+    y = Math.floor(i / w) % h,
+    z = Math.floor(i / layer);
+  around[0] = x ? i - 1 : -1;
+  around[1] = x + 1 < w ? i + 1 : -1;
+  around[2] = y ? i - w : -1;
+  around[3] = y + 1 < h ? i + w : -1;
+  around[4] = z ? i - layer : -1;
+  around[5] = z + 1 < geometry.depth ? i + layer : -1;
+  return x + 2 * y + 3 * z;
+}
 /** Clear invalid links only. Transformations never silently join neighboring solids.
  * Reads follow the words already cleared in this sweep; the draft copies structure on the first clear.
  */
@@ -266,23 +284,10 @@ function clearInvalidBonds(
   output: ReturnType<typeof draft>,
   geometry: ReactiveMaterialBlock3D,
 ): void {
-  const w = geometry.width,
-    h = geometry.height,
-    d = geometry.depth,
-    layer = w * h,
-    around = [-1, -1, -1, -1, -1, -1];
+  const around = [-1, -1, -1, -1, -1, -1];
   for (let i = 0; i < output.structure.length; i++) {
     if ((output.structure[i] & BOND_MASK_3D) === 0) continue;
-    // structuralNeighbor in each direction -X,+X,-Y,+Y,-Z,+Z; -1 at a closed boundary.
-    const x = i % w,
-      y = Math.floor(i / w) % h,
-      z = Math.floor(i / layer);
-    around[0] = x ? i - 1 : -1;
-    around[1] = x + 1 < w ? i + 1 : -1;
-    around[2] = y ? i - w : -1;
-    around[3] = y + 1 < h ? i + w : -1;
-    around[4] = z ? i - layer : -1;
-    around[5] = z + 1 < d ? i + layer : -1;
+    neighborsOf(around, i, geometry);
     for (let dir = 0; dir < 6; dir++)
       if (output.structure[i] & BONDS_3D[dir]) {
         const j = around[dir];
@@ -326,6 +331,10 @@ function phase(
   clearInvalidBonds(output, input);
   return output.block();
 }
+/** Each burning cell proposes to its first oxidizer neighbor in a rotated direction order and each
+ * proposed oxidizer accepts its first proposer in its own order. Only burning and fire cells can act,
+ * so one scan lists them in ascending order and the products follow that list.
+ */
 function combustion(
   input: ReactiveMaterialBlock3D,
   T: Tables,
@@ -333,59 +342,83 @@ function combustion(
   report: ReactiveReactionReport3D,
 ): ReactiveMaterialBlock3D {
   const output = draft(input),
-    n = input.packedCells.length,
-    proposed = new Int32Array(n).fill(-1),
-    chosen = new Int32Array(n).fill(-1),
-    wanted = new Uint8Array(n),
+    cells = input.packedCells,
+    energy = input.energyQ,
+    n = cells.length,
+    rotation = cycle % 6,
+    around = [-1, -1, -1, -1, -1, -1],
+    burning: number[] = [],
+    acting: number[] = [],
+    wanted: number[] = [],
     { fuelQ, flashQ, oxidizer } = T;
-  const burning = (i: number) =>
-    fuelQ[input.packedCells[i] & 255] > 0 &&
-    reactiveTemperatureQ3D(T, input.packedCells[i], input.energyQ[i]) >
-      flashQ[input.packedCells[i] & 255];
-  const neighbors = (i: number): number[] => {
-    const x = i % input.width,
-      y = Math.floor(i / input.width) % input.height,
-      z = Math.floor(i / (input.width * input.height));
-    const offset = (x + 2 * y + 3 * z + (cycle % 6)) % 6,
-      result: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const m = cells[i] & 255;
+    if (fuelQ[m] > 0 && reactiveTemperatureQ3D(T, cells[i], energy[i]) > flashQ[m]) {
+      burning.push(i);
+      acting.push(i);
+    } else if (m === MAT.FIRE) acting.push(i);
+  }
+  // proposed[i] = j + 1 and chosen[j] = i + 1, 0 for none; chosen -1 marks a queued oxidizer.
+  // Both are read only when some cell burns, so they stay empty otherwise.
+  const size = burning.length ? n : 0,
+    proposed = new Int32Array(size),
+    chosen = new Int32Array(size);
+  for (const i of burning) {
+    const offset = (neighborsOf(around, i, input) + rotation) % 6;
     for (let k = 0; k < 6; k++) {
-      const j = structuralNeighbor(i, (offset + k) % 6, input);
-      if (j >= 0) result.push(j);
+      const j = around[(offset + k) % 6];
+      if (j >= 0 && oxidizer[cells[j] & 255] === 1) {
+        proposed[i] = j + 1;
+        if (chosen[j] === 0) {
+          chosen[j] = -1;
+          wanted.push(j);
+        }
+        break;
+      }
     }
-    return result;
-  };
-  for (let i = 0; i < n; i++)
-    if (burning(i)) {
-      const j = neighbors(i).find((k) => oxidizer[input.packedCells[k] & 255] === 1) ?? -1;
-      proposed[i] = j;
-      if (j >= 0) wanted[j] = 1;
-    }
+  }
   // Only a proposed oxidizer can be chosen, so the neighbor order of every other cell is never needed.
-  for (let i = 0; i < n; i++)
-    if (wanted[i] && oxidizer[input.packedCells[i] & 255] === 1)
-      chosen[i] = neighbors(i).find((j) => proposed[j] === i) ?? -1;
+  for (const j of wanted) {
+    const offset = (neighborsOf(around, j, input) + rotation) % 6;
+    chosen[j] = 0;
+    for (let k = 0; k < 6; k++) {
+      const i = around[(offset + k) % 6];
+      if (i >= 0 && proposed[i] === j + 1) {
+        chosen[j] = i + 1;
+        break;
+      }
+    }
+  }
   const product = (i: number, material: number, energyQ: number) => {
     output.own();
     output.energy[i] = energyQ;
-    output.cells[i] = reactiveRewriteMaterial3D(T, input.packedCells[i], material, energyQ);
+    output.cells[i] = reactiveRewriteMaterial3D(T, cells[i], material, energyQ);
     output.structure[i] = eligible(output.cells[i], T) ? INTEGRITY_3D : 0;
   };
-  for (let i = 0; i < n; i++) {
-    const j = proposed[i];
-    if (j >= 0 && chosen[j] === i) {
-      const fuel = input.packedCells[i] & 255,
-        transfer = Math.min(Math.floor(fuelQ[fuel] / 2), MAX_ENERGY_Q - input.energyQ[j]);
-      product(i, T.burnsInto[fuel], input.energyQ[i] - transfer);
-      product(j, T.smokeProduct[fuel], input.energyQ[j] + transfer);
+  for (const i of acting) {
+    const j = size ? proposed[i] - 1 : -1;
+    if (j >= 0 && chosen[j] === i + 1) {
+      const fuel = cells[i] & 255,
+        transfer = Math.min(Math.floor(fuelQ[fuel] / 2), MAX_ENERGY_Q - energy[j]);
+      product(i, T.burnsInto[fuel], energy[i] - transfer);
+      product(j, T.smokeProduct[fuel], energy[j] + transfer);
       report.reactedPairs.push({ fuel: i, oxidizer: j, transferredEnergyQ: transfer });
-    } else if ((input.packedCells[i] & 255) === MAT.FIRE) {
-      const adjacent = neighbors(i);
+    } else if ((cells[i] & 255) === MAT.FIRE) {
+      neighborsOf(around, i, input);
+      let nearFuel = false,
+        nearWater = false;
+      for (let dir = 0; dir < 6; dir++) {
+        const k = around[dir];
+        if (k < 0) continue;
+        if (fuelQ[cells[k] & 255] > 0) nearFuel = true;
+        if ((cells[k] & 255) === MAT.WATER) nearWater = true;
+      }
       if (
-        !adjacent.some((k) => fuelQ[input.packedCells[k] & 255] > 0) ||
-        adjacent.some((k) => (input.packedCells[k] & 255) === MAT.WATER) ||
-        reactiveTemperatureQ3D(T, input.packedCells[i], input.energyQ[i]) < 80 * ENERGY_SCALE
+        !nearFuel ||
+        nearWater ||
+        reactiveTemperatureQ3D(T, cells[i], energy[i]) < 80 * ENERGY_SCALE
       ) {
-        product(i, MAT.SMOKE, input.energyQ[i]);
+        product(i, MAT.SMOKE, energy[i]);
         report.extinguishedCells.push(i);
       }
     }
