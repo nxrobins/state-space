@@ -1,12 +1,6 @@
 /** Portable reactive material blocks and atomic edits; no time evolution. */
 import { MAT, PHASE, PHASE_SHIFT, COLD_STRIDE, COLD_COHESION } from '../../generated/materials.js';
-import {
-  seedState,
-  validateEnergyState,
-  thermalView,
-  energyLedger,
-  MAX_ENERGY_Q,
-} from '../../thermal.js';
+import { seedState, thermalView, energyLedger, MAX_ENERGY_Q } from '../../thermal.js';
 import {
   INTEGRITY_3D,
   ANCHOR_3D,
@@ -21,26 +15,12 @@ import {
   reactiveInteger3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
+import {
+  reactiveThermalTables3D,
+  reactiveThermalView3D,
+  type ReactiveThermalTables3D,
+} from './reactive-thermal-tables.js';
 const BOND_MASK_3D = BONDS_3D.reduce((mask, bit) => mask | bit, 0);
-/** Per-registry material facts the block check needs for every cell; registries are frozen, so these never change. */
-const materialTables = new WeakMap<
-  ReactiveMaterialRegistry3D,
-  { known: Uint8Array; phase: Uint8Array }
->();
-function reactiveMaterialTables3D(registry: ReactiveMaterialRegistry3D) {
-  let tables = materialTables.get(registry);
-  if (!tables) {
-    const known = new Uint8Array(256),
-      phase = new Uint8Array(256);
-    for (const id of registry.materialIds) {
-      known[id] = 1;
-      phase[id] = registry.material(id).properties.default_phase;
-    }
-    tables = { known, phase };
-    materialTables.set(registry, tables);
-  }
-  return tables;
-}
 export const REACTIVE_BLOCK_RULES_3D = 'reactive-material-block-1';
 export const REACTIVE_BLOCK_SCHEMA_3D = 1;
 export const REACTIVE_BLOCK_LIMITS_3D = Object.freeze({
@@ -151,6 +131,36 @@ export function readReactiveMaterialBlock3D(
     structure,
   });
 }
+/** validateEnergyState without its typed copies: same checks, order and messages.
+ * Its typed-array shortcut never applies (blocks hold plain arrays) and would pass this loop.
+ * validatePackedCells labels energies 'packedCells' too.
+ */
+function checkReactiveEnergyState3D(
+  packedCells: readonly number[],
+  energyQ: readonly number[],
+  count: number,
+  T: ReactiveThermalTables3D,
+) {
+  for (const values of [packedCells, energyQ])
+    for (let index = 0; index < count; index++) {
+      const value = values[index];
+      if (!Number.isSafeInteger(value) || value < 0 || value > 0xffffffff)
+        throw Error(`packedCells[${index}] must be an integer in [0, 4294967295].`);
+    }
+  // In range, each value equals its Uint32 copy; table entries equal the inline cold products.
+  const { sourceKnown, fuelQ } = T;
+  for (let i = 0; i < count; i++) {
+    const v = packedCells[i],
+      m = v & 255;
+    if (!sourceKnown[m]) throw Error('Undefined material in simulation state.');
+    const minimum = fuelQ[m],
+      e = energyQ[i];
+    if (e < minimum || e > MAX_ENERGY_Q)
+      throw Error(`energyQ[${i}] must be an integer in [${minimum}, ${MAX_ENERGY_Q}].`);
+    if (reactiveThermalView3D(T, v, e) !== v)
+      throw Error('Packed thermal view disagrees with conserved energy.');
+  }
+}
 /** Internal only: physical invariants of an engine-owned block whose data shape is already trusted.
  * The public reader copies and checks shape first; this never copies, and returns canonical field order.
  */
@@ -164,14 +174,20 @@ export function checkReactiveMaterialBlock3D(
     count = shape(dimensions);
   if (packedCells.length !== count || energyQ.length !== count || structure.length !== count)
     throw Error('Reactive coordinate length mismatch.');
-  validateEnergyState(packedCells, energyQ, count, source.cold, source.registry);
-  const { known, phase } = reactiveMaterialTables3D(registry);
+  const T = reactiveThermalTables3D(registry),
+    { known, defaultPhase, eligibleById } = T;
+  checkReactiveEnergyState3D(packedCells, energyQ, count, T);
   for (let i = 0; i < count; i++) {
     const v = packedCells[i],
       word = structure[i];
-    if (!known[v & 255] || (v & 0xf0ff0000) !== 0 || ((v >>> PHASE_SHIFT) & 15) !== phase[v & 255])
+    if (
+      !known[v & 255] ||
+      (v & 0xf0ff0000) !== 0 ||
+      ((v >>> PHASE_SHIFT) & 15) !== defaultPhase[v & 255]
+    )
       throw Error('Invalid reactive packed material.');
-    if ((word & ~COMPLETE_STRUCTURE_3D) !== 0 || (!eligible(v, source.cold) && word !== 0))
+    // The phase nibble is the default phase here, so eligibility depends on the id alone.
+    if ((word & ~COMPLETE_STRUCTURE_3D) !== 0 || (!eligibleById[v & 255] && word !== 0))
       throw Error('Invalid reactive structural state.');
     if ((word & BOND_MASK_3D) === 0) continue;
     for (let dir = 0; dir < 6; dir++)
