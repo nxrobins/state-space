@@ -338,11 +338,11 @@ describe('reactive array reads', () => {
     nonExtensible: () => [Object.preventExtensions([0, 1]), 2],
     nonArray: () => [{}, 1],
     nullValue: () => [null, 1],
-    long: () => [range(33000), 65536],
-    longHole: () => [holed(33000, 100), 65536],
-    longHoleInTable: () => [define(holed(33000, 100), 'extra', { value: 1 }), 65536],
-    longHoleBeyondTable: () => [define(holed(33000, 32999), 'extra', { value: 1 }), 65536],
-    longGetterBeyondTable: () => [define(range(33000), 32800, counted()), 65536],
+    long: () => [range(40000), 65536],
+    longHole: () => [holed(40000, 100), 65536],
+    longHoleInTable: () => [define(holed(40000, 100), 'extra', { value: 1 }), 65536],
+    longHoleBeyondTable: () => [define(holed(40000, 39999), 'extra', { value: 1 }), 65536],
+    longGetterBeyondTable: () => [define(range(40000), 35000, counted()), 65536],
     proxy: () => [new Proxy([0, 1, 2], {}), 3],
     tracedProxy: () => [traced([0, 1, 2]), 3],
     tracedProxyHole: () => [traced([0, , 2]), 3],
@@ -386,7 +386,7 @@ describe('reactive array reads', () => {
   };
   test('match the per-index descriptor reader on adversarial arrays', () => {
     // Traces are compared as one text, a trap and its key per line: toEqual would walk each of the
-    // long proxy's 33000 entries.
+    // long proxy's 40000 entries.
     const text = ({ trace, ...rest }: ReturnType<typeof run>) => ({
       ...rest,
       trace: trace

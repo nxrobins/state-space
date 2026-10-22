@@ -593,6 +593,24 @@ describe('batched structure work replays the per-step oracle', () => {
     }
     return last!;
   }
+  /** A bonded floor slab carrying three loose stones, one of them carrying a fourth: the slab's
+   * dependents list holds several components in insertion order, and blocking reaches two levels. */
+  function stacked() {
+    return read(
+      r,
+      fixture(
+        [
+          ...Array.from({ length: 5 }, (_, x) => place(x, 2)),
+          ...Array.from({ length: 4 }, (_, x) => bond(x, 2)),
+          place(0, 1),
+          place(2, 1),
+          place(4, 1),
+          place(2, 0),
+        ],
+        { width: 5, height: 3, depth: 1 },
+      ),
+    );
+  }
   test('random blocks match unit for unit under every budget schedule', () => {
     const next = random(20261022);
     let moved = 0,
@@ -605,6 +623,10 @@ describe('batched structure work replays the per-step oracle', () => {
     }
     expect(moved).toBeGreaterThan(4);
     expect(broken).toBeGreaterThan(1);
+    // Every stone rests on the slab, directly or through another stone: nothing may move.
+    const out = expectReplay(r, stacked()).result!;
+    expect(out.report.movingCells).toEqual([]);
+    expect(out.report.moves).toEqual([]);
   });
   test('malformed owned blocks throw the same error after the same work', () => {
     const next = random(77),
@@ -646,9 +668,10 @@ describe('batched structure work replays the per-step oracle', () => {
         second = j.cancel();
       return [before, first, second, message(() => j.advance()), message(() => j.result())];
     };
-    for (let c = 0; c < 3; c++) {
+    for (let c = 0; c < 4; c++) {
       let input = randomBlock(next, r, 4);
       while (input.packedCells.length > 32) input = randomBlock(next, r, 4);
+      if (c === 3) input = stacked();
       expectReplay(r, input);
       const full = startReactiveStructureJob3D(r, input).job;
       while (full.progress().status === 'running') full.advance(256);

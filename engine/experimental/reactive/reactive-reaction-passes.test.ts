@@ -623,8 +623,9 @@ describe('reaction passes over thermal tables', () => {
     const shapes = [
       { width: 5, height: 7, depth: 3 },
       { width: 13, height: 3, depth: 5 },
-      { width: 1, height: 1, depth: 17 },
-      { width: 2, height: 17, depth: 1 },
+      // Even extents on every axis end the odd-parity heat passes one cell early.
+      { width: 1, height: 1, depth: 16 },
+      { width: 2, height: 16, depth: 1 },
       { width: 5, height: 5, depth: 5 },
     ];
     let phaseChanges = 0,

@@ -187,7 +187,8 @@ describe('reactive thermal tables', () => {
   test('temperature and thermal view match engine/thermal.ts at every breakpoint', () => {
     const mismatches: number[][] = [];
     let checked = 0,
-      expected = 0;
+      expected = 0,
+      saturated = 0;
     for (const [, registry] of registries) {
       const T = reactiveThermalTables3D(registry),
         cold = reactiveRegistrySource3D(registry).cold,
@@ -198,7 +199,7 @@ describe('reactive thermal tables', () => {
           ...registry.materialIds,
           ...inactive.filter((id, k) => !k || id === MAT.PLAYER || k === inactive.length - 1),
         ];
-      expected += ids.length * 19 * 49;
+      expected += ids.length * 19 * 53;
       for (const id of ids) {
         const f = T.fuelQ[id],
           p = f + T.phaseQ[id],
@@ -206,6 +207,9 @@ describe('reactive thermal tables', () => {
           energies: number[] = [];
         for (const point of points)
           for (const d of [0, 1, -1, 255, -255, 256, -256]) energies.push(point + d);
+        // Energies above every breakpoint, where the view saturates at 255 degrees.
+        energies.push(MAX_ENERGY_Q, MAX_ENERGY_Q - 1);
+        for (let k = 0; k < 2; k++) energies.push(Math.floor(rnd() * (MAX_ENERGY_Q + 1)));
         // Temperature depends on the id alone; the view also keeps every other bit of the word.
         const words = [id, (id | 0xf0ff0000) >>> 0, id | 0xff00];
         for (let nibble = 0; nibble < 16; nibble++)
@@ -213,6 +217,7 @@ describe('reactive thermal tables', () => {
         for (const word of words)
           for (const e of energies) {
             checked++;
+            if (reactiveTemperatureQ3D(T, word, e) >= 256 * ENERGY_SCALE) saturated++;
             if (
               !Object.is(reactiveTemperatureQ3D(T, word, e), temperatureQ(word, e, cold)) ||
               reactiveThermalView3D(T, word, e) !== thermalView(word, e, cold)
@@ -223,6 +228,7 @@ describe('reactive thermal tables', () => {
     }
     expect(mismatches).toEqual([]);
     expect(checked).toBe(expected);
+    expect(saturated).toBeGreaterThan(checked / 20);
   });
   test('block check throws the oracle message or accepts identically under random corruption', () => {
     const odd = [NaN, -1, 0.5, 2 ** 32, -0, 2 ** 53, Infinity, 'x', undefined, null];
