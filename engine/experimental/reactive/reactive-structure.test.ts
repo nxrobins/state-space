@@ -24,7 +24,7 @@ import {
   startReactiveStructureJob3D,
   type ReactiveStructureProgress3D,
 } from './reactive-structure.js';
-import { startStepBaselineStructureJob3D } from './reactive-structure.step-baseline.js';
+import { startStepBaselineStructureJob3D } from './reactive-structure.per-step-oracle.js';
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, custom: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
@@ -496,7 +496,7 @@ describe('reactive structural support and conservative fragments', () => {
     expect(out.report.energy.driftQ).toBe('0');
   });
 });
-describe('batched structure work replays the frozen per-step job', () => {
+describe('batched structure work replays the per-step oracle', () => {
   type Start = typeof startReactiveStructureJob3D;
   const schedules = [[1], [3], [64], [255, 1], [256], [1, 3, 2, 256, 5]];
   const progress = (p: ReactiveStructureProgress3D) =>

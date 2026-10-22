@@ -1,5 +1,7 @@
-/** Frozen per-step structure job for batched-stepper equivalence verification only. */
-// reactive-structure.ts solve() and structureJob() before batching, kept verbatim as the test oracle.
+/** Test oracle for reactive-structure.test.ts only: solve() and structureJob() as they were before
+ * the stepper was batched, kept verbatim so the tests can replay both unit for unit. It is not
+ * evidence and not byte-bound; delete it once the batched stepper has shipped and settled.
+ */
 import {
   COLD_STRIDE,
   COLD_COHESION,
