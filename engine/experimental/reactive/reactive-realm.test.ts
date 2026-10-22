@@ -1,4 +1,7 @@
-/** A patched realm is outside the bit-identity contract; a tick still publishes the true state or fails. */
+/** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
+ * Object.prototype hook a tick still publishes the true state or fails, and the structure stage never
+ * trusts a replaced slice, constructor or species more than the engine before batching did.
+ */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
 import {
@@ -162,6 +165,58 @@ describe('reactive ticks in a patched realm', () => {
       calls: 0,
     });
     expect(observe({ value: 7, writable: true }, 'width')).toEqual({ committed: 1, calls: 0 });
+  });
+  test('a replaced slice, constructor or species during the structure stage leaves the true state', () => {
+    const slice = Array.prototype.slice,
+      constructor = Reflect.getOwnPropertyDescriptor(Array.prototype, 'constructor')!,
+      species = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)!;
+    /** An array whose stores vanish, as a hostile species could return. */
+    class Swallow extends Array {
+      constructor(...items: unknown[]) {
+        super(...(items as number[]));
+        return new Proxy(this, { set: () => true });
+      }
+    }
+    const replaceSlice = (next: (this: unknown[], ...rest: unknown[]) => unknown) => () => {
+      Array.prototype.slice = next as typeof slice;
+      return () => void (Array.prototype.slice = slice);
+    };
+    const patches: Record<string, () => () => void> = {
+      identity: replaceSlice(function (...rest) {
+        return rest.length ? slice.apply(this, rest as []) : this;
+      }),
+      swallow: replaceSlice(function (...rest) {
+        return new Proxy(slice.apply(this, rest as []), { set: () => true });
+      }),
+      species: () => {
+        Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => Swallow });
+        return () => void Object.defineProperty(Array, Symbol.species, species);
+      },
+      constructor: () => {
+        Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
+        return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
+      },
+    };
+    const tick = (patch: () => () => void) => {
+      const w = createReactiveWorld3D(r, mixed(6)),
+        j = w.prepareTick();
+      let patched = 0;
+      while (j.progress().status === 'running') {
+        const stage = j.progress().phase === 'structure-prepare',
+          restore = stage ? patch() : () => undefined;
+        try {
+          j.advance(64);
+        } finally {
+          restore();
+        }
+        patched += stage ? 1 : 0;
+      }
+      w.commitTick(j);
+      return { patched: patched > 0, snapshot: w.snapshot() };
+    };
+    const clean = tick(() => () => undefined).snapshot;
+    for (const [name, patch] of Object.entries(patches))
+      expect({ name, ...tick(patch) }).toEqual({ name, patched: true, snapshot: clean });
   });
   test('an append that fails inside a structure batch stops where the per-step job stops', () => {
     // Hot wood breaks on the floor and a loose stone bar falls, so every report array fills. No cell

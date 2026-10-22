@@ -1,6 +1,7 @@
-/** Test oracle for reactive-structure.test.ts only: solve() and structureJob() as they were before
- * the stepper was batched, kept verbatim so the tests can replay both unit for unit. It is not
- * evidence and not byte-bound; delete it once the batched stepper has shipped and settled.
+/** Test oracle for reactive-structure.test.ts and reactive-realm.test.ts only: solve() and
+ * structureJob() as they were before the stepper was batched, kept verbatim so the tests can replay
+ * both unit for unit. It is not evidence and not byte-bound; once the batched stepper has shipped and
+ * settled, delete it together with the replay tests that import it.
  */
 import {
   COLD_STRIDE,

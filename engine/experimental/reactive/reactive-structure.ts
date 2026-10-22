@@ -15,6 +15,7 @@ import { readReactiveMaterialBlock3D, type ReactiveMaterialBlock3D } from './rea
 import {
   reactiveInteger3D,
   reactiveRegistrySource3D,
+  reactivePlainArraySlice3D,
   cloneReactiveData3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
@@ -79,11 +80,11 @@ const BOND_MASK_3D = BONDS_3D.reduce((mask, bond) => mask | bond, 0);
  * An explicit stepper: run(budget) executes up to budget steps in phase-local loops, and every former
  * yield is one loop iteration, in the same order. A stage transition is the first action of the step
  * after the exhausted stage; the balance and energy checks run there, uncounted. Steps that can
- * throw (component adjacency, the floor crossing, the permutation, and every append to a plain
- * array, which a realm Array.prototype index accessor can fail) are counted one at a time and a
- * throwing one is not counted; the loops that count a whole slice up front write typed storage
- * only. So any budget schedule sees the same stage and work after each step and the same throw
- * points. Replaced Array.prototype members are outside that guarantee.
+ * throw (the support graph, component adjacency, the floor crossing, the permutation, and every
+ * append to a plain array, which a realm Array.prototype index accessor can fail) are counted one
+ * at a time and a throwing one is not counted; the loops that count a whole slice up front write
+ * typed storage only. So any budget schedule sees the same stage and work after each step and the
+ * same throw points. Replaced Array.prototype members are outside that guarantee.
  */
 function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   const { packedCells: grid, energyQ, structure } = input,
@@ -130,12 +131,15 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   let length = 0,
     supportedWeight = 0,
     reactionTotal = 0;
-  // Publish writes every cell; slice() keeps a packed input packed for the next tick's readers.
+  // Publish writes every cell; slice() keeps a packed input packed for the next tick's readers. A
+  // replaced slice, constructor or species could hand back any object, so the output is then built
+  // as before batching.
+  const sliced = reactivePlainArraySlice3D();
   const block = {
     ...input,
-    packedCells: grid.slice(),
-    energyQ: energyQ.slice(),
-    structure: structure.slice(),
+    packedCells: sliced ? grid.slice() : new Array<number>(n),
+    energyQ: sliced ? energyQ.slice() : new Array<number>(n),
+    structure: sliced ? structure.slice() : new Array<number>(n),
   };
   // Exact under REACTIVE_BLOCK_LIMITS_3D: 32768 cells at MAX_ENERGY_Q stay far below 2^53.
   let beforeQ = 0,

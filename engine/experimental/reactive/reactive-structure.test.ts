@@ -593,8 +593,9 @@ describe('batched structure work replays the per-step oracle', () => {
     }
     return last!;
   }
-  /** A bonded floor slab carrying three loose stones, one of them carrying a fourth: the slab's
-   * dependents list holds several components in insertion order, and blocking reaches two levels. */
+  /** A bonded floor slab carrying a two-cell bar and two loose stones; the bar and one stone carry
+   * one more stone each. The slab's dependents list holds the bar once per resting cell and the
+   * stones after it, in insertion order, and blocking reaches two levels. */
   function stacked() {
     return read(
       r,
@@ -603,9 +604,12 @@ describe('batched structure work replays the per-step oracle', () => {
           ...Array.from({ length: 5 }, (_, x) => place(x, 2)),
           ...Array.from({ length: 4 }, (_, x) => bond(x, 2)),
           place(0, 1),
-          place(2, 1),
+          place(1, 1),
+          bond(0, 1),
+          place(3, 1),
           place(4, 1),
-          place(2, 0),
+          place(0, 0),
+          place(3, 0),
         ],
         { width: 5, height: 3, depth: 1 },
       ),
@@ -627,6 +631,17 @@ describe('batched structure work replays the per-step oracle', () => {
     const out = expectReplay(r, stacked()).result!;
     expect(out.report.movingCells).toEqual([]);
     expect(out.report.moves).toEqual([]);
+  });
+  test('owned geometry that outruns its arrays stops at the work bound like the per-step job', () => {
+    // A 1 x 4 x 6 shape over one cell of arrays never completes. Its bound is 20 * 1 + 16 = 36 units,
+    // and the unit past it is the first of a new stage, which must not become the reported stage.
+    const input = { ...read(r, fixture([place(0)], { width: 1, height: 1, depth: 1 })) };
+    Object.assign(input, { width: 1, height: 4, depth: 6 });
+    for (const budgets of [[1], [256], [36], [35, 1], [7]]) {
+      const expected = replay(startStepBaselineStructureJob3D, r, input, budgets);
+      expect(expected.error).toBe('Reactive structure work bound exceeded.');
+      expect(replay(startReactiveStructureJob3D, r, input, budgets)).toStrictEqual(expected);
+    }
   });
   test('malformed owned blocks throw the same error after the same work', () => {
     const next = random(77),

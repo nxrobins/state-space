@@ -100,6 +100,23 @@ export function reactivePlainObjectPrototype3D(): boolean {
   }
   return true;
 }
+const ARRAY_SLICE = Array.prototype.slice,
+  ARRAY_SPECIES = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)?.get;
+/** Array.prototype.slice, Array.prototype.constructor and Array[Symbol.species] as this module loaded
+ * them: slice() of a plain array then makes a fresh plain array of its own elements. A replaced one may
+ * return any object, even its input. Own descriptor fields only, as above.
+ */
+export function reactivePlainArraySlice3D(): boolean {
+  const own = (target: object, key: PropertyKey, field: 'value' | 'get') => {
+    const d = Reflect.getOwnPropertyDescriptor(target, key);
+    return d && Object.hasOwn(d, field) ? d[field] : undefined;
+  };
+  return (
+    own(Array.prototype, 'slice', 'value') === ARRAY_SLICE &&
+    own(Array.prototype, 'constructor', 'value') === Array &&
+    own(Array, Symbol.species, 'get') === ARRAY_SPECIES
+  );
+}
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
  * Field order is kept exactly as structuredClone keeps it, without its serializer cost.
  * Shared references are kept for arrays and nested objects; a flat record (primitive values only) inside an array
