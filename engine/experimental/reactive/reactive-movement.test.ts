@@ -14,8 +14,12 @@ import {
 import {
   reactiveMovementSchedule3D as schedule,
   runReactiveMovementPass3D as run,
+  executeReactiveMovementPass3D,
+  classifyReactiveMovement3D,
+  type ReactiveMovementClasses3D,
   type ReactiveMovementPass3D,
 } from './reactive-movement.js';
+import { reactiveRegistrySource3D } from './reactive-registry.js';
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
@@ -366,5 +370,139 @@ describe('profile-aware conservative reactive movement', () => {
     expect(() => run({ ...r }, b, 0, 0)).toThrow();
     expect(() => run(r, { ...b, materialCatalogHash: 'foreign' }, 0, 0)).toThrow();
     expect(b).toEqual(original);
+  });
+  test('every rule reads the pass input, never a swap made earlier in the same pass', () => {
+    // The left sand takes the open cell below its neighbour, which still saw that cell open.
+    const diagonal = fixture(
+      [place(MAT.SAND), { ...place(MAT.SAND), x: 1 }, { ...place(MAT.STONE), y: 1 }],
+      { width: 3, height: 2, depth: 1 },
+    );
+    const d = run(r, diagonal, 0, pass('diagonal', 0, 0, 1)),
+      cells = diagonal.packedCells;
+    expect(d.swaps).toEqual([[0, 4]]);
+    expect(d.block.packedCells).toEqual([
+      cells[4],
+      cells[1],
+      cells[2],
+      cells[3],
+      cells[0],
+      cells[5],
+    ]);
+    // Bottom water spreads along Z into the cell whose open fall still holds the upper water back.
+    const liquid = fixture(
+      [
+        { ...place(MAT.WATER), y: 1 },
+        { ...place(MAT.WATER), z: 2 },
+        { ...place(MAT.STONE), y: 1, z: 2 },
+        { ...place(MAT.STONE), y: 1, z: 3 },
+      ],
+      { width: 1, height: 2, depth: 4 },
+    );
+    const l = run(r, liquid, 0, pass('liquid', 2, 0));
+    expect(l.swaps).toEqual([[1, 3]]);
+    expect(l.block.packedCells[4]).toBe(liquid.packedCells[4]);
+  });
+});
+describe('owned movement working arrays', () => {
+  function random(seed: number) {
+    return (n: number) => {
+      seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+      return Math.floor((seed / 4294967296) * n);
+    };
+  }
+  function randomBlock(next: (n: number) => number) {
+    const size = { width: 1 + next(6), height: 1 + next(6), depth: 1 + next(6) },
+      ids = r.materialIds;
+    let b = block(r, size, next(3) ? MAT.AIR : ids[next(ids.length)]);
+    for (let e = next(48); e > 0; e--) {
+      const x = next(size.width),
+        y = next(size.height),
+        z = next(size.depth),
+        k = next(10);
+      const change: ReactiveMaterialEdit3D =
+        k < 7
+          ? { kind: 'place', x, y, z, material: ids[next(ids.length)], thermal: next(256) }
+          : k < 8
+            ? { kind: 'anchor', x, y, z, anchored: next(2) === 0 }
+            : k < 9
+              ? { kind: 'integrity', x, y, z, integrity: next(256) }
+              : { kind: 'bond', x, y, z, direction: next(6), bonded: true };
+      try {
+        b = edit(r, b, [change]).block;
+      } catch {
+        // Ineligible edits are skipped.
+      }
+    }
+    return b;
+  }
+  test('in-place passes with row skipping equal full scans and thread exact row counts', () => {
+    const cold = reactiveRegistrySource3D(r).cold,
+      next = random(20260601);
+    let moving = 0;
+    for (let k = 0; k < 60; k++) {
+      const initial = randomBlock(next),
+        tick = next(8),
+        original = structuredClone(initial);
+      let reference = initial,
+        current = initial,
+        classes: ReactiveMovementClasses3D | undefined,
+        working = false;
+      for (let p = 0; p < 20; p++) {
+        const expected = run(r, reference, tick, p),
+          swaps: [number, number][] = [],
+          full: [number, number][] = [];
+        // Counts of one in every row disable row skipping: the scan visits every pair.
+        const ones = () => new Uint16Array(reference.height * reference.depth).fill(1),
+          scanned = executeReactiveMovementPass3D(
+            reference,
+            cold,
+            tick,
+            schedule(tick)[p],
+            (a, b) => full.push([a, b]),
+            {
+              classes: classifyReactiveMovement3D(
+                reference.packedCells,
+                reference.structure,
+                cold,
+                reference.width,
+              ).classes,
+              rowFalling: ones(),
+              rowFluid: ones(),
+              rowGas: ones(),
+            },
+          );
+        expect(expected.swaps).toEqual(full);
+        expect(expected.block).toEqual(scanned.block);
+        const out = executeReactiveMovementPass3D(
+          current,
+          cold,
+          tick,
+          schedule(tick)[p],
+          (a, b) => swaps.push([a, b]),
+          classes,
+          working,
+        );
+        expect(swaps).toEqual(expected.swaps);
+        expect(out.block).toEqual(expected.block);
+        expect(out.classes).toEqual(
+          classifyReactiveMovement3D(
+            out.block.packedCells,
+            out.block.structure,
+            cold,
+            out.block.width,
+          ),
+        );
+        if (out.block.packedCells !== current.packedCells) {
+          expect(working).toBe(false);
+          working = true;
+        }
+        if (swaps.length) moving++;
+        reference = expected.block;
+        current = out.block;
+        classes = out.classes;
+      }
+      expect(initial).toEqual(original);
+    }
+    expect(moving).toBeGreaterThan(100);
   });
 });

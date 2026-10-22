@@ -63,34 +63,60 @@ const FALLING = 1,
   GASEOUS = 4,
   FLUID = 8,
   AIRY = 16;
+/** Per-cell classes plus, per x-row (fixed y and z), how many cells can start a fall, spread as a fluid,
+ * or move as a non-air gas. A pass skips every row pair that these counts prove no rule can swap.
+ */
+export type ReactiveMovementClasses3D = {
+  classes: Uint8Array;
+  rowFalling: Uint16Array;
+  rowFluid: Uint16Array;
+  rowGas: Uint16Array;
+};
 export function classifyReactiveMovement3D(
   cells: readonly number[],
   structure: readonly number[],
   cold: Uint32Array,
-): Uint8Array {
-  const classes = new Uint8Array(cells.length);
-  for (let i = 0; i < cells.length; i++) {
+  width: number,
+): ReactiveMovementClasses3D {
+  const classes = new Uint8Array(cells.length),
+    rows = Math.ceil(cells.length / width);
+  const rowFalling = new Uint16Array(rows),
+    rowFluid = new Uint16Array(rows),
+    rowGas = new Uint16Array(rows);
+  for (let i = 0, x = 0, row = 0; i < cells.length; i++) {
     const word = cells[i],
       p = (word >>> PHASE_SHIFT) & 15;
+    let c = 0;
     if (p === PHASE.SOLID || p === PHASE.FROZEN) {
       const cohesive = cold[(word & 255) * COLD_STRIDE + COLD_COHESION] > 0;
-      classes[i] =
+      c =
         (cohesive ? FALLING : 0) |
         (!cohesive || (structure[i] & (INTEGRITY_3D | ANCHOR_3D)) !== 0 ? BOUND : 0);
-    } else if (p === PHASE.POWDER) classes[i] = FALLING;
-    else if (p === PHASE.LIQUID || p === PHASE.VISCOUS || p === PHASE.MOLTEN)
-      classes[i] = FALLING | FLUID;
-    else if (p === PHASE.GAS) classes[i] = (word & 255) === MAT.AIR ? GASEOUS | AIRY : GASEOUS;
+    } else if (p === PHASE.POWDER) c = FALLING;
+    else if (p === PHASE.LIQUID || p === PHASE.VISCOUS || p === PHASE.MOLTEN) c = FALLING | FLUID;
+    else if (p === PHASE.GAS) c = (word & 255) === MAT.AIR ? GASEOUS | AIRY : GASEOUS;
+    classes[i] = c;
+    if (c & FALLING) rowFalling[row]++;
+    if (c & FLUID) rowFluid[row]++;
+    if ((c & (GASEOUS | AIRY)) === GASEOUS) rowGas[row]++;
+    if (++x === width) {
+      x = 0;
+      row++;
+    }
   }
-  return classes;
+  return { classes, rowFalling, rowFluid, rowGas };
 }
 const KIND = Object.freeze({ gravity: 0, diagonal: 1, buoyancy: 2, liquid: 3, gas: 4 });
-export type ReactiveMovementOutput3D = { block: ReactiveMaterialBlock3D; classes: Uint8Array };
+export type ReactiveMovementOutput3D = {
+  block: ReactiveMaterialBlock3D;
+  classes: ReactiveMovementClasses3D;
+};
 
 /** Trusted internal pass. The public wrappers validate input and select the frozen schedule.
  * Pairs that no rule can swap are skipped before any rule runs; the visiting order never changes.
- * Output arrays are copied on the first swap only, so a pass that moves nothing shares the immutable input arrays.
+ * A pass that moves nothing shares the input arrays; otherwise they are copied once, after the scan.
  * `inputClasses`, when given, must describe `input`; the returned classes describe the returned block.
+ * With `owned`, the input arrays and classes belong to the caller and are swapped in place after the scan.
  */
 export function executeReactiveMovementPass3D(
   input: ReactiveMaterialBlock3D,
@@ -98,20 +124,31 @@ export function executeReactiveMovementPass3D(
   tick: number,
   pass: Readonly<ReactiveMovementPass3D>,
   onSwap: (a: number, b: number) => void,
-  inputClasses?: Uint8Array,
+  inputClasses?: ReactiveMovementClasses3D,
+  owned = false,
 ): ReactiveMovementOutput3D {
   const { width: w, height: h, depth: d } = input,
     layer = w * h,
     cells = input.packedCells,
     energy = input.energyQ,
     structure = input.structure;
-  if (inputClasses && inputClasses.length !== cells.length)
+  if (
+    inputClasses &&
+    (inputClasses.classes.length !== cells.length ||
+      inputClasses.rowFalling.length !== h * d ||
+      inputClasses.rowFluid.length !== h * d ||
+      inputClasses.rowGas.length !== h * d)
+  )
     throw Error('Reactive movement classes do not match the block.');
-  const classes = inputClasses ?? classifyReactiveMovement3D(cells, structure, cold);
+  const state = inputClasses ?? classifyReactiveMovement3D(cells, structure, cold, w),
+    classes = state.classes,
+    rowFalling = state.rowFalling,
+    rowFluid = state.rowFluid,
+    rowGas = state.rowGas;
   let outCells = cells,
     outEnergy = energy,
     outStructure = structure,
-    outClasses = classes;
+    outState = state;
   const falling = (i: number) => (classes[i] & FALLING) !== 0;
   const bound = (i: number) => (classes[i] & BOUND) !== 0;
   const density = (i: number) => cold[(cells[i] & 255) * COLD_STRIDE + COLD_DENSITY];
@@ -132,21 +169,11 @@ export function executeReactiveMovementPass3D(
       (z + 1 < d && canFall(i, i + w + layer)));
   const spread = (s: number, t: number) =>
     (classes[s] & FLUID) !== 0 && (classes[t] & GASEOUS) !== 0 && density(s) > density(t);
+  // Every rule reads the pass input only, so the disjoint swaps of a pass are applied after the scan.
+  // `onSwap` therefore always observes the intact input of the pass.
+  const pairs: number[] = [];
   const swap = (a: number, b: number) => {
-    if (outCells === cells) {
-      outCells = cells.slice();
-      outEnergy = energy.slice();
-      outStructure = structure.slice();
-      outClasses = classes.slice();
-    }
-    outCells[a] = cells[b];
-    outCells[b] = cells[a];
-    outEnergy[a] = energy[b];
-    outEnergy[b] = energy[a];
-    outStructure[a] = structure[b];
-    outStructure[b] = structure[a];
-    outClasses[a] = classes[b];
-    outClasses[b] = classes[a];
+    pairs.push(a, b);
     onSwap(a, b);
   };
   // Pair geometry: vertical pairs for gravity, diagonal and buoyancy; axis pairs for liquid and gas. Bounds are hoisted into the ranges.
@@ -164,8 +191,19 @@ export function executeReactiveMovementPass3D(
   const x0 = pairAxis === 0 ? pass.parity : dx < 0 ? 1 : 0,
     x1 = pairAxis === 0 || dx > 0 ? w - 1 : w,
     xStep = pairAxis === 0 ? 2 : 1;
+  // Row skipping: a row pair whose counts show no possible source or target is skipped as a whole,
+  // which never changes the visiting order of the pairs that remain.
+  const rowOffset = pairAxis === 1 ? 1 : pairAxis === 2 ? h : 0;
   for (let z = z0; z < z1; z += zStep)
     for (let y = y0; y < y1; y += yStep) {
+      const row = y + h * z;
+      if (kind <= KIND.diagonal) {
+        if (rowFalling[row] === 0) continue;
+      } else if (kind === KIND.buoyancy) {
+        if (rowGas[row + 1] === 0) continue;
+      } else if (kind === KIND.liquid) {
+        if (rowFluid[row] === 0 && rowFluid[row + rowOffset] === 0) continue;
+      } else if (rowGas[row] === 0 && rowGas[row + rowOffset] === 0) continue;
       for (let x = x0, a = x0 + w * (y + h * z); x < x1; x += xStep, a += xStep) {
         const b = a + offset,
           ca = classes[a],
@@ -203,12 +241,58 @@ export function executeReactiveMovementPass3D(
         }
       }
     }
+  if (pairs.length) {
+    if (!owned) {
+      outCells = cells.slice();
+      outEnergy = energy.slice();
+      outStructure = structure.slice();
+      outState = {
+        classes: classes.slice(),
+        rowFalling: rowFalling.slice(),
+        rowFluid: rowFluid.slice(),
+        rowGas: rowGas.slice(),
+      };
+    }
+    const outClasses = outState.classes;
+    for (let k = 0; k < pairs.length; k += 2) {
+      const a = pairs[k],
+        b = pairs[k + 1];
+      const c = outCells[a],
+        e = outEnergy[a],
+        s = outStructure[a],
+        ma = outClasses[a],
+        mb = outClasses[b];
+      outCells[a] = outCells[b];
+      outCells[b] = c;
+      outEnergy[a] = outEnergy[b];
+      outEnergy[b] = e;
+      outStructure[a] = outStructure[b];
+      outStructure[b] = s;
+      outClasses[a] = mb;
+      outClasses[b] = ma;
+      const rowA = (a / w) | 0,
+        rowB = (b / w) | 0;
+      if (rowA !== rowB) {
+        const fall = ((mb & FALLING) !== 0 ? 1 : 0) - ((ma & FALLING) !== 0 ? 1 : 0),
+          fluid = ((mb & FLUID) !== 0 ? 1 : 0) - ((ma & FLUID) !== 0 ? 1 : 0),
+          gas =
+            ((mb & (GASEOUS | AIRY)) === GASEOUS ? 1 : 0) -
+            ((ma & (GASEOUS | AIRY)) === GASEOUS ? 1 : 0);
+        outState.rowFalling[rowA] += fall;
+        outState.rowFalling[rowB] -= fall;
+        outState.rowFluid[rowA] += fluid;
+        outState.rowFluid[rowB] -= fluid;
+        outState.rowGas[rowA] += gas;
+        outState.rowGas[rowB] -= gas;
+      }
+    }
+  }
   return {
     block:
       outCells === cells
         ? { ...input }
         : { ...input, packedCells: outCells, energyQ: outEnergy, structure: outStructure },
-    classes: outClasses,
+    classes: outState,
   };
 }
 /** Diagnostic single pass, selected by index; not a complete evolution tick. */

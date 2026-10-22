@@ -302,10 +302,12 @@ function worldTickJob(
     captureOptions.enabled
       ? {
           swap: capture.swap,
+          // Movement passes never move held cells, and the capture reads movement passes only at
+          // swapped cells, so overlay anchors are stripped from the last movement pass onwards.
           pass: (index, block) =>
             capture.pass(
               index,
-              capture.recording() && initialHolds.length
+              capture.recording() && initialHolds.length && index >= 19
                 ? stripReactiveHoldAnchors3D(before!.block, block, initialHolds)
                 : block,
             ),
