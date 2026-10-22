@@ -79,7 +79,8 @@ const BOND_MASK_3D = BONDS_3D.reduce((mask, bond) => mask | bond, 0);
  * Allocations and public input validation/copying are O(cells), outside this budget.
  * An explicit stepper: run(budget) executes up to budget steps in phase-local loops, and every former
  * yield is one loop iteration, in the same order. A stage transition is the first action of the step
- * after the exhausted stage; the balance and energy checks run there, uncounted. Steps that can
+ * after the exhausted stage and adds no unit; the balance checks run in transitions, and the energy
+ * checks in the final, counted step that completes the job. Steps that can
  * throw (the support graph, component adjacency, the floor crossing, the permutation, and every
  * append to a plain array, which a realm Array.prototype index accessor can fail) are counted one
  * at a time and a throwing one is not counted; the loops that count a whole slice up front write

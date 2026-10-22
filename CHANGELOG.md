@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-21)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-22)
 
 ### Added
 

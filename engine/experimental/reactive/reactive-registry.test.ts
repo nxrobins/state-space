@@ -340,9 +340,9 @@ describe('reactive array reads', () => {
     nullValue: () => [null, 1],
     long: () => [range(40000), 65536],
     longHole: () => [holed(40000, 100), 65536],
-    longHoleInTable: () => [define(holed(40000, 100), 'extra', { value: 1 }), 65536],
-    longHoleBeyondTable: () => [define(holed(40000, 39999), 'extra', { value: 1 }), 65536],
-    longGetterBeyondTable: () => [define(range(40000), 35000, counted()), 65536],
+    longHoleWithExtraKey: () => [define(holed(40000, 100), 'extra', { value: 1 }), 65536],
+    longLastHoleWithExtraKey: () => [define(holed(40000, 39999), 'extra', { value: 1 }), 65536],
+    longLateGetter: () => [define(range(40000), 35000, counted()), 65536],
     proxy: () => [new Proxy([0, 1, 2], {}), 3],
     tracedProxy: () => [traced([0, 1, 2]), 3],
     tracedProxyHole: () => [traced([0, , 2]), 3],
@@ -422,7 +422,8 @@ describe('reactive array reads', () => {
     });
   });
   test('keep no state that a transient realm wrapper could leave behind', async () => {
-    // A fresh module instance, so its first block-sized read happens while the wrapper is in place.
+    // A guard against caching keys between calls. A fresh module instance, so its first block-sized
+    // read happens while the wrapper is in place.
     vi.resetModules();
     const fresh = (await import('./reactive-registry.js')).reactiveArray3D;
     const ownKeys = Reflect.ownKeys,

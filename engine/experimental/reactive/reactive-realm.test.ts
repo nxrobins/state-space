@@ -23,7 +23,7 @@ import {
 } from '../reactive-materials.js';
 import { reactivePlainObjectPrototype3D } from './reactive-registry.js';
 import { startReactiveStructureJob3D } from './reactive-structure.js';
-import { startStepBaselineStructureJob3D } from './reactive-structure.per-step-oracle.js';
+import { startPerStepOracleStructureJob3D } from './reactive-structure.per-step-oracle.js';
 
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
@@ -107,7 +107,8 @@ describe('reactive ticks in a patched realm', () => {
         } catch (error) {
           outcome = (error as Error).message;
         }
-        // Failing closed is allowed; publishing anything but the true state is not.
+        // Publishing anything but the true state is never allowed. Failing closed would be, but these
+        // inputs are expected to complete: the count below keeps the test from passing vacuously.
         if (outcome === 'complete') {
           expect({ key, t, state: patched.result().state }).toEqual({
             key,
@@ -397,11 +398,11 @@ describe('reactive ticks in a patched realm', () => {
     };
     const stages = new Set<unknown>();
     for (const key of ['0', '1', '3']) {
-      const total = run(startStepBaselineStructureJob3D, key, 0, 64).appends;
+      const total = run(startPerStepOracleStructureJob3D, key, 0, 64).appends;
       expect(total).toBeGreaterThan(4);
       for (let nth = 1; nth <= total; nth++)
         for (const budget of [1, 7, 64, 256]) {
-          const expected = run(startStepBaselineStructureJob3D, key, nth, budget);
+          const expected = run(startPerStepOracleStructureJob3D, key, nth, budget);
           expect({
             key,
             nth,

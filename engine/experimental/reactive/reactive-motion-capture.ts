@@ -89,7 +89,8 @@ export function createReactiveMotionCapture3D(
   let pending: ReactiveMotionPass3D | null = null,
     handed = false;
   // Cells whose tuple the observed movement pass changes, found while the pass input is still intact:
-  // a swap changes both cells of its disjoint pair or neither, and a movement pass changes nothing else.
+  // a movement pass changes nothing but its disjoint swapped pairs. No movement rule swaps two equal
+  // tuples, so the comparison below is a guard only: a swap of equal tuples would change neither cell.
   const swapped: number[] = [];
   const overflow = (index: number) => {
     data.status = 'overflow';

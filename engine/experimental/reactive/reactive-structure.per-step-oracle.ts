@@ -1,7 +1,8 @@
 /** Test oracle for reactive-structure.test.ts and reactive-realm.test.ts only: solve() and
  * structureJob() as they were before the stepper was batched, kept verbatim so the tests can replay
  * both unit for unit. It is not evidence and not byte-bound; once the batched stepper has shipped and
- * settled, delete it together with the replay tests that import it.
+ * settled, delete it together with the replay tests that import it. It stays beside
+ * reactive-structure.ts because it imports the same engine modules by the same relative paths.
  */
 import {
   COLD_STRIDE,
@@ -503,7 +504,7 @@ function structureJob(registry: ReactiveMaterialRegistry3D, input: ReactiveMater
   };
 }
 /** Owned input without validation, like startReactiveStructureJob3D. */
-export function startStepBaselineStructureJob3D(
+export function startPerStepOracleStructureJob3D(
   registry: ReactiveMaterialRegistry3D,
   input: ReactiveMaterialBlock3D,
 ) {

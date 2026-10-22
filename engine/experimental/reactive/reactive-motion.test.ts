@@ -278,6 +278,14 @@ describe('executed reactive motion and bounded preview provenance', () => {
             .every((c) => !(c.structure & ANCHOR_3D)),
         ).toBe(true);
       expect(j.motion().passes.every((p) => p.segments.length === 0)).toBe(true);
+      // Nothing moves or heats the held stone, so no pass may record it: stripping the overlay must
+      // start exactly where the last movement pass ends.
+      expect(
+        j
+          .motion()
+          .passes.flatMap((p) => p.changes)
+          .filter((c) => c.index === 0),
+      ).toEqual([]);
       expect(Boolean(j.result().state.block.structure[0] & ANCHOR_3D)).toBe(permanent);
     }
   });

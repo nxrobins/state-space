@@ -24,7 +24,7 @@ import {
   startReactiveStructureJob3D,
   type ReactiveStructureProgress3D,
 } from './reactive-structure.js';
-import { startStepBaselineStructureJob3D } from './reactive-structure.per-step-oracle.js';
+import { startPerStepOracleStructureJob3D } from './reactive-structure.per-step-oracle.js';
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, custom: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
@@ -587,7 +587,7 @@ describe('batched structure work replays the per-step oracle', () => {
   function expectReplay(registry: ReactiveMaterialRegistry3D, input: ReactiveMaterialBlock3D) {
     let last: ReturnType<typeof replay> | undefined;
     for (const budgets of schedules) {
-      const expected = replay(startStepBaselineStructureJob3D, registry, input, budgets);
+      const expected = replay(startPerStepOracleStructureJob3D, registry, input, budgets);
       expect(replay(startReactiveStructureJob3D, registry, input, budgets)).toStrictEqual(expected);
       last = expected;
     }
@@ -638,7 +638,7 @@ describe('batched structure work replays the per-step oracle', () => {
     const input = { ...read(r, fixture([place(0)], { width: 1, height: 1, depth: 1 })) };
     Object.assign(input, { width: 1, height: 4, depth: 6 });
     for (const budgets of [[1], [256], [36], [35, 1], [7]]) {
-      const expected = replay(startStepBaselineStructureJob3D, r, input, budgets);
+      const expected = replay(startPerStepOracleStructureJob3D, r, input, budgets);
       expect(expected.error).toBe('Reactive structure work bound exceeded.');
       expect(replay(startReactiveStructureJob3D, r, input, budgets)).toStrictEqual(expected);
     }
@@ -692,7 +692,7 @@ describe('batched structure work replays the per-step oracle', () => {
       while (full.progress().status === 'running') full.advance(256);
       for (let stop = 0; stop <= full.progress().completedWork; stop++)
         expect(cancelAt(startReactiveStructureJob3D, input, stop)).toStrictEqual(
-          cancelAt(startStepBaselineStructureJob3D, input, stop),
+          cancelAt(startPerStepOracleStructureJob3D, input, stop),
         );
     }
   });
