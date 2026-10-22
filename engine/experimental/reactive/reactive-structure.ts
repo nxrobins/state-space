@@ -113,8 +113,15 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
     visited = new Uint8Array(n);
   // The -Z, -Y, -X, +X, +Y, +Z neighbors present in any shape have ascending indices: no sort needed.
   const supports = new Int32Array(6);
-  const dependents: number[][] = [],
-    brokenCells: number[] = [],
+  // Components resting on each component, as insertion-ordered linked lists in typed storage:
+  // first/last hold an entry + 1 (0 for none) and next the following entry + 1. Each vertex adds at
+  // most one entry. Plain arrays here would let a realm Array.prototype accessor steer the solve.
+  const dependentFirst = new Int32Array(n),
+    dependentLast = new Int32Array(n),
+    dependentNext = new Int32Array(n),
+    dependentValue = new Int32Array(n);
+  let dependentCount = 0;
+  const brokenCells: number[] = [],
     movingCells: number[] = [];
   let length = 0,
     supportedWeight = 0,
@@ -588,7 +595,14 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
                 ((edges[j] & INTEGRITY_3D) === 0 && obstructed(i, j))
               )
                 blocked[r] = 1;
-              else if (ids[j] >= 0 && ids[j] !== r) (dependents[ids[j]] ??= []).push(r);
+              else if (ids[j] >= 0 && ids[j] !== r) {
+                const c = ids[j],
+                  e = ++dependentCount;
+                dependentValue[e - 1] = r;
+                if (dependentLast[c]) dependentNext[dependentLast[c] - 1] = e;
+                else dependentFirst[c] = e;
+                dependentLast[c] = e;
+              }
             }
             last = 'dependencies';
             if (executed >= budget) return last;
@@ -618,15 +632,16 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
             }
             batchStage = 'blocked';
             batchBase = executed;
+            // k is the last visited entry + 1 of the current queue head's list, 0 before its first.
             while (head < length && executed < budget) {
-              const deps = dependents[queue[head]];
-              if (deps && k < deps.length) {
-                const above = deps[k];
+              const e = k === 0 ? dependentFirst[queue[head]] : dependentNext[k - 1];
+              if (e) {
+                const above = dependentValue[e - 1];
                 if (!blocked[above]) {
                   blocked[above] = 1;
                   queue[length++] = above;
                 }
-                k++;
+                k = e;
               } else {
                 head++;
                 k = 0;

@@ -170,10 +170,14 @@ export function executeReactiveMovementPass3D(
   const spread = (s: number, t: number) =>
     (classes[s] & FLUID) !== 0 && (classes[t] & GASEOUS) !== 0 && density(s) > density(t);
   // Every rule reads the pass input only, so the disjoint swaps of a pass are applied after the scan.
-  // `onSwap` therefore always observes the intact input of the pass.
-  const pairs: number[] = [];
+  // `onSwap` therefore always observes the intact input of the pass. Pairs are disjoint, so a pass
+  // records at most one entry per cell; a typed list keeps them out of reach of Array.prototype.
+  let pairs: Int32Array | null = null,
+    pairCount = 0;
   const swap = (a: number, b: number) => {
-    pairs.push(a, b);
+    pairs ??= new Int32Array(cells.length);
+    pairs[pairCount++] = a;
+    pairs[pairCount++] = b;
     onSwap(a, b);
   };
   // Pair geometry: vertical pairs for gravity, diagonal and buoyancy; axis pairs for liquid and gas. Bounds are hoisted into the ranges.
@@ -241,7 +245,7 @@ export function executeReactiveMovementPass3D(
         }
       }
     }
-  if (pairs.length) {
+  if (pairs) {
     if (!owned) {
       outCells = cells.slice();
       outEnergy = energy.slice();
@@ -254,7 +258,7 @@ export function executeReactiveMovementPass3D(
       };
     }
     const outClasses = outState.classes;
-    for (let k = 0; k < pairs.length; k += 2) {
+    for (let k = 0; k < pairCount; k += 2) {
       const a = pairs[k],
         b = pairs[k + 1];
       const c = outCells[a],

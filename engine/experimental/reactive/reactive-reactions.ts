@@ -347,23 +347,28 @@ function combustion(
     n = cells.length,
     rotation = cycle % 6,
     around = [-1, -1, -1, -1, -1, -1],
-    burning: number[] = [],
-    acting: number[] = [],
-    wanted: number[] = [],
+    // Ascending cell lists in typed storage, out of reach of Array.prototype.
+    burning = new Int32Array(n),
+    acting = new Int32Array(n),
     { fuelQ, flashQ, oxidizer } = T;
+  let burningCount = 0,
+    actingCount = 0;
   for (let i = 0; i < n; i++) {
     const m = cells[i] & 255;
     if (fuelQ[m] > 0 && reactiveTemperatureQ3D(T, cells[i], energy[i]) > flashQ[m]) {
-      burning.push(i);
-      acting.push(i);
-    } else if (m === MAT.FIRE) acting.push(i);
+      burning[burningCount++] = i;
+      acting[actingCount++] = i;
+    } else if (m === MAT.FIRE) acting[actingCount++] = i;
   }
   // proposed[i] = j + 1 and chosen[j] = i + 1, 0 for none; chosen -1 marks a queued oxidizer.
   // Both are read only when some cell burns, so they stay empty otherwise.
-  const size = burning.length ? n : 0,
+  const size = burningCount ? n : 0,
     proposed = new Int32Array(size),
-    chosen = new Int32Array(size);
-  for (const i of burning) {
+    chosen = new Int32Array(size),
+    wanted = new Int32Array(size);
+  let wantedCount = 0;
+  for (let b = 0; b < burningCount; b++) {
+    const i = burning[b];
     const offset = (neighborsOf(around, i, input) + rotation) % 6;
     for (let k = 0; k < 6; k++) {
       const j = around[(offset + k) % 6];
@@ -371,15 +376,16 @@ function combustion(
         proposed[i] = j + 1;
         if (chosen[j] === 0) {
           chosen[j] = -1;
-          wanted.push(j);
+          wanted[wantedCount++] = j;
         }
         break;
       }
     }
   }
   // Only a proposed oxidizer can be chosen, so the neighbor order of every other cell is never needed.
-  for (const j of wanted) {
-    const offset = (neighborsOf(around, j, input) + rotation) % 6;
+  for (let q = 0; q < wantedCount; q++) {
+    const j = wanted[q],
+      offset = (neighborsOf(around, j, input) + rotation) % 6;
     chosen[j] = 0;
     for (let k = 0; k < 6; k++) {
       const i = around[(offset + k) % 6];
@@ -395,8 +401,9 @@ function combustion(
     output.cells[i] = reactiveRewriteMaterial3D(T, cells[i], material, energyQ);
     output.structure[i] = eligible(output.cells[i], T) ? INTEGRITY_3D : 0;
   };
-  for (const i of acting) {
-    const j = size ? proposed[i] - 1 : -1;
+  for (let a = 0; a < actingCount; a++) {
+    const i = acting[a],
+      j = size ? proposed[i] - 1 : -1;
     if (j >= 0 && chosen[j] === i + 1) {
       const fuel = cells[i] & 255,
         transfer = Math.min(Math.floor(fuelQ[fuel] / 2), MAX_ENERGY_Q - energy[j]);

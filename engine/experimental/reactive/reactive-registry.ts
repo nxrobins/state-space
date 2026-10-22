@@ -89,7 +89,7 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
  * [[Set]] of the generic walk defines an own data property exactly as spread does. Anything else (an
  * enumerable, accessor or read-only key) sends every record through the generic walk.
  */
-function plainObjectPrototype(): boolean {
+export function reactivePlainObjectPrototype3D(): boolean {
   for (const key of Reflect.ownKeys(Object.prototype)) {
     const d = Reflect.getOwnPropertyDescriptor(Object.prototype, key)!;
     if (d.enumerable) return false;
@@ -106,7 +106,7 @@ function plainObjectPrototype(): boolean {
  */
 export function cloneReactiveData3D<T>(value: T): T {
   const seen = new Map<object, unknown>();
-  const records = plainObjectPrototype();
+  const records = reactivePlainObjectPrototype3D();
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');

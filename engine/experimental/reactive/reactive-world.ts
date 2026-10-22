@@ -10,6 +10,7 @@ import {
 import {
   reactiveInteger3D,
   cloneReactiveData3D,
+  reactivePlainObjectPrototype3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
 import type { ReactiveTickOptions3D } from './reactive-motion-capture.js';
@@ -170,10 +171,15 @@ export function createReactiveWorld3D(
         if (base === undefined) throw Error('Reactive tick job is foreign or already consumed.');
         if (base !== revision)
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
-        // live adopts the job's immutable result state; only the handed-out report is copied.
+        // live adopts the job's immutable result state; only the handed-out report is copied. While
+        // Object.prototype is not as the realm starts it, the whole result is copied in one walk, so
+        // caller setters and read-only keys see exactly the stores that copying always made.
         const next = nextRevision(),
-          output = takeReactiveWorldTickOutput3D(job),
-          report = cloneReactiveData3D(output.report);
+          taken = takeReactiveWorldTickOutput3D(job),
+          output = reactivePlainObjectPrototype3D()
+            ? { state: taken.state, report: cloneReactiveData3D(taken.report) }
+            : cloneReactiveData3D(taken),
+          report = output.report;
         if (
           output.state.tick !== live.tick + 1 ||
           total(output.state.block) !== initialQ + externalQ
