@@ -98,9 +98,11 @@ const OWN_KEYS = Reflect.ownKeys,
   ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get;
 /** A descriptor field, read only when the descriptor has it as its own: a descriptor is an ordinary
  * object, and Object.prototype may add any field. */
-function ownField(target: object, key: PropertyKey, field: keyof PropertyDescriptor) {
-  const d = OWN_DESCRIPTOR(target, key);
-  return d && HAS_OWN(d, field) ? d[field] : undefined;
+function field(d: PropertyDescriptor | undefined, name: keyof PropertyDescriptor) {
+  return d && HAS_OWN(d, name) ? d[name] : undefined;
+}
+function ownField(target: object, key: PropertyKey, name: keyof PropertyDescriptor) {
+  return field(OWN_DESCRIPTOR(target, key), name);
 }
 /** Object.prototype as the realm starts it: every own property is a non-enumerable writable data
  * property, apart from the non-enumerable __proto__ accessor this module loaded with. Then for-in sees
@@ -111,18 +113,16 @@ function ownField(target: object, key: PropertyKey, field: keyof PropertyDescrip
 export function reactivePlainObjectPrototype3D(): boolean {
   const keys = OWN_KEYS(OBJECT_PROTOTYPE);
   for (let k = 0; k < keys.length; k++) {
-    const key = keys[k];
-    if (ownField(OBJECT_PROTOTYPE, key, 'enumerable') !== false) return false;
+    // One descriptor read per key: Object.prototype is an ordinary object, so it runs no caller code.
+    const key = keys[k],
+      d = OWN_DESCRIPTOR(OBJECT_PROTOTYPE, key);
+    if (field(d, 'enumerable') !== false) return false;
     if (key === '__proto__') {
-      if (
-        ownField(OBJECT_PROTOTYPE, key, 'get') !== PROTO?.get ||
-        ownField(OBJECT_PROTOTYPE, key, 'set') !== PROTO?.set
-      )
-        return false;
+      if (field(d, 'get') !== PROTO?.get || field(d, 'set') !== PROTO?.set) return false;
     } else if (
-      ownField(OBJECT_PROTOTYPE, key, 'writable') !== true ||
-      ownField(OBJECT_PROTOTYPE, key, 'get') !== undefined ||
-      ownField(OBJECT_PROTOTYPE, key, 'set') !== undefined
+      field(d, 'writable') !== true ||
+      field(d, 'get') !== undefined ||
+      field(d, 'set') !== undefined
     )
       return false;
   }

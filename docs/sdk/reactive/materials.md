@@ -53,7 +53,11 @@ const restoredBlock = readReactiveMaterialBlock3D(restoredRegistry, decoded.bloc
 Readers reject holes, accessors, hidden or extra keys, symbols and typed arrays
 in plain arrays and records without running caller code, so every result is
 reproducible for plain data. A Proxy is read through its traps: they run, and
-they decide what is read. Both guarantees assume an unmodified JavaScript realm.
+they decide what is read. When a trap answers an array method, such as `map`,
+with an object of its own, the engine works on that object as returned, and
+later steps may call other methods on it than earlier engine versions did, so
+results for such inputs may differ between versions. Both guarantees assume an
+unmodified JavaScript realm.
 When a caller replaces or adds members of `Array.prototype` or `Object.prototype`,
 or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
 progress at a throw and outputs may differ between engine versions. An index
@@ -313,7 +317,9 @@ neighbors, or one blocking dependency edge; the complete solve uses at most
 are O(cells), bounded by the 32,768-cell block limit, and outside this work-unit
 claim. This is an operation bound, not a measured wall-clock latency guarantee.
 `progress()` exposes stage, status and completed work; `cancel()` discards staged
-work. `result()` returns isolated data only after the complete solve.
+work. `result()` returns isolated data only after the complete solve. Each
+`advance()` call also has a fixed cost, so `advance(1)` is the slowest way to
+drive a job; larger budgets finish it in less total time.
 
 The frozen schedule is support roots and complete BFS, weight initialization,
 reverse-BFS load distribution, one damage application, reciprocal bond pruning,

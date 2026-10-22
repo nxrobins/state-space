@@ -62,7 +62,9 @@ date of the last change in the section.
   and the reaction passes, a batched structure stepper, one movement working
   copy per tick with row skipping, combustion elected from one scan, and an
   owned world that adopts a committed tick's state instead of copying it,
-  with bit-identical results in an unmodified JavaScript realm (#68).
+  with bit-identical results for plain data in an unmodified JavaScript
+  realm; world ticks fail if the array built-ins they call were replaced
+  after the SDK loaded (#68).
 
 ### Fixed
 
