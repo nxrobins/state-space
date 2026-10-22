@@ -168,10 +168,12 @@ export function reactiveSameData3D(a: unknown, b: unknown): boolean {
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
-export function cloneReactiveData3D<T>(value: T): T {
+export function cloneReactiveData3D<T>(value: T, plainObjectPrototype?: boolean): T {
   const seen = new Map<object, unknown>();
-  const records = reactivePlainObjectPrototype3D(),
-    slices = reactivePlainArraySlice3D();
+  // Each realm check runs at most once per copy, and only when a value needs it; a caller that has
+  // just checked Object.prototype passes the answer.
+  let records = plainObjectPrototype,
+    slices: boolean | undefined;
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');
@@ -189,7 +191,7 @@ export function cloneReactiveData3D<T>(value: T): T {
       if (flat) {
         // A replaced slice could hand back v itself, and the caller would then hold engine state.
         let out = v;
-        if (slices) out = v.slice();
+        if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
         else {
           out = new Array<unknown>(v.length);
           for (let i = 0; i < v.length; i++) out[i] = v[i];
@@ -201,7 +203,8 @@ export function cloneReactiveData3D<T>(value: T): T {
       seen.set(v, out);
       for (let i = 0; i < v.length; i++) {
         const x = v[i];
-        out[i] = records && flatRecord(x) ? { ...x } : copy(x);
+        out[i] =
+          (records ??= reactivePlainObjectPrototype3D()) && flatRecord(x) ? { ...x } : copy(x);
       }
       return out;
     }

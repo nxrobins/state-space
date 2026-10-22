@@ -268,30 +268,22 @@ export function createReactiveWorldTickJob3D(
   options: ReactiveTickOptions3D = {},
 ): ReactiveWorldTickJob3D {
   const captureOptions = readReactiveTickOptions3D(options);
-  return worldTickJob(registry, readReactiveWorldSnapshot3D(registry, raw), captureOptions);
+  return worldTickJob(registry, readReactiveWorldSnapshot3D(registry, raw), captureOptions).job;
 }
-/** Internal only: an owned validated snapshot whose block and holds the job reads without copying. */
+/** Internal only: an owned validated snapshot whose block and holds the job reads without copying.
+ * take() hands the caller the completed job's uncopied result, which nothing writes. */
 export function startReactiveWorldTickJob3D(
   registry: ReactiveMaterialRegistry3D,
   owned: ReactiveWorldSnapshot3D,
   options: ReactiveTickOptions3D = {},
-): ReactiveWorldTickJob3D {
+) {
   return worldTickJob(registry, owned, readReactiveTickOptions3D(options));
-}
-const outputs = new WeakMap<ReactiveWorldTickJob3D, () => ReactiveWorldTickResult3D>();
-/** Internal only: the uncopied result of a completed job from this module; never written. */
-export function takeReactiveWorldTickOutput3D(
-  job: ReactiveWorldTickJob3D,
-): ReactiveWorldTickResult3D {
-  const take = outputs.get(job);
-  if (!take) throw Error('Reactive world tick result is not complete.');
-  return take();
 }
 function worldTickJob(
   registry: ReactiveMaterialRegistry3D,
   owned: ReactiveWorldSnapshot3D,
   captureOptions: ReturnType<typeof readReactiveTickOptions3D>,
-): ReactiveWorldTickJob3D {
+): { job: ReactiveWorldTickJob3D; take: () => ReactiveWorldTickResult3D } {
   let before: ReactiveWorldSnapshot3D | null = owned;
   if (before.tick === Number.MAX_SAFE_INTEGER) throw Error('Reactive world tick would overflow.');
   const initialHolds = copyReactiveHolds3D(reactiveSnapshotHolds3D(before)),
@@ -477,10 +469,10 @@ function worldTickJob(
       return cloneReactiveData3D(motion);
     },
   });
-  outputs.set(job, () => {
+  const take = () => {
     if (!result || status !== 'complete')
       throw Error('Reactive world tick result is not complete.');
     return result;
-  });
-  return job;
+  };
+  return { job, take };
 }

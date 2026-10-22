@@ -121,7 +121,8 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   const supports = new Int32Array(6);
   // Components resting on each component, as insertion-ordered linked lists in typed storage:
   // first/last hold an entry + 1 (0 for none) and next the following entry + 1. Each vertex adds at
-  // most one entry. Plain arrays here would let a realm Array.prototype accessor steer the solve.
+  // most one entry. Plain arrays here would let a realm Array.prototype accessor steer the solve. The
+  // four lists are zeroed with the job (about 0.2 ms at 32 cubed), outside any budgeted unit.
   const dependentFirst = new Int32Array(n),
     dependentLast = new Int32Array(n),
     dependentNext = new Int32Array(n),
