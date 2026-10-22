@@ -1,6 +1,7 @@
 /** Per-registry material constants for the reactive thermal and structural kernels. */
 import {
   PHASE,
+  PHASE_SHIFT,
   COLD_STRIDE,
   COLD_DENSITY,
   COLD_CONDUCTIVITY,
@@ -178,5 +179,29 @@ export function reactiveThermalView3D(
     ((word & 0xffff00ff) |
       (Math.min(255, Math.floor(reactiveTemperatureQ3D(T, word, energy) / ENERGY_SCALE)) << 8)) >>>
     0
+  );
+}
+/** thermal.ts phaseMaterial: the tabled boundaries equal its integer boundaries. */
+export function reactivePhaseMaterial3D(
+  T: ReactiveThermalTables3D,
+  word: number,
+  energy: number,
+): number {
+  const m = word & 255;
+  if (T.up[m] && energy >= T.upBoundary[m]) return T.up[m];
+  if (T.down[m] && energy <= T.downBoundary[m]) return T.down[m];
+  return m;
+}
+/** thermal.ts rewriteMaterial over the tables. */
+export function reactiveRewriteMaterial3D(
+  T: ReactiveThermalTables3D,
+  word: number,
+  material: number,
+  energy: number,
+): number {
+  return reactiveThermalView3D(
+    T,
+    ((word & 0xf0ff0000) | material | (T.defaultPhase[material] << PHASE_SHIFT)) >>> 0,
+    energy,
   );
 }
