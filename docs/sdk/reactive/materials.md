@@ -55,11 +55,12 @@ in plain arrays and records without running caller code, so every result is
 reproducible for plain data. A Proxy is read through its traps: they run, and
 they decide what is read. Both guarantees assume an unmodified JavaScript realm.
 When a caller replaces or adds members of `Array.prototype` or `Object.prototype`,
-or replaces `Array[Symbol.species]`, errors, progress at a throw and outputs may
-differ between engine versions. An index accessor on `Array.prototype` or a hook
-on `Object.prototype` can then make a tick fail, but the tick does not publish a
-state other than the one an unmodified realm computes. Replaced array methods,
-iterators or species give no such guarantee.
+or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
+progress at a throw and outputs may differ between engine versions. An index
+accessor on `Array.prototype` or a hook on `Object.prototype` can then make a
+tick fail, but the tick does not publish a state other than the one an
+unmodified realm computes. Replaced array methods, iterators or species give no
+such guarantee.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,
