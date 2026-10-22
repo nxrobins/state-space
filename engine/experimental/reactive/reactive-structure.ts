@@ -10,7 +10,7 @@ import {
   PHASE,
 } from '../../generated/materials.js';
 import { temperatureQ, ENERGY_SCALE } from '../../thermal.js';
-import { INTEGRITY_3D, BONDS_3D, ANCHOR_3D, structuralNeighbor } from '../structural-mechanics.js';
+import { INTEGRITY_3D, BONDS_3D, ANCHOR_3D } from '../structural-mechanics.js';
 import { readReactiveMaterialBlock3D, type ReactiveMaterialBlock3D } from './reactive-block.js';
 import {
   reactiveInteger3D,
@@ -72,20 +72,23 @@ export interface ReactiveStructureJob3D {
   result(): ReactiveStructureResult3D;
 }
 
+const BOND_MASK_3D = BONDS_3D.reduce((mask, bond) => mask | bond, 0);
+
 /** Each step visits at most one vertex and six neighbors, or one dependency edge.
  * Allocations and public input validation/copying are O(cells), outside this budget.
- * An explicit stepper rather than a generator: every former yield is one step, in the same order.
+ * An explicit stepper: run(budget) executes up to budget steps in phase-local loops, and every former
+ * yield is one loop iteration, in the same order. A stage transition is the first action of the step
+ * after the exhausted stage and a throwing step is not counted, so any budget schedule sees the same
+ * stage and work after each step and the same throw points.
  */
 function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   const { packedCells: grid, energyQ, structure } = input,
     n = grid.length,
     w = input.width,
     h = input.height,
-    d = input.depth;
-  const neighbor = (i: number, dir: number) => structuralNeighbor(i, dir, input);
+    d = input.depth,
+    layer = w * h;
   const density = (i: number) => cold[(grid[i] & 255) * COLD_STRIDE + COLD_DENSITY];
-  const active = (i: number, words: ArrayLike<number> = structure) =>
-    i >= 0 && (words[i] & INTEGRITY_3D) !== 0;
   const obstructed = (i: number, j: number) => {
     const phase = (grid[j] >>> PHASE_SHIFT) & 15;
     const fixed =
@@ -93,6 +96,8 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
       cold[(grid[j] & 255) * COLD_STRIDE + COLD_COHESION] === 0;
     return fixed || (structure[j] & ANCHOR_3D) !== 0 || density(i) <= density(j);
   };
+  /** The cell below i (direction 3), or -1 at the closed floor. */
+  const below = (i: number) => ((((i / w) | 0) % h) + 1 < h ? i + w : -1);
   const distances = new Int32Array(n).fill(-1),
     loads = new Uint32Array(n),
     reactions = new Uint32Array(n);
@@ -106,17 +111,20 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
     sources = new Uint32Array(n),
     destinations = new Uint32Array(n),
     visited = new Uint8Array(n);
+  // The -Z, -Y, -X, +X, +Y, +Z neighbors present in any shape have ascending indices: no sort needed.
+  const supports = new Int32Array(6);
   const dependents: number[][] = [],
     brokenCells: number[] = [],
     movingCells: number[] = [];
   let length = 0,
     supportedWeight = 0,
     reactionTotal = 0;
+  // Publish writes every cell; slice() keeps a packed input packed for the next tick's readers.
   const block = {
     ...input,
-    packedCells: new Array<number>(n),
-    energyQ: new Array<number>(n),
-    structure: new Array<number>(n),
+    packedCells: grid.slice(),
+    energyQ: energyQ.slice(),
+    structure: structure.slice(),
   };
   // Exact under REACTIVE_BLOCK_LIMITS_3D: 32768 cells at MAX_ENERGY_Q stay far below 2^53.
   let beforeQ = 0,
@@ -146,334 +154,632 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
     z = 0,
     x = 0,
     y = 0,
-    top = -1;
+    top = -1,
+    materialised = false;
   let output: ReactiveStructureResult3D | null = null;
-  const step = (): ReactiveStructureStage3D | null => {
-    for (;;) {
-      switch (phase) {
-        case 1: {
-          if (i >= n) {
-            phase = 2;
-            head = 0;
-            continue;
-          }
-          if (active(i)) {
-            const below = neighbor(i, 3);
-            if (structure[i] & ANCHOR_3D || below < 0 || (!active(below) && obstructed(i, below))) {
-              distances[i] = 0;
-              queue[length++] = i;
+  // Steps completed by the current run, and the stage of the latest one (null before any).
+  let executed = 0,
+    last: ReactiveStructureStage3D | null = null;
+  // The current phase batch: steps completed before a throwing step keep its stage.
+  let batchBase = 0,
+    batchStage: ReactiveStructureStage3D = 'ready';
+  const run = (budget: number): ReactiveStructureStage3D | null => {
+    executed = 0;
+    last = null;
+    try {
+      for (;;) {
+        switch (phase) {
+          case 1: {
+            if (i >= n) {
+              phase = 2;
+              head = 0;
+              continue;
             }
-          }
-          i++;
-          return 'roots';
-        }
-        case 2: {
-          if (head >= length) {
-            phase = 3;
-            k = 0;
-            continue;
-          }
-          const v = queue[head];
-          for (let dir = 0; dir < 6; dir++) {
-            const j = neighbor(v, dir);
-            if (active(j) && distances[j] < 0 && (structure[v] & BONDS_3D[dir] || dir === 2)) {
-              distances[j] = distances[v] + 1;
-              queue[length++] = j;
-            }
-          }
-          head++;
-          return 'reach';
-        }
-        case 3: {
-          if (k >= length) {
-            phase = 4;
-            k = length - 1;
-            continue;
-          }
-          const v = queue[k];
-          loads[v] = Math.max(1, Math.ceil(density(v) / 64));
-          supportedWeight += loads[v];
-          k++;
-          return 'weights';
-        }
-        case 4: {
-          if (k < 0) {
-            if (reactionTotal !== supportedWeight)
-              throw Error('Reactive support reactions do not balance.');
-            phase = 5;
-            i = 0;
-            continue;
-          }
-          const v = queue[k];
-          if (distances[v] === 0) {
-            reactions[v] = loads[v];
-            reactionTotal += loads[v];
-          } else {
-            const supports: number[] = [];
-            for (let dir = 0; dir < 6; dir++) {
-              const j = neighbor(v, dir);
+            batchStage = 'roots';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) {
+              const word = structure[i];
+              if ((word & INTEGRITY_3D) === 0) continue;
+              const j = below(i);
               if (
-                active(j) &&
-                distances[j] === distances[v] - 1 &&
-                (structure[v] & BONDS_3D[dir] || dir === 3)
-              )
-                supports.push(j);
-            }
-            supports.sort((a, b) => a - b);
-            if (!supports.length) throw Error('Incomplete reactive support graph.');
-            const share = Math.floor(loads[v] / supports.length),
-              remainder = loads[v] % supports.length;
-            for (let r = 0; r < supports.length; r++)
-              loads[supports[r]] += share + (r < remainder ? 1 : 0);
-          }
-          k--;
-          return 'loads';
-        }
-        case 5: {
-          if (i >= n) {
-            phase = 6;
-            i = 0;
-            continue;
-          }
-          damaged[i] = structure[i];
-          if (active(i)) {
-            const at = (grid[i] & 255) * COLD_STRIDE,
-              integrity = structure[i] & INTEGRITY_3D;
-            const nominal = cold[at + COLD_COHESION] * 16,
-              softening = cold[at + COLD_SOFTENING];
-            const remaining = softening
-              ? Math.max(
-                  0,
-                  Math.min(
-                    64 * ENERGY_SCALE,
-                    (softening + 64) * ENERGY_SCALE - temperatureQ(grid[i], energyQ[i], cold),
-                  ),
-                )
-              : 64 * ENERGY_SCALE;
-            const capacity = Math.floor(
-              (Math.floor((nominal * integrity) / 255) * remaining) / (64 * ENERGY_SCALE),
-            );
-            capacities[i] = capacity;
-            const loss =
-              capacity === 0
-                ? integrity
-                : loads[i] > capacity
-                  ? Math.min(
-                      integrity,
-                      Math.max(1, Math.floor(((loads[i] - capacity) * 255) / nominal)),
-                    )
-                  : 0;
-            damaged[i] = (structure[i] & ~INTEGRITY_3D) | (integrity - loss);
-            if (loss === integrity) brokenCells.push(i);
-          }
-          i++;
-          return 'damage';
-        }
-        case 6: {
-          // Prune only. Fresh placement never implicitly welds adjacent cells here.
-          if (i >= n) {
-            phase = 7;
-            root = 0;
-            rootVisited = false;
-            bfs = false;
-            continue;
-          }
-          edges[i] = damaged[i] & (INTEGRITY_3D | ANCHOR_3D);
-          if (active(i, damaged))
-            for (let dir = 0; dir < 6; dir++) {
-              const j = neighbor(i, dir);
-              if (
-                active(j, damaged) &&
-                damaged[i] & BONDS_3D[dir] &&
-                damaged[j] & BONDS_3D[dir ^ 1]
-              )
-                edges[i] |= BONDS_3D[dir];
-            }
-          i++;
-          return 'edges';
-        }
-        case 7: {
-          if (root >= n) {
-            phase = 8;
-            i = 0;
-            continue;
-          }
-          if (!bfs) {
-            if (!rootVisited) {
-              rootVisited = true;
-              if (active(root, edges) && ids[root] < 0) {
-                ids[root] = root;
-                length = 1;
-                queue[0] = root;
-                head = 0;
-                bfs = true;
+                word & ANCHOR_3D ||
+                j < 0 ||
+                ((structure[j] & INTEGRITY_3D) === 0 && obstructed(i, j))
+              ) {
+                distances[i] = 0;
+                queue[length++] = i;
               }
             }
-            if (!bfs) {
-              rootVisited = false;
-              root++;
-              return 'components';
-            }
+            last = 'roots';
+            if (executed >= budget) return last;
+            continue;
           }
-          const v = queue[head];
-          for (let dir = 0; dir < 6; dir++)
-            if (edges[v] & BONDS_3D[dir]) {
-              const j = neighbor(v, dir);
-              if (j < 0 || !active(j, edges)) throw Error('Invalid reactive component adjacency.');
-              if (ids[j] < 0) {
-                ids[j] = root;
+          case 2: {
+            if (head >= length) {
+              phase = 3;
+              k = 0;
+              continue;
+            }
+            batchStage = 'reach';
+            batchBase = executed;
+            while (head < length && executed < budget) {
+              const v = queue[head],
+                word = structure[v],
+                next = distances[v] + 1;
+              const vx = v % w,
+                vy = ((v / w) | 0) % h,
+                vz = (v / layer) | 0;
+              let j: number;
+              // Direction order 0..5 keeps the queue order; -Y (2) needs no bond.
+              if (
+                vx &&
+                word & BONDS_3D[0] &&
+                structure[(j = v - 1)] & INTEGRITY_3D &&
+                distances[j] < 0
+              ) {
+                distances[j] = next;
                 queue[length++] = j;
               }
+              if (
+                vx + 1 < w &&
+                word & BONDS_3D[1] &&
+                structure[(j = v + 1)] & INTEGRITY_3D &&
+                distances[j] < 0
+              ) {
+                distances[j] = next;
+                queue[length++] = j;
+              }
+              if (vy && structure[(j = v - w)] & INTEGRITY_3D && distances[j] < 0) {
+                distances[j] = next;
+                queue[length++] = j;
+              }
+              if (
+                vy + 1 < h &&
+                word & BONDS_3D[3] &&
+                structure[(j = v + w)] & INTEGRITY_3D &&
+                distances[j] < 0
+              ) {
+                distances[j] = next;
+                queue[length++] = j;
+              }
+              if (
+                vz &&
+                word & BONDS_3D[4] &&
+                structure[(j = v - layer)] & INTEGRITY_3D &&
+                distances[j] < 0
+              ) {
+                distances[j] = next;
+                queue[length++] = j;
+              }
+              if (
+                vz + 1 < d &&
+                word & BONDS_3D[5] &&
+                structure[(j = v + layer)] & INTEGRITY_3D &&
+                distances[j] < 0
+              ) {
+                distances[j] = next;
+                queue[length++] = j;
+              }
+              head++;
+              executed++;
             }
-          head++;
-          if (head >= length) bfs = false;
-          return 'components';
-        }
-        case 8: {
-          if (i >= n) {
-            phase = 9;
-            length = 0;
-            i = 0;
+            last = 'reach';
+            if (executed >= budget) return last;
             continue;
           }
-          const r = ids[i];
-          if (r >= 0) {
-            const below = neighbor(i, 3);
-            if (
-              edges[i] & ANCHOR_3D ||
-              below < 0 ||
-              (!active(below, edges) && obstructed(i, below))
-            )
-              blocked[r] = 1;
-            else if (ids[below] >= 0 && ids[below] !== r) (dependents[ids[below]] ??= []).push(r);
-          }
-          i++;
-          return 'dependencies';
-        }
-        case 9: {
-          if (i >= n) {
-            phase = 10;
-            head = 0;
-            k = 0;
-            continue;
-          }
-          if (blocked[i]) queue[length++] = i;
-          i++;
-          return 'blocked';
-        }
-        case 10: {
-          if (head >= length) {
-            phase = 11;
-            i = 0;
-            continue;
-          }
-          const deps = dependents[queue[head]];
-          if (deps && k < deps.length) {
-            const above = deps[k];
-            if (!blocked[above]) {
-              blocked[above] = 1;
-              queue[length++] = above;
+          case 3: {
+            if (k >= length) {
+              phase = 4;
+              k = length - 1;
+              continue;
             }
-            k++;
-            return 'blocked';
-          }
-          head++;
-          k = 0;
-          return 'blocked';
-        }
-        case 11: {
-          if (i >= n) {
-            phase = 12;
-            z = x = y = 0;
-            top = -1;
-            continue;
-          }
-          if (ids[i] >= 0 && !blocked[ids[i]]) {
-            moving[i] = 1;
-            movingCells.push(i);
-          }
-          sources[i] = i;
-          i++;
-          return 'moving';
-        }
-        case 12: {
-          if (z >= d) {
-            phase = 13;
-            i = 0;
-            continue;
-          }
-          if (y === 0) top = -1;
-          const v = x + w * (y + h * z);
-          if (moving[v]) {
-            if (y + 1 === h) throw Error('Reactive fragment crossed the floor.');
-            if (top < 0) top = v;
-            sources[v + w] = v;
-          } else if (top >= 0) {
-            sources[top] = v;
-            top = -1;
-          }
-          y++;
-          if (y >= h) {
-            y = 0;
-            x++;
-            if (x >= w) {
-              x = 0;
-              z++;
+            batchStage = 'weights';
+            batchBase = executed;
+            const end = Math.min(length, k + budget - executed);
+            executed += end - k;
+            for (; k < end; k++) {
+              const v = queue[k];
+              loads[v] = Math.max(1, Math.ceil(density(v) / 64));
+              supportedWeight += loads[v];
             }
-          }
-          return 'permutation';
-        }
-        case 13: {
-          if (i >= n) {
-            phase = 14;
-            i = 0;
+            last = 'weights';
+            if (executed >= budget) return last;
             continue;
           }
-          const source = sources[i];
-          if (visited[source]) throw Error('Reactive fragment motion is not a permutation.');
-          visited[source] = 1;
-          destinations[source] = i;
-          block.packedCells[i] = grid[source];
-          block.energyQ[i] = energyQ[source];
-          block.structure[i] = edges[source];
-          beforeQ += energyQ[i];
-          afterQ += block.energyQ[i];
-          report.distances.push(distances[i]);
-          report.loads.push(loads[i]);
-          report.capacities.push(capacities[i]);
-          report.reactions.push(reactions[i]);
-          report.componentIds.push(ids[i]);
-          if (
-            block.packedCells[i] !== grid[i] ||
-            block.energyQ[i] !== energyQ[i] ||
-            block.structure[i] !== structure[i]
-          )
-            report.changedCells.push(i);
-          i++;
-          return 'publish';
-        }
-        case 14: {
-          if (i >= n) {
-            if (!Number.isSafeInteger(beforeQ) || !Number.isSafeInteger(afterQ))
-              throw Error('Reactive energy total exceeds exact integer range.');
-            if (beforeQ !== afterQ) throw Error('Reactive structure lost conserved energy.');
-            report.supportedWeight = supportedWeight;
-            report.energy.beforeQ = String(beforeQ);
-            report.energy.afterQ = String(afterQ);
-            output = { block, report };
-            phase = 15;
-            return null;
+          case 4: {
+            if (k < 0) {
+              if (reactionTotal !== supportedWeight)
+                throw Error('Reactive support reactions do not balance.');
+              phase = 5;
+              i = 0;
+              continue;
+            }
+            batchStage = 'loads';
+            batchBase = executed;
+            while (k >= 0 && executed < budget) {
+              const v = queue[k];
+              if (distances[v] === 0) {
+                reactions[v] = loads[v];
+                reactionTotal += loads[v];
+              } else {
+                const word = structure[v],
+                  above = distances[v] - 1;
+                const vx = v % w,
+                  vy = ((v / w) | 0) % h,
+                  vz = (v / layer) | 0;
+                let count = 0,
+                  j: number;
+                // Ascending index order; +Y (3) needs no bond.
+                if (
+                  vz &&
+                  word & BONDS_3D[4] &&
+                  structure[(j = v - layer)] & INTEGRITY_3D &&
+                  distances[j] === above
+                )
+                  supports[count++] = j;
+                if (
+                  vy &&
+                  word & BONDS_3D[2] &&
+                  structure[(j = v - w)] & INTEGRITY_3D &&
+                  distances[j] === above
+                )
+                  supports[count++] = j;
+                if (
+                  vx &&
+                  word & BONDS_3D[0] &&
+                  structure[(j = v - 1)] & INTEGRITY_3D &&
+                  distances[j] === above
+                )
+                  supports[count++] = j;
+                if (
+                  vx + 1 < w &&
+                  word & BONDS_3D[1] &&
+                  structure[(j = v + 1)] & INTEGRITY_3D &&
+                  distances[j] === above
+                )
+                  supports[count++] = j;
+                if (vy + 1 < h && structure[(j = v + w)] & INTEGRITY_3D && distances[j] === above)
+                  supports[count++] = j;
+                if (
+                  vz + 1 < d &&
+                  word & BONDS_3D[5] &&
+                  structure[(j = v + layer)] & INTEGRITY_3D &&
+                  distances[j] === above
+                )
+                  supports[count++] = j;
+                if (!count) throw Error('Incomplete reactive support graph.');
+                const share = Math.floor(loads[v] / count),
+                  remainder = loads[v] % count;
+                for (let r = 0; r < count; r++)
+                  loads[supports[r]] += share + (r < remainder ? 1 : 0);
+              }
+              k--;
+              executed++;
+            }
+            last = 'loads';
+            if (executed >= budget) return last;
+            continue;
           }
-          if (destinations[i] !== i) report.moves.push({ from: i, to: destinations[i] });
-          i++;
-          return 'report';
+          case 5: {
+            if (i >= n) {
+              phase = 6;
+              i = 0;
+              continue;
+            }
+            batchStage = 'damage';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) {
+              const word = structure[i];
+              damaged[i] = word;
+              if ((word & INTEGRITY_3D) === 0) continue;
+              const at = (grid[i] & 255) * COLD_STRIDE,
+                integrity = word & INTEGRITY_3D;
+              const nominal = cold[at + COLD_COHESION] * 16,
+                softening = cold[at + COLD_SOFTENING];
+              const remaining = softening
+                ? Math.max(
+                    0,
+                    Math.min(
+                      64 * ENERGY_SCALE,
+                      (softening + 64) * ENERGY_SCALE - temperatureQ(grid[i], energyQ[i], cold),
+                    ),
+                  )
+                : 64 * ENERGY_SCALE;
+              const capacity = Math.floor(
+                (Math.floor((nominal * integrity) / 255) * remaining) / (64 * ENERGY_SCALE),
+              );
+              capacities[i] = capacity;
+              const loss =
+                capacity === 0
+                  ? integrity
+                  : loads[i] > capacity
+                    ? Math.min(
+                        integrity,
+                        Math.max(1, Math.floor(((loads[i] - capacity) * 255) / nominal)),
+                      )
+                    : 0;
+              damaged[i] = (word & ~INTEGRITY_3D) | (integrity - loss);
+              if (loss === integrity) brokenCells.push(i);
+            }
+            last = 'damage';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 6: {
+            // Prune only. Fresh placement never implicitly welds adjacent cells here.
+            if (i >= n) {
+              phase = 7;
+              root = 0;
+              rootVisited = false;
+              bfs = false;
+              continue;
+            }
+            batchStage = 'edges';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) {
+              const word = damaged[i];
+              let kept = word & (INTEGRITY_3D | ANCHOR_3D);
+              // Without bond bits nothing is kept beyond integrity and anchor.
+              if (word & INTEGRITY_3D && word & BOND_MASK_3D) {
+                const vx = i % w,
+                  vy = ((i / w) | 0) % h,
+                  vz = (i / layer) | 0;
+                let j: number;
+                if (
+                  word & BONDS_3D[0] &&
+                  vx &&
+                  damaged[(j = i - 1)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[1]
+                )
+                  kept |= BONDS_3D[0];
+                if (
+                  word & BONDS_3D[1] &&
+                  vx + 1 < w &&
+                  damaged[(j = i + 1)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[0]
+                )
+                  kept |= BONDS_3D[1];
+                if (
+                  word & BONDS_3D[2] &&
+                  vy &&
+                  damaged[(j = i - w)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[3]
+                )
+                  kept |= BONDS_3D[2];
+                if (
+                  word & BONDS_3D[3] &&
+                  vy + 1 < h &&
+                  damaged[(j = i + w)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[2]
+                )
+                  kept |= BONDS_3D[3];
+                if (
+                  word & BONDS_3D[4] &&
+                  vz &&
+                  damaged[(j = i - layer)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[5]
+                )
+                  kept |= BONDS_3D[4];
+                if (
+                  word & BONDS_3D[5] &&
+                  vz + 1 < d &&
+                  damaged[(j = i + layer)] & INTEGRITY_3D &&
+                  damaged[j] & BONDS_3D[4]
+                )
+                  kept |= BONDS_3D[5];
+              }
+              edges[i] = kept;
+            }
+            last = 'edges';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 7: {
+            if (root >= n) {
+              phase = 8;
+              i = 0;
+              continue;
+            }
+            batchStage = 'components';
+            batchBase = executed;
+            while (root < n && executed < budget) {
+              if (!bfs) {
+                // One step per root: start its flood fill, or move past a visited or inactive cell.
+                if (!rootVisited && edges[root] & INTEGRITY_3D && ids[root] < 0) {
+                  rootVisited = true;
+                  ids[root] = root;
+                  length = 1;
+                  queue[0] = root;
+                  head = 0;
+                  bfs = true;
+                } else {
+                  rootVisited = false;
+                  root++;
+                  executed++;
+                  continue;
+                }
+              }
+              const v = queue[head],
+                word = edges[v];
+              const vx = v % w,
+                vy = ((v / w) | 0) % h,
+                vz = (v / layer) | 0;
+              let j: number;
+              if (word & BONDS_3D[0]) {
+                if (!vx || (edges[(j = v - 1)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              if (word & BONDS_3D[1]) {
+                if (vx + 1 >= w || (edges[(j = v + 1)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              if (word & BONDS_3D[2]) {
+                if (!vy || (edges[(j = v - w)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              if (word & BONDS_3D[3]) {
+                if (vy + 1 >= h || (edges[(j = v + w)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              if (word & BONDS_3D[4]) {
+                if (!vz || (edges[(j = v - layer)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              if (word & BONDS_3D[5]) {
+                if (vz + 1 >= d || (edges[(j = v + layer)] & INTEGRITY_3D) === 0)
+                  throw Error('Invalid reactive component adjacency.');
+                if (ids[j] < 0) {
+                  ids[j] = root;
+                  queue[length++] = j;
+                }
+              }
+              head++;
+              if (head >= length) bfs = false;
+              executed++;
+            }
+            last = 'components';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 8: {
+            if (i >= n) {
+              phase = 9;
+              length = 0;
+              i = 0;
+              continue;
+            }
+            batchStage = 'dependencies';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) {
+              const r = ids[i];
+              if (r < 0) continue;
+              const j = below(i);
+              if (
+                edges[i] & ANCHOR_3D ||
+                j < 0 ||
+                ((edges[j] & INTEGRITY_3D) === 0 && obstructed(i, j))
+              )
+                blocked[r] = 1;
+              else if (ids[j] >= 0 && ids[j] !== r) (dependents[ids[j]] ??= []).push(r);
+            }
+            last = 'dependencies';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 9: {
+            if (i >= n) {
+              phase = 10;
+              head = 0;
+              k = 0;
+              continue;
+            }
+            batchStage = 'blocked';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) if (blocked[i]) queue[length++] = i;
+            last = 'blocked';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 10: {
+            if (head >= length) {
+              phase = 11;
+              i = 0;
+              continue;
+            }
+            batchStage = 'blocked';
+            batchBase = executed;
+            while (head < length && executed < budget) {
+              const deps = dependents[queue[head]];
+              if (deps && k < deps.length) {
+                const above = deps[k];
+                if (!blocked[above]) {
+                  blocked[above] = 1;
+                  queue[length++] = above;
+                }
+                k++;
+              } else {
+                head++;
+                k = 0;
+              }
+              executed++;
+            }
+            last = 'blocked';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 11: {
+            if (i >= n) {
+              phase = 12;
+              z = x = y = 0;
+              top = -1;
+              continue;
+            }
+            batchStage = 'moving';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++) {
+              const r = ids[i];
+              if (r >= 0 && !blocked[r]) {
+                moving[i] = 1;
+                movingCells.push(i);
+              }
+              sources[i] = i;
+            }
+            last = 'moving';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 12: {
+            if (z >= d) {
+              phase = 13;
+              i = 0;
+              continue;
+            }
+            batchStage = 'permutation';
+            batchBase = executed;
+            while (executed < budget) {
+              if (y === 0) top = -1;
+              const v = x + w * (y + h * z);
+              if (moving[v]) {
+                if (y + 1 === h) throw Error('Reactive fragment crossed the floor.');
+                if (top < 0) top = v;
+                sources[v + w] = v;
+              } else if (top >= 0) {
+                sources[top] = v;
+                top = -1;
+              }
+              y++;
+              executed++;
+              if (y >= h) {
+                y = 0;
+                x++;
+                if (x >= w) {
+                  x = 0;
+                  z++;
+                  if (z >= d) break;
+                }
+              }
+            }
+            last = 'permutation';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 13: {
+            if (i >= n) {
+              phase = 14;
+              i = 0;
+              continue;
+            }
+            batchStage = 'publish';
+            batchBase = executed;
+            if (!materialised) {
+              // The report arrays are final here and internal until completion: copy them once.
+              materialised = true;
+              const D = new Array<number>(n),
+                L = new Array<number>(n),
+                C = new Array<number>(n),
+                R = new Array<number>(n),
+                I = new Array<number>(n);
+              for (let q = 0; q < n; q++) {
+                D[q] = distances[q];
+                L[q] = loads[q];
+                C[q] = capacities[q];
+                R[q] = reactions[q];
+                I[q] = ids[q];
+              }
+              report.distances = D;
+              report.loads = L;
+              report.capacities = C;
+              report.reactions = R;
+              report.componentIds = I;
+            }
+            const end = Math.min(n, i + budget - executed);
+            for (; i < end; i++) {
+              const source = sources[i];
+              if (visited[source]) throw Error('Reactive fragment motion is not a permutation.');
+              visited[source] = 1;
+              destinations[source] = i;
+              const packed = grid[source],
+                q = energyQ[source],
+                word = edges[source];
+              block.packedCells[i] = packed;
+              block.energyQ[i] = q;
+              block.structure[i] = word;
+              beforeQ += energyQ[i];
+              afterQ += q;
+              if (packed !== grid[i] || q !== energyQ[i] || word !== structure[i])
+                report.changedCells.push(i);
+              executed++;
+            }
+            last = 'publish';
+            if (executed >= budget) return last;
+            continue;
+          }
+          case 14: {
+            if (i >= n) {
+              if (!Number.isSafeInteger(beforeQ) || !Number.isSafeInteger(afterQ))
+                throw Error('Reactive energy total exceeds exact integer range.');
+              if (beforeQ !== afterQ) throw Error('Reactive structure lost conserved energy.');
+              report.supportedWeight = supportedWeight;
+              report.energy.beforeQ = String(beforeQ);
+              report.energy.afterQ = String(afterQ);
+              output = { block, report };
+              phase = 15;
+              executed++;
+              last = null;
+              return null;
+            }
+            batchStage = 'report';
+            batchBase = executed;
+            const end = Math.min(n, i + budget - executed);
+            executed += end - i;
+            for (; i < end; i++)
+              if (destinations[i] !== i) report.moves.push({ from: i, to: destinations[i] });
+            last = 'report';
+            if (executed >= budget) return last;
+            continue;
+          }
+          default:
+            throw Error('Reactive structure solver is complete.');
         }
-        default:
-          throw Error('Reactive structure solver is complete.');
       }
+    } catch (error) {
+      if (executed > batchBase) last = batchStage;
+      throw error;
     }
   };
-  return { step, output: () => output };
+  return { run, executed: () => executed, last: () => last, output: () => output };
 }
 
 /** Owned validated input only. Public entries validate first and never hand over uncopied results. */
@@ -508,21 +814,32 @@ function structureJob(registry: ReactiveMaterialRegistry3D, input: ReactiveMater
       reactiveInteger3D(maxWork, 1, REACTIVE_STRUCTURE_MAX_WORK_3D);
       if (status !== 'running' || !solver)
         throw Error('Reactive structure job is no longer running.');
+      const stepper = solver;
       lastAdvanceWork = 0;
       try {
         while (lastAdvanceWork < maxWork) {
-          const next = solver.step();
-          completedWork++;
-          lastAdvanceWork++;
+          // A batch never crosses the work bound; the one step past it counts, sets no stage and throws.
+          const room = maxTotalWork - completedWork,
+            budget = Math.min(maxWork - lastAdvanceWork, room > 0 ? room : 1);
+          let next: ReactiveStructureStage3D | null;
+          try {
+            next = stepper.run(budget);
+          } finally {
+            // Steps completed before a throwing step still count, and the stage follows the last of them.
+            const done = stepper.executed(),
+              reached = stepper.last();
+            completedWork += done;
+            lastAdvanceWork += done;
+            if (reached !== null && room > 0) stage = reached;
+          }
           if (completedWork > maxTotalWork) throw Error('Reactive structure work bound exceeded.');
           if (next === null) {
-            result = solver.output();
+            result = stepper.output();
             solver = null;
             status = 'complete';
             stage = 'complete';
             break;
           }
-          stage = next;
         }
       } catch (error) {
         cancel();
