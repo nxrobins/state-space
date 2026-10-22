@@ -5,6 +5,7 @@ import {
   createReactiveMaterialRegistry3D,
   createReactiveMaterialBlock3D,
   editReactiveMaterialBlock3D,
+  readReactiveMaterialBlock3D,
   createReactiveWorldSnapshot3D,
   createReactiveWorldTickJob3D,
   createReactiveWorld3D,
@@ -15,6 +16,8 @@ import {
   type ReactiveMaterialEdit3D,
   type ReactiveWorldTickJob3D,
 } from '../reactive-materials.js';
+import { startReactiveStructureJob3D } from './reactive-structure.js';
+import { startStepBaselineStructureJob3D } from './reactive-structure.per-step-oracle.js';
 
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D;
@@ -113,36 +116,128 @@ describe('reactive ticks in a patched realm', () => {
     expect(ticks).toBe(15);
   });
   test('commits copy the whole result as before while Object.prototype carries hooks', () => {
-    const observe = (descriptor: PropertyDescriptor, key: string) => {
+    const observe = (
+      descriptor: PropertyDescriptor,
+      key: string,
+      plantDescriptorFields = false,
+    ) => {
       const w = createReactiveWorld3D(r, mixed(6)),
         j = w.prepareTick();
       finish(j, () => () => undefined);
-      const setter = vi.fn();
+      const setter = vi.fn(),
+        planted = plantDescriptorFields ? ['value', 'writable'] : [];
       Object.defineProperty(Object.prototype, key, {
         configurable: true,
         ...descriptor,
         ...('set' in descriptor ? { set: setter } : {}),
       });
+      // Inherited descriptor fields: an accessor descriptor then reads as a writable data one.
+      for (const field of planted)
+        Object.defineProperty(Object.prototype, field, {
+          value: true,
+          writable: true,
+          configurable: true,
+        });
       try {
         w.commitTick(j);
         return { committed: w.tick, calls: setter.mock.calls.length };
       } catch (error) {
         return { error: (error as Error).message, tick: w.tick, calls: setter.mock.calls.length };
       } finally {
-        delete (Object.prototype as Record<string, unknown>)[key];
+        for (const field of [key, ...planted])
+          delete (Object.prototype as Record<string, unknown>)[field];
       }
     };
     // A copy assigns every field, so a setter named 'tick' swallows it and the commit fails closed.
-    expect(observe({ set: () => undefined }, 'tick')).toEqual({
+    const swallowed = {
       error: 'Reactive tick commit identity or accounting mismatch.',
       tick: 0,
       calls: 1,
-    });
+    };
+    expect(observe({ set: () => undefined }, 'tick')).toEqual(swallowed);
+    expect(observe({ set: () => undefined }, 'tick', true)).toEqual(swallowed);
     expect(observe({ value: 7, writable: false }, 'width')).toEqual({
       error: "Cannot assign to read only property 'width' of object '#<Object>'",
       tick: 0,
       calls: 0,
     });
     expect(observe({ value: 7, writable: true }, 'width')).toEqual({ committed: 1, calls: 0 });
+  });
+  test('an append that fails inside a structure batch stops where the per-step job stops', () => {
+    // Hot wood breaks on the floor and a loose stone bar falls, so every report array fills. No cell
+    // rests on a bond or on another fragment: the per-step job then appends to no scratch list.
+    const edits: ReactiveMaterialEdit3D[] = [];
+    for (let x = 0; x < 4; x++)
+      edits.push(
+        { kind: 'place', x, y: 2, z: 0, material: MAT.WOOD, thermal: 184 },
+        { kind: 'place', x, y: 0, z: 1, material: MAT.STONE, thermal: 20 },
+      );
+    for (let x = 0; x < 3; x++)
+      edits.push({ kind: 'bond', x, y: 0, z: 1, direction: 1, bonded: true });
+    const input = readReactiveMaterialBlock3D(
+      r,
+      editReactiveMaterialBlock3D(
+        r,
+        createReactiveMaterialBlock3D(r, { width: 4, height: 3, depth: 2 }),
+        edits,
+      ).block,
+    );
+    /** Array.prototype[key] stores like an own element, except that its nth append throws. A store
+     * into a presized array is not counted: the batched job copies its output block instead. */
+    const run = (
+      start: typeof startReactiveStructureJob3D,
+      key: string,
+      nth: number,
+      budget: number,
+    ) => {
+      const { job } = start(r, input);
+      let appends = 0,
+        error = 'none';
+      Object.defineProperty(Array.prototype, key, {
+        get: () => undefined,
+        set(this: unknown[], value: unknown) {
+          if (this.length === Number(key) && ++appends === nth) throw Error('Append failed.');
+          Object.defineProperty(this, key, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        },
+        configurable: true,
+      });
+      try {
+        while (job.progress().status === 'running') job.advance(budget);
+      } catch (e) {
+        error = (e as Error).message;
+      } finally {
+        delete (Array.prototype as unknown as Record<string, unknown>)[key];
+      }
+      const p = job.progress();
+      return { error, appends, progress: [p.status, p.stage, p.completedWork, p.lastAdvanceWork] };
+    };
+    const stages = new Set<unknown>();
+    for (const key of ['0', '1', '3']) {
+      const total = run(startStepBaselineStructureJob3D, key, 0, 64).appends;
+      expect(total).toBeGreaterThan(4);
+      for (let nth = 1; nth <= total; nth++)
+        for (const budget of [1, 7, 64, 256]) {
+          const expected = run(startStepBaselineStructureJob3D, key, nth, budget);
+          expect({
+            key,
+            nth,
+            budget,
+            ...run(startReactiveStructureJob3D, key, nth, budget),
+          }).toEqual({
+            key,
+            nth,
+            budget,
+            ...expected,
+          });
+          stages.add(expected.progress[1]);
+        }
+    }
+    // The failing append sits in the damage, moving, publish and report loops in turn.
+    expect([...stages]).toEqual(expect.arrayContaining(['damage', 'moving', 'publish', 'report']));
   });
 });

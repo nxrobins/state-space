@@ -79,10 +79,11 @@ const BOND_MASK_3D = BONDS_3D.reduce((mask, bond) => mask | bond, 0);
  * An explicit stepper: run(budget) executes up to budget steps in phase-local loops, and every former
  * yield is one loop iteration, in the same order. A stage transition is the first action of the step
  * after the exhausted stage; the balance and energy checks run there, uncounted. Steps that can
- * throw (component adjacency, the floor crossing, the permutation) are counted one at a time and a
- * throwing one is not counted; the loops that count a whole slice up front hold steps that cannot
- * throw in an unmodified realm. So any budget schedule sees the same stage and work after each
- * step and the same throw points. Replaced Array.prototype members are outside that guarantee.
+ * throw (component adjacency, the floor crossing, the permutation, and every append to a plain
+ * array, which a realm Array.prototype index accessor can fail) are counted one at a time and a
+ * throwing one is not counted; the loops that count a whole slice up front write typed storage
+ * only. So any budget schedule sees the same stage and work after each step and the same throw
+ * points. Replaced Array.prototype members are outside that guarantee.
  */
 function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
   const { packedCells: grid, energyQ, structure } = input,
@@ -164,8 +165,7 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
     z = 0,
     x = 0,
     y = 0,
-    top = -1,
-    materialised = false;
+    top = -1;
   let output: ReactiveStructureResult3D | null = null;
   // Steps completed by the current run, and the stage of the latest one (null before any).
   let executed = 0,
@@ -380,9 +380,9 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
             }
             batchStage = 'damage';
             batchBase = executed;
+            // Counted per step, around brokenCells.push.
             const end = Math.min(n, i + budget - executed);
-            executed += end - i;
-            for (; i < end; i++) {
+            for (; i < end; i++, executed++) {
               const word = structure[i];
               damaged[i] = word;
               if ((word & INTEGRITY_3D) === 0) continue;
@@ -664,9 +664,9 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
             }
             batchStage = 'moving';
             batchBase = executed;
+            // Counted per step, around movingCells.push.
             const end = Math.min(n, i + budget - executed);
-            executed += end - i;
-            for (; i < end; i++) {
+            for (; i < end; i++, executed++) {
               const r = ids[i];
               if (r >= 0 && !blocked[r]) {
                 moving[i] = 1;
@@ -721,27 +721,6 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
             }
             batchStage = 'publish';
             batchBase = executed;
-            if (!materialised) {
-              // The report arrays are final here and internal until completion: copy them once.
-              materialised = true;
-              const D = new Array<number>(n),
-                L = new Array<number>(n),
-                C = new Array<number>(n),
-                R = new Array<number>(n),
-                I = new Array<number>(n);
-              for (let q = 0; q < n; q++) {
-                D[q] = distances[q];
-                L[q] = loads[q];
-                C[q] = capacities[q];
-                R[q] = reactions[q];
-                I[q] = ids[q];
-              }
-              report.distances = D;
-              report.loads = L;
-              report.capacities = C;
-              report.reactions = R;
-              report.componentIds = I;
-            }
             const end = Math.min(n, i + budget - executed);
             for (; i < end; i++) {
               const source = sources[i];
@@ -756,6 +735,12 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
               block.structure[i] = word;
               beforeQ += energyQ[i];
               afterQ += q;
+              // Per step, as before batching: O(1) work per unit and packed report arrays.
+              report.distances.push(distances[i]);
+              report.loads.push(loads[i]);
+              report.capacities.push(capacities[i]);
+              report.reactions.push(reactions[i]);
+              report.componentIds.push(ids[i]);
               if (packed !== grid[i] || q !== energyQ[i] || word !== structure[i])
                 report.changedCells.push(i);
               executed++;
@@ -780,9 +765,9 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
             }
             batchStage = 'report';
             batchBase = executed;
+            // Counted per step, around report.moves.push.
             const end = Math.min(n, i + budget - executed);
-            executed += end - i;
-            for (; i < end; i++)
+            for (; i < end; i++, executed++)
               if (destinations[i] !== i) report.moves.push({ from: i, to: destinations[i] });
             last = 'report';
             if (executed >= budget) return last;

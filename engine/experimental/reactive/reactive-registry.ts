@@ -91,9 +91,12 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
  */
 export function reactivePlainObjectPrototype3D(): boolean {
   for (const key of Reflect.ownKeys(Object.prototype)) {
+    // A descriptor is an ordinary object: read its own fields only, never ones Object.prototype adds.
     const d = Reflect.getOwnPropertyDescriptor(Object.prototype, key)!;
-    if (d.enumerable) return false;
-    if (key !== '__proto__' && (!('value' in d) || !d.writable)) return false;
+    if (Object.hasOwn(d, 'enumerable') && d.enumerable !== false) return false;
+    const data = !Object.hasOwn(d, 'get') && !Object.hasOwn(d, 'set');
+    if (key !== '__proto__' && (!data || !Object.hasOwn(d, 'writable') || d.writable !== true))
+      return false;
   }
   return true;
 }
