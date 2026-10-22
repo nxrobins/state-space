@@ -11,6 +11,7 @@ import {
   reactiveInteger3D,
   cloneReactiveData3D,
   reactivePlainObjectPrototype3D,
+  reactiveSameData3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
 import type { ReactiveTickOptions3D } from './reactive-motion-capture.js';
@@ -173,16 +174,19 @@ export function createReactiveWorld3D(
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
         // live adopts the job's immutable result state; only the handed-out report is copied. While
         // Object.prototype is not as the realm starts it, the whole result is copied in one walk, so
-        // caller setters and read-only keys see exactly the stores that copying always made.
+        // caller setters and read-only keys see exactly the stores that copying always made, and a
+        // copy that lost or changed any state field fails the commit.
         const next = nextRevision(),
           taken = takeReactiveWorldTickOutput3D(job),
-          output = reactivePlainObjectPrototype3D()
+          adopt = reactivePlainObjectPrototype3D(),
+          output = adopt
             ? { state: taken.state, report: cloneReactiveData3D(taken.report) }
             : cloneReactiveData3D(taken),
           report = output.report;
         if (
           output.state.tick !== live.tick + 1 ||
-          total(output.state.block) !== initialQ + externalQ
+          total(output.state.block) !== initialQ + externalQ ||
+          (!adopt && !reactiveSameData3D(output.state, taken.state))
         )
           throw Error('Reactive tick commit identity or accounting mismatch.');
         ensureValid();

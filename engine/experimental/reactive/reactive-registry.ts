@@ -84,38 +84,82 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
   }
   return true;
 }
+// The realm checks below use the intrinsics this module loaded with, so replacing one later cannot
+// hide a change from them.
+const OWN_KEYS = Reflect.ownKeys,
+  OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
+  HAS_OWN = Object.hasOwn,
+  PROTO = OWN_DESCRIPTOR(Object.prototype, '__proto__'),
+  ARRAY_SLICE = Array.prototype.slice,
+  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get;
+/** A descriptor field, read only when the descriptor has it as its own: a descriptor is an ordinary
+ * object, and Object.prototype may add any field. */
+function ownField(target: object, key: PropertyKey, field: keyof PropertyDescriptor) {
+  const d = OWN_DESCRIPTOR(target, key);
+  return d && HAS_OWN(d, field) ? d[field] : undefined;
+}
 /** Object.prototype as the realm starts it: every own property is a non-enumerable writable data
- * property, apart from a non-enumerable __proto__ accessor. Then for-in sees own keys only, and each
- * [[Set]] of the generic walk defines an own data property exactly as spread does. Anything else (an
- * enumerable, accessor or read-only key) sends every record through the generic walk.
+ * property, apart from the non-enumerable __proto__ accessor this module loaded with. Then for-in sees
+ * own keys only, and each [[Set]] of the generic walk defines an own data property exactly as spread
+ * does. Anything else (an enumerable, accessor or read-only key) sends every record through the generic
+ * walk.
  */
 export function reactivePlainObjectPrototype3D(): boolean {
-  for (const key of Reflect.ownKeys(Object.prototype)) {
-    // A descriptor is an ordinary object: read its own fields only, never ones Object.prototype adds.
-    const d = Reflect.getOwnPropertyDescriptor(Object.prototype, key)!;
-    if (Object.hasOwn(d, 'enumerable') && d.enumerable !== false) return false;
-    const data = !Object.hasOwn(d, 'get') && !Object.hasOwn(d, 'set');
-    if (key !== '__proto__' && (!data || !Object.hasOwn(d, 'writable') || d.writable !== true))
+  const keys = OWN_KEYS(Object.prototype);
+  for (let k = 0; k < keys.length; k++) {
+    const key = keys[k];
+    if (ownField(Object.prototype, key, 'enumerable') !== false) return false;
+    if (key === '__proto__') {
+      if (
+        ownField(Object.prototype, key, 'get') !== PROTO?.get ||
+        ownField(Object.prototype, key, 'set') !== PROTO?.set
+      )
+        return false;
+    } else if (
+      ownField(Object.prototype, key, 'writable') !== true ||
+      ownField(Object.prototype, key, 'get') !== undefined ||
+      ownField(Object.prototype, key, 'set') !== undefined
+    )
       return false;
   }
   return true;
 }
-const ARRAY_SLICE = Array.prototype.slice,
-  ARRAY_SPECIES = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)?.get;
 /** Array.prototype.slice, Array.prototype.constructor and Array[Symbol.species] as this module loaded
  * them: slice() of a plain array then makes a fresh plain array of its own elements. A replaced one may
- * return any object, even its input. Own descriptor fields only, as above.
+ * return any object, even its input.
  */
 export function reactivePlainArraySlice3D(): boolean {
-  const own = (target: object, key: PropertyKey, field: 'value' | 'get') => {
-    const d = Reflect.getOwnPropertyDescriptor(target, key);
-    return d && Object.hasOwn(d, field) ? d[field] : undefined;
-  };
   return (
-    own(Array.prototype, 'slice', 'value') === ARRAY_SLICE &&
-    own(Array.prototype, 'constructor', 'value') === Array &&
-    own(Array, Symbol.species, 'get') === ARRAY_SPECIES
+    ownField(Array.prototype, 'slice', 'value') === ARRAY_SLICE &&
+    ownField(Array.prototype, 'constructor', 'value') === Array &&
+    ownField(Array, Symbol.species, 'get') === ARRAY_SPECIES
   );
+}
+/** Internal only: whether two engine-built portable values hold the same data: own enumerable keys in
+ * the same order, the same array lengths and Object.is-equal primitives. */
+export function reactiveSameData3D(a: unknown, b: unknown): boolean {
+  if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null)
+    return Object.is(a, b);
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    const other = b as unknown[];
+    if (a.length !== other.length) return false;
+    for (let i = 0; i < a.length; i++) if (!reactiveSameData3D(a[i], other[i])) return false;
+    return true;
+  }
+  const ka = Object.keys(a),
+    kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (let i = 0; i < ka.length; i++)
+    if (
+      ka[i] !== kb[i] ||
+      !reactiveSameData3D(
+        (a as Record<string, unknown>)[ka[i]],
+        (b as Record<string, unknown>)[kb[i]],
+      )
+    )
+      return false;
+  return true;
 }
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
  * Field order is kept exactly as structuredClone keeps it, without its serializer cost.
@@ -126,7 +170,8 @@ export function reactivePlainArraySlice3D(): boolean {
  */
 export function cloneReactiveData3D<T>(value: T): T {
   const seen = new Map<object, unknown>();
-  const records = reactivePlainObjectPrototype3D();
+  const records = reactivePlainObjectPrototype3D(),
+    slices = reactivePlainArraySlice3D();
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');
@@ -142,7 +187,13 @@ export function cloneReactiveData3D<T>(value: T): T {
           break;
         }
       if (flat) {
-        const out = v.slice();
+        // A replaced slice could hand back v itself, and the caller would then hold engine state.
+        let out = v;
+        if (slices) out = v.slice();
+        else {
+          out = new Array<unknown>(v.length);
+          for (let i = 0; i < v.length; i++) out[i] = v[i];
+        }
         seen.set(v, out);
         return out;
       }

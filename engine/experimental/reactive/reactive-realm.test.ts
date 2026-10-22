@@ -1,6 +1,7 @@
 /** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
- * Object.prototype hook a tick still publishes the true state or fails, and the structure stage never
- * trusts a replaced slice, constructor or species more than the engine before batching did.
+ * Object.prototype hook a tick still publishes the true state or fails. Replaced array methods,
+ * iterators or species carry no such guarantee, but the windows tested here (the structure output,
+ * copies handed out before a commit, hold anchors at publish) stay as safe as before batching.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -13,12 +14,14 @@ import {
   createReactiveWorldTickJob3D,
   createReactiveWorld3D,
   MAT,
+  ANCHOR_3D,
   ENERGY_SCALE,
   type ReactiveMaterialRegistry3D,
   type ReactiveMaterialBlock3D,
   type ReactiveMaterialEdit3D,
   type ReactiveWorldTickJob3D,
 } from '../reactive-materials.js';
+import { reactivePlainObjectPrototype3D } from './reactive-registry.js';
 import { startReactiveStructureJob3D } from './reactive-structure.js';
 import { startStepBaselineStructureJob3D } from './reactive-structure.per-step-oracle.js';
 
@@ -217,6 +220,127 @@ describe('reactive ticks in a patched realm', () => {
     const clean = tick(() => () => undefined).snapshot;
     for (const [name, patch] of Object.entries(patches))
       expect({ name, ...tick(patch) }).toEqual({ name, patched: true, snapshot: clean });
+  });
+  test('a copy handed out under a replaced slice never aliases the committed state', () => {
+    const slice = Array.prototype.slice;
+    const w = createReactiveWorld3D(r, mixed(6)),
+      j = w.prepareTick();
+    finish(j, () => () => undefined);
+    // A slice that returns its receiver would hand out the job's own arrays.
+    Array.prototype.slice = function (this: unknown[], ...rest: unknown[]) {
+      return rest.length ? slice.apply(this, rest as []) : this;
+    } as typeof slice;
+    let handed;
+    try {
+      handed = j.result();
+    } finally {
+      Array.prototype.slice = slice;
+    }
+    w.commitTick(j);
+    const committed = w.snapshot();
+    handed.state.block.packedCells.fill(0);
+    handed.state.block.energyQ.fill(0);
+    expect(w.snapshot()).toEqual(committed);
+  });
+  test('a replaced array iterator during publish leaves no hold anchor behind', () => {
+    const iterator = Object.getPrototypeOf([][Symbol.iterator]()) as { next: () => unknown },
+      next = iterator.next;
+    /** Skips one cell index in every array iteration, as a hostile iterator could. */
+    const skip = (cell: number) => () => {
+      iterator.next = function (this: unknown) {
+        let step = next.call(this) as { done: boolean; value: unknown };
+        while (!step.done && step.value === cell) step = next.call(this) as typeof step;
+        return step;
+      };
+      return () => void (iterator.next = next);
+    };
+    const tick = (patch: (cell: number) => () => () => void) => {
+      const w = createReactiveWorld3D(r, mixed(6)),
+        b = w.snapshot().block,
+        held: number[] = [];
+      for (let i = 0; i < b.packedCells.length && held.length < 2; i++)
+        if (b.structure[i] !== 0 && !(b.structure[i] & ANCHOR_3D)) held.push(i);
+      const cells = held.map((i): [number, number, number] => [
+        i % 6,
+        Math.floor(i / 6) % 6,
+        Math.floor(i / 36),
+      ]);
+      w.hold({ id: 'held', expiresAtTick: 9, cells });
+      const before = w.snapshot(),
+        j = w.prepareTick();
+      let patched = false,
+        outcome = 'committed';
+      try {
+        while (j.progress().status === 'running') {
+          const stage = j.progress().phase === 'publish',
+            restore = stage ? patch(held[1])() : () => undefined;
+          patched ||= stage;
+          try {
+            j.advance(64);
+          } finally {
+            restore();
+          }
+        }
+        w.commitTick(j);
+      } catch (error) {
+        outcome = (error as Error).message;
+      }
+      return { patched, outcome, before, after: w.snapshot() };
+    };
+    const clean = tick(() => () => () => undefined),
+      patched = tick(skip);
+    expect({ clean: clean.outcome, patched: patched.patched }).toEqual({
+      clean: 'committed',
+      patched: true,
+    });
+    // Failing closed is allowed; publishing anything but the true state is not.
+    expect(patched.after).toEqual(patched.outcome === 'committed' ? clean.after : patched.before);
+  });
+  test('a commit copy that loses a state field fails the commit and keeps the world', () => {
+    for (const key of ['depth', 'width', 'height']) {
+      const w = createReactiveWorld3D(r, mixed(6)),
+        j = w.prepareTick();
+      finish(j, () => () => undefined);
+      const before = w.snapshot();
+      // A setter that swallows the store: the copied block would lack the field.
+      Object.defineProperty(Object.prototype, key, { configurable: true, set: () => undefined });
+      let outcome = 'committed';
+      try {
+        w.commitTick(j);
+      } catch (error) {
+        outcome = (error as Error).message;
+      } finally {
+        delete (Object.prototype as Record<string, unknown>)[key];
+      }
+      expect({ key, outcome, tick: w.tick, same: w.snapshot() }).toEqual({
+        key,
+        outcome: 'Reactive tick commit identity or accounting mismatch.',
+        tick: 0,
+        same: before,
+      });
+    }
+  });
+  test('the plain Object.prototype check sees a replaced __proto__ and ignores later wrappers', () => {
+    const proto = Reflect.getOwnPropertyDescriptor(Object.prototype, '__proto__')!,
+      ownKeys = Reflect.ownKeys;
+    expect(reactivePlainObjectPrototype3D()).toBe(true);
+    Object.defineProperty(Object.prototype, '__proto__', { ...proto, set: () => undefined });
+    try {
+      expect(reactivePlainObjectPrototype3D()).toBe(false);
+    } finally {
+      Object.defineProperty(Object.prototype, '__proto__', proto);
+    }
+    // A wrapper installed after load cannot hide a swallowing setter from the check.
+    Reflect.ownKeys = ((target: object) =>
+      ownKeys(target).filter((key) => key !== 'tick')) as typeof Reflect.ownKeys;
+    Object.defineProperty(Object.prototype, 'tick', { configurable: true, set: () => undefined });
+    try {
+      expect(reactivePlainObjectPrototype3D()).toBe(false);
+    } finally {
+      delete (Object.prototype as Record<string, unknown>).tick;
+      Reflect.ownKeys = ownKeys;
+    }
+    expect(reactivePlainObjectPrototype3D()).toBe(true);
   });
   test('an append that fails inside a structure batch stops where the per-step job stops', () => {
     // Hot wood breaks on the floor and a loose stone bar falls, so every report array fills. No cell

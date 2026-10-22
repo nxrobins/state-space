@@ -123,7 +123,11 @@ export function overlayReactiveHolds3D(
   holds: readonly ReactiveHold3D[],
 ): ReactiveMaterialBlock3D {
   const out = { ...block, structure: block.structure.slice() };
-  for (const h of holds) for (const i of h.cells) out.structure[i] |= ANCHOR_3D;
+  // Indexed loops: a replaced array iterator must not skip a held cell.
+  for (let k = 0; k < holds.length; k++) {
+    const cells = holds[k].cells;
+    for (let q = 0; q < cells.length; q++) out.structure[cells[q]] |= ANCHOR_3D;
+  }
   return out;
 }
 export function stripReactiveHoldAnchors3D(
@@ -132,9 +136,14 @@ export function stripReactiveHoldAnchors3D(
   holds: readonly ReactiveHold3D[],
 ): ReactiveMaterialBlock3D {
   const out = { ...after, structure: after.structure.slice() };
-  for (const h of holds)
-    for (const i of h.cells)
+  // Indexed loops: a replaced array iterator must not leave a hold anchor in the canonical state.
+  for (let k = 0; k < holds.length; k++) {
+    const cells = holds[k].cells;
+    for (let q = 0; q < cells.length; q++) {
+      const i = cells[q];
       if (!(canonicalBefore.structure[i] & ANCHOR_3D)) out.structure[i] &= ~ANCHOR_3D;
+    }
+  }
   return out;
 }
 export function retireReactiveHolds3D(
