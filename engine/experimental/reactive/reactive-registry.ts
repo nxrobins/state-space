@@ -85,11 +85,14 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
   return true;
 }
 // The realm checks below use the intrinsics this module loaded with, so replacing one later cannot
-// hide a change from them.
+// hide a change from them. One replaced before this module loaded cannot be told from the realm's own.
 const OWN_KEYS = Reflect.ownKeys,
   OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
+  GET_PROTOTYPE = Reflect.getPrototypeOf,
   HAS_OWN = Object.hasOwn,
   PROTO = OWN_DESCRIPTOR(Object.prototype, '__proto__'),
+  ARRAY = Array,
+  ARRAY_PROTOTYPE = Array.prototype,
   ARRAY_SLICE = Array.prototype.slice,
   ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get;
 /** A descriptor field, read only when the descriptor has it as its own: a descriptor is an ordinary
@@ -130,10 +133,15 @@ export function reactivePlainObjectPrototype3D(): boolean {
  */
 export function reactivePlainArraySlice3D(): boolean {
   return (
-    ownField(Array.prototype, 'slice', 'value') === ARRAY_SLICE &&
-    ownField(Array.prototype, 'constructor', 'value') === Array &&
-    ownField(Array, Symbol.species, 'get') === ARRAY_SPECIES
+    ownField(ARRAY_PROTOTYPE, 'slice', 'value') === ARRAY_SLICE &&
+    ownField(ARRAY_PROTOTYPE, 'constructor', 'value') === ARRAY &&
+    ownField(ARRAY, Symbol.species, 'get') === ARRAY_SPECIES
   );
+}
+/** An array whose slice() is the realm's: its prototype is the Array.prototype this module loaded with,
+ * and it has no own constructor to choose a species. */
+export function reactivePlainArray3D(value: object): boolean {
+  return GET_PROTOTYPE(value) === ARRAY_PROTOTYPE && !HAS_OWN(value, 'constructor');
 }
 /** Internal only: whether two engine-built portable values hold the same data: own enumerable keys in
  * the same order, the same array lengths and Object.is-equal primitives. */
@@ -191,7 +199,7 @@ export function cloneReactiveData3D<T>(value: T, plainObjectPrototype?: boolean)
       if (flat) {
         // A replaced slice could hand back v itself, and the caller would then hold engine state.
         let out = v;
-        if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
+        if ((slices ??= reactivePlainArraySlice3D()) && reactivePlainArray3D(v)) out = v.slice();
         else {
           out = new Array<unknown>(v.length);
           for (let i = 0; i < v.length; i++) out[i] = v[i];

@@ -1,7 +1,8 @@
 /** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
  * Object.prototype hook a tick still publishes the true state or fails. Replaced array methods,
- * iterators or species carry no such guarantee, but the windows tested here (the structure output,
- * copies handed out before a commit, hold anchors at publish) stay as safe as before batching.
+ * iterators or species carry no such guarantee; the tests below pin the windows where this branch
+ * could otherwise do worse than the engine before batching, for replacements made after the SDK
+ * loaded. A slice replaced before it loaded can still steer the structure output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -171,56 +172,123 @@ describe('reactive ticks in a patched realm', () => {
     expect(observe({ value: 7, writable: true }, 'width')).toEqual({ committed: 1, calls: 0 });
   });
   test('a replaced slice, constructor or species during the structure stage leaves the true state', () => {
-    const slice = Array.prototype.slice,
+    const RealArray = Array,
+      slice = Array.prototype.slice,
       constructor = Reflect.getOwnPropertyDescriptor(Array.prototype, 'constructor')!,
       species = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)!;
-    /** An array whose stores vanish, as a hostile species could return. */
+    let hostile = true;
+    /** An array whose stores vanish while hostile, as a caller's species could return. */
     class Swallow extends Array {
       constructor(...items: unknown[]) {
         super(...(items as number[]));
-        return new Proxy(this, { set: () => true });
+        if (hostile) return new Proxy(this, { set: () => true });
       }
     }
     const replaceSlice = (next: (this: unknown[], ...rest: unknown[]) => unknown) => () => {
       Array.prototype.slice = next as typeof slice;
       return () => void (Array.prototype.slice = slice);
     };
-    const patches: Record<string, () => () => void> = {
-      identity: replaceSlice(function (...rest) {
-        return rest.length ? slice.apply(this, rest as []) : this;
-      }),
-      swallow: replaceSlice(function (...rest) {
-        return new Proxy(slice.apply(this, rest as []), { set: () => true });
-      }),
-      species: () => {
-        Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => Swallow });
-        return () => void Object.defineProperty(Array, Symbol.species, species);
+    const swallowSlice = replaceSlice(function (...rest) {
+      return new Proxy(slice.apply(this, rest as []), { set: () => true });
+    });
+    const useSpecies = () => {
+      Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => Swallow });
+      return () => void Object.defineProperty(Array, Symbol.species, species);
+    };
+    type Phase = 'evolution' | 'structure-prepare';
+    const plans: Record<string, Partial<Record<Phase, () => () => void>>> = {
+      identity: {
+        'structure-prepare': replaceSlice(function (...rest) {
+          return rest.length ? slice.apply(this, rest as []) : this;
+        }),
       },
-      constructor: () => {
-        Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
-        return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
+      swallow: { 'structure-prepare': swallowSlice },
+      species: { 'structure-prepare': useSpecies },
+      constructor: {
+        'structure-prepare': () => {
+          Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
+          return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
+        },
+      },
+      // A global Array rebound to a lookalike whose own prototype carries the original slice.
+      reboundArray: {
+        'structure-prepare': () => {
+          const restore = swallowSlice();
+          const Lookalike = function (...items: unknown[]) {
+            return Reflect.construct(RealArray, items);
+          };
+          Lookalike.prototype = { slice, constructor: Lookalike };
+          Object.defineProperty(Lookalike, Symbol.species, species);
+          (globalThis as { Array: unknown }).Array = Lookalike;
+          return () => {
+            (globalThis as { Array: unknown }).Array = RealArray;
+            restore();
+          };
+        },
+      },
+      // Evolution builds its arrays through a benign subclass that turns hostile before structure.
+      latentSubclass: {
+        evolution: () => {
+          hostile = false;
+          const restore = useSpecies();
+          return () => {
+            restore();
+            hostile = true;
+          };
+        },
+        'structure-prepare': () => () => undefined,
       },
     };
-    const tick = (patch: () => () => void) => {
+    const tick = (plan: Partial<Record<Phase, () => () => void>>) => {
       const w = createReactiveWorld3D(r, mixed(6)),
         j = w.prepareTick();
       let patched = 0;
       while (j.progress().status === 'running') {
-        const stage = j.progress().phase === 'structure-prepare',
-          restore = stage ? patch() : () => undefined;
+        const phase = j.progress().phase as Phase,
+          restore = plan[phase]?.() ?? (() => undefined);
         try {
           j.advance(64);
         } finally {
           restore();
         }
-        patched += stage ? 1 : 0;
+        patched += phase === 'structure-prepare' && plan[phase] ? 1 : 0;
       }
       w.commitTick(j);
       return { patched: patched > 0, snapshot: w.snapshot() };
     };
-    const clean = tick(() => () => undefined).snapshot;
-    for (const [name, patch] of Object.entries(patches))
-      expect({ name, ...tick(patch) }).toEqual({ name, patched: true, snapshot: clean });
+    const clean = tick({}).snapshot;
+    for (const [name, plan] of Object.entries(plans))
+      expect({ name, ...tick(plan) }).toEqual({ name, patched: true, snapshot: clean });
+  });
+  test('a result() read before commit is copied at commit, even under a slice replaced before load', async () => {
+    const slice = Array.prototype.slice;
+    let identity = false;
+    // Installed before a fresh copy of the SDK loads, so its realm checks take it for the realm's own.
+    Array.prototype.slice = function (this: unknown[], ...rest: unknown[]) {
+      return identity && !rest.length ? this : slice.apply(this, rest as []);
+    } as typeof slice;
+    try {
+      vi.resetModules();
+      const fresh = await import('../reactive-materials.js'),
+        registry = await fresh.createReactiveMaterialRegistry3D(),
+        w = fresh.createReactiveWorld3D(registry, mixed(6)),
+        j = w.prepareTick();
+      while (j.progress().status === 'running') j.advance(64);
+      identity = true;
+      let handed;
+      try {
+        handed = j.result();
+      } finally {
+        identity = false;
+      }
+      w.commitTick(j);
+      const committed = w.snapshot();
+      handed.state.block.packedCells.fill(0);
+      handed.state.block.energyQ.fill(0);
+      expect(w.snapshot()).toEqual(committed);
+    } finally {
+      Array.prototype.slice = slice;
+    }
   });
   test('a copy handed out under a replaced slice never aliases the committed state', () => {
     const slice = Array.prototype.slice;

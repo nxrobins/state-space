@@ -271,7 +271,8 @@ export function createReactiveWorldTickJob3D(
   return worldTickJob(registry, readReactiveWorldSnapshot3D(registry, raw), captureOptions).job;
 }
 /** Internal only: an owned validated snapshot whose block and holds the job reads without copying.
- * take() hands the caller the completed job's uncopied result, which nothing writes. */
+ * take() hands the caller the completed job's uncopied result, which nothing writes, and whether
+ * result() has already handed out a copy of it. */
 export function startReactiveWorldTickJob3D(
   registry: ReactiveMaterialRegistry3D,
   owned: ReactiveWorldSnapshot3D,
@@ -283,7 +284,10 @@ function worldTickJob(
   registry: ReactiveMaterialRegistry3D,
   owned: ReactiveWorldSnapshot3D,
   captureOptions: ReturnType<typeof readReactiveTickOptions3D>,
-): { job: ReactiveWorldTickJob3D; take: () => ReactiveWorldTickResult3D } {
+): {
+  job: ReactiveWorldTickJob3D;
+  take: () => { result: ReactiveWorldTickResult3D; handed: boolean };
+} {
   let before: ReactiveWorldSnapshot3D | null = owned;
   if (before.tick === Number.MAX_SAFE_INTEGER) throw Error('Reactive world tick would overflow.');
   const initialHolds = copyReactiveHolds3D(reactiveSnapshotHolds3D(before)),
@@ -317,6 +321,8 @@ function worldTickJob(
   );
   let evolutionResult: ReactiveEvolutionResult3D | null = null,
     structure: StructureStage | null = null;
+  // Whether result() has handed out a copy: a world then commits a copy of its own, as before.
+  let handed = false;
   let result: ReactiveWorldTickResult3D | null = null,
     structureProgress: ReactiveStructureProgress3D | null = null;
   let motion: ReactiveMotionReport3D | null = null;
@@ -462,6 +468,7 @@ function worldTickJob(
     result() {
       if (!result || status !== 'complete')
         throw Error('Reactive world tick result is not complete.');
+      handed = true;
       return cloneReactiveData3D(result);
     },
     motion() {
@@ -472,7 +479,7 @@ function worldTickJob(
   const take = () => {
     if (!result || status !== 'complete')
       throw Error('Reactive world tick result is not complete.');
-    return result;
+    return { result, handed };
   };
   return { job, take };
 }

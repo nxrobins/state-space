@@ -99,7 +99,7 @@ export function createReactiveWorld3D(
     // Each prepared job's base revision, and the taker of its uncopied result.
     prepared = new WeakMap<
       ReactiveWorldTickJob3D,
-      { base: number; take: () => ReactiveWorldTickResult3D }
+      { base: number; take: () => { result: ReactiveWorldTickResult3D; handed: boolean } }
     >();
   const translations = new WeakMap<ReactiveTranslationJob3D, number>();
   const nextRevision = () => reactiveInteger3D(revision + 1, 0, Number.MAX_SAFE_INTEGER);
@@ -180,13 +180,16 @@ export function createReactiveWorld3D(
         // live adopts the job's immutable result state; only the handed-out report is copied. While
         // Object.prototype is not as the realm starts it, the whole result is copied in one walk, so
         // caller setters and read-only keys see exactly the stores that copying always made, and a
-        // copy that lost or changed any state field fails the commit.
+        // copy that lost or changed any state field fails the commit. A job whose result() was read
+        // is copied too, as before: in a realm whose slice was replaced, that read may have handed
+        // out the job's own arrays.
         const next = nextRevision(),
-          taken = entry.take(),
-          adopt = reactivePlainObjectPrototype3D(),
+          { result: taken, handed } = entry.take(),
+          plain = reactivePlainObjectPrototype3D(),
+          adopt = !handed && plain,
           output = adopt
-            ? { state: taken.state, report: cloneReactiveData3D(taken.report, adopt) }
-            : cloneReactiveData3D(taken, adopt),
+            ? { state: taken.state, report: cloneReactiveData3D(taken.report, plain) }
+            : cloneReactiveData3D(taken, plain),
           report = output.report;
         if (
           output.state.tick !== live.tick + 1 ||
