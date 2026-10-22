@@ -1,11 +1,12 @@
 /** Portable data validation only; no engine step or browser execution. */
-import { beforeAll, describe, expect, test } from 'vitest';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { DEFAULT_REGISTRY } from '../../registry.js';
 import { COLD_STRIDE, PHASE, MAT } from '../../generated/materials.js';
 import {
   createReactiveMaterialRegistry3D as create,
   defaultReactiveMaterialCatalog3D as catalog,
   REACTIVE_MATERIAL_RULES_3D,
+  reactiveArray3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
 import { createReactiveMaterialBlock3D } from '../reactive-materials.js';
@@ -245,5 +246,192 @@ describe('versioned reactive material catalog', () => {
   });
   test('null-prototype portable records produce the same identity', async () => {
     expect((await create(Object.assign(Object.create(null), catalog()))).hash).toBe(registry.hash);
+  });
+});
+
+/** The per-index descriptor reader that reactiveArray3D replaced, kept as the oracle. */
+function oracleArray(raw: unknown, maximum: number): unknown[] {
+  if (
+    !Array.isArray(raw) ||
+    Object.getPrototypeOf(raw) !== Array.prototype ||
+    raw.length > maximum ||
+    Reflect.ownKeys(raw).length !== raw.length + 1
+  )
+    throw Error('Invalid reactive array.');
+  for (let i = 0; i < raw.length; i++) {
+    const d = Object.getOwnPropertyDescriptor(raw, i);
+    if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');
+  }
+  return raw;
+}
+describe('reactive array reads', () => {
+  let calls = 0;
+  const trace: unknown[] = [];
+  const counted = (enumerable = true) => ({
+    get() {
+      calls++;
+      return 0;
+    },
+    enumerable,
+    configurable: true,
+  });
+  const define = (a: unknown[], key: PropertyKey, d: PropertyDescriptor) => (
+    Object.defineProperty(a, key, d),
+    a
+  );
+  const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+  const holed = (n: number, i: number) => {
+    const a: unknown[] = range(n);
+    delete a[i];
+    return a;
+  };
+  const traced = (target: unknown[], handler: ProxyHandler<unknown[]> = {}) =>
+    new Proxy(target, {
+      getPrototypeOf: (t) => (trace.push('proto'), Reflect.getPrototypeOf(t)),
+      get: (t, k, r) => (trace.push(['get', k]), Reflect.get(t, k, r)),
+      ownKeys: (t) => (trace.push('keys'), Reflect.ownKeys(t)),
+      getOwnPropertyDescriptor: (t, k) => (
+        trace.push(['own', k]),
+        Reflect.getOwnPropertyDescriptor(t, k)
+      ),
+      ...handler,
+    });
+  const run = (read: typeof oracleArray, [raw, maximum]: [unknown, number]) => {
+    calls = 0;
+    trace.length = 0;
+    let result: string;
+    try {
+      result = read(raw, maximum) === raw ? 'same' : 'other';
+    } catch (e) {
+      result = (e as Error).message;
+    }
+    return { result, calls, trace: [...trace] };
+  };
+  class Sub extends Array<number> {}
+  const cases: Record<string, () => [unknown, number]> = {
+    dense: () => [[1, 2, 3], 3],
+    empty: () => [[], 0],
+    tooLong: () => [[1, 2, 3], 2],
+    holeStart: () => [[, 1, 2], 3],
+    holeMiddle: () => [[0, , 2], 3],
+    holeEnd: () => [[0, 1, ,], 3],
+    getter: () => [define([0, 1, 2], 1, counted()), 3],
+    hiddenGetter: () => [define([0, 1, 2], 1, counted(false)), 3],
+    setterOnly: () => [define([0, 1, 2], 1, { set() {}, enumerable: true }), 3],
+    emptyAccessor: () => [define([0, 1, 2], 1, { get: undefined, enumerable: true }), 3],
+    hiddenData: () => [define([0, 1, 2], 1, { value: 1, enumerable: false }), 3],
+    oddValues: () => [[undefined, null, -0, NaN], 4],
+    extra: () => [Object.assign([0], { extra: 1 }), 1],
+    hiddenExtra: () => [define([0], 'extra', { value: 1 }), 1],
+    hiddenExtraWithHole: () => [define([0, , 2], 'extra', { value: 1 }), 3],
+    symbol: () => [Object.assign([0], { [Symbol('x')]: 1 }), 1],
+    maxIndexKey: () => [Object.assign([0, 1], { 4294967295: 1 }), 2],
+    maxIndexKeyWithHole: () => [Object.assign([0, , 2], { 4294967295: 1 }), 3],
+    nullPrototype: () => [Object.setPrototypeOf([0], null), 1],
+    objectPrototype: () => [Object.setPrototypeOf([0], Object.prototype), 1],
+    subclass: () => [Sub.from([0, 1]), 2],
+    typed: () => [new Uint32Array(2), 2],
+    arrayLike: () => [{ 0: 1, length: 1 }, 1],
+    frozen: () => [Object.freeze([0, 1]), 2],
+    sealed: () => [Object.seal([0, 1]), 2],
+    nonExtensible: () => [Object.preventExtensions([0, 1]), 2],
+    nonArray: () => [{}, 1],
+    nullValue: () => [null, 1],
+    long: () => [range(40000), 65536],
+    longHole: () => [holed(40000, 100), 65536],
+    longHoleInTable: () => [define(holed(40000, 100), 'extra', { value: 1 }), 65536],
+    longHoleBeyondTable: () => [define(holed(40000, 39999), 'extra', { value: 1 }), 65536],
+    longGetterBeyondTable: () => [define(range(40000), 35000, counted()), 65536],
+    proxy: () => [new Proxy([0, 1, 2], {}), 3],
+    tracedProxy: () => [traced([0, 1, 2]), 3],
+    tracedProxyHole: () => [traced([0, , 2]), 3],
+    tracedLongProxy: () => [traced(range(33000)), 65536],
+    lyingKeys: () => [
+      traced([0, 1], { ownKeys: () => (trace.push('keys'), ['b', 'a', 'length']) }),
+      2,
+    ],
+    lyingDescriptor: () => [
+      traced([0, , 2], {
+        ownKeys: () => ['0', '1', '2', 'length'],
+        getOwnPropertyDescriptor: (t, k) =>
+          k === '1'
+            ? { value: 1, writable: true, enumerable: true, configurable: true }
+            : Reflect.getOwnPropertyDescriptor(t, k),
+      }),
+      3,
+    ],
+    growingLength: () => {
+      let reads = 0;
+      return [
+        traced([0, 1], {
+          get: (t, k, r) => (k === 'length' ? (++reads > 2 ? 4 : 2) : Reflect.get(t, k, r)),
+        }),
+        4,
+      ];
+    },
+    throwingPrototype: () => [
+      traced([0], {
+        getPrototypeOf: () => {
+          throw Error('trap');
+        },
+      }),
+      1,
+    ],
+    revoked: () => {
+      const { proxy, revoke } = Proxy.revocable([0], {});
+      revoke();
+      return [proxy, 1];
+    },
+  };
+  test('match the per-index descriptor reader on adversarial arrays', () => {
+    for (const [name, make] of Object.entries(cases)) {
+      const expected = run(oracleArray, make());
+      expect({ name, ...run(reactiveArray3D, make()) }).toEqual({ name, ...expected });
+      expect(expected.calls).toBe(0);
+    }
+  });
+  test('match it under an Array.prototype index accessor', () => {
+    const holey = [0, , 2],
+      balanced = define([0, , 2], 'extra', { value: 1 }),
+      dense = [0, 1, 2];
+    Object.defineProperty(Array.prototype, '1', counted());
+    let results;
+    try {
+      results = {
+        holey: [run(oracleArray, [holey, 3]), run(reactiveArray3D, [holey, 3])],
+        balanced: [run(oracleArray, [balanced, 3]), run(reactiveArray3D, [balanced, 3])],
+        dense: [run(oracleArray, [dense, 3]), run(reactiveArray3D, [dense, 3])],
+      };
+    } finally {
+      delete (Array.prototype as unknown as Record<string, unknown>)['1'];
+    }
+    const outcome = (result: string) => Array(2).fill({ result, calls: 0, trace: [] });
+    expect(results).toEqual({
+      holey: outcome('Invalid reactive array.'),
+      balanced: outcome('Reactive arrays require dense data.'),
+      dense: outcome('same'),
+    });
+  });
+  test('keep no state that a transient realm wrapper could leave behind', async () => {
+    // A fresh module instance, so its first block-sized read happens while the wrapper is in place.
+    vi.resetModules();
+    const fresh = (await import('./reactive-registry.js')).reactiveArray3D;
+    const ownKeys = Reflect.ownKeys,
+      n = 32768;
+    // While wrapped, every key listing of a typed array reads as index 0.
+    Reflect.ownKeys = ((target: object) =>
+      ArrayBuffer.isView(target)
+        ? ownKeys(target).map(() => '0')
+        : ownKeys(target)) as typeof Reflect.ownKeys;
+    try {
+      fresh(range(n), n);
+    } finally {
+      Reflect.ownKeys = ownKeys;
+    }
+    const balanced = define(holed(n, 7), 'extra', { value: 1 }),
+      accessor = define(range(n), 9, counted());
+    expect([balanced, accessor].map((a) => run(fresh, [a, n]))).toEqual(
+      [balanced, accessor].map((a) => run(oracleArray, [a, n])),
+    );
   });
 });

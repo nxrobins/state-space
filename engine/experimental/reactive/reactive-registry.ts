@@ -55,9 +55,10 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
     Reflect.ownKeys(raw).length !== raw.length + 1
   )
     throw Error('Invalid reactive array.');
-  // A numeric key names the same property as String(i) and skips a string allocation per element.
+  // The canonical string key names the same property as i; a number key would be converted
+  // again inside every lookup. Primitive concatenation runs no caller code and keeps no state.
   for (let i = 0; i < raw.length; i++) {
-    const d = Object.getOwnPropertyDescriptor(raw, i);
+    const d = Object.getOwnPropertyDescriptor(raw, '' + i);
     if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');
   }
   return raw;
