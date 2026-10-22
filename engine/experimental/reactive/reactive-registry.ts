@@ -90,7 +90,8 @@ const OWN_KEYS = Reflect.ownKeys,
   OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   GET_PROTOTYPE = Reflect.getPrototypeOf,
   HAS_OWN = Object.hasOwn,
-  PROTO = OWN_DESCRIPTOR(Object.prototype, '__proto__'),
+  OBJECT_PROTOTYPE = Object.prototype,
+  PROTO = OWN_DESCRIPTOR(OBJECT_PROTOTYPE, '__proto__'),
   ARRAY = Array,
   ARRAY_PROTOTYPE = Array.prototype,
   ARRAY_SLICE = Array.prototype.slice,
@@ -108,20 +109,20 @@ function ownField(target: object, key: PropertyKey, field: keyof PropertyDescrip
  * walk.
  */
 export function reactivePlainObjectPrototype3D(): boolean {
-  const keys = OWN_KEYS(Object.prototype);
+  const keys = OWN_KEYS(OBJECT_PROTOTYPE);
   for (let k = 0; k < keys.length; k++) {
     const key = keys[k];
-    if (ownField(Object.prototype, key, 'enumerable') !== false) return false;
+    if (ownField(OBJECT_PROTOTYPE, key, 'enumerable') !== false) return false;
     if (key === '__proto__') {
       if (
-        ownField(Object.prototype, key, 'get') !== PROTO?.get ||
-        ownField(Object.prototype, key, 'set') !== PROTO?.set
+        ownField(OBJECT_PROTOTYPE, key, 'get') !== PROTO?.get ||
+        ownField(OBJECT_PROTOTYPE, key, 'set') !== PROTO?.set
       )
         return false;
     } else if (
-      ownField(Object.prototype, key, 'writable') !== true ||
-      ownField(Object.prototype, key, 'get') !== undefined ||
-      ownField(Object.prototype, key, 'set') !== undefined
+      ownField(OBJECT_PROTOTYPE, key, 'writable') !== true ||
+      ownField(OBJECT_PROTOTYPE, key, 'get') !== undefined ||
+      ownField(OBJECT_PROTOTYPE, key, 'set') !== undefined
     )
       return false;
   }
@@ -138,13 +139,97 @@ export function reactivePlainArraySlice3D(): boolean {
     ownField(ARRAY, Symbol.species, 'get') === ARRAY_SPECIES
   );
 }
-/** An array whose slice() is the realm's: its prototype is the Array.prototype this module loaded with,
- * and it has no own constructor to choose a species. */
-export function reactivePlainArray3D(value: object): boolean {
-  return GET_PROTOTYPE(value) === ARRAY_PROTOTYPE && !HAS_OWN(value, 'constructor');
+// The array, map, set and typed-array built-ins a world tick calls, as this module loaded them.
+const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unknown },
+  TYPED_PROTOTYPE = GET_PROTOTYPE(Int32Array.prototype) as Record<string, unknown>,
+  REALM = {
+    iterator: ARRAY_PROTOTYPE[Symbol.iterator],
+    next: ITERATOR_PROTOTYPE.next,
+    slice: ARRAY_PROTOTYPE.slice,
+    map: ARRAY_PROTOTYPE.map,
+    filter: ARRAY_PROTOTYPE.filter,
+    flatMap: ARRAY_PROTOTYPE.flatMap,
+    concat: ARRAY_PROTOTYPE.concat,
+    push: ARRAY_PROTOTYPE.push,
+    sort: ARRAY_PROTOTYPE.sort,
+    some: ARRAY_PROTOTYPE.some,
+    every: ARRAY_PROTOTYPE.every,
+    includes: ARRAY_PROTOTYPE.includes,
+    fill: ARRAY_PROTOTYPE.fill,
+    Map,
+    Set,
+    mapGet: Map.prototype.get,
+    mapSet: Map.prototype.set,
+    mapHas: Map.prototype.has,
+    setAdd: Set.prototype.add,
+    setHas: Set.prototype.has,
+    setIterator: Set.prototype[Symbol.iterator],
+    Int32Array,
+    Uint32Array,
+    Uint16Array,
+    Uint8Array,
+    typedSlice: TYPED_PROTOTYPE.slice,
+    typedFill: TYPED_PROTOTYPE.fill,
+    typedSet: TYPED_PROTOTYPE.set,
+  };
+/** Internal only: whether the array, map, set and typed-array built-ins a world tick calls are still
+ * the ones this module loaded with, including the global bindings, constructors and species. A tick
+ * that finds one replaced fails rather than trust it. Direct reads only: a replaced accessor answers
+ * with what the tick would call. Built-ins replaced before this module loaded cannot be told apart.
+ */
+const species = (constructor: object) =>
+  (constructor as { [Symbol.species]?: unknown })[Symbol.species];
+export function reactiveRealmIntact3D(): boolean {
+  return (
+    globalThis.Array === ARRAY &&
+    ARRAY_PROTOTYPE.constructor === ARRAY &&
+    ARRAY[Symbol.species] === ARRAY &&
+    ARRAY_PROTOTYPE[Symbol.iterator] === REALM.iterator &&
+    ITERATOR_PROTOTYPE.next === REALM.next &&
+    ARRAY_PROTOTYPE.slice === REALM.slice &&
+    ARRAY_PROTOTYPE.map === REALM.map &&
+    ARRAY_PROTOTYPE.filter === REALM.filter &&
+    ARRAY_PROTOTYPE.flatMap === REALM.flatMap &&
+    ARRAY_PROTOTYPE.concat === REALM.concat &&
+    ARRAY_PROTOTYPE.push === REALM.push &&
+    ARRAY_PROTOTYPE.sort === REALM.sort &&
+    ARRAY_PROTOTYPE.some === REALM.some &&
+    ARRAY_PROTOTYPE.every === REALM.every &&
+    ARRAY_PROTOTYPE.includes === REALM.includes &&
+    ARRAY_PROTOTYPE.fill === REALM.fill &&
+    globalThis.Map === REALM.Map &&
+    globalThis.Set === REALM.Set &&
+    REALM.Map.prototype.get === REALM.mapGet &&
+    REALM.Map.prototype.set === REALM.mapSet &&
+    REALM.Map.prototype.has === REALM.mapHas &&
+    REALM.Set.prototype.add === REALM.setAdd &&
+    REALM.Set.prototype.has === REALM.setHas &&
+    REALM.Set.prototype[Symbol.iterator] === REALM.setIterator &&
+    globalThis.Int32Array === REALM.Int32Array &&
+    globalThis.Uint32Array === REALM.Uint32Array &&
+    globalThis.Uint16Array === REALM.Uint16Array &&
+    globalThis.Uint8Array === REALM.Uint8Array &&
+    REALM.Int32Array.prototype.constructor === REALM.Int32Array &&
+    REALM.Uint32Array.prototype.constructor === REALM.Uint32Array &&
+    REALM.Uint16Array.prototype.constructor === REALM.Uint16Array &&
+    REALM.Uint8Array.prototype.constructor === REALM.Uint8Array &&
+    species(REALM.Int32Array) === REALM.Int32Array &&
+    species(REALM.Uint32Array) === REALM.Uint32Array &&
+    species(REALM.Uint16Array) === REALM.Uint16Array &&
+    species(REALM.Uint8Array) === REALM.Uint8Array &&
+    TYPED_PROTOTYPE.slice === REALM.typedSlice &&
+    TYPED_PROTOTYPE.fill === REALM.typedFill &&
+    TYPED_PROTOTYPE.set === REALM.typedSet
+  );
+}
+/** Internal only: fails a world tick whose realm no longer has the built-ins this module loaded with. */
+export function assertReactiveRealm3D(): void {
+  if (!reactiveRealmIntact3D())
+    throw Error('Reactive world ticks need the array built-ins the SDK loaded with.');
 }
 /** Internal only: whether two engine-built portable values hold the same data: own enumerable keys in
- * the same order, the same array lengths and Object.is-equal primitives. */
+ * the same order, the same array lengths, every array element an own property (never one a prototype
+ * accessor supplies), and Object.is-equal primitives. */
 export function reactiveSameData3D(a: unknown, b: unknown): boolean {
   if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null)
     return Object.is(a, b);
@@ -152,7 +237,8 @@ export function reactiveSameData3D(a: unknown, b: unknown): boolean {
   if (Array.isArray(a)) {
     const other = b as unknown[];
     if (a.length !== other.length) return false;
-    for (let i = 0; i < a.length; i++) if (!reactiveSameData3D(a[i], other[i])) return false;
+    for (let i = 0; i < a.length; i++)
+      if (!HAS_OWN(a, i) || !HAS_OWN(other, i) || !reactiveSameData3D(a[i], other[i])) return false;
     return true;
   }
   const ka = Object.keys(a),
@@ -199,7 +285,7 @@ export function cloneReactiveData3D<T>(value: T, plainObjectPrototype?: boolean)
       if (flat) {
         // A replaced slice could hand back v itself, and the caller would then hold engine state.
         let out = v;
-        if ((slices ??= reactivePlainArraySlice3D()) && reactivePlainArray3D(v)) out = v.slice();
+        if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
         else {
           out = new Array<unknown>(v.length);
           for (let i = 0; i < v.length; i++) out[i] = v[i];

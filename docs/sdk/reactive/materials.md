@@ -59,8 +59,11 @@ or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
 progress at a throw and outputs may differ between engine versions. An index
 accessor on `Array.prototype` or a hook on `Object.prototype` can then make a
 tick fail, but the tick does not publish a state other than the one an
-unmodified realm computes. Replaced array methods, iterators or species give no
-such guarantee.
+unmodified realm computes. A world tick that finds the array, map, set or
+typed-array built-ins it calls replaced since the SDK loaded fails at its next
+advance, `result()`, `motion()` or commit. Built-ins replaced before the SDK
+loaded cannot be told from the realm's own and carry no guarantee, nor do other
+replaced built-ins.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,

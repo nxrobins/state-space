@@ -6,6 +6,7 @@ import {
   type ReactiveMaterialBlock3D,
 } from './reactive-block.js';
 import {
+  assertReactiveRealm3D,
   reactiveFields3D,
   reactiveInteger3D,
   cloneReactiveData3D,
@@ -288,6 +289,7 @@ function worldTickJob(
   job: ReactiveWorldTickJob3D;
   take: () => { result: ReactiveWorldTickResult3D; handed: boolean };
 } {
+  assertReactiveRealm3D();
   let before: ReactiveWorldSnapshot3D | null = owned;
   if (before.tick === Number.MAX_SAFE_INTEGER) throw Error('Reactive world tick would overflow.');
   const initialHolds = copyReactiveHolds3D(reactiveSnapshotHolds3D(before)),
@@ -359,6 +361,8 @@ function worldTickJob(
       if (status !== 'running' || !before)
         throw Error('Reactive world tick job is no longer running.');
       try {
+        // Every stage but the structure graph calls array built-ins; the graph uses typed storage.
+        if (phase !== 'structure') assertReactiveRealm3D();
         if (phase === 'evolution') {
           evolutionPasses = evolution!.job.advance().completedPasses;
           if (evolutionPasses === 28) phase = 'structure-prepare';
@@ -468,11 +472,13 @@ function worldTickJob(
     result() {
       if (!result || status !== 'complete')
         throw Error('Reactive world tick result is not complete.');
+      assertReactiveRealm3D();
       handed = true;
       return cloneReactiveData3D(result);
     },
     motion() {
       if (!motion || status !== 'complete') throw Error('Reactive world motion is not complete.');
+      assertReactiveRealm3D();
       return cloneReactiveData3D(motion);
     },
   });

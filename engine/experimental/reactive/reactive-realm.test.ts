@@ -1,8 +1,9 @@
 /** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
- * Object.prototype hook a tick still publishes the true state or fails. Replaced array methods,
- * iterators or species carry no such guarantee; the tests below pin the windows where this branch
- * could otherwise do worse than the engine before batching, for replacements made after the SDK
- * loaded. A slice replaced before it loaded can still steer the structure output.
+ * Object.prototype hook a world tick still publishes the true state or fails. A tick that finds the
+ * array, map, set or typed-array built-ins it calls replaced since the SDK loaded fails. Built-ins
+ * replaced before the SDK loaded carry no guarantee; the tests below pin the windows where this
+ * branch would otherwise do worse than the engine before batching. A slice replaced before load can
+ * still steer the structure output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -171,107 +172,267 @@ describe('reactive ticks in a patched realm', () => {
     });
     expect(observe({ value: 7, writable: true }, 'width')).toEqual({ committed: 1, calls: 0 });
   });
-  test('a replaced slice, constructor or species during the structure stage leaves the true state', () => {
+  const REALM_ERROR = 'Reactive world ticks need the array built-ins the SDK loaded with.';
+  type Patch = () => () => void;
+  /** Built-in replacements a caller could make after the SDK loaded, each undone by its return. */
+  const patches = () => {
     const RealArray = Array,
       slice = Array.prototype.slice,
       constructor = Reflect.getOwnPropertyDescriptor(Array.prototype, 'constructor')!,
-      species = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)!;
-    let hostile = true;
-    /** An array whose stores vanish while hostile, as a caller's species could return. */
+      species = Reflect.getOwnPropertyDescriptor(Array, Symbol.species)!,
+      iterator = Object.getPrototypeOf([][Symbol.iterator]()) as { next: () => unknown },
+      next = iterator.next,
+      mapGet = Map.prototype.get;
+    /** An array whose stores vanish, as a caller's species could return. */
     class Swallow extends Array {
       constructor(...items: unknown[]) {
         super(...(items as number[]));
-        if (hostile) return new Proxy(this, { set: () => true });
+        return new Proxy(this, { set: () => true });
       }
     }
-    const replaceSlice = (next: (this: unknown[], ...rest: unknown[]) => unknown) => () => {
-      Array.prototype.slice = next as typeof slice;
-      return () => void (Array.prototype.slice = slice);
-    };
+    const replaceSlice =
+      (next: (this: unknown[], ...rest: unknown[]) => unknown): Patch =>
+      () => {
+        Array.prototype.slice = next as typeof slice;
+        return () => void (Array.prototype.slice = slice);
+      };
     const swallowSlice = replaceSlice(function (...rest) {
       return new Proxy(slice.apply(this, rest as []), { set: () => true });
     });
-    const useSpecies = () => {
+    const useSpecies: Patch = () => {
       Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => Swallow });
       return () => void Object.defineProperty(Array, Symbol.species, species);
     };
-    type Phase = 'evolution' | 'structure-prepare';
-    const plans: Record<string, Partial<Record<Phase, () => () => void>>> = {
-      identity: {
-        'structure-prepare': replaceSlice(function (...rest) {
-          return rest.length ? slice.apply(this, rest as []) : this;
-        }),
-      },
-      swallow: { 'structure-prepare': swallowSlice },
-      species: { 'structure-prepare': useSpecies },
-      constructor: {
-        'structure-prepare': () => {
-          Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
-          return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
-        },
-      },
+    return {
+      identitySlice: replaceSlice(function (...rest) {
+        return rest.length ? slice.apply(this, rest as []) : this;
+      }),
+      swallowSlice,
+      swapSlice: replaceSlice(function (...rest) {
+        const out = slice.apply(this, rest as []);
+        if (out.length > 1) [out[0], out[1]] = [out[1], out[0]];
+        return out;
+      }),
+      species: useSpecies,
+      constructor: (() => {
+        Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
+        return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
+      }) as Patch,
       // A global Array rebound to a lookalike whose own prototype carries the original slice.
-      reboundArray: {
-        'structure-prepare': () => {
-          const restore = swallowSlice();
-          const Lookalike = function (...items: unknown[]) {
-            return Reflect.construct(RealArray, items);
-          };
-          Lookalike.prototype = { slice, constructor: Lookalike };
-          Object.defineProperty(Lookalike, Symbol.species, species);
-          (globalThis as { Array: unknown }).Array = Lookalike;
-          return () => {
-            (globalThis as { Array: unknown }).Array = RealArray;
-            restore();
-          };
-        },
-      },
-      // Evolution builds its arrays through a benign subclass that turns hostile before structure.
-      latentSubclass: {
-        evolution: () => {
-          hostile = false;
-          const restore = useSpecies();
-          return () => {
-            restore();
-            hostile = true;
-          };
-        },
-        'structure-prepare': () => () => undefined,
-      },
-    };
-    const tick = (plan: Partial<Record<Phase, () => () => void>>) => {
-      const w = createReactiveWorld3D(r, mixed(6)),
-        j = w.prepareTick();
-      let patched = 0;
-      while (j.progress().status === 'running') {
-        const phase = j.progress().phase as Phase,
-          restore = plan[phase]?.() ?? (() => undefined);
-        try {
-          j.advance(64);
-        } finally {
+      reboundArray: (() => {
+        const restore = swallowSlice();
+        const Lookalike = function (...items: unknown[]) {
+          return Reflect.construct(RealArray, items);
+        };
+        Lookalike.prototype = { slice, constructor: Lookalike };
+        Object.defineProperty(Lookalike, Symbol.species, species);
+        (globalThis as { Array: unknown }).Array = Lookalike;
+        return () => {
+          (globalThis as { Array: unknown }).Array = RealArray;
           restore();
-        }
-        patched += phase === 'structure-prepare' && plan[phase] ? 1 : 0;
-      }
-      w.commitTick(j);
-      return { patched: patched > 0, snapshot: w.snapshot() };
+        };
+      }) as Patch,
+      iterator: (() => {
+        iterator.next = function (this: unknown) {
+          const step = next.call(this) as { done: boolean };
+          return step.done ? step : next.call(this);
+        };
+        return () => void (iterator.next = next);
+      }) as Patch,
+      typedSpecies: (() => {
+        const typed = Object.getOwnPropertyDescriptor(Uint8Array, Symbol.species);
+        class Kept extends Uint8Array {}
+        Object.defineProperty(Uint8Array, Symbol.species, { configurable: true, get: () => Kept });
+        return () =>
+          void (typed
+            ? Object.defineProperty(Uint8Array, Symbol.species, typed)
+            : delete (Uint8Array as unknown as Record<symbol, unknown>)[Symbol.species]);
+      }) as Patch,
+      mapGet: (() => {
+        Map.prototype.get = function (this: Map<unknown, unknown>, key: unknown) {
+          return key;
+        };
+        return () => void (Map.prototype.get = mapGet);
+      }) as Patch,
     };
-    const clean = tick({}).snapshot;
-    for (const [name, plan] of Object.entries(plans))
-      expect({ name, ...tick(plan) }).toEqual({ name, patched: true, snapshot: clean });
+  };
+  /** Holds up to two cohesive cells that nothing anchors, as a caller would. */
+  const holdCells = (w: ReturnType<typeof createReactiveWorld3D>) => {
+    const b = w.snapshot().block,
+      held: number[] = [];
+    for (let i = 0; i < b.packedCells.length && held.length < 2; i++)
+      if (b.structure[i] !== 0 && !(b.structure[i] & ANCHOR_3D)) held.push(i);
+    const n = b.width;
+    w.hold({
+      id: 'held',
+      expiresAtTick: 9,
+      cells: held.map((i): [number, number, number] => [
+        i % n,
+        Math.floor(i / n) % b.height,
+        Math.floor(i / (n * b.height)),
+      ]),
+    });
+    return held;
+  };
+  test('array built-ins replaced after load fail the tick and keep the world', () => {
+    const p = patches();
+    type Phase = 'evolution' | 'structure-prepare' | 'publish';
+    const plans: [string, boolean, Partial<Record<Phase, Patch>>][] = [
+      ['identity slice at structure', false, { 'structure-prepare': p.identitySlice }],
+      ['swallowing slice at structure', false, { 'structure-prepare': p.swallowSlice }],
+      ['species at structure', false, { 'structure-prepare': p.species }],
+      ['constructor at structure', false, { 'structure-prepare': p.constructor }],
+      ['rebound Array at structure', false, { 'structure-prepare': p.reboundArray }],
+      ['species during evolution', false, { evolution: p.species }],
+      ['swapping slice during evolution', false, { evolution: p.swapSlice }],
+      ['typed species during evolution', false, { evolution: p.typedSpecies }],
+      ['Map get at structure', true, { 'structure-prepare': p.mapGet }],
+      ['species at publish', true, { publish: p.species }],
+      ['constructor at publish', true, { publish: p.constructor }],
+      ['iterator at publish', true, { publish: p.iterator }],
+    ];
+    const world = (held: boolean) => {
+      const w = createReactiveWorld3D(r, mixed(6));
+      if (held) holdCells(w);
+      return w;
+    };
+    for (const [name, held, plan] of plans) {
+      const w = world(held),
+        before = w.snapshot(),
+        j = w.prepareTick();
+      let hit = false,
+        outcome = 'committed';
+      try {
+        while (j.progress().status === 'running') {
+          const install = plan[j.progress().phase as Phase],
+            restore = install ? install() : () => undefined;
+          hit ||= Boolean(install);
+          try {
+            j.advance(64);
+          } finally {
+            restore();
+          }
+        }
+        w.commitTick(j);
+      } catch (error) {
+        outcome = (error as Error).message;
+      }
+      expect({ name, hit, outcome, kept: w.snapshot() }).toEqual({
+        name,
+        hit: true,
+        outcome: REALM_ERROR,
+        kept: before,
+      });
+      // The world ticks on as an untouched twin does.
+      const twin = world(held);
+      for (const target of [w, twin]) {
+        const next = target.prepareTick();
+        finish(next, () => () => undefined);
+        target.commitTick(next);
+      }
+      expect({ name, after: w.snapshot() }).toEqual({ name, after: twin.snapshot() });
+    }
   });
+  test('a standalone structure job slices only with the realm slice it loaded with', () => {
+    const p = patches(),
+      input = readReactiveMaterialBlock3D(r, mixed(6)),
+      original = structuredClone(input);
+    const solve = (patch: Patch) => {
+      const restore = patch();
+      let started;
+      try {
+        started = startReactiveStructureJob3D(r, input);
+      } finally {
+        restore();
+      }
+      while (started.job.progress().status === 'running') started.job.advance(256);
+      return started.job.result();
+    };
+    const clean = solve(() => () => undefined);
+    for (const name of [
+      'identitySlice',
+      'swallowSlice',
+      'species',
+      'constructor',
+      'reboundArray',
+    ] as const)
+      expect({ name, result: solve(p[name]) }).toEqual({ name, result: clean });
+    expect(input).toEqual(original);
+  });
+  test('result() and motion() under replaced array built-ins fail and leave the job committable', () => {
+    const p = patches(),
+      twin = createReactiveWorld3D(r, mixed(6)),
+      w = createReactiveWorld3D(r, mixed(6)),
+      j = w.prepareTick({ motion: { maxEntries: 4096 } }),
+      t = twin.prepareTick();
+    finish(j, () => () => undefined);
+    finish(t, () => () => undefined);
+    for (const patch of [p.identitySlice, p.species, p.mapGet]) {
+      const restore = patch();
+      const outcomes: string[] = [];
+      for (const read of [() => j.result(), () => j.motion()])
+        try {
+          read();
+          outcomes.push('read');
+        } catch (error) {
+          outcomes.push((error as Error).message);
+        } finally {
+          if (outcomes.length === 2) restore();
+        }
+      expect(outcomes).toEqual([REALM_ERROR, REALM_ERROR]);
+    }
+    // A commit under a replaced built-in fails too and keeps the job for a later commit.
+    const restore = p.species();
+    let outcome = 'committed';
+    try {
+      w.commitTick(j);
+    } catch (error) {
+      outcome = (error as Error).message;
+    } finally {
+      restore();
+    }
+    expect({ outcome, tick: w.tick }).toEqual({ outcome: REALM_ERROR, tick: 0 });
+    w.commitTick(j);
+    twin.commitTick(t);
+    expect(w.snapshot()).toEqual(twin.snapshot());
+  });
+  test('a snapshot taken under a replaced slice is a copy, never the live state', () => {
+    const w = createReactiveWorld3D(r, mixed(6)),
+      committed = w.snapshot(),
+      restore = patches().identitySlice();
+    let handed;
+    try {
+      handed = w.snapshot();
+    } finally {
+      restore();
+    }
+    handed.block.packedCells.fill(0);
+    handed.block.energyQ.fill(0);
+    expect(w.snapshot()).toEqual(committed);
+  });
+  /** A copy of the SDK loaded after install() ran, so its checks take the replacement for the realm's. */
+  const loadAfter = async (install: () => () => void) => {
+    const restore = install();
+    vi.resetModules();
+    try {
+      const fresh = await import('../reactive-materials.js');
+      return { fresh, registry: await fresh.createReactiveMaterialRegistry3D(), restore };
+    } catch (error) {
+      restore();
+      throw error;
+    }
+  };
   test('a result() read before commit is copied at commit, even under a slice replaced before load', async () => {
     const slice = Array.prototype.slice;
     let identity = false;
-    // Installed before a fresh copy of the SDK loads, so its realm checks take it for the realm's own.
-    Array.prototype.slice = function (this: unknown[], ...rest: unknown[]) {
-      return identity && !rest.length ? this : slice.apply(this, rest as []);
-    } as typeof slice;
+    const { fresh, registry, restore } = await loadAfter(() => {
+      Array.prototype.slice = function (this: unknown[], ...rest: unknown[]) {
+        return identity && !rest.length ? this : slice.apply(this, rest as []);
+      } as typeof slice;
+      return () => void (Array.prototype.slice = slice);
+    });
     try {
-      vi.resetModules();
-      const fresh = await import('../reactive-materials.js'),
-        registry = await fresh.createReactiveMaterialRegistry3D(),
-        w = fresh.createReactiveWorld3D(registry, mixed(6)),
+      const w = fresh.createReactiveWorld3D(registry, mixed(6)),
         j = w.prepareTick();
       while (j.progress().status === 'running') j.advance(64);
       identity = true;
@@ -287,83 +448,42 @@ describe('reactive ticks in a patched realm', () => {
       handed.state.block.energyQ.fill(0);
       expect(w.snapshot()).toEqual(committed);
     } finally {
-      Array.prototype.slice = slice;
+      restore();
     }
   });
-  test('a copy handed out under a replaced slice never aliases the committed state', () => {
-    const slice = Array.prototype.slice;
-    const w = createReactiveWorld3D(r, mixed(6)),
-      j = w.prepareTick();
-    finish(j, () => () => undefined);
-    // A slice that returns its receiver would hand out the job's own arrays.
-    Array.prototype.slice = function (this: unknown[], ...rest: unknown[]) {
-      return rest.length ? slice.apply(this, rest as []) : this;
-    } as typeof slice;
-    let handed;
-    try {
-      handed = j.result();
-    } finally {
-      Array.prototype.slice = slice;
-    }
-    w.commitTick(j);
-    const committed = w.snapshot();
-    handed.state.block.packedCells.fill(0);
-    handed.state.block.energyQ.fill(0);
-    expect(w.snapshot()).toEqual(committed);
-  });
-  test('a replaced array iterator during publish leaves no hold anchor behind', () => {
+  test('an array iterator replaced before load cannot leave a hold anchor behind', async () => {
     const iterator = Object.getPrototypeOf([][Symbol.iterator]()) as { next: () => unknown },
       next = iterator.next;
-    /** Skips one cell index in every array iteration, as a hostile iterator could. */
-    const skip = (cell: number) => () => {
+    let skip = -1;
+    const { fresh, registry, restore } = await loadAfter(() => {
+      // Skips one cell index in every array iteration while armed.
       iterator.next = function (this: unknown) {
         let step = next.call(this) as { done: boolean; value: unknown };
-        while (!step.done && step.value === cell) step = next.call(this) as typeof step;
+        while (!step.done && step.value === skip) step = next.call(this) as typeof step;
         return step;
       };
       return () => void (iterator.next = next);
-    };
-    const tick = (patch: (cell: number) => () => () => void) => {
-      const w = createReactiveWorld3D(r, mixed(6)),
-        b = w.snapshot().block,
-        held: number[] = [];
-      for (let i = 0; i < b.packedCells.length && held.length < 2; i++)
-        if (b.structure[i] !== 0 && !(b.structure[i] & ANCHOR_3D)) held.push(i);
-      const cells = held.map((i): [number, number, number] => [
-        i % 6,
-        Math.floor(i / 6) % 6,
-        Math.floor(i / 36),
-      ]);
-      w.hold({ id: 'held', expiresAtTick: 9, cells });
-      const before = w.snapshot(),
-        j = w.prepareTick();
-      let patched = false,
-        outcome = 'committed';
-      try {
+    });
+    try {
+      const tick = (armed: boolean) => {
+        const w = fresh.createReactiveWorld3D(registry, mixed(6)),
+          held = holdCells(w as unknown as ReturnType<typeof createReactiveWorld3D>),
+          j = w.prepareTick();
         while (j.progress().status === 'running') {
-          const stage = j.progress().phase === 'publish',
-            restore = stage ? patch(held[1])() : () => undefined;
-          patched ||= stage;
+          skip = armed && j.progress().phase === 'publish' ? held[1] : -1;
           try {
             j.advance(64);
           } finally {
-            restore();
+            skip = -1;
           }
         }
         w.commitTick(j);
-      } catch (error) {
-        outcome = (error as Error).message;
-      }
-      return { patched, outcome, before, after: w.snapshot() };
-    };
-    const clean = tick(() => () => () => undefined),
-      patched = tick(skip);
-    expect({ clean: clean.outcome, patched: patched.patched }).toEqual({
-      clean: 'committed',
-      patched: true,
-    });
-    // Failing closed is allowed; publishing anything but the true state is not.
-    expect(patched.after).toEqual(patched.outcome === 'committed' ? clean.after : patched.before);
+        return w.snapshot();
+      };
+      expect(tick(true)).toEqual(tick(false));
+    } finally {
+      restore();
+    }
   });
   test('a commit copy that loses a state field fails the commit and keeps the world', () => {
     for (const key of ['depth', 'width', 'height']) {

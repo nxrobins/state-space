@@ -16,7 +16,6 @@ import {
   reactiveInteger3D,
   reactiveRegistrySource3D,
   reactivePlainArraySlice3D,
-  reactivePlainArray3D,
   cloneReactiveData3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
@@ -135,14 +134,10 @@ function solve(input: ReactiveMaterialBlock3D, cold: Uint32Array) {
     supportedWeight = 0,
     reactionTotal = 0;
   // Publish writes every cell; slice() keeps a packed input packed for the next tick's readers. A
-  // slice, constructor or species replaced after the SDK loaded, or an input that is not a plain
-  // array, could make slice() hand back any object, so the output is then built as before batching.
-  // A slice replaced before the SDK loaded cannot be told from the realm's own.
-  const sliced =
-    reactivePlainArraySlice3D() &&
-    reactivePlainArray3D(grid) &&
-    reactivePlainArray3D(energyQ) &&
-    reactivePlainArray3D(structure);
+  // slice, constructor or species replaced after the SDK loaded could make slice() hand back any
+  // object, so the output is then built as before batching. A slice replaced before the SDK loaded
+  // cannot be told from the realm's own.
+  const sliced = reactivePlainArraySlice3D();
   const block = {
     ...input,
     packedCells: sliced ? grid.slice() : new Array<number>(n),

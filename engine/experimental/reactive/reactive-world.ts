@@ -8,6 +8,7 @@ import {
   type ReactiveMaterialEdit3D,
 } from './reactive-block.js';
 import {
+  assertReactiveRealm3D,
   reactiveInteger3D,
   cloneReactiveData3D,
   reactivePlainObjectPrototype3D,
@@ -177,6 +178,7 @@ export function createReactiveWorld3D(
         const base = entry.base;
         if (base !== revision)
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
+        assertReactiveRealm3D();
         // live adopts the job's immutable result state; only the handed-out report is copied. While
         // Object.prototype is not as the realm starts it, the whole result is copied in one walk, so
         // caller setters and read-only keys see exactly the stores that copying always made, and a
