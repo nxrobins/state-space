@@ -58,6 +58,11 @@ date of the last change in the section.
   and game README use `sh` fences with repository-relative commands, the stale
   Windows developer files are removed, and the recorded evolution phase winners
   move from the root into `archive/` (#67).
+- Second reactive CPU pass: per-registry thermal tables for the block check
+  and the reaction passes, a batched structure stepper, one movement working
+  copy per tick with row skipping, combustion elected from one scan, and an
+  owned world that adopts a committed tick's state instead of copying it,
+  with bit-identical results in an unmodified JavaScript realm (#68).
 
 ### Fixed
 
