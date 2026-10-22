@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { DEFAULT_REGISTRY } from '../../registry.js';
 import { COLD_STRIDE, PHASE, MAT } from '../../generated/materials.js';
 import {
+  cloneReactiveData3D,
   createReactiveMaterialRegistry3D as create,
   defaultReactiveMaterialCatalog3D as catalog,
   REACTIVE_MATERIAL_RULES_3D,
@@ -433,5 +434,214 @@ describe('reactive array reads', () => {
     expect([balanced, accessor].map((a) => run(fresh, [a, n]))).toEqual(
       [balanced, accessor].map((a) => run(oracleArray, [a, n])),
     );
+  });
+});
+
+/** The generic walk every record took before flat records were spread; kept as the copy oracle. */
+function oracleClone<T>(value: T): T {
+  const seen = new Map<object, unknown>();
+  const copy = (v: unknown): unknown => {
+    if (typeof v === 'function' || typeof v === 'symbol')
+      throw Error('Reactive results hold portable data only.');
+    if (typeof v !== 'object' || v === null) return v;
+    const known = seen.get(v);
+    if (known !== undefined) return known;
+    if (Array.isArray(v)) {
+      if (Object.getPrototypeOf(v) !== Array.prototype) return structuredClone(v);
+      let flat = true;
+      for (let i = 0; i < v.length; i++)
+        if (typeof v[i] === 'object' && v[i] !== null) {
+          flat = false;
+          break;
+        }
+      if (flat) {
+        const out = v.slice();
+        seen.set(v, out);
+        return out;
+      }
+      const out = new Array<unknown>(v.length);
+      seen.set(v, out);
+      for (let i = 0; i < v.length; i++) out[i] = copy(v[i]);
+      return out;
+    }
+    if (Object.getPrototypeOf(v) !== Object.prototype) return structuredClone(v);
+    const out: Record<string, unknown> = {};
+    seen.set(v, out);
+    for (const key of Object.keys(v)) out[key] = copy((v as Record<string, unknown>)[key]);
+    return out;
+  };
+  return copy(value) as T;
+}
+/** Key order and the values JSON would lose (-0, NaN, undefined, bigint) in one comparable text. */
+const portableText = (value: unknown) =>
+  JSON.stringify(value, (_key, v: unknown) =>
+    Object.is(v, -0)
+      ? '<-0>'
+      : typeof v === 'number' && Number.isNaN(v)
+        ? '<NaN>'
+        : v === undefined
+          ? '<undefined>'
+          : typeof v === 'bigint'
+            ? `<${v}n>`
+            : v,
+  );
+const motionLike = () => ({
+  status: 'complete',
+  overflowAtPass: null,
+  passes: Array.from({ length: 3 }, (_, index) => ({
+    index,
+    kind: 'movement',
+    segments: Array.from({ length: 40 }, (_, i) => ({
+      origin: i,
+      from: i,
+      to: i + 1,
+      mode: i % 2 ? 'linear' : 'relocation',
+      component: i % 3 ? null : i,
+    })),
+    changes: Array.from({ length: 40 }, (_, i) => ({
+      index: i,
+      packed: i * 257,
+      energyQ: i % 5 ? -i : -0,
+      structure: 0,
+    })),
+  })),
+  holds: [{ id: 'h', expiresAtTick: 3, cells: [1, 2] }],
+  retired: [{ id: 'h', cells: [3] }],
+});
+
+describe('reactive result copies', () => {
+  test('flat records keep the generic walk field order and exact values', () => {
+    const records = [
+      { 2: 'two', b: -0, a: NaN, c: undefined, 1: null, big: BigInt(5), t: true, s: 'x' },
+      { z: 1, y: Infinity, x: -Infinity },
+      {},
+    ];
+    const data = { records, nested: [[{ b: 1, a: 2 }]], motion: motionLike() };
+    const out = cloneReactiveData3D(data);
+    expect(portableText(out)).toBe(portableText(oracleClone(data)));
+    expect(Object.keys(out.records[0])).toEqual(['1', '2', 'b', 'a', 'c', 'big', 't', 's']);
+    expect(Object.is(out.records[0].b, -0)).toBe(true);
+    expect('c' in out.records[0]).toBe(true);
+    expect(out).toStrictEqual(oracleClone(data));
+  });
+  test('function and symbol values are rejected as before', () => {
+    for (const bad of [[{ a: 1, f: () => 0 }], [{ s: Symbol('s') }], [{ a: 1 }, () => 0]]) {
+      expect(() => oracleClone(bad)).toThrow('Reactive results hold portable data only.');
+      expect(() => cloneReactiveData3D(bad)).toThrow('Reactive results hold portable data only.');
+    }
+    // A primitive-only array is sliced without inspection, before and after.
+    const sliced = [{ a: [Symbol.for('s')] }];
+    expect(cloneReactiveData3D(sliced)[0].a[0]).toBe(oracleClone(sliced)[0].a[0]);
+  });
+  test('arrays and nested objects stay shared; flat records in arrays are copied per reference', () => {
+    const list = [1, 2],
+      hold = { id: 'h', cells: [4] },
+      point = { x: 1 },
+      record = { from: 1, to: 2 };
+    const out = cloneReactiveData3D({
+      a: list,
+      b: list,
+      holds: [hold, hold],
+      u: point,
+      v: point,
+      moves: [record, record],
+    });
+    expect(out.a).toBe(out.b);
+    expect(out.a).not.toBe(list);
+    expect(out.holds[0]).toBe(out.holds[1]);
+    expect(out.holds[0].cells).not.toBe(hold.cells);
+    expect(out.u).toBe(out.v);
+    expect(out.u).not.toBe(point);
+    expect(out.moves[0]).not.toBe(out.moves[1]);
+    expect(out.moves[0]).toEqual(record);
+  });
+  test('record copies and the source are independent', () => {
+    const source = motionLike(),
+      text = portableText(source),
+      out = cloneReactiveData3D(source);
+    out.passes[0].segments[0].origin = 99;
+    out.passes[1].changes[2].packed = -1;
+    out.holds[0].cells.push(9);
+    expect(portableText(source)).toBe(text);
+    source.passes[2].segments[3].to = 77;
+    source.retired[0].id = 'changed';
+    expect(out.passes[2].segments[3].to).toBe(4);
+    expect(out.retired[0].id).toBe('h');
+    expect(out.passes[0].segments[0]).not.toBe(source.passes[0].segments[0]);
+  });
+  test('typed arrays, maps and nonplain records still fall back to structuredClone', () => {
+    class Point {
+      x = 1;
+    }
+    const typed = new Int32Array([1, -2]),
+      map = new Map([[1, { a: 1 }]]),
+      data = [typed, map, Object.assign(Object.create(null), { a: 1 }), new Point(), { t: typed }];
+    const out = cloneReactiveData3D(data);
+    expect(out).toStrictEqual(oracleClone(data));
+    expect(out[0]).toBeInstanceOf(Int32Array);
+    expect(out[0]).not.toBe(typed);
+    expect(out[1]).toBeInstanceOf(Map);
+    expect(Object.getPrototypeOf(out[2])).toBe(Object.prototype);
+    expect(out[3]).not.toBeInstanceOf(Point);
+    expect((out[4] as { t: Int32Array }).t).not.toBe(typed);
+  });
+  test('an enumerable Object.prototype accessor is never read', () => {
+    const read = vi.fn(() => ({}));
+    const data = { moves: [{ from: 1, to: 2 }], motion: motionLike() };
+    let out: typeof data, oracle: typeof data;
+    Object.defineProperty(Object.prototype, 'polluted', {
+      get: read,
+      enumerable: true,
+      configurable: true,
+    });
+    try {
+      out = cloneReactiveData3D(data);
+      oracle = oracleClone(data);
+    } finally {
+      delete (Object.prototype as Record<string, unknown>).polluted;
+    }
+    expect(read).not.toHaveBeenCalled();
+    expect(portableText(out)).toBe(portableText(oracle));
+  });
+  test('hidden accessor and read-only Object.prototype keys give the generic walk result', () => {
+    const variants: Record<string, (calls: { n: number }) => PropertyDescriptor> = {
+      setter: (calls) => ({ set: () => void calls.n++, configurable: true }),
+      getterOnly: () => ({ get: () => 7, configurable: true }),
+      readOnly: () => ({ value: 7, writable: false, configurable: true }),
+      throwingSetter: () => ({
+        set: () => {
+          throw Error('caller setter');
+        },
+        configurable: true,
+      }),
+      writableData: () => ({ value: 7, writable: true, configurable: true }),
+    };
+    const observe = (clone: typeof oracleClone, d: PropertyDescriptor, calls: { n: number }) => {
+      const data = { moves: [{ from: 1, to: 2 }], motion: motionLike() };
+      Object.defineProperty(Object.prototype, 'from', d);
+      try {
+        return { result: portableText(clone(data)), calls: calls.n };
+      } catch (error) {
+        return { error: (error as Error).message, calls: calls.n };
+      } finally {
+        delete (Object.prototype as Record<string, unknown>).from;
+      }
+    };
+    for (const [name, make] of Object.entries(variants)) {
+      const a = { n: 0 },
+        b = { n: 0 };
+      expect({ name, ...observe(cloneReactiveData3D, make(a), a) }).toEqual({
+        name,
+        ...observe(oracleClone, make(b), b),
+      });
+    }
+  });
+  test('an own __proto__ key takes the generic walk', () => {
+    for (const text of ['[{"a":1,"__proto__":null},[0]]', '[{"a":1,"__proto__":5},[0]]']) {
+      const out = cloneReactiveData3D({ a: JSON.parse(text) }),
+        oracle = oracleClone({ a: JSON.parse(text) });
+      expect(Object.keys(out.a[0])).toEqual(Object.keys(oracle.a[0]));
+      expect(Object.getPrototypeOf(out.a[0])).toBe(Object.getPrototypeOf(oracle.a[0]));
+    }
   });
 });

@@ -63,13 +63,50 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   }
   return raw;
 }
+/** A plain record whose own enumerable values are all primitives: under a plain Object.prototype its
+ * spread is the generic walk's copy. An own __proto__ key takes the generic walk, whose store treats it
+ * as the prototype. Own accessors would be read twice and own symbol keys copied; engine records hold
+ * neither.
+ */
+function flatRecord(x: unknown): x is Record<string, unknown> {
+  if (
+    typeof x !== 'object' ||
+    x === null ||
+    Array.isArray(x) ||
+    Object.getPrototypeOf(x) !== Object.prototype
+  )
+    return false;
+  for (const key in x) {
+    if (key === '__proto__') return false;
+    const y = (x as Record<string, unknown>)[key];
+    if ((typeof y === 'object' && y !== null) || typeof y === 'function' || typeof y === 'symbol')
+      return false;
+  }
+  return true;
+}
+/** Object.prototype as the realm starts it: every own property is a non-enumerable writable data
+ * property, apart from a non-enumerable __proto__ accessor. Then for-in sees own keys only, and each
+ * [[Set]] of the generic walk defines an own data property exactly as spread does. Anything else (an
+ * enumerable, accessor or read-only key) sends every record through the generic walk.
+ */
+function plainObjectPrototype(): boolean {
+  for (const key of Reflect.ownKeys(Object.prototype)) {
+    const d = Reflect.getOwnPropertyDescriptor(Object.prototype, key)!;
+    if (d.enumerable) return false;
+    if (key !== '__proto__' && (!('value' in d) || !d.writable)) return false;
+  }
+  return true;
+}
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
- * Field order and shared references are kept exactly as structuredClone keeps them, without its serializer cost.
+ * Field order is kept exactly as structuredClone keeps it, without its serializer cost.
+ * Shared references are kept for arrays and nested objects; a flat record (primitive values only) inside an array
+ * is copied per reference, and engine results never share one.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
 export function cloneReactiveData3D<T>(value: T): T {
   const seen = new Map<object, unknown>();
+  const records = plainObjectPrototype();
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');
@@ -91,7 +128,10 @@ export function cloneReactiveData3D<T>(value: T): T {
       }
       const out = new Array<unknown>(v.length);
       seen.set(v, out);
-      for (let i = 0; i < v.length; i++) out[i] = copy(v[i]);
+      for (let i = 0; i < v.length; i++) {
+        const x = v[i];
+        out[i] = records && flatRecord(x) ? { ...x } : copy(x);
+      }
       return out;
     }
     if (Object.getPrototypeOf(v) !== Object.prototype) return structuredClone(v);
