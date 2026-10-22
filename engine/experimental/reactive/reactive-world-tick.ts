@@ -278,6 +278,15 @@ export function startReactiveWorldTickJob3D(
 ): ReactiveWorldTickJob3D {
   return worldTickJob(registry, owned, readReactiveTickOptions3D(options));
 }
+const outputs = new WeakMap<ReactiveWorldTickJob3D, () => ReactiveWorldTickResult3D>();
+/** Internal only: the uncopied result of a completed job from this module; never written. */
+export function takeReactiveWorldTickOutput3D(
+  job: ReactiveWorldTickJob3D,
+): ReactiveWorldTickResult3D {
+  const take = outputs.get(job);
+  if (!take) throw Error('Reactive world tick result is not complete.');
+  return take();
+}
 function worldTickJob(
   registry: ReactiveMaterialRegistry3D,
   owned: ReactiveWorldSnapshot3D,
@@ -344,7 +353,7 @@ function worldTickJob(
     status = 'cancelled';
     return true;
   };
-  return Object.freeze({
+  const job: ReactiveWorldTickJob3D = Object.freeze({
     progress,
     cancel,
     advance(structuralWork: number = 64) {
@@ -468,4 +477,10 @@ function worldTickJob(
       return cloneReactiveData3D(motion);
     },
   });
+  outputs.set(job, () => {
+    if (!result || status !== 'complete')
+      throw Error('Reactive world tick result is not complete.');
+    return result;
+  });
+  return job;
 }

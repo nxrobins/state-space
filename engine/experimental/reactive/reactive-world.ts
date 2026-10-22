@@ -34,6 +34,7 @@ import {
   reactiveSnapshotHolds3D,
   readReactiveWorldSnapshot3D,
   startReactiveWorldTickJob3D,
+  takeReactiveWorldTickOutput3D,
   type ReactiveWorldSnapshot3D,
   type ReactiveWorldTickJob3D,
   type ReactiveWorldTickReport3D,
@@ -169,8 +170,10 @@ export function createReactiveWorld3D(
         if (base === undefined) throw Error('Reactive tick job is foreign or already consumed.');
         if (base !== revision)
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
+        // live adopts the job's immutable result state; only the handed-out report is copied.
         const next = nextRevision(),
-          output = job.result();
+          output = takeReactiveWorldTickOutput3D(job),
+          report = cloneReactiveData3D(output.report);
         if (
           output.state.tick !== live.tick + 1 ||
           total(output.state.block) !== initialQ + externalQ
@@ -180,7 +183,7 @@ export function createReactiveWorld3D(
         live = output.state;
         revision = next;
         prepared.delete(job);
-        return { fromRevision: base, toRevision: next, report: output.report };
+        return { fromRevision: base, toRevision: next, report };
       });
     },
     prepareTranslation(request: ReactiveTranslationRequest3D) {
