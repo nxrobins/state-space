@@ -70,9 +70,8 @@ date of the last change in the section.
   of world tick jobs copy without assigning through prototype setters, and
   a world tick job cannot be advanced or cancelled from inside its own
   `advance()`; the reactive materials guide gives the scope and limits of
-  each. A standalone
-  structure job driven one work unit per `advance()` call is slower than
-  before (#68).
+  each. A standalone structure job driven one work unit per `advance()`
+  call is slower than before (#68).
 
 ### Fixed
 
