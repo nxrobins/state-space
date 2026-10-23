@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 import { reactiveGeometrySource3D } from './reactive-geometry.js';
 import { reactiveTickMovementSource3D, bindReactiveTickMovement3D } from './reactive-motion.js';
+import { REACTIVE_EVOLUTION_RULES_3D, startReactiveEvolutionJob3D } from './reactive-evolution.js';
 import {
   createReactiveMaterialRegistry3D,
   defaultReactiveMaterialCatalog3D,
@@ -277,6 +278,14 @@ describe('executed reactive motion and bounded preview provenance', () => {
             .every((c) => !(c.structure & ANCHOR_3D)),
         ).toBe(true);
       expect(j.motion().passes.every((p) => p.segments.length === 0)).toBe(true);
+      // Nothing moves or heats the held stone, so no pass may record it: stripping the overlay must
+      // start no later than the last movement pass.
+      expect(
+        j
+          .motion()
+          .passes.flatMap((p) => p.changes)
+          .filter((c) => c.index === 0),
+      ).toEqual([]);
       expect(Boolean(j.result().state.block.structure[0] & ANCHOR_3D)).toBe(permanent);
     }
   });
@@ -350,6 +359,94 @@ describe('executed reactive motion and bounded preview provenance', () => {
       });
       expect(j.result()).toEqual(unlimited.result());
     }
+  });
+  test('random captures equal full block diffs at every boundary and overflow at the exact pass', () => {
+    let seed = 4242;
+    const next = (n: number) => {
+      seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+      return Math.floor((seed / 4294967296) * n);
+    };
+    const ids = warm.materialIds,
+      diff = (from: ReactiveMaterialBlock3D, to: ReactiveMaterialBlock3D) =>
+        to.packedCells.flatMap((packed, index) =>
+          packed !== from.packedCells[index] ||
+          to.energyQ[index] !== from.energyQ[index] ||
+          to.structure[index] !== from.structure[index]
+            ? [{ index, packed, energyQ: to.energyQ[index], structure: to.structure[index] }]
+            : [],
+        );
+    let overflowed = 0;
+    for (let k = 0; k < 24; k++) {
+      const size = { width: 1 + next(5), height: 1 + next(5), depth: 1 + next(5) };
+      let b = block(warm, size);
+      for (let e = 8 + next(32); e > 0; e--) {
+        const at = { x: next(size.width), y: next(size.height), z: next(size.depth) },
+          roll = next(10);
+        const change: ReactiveMaterialEdit3D =
+          roll < 8
+            ? { ...at, kind: 'place', material: ids[next(ids.length)], thermal: next(256) }
+            : roll < 9
+              ? { ...at, kind: 'integrity', integrity: next(256) }
+              : { ...at, kind: 'bond', direction: next(6), bonded: true };
+        try {
+          b = edit(warm, b, [change]).block;
+        } catch {
+          // Ineligible edits are skipped.
+        }
+      }
+      const before = world(warm, b, next(8)),
+        boundaries: ReactiveMaterialBlock3D[] = [before.block];
+      // Reference blocks are copied at every evolution boundary before a later pass can reuse them.
+      const evolution = startReactiveEvolutionJob3D(
+        warm,
+        {
+          schemaVersion: 1,
+          rulesVersion: REACTIVE_EVOLUTION_RULES_3D,
+          tick: before.tick,
+          block: before.block,
+        },
+        { swap() {}, pass: (_index, x) => boundaries.push(structuredClone(x)) },
+      );
+      for (let i = 0; i < 28; i++) evolution.job.advance();
+      const full = run(
+          before,
+          { motion: { maxEntries: REACTIVE_MOTION_LIMITS_3D.entries } },
+          5,
+          warm,
+        ),
+        trace = full.motion();
+      boundaries.push(full.result().state.block);
+      expect(trace.status).toBe('complete');
+      expect(trace.passes.map((p) => p.changes)).toEqual(
+        boundaries.slice(1).map((x, i) => diff(boundaries[i], x)),
+      );
+      const needs = trace.passes.map((p) => 1 + p.segments.length + p.changes.length);
+      for (const maxEntries of [next(71), next(71), trace.entries - 1, trace.entries]) {
+        let used = 0,
+          at: number | null = null;
+        for (const [index, need] of needs.entries()) {
+          if (used + need > maxEntries) {
+            at = index;
+            break;
+          }
+          used += need;
+        }
+        const j = run(before, { motion: { maxEntries } }, 1 + next(9), warm);
+        if (at === null) expect(j.motion()).toEqual({ ...trace, maxEntries });
+        else {
+          overflowed++;
+          expect(j.motion()).toMatchObject({
+            status: 'overflow',
+            overflowAtPass: at,
+            entries: 0,
+            passes: [],
+            passesObserved: 29,
+          });
+        }
+        expect(j.result()).toEqual(full.result());
+      }
+    }
+    expect(overflowed).toBeGreaterThan(24);
   });
   test('invalid capture options reject before work without invoking getters', () => {
     const s = state(),

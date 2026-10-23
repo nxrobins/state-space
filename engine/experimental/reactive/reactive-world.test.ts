@@ -583,6 +583,63 @@ describe('owned world publication and accounting', () => {
     expect(w.energyBalance()).toEqual(balance);
     expect(w.revision).toBe(1);
   });
+  test('commits adopt the completed state without sharing it with any handed-out copy', () => {
+    const scramble = (value: unknown): void => {
+      if (typeof value !== 'object' || value === null) return;
+      const record = value as Record<string, unknown>;
+      for (const key of Object.keys(record))
+        if (typeof record[key] === 'object' && record[key] !== null) scramble(record[key]);
+        else record[key] = -1;
+      if (Array.isArray(value)) value.push(-1);
+    };
+    const w = world(r, bridge().block);
+    w.hold({ id: 'span', expiresAtTick: 2, cells: [[4, 0, 0]] });
+    w.hold({ id: 'pin', expiresAtTick: 9, cells: [[3, 0, 0]] });
+    let previous: { job: ReactiveWorldTickJob3D; result: ReturnType<typeof advance> } | null = null;
+    for (let i = 0; i < 6; i++) {
+      if (i === 2) w.edit([place(2, 2, 0, MAT.SAND)]);
+      if (i === 4) w.releaseHold('pin');
+      const expected = advance(w.snapshot()),
+        j = w.prepareTick();
+      finish(j, 5);
+      const receipt = w.commitTick(j),
+        balance = w.energyBalance();
+      expect(receipt.report).toEqual(expected.report);
+      expect(w.snapshot()).toEqual(expected.state);
+      scramble(receipt.report);
+      scramble(j.result());
+      scramble(w.snapshot());
+      expect(w.snapshot()).toEqual(expected.state);
+      expect(j.result()).toEqual(expected);
+      expect(w.energyBalance()).toEqual(balance);
+      expect(balance.driftQ).toBe(0n);
+      // The next tick reads the adopted state and never writes the job result it aliases.
+      if (previous) expect(previous.job.result()).toEqual(previous.result);
+      previous = { job: j, result: expected };
+    }
+    expect(w.snapshot().schemaVersion).toBe(2);
+    const copy = world(r, bridge().block);
+    copy.restore(JSON.parse(JSON.stringify(w.snapshot())));
+    expect(copy.snapshot()).toEqual(w.snapshot());
+    expect(commit(copy).report).toEqual(commit(w).report);
+    expect(copy.snapshot()).toEqual(w.snapshot());
+  });
+  test('unfinished and cancelled jobs fail commit with the not-complete error', () => {
+    const w = world(r, bridge().block),
+      before = w.snapshot(),
+      running = w.prepareTick(),
+      cancelled = w.prepareTick();
+    running.advance();
+    cancelled.advance();
+    cancelled.cancel();
+    for (const j of [running, cancelled])
+      expect(() => w.commitTick(j)).toThrow('Reactive world tick result is not complete.');
+    expect(w.snapshot()).toEqual(before);
+    expect(w.revision).toBe(0);
+    finish(running);
+    expect(w.commitTick(running).toRevision).toBe(1);
+    expect(() => w.commitTick(cancelled)).toThrow(/stale/);
+  });
   test('an eight-tick owned-world restart preserves exact future snapshots and tick reports', () => {
     const seed = bridge(),
       a = world(r, seed.block),

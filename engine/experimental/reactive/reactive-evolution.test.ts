@@ -12,6 +12,7 @@ import {
   MAT,
   type ReactiveMaterialRegistry3D,
   type ReactiveMaterialEdit3D,
+  type ReactiveMaterialBlock3D,
 } from '../reactive-materials.js';
 import { runReactiveMovementPass3D } from './reactive-movement.js';
 import {
@@ -19,6 +20,7 @@ import {
   readReactiveEvolutionState3D as read,
   createReactiveEvolutionJob3D as job,
   advanceReactiveEvolution3D as advance,
+  startReactiveEvolutionJob3D as start,
   type ReactiveEvolutionState3D,
 } from './reactive-evolution.js';
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
@@ -164,6 +166,35 @@ describe('complete conservative reactive evolution', () => {
     s.block.structure.fill(0);
     for (let i = 20; i < 28; i++) j.advance();
     expect(j.result()).toEqual(advance(r, original));
+  });
+  test('an owned job never writes its input while later passes reuse one working copy', () => {
+    let s = seed(),
+      moving = 0;
+    for (let t = 0; t < 6; t++) {
+      const original = structuredClone(s),
+        blocks: ReactiveMaterialBlock3D[] = [],
+        stage = start(r, s, {
+          swap() {},
+          pass(_index, b) {
+            expect(s).toEqual(original);
+            blocks.push(b);
+          },
+        });
+      for (let i = 0; i < 28; i++) stage.job.advance();
+      expect(s).toEqual(original);
+      const out = stage.output();
+      expect(out).toEqual(advance(r, original));
+      const copies = new Set(
+        blocks
+          .slice(0, 20)
+          .map((b) => b.packedCells)
+          .filter((cells) => cells !== s.block.packedCells),
+      );
+      expect(copies.size).toBeLessThanOrEqual(1);
+      moving += copies.size;
+      s = out.state;
+    }
+    expect(moving).toBeGreaterThan(0);
   });
   test('result state, movement, reaction reports and progress values are isolated', () => {
     const j = job(r, seed());

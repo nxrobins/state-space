@@ -8,6 +8,7 @@ import {
   type ReactiveMaterialEdit3D,
 } from './reactive-block.js';
 import {
+  assertReactiveRealm3D,
   reactiveInteger3D,
   cloneReactiveData3D,
   type ReactiveMaterialRegistry3D,
@@ -37,6 +38,7 @@ import {
   type ReactiveWorldSnapshot3D,
   type ReactiveWorldTickJob3D,
   type ReactiveWorldTickReport3D,
+  type ReactiveWorldTickResult3D,
 } from './reactive-world-tick.js';
 
 export type ReactiveWorldTickCommit3D = {
@@ -93,7 +95,11 @@ export function createReactiveWorld3D(
     initialQ = total(live.block),
     externalQ = 0n;
   const { width, height, depth } = live.block,
-    prepared = new WeakMap<ReactiveWorldTickJob3D, number>();
+    // Each prepared job's base revision, and the taker of its uncopied result.
+    prepared = new WeakMap<
+      ReactiveWorldTickJob3D,
+      { base: number; take: () => { result: ReactiveWorldTickResult3D; handed: boolean } }
+    >();
   const translations = new WeakMap<ReactiveTranslationJob3D, number>();
   const nextRevision = () => reactiveInteger3D(revision + 1, 0, Number.MAX_SAFE_INTEGER);
   let mutating = false,
@@ -157,30 +163,34 @@ export function createReactiveWorld3D(
       // The live snapshot is always owned and validated, so the tick reads it without a second copy.
       return mutation((ensureValid) => {
         nextRevision();
-        const job = startReactiveWorldTickJob3D(registry, live, options);
+        const { job, take } = startReactiveWorldTickJob3D(registry, live, options);
         ensureValid();
-        prepared.set(job, revision);
+        prepared.set(job, { base: revision, take });
         return job;
       });
     },
     commitTick(job: ReactiveWorldTickJob3D) {
       return mutation((ensureValid) => {
-        const base = prepared.get(job);
-        if (base === undefined) throw Error('Reactive tick job is foreign or already consumed.');
+        const entry = prepared.get(job);
+        if (entry === undefined) throw Error('Reactive tick job is foreign or already consumed.');
+        const base = entry.base;
         if (base !== revision)
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
+        assertReactiveRealm3D();
+        // live adopts the job's immutable result state; only the handed-out report is copied. A job
+        // whose result() was read is copied, as before: in a realm whose slice was replaced before the
+        // SDK loaded, that read may have handed out the job's own arrays.
         const next = nextRevision(),
-          output = job.result();
-        if (
-          output.state.tick !== live.tick + 1 ||
-          total(output.state.block) !== initialQ + externalQ
-        )
+          { result: taken, handed } = entry.take(),
+          state = handed ? cloneReactiveData3D(taken.state) : taken.state,
+          report = cloneReactiveData3D(taken.report);
+        if (state.tick !== live.tick + 1 || total(state.block) !== initialQ + externalQ)
           throw Error('Reactive tick commit identity or accounting mismatch.');
         ensureValid();
-        live = output.state;
+        live = state;
         revision = next;
         prepared.delete(job);
-        return { fromRevision: base, toRevision: next, report: output.report };
+        return { fromRevision: base, toRevision: next, report };
       });
     },
     prepareTranslation(request: ReactiveTranslationRequest3D) {

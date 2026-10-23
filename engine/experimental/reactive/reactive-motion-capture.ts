@@ -58,7 +58,9 @@ export function readReactiveTickOptions3D(raw: ReactiveTickOptions3D = {}) {
       : REACTIVE_MOTION_LIMITS_3D.defaultEntries,
   };
 }
-/** Trusted internal observer. Input blocks belong to the running job and are immutable per pass. */
+/** Trusted internal observer. Input blocks belong to the running job and hold still until its next
+ * pass: movement passes after the first copy swap the job's working arrays in place.
+ */
 export function createReactiveMotionCapture3D(
   before: ReactiveWorldSnapshot3D,
   options: ReturnType<typeof readReactiveTickOptions3D>,
@@ -86,7 +88,9 @@ export function createReactiveMotionCapture3D(
   if (origins) for (let i = 0; i < origins.length; i++) origins[i] = i;
   let pending: ReactiveMotionPass3D | null = null,
     handed = false;
-  // Cells written by the movement pass being observed; a movement pass changes nothing else.
+  // Cells whose tuple the observed movement pass changes, found while the pass input is still intact:
+  // a movement pass changes nothing but its disjoint swapped pairs. No movement rule swaps two equal
+  // tuples, so the comparison below is a guard only: a swap of equal tuples would change neither cell.
   const swapped: number[] = [];
   const overflow = (index: number) => {
     data.status = 'overflow';
@@ -137,7 +141,13 @@ export function createReactiveMotionCapture3D(
       if (!origins) return;
       const first = origins[a],
         second = origins[z];
-      swapped.push(a, z);
+      if (
+        previous &&
+        (previous.packedCells[a] !== previous.packedCells[z] ||
+          previous.energyQ[a] !== previous.energyQ[z] ||
+          previous.structure[a] !== previous.structure[z])
+      )
+        swapped.push(a, z);
       add(index, { origin: first, from: a, to: z, mode: 'linear', component: null });
       add(index, { origin: second, from: z, to: a, mode: 'linear', component: null });
       if (origins) {
@@ -149,11 +159,19 @@ export function createReactiveMotionCapture3D(
       if (!options.enabled) return;
       begin(index);
       if (data.status === 'complete' && previous && pending) {
-        const candidates = index < 20 ? [...new Set(swapped)].sort((a, z) => a - z) : null,
-          n = candidates ? candidates.length : block.packedCells.length;
+        // Swapped cells are unique within a pass (its pairs are disjoint), so sorting in place suffices.
+        const candidates = index < 20 ? swapped.sort((a, z) => a - z) : null,
+          // A copy-on-write pass that wrote nothing hands back the very arrays it read: no changes.
+          unchanged =
+            !candidates &&
+            block.packedCells === previous.packedCells &&
+            block.energyQ === previous.energyQ &&
+            block.structure === previous.structure,
+          n = candidates ? candidates.length : unchanged ? 0 : block.packedCells.length;
         for (let k = 0; k < n; k++) {
           const i = candidates ? candidates[k] : k;
           if (
+            candidates ||
             block.packedCells[i] !== previous.packedCells[i] ||
             block.energyQ[i] !== previous.energyQ[i] ||
             block.structure[i] !== previous.structure[i]

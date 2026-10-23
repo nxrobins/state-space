@@ -15,6 +15,7 @@ import {
   reactiveMovementSchedule3D,
   executeReactiveMovementPass3D,
   REACTIVE_MOVEMENT_RULES_3D,
+  type ReactiveMovementClasses3D,
 } from './reactive-movement.js';
 import {
   REACTIVE_REACTION_RULES_3D,
@@ -109,7 +110,9 @@ function evolutionJob(
     initialQ = reactiveEnergyTotalQ3D(owned.block.energyQ);
   let before: ReactiveMaterialBlock3D | null = owned.block,
     current: ReactiveMaterialBlock3D | null = owned.block,
-    classes: Uint8Array | undefined;
+    classes: ReactiveMovementClasses3D | undefined,
+    // The first moving pass copies the block once; later passes swap that private copy in place.
+    working = false;
   let origins: Int32Array | null = new Int32Array(owned.block.packedCells.length);
   for (let i = 0; i < origins.length; i++) origins[i] = i;
   let touched: Uint8Array | null = new Uint8Array(origins.length),
@@ -155,7 +158,9 @@ function evolutionJob(
             schedule[completedPasses],
             swapped,
             classes,
+            working,
           );
+          if (moved.block.packedCells !== current.packedCells) working = true;
           current = moved.block;
           classes = moved.classes;
           observer?.pass(completedPasses, current);

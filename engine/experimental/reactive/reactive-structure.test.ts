@@ -14,11 +14,17 @@ import {
   PHASE,
   BONDS_3D,
   ANCHOR_3D,
+  INTEGRITY_3D,
   type ReactiveMaterialRegistry3D,
   type ReactiveMaterialBlock3D,
   type ReactiveMaterialEdit3D,
 } from '../reactive-materials.js';
-import { createReactiveStructureJob3D as job } from './reactive-structure.js';
+import {
+  createReactiveStructureJob3D as job,
+  startReactiveStructureJob3D,
+  type ReactiveStructureProgress3D,
+} from './reactive-structure.js';
+import { startPerStepOracleStructureJob3D } from './reactive-structure.per-step-oracle.js';
 holdPhysics('volumeStep', 'solveStructure3D', ...STRUCTURAL_CALLS);
 let r: ReactiveMaterialRegistry3D, custom: ReactiveMaterialRegistry3D;
 beforeAll(async () => {
@@ -488,5 +494,234 @@ describe('reactive structural support and conservative fragments', () => {
     }
     expect(out.report.energy.beforeQ).toBe(out.report.energy.afterQ);
     expect(out.report.energy.driftQ).toBe('0');
+  });
+});
+describe('batched structure work replays the per-step oracle', () => {
+  type Start = typeof startReactiveStructureJob3D;
+  const schedules = [[1], [3], [64], [255, 1], [256], [1, 3, 2, 256, 5]];
+  const progress = (p: ReactiveStructureProgress3D) =>
+    `${p.status} ${p.stage} ${p.completedWork} ${p.lastAdvanceWork} ${p.maxTotalWork}`;
+  const message = (run: () => unknown) => {
+    try {
+      run();
+      return 'ok';
+    } catch (error) {
+      return (error as Error).message;
+    }
+  };
+  function random(seed: number) {
+    return (n: number) => {
+      seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
+      return Math.floor((seed / 4294967296) * n);
+    };
+  }
+  function randomBlock(
+    next: (n: number) => number,
+    registry: ReactiveMaterialRegistry3D,
+    side = 5,
+  ) {
+    const size = { width: 1 + next(side), height: 1 + next(side), depth: 1 + next(side) },
+      count = size.width * size.height * size.depth,
+      ids = registry.materialIds,
+      solids: number[] = [MAT.STONE, MAT.WOOD, MAT.ICE, MAT.METAL, MAT.GLASS],
+      fill = next(101);
+    if (registry === custom) solids.push(200, 201, 202);
+    const cell = (i: number) => ({
+      x: i % size.width,
+      y: Math.floor(i / size.width) % size.height,
+      z: Math.floor(i / (size.width * size.height)),
+    });
+    let b = block(registry, size);
+    const apply = (change: ReactiveMaterialEdit3D) => {
+      try {
+        b = edit(registry, b, [change]).block;
+      } catch {
+        // Ineligible edits are skipped.
+      }
+    };
+    for (let i = 0; i < count; i++)
+      if (next(100) < fill)
+        apply({
+          ...cell(i),
+          kind: 'place',
+          material: next(10) < 7 ? solids[next(solids.length)] : ids[next(ids.length)],
+          thermal: next(10) < 3 ? next(256) : 20,
+        });
+    for (let i = 0; i < count; i++) {
+      const p = cell(i);
+      if (next(5) === 0) apply({ ...p, kind: 'integrity', integrity: next(3) ? 1 + next(255) : 0 });
+      if (next(4) === 0) apply({ ...p, kind: 'anchor', anchored: true });
+      for (const direction of [1, 3, 5])
+        if (next(2)) apply({ ...p, kind: 'bond', direction, bonded: true });
+      if (next(7) === 0) apply({ ...p, kind: 'energy', energyQ: b.energyQ[i] + next(300 * 256) });
+    }
+    return read(registry, b);
+  }
+  /** Progress after every advance, then the result, or the error and the cancelled job's answers. */
+  function replay(
+    start: Start,
+    registry: ReactiveMaterialRegistry3D,
+    input: ReactiveMaterialBlock3D,
+    budgets: number[],
+  ) {
+    const { job: j, output } = start(registry, input),
+      steps = [progress(j.progress())];
+    try {
+      for (let q = 0; j.progress().status === 'running'; q++)
+        steps.push(progress(j.advance(budgets[q % budgets.length])));
+    } catch (error) {
+      return {
+        steps,
+        error: (error as Error).message,
+        after: [progress(j.progress()), message(() => j.advance()), message(() => j.result())],
+      };
+    }
+    const result = j.result();
+    return {
+      steps,
+      result,
+      keys: [Object.keys(result.block), Object.keys(result.report)],
+      output: output(),
+    };
+  }
+  function expectReplay(registry: ReactiveMaterialRegistry3D, input: ReactiveMaterialBlock3D) {
+    let last: ReturnType<typeof replay> | undefined;
+    for (const budgets of schedules) {
+      const expected = replay(startPerStepOracleStructureJob3D, registry, input, budgets);
+      expect(replay(startReactiveStructureJob3D, registry, input, budgets)).toStrictEqual(expected);
+      last = expected;
+    }
+    return last!;
+  }
+  /** A bonded floor slab carrying a two-cell bar and two loose stones; the bar and one stone carry
+   * one more stone each. The slab's dependents list holds the bar once per resting cell and the
+   * stones after it, in insertion order, and blocking reaches two levels. */
+  function stacked() {
+    return read(
+      r,
+      fixture(
+        [
+          ...Array.from({ length: 5 }, (_, x) => place(x, 2)),
+          ...Array.from({ length: 4 }, (_, x) => bond(x, 2)),
+          place(0, 1),
+          place(1, 1),
+          bond(0, 1),
+          place(3, 1),
+          place(4, 1),
+          place(0, 0),
+          place(3, 0),
+        ],
+        { width: 5, height: 3, depth: 1 },
+      ),
+    );
+  }
+  test('random blocks match unit for unit under every budget schedule', () => {
+    const next = random(20261022);
+    let moved = 0,
+      broken = 0;
+    for (let c = 0; c < 20; c++) {
+      const registry = c % 4 === 3 ? custom : r,
+        out = expectReplay(registry, randomBlock(next, registry)).result!;
+      if (out.report.moves.length) moved++;
+      if (out.report.brokenCells.length) broken++;
+    }
+    expect(moved).toBeGreaterThan(4);
+    expect(broken).toBeGreaterThan(1);
+    // Every stone rests on the slab, directly or through another stone: nothing may move.
+    const out = expectReplay(r, stacked()).result!;
+    expect(out.report.movingCells).toEqual([]);
+    expect(out.report.moves).toEqual([]);
+  });
+  test('owned geometry that outruns its arrays stops at the work bound like the per-step job', () => {
+    // A 1 x 4 x 6 shape over one cell of arrays never completes. Its bound is 20 * 1 + 16 = 36 units,
+    // and the unit past it is the first of a new stage, which must not become the reported stage.
+    const input = { ...read(r, fixture([place(0)], { width: 1, height: 1, depth: 1 })) };
+    Object.assign(input, { width: 1, height: 4, depth: 6 });
+    for (const budgets of [[1], [256], [36], [35, 1], [7]]) {
+      const expected = replay(startPerStepOracleStructureJob3D, r, input, budgets);
+      expect(expected.error).toBe('Reactive structure work bound exceeded.');
+      expect(replay(startReactiveStructureJob3D, r, input, budgets)).toStrictEqual(expected);
+    }
+  });
+  test('malformed owned blocks throw the same error after the same work', () => {
+    const next = random(77),
+      errors = new Set<string>();
+    for (let c = 0; c < 16; c++) {
+      const registry = c % 4 === 3 ? custom : r,
+        bad = structuredClone(randomBlock(next, registry)),
+        n = bad.structure.length;
+      // Non-reciprocal or boundary bonds, bonded cells without integrity, toggled anchors.
+      for (let m = 1 + next(4); m > 0; m--) {
+        const i = next(n),
+          kind = next(4);
+        if (kind === 0) bad.structure[i] |= BONDS_3D[next(6)];
+        else if (kind === 1) bad.structure[i] &= ~BONDS_3D[next(6)];
+        else if (kind === 2) bad.structure[i] &= ~INTEGRITY_3D;
+        else bad.structure[i] ^= ANCHOR_3D;
+      }
+      const out = expectReplay(registry, bad);
+      if (out.error) errors.add(out.error);
+    }
+    // Random corruption rarely leaves a cell that is reached but cannot be supported. A bridge whose
+    // span cell k keeps no bond back to the cell reaching it always does, at a unit that moves with k.
+    for (let k = 1; k < 5; k++) {
+      const bad = structuredClone(bridge());
+      bad.structure[k] &= ~BONDS_3D[0];
+      const { error } = expectReplay(r, bad);
+      expect(error).toBe('Incomplete reactive support graph.');
+      errors.add(error!);
+    }
+    expect(errors).toContain('Incomplete reactive support graph.');
+  });
+  test('cancelling at every work boundary matches the per-step job', () => {
+    const next = random(5);
+    const cancelAt = (start: Start, input: ReactiveMaterialBlock3D, stop: number) => {
+      const { job: j } = start(r, input);
+      for (let s = 0; s < stop; s++) j.advance(1);
+      const before = progress(j.progress()),
+        first = j.cancel(),
+        second = j.cancel();
+      return [before, first, second, message(() => j.advance()), message(() => j.result())];
+    };
+    for (let c = 0; c < 4; c++) {
+      let input = randomBlock(next, r, 4);
+      while (input.packedCells.length > 32) input = randomBlock(next, r, 4);
+      if (c === 3) input = stacked();
+      expectReplay(r, input);
+      const full = startReactiveStructureJob3D(r, input).job;
+      while (full.progress().status === 'running') full.advance(256);
+      for (let stop = 0; stop <= full.progress().completedWork; stop++)
+        expect(cancelAt(startReactiveStructureJob3D, input, stop)).toStrictEqual(
+          cancelAt(startPerStepOracleStructureJob3D, input, stop),
+        );
+    }
+  });
+  test('a 12 cubed scene with bridges, liquid and falling ice matches every schedule', () => {
+    const size = 12,
+      deck = size >> 1,
+      edits: ReactiveMaterialEdit3D[] = [];
+    const anchor = (x: number, y: number, z: number): ReactiveMaterialEdit3D => ({
+      kind: 'anchor',
+      x,
+      y,
+      z,
+      anchored: true,
+    });
+    for (let z = 0; z < size; z++)
+      for (let x = 0; x < size; x++) edits.push(place(x, size - 1, z), anchor(x, size - 1, z));
+    for (let z = 1; z < size - 1; z += 4)
+      for (let sx = 2; sx + 3 < size; sx += 4) {
+        for (let y = deck; y < size - 1; y++) edits.push(place(sx - 1, y, z), anchor(sx - 1, y, z));
+        edits.push(place(sx, deck, z, MAT.WOOD), place(sx + 1, deck, z), place(sx + 2, deck, z));
+        for (let x = sx - 1; x < sx + 2; x++) edits.push(bond(x, deck, z));
+      }
+    for (let z = 0; z < size; z += 2)
+      for (let x = 0; x < size; x += 2) edits.push(place(x, size - 2, z, MAT.WATER, 25));
+    for (let z = 2; z < size; z += 5)
+      for (let x = 2; x < size; x += 5) edits.push(place(x, 1, z, MAT.ICE, 5));
+    const scene = edit(r, block(r, { width: size, height: size, depth: size }), edits).block,
+      out = expectReplay(r, read(r, scene)).result!;
+    expect(out.report.moves.length).toBeGreaterThan(0);
+    expect(out.report.supportedWeight).toBeGreaterThan(0);
   });
 });

@@ -55,48 +55,266 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
     Reflect.ownKeys(raw).length !== raw.length + 1
   )
     throw Error('Invalid reactive array.');
-  // A numeric key names the same property as String(i) and skips a string allocation per element.
+  // The canonical string key names the same property as i; a number key would be converted
+  // again inside every lookup. Primitive concatenation runs no caller code and keeps no state.
   for (let i = 0; i < raw.length; i++) {
-    const d = Object.getOwnPropertyDescriptor(raw, i);
+    const d = Object.getOwnPropertyDescriptor(raw, '' + i);
     if (!d || !('value' in d) || !d.enumerable) throw Error('Reactive arrays require dense data.');
   }
   return raw;
 }
+// The realm checks and result copies below use the intrinsics and well-known symbols this module loaded
+// with, so replacing one later, or the global Symbol, cannot hide a change from them or reach into a
+// copy. One replaced before this module loaded cannot be told from the realm's own.
+const SPECIES: typeof Symbol.species = Symbol.species,
+  ITERATOR: typeof Symbol.iterator = Symbol.iterator,
+  OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
+  GET_PROTOTYPE = Reflect.getPrototypeOf,
+  DEFINE = Reflect.defineProperty,
+  APPLY = Reflect.apply,
+  OBJECT_KEYS = Object.keys,
+  HAS_OWN = Object.hasOwn,
+  IS_ARRAY = Array.isArray,
+  OBJECT_PROTOTYPE = Object.prototype,
+  PROTO_SET = OWN_DESCRIPTOR(Object.prototype, '__proto__')?.set,
+  ARRAY = Array,
+  ARRAY_PROTOTYPE = Array.prototype,
+  ARRAY_SLICE = Array.prototype.slice,
+  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, SPECIES)?.get,
+  STRUCTURED_CLONE = structuredClone;
+/** A Map whose get and set are the ones this module loaded with, on a frozen prototype of its own. */
+class SeenMap extends Map<object, unknown> {}
+Object.freeze(
+  Object.defineProperties(SeenMap.prototype, {
+    get: { value: Map.prototype.get },
+    set: { value: Map.prototype.set },
+  }),
+);
+/** A descriptor field, read only when the descriptor has it as its own: a descriptor is an ordinary
+ * object, and Object.prototype may add any field. */
+function field(d: PropertyDescriptor | undefined, name: keyof PropertyDescriptor) {
+  return d && HAS_OWN(d, name) ? d[name] : undefined;
+}
+function ownField(target: object, key: PropertyKey, name: keyof PropertyDescriptor) {
+  return field(OWN_DESCRIPTOR(target, key), name);
+}
+/** Array.prototype.slice, Array.prototype.constructor and Array[Symbol.species] as this module loaded
+ * them: slice() of a plain array then makes a fresh plain array of its own elements. A replaced one may
+ * return any object, even its input.
+ */
+export function reactivePlainArraySlice3D(): boolean {
+  return (
+    ownField(ARRAY_PROTOTYPE, 'slice', 'value') === ARRAY_SLICE &&
+    ownField(ARRAY_PROTOTYPE, 'constructor', 'value') === ARRAY &&
+    ownField(ARRAY, SPECIES, 'get') === ARRAY_SPECIES
+  );
+}
+// The array, map, set and typed-array built-ins the realm check compares, as this module loaded them.
+const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][ITERATOR]()) as { next: unknown },
+  TYPED_PROTOTYPE = GET_PROTOTYPE(Int32Array.prototype) as Record<string, unknown>,
+  REALM = {
+    isArray: Array.isArray,
+    iterator: ARRAY_PROTOTYPE[ITERATOR],
+    next: ITERATOR_PROTOTYPE.next,
+    slice: ARRAY_PROTOTYPE.slice,
+    map: ARRAY_PROTOTYPE.map,
+    filter: ARRAY_PROTOTYPE.filter,
+    flatMap: ARRAY_PROTOTYPE.flatMap,
+    concat: ARRAY_PROTOTYPE.concat,
+    push: ARRAY_PROTOTYPE.push,
+    sort: ARRAY_PROTOTYPE.sort,
+    some: ARRAY_PROTOTYPE.some,
+    every: ARRAY_PROTOTYPE.every,
+    includes: ARRAY_PROTOTYPE.includes,
+    fill: ARRAY_PROTOTYPE.fill,
+    Map,
+    Set,
+    mapGet: Map.prototype.get,
+    mapSet: Map.prototype.set,
+    mapHas: Map.prototype.has,
+    setAdd: Set.prototype.add,
+    setHas: Set.prototype.has,
+    setIterator: Set.prototype[ITERATOR],
+    Int32Array,
+    Uint32Array,
+    Uint16Array,
+    Uint8Array,
+    typedSlice: TYPED_PROTOTYPE.slice,
+    typedFill: TYPED_PROTOTYPE.fill,
+    typedSet: TYPED_PROTOTYPE.set,
+  };
+const species = (constructor: object) => (constructor as { [SPECIES]?: unknown })[SPECIES];
+/** Internal only: whether the built-ins below still read as the ones this module loaded with, in 49
+ * comparisons: the global constructors, Array.isArray, and the listed array, map, set and typed-array
+ * methods, constructors, species and iterators, the typed-array methods read through each of the four
+ * typed-array prototypes. A tick that finds one replaced fails rather than trust it. The check reads
+ * the constructors through the global names the tick uses and the well-known symbols as this module
+ * loaded them; it costs a few nanoseconds.
+ * It checks no other getter (typed-array length, Set size) and no other built-in (WeakMap, Math), and
+ * it does not see an accessor that answers it with the original, a replacement that a caller's hook
+ * makes and undoes while a tick call runs, or a built-in replaced before this module loaded.
+ */
+export function reactiveRealmIntact3D(): boolean {
+  return (
+    Array === ARRAY &&
+    ARRAY.isArray === REALM.isArray &&
+    ARRAY_PROTOTYPE.constructor === ARRAY &&
+    ARRAY[SPECIES] === ARRAY &&
+    ARRAY_PROTOTYPE[ITERATOR] === REALM.iterator &&
+    ITERATOR_PROTOTYPE.next === REALM.next &&
+    ARRAY_PROTOTYPE.slice === REALM.slice &&
+    ARRAY_PROTOTYPE.map === REALM.map &&
+    ARRAY_PROTOTYPE.filter === REALM.filter &&
+    ARRAY_PROTOTYPE.flatMap === REALM.flatMap &&
+    ARRAY_PROTOTYPE.concat === REALM.concat &&
+    ARRAY_PROTOTYPE.push === REALM.push &&
+    ARRAY_PROTOTYPE.sort === REALM.sort &&
+    ARRAY_PROTOTYPE.some === REALM.some &&
+    ARRAY_PROTOTYPE.every === REALM.every &&
+    ARRAY_PROTOTYPE.includes === REALM.includes &&
+    ARRAY_PROTOTYPE.fill === REALM.fill &&
+    Map === REALM.Map &&
+    Set === REALM.Set &&
+    REALM.Map.prototype.get === REALM.mapGet &&
+    REALM.Map.prototype.set === REALM.mapSet &&
+    REALM.Map.prototype.has === REALM.mapHas &&
+    REALM.Set.prototype.add === REALM.setAdd &&
+    REALM.Set.prototype.has === REALM.setHas &&
+    REALM.Set.prototype[ITERATOR] === REALM.setIterator &&
+    Int32Array === REALM.Int32Array &&
+    Uint32Array === REALM.Uint32Array &&
+    Uint16Array === REALM.Uint16Array &&
+    Uint8Array === REALM.Uint8Array &&
+    REALM.Int32Array.prototype.constructor === REALM.Int32Array &&
+    REALM.Uint32Array.prototype.constructor === REALM.Uint32Array &&
+    REALM.Uint16Array.prototype.constructor === REALM.Uint16Array &&
+    REALM.Uint8Array.prototype.constructor === REALM.Uint8Array &&
+    species(REALM.Int32Array) === REALM.Int32Array &&
+    species(REALM.Uint32Array) === REALM.Uint32Array &&
+    species(REALM.Uint16Array) === REALM.Uint16Array &&
+    species(REALM.Uint8Array) === REALM.Uint8Array &&
+    // The tick calls these on instances, so a method added to one typed-array prototype shadows them.
+    REALM.Int32Array.prototype.slice === REALM.typedSlice &&
+    REALM.Uint32Array.prototype.slice === REALM.typedSlice &&
+    REALM.Uint16Array.prototype.slice === REALM.typedSlice &&
+    REALM.Uint8Array.prototype.slice === REALM.typedSlice &&
+    REALM.Int32Array.prototype.fill === REALM.typedFill &&
+    REALM.Uint32Array.prototype.fill === REALM.typedFill &&
+    REALM.Uint16Array.prototype.fill === REALM.typedFill &&
+    REALM.Uint8Array.prototype.fill === REALM.typedFill &&
+    REALM.Int32Array.prototype.set === REALM.typedSet &&
+    REALM.Uint32Array.prototype.set === REALM.typedSet &&
+    REALM.Uint16Array.prototype.set === REALM.typedSet &&
+    REALM.Uint8Array.prototype.set === REALM.typedSet
+  );
+}
+/** Internal only: fails a world tick whose realm no longer has the built-ins this module loaded with. */
+export function assertReactiveRealm3D(): void {
+  if (!reactiveRealmIntact3D())
+    throw Error('Reactive world ticks need the array built-ins the SDK loaded with.');
+}
+/** Defines an own data property as an assignment to a missing key would, without consulting any
+ * prototype. The descriptor has no prototype, so no field planted on Object.prototype joins it. */
+function define(target: object, key: PropertyKey, value: unknown) {
+  DEFINE(target, key, {
+    __proto__: null,
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  } as PropertyDescriptor);
+}
+/** Whether for-in over a plain record sees only its own keys, as it does while Object.prototype has no
+ * enumerable key. Enumerating reads no value, so it runs no caller code. */
+function forInSeesOwnKeysOnly(): boolean {
+  for (const key in {}) if (typeof key === 'string') return false;
+  return true;
+}
+/** A plain record whose own enumerable values are all primitives: in an unmodified realm its spread is
+ * the generic walk's copy. Its for-in must see own keys only (forInSeesOwnKeysOnly). An own __proto__
+ * key takes the generic walk, whose store treats it as the prototype. Own accessors would be read twice
+ * and own symbol keys copied; engine records hold neither.
+ */
+function flatRecord(x: unknown): x is Record<string, unknown> {
+  if (typeof x !== 'object' || x === null || IS_ARRAY(x) || GET_PROTOTYPE(x) !== OBJECT_PROTOTYPE)
+    return false;
+  for (const key in x) {
+    if (key === '__proto__') return false;
+    const y = (x as Record<string, unknown>)[key];
+    if ((typeof y === 'object' && y !== null) || typeof y === 'function' || typeof y === 'symbol')
+      return false;
+  }
+  return true;
+}
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
- * Field order and shared references are kept exactly as structuredClone keeps them, without its serializer cost.
+ * Field order is kept exactly as structuredClone keeps it, without its serializer cost.
+ * Shared references are kept for arrays and nested objects; a flat record (primitive values only) inside an array
+ * is copied per reference, and engine results never share one.
+ * The copy calls only built-ins captured when this module loaded. Each array and record of it starts as
+ * a slice() or spread of the original, or as elements defined one by one when slice, its constructor or
+ * species was replaced, and nested copies are then stored over those own properties or defined where
+ * there is none (a hole a hook left, or a record with an own __proto__ key, whose prototype is then set
+ * through the built-in setter as assignment always set it), so no prototype setter sees the copy. For
+ * portable data in an unmodified realm, this is the copy that assigning every field makes.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
 export function cloneReactiveData3D<T>(value: T): T {
-  const seen = new Map<object, unknown>();
+  const seen = new SeenMap();
+  // Each realm check runs at most once per copy, and only when a value needs it.
+  let records: boolean | undefined, slices: boolean | undefined;
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');
     if (typeof v !== 'object' || v === null) return v;
     const known = seen.get(v);
     if (known !== undefined) return known;
-    if (Array.isArray(v)) {
-      if (Object.getPrototypeOf(v) !== Array.prototype) return structuredClone(v);
+    if (IS_ARRAY(v)) {
+      if (GET_PROTOTYPE(v) !== ARRAY_PROTOTYPE) return STRUCTURED_CLONE(v);
       let flat = true;
       for (let i = 0; i < v.length; i++)
         if (typeof v[i] === 'object' && v[i] !== null) {
           flat = false;
           break;
         }
-      if (flat) {
-        const out = v.slice();
-        seen.set(v, out);
-        return out;
+      // A replaced slice could hand back v itself, and the caller would then hold engine state, so
+      // the elements are then defined one by one on a fresh array. The check holds for the whole
+      // copy, which runs no caller code.
+      let out: unknown[];
+      if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
+      else {
+        out = new ARRAY<unknown>(v.length);
+        for (let i = 0; i < v.length; i++) define(out, i, v[i]);
       }
-      const out = new Array<unknown>(v.length);
       seen.set(v, out);
-      for (let i = 0; i < v.length; i++) out[i] = copy(v[i]);
+      if (flat) return out;
+      for (let i = 0; i < v.length; i++) {
+        const x = v[i],
+          y = (records ??= forInSeesOwnKeysOnly()) && flatRecord(x) ? { ...x } : copy(x);
+        // A hole left where a hook swallowed a store is defined, not assigned through the prototypes.
+        if (HAS_OWN(out, i)) out[i] = y;
+        else define(out, i, y);
+      }
       return out;
     }
-    if (Object.getPrototypeOf(v) !== Object.prototype) return structuredClone(v);
-    const out: Record<string, unknown> = {};
+    if (GET_PROTOTYPE(v) !== OBJECT_PROTOTYPE) return STRUCTURED_CLONE(v);
+    // The spread holds every primitive field already. A record with an own __proto__ key starts empty
+    // instead: that key sets the copy's prototype through the built-in setter, as assigning it always
+    // did, and every other field is defined.
+    const proto = HAS_OWN(v, '__proto__'),
+      out: Record<string, unknown> = proto ? {} : { ...v },
+      keys = OBJECT_KEYS(v);
     seen.set(v, out);
-    for (const key of Object.keys(v)) out[key] = copy((v as Record<string, unknown>)[key]);
+    for (let k = 0; k < keys.length; k++) {
+      const key = keys[k],
+        x = (v as Record<string, unknown>)[key];
+      if (proto) {
+        const y = copy(x);
+        if (key === '__proto__') APPLY(PROTO_SET!, out, [y]);
+        else define(out, key, y);
+      } else if (typeof x !== 'string' && typeof x !== 'number' && typeof x !== 'boolean')
+        out[key] = copy(x);
+    }
     return out;
   };
   return copy(value) as T;

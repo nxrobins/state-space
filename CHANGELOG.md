@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-21)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-22)
 
 ### Added
 
@@ -58,6 +58,20 @@ date of the last change in the section.
   and game README use `sh` fences with repository-relative commands, the stale
   Windows developer files are removed, and the recorded evolution phase winners
   move from the root into `archive/` (#67).
+- Second reactive CPU pass: per-registry thermal tables for the block check
+  and the reaction passes, a batched structure stepper, one movement working
+  copy per tick with row skipping, combustion elected from one scan, and an
+  owned world that adopts a committed tick's state instead of copying it,
+  with bit-identical results for plain data in an unmodified JavaScript
+  realm. A realm whose built-ins caller code replaced or hooked carries no
+  guarantee. For it, world ticks now fail when their check sees a listed
+  array, map, set or typed-array built-in replaced after the SDK loaded,
+  a world's snapshots and tick commits and the results and motion reports
+  of world tick jobs copy without assigning through prototype setters, and
+  a world tick job cannot be advanced or cancelled from inside its own
+  `advance()`; the reactive materials guide gives the scope and limits of
+  each. A standalone structure job driven one work unit per `advance()`
+  call is slower than before (#68).
 
 ### Fixed
 
