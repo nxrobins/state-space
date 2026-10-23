@@ -356,7 +356,8 @@ function worldTickJob(
   };
   const job: ReactiveWorldTickJob3D = Object.freeze({
     progress,
-    cancel,
+    // Caller code that a hook runs inside advance() cannot cancel the job under it either.
+    cancel: () => !advancing && cancel(),
     advance(structuralWork: number = 64) {
       reactiveInteger3D(structuralWork, 1, REACTIVE_STRUCTURE_MAX_WORK_3D);
       if (status !== 'running' || !before)

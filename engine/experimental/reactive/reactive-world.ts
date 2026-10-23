@@ -11,8 +11,6 @@ import {
   assertReactiveRealm3D,
   reactiveInteger3D,
   cloneReactiveData3D,
-  cloneReactiveDataQuietly3D,
-  reactivePlainObjectPrototype3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
 import type { ReactiveTickOptions3D } from './reactive-motion-capture.js';
@@ -181,27 +179,15 @@ export function createReactiveWorld3D(
         assertReactiveRealm3D();
         // live adopts the job's immutable result state; only the handed-out report is copied. A job
         // whose result() was read is copied, as before: in a realm whose slice was replaced before the
-        // SDK loaded, that read may have handed out the job's own arrays. While Object.prototype is not
-        // as the realm starts it, its hooks may have seen the job's objects, so the state is cloned
-        // without running caller code.
+        // SDK loaded, that read may have handed out the job's own arrays.
         const next = nextRevision(),
           { result: taken, handed } = entry.take(),
-          output = {
-            state: !reactivePlainObjectPrototype3D()
-              ? cloneReactiveDataQuietly3D(taken.state)
-              : handed
-                ? cloneReactiveData3D(taken.state)
-                : taken.state,
-            report: cloneReactiveData3D(taken.report),
-          },
-          report = output.report;
-        if (
-          output.state.tick !== live.tick + 1 ||
-          total(output.state.block) !== initialQ + externalQ
-        )
+          state = handed ? cloneReactiveData3D(taken.state) : taken.state,
+          report = cloneReactiveData3D(taken.report);
+        if (state.tick !== live.tick + 1 || total(state.block) !== initialQ + externalQ)
           throw Error('Reactive tick commit identity or accounting mismatch.');
         ensureValid();
-        live = output.state;
+        live = state;
         revision = next;
         prepared.delete(job);
         return { fromRevision: base, toRevision: next, report };

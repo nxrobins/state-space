@@ -78,19 +78,17 @@ versions did not guard against this either. This version adds three defenses:
   of `Array.prototype`, and the array iterator's `next`; `get`, `set` and `has`
   of `Map.prototype`; `add`, `has` and the iterator of `Set.prototype`; the four
   typed arrays' `constructor` and species; and the typed-array `slice`, `fill`
-  and `set`. The check reads no getter (a typed array's `length`, a set's `size`)
-  and no other built-in (such as `WeakMap`), and it does not see a replacement
-  that reads as the original (an accessor that answers with it), one that caller
+  and `set`, read through each of the four typed-array prototypes. The check
+  reads no other getter (such as a typed array's `length` or a set's `size`) and
+  no other built-in (such as `WeakMap`), and it does not see a replacement that
+  reads as the original (an accessor that answers with it), one that caller
   code makes and undoes while a tick call runs, or one made before the SDK
   loaded.
-- `result()`, `motion()`, `snapshot()` and commits build each copied array or
-  record from a `slice()` or spread of the original, which define its elements,
-  so no prototype setter sees a copy while `Array.prototype.slice`, its
-  `constructor` and `Array[Symbol.species]` are the ones the SDK loaded with. A
-  commit made while `Object.prototype` carries a hook stores a structured clone
-  of the state, which runs no caller code.
-- A world tick job's `advance()` fails if caller code calls it again while it
-  runs.
+- `result()`, `motion()`, `snapshot()` and commits copy with built-ins captured
+  when the SDK loaded, and define each element and field of a copy before
+  storing into it, so no prototype setter sees a copy.
+- A world tick job's `advance()` fails, and its `cancel()` returns `false`, if
+  caller code calls them while `advance()` runs.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,

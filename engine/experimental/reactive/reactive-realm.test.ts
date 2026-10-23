@@ -1,7 +1,8 @@
 /** A patched realm is outside the bit-identity contract and carries no guarantee. These tests pin the
- * defenses the engine adds there: the realm check, copies that no prototype setter sees, commits under
- * Object.prototype hooks, the reentry guard, and the inputs where this branch would otherwise do worse
- * than the engine before batching. A slice replaced before load can still steer the structure output.
+ * defenses the engine adds there: the realm check, copies that no prototype setter sees (commits under
+ * Object.prototype hooks included), the reentry guard, and the inputs where this branch would otherwise
+ * do worse than the engine before batching. A slice replaced before load can still steer the structure
+ * output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -22,7 +23,6 @@ import {
   type ReactiveWorldTickJob3D,
 } from '../reactive-materials.js';
 import { overlayReactiveHolds3D, stripReactiveHoldAnchors3D } from './reactive-holds.js';
-import { reactivePlainObjectPrototype3D } from './reactive-registry.js';
 import { startReactiveStructureJob3D } from './reactive-structure.js';
 import { startPerStepOracleStructureJob3D } from './reactive-structure.per-step-oracle.js';
 
@@ -374,13 +374,21 @@ describe('reactive ticks in a patched realm', () => {
         [`${T.name}.prototype.constructor`, lookalike(T.prototype, 'constructor')],
         [`${T.name} species`, replace(T, Symbol.species, class extends T {})],
       ]),
-      ...['slice', 'fill', 'set'].map((key): [string, Patch] => [
-        `typed array ${key}`,
-        wrap(typedPrototype, key),
-      ]),
+      // Each typed-array method shadowed on one typed-array prototype, through which the tick reads it.
+      ...typed.flatMap((T) =>
+        ['slice', 'fill', 'set'].map((key): [string, Patch] => {
+          const original = (typedPrototype as Bag)[key] as (...rest: unknown[]) => unknown;
+          return [
+            `${T.name}.prototype.${key}`,
+            replace(T.prototype, key, function (this: unknown, ...rest: unknown[]) {
+              return original.apply(this, rest);
+            }),
+          ];
+        }),
+      ),
     ];
     // One case for each comparison in reactiveRealmIntact3D.
-    expect(cases).toHaveLength(40);
+    expect(cases).toHaveLength(49);
     for (const [name, patch] of cases) {
       const j = createReactiveWorld3D(r, mixed(6)).prepareTick();
       let outcome = 'advanced';
@@ -795,14 +803,15 @@ describe('reactive ticks in a patched realm', () => {
         expect({ key, read, after: w.snapshot() }).toEqual({ key, read, after: twin.snapshot() });
       }
   });
-  test('caller code that advances a tick job inside its advance() fails there and leaves the tick true', () => {
+  test('caller code that advances or cancels a tick job inside its advance() fails there and leaves the tick true', () => {
     const w = createReactiveWorld3D(r, mixed(6)),
       twin = createReactiveWorld3D(r, mixed(6)),
       j = w.prepareTick(),
       keys = Array.from({ length: 64 }, (_, i) => String(i));
     let calls = 0,
-      message = '';
-    // Index setters that store as an assignment would, and advance the job again on every store.
+      message = '',
+      cancelled = false;
+    // Index setters that store as an assignment would, then advance and cancel the job on every store.
     for (const key of keys)
       Object.defineProperty(Array.prototype, key, {
         configurable: true,
@@ -820,6 +829,7 @@ describe('reactive ticks in a patched realm', () => {
           } catch (error) {
             message = (error as Error).message;
           }
+          cancelled ||= j.cancel();
         },
       });
     try {
@@ -829,79 +839,139 @@ describe('reactive ticks in a patched realm', () => {
     }
     expect(calls).toBeGreaterThan(0);
     expect(message).toBe('Reactive world tick job cannot advance while it advances.');
+    expect(cancelled).toBe(false);
     w.commitTick(j);
     const t = twin.prepareTick();
     finish(t, () => () => undefined);
     twin.commitTick(t);
     expect(w.snapshot()).toEqual(twin.snapshot());
   });
-  test('the plain Object.prototype check sees a replaced __proto__ and ignores later wrappers', () => {
-    const proto = Reflect.getOwnPropertyDescriptor(Object.prototype, '__proto__')!,
-      ownKeys = Reflect.ownKeys;
-    expect(reactivePlainObjectPrototype3D()).toBe(true);
-    Object.defineProperty(Object.prototype, '__proto__', { ...proto, set: () => undefined });
-    try {
-      expect(reactivePlainObjectPrototype3D()).toBe(false);
-    } finally {
-      Object.defineProperty(Object.prototype, '__proto__', proto);
-    }
-    // Wrappers installed after load cannot hide a swallowing setter from the check.
-    const swallow = () => undefined,
-      descriptor = Reflect.getOwnPropertyDescriptor,
-      hasOwn = Object.hasOwn;
-    const wrappers: [string, () => () => void][] = [
+  test('result copies call only built-ins captured at load, so no prototype setter sees one', () => {
+    const keys = Object.keys,
+      slice = Array.prototype.slice,
+      mapGet = Map.prototype.get,
+      iterator = Object.getPrototypeOf([][Symbol.iterator]()) as {
+        next: () => IteratorResult<unknown>;
+      },
+      next = iterator.next,
+      indices = Array.from({ length: 64 }, (_, i) => String(i)),
+      finished = new WeakSet<object>();
+    let calls = 0;
+    /** Setters that store as an assignment would and count every store that reaches them. */
+    const hooks: Patch = () => {
+      const count = (target: object, key: string) =>
+        Object.defineProperty(target, key, {
+          configurable: true,
+          set(this: object, value: unknown) {
+            calls++;
+            Object.defineProperty(this, key, {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        });
+      count(Object.prototype, 'extra');
+      for (const key of indices) count(Array.prototype, key);
+      return () => {
+        delete (Object.prototype as Record<string, unknown>).extra;
+        for (const key of indices)
+          delete (Array.prototype as unknown as Record<string, unknown>)[key];
+      };
+    };
+    // Built-ins a copy once looked up as it ran. World ticks check the iterator and Map.prototype.get,
+    // so only snapshot() meets those two.
+    const replacements: [string, Patch, boolean][] = [
       [
-        'ownKeys',
+        'Object.keys answering an extra key',
         () => {
-          Reflect.ownKeys = ((target: object) =>
-            ownKeys(target).filter((key) => key !== 'tick')) as typeof Reflect.ownKeys;
-          return () => void (Reflect.ownKeys = ownKeys);
+          Object.keys = ((o: object) => [...keys(o), 'extra']) as typeof Object.keys;
+          return () => void (Object.keys = keys);
         },
+        true,
       ],
       [
-        'getOwnPropertyDescriptor',
+        'slice as an accessor that answers with the original',
         () => {
-          Reflect.getOwnPropertyDescriptor = ((target: object, key: PropertyKey) =>
-            key === 'tick'
-              ? { value: undefined, writable: true, enumerable: false, configurable: true }
-              : descriptor(target, key)) as typeof Reflect.getOwnPropertyDescriptor;
-          return () => void (Reflect.getOwnPropertyDescriptor = descriptor);
+          Object.defineProperty(Array.prototype, 'slice', { configurable: true, get: () => slice });
+          return () =>
+            void Object.defineProperty(Array.prototype, 'slice', {
+              value: slice,
+              writable: true,
+              enumerable: false,
+              configurable: true,
+            });
         },
+        true,
       ],
       [
-        'hasOwn',
+        'an array iterator that yields an extra key',
         () => {
-          // With a planted 'writable', an accessor descriptor would read as a writable data one.
-          Object.defineProperty(Object.prototype, 'writable', {
-            value: true,
-            writable: true,
-            configurable: true,
-          });
-          // Hides the hook's own accessor fields and shows a writable field it lacks.
-          Object.hasOwn = ((target: object, key: PropertyKey) =>
-            (target as PropertyDescriptor).set === swallow
-              ? key !== 'set' && key !== 'get' && (key === 'writable' || hasOwn(target, key))
-              : hasOwn(target, key)) as typeof Object.hasOwn;
-          return () => {
-            Object.hasOwn = hasOwn;
-            delete (Object.prototype as Record<string, unknown>).writable;
+          iterator.next = function (this: object) {
+            const step = next.call(this);
+            if (!step.done || finished.has(this)) return step;
+            finished.add(this);
+            return { done: false, value: 'extra' };
           };
+          return () => void (iterator.next = next);
         },
+        false,
+      ],
+      [
+        'Map.prototype.get answering a decoy',
+        () => {
+          Map.prototype.get = function () {
+            return 'decoy';
+          };
+          return () => void (Map.prototype.get = mapGet);
+        },
+        false,
       ],
     ];
-    for (const [name, wrap] of wrappers) {
-      Object.defineProperty(Object.prototype, 'tick', { configurable: true, set: swallow });
-      const restore = wrap();
-      let plain;
+    const under = (replace: Patch, call: () => unknown) => {
+      calls = 0;
+      const undoHooks = hooks(),
+        undo = replace();
       try {
-        plain = reactivePlainObjectPrototype3D();
+        return call();
       } finally {
-        restore();
-        delete (Object.prototype as Record<string, unknown>).tick;
+        undo();
+        undoHooks();
       }
-      expect({ name, plain }).toEqual({ name, plain: false });
+    };
+    for (const [name, replace, ticks] of replacements) {
+      const w = createReactiveWorld3D(r, mixed(6)),
+        twin = createReactiveWorld3D(r, mixed(6));
+      holdCells(w);
+      holdCells(twin);
+      const j = w.prepareTick({ motion: { maxEntries: 4096 } }),
+        t = twin.prepareTick({ motion: { maxEntries: 4096 } });
+      finish(j, () => () => undefined);
+      finish(t, () => () => undefined);
+      const reads: [string, () => unknown, unknown][] = [
+        ['snapshot()', () => w.snapshot(), twin.snapshot()],
+      ];
+      if (ticks)
+        reads.push(
+          ['result()', () => j.result(), t.result()],
+          ['motion()', () => j.motion(), t.motion()],
+        );
+      for (const [read, call, expected] of reads) {
+        const got = under(replace, call);
+        expect({ name, read, calls, got }).toEqual({ name, read, calls: 0, got: expected });
+      }
+      if (!ticks) continue;
+      // After a result() read, the commit copies the state too.
+      j.result();
+      twin.commitTick(t);
+      under(replace, () => w.commitTick(j));
+      expect({ name, calls, state: w.snapshot() }).toEqual({
+        name,
+        calls: 0,
+        state: twin.snapshot(),
+      });
     }
-    expect(reactivePlainObjectPrototype3D()).toBe(true);
   });
   test('an append that fails inside a structure batch stops where the per-step job stops', () => {
     // Hot wood breaks on the floor and a loose stone bar falls, so every report array fills. No cell

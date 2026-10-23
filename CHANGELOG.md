@@ -67,8 +67,8 @@ date of the last change in the section.
   guarantee; for it, world ticks now fail when their check sees a listed
   array, map, set or typed-array built-in replaced after the SDK loaded,
   result copies no longer assign through prototype setters, and a tick
-  job's `advance()` cannot be reentered (the reactive materials guide gives
-  the limits). A standalone structure job driven one work unit per
+  job cannot be advanced or cancelled from inside its own `advance()` (the
+  reactive materials guide gives the limits). A standalone structure job driven one work unit per
   `advance()` call is slower than before (#68).
 
 ### Fixed
