@@ -88,9 +88,10 @@ versions did not guard against this either. This version adds three defenses:
 - A world's `snapshot()` and `commitTick()`, the `result()` and `motion()` of
   world tick jobs, and the `result()` of evolution, reaction and structure jobs
   copy with built-ins captured when the SDK loaded, and define each element and
-  field of a copy before storing into it, so no prototype setter sees a copy.
-  Other methods, such as those of translations, holds, transfers and domain
-  sets, copy as before.
+  field of a copy instead of assigning it, so no prototype setter sees a copy.
+  This does not cover engine objects that a hook replaced during a tick, for
+  example with a Proxy. Other methods, such as those of translations, holds,
+  transfers and domain sets, copy as before.
 - A world tick job's `advance()` fails, and its `cancel()` returns `false`, if
   caller code calls them while `advance()` runs. The tick jobs of a domain set
   have no such guard.

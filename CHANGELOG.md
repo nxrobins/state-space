@@ -66,10 +66,11 @@ date of the last change in the section.
   realm. A realm whose built-ins caller code replaced or hooked carries no
   guarantee. For it, world ticks now fail when their check sees a listed
   array, map, set or typed-array built-in replaced after the SDK loaded,
-  tick results, motion reports, world snapshots and tick commits copy
-  without assigning through prototype setters, and a world tick job cannot
-  be advanced or cancelled from inside its own `advance()`; the reactive
-  materials guide gives the scope and limits of each. A standalone
+  a world's snapshots and tick commits and the results and motion reports
+  of world tick jobs copy without assigning through prototype setters, and
+  a world tick job cannot be advanced or cancelled from inside its own
+  `advance()`; the reactive materials guide gives the scope and limits of
+  each. A standalone
   structure job driven one work unit per `advance()` call is slower than
   before (#68).
 

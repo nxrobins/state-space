@@ -359,117 +359,125 @@ function worldTickJob(
     // Caller code that a hook runs inside advance() cannot cancel the job under it either.
     cancel: () => !advancing && cancel(),
     advance(structuralWork: number = 64) {
-      reactiveInteger3D(structuralWork, 1, REACTIVE_STRUCTURE_MAX_WORK_3D);
-      if (status !== 'running' || !before)
-        throw Error('Reactive world tick job is no longer running.');
-      // Caller code that a hook runs inside this call cannot advance the job a second time.
+      // Caller code that a hook runs inside this call, from the budget check on, cannot advance the
+      // job a second time.
       if (advancing) throw Error('Reactive world tick job cannot advance while it advances.');
       advancing = true;
       try {
-        assertReactiveRealm3D();
-        if (phase === 'evolution') {
-          evolutionPasses = evolution!.job.advance().completedPasses;
-          if (evolutionPasses === 28) phase = 'structure-prepare';
-        } else if (phase === 'structure-prepare') {
-          evolutionResult = evolution!.output();
-          evolution = null;
-          if (initialHolds.length) {
-            const touched = new Set(evolutionResult.report.movement.touchedOrigins);
-            if (movementCells.some((i) => touched.has(i)))
-              throw Error('Held reactive matter moved during evolution.');
-            const reactions = evolutionResult.report.reactions,
-              transformed = new Set([
-                ...reactions.phaseChangedCells,
-                ...reactions.extinguishedCells,
-              ]);
-            for (const pair of reactions.reactedPairs) {
-              transformed.add(pair.fuel);
-              transformed.add(pair.oxidizer);
+        reactiveInteger3D(structuralWork, 1, REACTIVE_STRUCTURE_MAX_WORK_3D);
+        if (status !== 'running' || !before)
+          throw Error('Reactive world tick job is no longer running.');
+        try {
+          assertReactiveRealm3D();
+          if (phase === 'evolution') {
+            evolutionPasses = evolution!.job.advance().completedPasses;
+            if (evolutionPasses === 28) phase = 'structure-prepare';
+          } else if (phase === 'structure-prepare') {
+            evolutionResult = evolution!.output();
+            evolution = null;
+            if (initialHolds.length) {
+              const touched = new Set(evolutionResult.report.movement.touchedOrigins);
+              if (movementCells.some((i) => touched.has(i)))
+                throw Error('Held reactive matter moved during evolution.');
+              const reactions = evolutionResult.report.reactions,
+                transformed = new Set([
+                  ...reactions.phaseChangedCells,
+                  ...reactions.extinguishedCells,
+                ]);
+              for (const pair of reactions.reactedPairs) {
+                transformed.add(pair.fuel);
+                transformed.add(pair.oxidizer);
+              }
+              evolutionResult.state.block = stripReactiveHoldAnchors3D(
+                before.block,
+                evolutionResult.state.block,
+                initialHolds,
+              );
+              const retirement = retireReactiveHolds3D(
+                registry,
+                before.block,
+                evolutionResult.state.block,
+                initialHolds,
+                transformed,
+              );
+              structureHolds = retirement.holds;
+              retired = retirement.retired;
             }
-            evolutionResult.state.block = stripReactiveHoldAnchors3D(
-              before.block,
-              evolutionResult.state.block,
-              initialHolds,
-            );
-            const retirement = retireReactiveHolds3D(
-              registry,
-              before.block,
-              evolutionResult.state.block,
-              initialHolds,
-              transformed,
-            );
-            structureHolds = retirement.holds;
-            retired = retirement.retired;
+            const structuralInput = structureHolds.length
+              ? overlayReactiveHolds3D(evolutionResult.state.block, structureHolds)
+              : evolutionResult.state.block;
+            structure = startReactiveStructureJob3D(registry, structuralInput);
+            structureProgress = structure.job.progress();
+            phase = 'structure';
+          } else if (phase === 'structure') {
+            structureProgress = structure!.job.advance(structuralWork);
+            if (structureProgress.status === 'complete') phase = 'publish';
+          } else if (phase === 'publish') {
+            const structural = structure!.output(),
+              structureCells = reactiveHeldCells3D(structureHolds),
+              moved = new Set(structural.report.moves.map((m) => m.from));
+            if (structureCells.some((i) => moved.has(i)))
+              throw Error('Held reactive matter moved during structural settlement.');
+            if (structureHolds.length)
+              structural.block = stripReactiveHoldAnchors3D(
+                evolutionResult!.state.block,
+                structural.block,
+                structureHolds,
+              );
+            // Fail closed: the published block passes the physical invariants before any snapshot carries it forward.
+            structural.block = checkReactiveMaterialBlock3D(registry, structural.block);
+            const holdReport: ReactiveHoldTickReport3D | undefined =
+              before.schemaVersion === 2
+                ? {
+                    rulesVersion: REACTIVE_HOLD_RULES_3D,
+                    before: initialHolds,
+                    after: copyReactiveHolds3D(
+                      structureHolds.filter((h) => h.expiresAtTick > before!.tick + 1),
+                    ),
+                    expired: initialHolds
+                      .filter((h) => h.expiresAtTick <= before!.tick + 1)
+                      .map((h) => h.id),
+                    retired,
+                    movementCells,
+                    structureCells,
+                  }
+                : undefined;
+            const composed = compose(before, evolutionResult!, structural, holdReport);
+            if (captureOptions.enabled) {
+              capture.structure(structural.report);
+              capture.pass(28, structural.block);
+            }
+            motion = capture.result();
+            capture.release();
+            // Surviving holds are validated against the published block before the snapshot is handed over.
+            const state = composed.state;
+            result =
+              state.schemaVersion === 2
+                ? {
+                    ...composed,
+                    state: {
+                      schemaVersion: 2,
+                      rulesVersion: REACTIVE_CONSTRAINED_WORLD_RULES_3D,
+                      holdRulesVersion: REACTIVE_HOLD_RULES_3D,
+                      tick: state.tick,
+                      block: state.block,
+                      holds: validateReactiveHolds3D(
+                        registry,
+                        state.holds,
+                        state.tick,
+                        state.block,
+                      ),
+                    },
+                  }
+                : composed;
+            release();
+            status = 'complete';
+            phase = 'complete';
           }
-          const structuralInput = structureHolds.length
-            ? overlayReactiveHolds3D(evolutionResult.state.block, structureHolds)
-            : evolutionResult.state.block;
-          structure = startReactiveStructureJob3D(registry, structuralInput);
-          structureProgress = structure.job.progress();
-          phase = 'structure';
-        } else if (phase === 'structure') {
-          structureProgress = structure!.job.advance(structuralWork);
-          if (structureProgress.status === 'complete') phase = 'publish';
-        } else if (phase === 'publish') {
-          const structural = structure!.output(),
-            structureCells = reactiveHeldCells3D(structureHolds),
-            moved = new Set(structural.report.moves.map((m) => m.from));
-          if (structureCells.some((i) => moved.has(i)))
-            throw Error('Held reactive matter moved during structural settlement.');
-          if (structureHolds.length)
-            structural.block = stripReactiveHoldAnchors3D(
-              evolutionResult!.state.block,
-              structural.block,
-              structureHolds,
-            );
-          // Fail closed: the published block passes the physical invariants before any snapshot carries it forward.
-          structural.block = checkReactiveMaterialBlock3D(registry, structural.block);
-          const holdReport: ReactiveHoldTickReport3D | undefined =
-            before.schemaVersion === 2
-              ? {
-                  rulesVersion: REACTIVE_HOLD_RULES_3D,
-                  before: initialHolds,
-                  after: copyReactiveHolds3D(
-                    structureHolds.filter((h) => h.expiresAtTick > before!.tick + 1),
-                  ),
-                  expired: initialHolds
-                    .filter((h) => h.expiresAtTick <= before!.tick + 1)
-                    .map((h) => h.id),
-                  retired,
-                  movementCells,
-                  structureCells,
-                }
-              : undefined;
-          const composed = compose(before, evolutionResult!, structural, holdReport);
-          if (captureOptions.enabled) {
-            capture.structure(structural.report);
-            capture.pass(28, structural.block);
-          }
-          motion = capture.result();
-          capture.release();
-          // Surviving holds are validated against the published block before the snapshot is handed over.
-          const state = composed.state;
-          result =
-            state.schemaVersion === 2
-              ? {
-                  ...composed,
-                  state: {
-                    schemaVersion: 2,
-                    rulesVersion: REACTIVE_CONSTRAINED_WORLD_RULES_3D,
-                    holdRulesVersion: REACTIVE_HOLD_RULES_3D,
-                    tick: state.tick,
-                    block: state.block,
-                    holds: validateReactiveHolds3D(registry, state.holds, state.tick, state.block),
-                  },
-                }
-              : composed;
-          release();
-          status = 'complete';
-          phase = 'complete';
+        } catch (error) {
+          cancel();
+          throw error;
         }
-      } catch (error) {
-        cancel();
-        throw error;
       } finally {
         advancing = false;
       }

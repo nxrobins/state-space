@@ -594,13 +594,19 @@ describe('reactive result copies', () => {
     expect(out[3]).not.toBeInstanceOf(Point);
     expect((out[4] as { t: Int32Array }).t).not.toBe(typed);
   });
-  test('a copy calls no built-in replaced after load, on the slice and the element-by-element path', () => {
+  test('a copy calls no built-in replaced after load and no prototype setter, on either path', () => {
     const data = () => ({
       moves: [{ from: 1, to: 2 }],
       nested: { list: [{ a: 1, b: [2, 3] }], typed: new Uint8Array([4, 5]) },
       flat: [6, 7],
+      // An array on another prototype takes the structured clone.
+      odd: Object.setPrototypeOf([8, 9], Object.create(Array.prototype)) as number[],
+      // A hole where a hook swallowed a store, and a record with an own __proto__ key.
+      holey: [{ c: 1 }, , { d: 2 }],
+      own: JSON.parse('{"e":1,"__proto__":{"f":2},"g":[3]}') as Record<string, unknown>,
     });
     const clean = cloneReactiveData3D(data());
+    expect(Object.hasOwn(clean.holey, 1)).toBe(true);
     let calls = 0;
     const g = globalThis as unknown as Record<string, unknown>;
     /** Wraps target[key] with a function that counts its calls; returns the undo. */
@@ -613,8 +619,29 @@ describe('reactive result copies', () => {
       };
       return () => void (bag[key] = original);
     };
+    const getOwn = Reflect.getOwnPropertyDescriptor;
+    /** A setter that counts what reaches it, on target[key]; returns the undo. */
+    const setter = (target: object, key: string) => {
+      const before = getOwn(target, key);
+      Object.defineProperty(target, key, {
+        configurable: true,
+        get: before?.get,
+        set(this: object, value: unknown) {
+          calls++;
+          return before?.set?.call(this, value);
+        },
+      });
+      return () =>
+        void (before
+          ? Object.defineProperty(target, key, before)
+          : delete (target as Record<string, unknown>)[key]);
+    };
+    // Captured, since the global Array is replaced below; the handlers have no prototype, so the 'get'
+    // planted on Object.prototype does not become their trap.
     const iterator = Object.getPrototypeOf([][Symbol.iterator]()) as object,
       RealSymbol = Symbol,
+      RealArray = Array,
+      ArrayPrototype = Array.prototype,
       slice = Array.prototype.slice;
     const replaceAll = (alsoSlice: boolean) => {
       const undo = [
@@ -623,24 +650,52 @@ describe('reactive result copies', () => {
         wrap(Reflect, 'getPrototypeOf'),
         wrap(Reflect, 'getOwnPropertyDescriptor'),
         wrap(Reflect, 'defineProperty'),
+        wrap(Reflect, 'apply'),
         wrap(Object, 'keys'),
         wrap(Object, 'hasOwn'),
         wrap(Map.prototype, 'get'),
         wrap(Map.prototype, 'set'),
         wrap(iterator, 'next'),
         wrap(g, 'structuredClone'),
+        setter(Object.prototype, '__proto__'),
+        setter(Object.prototype, 'e'),
+        setter(Object.prototype, 'g'),
       ];
       g.Symbol = new Proxy(RealSymbol, {
+        __proto__: null,
         get(target, key, receiver) {
           calls++;
           return Reflect.get(target, key, receiver);
         },
+      } as ProxyHandler<SymbolConstructor>);
+      g.Array = new Proxy(RealArray, {
+        __proto__: null,
+        construct(target, rest, newTarget) {
+          calls++;
+          return Reflect.construct(target, rest, newTarget);
+        },
+      } as ProxyHandler<ArrayConstructor>);
+      undo.push(() => {
+        g.Array = RealArray;
+        g.Symbol = RealSymbol;
       });
-      undo.push(() => void (g.Symbol = RealSymbol));
       if (alsoSlice) {
-        // An accessor sends the copy down the element-by-element path; a planted 'get' would break a
-        // descriptor that inherits from Object.prototype.
-        Object.defineProperty(Array.prototype, 'slice', { configurable: true, get: () => slice });
+        // An accessor sends the copy down the element-by-element path. It answers with the original
+        // only once, so a copy that read it and then called it would call a counted stand-in; a planted
+        // 'get' would break a descriptor that inherits from Object.prototype.
+        let reads = 0;
+        Object.defineProperty(ArrayPrototype, 'slice', {
+          configurable: true,
+          get() {
+            calls++;
+            return ++reads === 1
+              ? slice
+              : function (this: unknown) {
+                  calls++;
+                  return this;
+                };
+          },
+        });
         Object.defineProperty(Object.prototype, 'get', {
           value: () => undefined,
           writable: true,
@@ -648,7 +703,7 @@ describe('reactive result copies', () => {
         });
         undo.push(() => {
           delete (Object.prototype as Record<string, unknown>).get;
-          Object.defineProperty(Array.prototype, 'slice', {
+          Object.defineProperty(ArrayPrototype, 'slice', {
             value: slice,
             writable: true,
             enumerable: false,
@@ -656,6 +711,20 @@ describe('reactive result copies', () => {
           });
         });
       }
+      // Last, since storing into a new array index from here on reaches the trap: assigning to the
+      // hole would reach it, and slice() leaves the hole as a hole.
+      undo.push(() => void Object.setPrototypeOf(ArrayPrototype, Object.prototype));
+      Object.setPrototypeOf(
+        ArrayPrototype,
+        new Proxy(Object.prototype, {
+          __proto__: null,
+          has: (target, key) => key !== '1' && Reflect.has(target, key),
+          set(target, key, value, receiver) {
+            calls++;
+            return Reflect.set(target, key, value, receiver);
+          },
+        } as ProxyHandler<object>),
+      );
       return () => {
         for (let k = undo.length - 1; k >= 0; k--) undo[k]();
       };
@@ -664,13 +733,15 @@ describe('reactive result copies', () => {
       const value = data();
       calls = 0;
       const restore = replaceAll(alsoSlice);
-      let copy: unknown;
+      let copy: ReturnType<typeof data> | undefined;
       try {
         copy = cloneReactiveData3D(value);
       } finally {
         restore();
       }
       expect({ alsoSlice, calls, copy }).toEqual({ alsoSlice, calls: 0, copy: clean });
+      expect({ alsoSlice, hole: Object.hasOwn(copy!.holey, 1) }).toEqual({ alsoSlice, hole: true });
+      expect(Object.getPrototypeOf(copy!.own)).toEqual({ f: 2 });
     }
   });
   test('an enumerable Object.prototype accessor is never read', () => {

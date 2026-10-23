@@ -71,10 +71,12 @@ const SPECIES: typeof Symbol.species = Symbol.species,
   OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   GET_PROTOTYPE = Reflect.getPrototypeOf,
   DEFINE = Reflect.defineProperty,
+  APPLY = Reflect.apply,
   OBJECT_KEYS = Object.keys,
   HAS_OWN = Object.hasOwn,
   IS_ARRAY = Array.isArray,
   OBJECT_PROTOTYPE = Object.prototype,
+  PROTO_SET = OWN_DESCRIPTOR(Object.prototype, '__proto__')?.set,
   ARRAY = Array,
   ARRAY_PROTOTYPE = Array.prototype,
   ARRAY_SLICE = Array.prototype.slice,
@@ -146,8 +148,8 @@ const species = (constructor: object) => (constructor as { [SPECIES]?: unknown }
  * comparisons: the global constructors, Array.isArray, and the listed array, map, set and typed-array
  * methods, constructors, species and iterators, the typed-array methods read through each of the four
  * typed-array prototypes. A tick that finds one replaced fails rather than trust it. The check reads
- * the constructors through the global names the tick uses, so a later global declaration that shadows
- * one is seen too, and the well-known symbols as this module loaded them; it costs a few nanoseconds.
+ * the constructors through the global names the tick uses and the well-known symbols as this module
+ * loaded them; it costs a few nanoseconds.
  * It checks no other getter (typed-array length, Set size) and no other built-in (WeakMap, Math), and
  * it does not see an accessor that answers it with the original, a replacement that a caller's hook
  * makes and undoes while a tick call runs, or a built-in replaced before this module loaded.
@@ -211,6 +213,17 @@ export function assertReactiveRealm3D(): void {
   if (!reactiveRealmIntact3D())
     throw Error('Reactive world ticks need the array built-ins the SDK loaded with.');
 }
+/** Defines an own data property as an assignment to a missing key would, without consulting any
+ * prototype. The descriptor has no prototype, so no field planted on Object.prototype joins it. */
+function define(target: object, key: PropertyKey, value: unknown) {
+  DEFINE(target, key, {
+    __proto__: null,
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  } as PropertyDescriptor);
+}
 /** Whether for-in over a plain record sees only its own keys, as it does while Object.prototype has no
  * enumerable key. Enumerating reads no value, so it runs no caller code. */
 function forInSeesOwnKeysOnly(): boolean {
@@ -239,11 +252,10 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
  * is copied per reference, and engine results never share one.
  * The copy calls only built-ins captured when this module loaded. Each array and record of it starts as
  * a slice() or spread of the original, or as elements defined one by one when slice, its constructor or
- * species was replaced, and nested copies are then stored over those own properties, so no prototype
- * setter sees the copy. Engine results hold neither of the two exceptions: a record with an own
- * __proto__ key has its fields assigned, as they always were, and a hole in an array of records is
- * assigned through the prototype chain. In an unmodified realm this is the copy that assigning every
- * field makes.
+ * species was replaced, and nested copies are then stored over those own properties or defined where
+ * there is none (a hole a hook left, or a record with an own __proto__ key, whose prototype is then set
+ * through the built-in setter as assignment always set it), so no prototype setter sees the copy. In an
+ * unmodified realm this is the copy that assigning every field makes.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
@@ -272,27 +284,23 @@ export function cloneReactiveData3D<T>(value: T): T {
       if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
       else {
         out = new ARRAY<unknown>(v.length);
-        for (let i = 0; i < v.length; i++)
-          // A descriptor without a prototype, so no field planted on Object.prototype joins it.
-          DEFINE(out, i, {
-            __proto__: null,
-            value: v[i],
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          } as PropertyDescriptor);
+        for (let i = 0; i < v.length; i++) define(out, i, v[i]);
       }
       seen.set(v, out);
       if (flat) return out;
       for (let i = 0; i < v.length; i++) {
-        const x = v[i];
-        out[i] = (records ??= forInSeesOwnKeysOnly()) && flatRecord(x) ? { ...x } : copy(x);
+        const x = v[i],
+          y = (records ??= forInSeesOwnKeysOnly()) && flatRecord(x) ? { ...x } : copy(x);
+        // A hole left where a hook swallowed a store is defined, not assigned through the prototypes.
+        if (HAS_OWN(out, i)) out[i] = y;
+        else define(out, i, y);
       }
       return out;
     }
     if (GET_PROTOTYPE(v) !== OBJECT_PROTOTYPE) return STRUCTURED_CLONE(v);
-    // The spread holds every primitive field already; an own __proto__ key instead has every field
-    // stored, as it always was, so that it sets the copy's prototype.
+    // The spread holds every primitive field already. A record with an own __proto__ key starts empty
+    // instead: that key sets the copy's prototype through the built-in setter, as assigning it always
+    // did, and every other field is defined.
     const proto = HAS_OWN(v, '__proto__'),
       out: Record<string, unknown> = proto ? {} : { ...v },
       keys = OBJECT_KEYS(v);
@@ -300,7 +308,11 @@ export function cloneReactiveData3D<T>(value: T): T {
     for (let k = 0; k < keys.length; k++) {
       const key = keys[k],
         x = (v as Record<string, unknown>)[key];
-      if (proto || (typeof x !== 'string' && typeof x !== 'number' && typeof x !== 'boolean'))
+      if (proto) {
+        const y = copy(x);
+        if (key === '__proto__') APPLY(PROTO_SET!, out, [y]);
+        else define(out, key, y);
+      } else if (typeof x !== 'string' && typeof x !== 'number' && typeof x !== 'boolean')
         out[key] = copy(x);
     }
     return out;

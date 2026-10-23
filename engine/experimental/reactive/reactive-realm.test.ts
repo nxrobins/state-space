@@ -424,62 +424,99 @@ describe('reactive ticks in a patched realm', () => {
   });
   test('the realm check reads the global constructors and well-known symbols as the tick does', () => {
     const g = globalThis as unknown as Record<string, unknown>,
-      RealSet = Set,
       RealSymbol = Symbol,
       own = Reflect.getOwnPropertyDescriptor(g, 'globalThis')!,
-      iterator = Array.prototype[Symbol.iterator],
-      setIterator = Set.prototype[Symbol.iterator],
+      names = ['Array', 'Map', 'Set', 'Int32Array', 'Uint32Array', 'Uint16Array', 'Uint8Array'],
+      originals = Object.fromEntries(names.map((name) => [name, g[name]])),
       typed = [Int32Array, Uint32Array, Uint16Array, Uint8Array];
-    const cases: [string, Patch][] = [
+    // One global replaced while globalThis points at the originals, as a lookup through it would see.
+    const globalCases = names.map((name): [string, Patch] => [
+      `${name} behind a global object that points elsewhere`,
+      () => {
+        Object.defineProperty(g, 'globalThis', { ...own, value: { ...originals } });
+        g[name] = new Proxy(originals[name] as object, {});
+        return () => {
+          g[name] = originals[name];
+          Object.defineProperty(g, 'globalThis', own);
+        };
+      },
+    ]);
+    // One symbol-keyed built-in replaced while the global Symbol leads to the originals under string
+    // keys, as a lookup through it would see.
+    const symbolKeyed: [string, object, symbol, PropertyDescriptor][] = [
       [
-        'a replaced Set behind a global object that points elsewhere',
-        () => {
-          // A lookup through globalThis would find the original constructors here.
-          const originals = { Array, Map, Set, Int32Array, Uint32Array, Uint16Array, Uint8Array };
-          Object.defineProperty(g, 'globalThis', { ...own, value: originals });
-          g.Set = class extends RealSet {};
-          return () => {
-            g.Set = RealSet;
-            Object.defineProperty(g, 'globalThis', own);
-          };
+        'Array species',
+        Array,
+        RealSymbol.species,
+        { configurable: true, get: () => class extends Array {} },
+      ],
+      [
+        'array iterator',
+        Array.prototype,
+        RealSymbol.iterator,
+        {
+          configurable: true,
+          writable: true,
+          value: function (this: unknown[]) {
+            return originals.Array && (Array.prototype.values as () => unknown).call(this);
+          },
         },
       ],
       [
-        'a replaced array iterator behind a replaced global Symbol',
-        () => {
-          // A lookup through the global Symbol would find the originals under these string keys.
-          const planted: [object, string, PropertyDescriptor][] = [
-            [Array, '@@species', Reflect.getOwnPropertyDescriptor(Array, RealSymbol.species)!],
-            [Array.prototype, '@@iterator', { value: iterator, configurable: true }],
-            [Set.prototype, '@@iterator', { value: setIterator, configurable: true }],
-            ...typed.map((T): [object, string, PropertyDescriptor] => [
-              T,
-              '@@species',
-              { value: T, configurable: true },
-            ]),
-          ];
-          for (const [target, key, descriptor] of planted)
-            Object.defineProperty(target, key, descriptor);
-          g.Symbol = { species: '@@species', iterator: '@@iterator' };
-          Object.defineProperty(Array.prototype, RealSymbol.iterator, {
-            value: function (this: unknown[]) {
-              return iterator.call(this);
-            },
-            writable: true,
-            configurable: true,
-          });
-          return () => {
-            Object.defineProperty(Array.prototype, RealSymbol.iterator, {
-              value: iterator,
-              writable: true,
-              configurable: true,
-            });
-            g.Symbol = RealSymbol;
-            for (const [target, key] of planted) delete (target as Record<string, unknown>)[key];
-          };
+        'Set iterator',
+        Set.prototype,
+        RealSymbol.iterator,
+        {
+          configurable: true,
+          writable: true,
+          value: function (this: Set<unknown>) {
+            return Set.prototype.values.call(this);
+          },
         },
       ],
+      ...typed.map((T): [string, object, symbol, PropertyDescriptor] => [
+        `${T.name} species`,
+        T,
+        RealSymbol.species,
+        { configurable: true, get: () => class extends T {} },
+      ]),
     ];
+    const symbolCases = symbolKeyed.map(([name, target, symbol, replacement]): [string, Patch] => [
+      `${name} behind a replaced global Symbol`,
+      () => {
+        const planted: [object, string, PropertyDescriptor][] = [
+          [Array, '@@species', Reflect.getOwnPropertyDescriptor(Array, RealSymbol.species)!],
+          [
+            Array.prototype,
+            '@@iterator',
+            { value: Array.prototype[RealSymbol.iterator], configurable: true },
+          ],
+          [
+            Set.prototype,
+            '@@iterator',
+            { value: Set.prototype[RealSymbol.iterator], configurable: true },
+          ],
+          ...typed.map((T): [object, string, PropertyDescriptor] => [
+            T,
+            '@@species',
+            { value: T, configurable: true },
+          ]),
+        ];
+        for (const [object, key, descriptor] of planted)
+          Object.defineProperty(object, key, descriptor);
+        const before = Reflect.getOwnPropertyDescriptor(target, symbol);
+        Object.defineProperty(target, symbol, replacement);
+        g.Symbol = { species: '@@species', iterator: '@@iterator' };
+        return () => {
+          g.Symbol = RealSymbol;
+          if (before) Object.defineProperty(target, symbol, before);
+          else delete (target as Record<symbol, unknown>)[symbol];
+          for (const [object, key] of planted) delete (object as Record<string, unknown>)[key];
+        };
+      },
+    ]);
+    const cases = [...globalCases, ...symbolCases];
+    expect(cases).toHaveLength(14);
     for (const [name, patch] of cases) {
       const j = createReactiveWorld3D(r, mixed(6)).prepareTick();
       let outcome = 'advanced';
@@ -958,6 +995,38 @@ describe('reactive ticks in a patched realm', () => {
     finish(k, () => () => undefined);
     other.commitTick(k);
     expect(other.snapshot()).toEqual(twin.snapshot());
+    // The budget check runs before any stage too; the guard is set before it.
+    const third = createReactiveWorld3D(r, mixed(6)),
+      m = third.prepareTick(),
+      isSafeInteger = Number.isSafeInteger;
+    armed = true;
+    message = '';
+    Number.isSafeInteger = (value: unknown) => {
+      if (armed) {
+        armed = false;
+        try {
+          m.advance(1);
+          message = 'advanced';
+        } catch (error) {
+          message = (error as Error).message;
+        }
+        cancelled ||= m.cancel();
+      }
+      return isSafeInteger(value);
+    };
+    try {
+      m.advance(64);
+    } finally {
+      Number.isSafeInteger = isSafeInteger;
+    }
+    expect({ armed, message, cancelled }).toEqual({
+      armed: false,
+      message: 'Reactive world tick job cannot advance while it advances.',
+      cancelled: false,
+    });
+    finish(m, () => () => undefined);
+    third.commitTick(m);
+    expect(third.snapshot()).toEqual(twin.snapshot());
   });
   test('result copies call only built-ins captured at load, so no prototype setter sees one', () => {
     const keys = Object.keys,
