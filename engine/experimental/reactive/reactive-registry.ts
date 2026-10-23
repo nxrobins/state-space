@@ -254,8 +254,8 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
  * a slice() or spread of the original, or as elements defined one by one when slice, its constructor or
  * species was replaced, and nested copies are then stored over those own properties or defined where
  * there is none (a hole a hook left, or a record with an own __proto__ key, whose prototype is then set
- * through the built-in setter as assignment always set it), so no prototype setter sees the copy. In an
- * unmodified realm this is the copy that assigning every field makes.
+ * through the built-in setter as assignment always set it), so no prototype setter sees the copy. For
+ * portable data in an unmodified realm, this is the copy that assigning every field makes.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
