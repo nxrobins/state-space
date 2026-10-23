@@ -54,18 +54,23 @@ Readers reject holes, accessors, hidden or extra keys, symbols and typed arrays
 in plain arrays and records without running caller code, so every result is
 reproducible for plain data. A Proxy is read through its traps: they run, and
 they decide what is read. When a trap answers an array method, such as `map`,
-with an object of its own, the engine works on that object as returned, and
-later steps may call other methods on it than earlier engine versions did, so
-results for such inputs may differ between versions. Both guarantees assume an
-unmodified JavaScript realm.
+with a result of its own instead of the one the method would compute (another
+object, a typed array, or an array holding values the reader's callback would
+reject), the engine works on that result as returned, and later steps may read
+it differently than earlier engine versions did, so results for such inputs may
+differ between versions. Both guarantees assume an unmodified JavaScript realm.
 When a caller replaces or adds members of `Array.prototype` or `Object.prototype`,
 or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
 progress at a throw and outputs may differ between engine versions. Then:
 
 - An index accessor on `Array.prototype` or a hook on `Object.prototype` can
-  make a world tick fail. Unless the accessor or hook itself replaces built-ins
-  while a tick call runs, the tick does not publish or commit a state other than
-  the one an unmodified realm computes.
+  make a world tick fail. Unless it replaces built-ins while a tick call runs,
+  or changes an engine array or record that it kept, the tick does not publish
+  or commit a state other than the one an unmodified realm computes. Hooks can
+  see engine arrays and records, and caller code that keeps one and changes it
+  later can change the world's state; earlier engine versions did not guard
+  against that either. A commit made while `Object.prototype` carries a hook
+  stores a copy that no caller code saw.
 - At creation, at each advance, and in `result()`, `motion()` and commit, a
   world tick checks that the array, map, set and typed-array built-ins it calls
   still read as the ones the SDK loaded with, and fails if one does not.

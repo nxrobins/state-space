@@ -64,7 +64,8 @@ date of the last change in the section.
   owned world that adopts a committed tick's state instead of copying it,
   with bit-identical results for plain data in an unmodified JavaScript
   realm; world ticks fail if the array built-ins they call were replaced
-  after the SDK loaded (#68).
+  after the SDK loaded, and a standalone structure job driven one work unit
+  per `advance()` call is slower than before (#68).
 
 ### Fixed
 

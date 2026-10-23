@@ -89,14 +89,14 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
 const OWN_KEYS = Reflect.ownKeys,
   OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   GET_PROTOTYPE = Reflect.getPrototypeOf,
-  OBJECT_KEYS = Object.keys,
   HAS_OWN = Object.hasOwn,
   OBJECT_PROTOTYPE = Object.prototype,
   PROTO = OWN_DESCRIPTOR(OBJECT_PROTOTYPE, '__proto__'),
   ARRAY = Array,
   ARRAY_PROTOTYPE = Array.prototype,
   ARRAY_SLICE = Array.prototype.slice,
-  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get;
+  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get,
+  STRUCTURED_CLONE = structuredClone;
 /** A descriptor field, read only when the descriptor has it as its own: a descriptor is an ordinary
  * object, and Object.prototype may add any field. */
 function field(d: PropertyDescriptor | undefined, name: keyof PropertyDescriptor) {
@@ -174,6 +174,8 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
     typedFill: TYPED_PROTOTYPE.fill,
     typedSet: TYPED_PROTOTYPE.set,
   };
+const species = (constructor: object) =>
+  (constructor as { [Symbol.species]?: unknown })[Symbol.species];
 /** Internal only: whether the array, map, set and typed-array built-ins a world tick calls still read
  * as the ones this module loaded with, including the global bindings, constructors and species. A tick
  * that finds one replaced fails rather than trust it. The check reads each built-in as the tick does,
@@ -181,8 +183,6 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
  * caller's hook makes and undoes while a tick call runs, and a built-in replaced before this module
  * loaded are not seen.
  */
-const species = (constructor: object) =>
-  (constructor as { [Symbol.species]?: unknown })[Symbol.species];
 export function reactiveRealmIntact3D(): boolean {
   return (
     globalThis.Array === ARRAY &&
@@ -232,33 +232,11 @@ export function assertReactiveRealm3D(): void {
   if (!reactiveRealmIntact3D())
     throw Error('Reactive world ticks need the array built-ins the SDK loaded with.');
 }
-/** Internal only: whether a copy holds exactly the data of an engine-built original. The copy is read
- * through its own data descriptors only, with the intrinsics this module loaded with, so no prototype
- * hook or own accessor can answer for it: every array element and record key must be an own data
- * property, prototypes must be the plain ones, and keys, lengths and Object.is-equal primitives must
- * match the original's. */
-export function reactiveSameData3D(copy: unknown, original: unknown): boolean {
-  if (
-    typeof copy !== 'object' ||
-    copy === null ||
-    typeof original !== 'object' ||
-    original === null
-  )
-    return Object.is(copy, original);
-  const list = ARRAY.isArray(original);
-  if (GET_PROTOTYPE(copy) !== (list ? ARRAY_PROTOTYPE : OBJECT_PROTOTYPE)) return false;
-  const keys = list ? null : OBJECT_KEYS(original),
-    count = list ? (original as unknown[]).length : keys!.length,
-    own = OWN_KEYS(copy);
-  // An array's own keys are its indices and 'length'; a record's are exactly the original's keys.
-  if (own.length !== count + (list ? 1 : 0)) return false;
-  for (let i = 0; i < count; i++) {
-    const key = list ? '' + i : keys![i],
-      d = OWN_DESCRIPTOR(copy, key);
-    if (!d || !HAS_OWN(d, 'value') || HAS_OWN(d, 'get') || HAS_OWN(d, 'set')) return false;
-    if (!reactiveSameData3D(d.value, (original as Record<string, unknown>)[key])) return false;
-  }
-  return true;
+/** Internal only: a copy of engine-built data (own data properties only) that runs no caller code.
+ * The structured clone this module loaded with reads own properties and defines the copy's, so no
+ * prototype hook sees the copy or changes it. */
+export function cloneReactiveDataQuietly3D<T>(value: T): T {
+  return STRUCTURED_CLONE(value);
 }
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
  * Field order is kept exactly as structuredClone keeps it, without its serializer cost.

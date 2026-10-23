@@ -619,7 +619,7 @@ describe('reaction passes over thermal tables', () => {
     expect(moved).toBeGreaterThan(pairs / 4);
     expect(held).toBeGreaterThan(pairs / 20);
   });
-  test('each pass and each cycle equal the previous implementation on random odd blocks', () => {
+  test('each pass and each cycle equal the previous implementation on random small blocks', () => {
     const shapes = [
       { width: 5, height: 7, depth: 3 },
       { width: 13, height: 3, depth: 5 },

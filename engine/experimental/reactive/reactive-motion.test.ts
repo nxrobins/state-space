@@ -279,7 +279,7 @@ describe('executed reactive motion and bounded preview provenance', () => {
         ).toBe(true);
       expect(j.motion().passes.every((p) => p.segments.length === 0)).toBe(true);
       // Nothing moves or heats the held stone, so no pass may record it: stripping the overlay must
-      // start exactly where the last movement pass ends.
+      // start no later than the pass after the last movement pass.
       expect(
         j
           .motion()

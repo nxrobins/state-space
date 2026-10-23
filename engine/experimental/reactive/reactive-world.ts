@@ -11,8 +11,8 @@ import {
   assertReactiveRealm3D,
   reactiveInteger3D,
   cloneReactiveData3D,
+  cloneReactiveDataQuietly3D,
   reactivePlainObjectPrototype3D,
-  reactiveSameData3D,
   type ReactiveMaterialRegistry3D,
 } from './reactive-registry.js';
 import type { ReactiveTickOptions3D } from './reactive-motion-capture.js';
@@ -179,24 +179,26 @@ export function createReactiveWorld3D(
         if (base !== revision)
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
         assertReactiveRealm3D();
-        // live adopts the job's immutable result state; only the handed-out report is copied. While
-        // Object.prototype is not as the realm starts it, the whole result is copied in one walk, so
-        // caller setters and read-only keys see exactly the stores that copying always made, and a
-        // copy that lost or changed any state field fails the commit. A job whose result() was read
-        // is copied too, as before: in a realm whose slice was replaced, that read may have handed
-        // out the job's own arrays.
+        // live adopts the job's immutable result state; only the handed-out report is copied. A job
+        // whose result() was read is copied, as before: in a realm whose slice was replaced, that read
+        // may have handed out the job's own arrays. While Object.prototype is not as the realm starts
+        // it, its hooks may have seen the job's objects and would see every store of a copy, so the
+        // state is cloned without running caller code and only the report takes the usual copy.
         const next = nextRevision(),
           { result: taken, handed } = entry.take(),
           plain = reactivePlainObjectPrototype3D(),
-          adopt = !handed && plain,
-          output = adopt
-            ? { state: taken.state, report: cloneReactiveData3D(taken.report, plain) }
-            : cloneReactiveData3D(taken, plain),
+          output = !plain
+            ? {
+                state: cloneReactiveDataQuietly3D(taken.state),
+                report: cloneReactiveData3D(taken.report, plain),
+              }
+            : handed
+              ? cloneReactiveData3D(taken, plain)
+              : { state: taken.state, report: cloneReactiveData3D(taken.report, plain) },
           report = output.report;
         if (
           output.state.tick !== live.tick + 1 ||
-          total(output.state.block) !== initialQ + externalQ ||
-          (!plain && !reactiveSameData3D(output.state, taken.state))
+          total(output.state.block) !== initialQ + externalQ
         )
           throw Error('Reactive tick commit identity or accounting mismatch.');
         ensureValid();

@@ -1,10 +1,11 @@
 /** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
- * Object.prototype hook that does not itself replace built-ins, a world tick still publishes the true
- * state or fails. A tick that finds the array, map, set or typed-array built-ins it calls reading
- * other than at load fails. Built-ins replaced before the SDK loaded, accessors that answer the check
- * with the original, and replacements made and undone inside a tick call carry no guarantee; the
- * tests below pin the windows where this branch would otherwise do worse than the engine before
- * batching. A slice replaced before load can still steer the structure output.
+ * Object.prototype hook that neither replaces built-ins nor changes engine objects it kept, a world
+ * tick still publishes the true state or fails, and a commit under Object.prototype hooks keeps nothing
+ * a hook saw. A tick that finds the array, map, set or typed-array built-ins it calls reading other
+ * than at load fails. Built-ins replaced before the SDK loaded, accessors that answer the check with
+ * the original, and replacements made and undone inside a tick call carry no guarantee; the tests
+ * below pin the windows where this branch would otherwise do worse than the engine before batching.
+ * A slice replaced before load can still steer the structure output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -96,7 +97,7 @@ const indexAccessor = (key: string) => () => {
 };
 
 describe('reactive ticks in a patched realm', () => {
-  test('an Array.prototype index accessor never steers a tick to a different state', () => {
+  test('an Array.prototype index accessor that replaces no built-ins never steers a tick to another state', () => {
     let ticks = 0;
     for (const key of ['0', '1', '2', '5', '17']) {
       let snapshot = createReactiveWorldSnapshot3D(r, mixed(6));
@@ -126,54 +127,6 @@ describe('reactive ticks in a patched realm', () => {
     }
     expect(ticks).toBe(15);
   });
-  test('commits copy the whole result as before while Object.prototype carries hooks', () => {
-    const observe = (
-      descriptor: PropertyDescriptor,
-      key: string,
-      plantDescriptorFields = false,
-    ) => {
-      const w = createReactiveWorld3D(r, mixed(6)),
-        j = w.prepareTick();
-      finish(j, () => () => undefined);
-      const setter = vi.fn(),
-        planted = plantDescriptorFields ? ['value', 'writable'] : [];
-      Object.defineProperty(Object.prototype, key, {
-        configurable: true,
-        ...descriptor,
-        ...('set' in descriptor ? { set: setter } : {}),
-      });
-      // Inherited descriptor fields: an accessor descriptor then reads as a writable data one.
-      for (const field of planted)
-        Object.defineProperty(Object.prototype, field, {
-          value: true,
-          writable: true,
-          configurable: true,
-        });
-      try {
-        w.commitTick(j);
-        return { committed: w.tick, calls: setter.mock.calls.length };
-      } catch (error) {
-        return { error: (error as Error).message, tick: w.tick, calls: setter.mock.calls.length };
-      } finally {
-        for (const field of [key, ...planted])
-          delete (Object.prototype as Record<string, unknown>)[field];
-      }
-    };
-    // A copy assigns every field, so a setter named 'tick' swallows it and the commit fails closed.
-    const swallowed = {
-      error: 'Reactive tick commit identity or accounting mismatch.',
-      tick: 0,
-      calls: 1,
-    };
-    expect(observe({ set: () => undefined }, 'tick')).toEqual(swallowed);
-    expect(observe({ set: () => undefined }, 'tick', true)).toEqual(swallowed);
-    expect(observe({ value: 7, writable: false }, 'width')).toEqual({
-      error: "Cannot assign to read only property 'width' of object '#<Object>'",
-      tick: 0,
-      calls: 0,
-    });
-    expect(observe({ value: 7, writable: true }, 'width')).toEqual({ committed: 1, calls: 0 });
-  });
   const REALM_ERROR = 'Reactive world ticks need the array built-ins the SDK loaded with.';
   type Patch = () => () => void;
   /** Built-in replacements a caller could make after the SDK loaded, each undone by its return. */
@@ -201,6 +154,16 @@ describe('reactive ticks in a patched realm', () => {
     const swallowSlice = replaceSlice(function (...rest) {
       return new Proxy(slice.apply(this, rest as []), { set: () => true });
     });
+    // A global Array rebound to a lookalike whose own prototype carries the original slice.
+    const lookalikeArray: Patch = () => {
+      const Lookalike = function (...items: unknown[]) {
+        return Reflect.construct(RealArray, items);
+      };
+      Lookalike.prototype = { slice, constructor: Lookalike };
+      Object.defineProperty(Lookalike, Symbol.species, species);
+      (globalThis as { Array: unknown }).Array = Lookalike;
+      return () => void ((globalThis as { Array: unknown }).Array = RealArray);
+    };
     const useSpecies: Patch = () => {
       Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => Swallow });
       return () => void Object.defineProperty(Array, Symbol.species, species);
@@ -220,18 +183,14 @@ describe('reactive ticks in a patched realm', () => {
         Object.defineProperty(Array.prototype, 'constructor', { ...constructor, value: Swallow });
         return () => void Object.defineProperty(Array.prototype, 'constructor', constructor);
       }) as Patch,
-      // A global Array rebound to a lookalike whose own prototype carries the original slice.
+      lookalikeArray,
+      // The lookalike global Array with a swallowing slice, for jobs that do not check the realm.
       reboundArray: (() => {
-        const restore = swallowSlice();
-        const Lookalike = function (...items: unknown[]) {
-          return Reflect.construct(RealArray, items);
-        };
-        Lookalike.prototype = { slice, constructor: Lookalike };
-        Object.defineProperty(Lookalike, Symbol.species, species);
-        (globalThis as { Array: unknown }).Array = Lookalike;
+        const restoreSlice = swallowSlice(),
+          restoreArray = lookalikeArray();
         return () => {
-          (globalThis as { Array: unknown }).Array = RealArray;
-          restore();
+          restoreArray();
+          restoreSlice();
         };
       }) as Patch,
       iterator: (() => {
@@ -297,7 +256,7 @@ describe('reactive ticks in a patched realm', () => {
       ['swallowing slice at structure', false, { 'structure-prepare': p.swallowSlice }],
       ['species at structure', false, { 'structure-prepare': p.species }],
       ['constructor at structure', false, { 'structure-prepare': p.constructor }],
-      ['rebound Array at structure', false, { 'structure-prepare': p.reboundArray }],
+      ['rebound Array at structure', false, { 'structure-prepare': p.lookalikeArray }],
       ['species during evolution', false, { evolution: p.species }],
       ['swapping slice during evolution', false, { evolution: p.swapSlice }],
       ['typed species during evolution', false, { evolution: p.typedSpecies }],
@@ -349,6 +308,113 @@ describe('reactive ticks in a patched realm', () => {
       }
       expect({ name, after: w.snapshot() }).toEqual({ name, after: twin.snapshot() });
     }
+  });
+  test('each built-in the realm check covers fails a tick when replaced, even only for prepareTick()', () => {
+    type Bag = Record<PropertyKey, unknown>;
+    /** Replaces target[key], an own data value or accessor result, until the returned undo runs. */
+    const replace =
+      (target: object, key: PropertyKey, value: unknown): Patch =>
+      () => {
+        const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
+        Object.defineProperty(
+          target,
+          key,
+          descriptor && 'value' in descriptor
+            ? { ...descriptor, value }
+            : { ...descriptor, configurable: true, get: () => value },
+        );
+        return () =>
+          void (descriptor
+            ? Object.defineProperty(target, key, descriptor)
+            : delete (target as Bag)[key]);
+      };
+    // Every replacement below behaves as the original; only the check can tell them apart.
+    const wrap = (target: object, key: PropertyKey) => {
+      const original = (target as Bag)[key] as (...rest: unknown[]) => unknown;
+      return replace(target, key, function (this: unknown, ...rest: unknown[]) {
+        return original.apply(this, rest);
+      });
+    };
+    const lookalike = (target: object, key: PropertyKey) =>
+      replace(target, key, new Proxy((target as Bag)[key] as object, {}));
+    const typed = [Int32Array, Uint32Array, Uint16Array, Uint8Array],
+      typedPrototype = Object.getPrototypeOf(Int32Array.prototype) as object,
+      iterator = Object.getPrototypeOf([][Symbol.iterator]()) as object;
+    const cases: [string, Patch][] = [
+      ['global Array', lookalike(globalThis, 'Array')],
+      ['Array.isArray', wrap(Array, 'isArray')],
+      ['Array.prototype.constructor', lookalike(Array.prototype, 'constructor')],
+      ['Array species', replace(Array, Symbol.species, class extends Array {})],
+      ['array iterator', wrap(Array.prototype, Symbol.iterator)],
+      ['array iterator next', wrap(iterator, 'next')],
+      ...[
+        'slice',
+        'map',
+        'filter',
+        'flatMap',
+        'concat',
+        'push',
+        'sort',
+        'some',
+        'every',
+        'includes',
+        'fill',
+      ].map((key): [string, Patch] => [`Array.prototype.${key}`, wrap(Array.prototype, key)]),
+      ['global Map', lookalike(globalThis, 'Map')],
+      ['global Set', lookalike(globalThis, 'Set')],
+      ...['get', 'set', 'has'].map((key): [string, Patch] => [
+        `Map.prototype.${key}`,
+        wrap(Map.prototype, key),
+      ]),
+      ...['add', 'has'].map((key): [string, Patch] => [
+        `Set.prototype.${key}`,
+        wrap(Set.prototype, key),
+      ]),
+      ['Set iterator', wrap(Set.prototype, Symbol.iterator)],
+      ...typed.flatMap((T): [string, Patch][] => [
+        [`global ${T.name}`, lookalike(globalThis, T.name)],
+        [`${T.name}.prototype.constructor`, lookalike(T.prototype, 'constructor')],
+        [`${T.name} species`, replace(T, Symbol.species, class extends T {})],
+      ]),
+      ...['slice', 'fill', 'set'].map((key): [string, Patch] => [
+        `typed array ${key}`,
+        wrap(typedPrototype, key),
+      ]),
+    ];
+    // One case for each comparison in reactiveRealmIntact3D.
+    expect(cases).toHaveLength(40);
+    for (const [name, patch] of cases) {
+      const j = createReactiveWorld3D(r, mixed(6)).prepareTick();
+      let outcome = 'advanced';
+      const restore = patch();
+      try {
+        j.advance(64);
+      } catch (error) {
+        outcome = (error as Error).message;
+      } finally {
+        restore();
+      }
+      expect({ name, outcome }).toEqual({ name, outcome: REALM_ERROR });
+    }
+    // A replacement made only while prepareTick() runs fails it and keeps the world.
+    const w = createReactiveWorld3D(r, mixed(6)),
+      twin = createReactiveWorld3D(r, mixed(6)),
+      restore = wrap(Map.prototype, 'get')();
+    let outcome = 'prepared';
+    try {
+      w.prepareTick();
+    } catch (error) {
+      outcome = (error as Error).message;
+    } finally {
+      restore();
+    }
+    expect(outcome).toBe(REALM_ERROR);
+    for (const target of [w, twin]) {
+      const next = target.prepareTick();
+      finish(next, () => () => undefined);
+      target.commitTick(next);
+    }
+    expect(w.snapshot()).toEqual(twin.snapshot());
   });
   test('a standalone structure job slices only with the realm slice it loaded with', () => {
     const p = patches(),
@@ -526,14 +592,30 @@ describe('reactive ticks in a patched realm', () => {
     expect(cells.map((i) => Boolean(over.structure[i] & ANCHOR_3D))).toEqual([true, true, true]);
     expect(stripped.structure).toEqual(block.structure);
   });
-  test('a commit copy that a hook changes in any way fails the commit and keeps the world', () => {
-    const stash = new WeakMap<object, unknown>();
-    /** Object.prototype hooks that make the commit's copy differ from the true state. */
+  test('a commit under Object.prototype hooks keeps nothing the hooks saw', () => {
+    const stash = new WeakMap<object, unknown>(),
+      kept: object[] = [];
+    /** Stores as an assignment would, and keeps the object and the value for later changes. */
+    const keep = (key: string): PropertyDescriptor => ({
+      set(this: object, value: unknown) {
+        Object.defineProperty(this, key, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+        kept.push(this);
+        if (typeof value === 'object' && value !== null) kept.push(value);
+      },
+    });
     const hooks: [string, string, PropertyDescriptor][] = [
-      // Swallowed stores: the copied block lacks the field.
+      // Swallowed stores: a copy that stores through Object.prototype would lack the field.
+      ['swallow tick', 'tick', { set: () => undefined }],
       ['swallow depth', 'depth', { set: () => undefined }],
       ['swallow width', 'width', { set: () => undefined }],
       ['swallow height', 'height', { set: () => undefined }],
+      ['read-only width', 'width', { value: 7, writable: false }],
+      ['enumerable key', 'extra', { value: 1, writable: true, enumerable: true }],
       // A stored value that differs from the true one.
       [
         'width off by one',
@@ -630,13 +712,21 @@ describe('reactive ticks in a patched realm', () => {
           },
         },
       ],
+      ...['tick', 'block', 'packedCells', 'energyQ', 'structure', 'holds', 'cells'].map(
+        (key): [string, string, PropertyDescriptor] => [`kept ${key}`, key, keep(key)],
+      ),
     ];
     for (const [name, key, descriptor] of hooks) {
-      const w = createReactiveWorld3D(r, mixed(6));
+      const w = createReactiveWorld3D(r, mixed(6)),
+        twin = createReactiveWorld3D(r, mixed(6));
       holdCells(w);
-      const j = w.prepareTick();
+      holdCells(twin);
+      const j = w.prepareTick(),
+        t = twin.prepareTick();
       finish(j, () => () => undefined);
-      const before = w.snapshot();
+      finish(t, () => () => undefined);
+      twin.commitTick(t);
+      kept.length = 0;
       Object.defineProperty(Object.prototype, key, { configurable: true, ...descriptor });
       let outcome = 'committed';
       try {
@@ -647,12 +737,22 @@ describe('reactive ticks in a patched realm', () => {
         delete (Object.prototype as Record<string, unknown>)[key];
         delete (Object.prototype as Record<string, unknown>).value;
       }
-      expect({ name, outcome, tick: w.tick, same: w.snapshot() }).toEqual({
+      // Whatever a hook kept, changed after the commit, is not the world's state.
+      for (const object of kept)
+        if (Array.isArray(object)) object.fill(0);
+        else
+          for (const field of Object.keys(object)) (object as Record<string, unknown>)[field] = 0;
+      expect({ name, outcome, state: w.snapshot() }).toEqual({
         name,
-        outcome: 'Reactive tick commit identity or accounting mismatch.',
-        tick: 0,
-        same: before,
+        outcome: 'committed',
+        state: twin.snapshot(),
       });
+      for (const target of [w, twin]) {
+        const next = target.prepareTick();
+        finish(next, () => () => undefined);
+        target.commitTick(next);
+      }
+      expect({ name, after: w.snapshot() }).toEqual({ name, after: twin.snapshot() });
     }
   });
   test('the plain Object.prototype check sees a replaced __proto__ and ignores later wrappers', () => {
