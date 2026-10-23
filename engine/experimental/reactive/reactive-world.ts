@@ -180,21 +180,20 @@ export function createReactiveWorld3D(
           throw Error('Reactive tick job is stale; recompute from the committed revision.');
         assertReactiveRealm3D();
         // live adopts the job's immutable result state; only the handed-out report is copied. A job
-        // whose result() was read is copied, as before: in a realm whose slice was replaced, that read
-        // may have handed out the job's own arrays. While Object.prototype is not as the realm starts
-        // it, its hooks may have seen the job's objects and would see every store of a copy, so the
-        // state is cloned without running caller code and only the report takes the usual copy.
+        // whose result() was read is copied, as before: in a realm whose slice was replaced before the
+        // SDK loaded, that read may have handed out the job's own arrays. While Object.prototype is not
+        // as the realm starts it, its hooks may have seen the job's objects, so the state is cloned
+        // without running caller code.
         const next = nextRevision(),
           { result: taken, handed } = entry.take(),
-          plain = reactivePlainObjectPrototype3D(),
-          output = !plain
-            ? {
-                state: cloneReactiveDataQuietly3D(taken.state),
-                report: cloneReactiveData3D(taken.report, plain),
-              }
-            : handed
-              ? cloneReactiveData3D(taken, plain)
-              : { state: taken.state, report: cloneReactiveData3D(taken.report, plain) },
+          output = {
+            state: !reactivePlainObjectPrototype3D()
+              ? cloneReactiveDataQuietly3D(taken.state)
+              : handed
+                ? cloneReactiveData3D(taken.state)
+                : taken.state,
+            report: cloneReactiveData3D(taken.report),
+          },
           report = output.report;
         if (
           output.state.tick !== live.tick + 1 ||

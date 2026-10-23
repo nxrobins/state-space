@@ -63,10 +63,9 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   }
   return raw;
 }
-/** A plain record whose own enumerable values are all primitives: under a plain Object.prototype its
- * spread is the generic walk's copy. An own __proto__ key takes the generic walk, whose store treats it
- * as the prototype. Own accessors would be read twice and own symbol keys copied; engine records hold
- * neither.
+/** A plain record whose own enumerable values are all primitives: in an unmodified realm its spread is
+ * the generic walk's copy. An own __proto__ key takes the generic walk, whose store treats it as the
+ * prototype. Own accessors would be read twice and own symbol keys copied; engine records hold neither.
  */
 function flatRecord(x: unknown): x is Record<string, unknown> {
   if (
@@ -140,7 +139,7 @@ export function reactivePlainArraySlice3D(): boolean {
     ownField(ARRAY, Symbol.species, 'get') === ARRAY_SPECIES
   );
 }
-// The array, map, set and typed-array built-ins a world tick calls, as this module loaded them.
+// The array, map, set and typed-array built-ins the realm check compares, as this module loaded them.
 const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unknown },
   TYPED_PROTOTYPE = GET_PROTOTYPE(Int32Array.prototype) as Record<string, unknown>,
   REALM = {
@@ -176,12 +175,13 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
   };
 const species = (constructor: object) =>
   (constructor as { [Symbol.species]?: unknown })[Symbol.species];
-/** Internal only: whether the array, map, set and typed-array built-ins a world tick calls still read
- * as the ones this module loaded with, including the global bindings, constructors and species. A tick
- * that finds one replaced fails rather than trust it. The check reads each built-in as the tick does,
- * so it costs a few nanoseconds; an accessor that answers it with the original, a replacement that a
- * caller's hook makes and undoes while a tick call runs, and a built-in replaced before this module
- * loaded are not seen.
+/** Internal only: whether the 40 built-ins in REALM still read as the ones this module loaded with: the
+ * global bindings, Array.isArray, and the listed array, map, set and typed-array methods, constructors,
+ * species and iterators. A tick that finds one replaced fails rather than trust it. The check reads
+ * each built-in as the tick does, so it costs a few nanoseconds. It reads no getter (typed-array
+ * length, Set size) and no other built-in (WeakMap, Math), and it does not see an accessor that
+ * answers it with the original, a replacement that a caller's hook makes and undoes while a tick call
+ * runs, or a built-in replaced before this module loaded.
  */
 export function reactiveRealmIntact3D(): boolean {
   return (
@@ -242,15 +242,17 @@ export function cloneReactiveDataQuietly3D<T>(value: T): T {
  * Field order is kept exactly as structuredClone keeps it, without its serializer cost.
  * Shared references are kept for arrays and nested objects; a flat record (primitive values only) inside an array
  * is copied per reference, and engine results never share one.
+ * Each array and record of the copy starts as a slice() or spread of the original, which define its
+ * elements, and nested copies are then stored over those own properties, so no prototype setter sees
+ * the copy while Array.prototype.slice, its constructor and species are the ones this module loaded
+ * with. In an unmodified realm this is the copy that assigning every field makes.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */
-export function cloneReactiveData3D<T>(value: T, plainObjectPrototype?: boolean): T {
+export function cloneReactiveData3D<T>(value: T): T {
   const seen = new Map<object, unknown>();
-  // Each realm check runs at most once per copy, and only when a value needs it; a caller that has
-  // just checked Object.prototype passes the answer.
-  let records = plainObjectPrototype,
-    slices: boolean | undefined;
+  // Each realm check runs at most once per copy, and only when a value needs it.
+  let records: boolean | undefined, slices: boolean | undefined;
   const copy = (v: unknown): unknown => {
     if (typeof v === 'function' || typeof v === 'symbol')
       throw Error('Reactive results hold portable data only.');
@@ -265,28 +267,26 @@ export function cloneReactiveData3D<T>(value: T, plainObjectPrototype?: boolean)
           flat = false;
           break;
         }
+      // A replaced slice could hand back v itself, and the caller would then hold engine state, so
+      // the copy is then built by index.
+      const sliced = (slices ??= reactivePlainArraySlice3D()),
+        out = sliced ? v.slice() : new Array<unknown>(v.length);
+      seen.set(v, out);
       if (flat) {
-        // A replaced slice could hand back v itself, and the caller would then hold engine state.
-        let out = v;
-        if ((slices ??= reactivePlainArraySlice3D())) out = v.slice();
-        else {
-          out = new Array<unknown>(v.length);
-          for (let i = 0; i < v.length; i++) out[i] = v[i];
-        }
-        seen.set(v, out);
+        if (!sliced) for (let i = 0; i < v.length; i++) out[i] = v[i];
         return out;
       }
-      const out = new Array<unknown>(v.length);
-      seen.set(v, out);
       for (let i = 0; i < v.length; i++) {
         const x = v[i];
+        // flatRecord's for-in sees inherited keys too, so it runs only under a plain Object.prototype.
         out[i] =
           (records ??= reactivePlainObjectPrototype3D()) && flatRecord(x) ? { ...x } : copy(x);
       }
       return out;
     }
     if (Object.getPrototypeOf(v) !== Object.prototype) return structuredClone(v);
-    const out: Record<string, unknown> = {};
+    // An own __proto__ key is stored, as it always was, and so sets the copy's prototype.
+    const out: Record<string, unknown> = HAS_OWN(v, '__proto__') ? {} : { ...v };
     seen.set(v, out);
     for (const key of Object.keys(v)) out[key] = copy((v as Record<string, unknown>)[key]);
     return out;

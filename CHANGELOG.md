@@ -63,9 +63,13 @@ date of the last change in the section.
   copy per tick with row skipping, combustion elected from one scan, and an
   owned world that adopts a committed tick's state instead of copying it,
   with bit-identical results for plain data in an unmodified JavaScript
-  realm; world ticks fail if the array built-ins they call were replaced
-  after the SDK loaded, and a standalone structure job driven one work unit
-  per `advance()` call is slower than before (#68).
+  realm. A realm whose built-ins caller code replaced or hooked carries no
+  guarantee; for it, world ticks now fail when their check sees a listed
+  array, map, set or typed-array built-in replaced after the SDK loaded,
+  result copies no longer assign through prototype setters, and a tick
+  job's `advance()` cannot be reentered (the reactive materials guide gives
+  the limits). A standalone structure job driven one work unit per
+  `advance()` call is slower than before (#68).
 
 ### Fixed
 

@@ -27,25 +27,38 @@ export function reactiveMovementSchedule3D(
   tick: number,
 ): readonly Readonly<ReactiveMovementPass3D>[] {
   reactiveInteger3D(tick, 0, Number.MAX_SAFE_INTEGER);
-  const passes: ReactiveMovementPass3D[] = [];
-  const pairs = (kind: ReactiveMovementPass3D['kind'], axis: number, direction = 1) => {
-    for (const parity of [0, 1]) passes.push({ kind, axis, parity, direction });
-  };
-  pairs('gravity', 1);
+  // Array literals and map() define their elements, so no Array.prototype index setter sees the list.
+  const pairs = (
+    kind: ReactiveMovementPass3D['kind'],
+    axis: number,
+    direction = 1,
+  ): ReactiveMovementPass3D[] => [
+    { kind, axis, parity: 0, direction },
+    { kind, axis, parity: 1, direction },
+  ];
   const directions = [
     [0, 1],
     [0, -1],
     [2, 1],
     [2, -1],
   ];
-  for (let k = 0; k < 4; k++) {
+  const diagonal = (k: number) => {
     const [axis, direction] = directions[(k + (tick % 4)) % 4];
-    pairs('diagonal', axis, direction);
-  }
-  const axes = tick % 2 ? [2, 0] : [0, 2];
-  for (const axis of axes) pairs('liquid', axis);
-  pairs('buoyancy', 1);
-  for (const axis of axes) pairs('gas', axis);
+    return pairs('diagonal', axis, direction);
+  };
+  const [first, second] = tick % 2 ? [2, 0] : [0, 2];
+  const passes = [
+    ...pairs('gravity', 1),
+    ...diagonal(0),
+    ...diagonal(1),
+    ...diagonal(2),
+    ...diagonal(3),
+    ...pairs('liquid', first),
+    ...pairs('liquid', second),
+    ...pairs('buoyancy', 1),
+    ...pairs('gas', first),
+    ...pairs('gas', second),
+  ];
   return Object.freeze(passes.map((p) => Object.freeze(p)));
 }
 function choice(index: number, axis: number, tick: number): boolean {

@@ -324,7 +324,8 @@ function worldTickJob(
   let evolutionResult: ReactiveEvolutionResult3D | null = null,
     structure: StructureStage | null = null;
   // Whether result() has handed out a copy: a world then commits a copy of its own, as before.
-  let handed = false;
+  let handed = false,
+    advancing = false;
   let result: ReactiveWorldTickResult3D | null = null,
     structureProgress: ReactiveStructureProgress3D | null = null;
   let motion: ReactiveMotionReport3D | null = null;
@@ -360,6 +361,9 @@ function worldTickJob(
       reactiveInteger3D(structuralWork, 1, REACTIVE_STRUCTURE_MAX_WORK_3D);
       if (status !== 'running' || !before)
         throw Error('Reactive world tick job is no longer running.');
+      // Caller code that a hook runs inside this call cannot advance the job a second time.
+      if (advancing) throw Error('Reactive world tick job cannot advance while it advances.');
+      advancing = true;
       try {
         assertReactiveRealm3D();
         if (phase === 'evolution') {
@@ -465,6 +469,8 @@ function worldTickJob(
       } catch (error) {
         cancel();
         throw error;
+      } finally {
+        advancing = false;
       }
       return progress();
     },

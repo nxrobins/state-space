@@ -386,7 +386,7 @@ describe('reactive array reads', () => {
   };
   test('match the per-index descriptor reader on adversarial arrays', () => {
     // Traces are compared as one text, a trap and its key per line: toEqual would walk each of the
-    // long proxy's 40000 entries.
+    // long proxy's 33000 entries.
     const text = ({ trace, ...rest }: ReturnType<typeof run>) => ({
       ...rest,
       trace: trace
@@ -612,7 +612,7 @@ describe('reactive result copies', () => {
     expect(read).not.toHaveBeenCalled();
     expect(portableText(out)).toBe(portableText(oracle));
   });
-  test('hidden accessor and read-only Object.prototype keys give the generic walk result', () => {
+  test('hidden accessor and read-only Object.prototype keys neither see nor change a copy', () => {
     const variants: Record<string, (calls: { n: number }) => PropertyDescriptor> = {
       setter: (calls) => ({ set: () => void calls.n++, configurable: true }),
       getterOnly: () => ({ get: () => 7, configurable: true }),
@@ -625,24 +625,20 @@ describe('reactive result copies', () => {
       }),
       writableData: () => ({ value: 7, writable: true, configurable: true }),
     };
-    const observe = (clone: typeof oracleClone, d: PropertyDescriptor, calls: { n: number }) => {
-      const data = { moves: [{ from: 1, to: 2 }], motion: motionLike() };
-      Object.defineProperty(Object.prototype, 'from', d);
+    const data = () => ({ moves: [{ from: 1, to: 2 }], motion: motionLike() }),
+      clean = portableText(oracleClone(data()));
+    for (const [name, make] of Object.entries(variants)) {
+      const calls = { n: 0 };
+      Object.defineProperty(Object.prototype, 'from', make(calls));
+      let result: string;
       try {
-        return { result: portableText(clone(data)), calls: calls.n };
+        result = portableText(cloneReactiveData3D(data()));
       } catch (error) {
-        return { error: (error as Error).message, calls: calls.n };
+        result = (error as Error).message;
       } finally {
         delete (Object.prototype as Record<string, unknown>).from;
       }
-    };
-    for (const [name, make] of Object.entries(variants)) {
-      const a = { n: 0 },
-        b = { n: 0 };
-      expect({ name, ...observe(cloneReactiveData3D, make(a), a) }).toEqual({
-        name,
-        ...observe(oracleClone, make(b), b),
-      });
+      expect({ name, result, calls: calls.n }).toEqual({ name, result: clean, calls: 0 });
     }
   });
   test('an own __proto__ key takes the generic walk', () => {

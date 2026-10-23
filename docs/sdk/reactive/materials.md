@@ -59,27 +59,38 @@ object, a typed array, or an array holding values the reader's callback would
 reject), the engine works on that result as returned, and later steps may read
 it differently than earlier engine versions did, so results for such inputs may
 differ between versions. Both guarantees assume an unmodified JavaScript realm.
-When a caller replaces or adds members of `Array.prototype` or `Object.prototype`,
-or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
-progress at a throw and outputs may differ between engine versions. Then:
 
-- An index accessor on `Array.prototype` or a hook on `Object.prototype` can
-  make a world tick fail. Unless it replaces built-ins while a tick call runs,
-  or changes an engine array or record that it kept, the tick does not publish
-  or commit a state other than the one an unmodified realm computes. Hooks can
-  see engine arrays and records, and caller code that keeps one and changes it
-  later can change the world's state; earlier engine versions did not guard
-  against that either. A commit made while `Object.prototype` carries a hook
-  stores a copy that no caller code saw.
+When a caller replaces or adds members of built-in objects, their prototypes or
+their constructors, the engine makes no guarantee: errors, progress at a throw
+and outputs may differ between engine versions, and a tick may publish or commit
+a state that an unmodified realm would not compute. Hooks, such as an accessor on
+`Array.prototype` or `Object.prototype`, see engine arrays and records while the
+engine works; they can steer it and can keep what they see, and caller code that
+changes a kept engine object can change the world's state. Earlier engine
+versions did not guard against this either. This version adds three defenses:
+
 - At creation, at each advance, and in `result()`, `motion()` and commit, a
-  world tick checks that the array, map, set and typed-array built-ins it calls
-  still read as the ones the SDK loaded with, and fails if one does not.
-- The check does not see a replacement that reads as the original (an accessor
-  that answers with it), one that caller code makes and undoes while a tick call
-  runs, or one made before the SDK loaded. These, other replaced built-ins, and
-  replacements during world methods other than ticks (snapshots, holds, edits,
-  restores, translations) carry no guarantee, and can leave the world's state
-  changed.
+  world tick checks that these built-ins still read as the ones the SDK loaded
+  with, and fails if one does not: the global `Array`, `Map`, `Set`,
+  `Int32Array`, `Uint32Array`, `Uint16Array` and `Uint8Array`; `Array.isArray`
+  and `Array[Symbol.species]`; the `slice`, `map`, `filter`, `flatMap`, `concat`,
+  `push`, `sort`, `some`, `every`, `includes`, `fill`, `constructor` and iterator
+  of `Array.prototype`, and the array iterator's `next`; `get`, `set` and `has`
+  of `Map.prototype`; `add`, `has` and the iterator of `Set.prototype`; the four
+  typed arrays' `constructor` and species; and the typed-array `slice`, `fill`
+  and `set`. The check reads no getter (a typed array's `length`, a set's `size`)
+  and no other built-in (such as `WeakMap`), and it does not see a replacement
+  that reads as the original (an accessor that answers with it), one that caller
+  code makes and undoes while a tick call runs, or one made before the SDK
+  loaded.
+- `result()`, `motion()`, `snapshot()` and commits build each copied array or
+  record from a `slice()` or spread of the original, which define its elements,
+  so no prototype setter sees a copy while `Array.prototype.slice`, its
+  `constructor` and `Array[Symbol.species]` are the ones the SDK loaded with. A
+  commit made while `Object.prototype` carries a hook stores a structured clone
+  of the state, which runs no caller code.
+- A world tick job's `advance()` fails if caller code calls it again while it
+  runs.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,

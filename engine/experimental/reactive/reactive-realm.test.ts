@@ -1,11 +1,7 @@
-/** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
- * Object.prototype hook that neither replaces built-ins nor changes engine objects it kept, a world
- * tick still publishes the true state or fails, and a commit under Object.prototype hooks keeps nothing
- * a hook saw. A tick that finds the array, map, set or typed-array built-ins it calls reading other
- * than at load fails. Built-ins replaced before the SDK loaded, accessors that answer the check with
- * the original, and replacements made and undone inside a tick call carry no guarantee; the tests
- * below pin the windows where this branch would otherwise do worse than the engine before batching.
- * A slice replaced before load can still steer the structure output.
+/** A patched realm is outside the bit-identity contract and carries no guarantee. These tests pin the
+ * defenses the engine adds there: the realm check, copies that no prototype setter sees, commits under
+ * Object.prototype hooks, the reentry guard, and the inputs where this branch would otherwise do worse
+ * than the engine before batching. A slice replaced before load can still steer the structure output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -97,29 +93,31 @@ const indexAccessor = (key: string) => () => {
 };
 
 describe('reactive ticks in a patched realm', () => {
-  test('an Array.prototype index accessor that replaces no built-ins never steers a tick to another state', () => {
+  test('these Array.prototype index accessors over a whole tick and its result() leave the true state', () => {
     let ticks = 0;
     for (const key of ['0', '1', '2', '5', '17']) {
       let snapshot = createReactiveWorldSnapshot3D(r, mixed(6));
       for (let t = 0; t < 3; t++) {
-        const clean = createReactiveWorldTickJob3D(r, snapshot),
-          patched = createReactiveWorldTickJob3D(r, snapshot);
+        const clean = createReactiveWorldTickJob3D(r, snapshot);
         finish(clean, () => () => undefined);
-        let outcome: string;
+        let outcome: string,
+          state: unknown = null;
+        const restore = indexAccessor(key)();
         try {
-          finish(patched, indexAccessor(key));
+          // Creation, every advance and the result() copy run under the accessor.
+          const patched = createReactiveWorldTickJob3D(r, snapshot);
+          while (patched.progress().status === 'running') patched.advance(64);
+          state = patched.result().state;
           outcome = 'complete';
         } catch (error) {
           outcome = (error as Error).message;
+        } finally {
+          restore();
         }
-        // Publishing anything but the true state is never allowed. Failing closed would be, but these
-        // inputs are expected to complete: the count below keeps the test from passing vacuously.
+        // These inputs are expected to complete: the count below keeps the test from passing
+        // vacuously.
         if (outcome === 'complete') {
-          expect({ key, t, state: patched.result().state }).toEqual({
-            key,
-            t,
-            state: clean.result().state,
-          });
+          expect({ key, t, state }).toEqual({ key, t, state: clean.result().state });
           ticks++;
         }
         snapshot = clean.result().state;
@@ -716,44 +714,126 @@ describe('reactive ticks in a patched realm', () => {
         (key): [string, string, PropertyDescriptor] => [`kept ${key}`, key, keep(key)],
       ),
     ];
-    for (const [name, key, descriptor] of hooks) {
-      const w = createReactiveWorld3D(r, mixed(6)),
-        twin = createReactiveWorld3D(r, mixed(6));
-      holdCells(w);
-      holdCells(twin);
-      const j = w.prepareTick(),
-        t = twin.prepareTick();
-      finish(j, () => () => undefined);
-      finish(t, () => () => undefined);
-      twin.commitTick(t);
-      kept.length = 0;
-      Object.defineProperty(Object.prototype, key, { configurable: true, ...descriptor });
-      let outcome = 'committed';
-      try {
-        w.commitTick(j);
-      } catch (error) {
-        outcome = (error as Error).message;
-      } finally {
-        delete (Object.prototype as Record<string, unknown>)[key];
-        delete (Object.prototype as Record<string, unknown>).value;
+    for (const [name, key, descriptor] of hooks)
+      for (const read of [false, true]) {
+        const w = createReactiveWorld3D(r, mixed(6)),
+          twin = createReactiveWorld3D(r, mixed(6));
+        holdCells(w);
+        holdCells(twin);
+        const j = w.prepareTick(),
+          t = twin.prepareTick();
+        finish(j, () => () => undefined);
+        finish(t, () => () => undefined);
+        twin.commitTick(t);
+        kept.length = 0;
+        Object.defineProperty(Object.prototype, key, { configurable: true, ...descriptor });
+        let outcome = 'committed',
+          handed: unknown = 'not read';
+        try {
+          // A result() read under the hook is a copy the hook does not see either.
+          if (read) handed = j.result().state;
+          w.commitTick(j);
+        } catch (error) {
+          outcome = (error as Error).message;
+        } finally {
+          delete (Object.prototype as Record<string, unknown>)[key];
+          delete (Object.prototype as Record<string, unknown>).value;
+        }
+        // Whatever a hook kept, changed after the commit, is not the world's state.
+        for (const object of kept)
+          if (Array.isArray(object)) object.fill(0);
+          else
+            for (const field of Object.keys(object)) (object as Record<string, unknown>)[field] = 0;
+        expect({ name, read, outcome, state: w.snapshot() }).toEqual({
+          name,
+          read,
+          outcome: 'committed',
+          state: twin.snapshot(),
+        });
+        if (read) expect({ name, handed }).toEqual({ name, handed: twin.snapshot() });
+        for (const target of [w, twin]) {
+          const next = target.prepareTick();
+          finish(next, () => () => undefined);
+          target.commitTick(next);
+        }
+        expect({ name, read, after: w.snapshot() }).toEqual({ name, read, after: twin.snapshot() });
       }
-      // Whatever a hook kept, changed after the commit, is not the world's state.
-      for (const object of kept)
-        if (Array.isArray(object)) object.fill(0);
-        else
-          for (const field of Object.keys(object)) (object as Record<string, unknown>)[field] = 0;
-      expect({ name, outcome, state: w.snapshot() }).toEqual({
-        name,
-        outcome: 'committed',
-        state: twin.snapshot(),
+  });
+  test('a held world ticked, read and committed under an Array.prototype index accessor keeps the true state', () => {
+    for (const key of ['0', '1', '2', '5', '17'])
+      for (const read of [false, true]) {
+        const w = createReactiveWorld3D(r, mixed(6)),
+          twin = createReactiveWorld3D(r, mixed(6));
+        holdCells(w);
+        holdCells(twin);
+        const t = twin.prepareTick();
+        finish(t, () => () => undefined);
+        twin.commitTick(t);
+        let outcome = 'committed';
+        const restore = indexAccessor(key)();
+        try {
+          const j = w.prepareTick();
+          while (j.progress().status === 'running') j.advance(64);
+          if (read) j.result();
+          w.commitTick(j);
+        } catch (error) {
+          outcome = (error as Error).message;
+        } finally {
+          restore();
+        }
+        expect({ key, read, outcome, state: w.snapshot() }).toEqual({
+          key,
+          read,
+          outcome: 'committed',
+          state: twin.snapshot(),
+        });
+        for (const target of [w, twin]) {
+          const next = target.prepareTick();
+          finish(next, () => () => undefined);
+          target.commitTick(next);
+        }
+        expect({ key, read, after: w.snapshot() }).toEqual({ key, read, after: twin.snapshot() });
+      }
+  });
+  test('caller code that advances a tick job inside its advance() fails there and leaves the tick true', () => {
+    const w = createReactiveWorld3D(r, mixed(6)),
+      twin = createReactiveWorld3D(r, mixed(6)),
+      j = w.prepareTick(),
+      keys = Array.from({ length: 64 }, (_, i) => String(i));
+    let calls = 0,
+      message = '';
+    // Index setters that store as an assignment would, and advance the job again on every store.
+    for (const key of keys)
+      Object.defineProperty(Array.prototype, key, {
+        configurable: true,
+        set(this: unknown[], value: unknown) {
+          Object.defineProperty(this, key, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+          calls++;
+          try {
+            j.advance(1);
+            message = 'advanced';
+          } catch (error) {
+            message = (error as Error).message;
+          }
+        },
       });
-      for (const target of [w, twin]) {
-        const next = target.prepareTick();
-        finish(next, () => () => undefined);
-        target.commitTick(next);
-      }
-      expect({ name, after: w.snapshot() }).toEqual({ name, after: twin.snapshot() });
+    try {
+      while (j.progress().status === 'running') j.advance(64);
+    } finally {
+      for (const key of keys) delete (Array.prototype as unknown as Record<string, unknown>)[key];
     }
+    expect(calls).toBeGreaterThan(0);
+    expect(message).toBe('Reactive world tick job cannot advance while it advances.');
+    w.commitTick(j);
+    const t = twin.prepareTick();
+    finish(t, () => () => undefined);
+    twin.commitTick(t);
+    expect(w.snapshot()).toEqual(twin.snapshot());
   });
   test('the plain Object.prototype check sees a replaced __proto__ and ignores later wrappers', () => {
     const proto = Reflect.getOwnPropertyDescriptor(Object.prototype, '__proto__')!,
