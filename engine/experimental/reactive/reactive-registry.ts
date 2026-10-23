@@ -63,10 +63,12 @@ export function reactiveArray3D(raw: unknown, maximum: number): unknown[] {
   }
   return raw;
 }
-// The realm checks and result copies below use the intrinsics this module loaded with, so replacing
-// one later cannot hide a change from them or reach into a copy. One replaced before this module
-// loaded cannot be told from the realm's own.
-const OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
+// The realm checks and result copies below use the intrinsics and well-known symbols this module loaded
+// with, so replacing one later, or the global Symbol, cannot hide a change from them or reach into a
+// copy. One replaced before this module loaded cannot be told from the realm's own.
+const SPECIES: typeof Symbol.species = Symbol.species,
+  ITERATOR: typeof Symbol.iterator = Symbol.iterator,
+  OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   GET_PROTOTYPE = Reflect.getPrototypeOf,
   DEFINE = Reflect.defineProperty,
   OBJECT_KEYS = Object.keys,
@@ -76,7 +78,7 @@ const OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   ARRAY = Array,
   ARRAY_PROTOTYPE = Array.prototype,
   ARRAY_SLICE = Array.prototype.slice,
-  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, Symbol.species)?.get,
+  ARRAY_SPECIES = OWN_DESCRIPTOR(Array, SPECIES)?.get,
   STRUCTURED_CLONE = structuredClone;
 /** A Map whose get and set are the ones this module loaded with, on a frozen prototype of its own. */
 class SeenMap extends Map<object, unknown> {}
@@ -102,15 +104,15 @@ export function reactivePlainArraySlice3D(): boolean {
   return (
     ownField(ARRAY_PROTOTYPE, 'slice', 'value') === ARRAY_SLICE &&
     ownField(ARRAY_PROTOTYPE, 'constructor', 'value') === ARRAY &&
-    ownField(ARRAY, Symbol.species, 'get') === ARRAY_SPECIES
+    ownField(ARRAY, SPECIES, 'get') === ARRAY_SPECIES
   );
 }
 // The array, map, set and typed-array built-ins the realm check compares, as this module loaded them.
-const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unknown },
+const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][ITERATOR]()) as { next: unknown },
   TYPED_PROTOTYPE = GET_PROTOTYPE(Int32Array.prototype) as Record<string, unknown>,
   REALM = {
     isArray: Array.isArray,
-    iterator: ARRAY_PROTOTYPE[Symbol.iterator],
+    iterator: ARRAY_PROTOTYPE[ITERATOR],
     next: ITERATOR_PROTOTYPE.next,
     slice: ARRAY_PROTOTYPE.slice,
     map: ARRAY_PROTOTYPE.map,
@@ -130,7 +132,7 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
     mapHas: Map.prototype.has,
     setAdd: Set.prototype.add,
     setHas: Set.prototype.has,
-    setIterator: Set.prototype[Symbol.iterator],
+    setIterator: Set.prototype[ITERATOR],
     Int32Array,
     Uint32Array,
     Uint16Array,
@@ -139,24 +141,24 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
     typedFill: TYPED_PROTOTYPE.fill,
     typedSet: TYPED_PROTOTYPE.set,
   };
-const species = (constructor: object) =>
-  (constructor as { [Symbol.species]?: unknown })[Symbol.species];
+const species = (constructor: object) => (constructor as { [SPECIES]?: unknown })[SPECIES];
 /** Internal only: whether the built-ins below still read as the ones this module loaded with, in 49
- * comparisons: the global bindings, Array.isArray, and the listed array, map, set and typed-array
+ * comparisons: the global constructors, Array.isArray, and the listed array, map, set and typed-array
  * methods, constructors, species and iterators, the typed-array methods read through each of the four
  * typed-array prototypes. A tick that finds one replaced fails rather than trust it. The check reads
- * each built-in as the tick does, so it costs a few nanoseconds. It checks no other getter (typed-array
- * length, Set size) and no other built-in (WeakMap, Math), and it does not see an accessor that
- * answers it with the original, a replacement that a caller's hook makes and undoes while a tick call
- * runs, or a built-in replaced before this module loaded.
+ * the constructors through the global names the tick uses, so a later global declaration that shadows
+ * one is seen too, and the well-known symbols as this module loaded them; it costs a few nanoseconds.
+ * It checks no other getter (typed-array length, Set size) and no other built-in (WeakMap, Math), and
+ * it does not see an accessor that answers it with the original, a replacement that a caller's hook
+ * makes and undoes while a tick call runs, or a built-in replaced before this module loaded.
  */
 export function reactiveRealmIntact3D(): boolean {
   return (
-    globalThis.Array === ARRAY &&
+    Array === ARRAY &&
     ARRAY.isArray === REALM.isArray &&
     ARRAY_PROTOTYPE.constructor === ARRAY &&
-    ARRAY[Symbol.species] === ARRAY &&
-    ARRAY_PROTOTYPE[Symbol.iterator] === REALM.iterator &&
+    ARRAY[SPECIES] === ARRAY &&
+    ARRAY_PROTOTYPE[ITERATOR] === REALM.iterator &&
     ITERATOR_PROTOTYPE.next === REALM.next &&
     ARRAY_PROTOTYPE.slice === REALM.slice &&
     ARRAY_PROTOTYPE.map === REALM.map &&
@@ -169,18 +171,18 @@ export function reactiveRealmIntact3D(): boolean {
     ARRAY_PROTOTYPE.every === REALM.every &&
     ARRAY_PROTOTYPE.includes === REALM.includes &&
     ARRAY_PROTOTYPE.fill === REALM.fill &&
-    globalThis.Map === REALM.Map &&
-    globalThis.Set === REALM.Set &&
+    Map === REALM.Map &&
+    Set === REALM.Set &&
     REALM.Map.prototype.get === REALM.mapGet &&
     REALM.Map.prototype.set === REALM.mapSet &&
     REALM.Map.prototype.has === REALM.mapHas &&
     REALM.Set.prototype.add === REALM.setAdd &&
     REALM.Set.prototype.has === REALM.setHas &&
-    REALM.Set.prototype[Symbol.iterator] === REALM.setIterator &&
-    globalThis.Int32Array === REALM.Int32Array &&
-    globalThis.Uint32Array === REALM.Uint32Array &&
-    globalThis.Uint16Array === REALM.Uint16Array &&
-    globalThis.Uint8Array === REALM.Uint8Array &&
+    REALM.Set.prototype[ITERATOR] === REALM.setIterator &&
+    Int32Array === REALM.Int32Array &&
+    Uint32Array === REALM.Uint32Array &&
+    Uint16Array === REALM.Uint16Array &&
+    Uint8Array === REALM.Uint8Array &&
     REALM.Int32Array.prototype.constructor === REALM.Int32Array &&
     REALM.Uint32Array.prototype.constructor === REALM.Uint32Array &&
     REALM.Uint16Array.prototype.constructor === REALM.Uint16Array &&
@@ -238,9 +240,10 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
  * The copy calls only built-ins captured when this module loaded. Each array and record of it starts as
  * a slice() or spread of the original, or as elements defined one by one when slice, its constructor or
  * species was replaced, and nested copies are then stored over those own properties, so no prototype
- * setter sees the copy. A record with an own __proto__ key, which engine results never hold, is the
- * exception: its fields are assigned, as they always were. In an unmodified realm this is the copy
- * that assigning every field makes.
+ * setter sees the copy. Engine results hold neither of the two exceptions: a record with an own
+ * __proto__ key has its fields assigned, as they always were, and a hole in an array of records is
+ * assigned through the prototype chain. In an unmodified realm this is the copy that assigning every
+ * field makes.
  * Functions and symbols are rejected as structuredClone rejects them; other exotic values fall back to structuredClone.
  * Not for caller-supplied data: that goes through the validating readers.
  */

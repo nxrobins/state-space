@@ -422,6 +422,78 @@ describe('reactive ticks in a patched realm', () => {
     }
     expect(w.snapshot()).toEqual(twin.snapshot());
   });
+  test('the realm check reads the global constructors and well-known symbols as the tick does', () => {
+    const g = globalThis as unknown as Record<string, unknown>,
+      RealSet = Set,
+      RealSymbol = Symbol,
+      own = Reflect.getOwnPropertyDescriptor(g, 'globalThis')!,
+      iterator = Array.prototype[Symbol.iterator],
+      setIterator = Set.prototype[Symbol.iterator],
+      typed = [Int32Array, Uint32Array, Uint16Array, Uint8Array];
+    const cases: [string, Patch][] = [
+      [
+        'a replaced Set behind a global object that points elsewhere',
+        () => {
+          // A lookup through globalThis would find the original constructors here.
+          const originals = { Array, Map, Set, Int32Array, Uint32Array, Uint16Array, Uint8Array };
+          Object.defineProperty(g, 'globalThis', { ...own, value: originals });
+          g.Set = class extends RealSet {};
+          return () => {
+            g.Set = RealSet;
+            Object.defineProperty(g, 'globalThis', own);
+          };
+        },
+      ],
+      [
+        'a replaced array iterator behind a replaced global Symbol',
+        () => {
+          // A lookup through the global Symbol would find the originals under these string keys.
+          const planted: [object, string, PropertyDescriptor][] = [
+            [Array, '@@species', Reflect.getOwnPropertyDescriptor(Array, RealSymbol.species)!],
+            [Array.prototype, '@@iterator', { value: iterator, configurable: true }],
+            [Set.prototype, '@@iterator', { value: setIterator, configurable: true }],
+            ...typed.map((T): [object, string, PropertyDescriptor] => [
+              T,
+              '@@species',
+              { value: T, configurable: true },
+            ]),
+          ];
+          for (const [target, key, descriptor] of planted)
+            Object.defineProperty(target, key, descriptor);
+          g.Symbol = { species: '@@species', iterator: '@@iterator' };
+          Object.defineProperty(Array.prototype, RealSymbol.iterator, {
+            value: function (this: unknown[]) {
+              return iterator.call(this);
+            },
+            writable: true,
+            configurable: true,
+          });
+          return () => {
+            Object.defineProperty(Array.prototype, RealSymbol.iterator, {
+              value: iterator,
+              writable: true,
+              configurable: true,
+            });
+            g.Symbol = RealSymbol;
+            for (const [target, key] of planted) delete (target as Record<string, unknown>)[key];
+          };
+        },
+      ],
+    ];
+    for (const [name, patch] of cases) {
+      const j = createReactiveWorld3D(r, mixed(6)).prepareTick();
+      let outcome = 'advanced';
+      const restore = patch();
+      try {
+        j.advance(64);
+      } catch (error) {
+        outcome = (error as Error).message;
+      } finally {
+        restore();
+      }
+      expect({ name, outcome }).toEqual({ name, outcome: REALM_ERROR });
+    }
+  });
   test('a standalone structure job slices only with the realm slice it loaded with', () => {
     const p = patches(),
       input = readReactiveMaterialBlock3D(r, mixed(6)),
@@ -845,6 +917,47 @@ describe('reactive ticks in a patched realm', () => {
     finish(t, () => () => undefined);
     twin.commitTick(t);
     expect(w.snapshot()).toEqual(twin.snapshot());
+    // The realm check reads built-ins too, so an accessor it reads runs caller code before any stage;
+    // the guard is set before the check runs.
+    const other = createReactiveWorld3D(r, mixed(6)),
+      k = other.prepareTick(),
+      slice = Array.prototype.slice;
+    let armed = true;
+    message = '';
+    Object.defineProperty(Array.prototype, 'slice', {
+      configurable: true,
+      get() {
+        if (armed) {
+          armed = false;
+          try {
+            k.advance(1);
+            message = 'advanced';
+          } catch (error) {
+            message = (error as Error).message;
+          }
+          cancelled ||= k.cancel();
+        }
+        return slice;
+      },
+    });
+    try {
+      k.advance(64);
+    } finally {
+      Object.defineProperty(Array.prototype, 'slice', {
+        value: slice,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      });
+    }
+    expect({ armed, message, cancelled }).toEqual({
+      armed: false,
+      message: 'Reactive world tick job cannot advance while it advances.',
+      cancelled: false,
+    });
+    finish(k, () => () => undefined);
+    other.commitTick(k);
+    expect(other.snapshot()).toEqual(twin.snapshot());
   });
   test('result copies call only built-ins captured at load, so no prototype setter sees one', () => {
     const keys = Object.keys,
@@ -880,8 +993,8 @@ describe('reactive ticks in a patched realm', () => {
           delete (Array.prototype as unknown as Record<string, unknown>)[key];
       };
     };
-    // Built-ins a copy once looked up as it ran. World ticks check the iterator and Map.prototype.get,
-    // so only snapshot() meets those two.
+    // Built-ins a copy once looked up as it ran. World ticks check the iterator, Map.prototype.get and
+    // the species, so only snapshot() meets those three.
     const replacements: [string, Patch, boolean][] = [
       [
         'Object.keys answering an extra key',
@@ -892,16 +1005,25 @@ describe('reactive ticks in a patched realm', () => {
         true,
       ],
       [
-        'slice as an accessor that answers with the original',
+        'slice as an accessor that answers with the original, and a planted descriptor field',
         () => {
+          // The accessor sends copies down the element-by-element path; a planted 'get' would break
+          // a descriptor there that inherits from Object.prototype.
           Object.defineProperty(Array.prototype, 'slice', { configurable: true, get: () => slice });
-          return () =>
-            void Object.defineProperty(Array.prototype, 'slice', {
+          Object.defineProperty(Object.prototype, 'get', {
+            value: () => undefined,
+            writable: true,
+            configurable: true,
+          });
+          return () => {
+            delete (Object.prototype as Record<string, unknown>).get;
+            Object.defineProperty(Array.prototype, 'slice', {
               value: slice,
               writable: true,
               enumerable: false,
               configurable: true,
             });
+          };
         },
         true,
       ],
@@ -915,6 +1037,34 @@ describe('reactive ticks in a patched realm', () => {
             return { done: false, value: 'extra' };
           };
           return () => void (iterator.next = next);
+        },
+        false,
+      ],
+      [
+        'a replaced Array species behind a replaced global Symbol',
+        () => {
+          const RealSymbol = Symbol,
+            g = globalThis as unknown as { Symbol: unknown },
+            species = Reflect.getOwnPropertyDescriptor(Array, RealSymbol.species)!,
+            // Every array this species builds counts a store to its length.
+            built = Object.create(null, {
+              length: { set: () => void calls++, configurable: true },
+            }) as object;
+          // A live Symbol lookup would read the original species getter under this string key.
+          Object.defineProperty(Array, '@@species', species);
+          Object.defineProperty(Array, RealSymbol.species, {
+            configurable: true,
+            get: () =>
+              function Built() {
+                return Object.create(built);
+              },
+          });
+          g.Symbol = { species: '@@species', iterator: RealSymbol.iterator };
+          return () => {
+            g.Symbol = RealSymbol;
+            Object.defineProperty(Array, RealSymbol.species, species);
+            delete (Array as unknown as Record<string, unknown>)['@@species'];
+          };
         },
         false,
       ],

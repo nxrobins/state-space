@@ -78,17 +78,22 @@ versions did not guard against this either. This version adds three defenses:
   of `Array.prototype`, and the array iterator's `next`; `get`, `set` and `has`
   of `Map.prototype`; `add`, `has` and the iterator of `Set.prototype`; the four
   typed arrays' `constructor` and species; and the typed-array `slice`, `fill`
-  and `set`, read through each of the four typed-array prototypes. The check
-  reads no other getter (such as a typed array's `length` or a set's `size`) and
-  no other built-in (such as `WeakMap`), and it does not see a replacement that
-  reads as the original (an accessor that answers with it), one that caller
-  code makes and undoes while a tick call runs, or one made before the SDK
-  loaded.
-- `result()`, `motion()`, `snapshot()` and commits copy with built-ins captured
-  when the SDK loaded, and define each element and field of a copy before
-  storing into it, so no prototype setter sees a copy.
+  and `set`, read through each of the four typed-array prototypes. It reads the
+  global constructors by their global names and the well-known symbols as the
+  SDK loaded them, as the tick does. The check reads no other getter (such as a
+  typed array's `length` or a set's `size`) and no other built-in (such as
+  `WeakMap`), and it does not see a replacement that reads as the original (an
+  accessor that answers with it), one that caller code makes and undoes while
+  a tick call runs, or one made before the SDK loaded.
+- A world's `snapshot()` and `commitTick()`, the `result()` and `motion()` of
+  world tick jobs, and the `result()` of evolution, reaction and structure jobs
+  copy with built-ins captured when the SDK loaded, and define each element and
+  field of a copy before storing into it, so no prototype setter sees a copy.
+  Other methods, such as those of translations, holds, transfers and domain
+  sets, copy as before.
 - A world tick job's `advance()` fails, and its `cancel()` returns `false`, if
-  caller code calls them while `advance()` runs.
+  caller code calls them while `advance()` runs. The tick jobs of a domain set
+  have no such guard.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,

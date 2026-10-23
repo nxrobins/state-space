@@ -594,6 +594,85 @@ describe('reactive result copies', () => {
     expect(out[3]).not.toBeInstanceOf(Point);
     expect((out[4] as { t: Int32Array }).t).not.toBe(typed);
   });
+  test('a copy calls no built-in replaced after load, on the slice and the element-by-element path', () => {
+    const data = () => ({
+      moves: [{ from: 1, to: 2 }],
+      nested: { list: [{ a: 1, b: [2, 3] }], typed: new Uint8Array([4, 5]) },
+      flat: [6, 7],
+    });
+    const clean = cloneReactiveData3D(data());
+    let calls = 0;
+    const g = globalThis as unknown as Record<string, unknown>;
+    /** Wraps target[key] with a function that counts its calls; returns the undo. */
+    const wrap = (target: object, key: PropertyKey) => {
+      const bag = target as Record<PropertyKey, unknown>,
+        original = bag[key] as (...rest: unknown[]) => unknown;
+      bag[key] = function (this: unknown, ...rest: unknown[]) {
+        calls++;
+        return original.apply(this, rest);
+      };
+      return () => void (bag[key] = original);
+    };
+    const iterator = Object.getPrototypeOf([][Symbol.iterator]()) as object,
+      RealSymbol = Symbol,
+      slice = Array.prototype.slice;
+    const replaceAll = (alsoSlice: boolean) => {
+      const undo = [
+        wrap(Array, 'isArray'),
+        wrap(Object, 'getPrototypeOf'),
+        wrap(Reflect, 'getPrototypeOf'),
+        wrap(Reflect, 'getOwnPropertyDescriptor'),
+        wrap(Reflect, 'defineProperty'),
+        wrap(Object, 'keys'),
+        wrap(Object, 'hasOwn'),
+        wrap(Map.prototype, 'get'),
+        wrap(Map.prototype, 'set'),
+        wrap(iterator, 'next'),
+        wrap(g, 'structuredClone'),
+      ];
+      g.Symbol = new Proxy(RealSymbol, {
+        get(target, key, receiver) {
+          calls++;
+          return Reflect.get(target, key, receiver);
+        },
+      });
+      undo.push(() => void (g.Symbol = RealSymbol));
+      if (alsoSlice) {
+        // An accessor sends the copy down the element-by-element path; a planted 'get' would break a
+        // descriptor that inherits from Object.prototype.
+        Object.defineProperty(Array.prototype, 'slice', { configurable: true, get: () => slice });
+        Object.defineProperty(Object.prototype, 'get', {
+          value: () => undefined,
+          writable: true,
+          configurable: true,
+        });
+        undo.push(() => {
+          delete (Object.prototype as Record<string, unknown>).get;
+          Object.defineProperty(Array.prototype, 'slice', {
+            value: slice,
+            writable: true,
+            enumerable: false,
+            configurable: true,
+          });
+        });
+      }
+      return () => {
+        for (let k = undo.length - 1; k >= 0; k--) undo[k]();
+      };
+    };
+    for (const alsoSlice of [false, true]) {
+      const value = data();
+      calls = 0;
+      const restore = replaceAll(alsoSlice);
+      let copy: unknown;
+      try {
+        copy = cloneReactiveData3D(value);
+      } finally {
+        restore();
+      }
+      expect({ alsoSlice, calls, copy }).toEqual({ alsoSlice, calls: 0, copy: clean });
+    }
+  });
   test('an enumerable Object.prototype accessor is never read', () => {
     const read = vi.fn(() => ({}));
     const data = { moves: [{ from: 1, to: 2 }], motion: motionLike() };
