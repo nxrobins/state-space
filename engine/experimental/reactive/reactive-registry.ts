@@ -144,6 +144,7 @@ export function reactivePlainArraySlice3D(): boolean {
 const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unknown },
   TYPED_PROTOTYPE = GET_PROTOTYPE(Int32Array.prototype) as Record<string, unknown>,
   REALM = {
+    isArray: Array.isArray,
     iterator: ARRAY_PROTOTYPE[Symbol.iterator],
     next: ITERATOR_PROTOTYPE.next,
     slice: ARRAY_PROTOTYPE.slice,
@@ -173,16 +174,19 @@ const ITERATOR_PROTOTYPE = GET_PROTOTYPE([][Symbol.iterator]()) as { next: unkno
     typedFill: TYPED_PROTOTYPE.fill,
     typedSet: TYPED_PROTOTYPE.set,
   };
-/** Internal only: whether the array, map, set and typed-array built-ins a world tick calls are still
- * the ones this module loaded with, including the global bindings, constructors and species. A tick
- * that finds one replaced fails rather than trust it. Direct reads only: a replaced accessor answers
- * with what the tick would call. Built-ins replaced before this module loaded cannot be told apart.
+/** Internal only: whether the array, map, set and typed-array built-ins a world tick calls still read
+ * as the ones this module loaded with, including the global bindings, constructors and species. A tick
+ * that finds one replaced fails rather than trust it. The check reads each built-in as the tick does,
+ * so it costs a few nanoseconds; an accessor that answers it with the original, a replacement that a
+ * caller's hook makes and undoes while a tick call runs, and a built-in replaced before this module
+ * loaded are not seen.
  */
 const species = (constructor: object) =>
   (constructor as { [Symbol.species]?: unknown })[Symbol.species];
 export function reactiveRealmIntact3D(): boolean {
   return (
     globalThis.Array === ARRAY &&
+    ARRAY.isArray === REALM.isArray &&
     ARRAY_PROTOTYPE.constructor === ARRAY &&
     ARRAY[Symbol.species] === ARRAY &&
     ARRAY_PROTOTYPE[Symbol.iterator] === REALM.iterator &&

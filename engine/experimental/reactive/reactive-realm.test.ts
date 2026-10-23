@@ -1,9 +1,10 @@
 /** A patched realm is outside the bit-identity contract. Under an Array.prototype index accessor or an
- * Object.prototype hook a world tick still publishes the true state or fails. A tick that finds the
- * array, map, set or typed-array built-ins it calls replaced since the SDK loaded fails. Built-ins
- * replaced before the SDK loaded carry no guarantee; the tests below pin the windows where this
- * branch would otherwise do worse than the engine before batching. A slice replaced before load can
- * still steer the structure output.
+ * Object.prototype hook that does not itself replace built-ins, a world tick still publishes the true
+ * state or fails. A tick that finds the array, map, set or typed-array built-ins it calls reading
+ * other than at load fails. Built-ins replaced before the SDK loaded, accessors that answer the check
+ * with the original, and replacements made and undone inside a tick call carry no guarantee; the
+ * tests below pin the windows where this branch would otherwise do worse than the engine before
+ * batching. A slice replaced before load can still steer the structure output.
  */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { holdPhysics, STRUCTURAL_CALLS } from '../../test-support/hold-physics.js';
@@ -249,6 +250,19 @@ describe('reactive ticks in a patched realm', () => {
             ? Object.defineProperty(Uint8Array, Symbol.species, typed)
             : delete (Uint8Array as unknown as Record<symbol, unknown>)[Symbol.species]);
       }) as Patch,
+      dropPush: (() => {
+        const push = Array.prototype.push;
+        let count = 0;
+        Array.prototype.push = function (this: unknown[], ...items: unknown[]) {
+          return ++count % 3 ? push.apply(this, items) : this.length;
+        };
+        return () => void (Array.prototype.push = push);
+      }) as Patch,
+      isArray: (() => {
+        const isArray = Array.isArray;
+        Array.isArray = ((value: unknown) => !isArray(value)) as typeof Array.isArray;
+        return () => void (Array.isArray = isArray);
+      }) as Patch,
       mapGet: (() => {
         Map.prototype.get = function (this: Map<unknown, unknown>, key: unknown) {
           return key;
@@ -277,7 +291,7 @@ describe('reactive ticks in a patched realm', () => {
   };
   test('array built-ins replaced after load fail the tick and keep the world', () => {
     const p = patches();
-    type Phase = 'evolution' | 'structure-prepare' | 'publish';
+    type Phase = 'evolution' | 'structure-prepare' | 'structure' | 'publish';
     const plans: [string, boolean, Partial<Record<Phase, Patch>>][] = [
       ['identity slice at structure', false, { 'structure-prepare': p.identitySlice }],
       ['swallowing slice at structure', false, { 'structure-prepare': p.swallowSlice }],
@@ -291,6 +305,8 @@ describe('reactive ticks in a patched realm', () => {
       ['species at publish', true, { publish: p.species }],
       ['constructor at publish', true, { publish: p.constructor }],
       ['iterator at publish', true, { publish: p.iterator }],
+      ['push during the structure graph', false, { structure: p.dropPush }],
+      ['isArray during evolution', false, { evolution: p.isArray }],
     ];
     const world = (held: boolean) => {
       const w = createReactiveWorld3D(r, mixed(6));

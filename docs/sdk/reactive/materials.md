@@ -60,14 +60,21 @@ results for such inputs may differ between versions. Both guarantees assume an
 unmodified JavaScript realm.
 When a caller replaces or adds members of `Array.prototype` or `Object.prototype`,
 or replaces `Array[Symbol.species]` or the array iterator's `next`, errors,
-progress at a throw and outputs may differ between engine versions. An index
-accessor on `Array.prototype` or a hook on `Object.prototype` can then make a
-tick fail, but the tick does not publish a state other than the one an
-unmodified realm computes. A world tick that finds the array, map, set or
-typed-array built-ins it calls replaced since the SDK loaded fails at its next
-advance, `result()`, `motion()` or commit. Built-ins replaced before the SDK
-loaded cannot be told from the realm's own and carry no guarantee, nor do other
-replaced built-ins.
+progress at a throw and outputs may differ between engine versions. Then:
+
+- An index accessor on `Array.prototype` or a hook on `Object.prototype` can
+  make a world tick fail. Unless the accessor or hook itself replaces built-ins
+  while a tick call runs, the tick does not publish or commit a state other than
+  the one an unmodified realm computes.
+- At creation, at each advance, and in `result()`, `motion()` and commit, a
+  world tick checks that the array, map, set and typed-array built-ins it calls
+  still read as the ones the SDK loaded with, and fails if one does not.
+- The check does not see a replacement that reads as the original (an accessor
+  that answers with it), one that caller code makes and undoes while a tick call
+  runs, or one made before the SDK loaded. These, other replaced built-ins, and
+  replacements during world methods other than ticks (snapshots, holds, edits,
+  restores, translations) carry no guarantee, and can leave the world's state
+  changed.
 
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,

@@ -361,8 +361,7 @@ function worldTickJob(
       if (status !== 'running' || !before)
         throw Error('Reactive world tick job is no longer running.');
       try {
-        // Every stage but the structure graph calls array built-ins; the graph uses typed storage.
-        if (phase !== 'structure') assertReactiveRealm3D();
+        assertReactiveRealm3D();
         if (phase === 'evolution') {
           evolutionPasses = evolution!.job.advance().completedPasses;
           if (evolutionPasses === 28) phase = 'structure-prepare';
