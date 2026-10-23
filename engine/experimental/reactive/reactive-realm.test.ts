@@ -23,6 +23,7 @@ import {
   type ReactiveMaterialEdit3D,
   type ReactiveWorldTickJob3D,
 } from '../reactive-materials.js';
+import { overlayReactiveHolds3D, stripReactiveHoldAnchors3D } from './reactive-holds.js';
 import { reactivePlainObjectPrototype3D } from './reactive-registry.js';
 import { startReactiveStructureJob3D } from './reactive-structure.js';
 import { startPerStepOracleStructureJob3D } from './reactive-structure.per-step-oracle.js';
@@ -485,14 +486,142 @@ describe('reactive ticks in a patched realm', () => {
       restore();
     }
   });
-  test('a commit copy that loses a state field fails the commit and keeps the world', () => {
-    for (const key of ['depth', 'width', 'height']) {
-      const w = createReactiveWorld3D(r, mixed(6)),
-        j = w.prepareTick();
+  test('the hold overlay and strip visit every held cell under a replaced array iterator', () => {
+    const block = readReactiveMaterialBlock3D(r, mixed(6)),
+      cells: number[] = [];
+    for (let i = 0; i < block.structure.length && cells.length < 3; i++)
+      if (block.structure[i] !== 0 && !(block.structure[i] & ANCHOR_3D)) cells.push(i);
+    const holds = [{ id: 'held', expiresAtTick: 9, cells }],
+      iterator = Object.getPrototypeOf([][Symbol.iterator]()) as { next: () => unknown },
+      next = iterator.next;
+    // Skips every second value of every array iteration.
+    let count = 0;
+    iterator.next = function (this: unknown) {
+      const step = next.call(this) as { done: boolean };
+      return step.done || ++count % 2 ? step : next.call(this);
+    };
+    let over, stripped;
+    try {
+      over = overlayReactiveHolds3D(block, holds);
+      stripped = stripReactiveHoldAnchors3D(block, over, holds);
+    } finally {
+      iterator.next = next;
+    }
+    expect(cells.map((i) => Boolean(over.structure[i] & ANCHOR_3D))).toEqual([true, true, true]);
+    expect(stripped.structure).toEqual(block.structure);
+  });
+  test('a commit copy that a hook changes in any way fails the commit and keeps the world', () => {
+    const stash = new WeakMap<object, unknown>();
+    /** Object.prototype hooks that make the commit's copy differ from the true state. */
+    const hooks: [string, string, PropertyDescriptor][] = [
+      // Swallowed stores: the copied block lacks the field.
+      ['swallow depth', 'depth', { set: () => undefined }],
+      ['swallow width', 'width', { set: () => undefined }],
+      ['swallow height', 'height', { set: () => undefined }],
+      // A stored value that differs from the true one.
+      [
+        'width off by one',
+        'width',
+        {
+          set(this: object, value: number) {
+            Object.defineProperty(this, 'width', {
+              value: value + 1,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        },
+      ],
+      // An own accessor that answers with the true value while the hook decides it.
+      [
+        'own accessor for width',
+        'width',
+        {
+          set(this: object, value: unknown) {
+            Object.defineProperty(this, 'width', {
+              get: () => value,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        },
+      ],
+      // The copied block on another prototype, which could carry its own accessors later.
+      [
+        'block on another prototype',
+        'block',
+        {
+          set(this: object, value: object) {
+            Object.defineProperty(this, 'block', {
+              value: Object.setPrototypeOf(value, { tampered: true }),
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        },
+      ],
+      // The true value plus an extra own key on the copy.
+      [
+        'extra key beside width',
+        'width',
+        {
+          set(this: object, value: unknown) {
+            Object.defineProperty(this, 'width', {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+            Object.defineProperty(this, 'extra', {
+              value: 1,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        },
+      ],
+      // An own accessor whose descriptor a planted 'value' would answer with the true width.
+      [
+        'own accessor with planted value',
+        'width',
+        {
+          set(this: object, value: unknown) {
+            Object.defineProperty(this, 'width', {
+              get: () => value,
+              enumerable: true,
+              configurable: true,
+            });
+            Object.defineProperty(Object.prototype, 'value', {
+              value,
+              writable: true,
+              configurable: true,
+            });
+          },
+        },
+      ],
+      // A hole whose reads the hook answers from a stash: the held cells array keeps no element.
+      [
+        'stashed index 0',
+        '0',
+        {
+          get(this: object) {
+            return stash.get(this);
+          },
+          set(this: object, value: unknown) {
+            stash.set(this, value);
+          },
+        },
+      ],
+    ];
+    for (const [name, key, descriptor] of hooks) {
+      const w = createReactiveWorld3D(r, mixed(6));
+      holdCells(w);
+      const j = w.prepareTick();
       finish(j, () => () => undefined);
       const before = w.snapshot();
-      // A setter that swallows the store: the copied block would lack the field.
-      Object.defineProperty(Object.prototype, key, { configurable: true, set: () => undefined });
+      Object.defineProperty(Object.prototype, key, { configurable: true, ...descriptor });
       let outcome = 'committed';
       try {
         w.commitTick(j);
@@ -500,9 +629,10 @@ describe('reactive ticks in a patched realm', () => {
         outcome = (error as Error).message;
       } finally {
         delete (Object.prototype as Record<string, unknown>)[key];
+        delete (Object.prototype as Record<string, unknown>).value;
       }
-      expect({ key, outcome, tick: w.tick, same: w.snapshot() }).toEqual({
-        key,
+      expect({ name, outcome, tick: w.tick, same: w.snapshot() }).toEqual({
+        name,
         outcome: 'Reactive tick commit identity or accounting mismatch.',
         tick: 0,
         same: before,
@@ -519,15 +649,61 @@ describe('reactive ticks in a patched realm', () => {
     } finally {
       Object.defineProperty(Object.prototype, '__proto__', proto);
     }
-    // A wrapper installed after load cannot hide a swallowing setter from the check.
-    Reflect.ownKeys = ((target: object) =>
-      ownKeys(target).filter((key) => key !== 'tick')) as typeof Reflect.ownKeys;
-    Object.defineProperty(Object.prototype, 'tick', { configurable: true, set: () => undefined });
-    try {
-      expect(reactivePlainObjectPrototype3D()).toBe(false);
-    } finally {
-      delete (Object.prototype as Record<string, unknown>).tick;
-      Reflect.ownKeys = ownKeys;
+    // Wrappers installed after load cannot hide a swallowing setter from the check.
+    const swallow = () => undefined,
+      descriptor = Reflect.getOwnPropertyDescriptor,
+      hasOwn = Object.hasOwn;
+    const wrappers: [string, () => () => void][] = [
+      [
+        'ownKeys',
+        () => {
+          Reflect.ownKeys = ((target: object) =>
+            ownKeys(target).filter((key) => key !== 'tick')) as typeof Reflect.ownKeys;
+          return () => void (Reflect.ownKeys = ownKeys);
+        },
+      ],
+      [
+        'getOwnPropertyDescriptor',
+        () => {
+          Reflect.getOwnPropertyDescriptor = ((target: object, key: PropertyKey) =>
+            key === 'tick'
+              ? { value: undefined, writable: true, enumerable: false, configurable: true }
+              : descriptor(target, key)) as typeof Reflect.getOwnPropertyDescriptor;
+          return () => void (Reflect.getOwnPropertyDescriptor = descriptor);
+        },
+      ],
+      [
+        'hasOwn',
+        () => {
+          // With a planted 'writable', an accessor descriptor would read as a writable data one.
+          Object.defineProperty(Object.prototype, 'writable', {
+            value: true,
+            writable: true,
+            configurable: true,
+          });
+          // Hides the hook's own accessor fields and shows a writable field it lacks.
+          Object.hasOwn = ((target: object, key: PropertyKey) =>
+            (target as PropertyDescriptor).set === swallow
+              ? key !== 'set' && key !== 'get' && (key === 'writable' || hasOwn(target, key))
+              : hasOwn(target, key)) as typeof Object.hasOwn;
+          return () => {
+            Object.hasOwn = hasOwn;
+            delete (Object.prototype as Record<string, unknown>).writable;
+          };
+        },
+      ],
+    ];
+    for (const [name, wrap] of wrappers) {
+      Object.defineProperty(Object.prototype, 'tick', { configurable: true, set: swallow });
+      const restore = wrap();
+      let plain;
+      try {
+        plain = reactivePlainObjectPrototype3D();
+      } finally {
+        restore();
+        delete (Object.prototype as Record<string, unknown>).tick;
+      }
+      expect({ name, plain }).toEqual({ name, plain: false });
     }
     expect(reactivePlainObjectPrototype3D()).toBe(true);
   });

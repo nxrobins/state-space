@@ -196,7 +196,7 @@ export function createReactiveWorld3D(
         if (
           output.state.tick !== live.tick + 1 ||
           total(output.state.block) !== initialQ + externalQ ||
-          (!adopt && !reactiveSameData3D(output.state, taken.state))
+          (!plain && !reactiveSameData3D(output.state, taken.state))
         )
           throw Error('Reactive tick commit identity or accounting mismatch.');
         ensureValid();

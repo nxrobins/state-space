@@ -89,6 +89,7 @@ function flatRecord(x: unknown): x is Record<string, unknown> {
 const OWN_KEYS = Reflect.ownKeys,
   OWN_DESCRIPTOR = Reflect.getOwnPropertyDescriptor,
   GET_PROTOTYPE = Reflect.getPrototypeOf,
+  OBJECT_KEYS = Object.keys,
   HAS_OWN = Object.hasOwn,
   OBJECT_PROTOTYPE = Object.prototype,
   PROTO = OWN_DESCRIPTOR(OBJECT_PROTOTYPE, '__proto__'),
@@ -227,32 +228,32 @@ export function assertReactiveRealm3D(): void {
   if (!reactiveRealmIntact3D())
     throw Error('Reactive world ticks need the array built-ins the SDK loaded with.');
 }
-/** Internal only: whether two engine-built portable values hold the same data: own enumerable keys in
- * the same order, the same array lengths, every array element an own property (never one a prototype
- * accessor supplies), and Object.is-equal primitives. */
-export function reactiveSameData3D(a: unknown, b: unknown): boolean {
-  if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null)
-    return Object.is(a, b);
-  if (Array.isArray(a) !== Array.isArray(b)) return false;
-  if (Array.isArray(a)) {
-    const other = b as unknown[];
-    if (a.length !== other.length) return false;
-    for (let i = 0; i < a.length; i++)
-      if (!HAS_OWN(a, i) || !HAS_OWN(other, i) || !reactiveSameData3D(a[i], other[i])) return false;
-    return true;
+/** Internal only: whether a copy holds exactly the data of an engine-built original. The copy is read
+ * through its own data descriptors only, with the intrinsics this module loaded with, so no prototype
+ * hook or own accessor can answer for it: every array element and record key must be an own data
+ * property, prototypes must be the plain ones, and keys, lengths and Object.is-equal primitives must
+ * match the original's. */
+export function reactiveSameData3D(copy: unknown, original: unknown): boolean {
+  if (
+    typeof copy !== 'object' ||
+    copy === null ||
+    typeof original !== 'object' ||
+    original === null
+  )
+    return Object.is(copy, original);
+  const list = ARRAY.isArray(original);
+  if (GET_PROTOTYPE(copy) !== (list ? ARRAY_PROTOTYPE : OBJECT_PROTOTYPE)) return false;
+  const keys = list ? null : OBJECT_KEYS(original),
+    count = list ? (original as unknown[]).length : keys!.length,
+    own = OWN_KEYS(copy);
+  // An array's own keys are its indices and 'length'; a record's are exactly the original's keys.
+  if (own.length !== count + (list ? 1 : 0)) return false;
+  for (let i = 0; i < count; i++) {
+    const key = list ? '' + i : keys![i],
+      d = OWN_DESCRIPTOR(copy, key);
+    if (!d || !HAS_OWN(d, 'value') || HAS_OWN(d, 'get') || HAS_OWN(d, 'set')) return false;
+    if (!reactiveSameData3D(d.value, (original as Record<string, unknown>)[key])) return false;
   }
-  const ka = Object.keys(a),
-    kb = Object.keys(b);
-  if (ka.length !== kb.length) return false;
-  for (let i = 0; i < ka.length; i++)
-    if (
-      ka[i] !== kb[i] ||
-      !reactiveSameData3D(
-        (a as Record<string, unknown>)[ka[i]],
-        (b as Record<string, unknown>)[kb[i]],
-      )
-    )
-      return false;
   return true;
 }
 /** Internal only: copy of engine-built portable results (plain objects, arrays and primitives).
