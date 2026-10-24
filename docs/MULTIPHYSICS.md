@@ -250,3 +250,75 @@ velocity and spin to agree with rigid motion, preserves both, and has a direct
 regression. Sparse vector validation also rejects missing components. The final
 reference review reported no remaining actionable finding. Later runtime files
 remain behind their own gates and are not exported by this checkpoint.
+
+### Private runtime checkpoint (not a release)
+
+The private modules in `engine/experimental/multiphysics/` now connect rigid
+motion, profile-aware heat/phase/combustion, finite DC sources, and fluid operators
+in an atomic world tick. None of these runtime APIs are exported by the public
+entry. The model currently admits 256 material parcels, 768 bonds, 128 fluid
+samples and 128 nearby solid-volume boundary samples. A preview advances at most
+two fixed ticks, with at most 256 yielded work units per call and three million
+units per tick. Work units bound deterministic operations, not wall-clock time.
+
+The liquid candidate uses a mass-metric SPH density/divergence projection with
+canonical sequential constraint updates and full rigid effective inertia. This
+is not yet a qualified implementation of the planned DFSPH release. Density
+compression tolerance is `1e-4`; divergence is now measured as a normalized
+*density-change rate*, with tolerance `1e-7` per model time unit, rather than
+relaxing velocity accuracy as the timestep shrinks. Each solve permits at most
+128 iterations. Gas uses a `gamma = 1.4` caloric pressure law with saved volume,
+compatible midpoint pressure work, and explicit latent plateaus. Gas pair volume
+changes are limited to 10% and total step volume changes to 25%; larger changes
+reject rather than invent heat. An isolated gas sample has no resolved free
+expansion without neighboring material or a boundary.
+
+Fluid-to-solid exclusion uses a round particle of radius equal to its minimum
+half extent. Solid-to-solid contact retains oriented cuboids. Fluid samples do
+not collide with one another as rigid cubes. Their saved mass, intrinsic inertia,
+spin, and energy stores remain authoritative across this distinction. Pressure
+and viscosity carry fluid-fluid interaction. Finite-face electrical transport
+uses geometric contact area, so edge/vertex touching cannot create a conducting
+shortcut. Resting-contact tolerance does not enlarge that electrical area.
+
+The world owns snapshots, edit batches, and revision-bound previews. Placement,
+removal, heating, transforms, anchors, bonds and battery replacement carry external
+mass, energy and momentum receipts. Invalid batches, failed convergence and
+cancelled previews cannot publish partial state. A removed battery terminal fails
+the source while preserving remaining core energy. Snapshot validation checks
+mass, energy, linear momentum and angular momentum ledgers, including saved
+sub-quantum conversion remainders. The default per-tick numerical energy limit is
+`0.01` model energy units; numerical corrections are never deposited as heat.
+
+The private Worker host owns one live world and one candidate. It advances only
+bounded chunks on a macrotask scheduler. The client permits one operation plus a
+cancellation request, with no unbounded queue, and closes on timeout or malformed
+replies. Commit requires the exact outstanding preview identity. Mock-transport
+checks cover direct/Worker equality, work-budget independence, JSON continuation,
+late cancellation, stale handles, lost replies and transport/scheduler failure.
+They do not qualify a native Worker or rendering performance.
+
+Qualification remains open. The 27-sample floor-column check passes, but a
+closed-tank submerged-body probe exposed contact degeneracy and pressure/contact
+splitting error. Roundoff contact handling and the timestep-dependent divergence
+criterion were corrected; the full hydrostatic, floating/sinking and refinement
+gates still need positive quantitative evidence. In particular, a small tank can
+artificially support a body on one coarse fluid layer, and longer coupled runs can
+exceed the unchanged numerical energy limit. Do not interpret an atomic rejection
+as successful physical qualification. Arbitrary freezing of overlapping fluid
+samples also requires an explicit admissible solid geometry policy.
+
+The builder and its fresh macOS qualification remain outstanding. Its required
+five demonstrations are a powered wax valve; a rotating conductor; a falling,
+breaking battery; fluid moving a conductor; and combined electrical, thermal,
+fluid and structural failure. The public runtime must remain gated until the
+preceding mechanics, fluid and reactive capability checks pass.
+
+The private checkpoint passed 115 focused multiphysics tests within the full
+1,982-test CPU suite, followed serially by 24 Node build/controller tests on
+2026-10-24. Type checks, structural lint and formatting passed. The local
+supervisor receipt is `e0b07a9f3e2a477697af526dc617b549`. The separate diagnostic
+probe `685385a398044e859ebc42efa14b83da` recorded the unresolved closed-tank error;
+its process completed successfully because the probe reports candidate rejections,
+not because its physical acceptance criteria passed. No native, performance or
+full reactive-parity qualification is implied by these unit checks.
