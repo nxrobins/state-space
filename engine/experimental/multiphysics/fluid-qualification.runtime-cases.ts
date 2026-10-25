@@ -84,51 +84,56 @@ test('sustained resting liquid support neither leaks nor creates artificial heat
 
 test('heated gas over a floor expands and rises relative to an otherwise identical cold column', () => {
   const measured = [];
-  for (const temperature of [20, 80]) {
-    const floor = seedThermalParcel3D(profiles, {
-      id: 'floor',
-      material: 'ceramic',
-      center: [0, 0, 0],
-      halfExtents: [2.5, 0.5, 2.5],
-      owner: 'fixed',
-      temperature: 20,
-    });
-    const gas = Array.from({ length: 27 }, (_, i) =>
-      seedThermalParcel3D(profiles, {
-        id: `g${i}`,
-        material: 'air',
-        owner: 'authored',
-        center: [(i % 3) - 1, 1 + Math.floor(i / 9), (Math.floor(i / 3) % 3) - 1],
-        temperature: i === 4 ? temperature : 20,
-      }),
-    );
-    let state = createMultiphysicsSnapshot3D(profiles, {
-      parcels: [floor, ...gas],
-      anchors: ['floor'],
-      settings: { dt: 0.0005 },
-    });
-    const mass = multiphysicsInventory3D(state).mass;
-    for (let step = 0; step < 60; step++) {
-      const job = createMultiphysicsTickJob3D(profiles, state);
-      while (job.progress().status === 'running') job.advance(256);
-      state = job.result().snapshot;
+  for (const dt of [0.0005, 0.00025]) {
+    for (const temperature of [20, 80]) {
+      const floor = seedThermalParcel3D(profiles, {
+        id: 'floor',
+        material: 'ceramic',
+        center: [0, 0, 0],
+        halfExtents: [2.5, 0.5, 2.5],
+        owner: 'fixed',
+        temperature: 20,
+      });
+      const gas = Array.from({ length: 27 }, (_, i) =>
+        seedThermalParcel3D(profiles, {
+          id: `g${i}`,
+          material: 'air',
+          owner: 'authored',
+          center: [(i % 3) - 1, 1 + Math.floor(i / 9), (Math.floor(i / 3) % 3) - 1],
+          temperature: i === 4 ? temperature : 20,
+        }),
+      );
+      let state = createMultiphysicsSnapshot3D(profiles, {
+        parcels: [floor, ...gas],
+        anchors: ['floor'],
+        settings: { dt },
+      });
+      const mass = multiphysicsInventory3D(state).mass;
+      for (let step = 0; step < Math.round(0.03 / dt); step++) {
+        const job = createMultiphysicsTickJob3D(profiles, state);
+        while (job.progress().status === 'running') job.advance(256);
+        state = job.result().snapshot;
+      }
+      const parcel = state.parcels.find((p) => p.id === 'g4')!;
+      measured.push({
+        temperature,
+        dt,
+        height: parcel.center[1],
+        speed: parcel.velocity[1],
+        volume: state.gasVolumes.find((v) => v.id === 'g4')!.volume,
+        energy: state.accounting.numericalEnergy,
+      });
+      console.log(JSON.stringify({ case: 'heated-gas', measured }));
+      expect(multiphysicsInventory3D(state).mass).toBe(mass);
+      expect(state.accounting.externalStoredSubQ).toBe('0');
     }
-    const parcel = state.parcels.find((p) => p.id === 'g4')!;
-    measured.push({
-      temperature,
-      height: parcel.center[1],
-      speed: parcel.velocity[1],
-      volume: state.gasVolumes.find((v) => v.id === 'g4')!.volume,
-      energy: state.accounting.numericalEnergy,
-    });
-    console.log(JSON.stringify({ case: 'heated-gas', measured }));
-    expect(multiphysicsInventory3D(state).mass).toBe(mass);
-    expect(state.accounting.externalStoredSubQ).toBe('0');
   }
   for (const row of measured) expect(Math.abs(row.energy)).toBeLessThan(1e-4);
-  expect(measured[1].height).toBeGreaterThan(measured[0].height);
-  expect(measured[1].speed).toBeGreaterThan(measured[0].speed);
-  expect(measured[1].volume).toBeGreaterThan(measured[0].volume);
+  for (let i = 0; i < measured.length; i += 2) {
+    expect(measured[i + 1].height).toBeGreaterThan(measured[i].height);
+    expect(measured[i + 1].speed).toBeGreaterThan(measured[i].speed);
+    expect(measured[i + 1].volume).toBeGreaterThan(measured[i].volume);
+  }
 }, 30000);
 
 function run(state: MultiphysicsSnapshot3D) {

@@ -681,7 +681,13 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         neighborMass ??
         (p[index].parcel.mass / volume) *
           boundaries[(other as { boundary: number }).boundary].volume;
-      const coefficient = finite(((dt * mass * volume * volume) / p[index].parcel.mass) * radial);
+      // A reflected wall neighbor has v_ghost = 2*v_wall - v_fluid.
+      // Its continuity rate is twice the fluid/wall relative velocity.
+      // Use that same derivative for pressure impulse and enthalpy work.
+      const reflection = neighborMass === null ? 2 : 1;
+      const coefficient = finite(
+        ((reflection * dt * mass * volume * volume) / p[index].parcel.mass) * radial,
+      );
       if (coefficient > 0)
         contributions.push({
           index,

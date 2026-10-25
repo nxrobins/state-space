@@ -290,6 +290,38 @@ test('saved gas volume controls EOS and support, survives JSON continuation, and
   expect(alteredMass.densities[0].pressure).toBe(isolated.densities[0].pressure);
 });
 
+test.each([-0.2, 0, 0.2])(
+  'gas wall matches a symmetric reflected gas neighbor (speed %s)',
+  (speed) => {
+    const fluid = particle('a', [0, 0, 0], {
+      parcel: parcel('a', [0, 0, 0], { velocity: [-speed, 0, 0] }),
+    });
+    const reflected = solveFluidReference3D(
+      input([
+        fluid,
+        particle('b', [1, 0, 0], { parcel: parcel('b', [1, 0, 0], { velocity: [speed, 0, 0] }) }),
+      ]),
+    );
+    const wall = solveFluidReference3D(
+      input([fluid], {
+        bodies: [
+          body({
+            center: [0.5, 0, 0],
+            inverseMass: 0,
+            inverseInertia: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          }),
+        ],
+        boundaries: [{ id: 'mirror', bodyId: 'body', position: [1, 0, 0], volume: 1 }],
+      }),
+    );
+    closeVector(wall.particles[0].parcel.velocity, reflected.particles[0].parcel.velocity);
+    expect(wall.gasVolumes[0].volume).toBeCloseTo(reflected.gasVolumes[0].volume, 13);
+    expect(wall.thermalWork[0].pressure).toBeCloseTo(reflected.thermalWork[0].pressure, 13);
+    expect(wall.energy.projectionKineticChange).toBe(0);
+    expect(wall.energy.impulseWorkResidual).toBeCloseTo(0, 13);
+  },
+);
+
 test('gas boundary pressure funds translation and off-center rotation and conserves total angular momentum', () => {
   const fluid = particle('a', [0, 0, 0]),
     solid = body();

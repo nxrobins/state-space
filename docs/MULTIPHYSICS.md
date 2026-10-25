@@ -449,12 +449,11 @@ now measures the cross-product angle and prefers a face within the existing
 contact skin; geometric projection still uses the true minimum translation axis.
 Settling, resting stacks, fast impacts and released-edge regressions pass together.
 
-Two extended acceptance gates remain **unpassed** in
+One extended acceptance gate remains **unpassed** in
 `engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts`:
 
 | Gate | Observed failure on the development Mac |
 | --- | --- |
-| Heated gas over a floor for 0.03 model seconds | Cold/hot cumulative energy errors `-0.05271275`/`-0.04530049`. The tracked hot parcel expands more but does not rise. This is not a qualified plume. |
 | Freezing overlapping liquid parcels | Conversion retains both parcels but the resulting solid overlap exceeds the geometric correction limit; the tick rejects. No admissible freezing geometry policy is implemented yet. |
 
 Run these unfinished gates explicitly and serially under the supervisor with
@@ -467,8 +466,7 @@ local. A tightly wedged support also exposed conflicting simultaneous restitutio
 constraints; the authored combined scene provides lateral clearance rather than
 claiming arbitrary wedged-contact qualification.
 
-The next physics work is compatible gas pressure/contact work and a conservative
-freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
+The next physics work is an explicit freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
 runtime export or full milestone completion is claimed by this checkpoint.
 
 This checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
@@ -537,3 +535,30 @@ consistency, gas exclusion and the retained density guard.
 
 The sustained resting control also passed unchanged
 (`fdb463a412be455aa17328d93b041877`). Type checks, lint and formatting passed.
+
+### Reflected gas-wall pressure work (2026-10-25)
+
+The fixed-solid pressure contribution used the fluid/wall relative velocity,
+while the [reflected-neighbor boundary model](https://gmd.copernicus.org/articles/11/2691/2018/gmd-11-2691-2018.html)
+requires twice that relative normal velocity. The same corrected continuity
+derivative now supplies both pressure impulse and the adiabatic enthalpy work.
+The wall receives the opposite linear/angular impulse; no numerical loss is
+converted into heat. This is the candidate's radial boundary quadrature, not a
+claim of a general resolved-wall discretization.
+
+A symmetric reflected gas pair gives an independent boundary equivalence check
+for compression, rest and expansion. All three failed before the fix
+(`4b8a0dd838d540679a19ad64051b2c58`) and passed afterward, alongside the existing
+analytic pair midpoint/adiabatic oracle, moving-body torque and energy checks.
+The 180 private checks passed (`a95f1c203f7e47f3928ec3e8da74b445`); types, lint and
+formatting passed. Manual review checked that the reflection factor is used in
+both impulse and volume work, leaves gas/gas and liquid operators unchanged,
+and retains finite-volume and thermal-store rejection bounds.
+
+The unchanged hot/cold 0.03-second gate passed, and now also covers half the
+timestep (`f9b0581253804f2cb2c3cc65128bd1f5`). At `dt=0.0005`, tracked cold/hot
+heights are `1.01018`/`1.26193`; at `dt=0.00025`, `1.00993`/`1.25978`. Hot gas
+expands and rises faster at both steps. Maximum cumulative absolute numerical
+energy is `1.03e-8`, below the original `1e-4` limit. This qualifies that bounded
+floor-column comparison, not a long-running atmospheric plume or arbitrary gas
+boundary scenes. Freezing geometry and native product gates remain open.
