@@ -1,0 +1,1661 @@
+/** Bounded rigid candidate kernel. Release qualification still requires coupled runtime evidence. */
+import { copyPortableValue, type PortableValue } from '../../portable-data.js';
+import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  type Vec3,
+  type Quat,
+  IDENTITY_QUATERNION,
+  addVec3,
+  subtractVec3,
+  scaleVec3,
+  dotVec3,
+  crossVec3,
+  lengthVec3,
+  normalizeVec3,
+  assertFiniteVec3,
+  rotateVector,
+  integrateOrientation,
+  multiplyQuaternions,
+  normalizeQuaternion,
+} from './math.js';
+import { type OrientedCuboid, orientedCuboidContact, boundsOverlap } from './collision.js';
+
+/** Row-major world-space tensor. */
+export type Matrix3 = readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
+export type RigidParcel3D = MaterialParcel3D & { halfExtents: Vec3 };
+export type RigidBond3D = { a: string; b: string; strength: number; restLength: number };
+/** Linear impulse and angular impulse about the fixed world origin. */
+export type RigidImpulse3D = { id: string; linear: Vec3; angular: Vec3 };
+export type RigidStepOptions3D = {
+  dt: number;
+  gravity?: Vec3;
+  restitution?: number;
+  friction?: number;
+  nonCollidingParticleIds?: string[];
+  /** The preceding fluid operator already resolved impacts at its initial contacts. */
+  resolvedParticleContacts?: boolean;
+  /** A coupled caller will evaluate the sum of all operators' loads once. */
+  deferFracture?: boolean;
+  solverIterations?: number;
+  maxWork?: number;
+  maxEvents?: number;
+  contactTolerance?: number;
+  velocityTolerance?: number;
+  maxPenetration?: number;
+};
+export type RigidWork3D = { phase: 'assembly' | 'sweep' | 'contact' | 'fracture'; work: number };
+export type RigidStepResult3D<T extends RigidParcel3D> = {
+  parcels: T[];
+  bonds: RigidBond3D[];
+  brokenBonds: RigidBond3D[];
+  loadDemands: RigidImpulse3D[];
+  components: string[][];
+  dissipatedEnergyByParcel: { id: string; impact: number; friction: number }[];
+  boundaryLinearImpulse: Vec3;
+  boundaryAngularImpulse: Vec3;
+  numericalEnergyResidual: number;
+  numericalLinearMomentumResidual: Vec3;
+  numericalAngularMomentumResidual: Vec3;
+  /** Signed kinetic work of support constraints; never deposited as physical heat. */
+  supportConstraintEnergy: number;
+  report: { work: number; events: number; contacts: number };
+};
+const ZERO: Vec3 = [0, 0, 0];
+const ZERO_MATRIX: Matrix3 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+const BASIS: readonly Vec3[] = [
+  [1, 0, 0],
+  [0, 1, 0],
+  [0, 0, 1],
+];
+const lexical = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+const finite = (n: number) => {
+  if (!Number.isFinite(n)) throw Error('Rigid arithmetic exceeded finite range.');
+  return n;
+};
+export function applyMatrix3(matrix: Matrix3, vector: Vec3): Vec3 {
+  return [0, 1, 2].map((i) =>
+    finite(
+      matrix[3 * i] * vector[0] + matrix[3 * i + 1] * vector[1] + matrix[3 * i + 2] * vector[2],
+    ),
+  ) as unknown as Vec3;
+}
+function tensor(orientation: Quat, principal: Vec3): Matrix3 {
+  const axes = BASIS.map((axis) => rotateVector(orientation, axis));
+  return Array.from({ length: 9 }, (_, at) =>
+    axes.reduce((sum, axis, k) => sum + principal[k] * axis[Math.floor(at / 3)] * axis[at % 3], 0),
+  ) as unknown as Matrix3;
+}
+function rotateTensor(matrix: Matrix3, orientation: Quat): Matrix3 {
+  const columns = BASIS.map((axis) => rotateVector(orientation, axis));
+  return Array.from({ length: 9 }, (_, at) => {
+    const row = Math.floor(at / 3),
+      column = at % 3;
+    let value = 0;
+    for (let i = 0; i < 3; i++)
+      for (let j = 0; j < 3; j++) value += columns[i][row] * matrix[3 * i + j] * columns[j][column];
+    return finite(value);
+  }) as unknown as Matrix3;
+}
+/** Scaled Cholesky rejects singular or poorly conditioned inertia. */
+function invertTensor(matrix: Matrix3): Matrix3 {
+  const scale = Math.max(...matrix.map(Math.abs));
+  if (!(scale > 0) || !Number.isFinite(scale)) throw Error('Invalid assembly inertia.');
+  const a = matrix.map((value) => value / scale),
+    l = new Array<number>(9).fill(0);
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j <= i; j++) {
+      let value = a[3 * i + j];
+      for (let k = 0; k < j; k++) value -= l[3 * i + k] * l[3 * j + k];
+      if (i === j) {
+        if (!(value > 1e-12)) throw Error('Singular or ill-conditioned assembly inertia.');
+        l[3 * i + j] = Math.sqrt(value);
+      } else l[3 * i + j] = value / l[3 * j + j];
+    }
+  const result = new Array<number>(9).fill(0);
+  for (let column = 0; column < 3; column++) {
+    const y = [0, 0, 0],
+      x = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+      let value = Number(i === column);
+      for (let k = 0; k < i; k++) value -= l[3 * i + k] * y[k];
+      y[i] = value / l[3 * i + i];
+    }
+    for (let i = 2; i >= 0; i--) {
+      let value = y[i];
+      for (let k = i + 1; k < 3; k++) value -= l[3 * k + i] * x[k];
+      x[i] = value / l[3 * i + i];
+      result[3 * i + column] = finite(x[i] / scale);
+    }
+  }
+  return result as unknown as Matrix3;
+}
+function readParcel<T extends RigidParcel3D>(raw: T): T {
+  const copy = copyPortableValue(raw as unknown as PortableValue) as unknown as T;
+  const base = Object.fromEntries(
+    [
+      'id',
+      'material',
+      'owner',
+      'mass',
+      'referenceAmount',
+      'heatCapacity',
+      'thermalQ',
+      'latentQ',
+      'chemicalQ',
+      'center',
+      'velocity',
+      'orientation',
+      'intrinsicAngularMomentum',
+      'principalInertia',
+    ].map((key) => [key, (copy as unknown as Record<string, unknown>)[key]]),
+  );
+  readMaterialParcel3D(base);
+  assertFiniteVec3(copy.halfExtents);
+  if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
+  return copy;
+}
+export function rigidAssemblyMassProperties3D(raw: readonly RigidParcel3D[]): {
+  mass: number;
+  center: Vec3;
+  inertia: Matrix3;
+  inverseInertia: Matrix3;
+} {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
+    throw Error('Rigid assemblies require 1..256 parcels.');
+  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
+  const parcels = owned.map(readParcel).sort((a, b) => lexical(a.id, b.id));
+  if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
+    throw Error('Duplicate rigid parcel ID.');
+  const mass = finite(parcels.reduce((sum, p) => sum + p.mass, 0));
+  const center = parcels.reduce<Vec3>(
+    (sum, p) => addVec3(sum, scaleVec3(p.center, p.mass / mass)),
+    ZERO,
+  );
+  assertFiniteVec3(center);
+  const inertia = new Array<number>(9).fill(0);
+  for (const parcel of parcels) {
+    const local = tensor(parcel.orientation, parcel.principalInertia),
+      r = subtractVec3(parcel.center, center),
+      squared = dotVec3(r, r);
+    for (let i = 0; i < 3; i++)
+      for (let j = 0; j < 3; j++)
+        inertia[3 * i + j] = finite(
+          inertia[3 * i + j] +
+            local[3 * i + j] +
+            parcel.mass * (Number(i === j) * squared - r[i] * r[j]),
+        );
+  }
+  const matrix = inertia as unknown as Matrix3;
+  return { mass, center, inertia: matrix, inverseInertia: invertTensor(matrix) };
+}
+
+/** Shared admission check: no hidden unaccounted weld or moving anchor is accepted. */
+export function validateRigidAssemblyMotion3D(
+  raw: readonly RigidParcel3D[],
+  anchored = false,
+): {
+  mass: number;
+  center: Vec3;
+  inertia: Matrix3;
+  inverseInertia: Matrix3;
+  velocity: Vec3;
+  angularMomentum: Vec3;
+  angularVelocity: Vec3;
+} {
+  const props = rigidAssemblyMassProperties3D(raw);
+  const members = (copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[])
+    .map(readParcel)
+    .sort((a, b) => lexical(a.id, b.id));
+  const velocity = members.reduce<Vec3>(
+    (v, p) => addVec3(v, scaleVec3(p.velocity, p.mass / props.mass)),
+    ZERO,
+  );
+  const angularMomentum = members.reduce<Vec3>(
+    (sum, p) =>
+      addVec3(
+        sum,
+        addVec3(
+          p.intrinsicAngularMomentum,
+          crossVec3(
+            subtractVec3(p.center, props.center),
+            scaleVec3(subtractVec3(p.velocity, velocity), p.mass),
+          ),
+        ),
+      ),
+    ZERO,
+  );
+  const angularVelocity = applyMatrix3(props.inverseInertia, angularMomentum);
+  for (const p of members) {
+    const expectedVelocity = addVec3(
+      velocity,
+      crossVec3(angularVelocity, subtractVec3(p.center, props.center)),
+    );
+    const expectedSpin = applyMatrix3(tensor(p.orientation, p.principalInertia), angularVelocity);
+    if (
+      lengthVec3(subtractVec3(p.velocity, expectedVelocity)) >
+        1e-9 * Math.max(1, lengthVec3(p.velocity)) ||
+      lengthVec3(subtractVec3(p.intrinsicAngularMomentum, expectedSpin)) >
+        1e-9 * Math.max(1, lengthVec3(expectedSpin))
+    )
+      throw Error('Bonded parcel motion is not rigid; welding requires an accounted edit.');
+  }
+  if (
+    anchored &&
+    members.some(
+      (p) => p.velocity.some((v) => v !== 0) || p.intrinsicAngularMomentum.some((v) => v !== 0),
+    )
+  )
+    throw Error('Anchored assemblies require exactly stationary input.');
+  return { ...props, velocity, angularMomentum, angularVelocity };
+}
+
+type Body<T extends RigidParcel3D> = {
+  members: T[];
+  mass: number;
+  center: Vec3;
+  velocity: Vec3;
+  angularMomentum: Vec3;
+  inertia: Matrix3;
+  inverseInertia: Matrix3;
+  anchored: boolean;
+  radius: number;
+};
+type Contact<T extends RigidParcel3D> = {
+  a: Body<T>;
+  b: Body<T>;
+  pa: T;
+  pb: T;
+  point: Vec3;
+  normal: Vec3;
+  tangent1: Vec3;
+  tangent2: Vec3;
+  normalImpulse: number;
+  tangentImpulse: Vec3;
+  target: number;
+  friction: number;
+  restitution: number;
+  impact: boolean;
+  physicalFriction: boolean;
+  normalWork: number;
+  frictionWork: number;
+};
+const omega = <T extends RigidParcel3D>(body: Body<T>) =>
+  applyMatrix3(body.inverseInertia, body.angularMomentum);
+const inverseMass = <T extends RigidParcel3D>(body: Body<T>) => (body.anchored ? 0 : 1 / body.mass);
+const inverseTensor = <T extends RigidParcel3D>(body: Body<T>) =>
+  body.anchored ? ZERO_MATRIX : body.inverseInertia;
+const pointVelocity = <T extends RigidParcel3D>(body: Body<T>, point: Vec3) =>
+  addVec3(body.velocity, crossVec3(omega(body), subtractVec3(point, body.center)));
+const shape = (p: RigidParcel3D): OrientedCuboid => ({
+  center: p.center,
+  halfExtents: p.halfExtents,
+  orientation: p.orientation,
+});
+function sync<T extends RigidParcel3D>(body: Body<T>): void {
+  const angular = omega(body);
+  for (const parcel of body.members) {
+    parcel.velocity = pointVelocity(body, parcel.center);
+    parcel.intrinsicAngularMomentum = applyMatrix3(
+      tensor(parcel.orientation, parcel.principalInertia),
+      angular,
+    );
+  }
+}
+function componentIds(
+  parcels: readonly RigidParcel3D[],
+  bonds: readonly RigidBond3D[],
+): string[][] {
+  const adjacency = new Map(parcels.map((p) => [p.id, [] as string[]]));
+  for (const b of bonds) {
+    adjacency.get(b.a)!.push(b.b);
+    adjacency.get(b.b)!.push(b.a);
+  }
+  for (const neighbors of adjacency.values()) neighbors.sort(lexical);
+  const seen = new Set<string>(),
+    groups: string[][] = [];
+  for (const { id } of parcels)
+    if (!seen.has(id)) {
+      const ids = [id];
+      seen.add(id);
+      for (let cursor = 0; cursor < ids.length; cursor++)
+        for (const neighbor of adjacency.get(ids[cursor])!)
+          if (!seen.has(neighbor)) {
+            seen.add(neighbor);
+            ids.push(neighbor);
+          }
+      groups.push(ids.sort(lexical));
+    }
+  return groups;
+}
+/** Private adapter for admitted parcels and impulse receipts. Anchor reactions
+ * balance free members; directly applied loads on an anchored parcel are local. */
+export function rigidLoadDemands3D(
+  parcels: readonly RigidParcel3D[],
+  bonds: readonly RigidBond3D[],
+  anchors: readonly string[],
+  changes: readonly RigidImpulse3D[],
+  applied: readonly RigidImpulse3D[],
+): RigidImpulse3D[] {
+  const byId = new Map(parcels.map((p) => [p.id, p]));
+  const byChange = new Map(changes.map((v) => [v.id, v]));
+  const external = new Map(parcels.map((p) => [p.id, { id: p.id, linear: ZERO, angular: ZERO }]));
+  for (const row of applied) external.set(row.id, { ...row });
+  const fixed = new Set(anchors);
+  for (const ids of componentIds(parcels, bonds)) {
+    const pins = ids.filter((id) => fixed.has(id));
+    if (!pins.length) continue;
+    const free = ids.filter((id) => !fixed.has(id));
+    const force = free.reduce<Vec3>((sum, id) => addVec3(sum, external.get(id)!.linear), ZERO);
+    const torque = free.reduce<Vec3>((sum, id) => addVec3(sum, external.get(id)!.angular), ZERO);
+    for (const id of pins)
+      external.set(id, {
+        id,
+        linear: scaleVec3(force, -1 / pins.length),
+        angular: scaleVec3(torque, -1 / pins.length),
+      });
+  }
+  return [...byId.keys()].map((id) => {
+    const change = byChange.get(id) ?? { linear: ZERO, angular: ZERO },
+      load = external.get(id)!;
+    const linear = subtractVec3(change.linear, load.linear),
+      angular = subtractVec3(change.angular, load.angular);
+    assertFiniteVec3(linear, 'internal linear impulse');
+    assertFiniteVec3(angular, 'internal angular impulse');
+    return { id, linear, angular };
+  });
+}
+
+/** Canonical graph-cut strength model, not continuum stress or elastic strain.
+ * Origin-based loads can be summed across operators without moving their torque. */
+export function* fractureRigidBonds3D(
+  parcels: readonly RigidParcel3D[],
+  bonds: readonly RigidBond3D[],
+  loads: readonly RigidImpulse3D[],
+  dt: number,
+): Generator<void, RigidBond3D[], void> {
+  const byId = new Map(parcels.map((p) => [p.id, p])),
+    byLoad = new Map(loads.map((v) => [v.id, v]));
+  const broken = new Set<RigidBond3D>();
+  for (const ids of componentIds(parcels, bonds)) {
+    const members = ids.map((id) => byId.get(id)!),
+      memberIds = new Set(ids);
+    const localBonds = bonds.filter((b) => memberIds.has(b.a) && memberIds.has(b.b));
+    if (!localBonds.length) continue;
+    const adjacency = new Map(members.map((p) => [p.id, [] as string[]]));
+    for (const b of localBonds) {
+      adjacency.get(b.a)!.push(b.b);
+      adjacency.get(b.b)!.push(b.a);
+    }
+    for (const list of adjacency.values()) list.sort(lexical);
+    const root = members[0].id,
+      order = [root],
+      parent = new Map<string, string>();
+    for (let i = 0; i < order.length; i++)
+      for (const next of adjacency.get(order[i])!)
+        if (next !== root && !parent.has(next)) {
+          parent.set(next, order[i]);
+          order.push(next);
+        }
+    for (const child of order.slice(1)) {
+      yield;
+      const cut = new Set<string>([child]);
+      for (const id of order) if (parent.has(id) && cut.has(parent.get(id)!)) cut.add(id);
+      const crossing = localBonds.filter((b) => cut.has(b.a) !== cut.has(b.b));
+      const pivot = scaleVec3(
+        addVec3(byId.get(child)!.center, byId.get(parent.get(child)!)!.center),
+        0.5,
+      );
+      let force: Vec3 = ZERO,
+        torque: Vec3 = ZERO;
+      for (const id of cut) {
+        const demand = byLoad.get(id)!;
+        force = addVec3(force, demand.linear);
+        torque = addVec3(torque, subtractVec3(demand.angular, crossVec3(pivot, demand.linear)));
+      }
+      const capacity = crossing.reduce((sum, b) => sum + b.strength, 0),
+        lever = crossing.reduce((sum, b) => sum + b.restLength, 0) / crossing.length;
+      if ((lengthVec3(force) + lengthVec3(torque) / lever) / dt > capacity)
+        for (const b of crossing) broken.add(b);
+    }
+  }
+  return bonds.filter((b) => broken.has(b));
+}
+
+function axes(p: RigidParcel3D): Vec3[] {
+  return BASIS.map((axis) => rotateVector(p.orientation, axis));
+}
+function projectionRadius(p: RigidParcel3D, directions: readonly Vec3[], axis: Vec3): number {
+  return directions.reduce(
+    (sum, direction, i) => sum + p.halfExtents[i] * Math.abs(dotVec3(direction, axis)),
+    0,
+  );
+}
+function pairAxes(a: RigidParcel3D, b: RigidParcel3D): { a: Vec3[]; b: Vec3[]; all: Vec3[] } {
+  const aa = axes(a),
+    bb = axes(b),
+    all = [...aa, ...bb];
+  for (const x of aa)
+    for (const y of bb) {
+      const n = crossVec3(x, y);
+      if (lengthVec3(n) > 1e-12) all.push(normalizeVec3(n));
+    }
+  return { a: aa, b: bb, all };
+}
+/** Exact interval clipping for constant-orientation motion, including its gravity arc. */
+function translationImpact(
+  a: RigidParcel3D,
+  b: RigidParcel3D,
+  velocity: Vec3,
+  acceleration: Vec3,
+  duration: number,
+  tolerance: number,
+): number | null {
+  const directions = pairAxes(a, b),
+    offset = subtractVec3(b.center, a.center);
+  let intervals: [number, number][] = [[0, duration]];
+  for (const axis of directions.all) {
+    const radius =
+        projectionRadius(a, directions.a, axis) + projectionRadius(b, directions.b, axis),
+      distance = dotVec3(offset, axis),
+      speed = dotVec3(velocity, axis),
+      quadratic = dotVec3(acceleration, axis) / 2;
+    const times = [0, duration];
+    for (const boundary of [-radius, radius]) {
+      const constant = distance - boundary;
+      const roots: number[] = [];
+      if (quadratic === 0) {
+        if (speed !== 0) roots.push(-constant / speed);
+      } else {
+        const discriminant = speed * speed - 4 * quadratic * constant;
+        if (discriminant >= 0) {
+          // Stable quadratic roots, including a root at time zero.
+          const q = -0.5 * (speed + (speed < 0 ? -1 : 1) * Math.sqrt(discriminant));
+          if (q === 0) roots.push(-speed / (2 * quadratic));
+          else roots.push(q / quadratic, constant / q);
+        }
+      }
+      for (const root of roots) if (root > 0 && root < duration) times.push(root);
+    }
+    times.sort((x, y) => x - y);
+    const admitted: [number, number][] = [];
+    for (let i = 1; i < times.length; i++) {
+      const mid = (times[i - 1] + times[i]) / 2;
+      if (times[i] === times[i - 1]) continue;
+      // A stationary near-touching axis must not discard a face manifold because
+      // of transform roundoff. Moving axes use the actual contact roots.
+      const margin = speed === 0 && quadratic === 0 ? tolerance : 0;
+      if (Math.abs(distance + mid * (speed + quadratic * mid)) <= radius + margin)
+        for (const [lo, hi] of intervals) {
+          const enter = Math.max(lo, times[i - 1]),
+            exit = Math.min(hi, times[i]);
+          if (enter <= exit) admitted.push([enter, exit]);
+        }
+    }
+    // Closed intervals include a contact exactly at the end of the drift,
+    // and a quadratic tangent even when neither adjacent interval overlaps.
+    const roundoff = 16 * Number.EPSILON * Math.max(1, radius, Math.abs(distance));
+    for (const time of times)
+      if (Math.abs(distance + time * (speed + quadratic * time)) <= radius + roundoff)
+        for (const [lo, hi] of intervals) if (time >= lo && time <= hi) admitted.push([time, time]);
+    admitted.sort((x, y) => x[0] - y[0]);
+    intervals = [];
+    for (const interval of admitted) {
+      const last = intervals.at(-1);
+      if (last && interval[0] <= last[1]) last[1] = Math.max(last[1], interval[1]);
+      else intervals.push(interval);
+    }
+    if (intervals.length === 0) return null;
+  }
+  intervals.sort((x, y) => x[0] - y[0]);
+  const contact = contactWithinTolerance(a, b, tolerance);
+  for (const [enter] of intervals) {
+    if (enter === 0 && contact && dotVec3(velocity, contact.normal) >= -tolerance) continue;
+    return enter;
+  }
+  return null;
+}
+function corners(parcel: RigidParcel3D): Vec3[] {
+  return Array.from({ length: 8 }, (_, bits) =>
+    addVec3(
+      parcel.center,
+      rotateVector(
+        parcel.orientation,
+        parcel.halfExtents.map((value, axis) =>
+          bits & (1 << axis) ? value : -value,
+        ) as unknown as Vec3,
+      ),
+    ),
+  );
+}
+/** Round fluid exclusion against a solid OBB; finite spin/inertia stays authoritative.
+ * Particle-particle exclusion is supplied by pressure, not this contact kernel.
+ */
+export function particleBoxGeometry(a: RigidParcel3D, b: RigidParcel3D, first: boolean) {
+  const particle = first ? a : b,
+    box = first ? b : a,
+    q = box.orientation;
+  const local = rotateVector(
+    [-q[0], -q[1], -q[2], q[3]],
+    subtractVec3(particle.center, box.center),
+  );
+  const closest = local.map((v, i) =>
+    Math.max(-box.halfExtents[i], Math.min(box.halfExtents[i], v)),
+  ) as unknown as Vec3;
+  const offset = subtractVec3(local, closest),
+    distance = lengthVec3(offset),
+    radius = Math.min(...particle.halfExtents);
+  let outward: Vec3,
+    gap: number,
+    surface = closest;
+  if (distance > 0) {
+    outward = scaleVec3(offset, 1 / distance);
+    gap = distance - radius;
+  } else {
+    const margins = local.map((v, i) => box.halfExtents[i] - Math.abs(v));
+    const axis = margins.indexOf(Math.min(...margins)),
+      sign = local[axis] < 0 ? -1 : 1;
+    outward = BASIS[axis].map((v) => v * sign) as unknown as Vec3;
+    surface = local.map((v, i) => (i === axis ? sign * box.halfExtents[i] : v)) as unknown as Vec3;
+    gap = -margins[axis] - radius;
+  }
+  outward = rotateVector(q, outward);
+  const solidPoint = addVec3(box.center, rotateVector(q, surface));
+  const point = scaleVec3(
+    addVec3(solidPoint, subtractVec3(particle.center, scaleVec3(outward, radius))),
+    0.5,
+  );
+  return { normal: scaleVec3(outward, first ? -1 : 1), gap, point };
+}
+function separationPlane(a: RigidParcel3D, b: RigidParcel3D): { normal: Vec3; gap: number } {
+  const directions = pairAxes(a, b),
+    offset = subtractVec3(b.center, a.center);
+  let normal: Vec3 = [1, 0, 0],
+    gap = -Infinity;
+  for (const axis of directions.all) {
+    const distance = dotVec3(offset, axis),
+      candidate =
+        Math.abs(distance) -
+        projectionRadius(a, directions.a, axis) -
+        projectionRadius(b, directions.b, axis);
+    if (candidate > gap) {
+      gap = candidate;
+      normal = scaleVec3(axis, distance < 0 ? -1 : 1);
+    }
+  }
+  return { normal, gap };
+}
+/**
+ * Bound every corner-pair projection, including currently hidden corners, against
+ * a fixed or co-rotating separating plane. Include the trial gravity arc as well
+ * as rotation, so clear drift endpoints cannot conceal an intermediate collision.
+ * The midpoint axis satisfies |omegaMid - omega0| <= A h, where
+ * A = ||I^-1||F |omega0 cross L| / 2. This retains the exact zero bound
+ * for principal-axis spin; a global |L|/Imin bound would stall slender rods.
+ * Use A*duration as a velocity uncertainty and (|omega0|+A*duration)^2 R
+ * as curvature, valid for every shorter drift and every support-feature switch.
+ */
+function boundedContactAdvance<T extends RigidParcel3D>(
+  a: Body<T>,
+  b: Body<T>,
+  pa: T,
+  pb: T,
+  duration: number,
+  allowance: number,
+  particleA = false,
+  particleB = false,
+  relativeAcceleration: Vec3 = ZERO,
+): number {
+  const plane =
+    particleA || particleB ? particleBoxGeometry(pa, pb, particleA) : separationPlane(pa, pb);
+  const changeBound = (body: Body<T>) =>
+    body.anchored
+      ? 0
+      : 0.5 *
+        Math.hypot(...body.inverseInertia) *
+        lengthVec3(crossVec3(omega(body), body.angularMomentum));
+  const aa = particleA ? 0 : changeBound(a),
+    ab = particleB ? 0 : changeBound(b);
+  const wa = particleA ? 0 : lengthVec3(omega(a)) + aa * duration,
+    wb = particleB ? 0 : lengthVec3(omega(b)) + ab * duration;
+  // Either a fixed or a co-rotating plane can certify separation. Use the
+  // farther certified interval, avoiding false approach at hidden corners near
+  // small terminals while retaining the tight fixed-plane bound for large walls.
+  const frameOmega =
+    particleA || a.anchored
+      ? omega(b)
+      : particleB || b.anchored
+        ? omega(a)
+        : scaleVec3(addVec3(omega(a), omega(b)), 0.5);
+  function certifiedInterval(frameOmega: Vec3): number {
+    const frameSpeed = lengthVec3(frameOmega);
+    const accelerationBound = lengthVec3(relativeAcceleration);
+    const relativeStartVelocity = subtractVec3(
+      subtractVec3(b.velocity, a.velocity),
+      scaleVec3(relativeAcceleration, duration / 2),
+    );
+    const relativeSpeed = lengthVec3(relativeStartVelocity) + accelerationBound * duration;
+    const span =
+      lengthVec3(subtractVec3(b.center, a.center)) + relativeSpeed * duration + a.radius + b.radius;
+    const planeAcceleration =
+      frameSpeed === 0
+        ? Math.max(0, -dotVec3(relativeAcceleration, plane.normal))
+        : accelerationBound;
+    const curvature = finite(
+      planeAcceleration +
+        wa * wa * a.radius +
+        wb * wb * b.radius +
+        2 * frameSpeed * (relativeSpeed + wa * a.radius + wb * b.radius) +
+        frameSpeed * frameSpeed * span,
+    );
+    const uncertainSpeed = finite((aa * a.radius + ab * b.radius) * duration);
+    let limit = duration;
+    const xs = particleA
+      ? [addVec3(pa.center, scaleVec3(plane.normal, Math.min(...pa.halfExtents)))]
+      : corners(pa);
+    const ys = particleB
+      ? [subtractVec3(pb.center, scaleVec3(plane.normal, Math.min(...pb.halfExtents)))]
+      : corners(pb);
+    for (const x of xs)
+      for (const y of ys) {
+        const distance = dotVec3(subtractVec3(y, x), plane.normal) + allowance;
+        if (!(distance > 0))
+          throw Error('Rotating contact requires overlap projection before advancement.');
+        const speed =
+          dotVec3(
+            subtractVec3(
+              subtractVec3(
+                particleB ? b.velocity : pointVelocity(b, y),
+                particleA ? a.velocity : pointVelocity(a, x),
+              ),
+              addVec3(
+                crossVec3(frameOmega, subtractVec3(y, x)),
+                scaleVec3(relativeAcceleration, duration / 2),
+              ),
+            ),
+            plane.normal,
+          ) - uncertainSpeed;
+        let bound = Infinity;
+        if (curvature === 0) {
+          if (speed < 0) bound = distance / -speed;
+        } else {
+          const root = Math.sqrt(speed * speed + 2 * curvature * distance);
+          bound = speed < 0 ? (2 * distance) / (root - speed) : (speed + root) / curvature;
+        }
+        limit = Math.min(limit, bound);
+      }
+    return limit;
+  }
+  const fixed = certifiedInterval(ZERO);
+  const limit =
+    fixed === duration || lengthVec3(frameOmega) === 0
+      ? fixed
+      : Math.max(fixed, certifiedInterval(frameOmega));
+  if (!(limit > 0) || !Number.isFinite(limit))
+    throw Error('Rotational advancement failed to make finite progress.');
+  return limit;
+}
+
+function closestEdgePoint(a: RigidParcel3D, b: RigidParcel3D, normal: Vec3): Vec3 {
+  const aa = axes(a),
+    bb = axes(b);
+  let ai = 0,
+    bi = 0,
+    alignment = -1;
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++) {
+      const cross = crossVec3(aa[i], bb[j]);
+      if (lengthVec3(cross) < 1e-12) continue;
+      const match = Math.abs(dotVec3(normalizeVec3(cross), normal));
+      if (match > alignment) {
+        alignment = match;
+        ai = i;
+        bi = j;
+      }
+    }
+  const edge = (p: RigidParcel3D, directions: Vec3[], axis: number, facing: Vec3): [Vec3, Vec3] => {
+    let center = p.center;
+    for (let i = 0; i < 3; i++)
+      if (i !== axis)
+        center = addVec3(
+          center,
+          scaleVec3(
+            directions[i],
+            (dotVec3(directions[i], facing) < 0 ? -1 : 1) * p.halfExtents[i],
+          ),
+        );
+    const delta = scaleVec3(directions[axis], p.halfExtents[axis]);
+    return [subtractVec3(center, delta), addVec3(center, delta)];
+  };
+  const [p, q] = edge(a, aa, ai, normal),
+    [r, t] = edge(b, bb, bi, scaleVec3(normal, -1));
+  const d1 = subtractVec3(q, p),
+    d2 = subtractVec3(t, r),
+    offset = subtractVec3(p, r);
+  const a1 = dotVec3(d1, d1),
+    a2 = dotVec3(d2, d2),
+    coupling = dotVec3(d1, d2),
+    c = dotVec3(d1, offset),
+    f = dotVec3(d2, offset);
+  const clamp = (value: number) => Math.max(0, Math.min(1, value)),
+    denominator = a1 * a2 - coupling * coupling;
+  let u = denominator > 1e-14 * a1 * a2 ? clamp((coupling * f - c * a2) / denominator) : 0;
+  let v = (coupling * u + f) / a2;
+  if (v < 0) {
+    v = 0;
+    u = clamp(-c / a1);
+  } else if (v > 1) {
+    v = 1;
+    u = clamp((coupling - c) / a1);
+  }
+  return scaleVec3(addVec3(addVec3(p, scaleVec3(d1, u)), addVec3(r, scaleVec3(d2, v))), 0.5);
+}
+/** Solver contact skin: a roundoff-sized positive gap still supports a resting body.
+ * This never moves geometry; geometric projection continues to use actual overlap.
+ */
+function contactWithinTolerance(
+  a: RigidParcel3D,
+  b: RigidParcel3D,
+  tolerance: number,
+): { normal: Vec3; depth: number } | null {
+  const directions = pairAxes(a, b),
+    offset = subtractVec3(b.center, a.center);
+  const candidates = directions.all.map((axis) => {
+    const distance = dotVec3(offset, axis);
+    return {
+      depth:
+        projectionRadius(a, directions.a, axis) +
+        projectionRadius(b, directions.b, axis) -
+        Math.abs(distance),
+      normal: scaleVec3(axis, distance < 0 ? -1 : 1),
+    };
+  });
+  const depth = Math.min(...candidates.map((c) => c.depth));
+  if (depth < -tolerance) return null;
+  // Face axes precede cross-edge axes. Prefer a face when its separation differs
+  // by less than the contact skin, so unresolved tiny rotations do not replace
+  // a resting manifold with a single ill-conditioned edge point. Projection
+  // passes zero tolerance and still uses the actual minimum translation axis.
+  const selected = candidates.find((c) => c.depth <= depth + tolerance / 4)!;
+  return { normal: selected.normal, depth: Math.max(0, depth) };
+}
+function clipPolygon(points: Vec3[], center: Vec3, axis: Vec3, extent: number): Vec3[] {
+  const result: Vec3[] = [];
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i],
+      b = points[(i + 1) % points.length];
+    const da = dotVec3(subtractVec3(a, center), axis) - extent,
+      db = dotVec3(subtractVec3(b, center), axis) - extent;
+    if (da <= 0) result.push(a);
+    if (da <= 0 !== db <= 0) result.push(addVec3(a, scaleVec3(subtractVec3(b, a), da / (da - db))));
+  }
+  return result;
+}
+/** Face clipping supplies the contact polygon; edge contacts use closest segments. */
+function manifold(
+  a: RigidParcel3D,
+  b: RigidParcel3D,
+  normal: Vec3,
+  tolerance: number,
+  sideTolerance = 0,
+): Vec3[] {
+  const aa = axes(a),
+    bb = axes(b);
+  const best = (directions: Vec3[]) =>
+    directions.reduce(
+      (index, axis, i) =>
+        lengthVec3(crossVec3(axis, normal)) < lengthVec3(crossVec3(directions[index], normal))
+          ? i
+          : index,
+      0,
+    );
+  const ai = best(aa),
+    bi = best(bb),
+    useA = lengthVec3(crossVec3(aa[ai], normal)) <= lengthVec3(crossVec3(bb[bi], normal));
+  const ref = useA ? a : b,
+    incident = useA ? b : a,
+    ra = useA ? aa : bb,
+    ia = useA ? bb : aa,
+    ri = useA ? ai : bi;
+  // A cross-edge SAT axis can be almost parallel to a face while still
+  // describing an edge contact. Comparing 1 - dot loses the small angle and
+  // can clip against a fictitious face outside the actual touching edges.
+  if (lengthVec3(crossVec3(ra[ri], normal)) > 1e-10) return [closestEdgePoint(a, b, normal)];
+  const outward = useA ? normal : scaleVec3(normal, -1);
+  const faceCenter = addVec3(ref.center, scaleVec3(outward, ref.halfExtents[ri]));
+  const ii = ia.reduce(
+    (index, axis, i) =>
+      Math.abs(dotVec3(axis, outward)) > Math.abs(dotVec3(ia[index], outward)) ? i : index,
+    0,
+  );
+  const incidentCenter = addVec3(
+    incident.center,
+    scaleVec3(ia[ii], (dotVec3(ia[ii], outward) > 0 ? -1 : 1) * incident.halfExtents[ii]),
+  );
+  const side = [0, 1, 2].filter((i) => i !== ii);
+  let points = [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ].map(([x, y]) =>
+    addVec3(
+      incidentCenter,
+      addVec3(
+        scaleVec3(ia[side[0]], x * incident.halfExtents[side[0]]),
+        scaleVec3(ia[side[1]], y * incident.halfExtents[side[1]]),
+      ),
+    ),
+  );
+  for (const i of [0, 1, 2].filter((i) => i !== ri))
+    for (const sign of [-1, 1])
+      points = clipPolygon(
+        points,
+        ref.center,
+        scaleVec3(ra[i], sign),
+        ref.halfExtents[i] + sideTolerance,
+      );
+  return points
+    .filter((p) => dotVec3(subtractVec3(p, faceCenter), outward) <= tolerance)
+    .map((p) => addVec3(p, scaleVec3(outward, dotVec3(subtractVec3(faceCenter, p), outward) / 2)))
+    .sort((x, y) => x[0] - y[0] || x[1] - y[1] || x[2] - y[2]);
+}
+/** Finite contact patch for transport laws. Edge/vertex touch has zero area.
+ * The caller owns validated parcels; mechanical point contact remains separate.
+ */
+export function rigidContactPatchArea3D(a: RigidParcel3D, b: RigidParcel3D): number {
+  const contact = orientedCuboidContact(shape(a), shape(b));
+  if (!contact) return 0;
+  const points = manifold(a, b, contact.normal, 1e-8);
+  if (points.length < 3) return 0;
+  const center = points.reduce<Vec3>(
+    (sum, p) => addVec3(sum, scaleVec3(p, 1 / points.length)),
+    ZERO,
+  );
+  const axis = BASIS.reduce((best, axis) =>
+    Math.abs(dotVec3(axis, contact.normal)) < Math.abs(dotVec3(best, contact.normal)) ? axis : best,
+  );
+  const u = normalizeVec3(crossVec3(contact.normal, axis)),
+    v = crossVec3(contact.normal, u);
+  const ordered = points
+    .map((p) => subtractVec3(p, center))
+    .sort(
+      (a, b) => Math.atan2(dotVec3(a, v), dotVec3(a, u)) - Math.atan2(dotVec3(b, v), dotVec3(b, u)),
+    );
+  const area =
+    0.5 *
+    Math.abs(
+      ordered.reduce(
+        (sum, p, i) =>
+          sum + dotVec3(contact.normal, crossVec3(p, ordered[(i + 1) % ordered.length])),
+        0,
+      ),
+    );
+  return finite(area);
+}
+function effective<T extends RigidParcel3D>(contact: Contact<T>, direction: Vec3): Vec3 {
+  const ra = subtractVec3(contact.point, contact.a.center),
+    rb = subtractVec3(contact.point, contact.b.center);
+  return addVec3(
+    scaleVec3(direction, inverseMass(contact.a) + inverseMass(contact.b)),
+    addVec3(
+      crossVec3(applyMatrix3(inverseTensor(contact.a), crossVec3(ra, direction)), ra),
+      crossVec3(applyMatrix3(inverseTensor(contact.b), crossVec3(rb, direction)), rb),
+    ),
+  );
+}
+
+/** Owns inputs immediately. No candidate state escapes through progress yields. */
+export function createRigidStep3D<T extends RigidParcel3D>(
+  rawParcels: readonly T[],
+  rawBonds: readonly RigidBond3D[],
+  rawAnchors: readonly string[],
+  rawOptions: RigidStepOptions3D,
+): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
+  if (
+    !Array.isArray(rawParcels) ||
+    rawParcels.length > 256 ||
+    !Array.isArray(rawBonds) ||
+    rawBonds.length > 1024 ||
+    !Array.isArray(rawAnchors) ||
+    rawAnchors.length > rawParcels.length
+  )
+    throw Error('Rigid candidate exceeds bounded input limits.');
+  const ownedParcels = copyPortableValue(rawParcels as unknown as PortableValue) as unknown as T[];
+  const parcels = ownedParcels.map(readParcel).sort((a, b) => lexical(a.id, b.id));
+  const byId = new Map(parcels.map((p) => [p.id, p]));
+  if (byId.size !== parcels.length) throw Error('Duplicate rigid parcel ID.');
+  const bonds = copyPortableValue(rawBonds as unknown as PortableValue) as unknown as RigidBond3D[];
+  const ownedAnchors = copyPortableValue(
+    rawAnchors as unknown as PortableValue,
+  ) as unknown as string[];
+  const anchors = new Set(ownedAnchors);
+  if (anchors.size !== rawAnchors.length || [...anchors].some((id) => !byId.has(id)))
+    throw Error('Invalid rigid anchor IDs.');
+  for (const bond of bonds) {
+    if (
+      !byId.has(bond.a) ||
+      !byId.has(bond.b) ||
+      bond.a === bond.b ||
+      !Number.isFinite(bond.strength) ||
+      bond.strength < 0 ||
+      !Number.isFinite(bond.restLength) ||
+      bond.restLength <= 0
+    )
+      throw Error('Invalid rigid bond.');
+    if (lexical(bond.a, bond.b) > 0) [bond.a, bond.b] = [bond.b, bond.a];
+  }
+  bonds.sort((a, b) => lexical(a.a, b.a) || lexical(a.b, b.b));
+  if (bonds.some((b, i) => i > 0 && b.a === bonds[i - 1].a && b.b === bonds[i - 1].b))
+    throw Error('Duplicate rigid bond.');
+  const input = copyPortableValue(
+    rawOptions as unknown as PortableValue,
+  ) as unknown as RigidStepOptions3D;
+  const options = {
+    gravity: ZERO,
+    restitution: 0,
+    friction: 0.5,
+    solverIterations: 96,
+    maxWork: 200000,
+    maxEvents: 64,
+    contactTolerance: 1e-8,
+    velocityTolerance: 1e-8,
+    maxPenetration: 1e-5,
+    ...input,
+  };
+  assertFiniteVec3(options.gravity);
+  if (
+    !(options.dt > 0) ||
+    !Number.isFinite(options.dt) ||
+    ![
+      options.restitution,
+      options.friction,
+      options.contactTolerance,
+      options.velocityTolerance,
+      options.maxPenetration,
+    ].every(Number.isFinite) ||
+    options.restitution < 0 ||
+    options.restitution > 1 ||
+    options.friction < 0 ||
+    options.contactTolerance <= 0 ||
+    options.velocityTolerance <= 0 ||
+    options.maxPenetration < options.contactTolerance
+  )
+    throw Error('Invalid rigid step options.');
+  for (const [value, maximum] of [
+    [options.solverIterations, 1024],
+    [options.maxWork, 1000000],
+    [options.maxEvents, 1024],
+  ])
+    if (!Number.isInteger(value) || value < 1 || value > maximum)
+      throw Error('Invalid rigid work bound.');
+  if (
+    options.resolvedParticleContacts !== undefined &&
+    typeof options.resolvedParticleContacts !== 'boolean'
+  )
+    throw Error('Invalid resolved particle contact mode.');
+  if (options.deferFracture !== undefined && typeof options.deferFracture !== 'boolean')
+    throw Error('Invalid deferred fracture mode.');
+  const particleList = options.nonCollidingParticleIds ?? [];
+  if (!Array.isArray(particleList) || particleList.length > parcels.length)
+    throw Error('Invalid non-colliding particle list.');
+  const particleIds = new Set(particleList);
+  if (
+    particleIds.size !== particleList.length ||
+    particleList.some((id) => !byId.has(id)) ||
+    bonds.some((b) => particleIds.has(b.a) || particleIds.has(b.b))
+  )
+    throw Error('Non-colliding particles require unique existing unbonded IDs.');
+  const skipPair = (a: Body<T>, b: Body<T>) =>
+    (a.anchored && b.anchored) ||
+    (a.members.length === 1 &&
+      b.members.length === 1 &&
+      particleIds.has(a.members[0].id) &&
+      particleIds.has(b.members[0].id));
+  function contactGeometry(a: T, b: T, tolerance: number) {
+    if (!particleIds.has(a.id) && !particleIds.has(b.id))
+      return contactWithinTolerance(a, b, tolerance);
+    const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
+    return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
+  }
+  return run();
+
+  function* run(): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
+    let work = 0,
+      events = 0,
+      contactCount = 0,
+      supportConstraintEnergy = 0;
+    let boundaryLinearImpulse: Vec3 = ZERO,
+      boundaryAngularImpulse: Vec3 = ZERO;
+    let gravityLinearImpulse: Vec3 = ZERO,
+      gravityAngularImpulse: Vec3 = ZERO;
+    const progress = (phase: RigidWork3D['phase']): RigidWork3D => {
+      if (++work > options.maxWork) throw Error('Rigid work limit exceeded.');
+      return { phase, work };
+    };
+    const external = new Map(parcels.map((p) => [p.id, { linear: ZERO, angular: ZERO }]));
+    const initial = new Map(
+      parcels.map((p) => [
+        p.id,
+        {
+          momentum: scaleVec3(p.velocity, p.mass),
+          angular: addVec3(
+            p.intrinsicAngularMomentum,
+            crossVec3(p.center, scaleVec3(p.velocity, p.mass)),
+          ),
+        },
+      ]),
+    );
+    const heat = new Map(parcels.map((p) => [p.id, { id: p.id, impact: 0, friction: 0 }]));
+    const broken = new Set(bonds.filter((b) => b.strength === 0)),
+      retained = () => bonds.filter((b) => !broken.has(b));
+    const bodies: Body<T>[] = [];
+    for (const ids of componentIds(parcels, retained())) {
+      yield progress('assembly');
+      const members = ids.map((id) => byId.get(id)!),
+        anchored = ids.some((id) => anchors.has(id));
+      const props = validateRigidAssemblyMotion3D(members, anchored);
+      const body: Body<T> = {
+        ...props,
+        members,
+        anchored,
+        radius: Math.max(
+          ...members.map(
+            (p) => lengthVec3(subtractVec3(p.center, props.center)) + lengthVec3(p.halfExtents),
+          ),
+        ),
+      };
+      bodies.push(body);
+    }
+    const parcelEnergy = () =>
+      finite(
+        parcels.reduce(
+          (sum, p) =>
+            sum +
+            0.5 * p.mass * dotVec3(p.velocity, p.velocity) +
+            0.5 *
+              dotVec3(
+                p.intrinsicAngularMomentum,
+                applyMatrix3(
+                  invertTensor(tensor(p.orientation, p.principalInertia)),
+                  p.intrinsicAngularMomentum,
+                ),
+              ) -
+            p.mass * dotVec3(options.gravity, p.center),
+          0,
+        ),
+      );
+    const parcelMomentum = () => ({
+      linear: parcels.reduce<Vec3>((sum, p) => addVec3(sum, scaleVec3(p.velocity, p.mass)), ZERO),
+      angular: parcels.reduce<Vec3>(
+        (sum, p) =>
+          addVec3(
+            sum,
+            addVec3(p.intrinsicAngularMomentum, crossVec3(p.center, scaleVec3(p.velocity, p.mass))),
+          ),
+        ZERO,
+      ),
+    });
+    const beforeEnergy = parcelEnergy(),
+      beforeMomentum = parcelMomentum();
+    assertFiniteVec3(beforeMomentum.linear, 'initial total momentum');
+    assertFiniteVec3(beforeMomentum.angular, 'initial total angular momentum');
+    function record(parcel: T, impulse: Vec3, point: Vec3): void {
+      const row = external.get(parcel.id)!;
+      row.linear = addVec3(row.linear, impulse);
+      row.angular = addVec3(row.angular, crossVec3(point, impulse));
+    }
+    function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3): void {
+      record(parcel, impulse, point);
+      if (body.anchored) {
+        boundaryLinearImpulse = addVec3(boundaryLinearImpulse, impulse);
+        boundaryAngularImpulse = addVec3(boundaryAngularImpulse, crossVec3(point, impulse));
+      } else {
+        body.velocity = addVec3(body.velocity, scaleVec3(impulse, 1 / body.mass));
+        body.angularMomentum = addVec3(
+          body.angularMomentum,
+          crossVec3(subtractVec3(point, body.center), impulse),
+        );
+      }
+    }
+    function kick(dt: number): Map<Body<T>, { velocity: Vec3; angular: Vec3 }> {
+      const prior = new Map(
+        bodies.map((body) => [body, { velocity: body.velocity, angular: omega(body) }]),
+      );
+      for (const body of bodies) {
+        if (!body.anchored) body.velocity = addVec3(body.velocity, scaleVec3(options.gravity, dt));
+        for (const parcel of body.members) {
+          const impulse = scaleVec3(options.gravity, parcel.mass * dt);
+          record(parcel, impulse, parcel.center);
+          gravityLinearImpulse = addVec3(gravityLinearImpulse, impulse);
+          gravityAngularImpulse = addVec3(gravityAngularImpulse, crossVec3(parcel.center, impulse));
+          if (body.anchored) {
+            boundaryLinearImpulse = addVec3(boundaryLinearImpulse, impulse);
+            boundaryAngularImpulse = addVec3(
+              boundaryAngularImpulse,
+              crossVec3(parcel.center, impulse),
+            );
+          }
+        }
+      }
+      return prior;
+    }
+    function drift(dt: number): void {
+      for (const body of bodies)
+        if (!body.anchored) {
+          const before = body.center,
+            angular = omega(body);
+          const half = integrateOrientation(IDENTITY_QUATERNION, angular, dt / 2);
+          const midOmega = applyMatrix3(
+            invertTensor(rotateTensor(body.inertia, half)),
+            body.angularMomentum,
+          );
+          const rotation = integrateOrientation(IDENTITY_QUATERNION, midOmega, dt);
+          body.center = addVec3(body.center, scaleVec3(body.velocity, dt));
+          for (const parcel of body.members) {
+            parcel.center = addVec3(
+              body.center,
+              rotateVector(rotation, subtractVec3(parcel.center, before)),
+            );
+            parcel.orientation = normalizeQuaternion(
+              multiplyQuaternions(rotation, parcel.orientation),
+            );
+          }
+          body.inertia = rotateTensor(body.inertia, rotation);
+          body.inverseInertia = invertTensor(body.inertia);
+        }
+    }
+    function* project(): Generator<RigidWork3D, void, void> {
+      for (let iteration = 0; iteration < options.solverIterations; iteration++) {
+        let changed = false;
+        for (let i = 0; i < bodies.length; i++)
+          for (let j = i + 1; j < bodies.length; j++) {
+            const a = bodies[i],
+              b = bodies[j];
+            if (skipPair(a, b)) continue;
+            for (const pa of a.members)
+              for (const pb of b.members) {
+                yield progress('contact');
+                const contact = contactGeometry(pa, pb, 0);
+                // Leave strictly more clearance than the smallest swept allowance
+                // (contactTolerance / 4). Accepting a full contactTolerance of
+                // overlap can consume that allowance and stall a settling body.
+                if (!contact || contact.depth <= options.contactTolerance / 8) continue;
+                if (contact.depth > options.maxPenetration)
+                  throw Error('Rigid penetration exceeds geometric correction limit.');
+                const total = inverseMass(a) + inverseMass(b);
+                for (const [body, direction] of [
+                  [a, -1],
+                  [b, 1],
+                ] as const)
+                  if (!body.anchored) {
+                    const shift = scaleVec3(
+                      contact.normal,
+                      (direction * contact.depth * inverseMass(body)) / total,
+                    );
+                    body.center = addVec3(body.center, shift);
+                    for (const member of body.members)
+                      member.center = addVec3(member.center, shift);
+                  }
+                changed = true;
+              }
+          }
+        if (!changed) return;
+      }
+      throw Error('Rigid geometric projection did not converge.');
+    }
+    const settledParticlePairs = new Set<string>();
+    let captureSettledParticleContacts = options.resolvedParticleContacts === true;
+    function* solve(
+      impact: boolean,
+      prior?: Map<Body<T>, { velocity: Vec3; angular: Vec3 }>,
+      restingPairs?: Set<string>,
+      collectPairs?: Set<string>,
+    ): Generator<RigidWork3D, void, void> {
+      const contacts: Contact<T>[] = [];
+      for (let i = 0; i < bodies.length; i++)
+        for (let j = i + 1; j < bodies.length; j++) {
+          const a = bodies[i],
+            b = bodies[j];
+          if (skipPair(a, b)) continue;
+          for (const pa of a.members)
+            for (const pb of b.members) {
+              yield progress('contact');
+              const contact = contactGeometry(pa, pb, options.contactTolerance);
+              if (!contact) continue;
+              if (contact.depth > options.maxPenetration)
+                throw Error('Rigid penetration exceeds correction-free candidate limit.');
+              const pairKey = JSON.stringify([pa.id, pb.id]);
+              const particleBoundary = particleIds.has(pa.id) || particleIds.has(pb.id);
+              if (captureSettledParticleContacts && particleBoundary)
+                settledParticlePairs.add(pairKey);
+              const friction = particleBoundary ? 0 : options.friction,
+                restitution = particleBoundary ? 0 : options.restitution;
+              const n = contact.normal,
+                tangent1 = normalizeVec3(
+                  crossVec3(
+                    n,
+                    BASIS.reduce((best, axis) =>
+                      Math.abs(dotVec3(n, axis)) < Math.abs(dotVec3(n, best)) ? axis : best,
+                    ),
+                  ),
+                ),
+                tangent2 = crossVec3(n, tangent1);
+              const points = particleBoundary
+                ? [particleBoxGeometry(pa, pb, particleIds.has(pa.id)).point]
+                : manifold(pa, pb, n, options.contactTolerance, options.contactTolerance);
+              if (points.length === 0)
+                throw Error(`Unresolved contact manifold between ${pa.id} and ${pb.id}.`);
+              const beforeKickVelocity = (body: Body<T>, point: Vec3) => {
+                const motion = prior?.get(body);
+                return motion
+                  ? addVec3(
+                      motion.velocity,
+                      crossVec3(motion.angular, subtractVec3(point, body.center)),
+                    )
+                  : pointVelocity(body, point);
+              };
+              // Require the entire manifold to lift off beyond the solver's
+              // residual band; dropping individual corners destabilizes stacks.
+              const separating = points.every(
+                (point) =>
+                  dotVec3(
+                    subtractVec3(beforeKickVelocity(b, point), beforeKickVelocity(a, point)),
+                    n,
+                  ) >
+                  4 * options.velocityTolerance,
+              );
+              if (!separating) collectPairs?.add(pairKey);
+              if (!impact && separating && !settledParticlePairs.has(pairKey)) continue;
+              for (const point of points) {
+                const speed = dotVec3(
+                  subtractVec3(pointVelocity(b, point), pointVelocity(a, point)),
+                  n,
+                );
+                const previousRelative = subtractVec3(
+                  beforeKickVelocity(b, point),
+                  beforeKickVelocity(a, point),
+                );
+                const physicalImpact =
+                  impact &&
+                  !settledParticlePairs.has(pairKey) &&
+                  !restingPairs?.has(pairKey) &&
+                  speed < -options.velocityTolerance;
+                const previousTangent = subtractVec3(
+                  previousRelative,
+                  scaleVec3(n, dotVec3(previousRelative, n)),
+                );
+                contacts.push({
+                  a,
+                  b,
+                  pa,
+                  pb,
+                  point,
+                  normal: n,
+                  tangent1,
+                  tangent2,
+                  normalImpulse: 0,
+                  tangentImpulse: ZERO,
+                  target: physicalImpact ? -restitution * speed : 0,
+                  friction,
+                  restitution,
+                  impact: physicalImpact,
+                  physicalFriction:
+                    physicalImpact || lengthVec3(previousTangent) > options.velocityTolerance,
+                  normalWork: 0,
+                  frictionWork: 0,
+                });
+              }
+            }
+        }
+      contactCount += contacts.length;
+      if (contacts.length > 4096) throw Error('Rigid contact count exceeded.');
+      if (contacts.length === 0) return;
+      const kineticBefore = bodies.reduce(
+        (sum, body) =>
+          sum +
+          0.5 * body.mass * dotVec3(body.velocity, body.velocity) +
+          0.5 * dotVec3(body.angularMomentum, omega(body)),
+        0,
+      );
+      const relative = (c: Contact<T>) =>
+        subtractVec3(pointVelocity(c.b, c.point), pointVelocity(c.a, c.point));
+      const impulse = (c: Contact<T>, j: Vec3) => {
+        apply(c.a, c.pa, scaleVec3(j, -1), c.point);
+        apply(c.b, c.pb, j, c.point);
+      };
+      for (let iteration = 0; iteration < options.solverIterations; iteration++) {
+        for (const c of contacts) {
+          yield progress('contact');
+          const velocity = relative(c),
+            denominator = dotVec3(c.normal, effective(c, c.normal));
+          const next = Math.max(
+            0,
+            c.normalImpulse + (c.target - dotVec3(velocity, c.normal)) / denominator,
+          );
+          const delta = next - c.normalImpulse;
+          c.normalImpulse = next;
+          c.normalWork += delta * dotVec3(velocity, c.normal) + 0.5 * delta * delta * denominator;
+          impulse(c, scaleVec3(c.normal, delta));
+          if (c.friction === 0) continue;
+          const current = relative(c),
+            t1 = c.tangent1,
+            t2 = c.tangent2;
+          const k11 = dotVec3(t1, effective(c, t1)),
+            k22 = dotVec3(t2, effective(c, t2)),
+            k12 = dotVec3(t1, effective(c, t2));
+          const determinant = k11 * k22 - k12 * k12;
+          if (!(determinant > 0)) throw Error('Invalid tangent effective inertia.');
+          const v1 = dotVec3(current, t1),
+            v2 = dotVec3(current, t2);
+          const old1 = dotVec3(c.tangentImpulse, t1),
+            old2 = dotVec3(c.tangentImpulse, t2);
+          const rhs1 = k11 * old1 + k12 * old2 - v1,
+            rhs2 = k12 * old1 + k22 * old2 - v2;
+          const diskSolution = (alpha: number) => {
+            const determinant = (k11 + alpha) * (k22 + alpha) - k12 * k12;
+            return [
+              (rhs1 * (k22 + alpha) - rhs2 * k12) / determinant,
+              (rhs2 * (k11 + alpha) - rhs1 * k12) / determinant,
+            ];
+          };
+          const limit = c.friction * next;
+          let solved = diskSolution(0);
+          if (limit === 0) solved = [0, 0];
+          else if (Math.hypot(...solved) > limit) {
+            // Anisotropic tangent inertia needs the constrained quadratic solve;
+            // radial clamping of an unconstrained impulse violates Coulomb KKT.
+            let low = 0,
+              high = Math.max(1, Math.hypot(rhs1, rhs2) / limit);
+            for (let search = 0; search < 48; search++) {
+              yield progress('contact');
+              const middle = (low + high) / 2;
+              if (Math.hypot(...diskSolution(middle)) > limit) low = middle;
+              else high = middle;
+            }
+            solved = diskSolution(high);
+          }
+          const candidate = addVec3(scaleVec3(t1, solved[0]), scaleVec3(t2, solved[1]));
+          const change = subtractVec3(candidate, c.tangentImpulse);
+          c.tangentImpulse = candidate;
+          c.frictionWork += dotVec3(change, current) + 0.5 * dotVec3(change, effective(c, change));
+          impulse(c, change);
+        }
+        if (
+          contacts.every((c) => {
+            const speed = dotVec3(relative(c), c.normal) - c.target;
+            const normalDone =
+              c.normalImpulse > options.velocityTolerance
+                ? Math.abs(speed) <= options.velocityTolerance
+                : speed >= -options.velocityTolerance;
+            if (!normalDone || c.friction === 0 || c.normalImpulse === 0) return normalDone;
+            const v = relative(c),
+              tangent = subtractVec3(v, scaleVec3(c.normal, dotVec3(v, c.normal)));
+            const impulseLength = lengthVec3(c.tangentImpulse),
+              limit = c.friction * c.normalImpulse;
+            return impulseLength < limit - options.velocityTolerance
+              ? lengthVec3(tangent) <= options.velocityTolerance
+              : dotVec3(c.tangentImpulse, tangent) <= options.velocityTolerance &&
+                  lengthVec3(crossVec3(c.tangentImpulse, tangent)) <=
+                    options.velocityTolerance * Math.max(1, impulseLength);
+          }) &&
+          (contacts.every((c) => c.friction === 0) || iteration >= 3)
+        )
+          break;
+        if (iteration + 1 === options.solverIterations)
+          throw Error('Rigid contact solve did not converge.');
+      }
+      const normalWork = contacts.reduce((sum, c) => sum + (c.impact ? c.normalWork : 0), 0),
+        frictionWork = contacts.reduce(
+          (sum, c) => sum + (c.physicalFriction ? c.frictionWork : 0),
+          0,
+        );
+      supportConstraintEnergy += contacts.reduce(
+        (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
+        0,
+      );
+      const roundoff =
+        1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
+      if (frictionWork > roundoff || (impact && normalWork > roundoff))
+        throw Error('Contact iteration generated unclassified energy.');
+      if (
+        impact &&
+        contacts.every((c) => c.restitution === 1 && c.friction === 0) &&
+        Math.abs(normalWork) > roundoff
+      )
+        throw Error('Elastic contact energy residual exceeds limit.');
+      const impactLoss = impact ? Math.max(0, -normalWork) : 0,
+        frictionLoss = Math.max(0, -frictionWork);
+      const normalWeight = contacts.reduce((sum, c) => sum + (c.impact ? c.normalImpulse : 0), 0),
+        frictionWeight = contacts.reduce(
+          (sum, c) => sum + (c.physicalFriction ? lengthVec3(c.tangentImpulse) : 0),
+          0,
+        );
+      for (const c of contacts)
+        for (const parcel of [c.pa, c.pb]) {
+          const row = heat.get(parcel.id)!;
+          if (normalWeight > 0 && c.impact)
+            row.impact += (0.5 * impactLoss * c.normalImpulse) / normalWeight;
+          if (frictionWeight > 0 && c.physicalFriction)
+            row.friction += (0.5 * frictionLoss * lengthVec3(c.tangentImpulse)) / frictionWeight;
+        }
+    }
+
+    function* nextImpact(
+      duration: number,
+      starts: Map<Body<T>, Vec3>,
+    ): Generator<RigidWork3D, number | null, void> {
+      let hit: number | null = null;
+      for (let i = 0; i < bodies.length; i++)
+        for (let j = i + 1; j < bodies.length; j++) {
+          const a = bodies[i],
+            b = bodies[j];
+          if (skipPair(a, b)) continue;
+          const swept = (body: Body<T>) => {
+            const end = addVec3(body.center, scaleVec3(body.velocity, duration));
+            const padding = scaleVec3(subtractVec3(body.velocity, starts.get(body)!), duration / 4);
+            return {
+              min: body.center.map(
+                (v, axis) => Math.min(v, end[axis]) - body.radius - Math.abs(padding[axis]),
+              ) as unknown as Vec3,
+              max: body.center.map(
+                (v, axis) => Math.max(v, end[axis]) + body.radius + Math.abs(padding[axis]),
+              ) as unknown as Vec3,
+            };
+          };
+          yield progress('sweep');
+          if (!boundsOverlap(swept(a), swept(b))) continue;
+          const relativeAcceleration = scaleVec3(
+            subtractVec3(
+              subtractVec3(b.velocity, starts.get(b)!),
+              subtractVec3(a.velocity, starts.get(a)!),
+            ),
+            2 / duration,
+          );
+          const rotating =
+            lengthVec3(omega(a)) * duration * a.radius > options.contactTolerance / 4 ||
+            lengthVec3(omega(b)) * duration * b.radius > options.contactTolerance / 4;
+          for (const pa of a.members)
+            for (const pb of b.members) {
+              yield progress('sweep');
+              const particleA = particleIds.has(pa.id),
+                particleB = particleIds.has(pb.id);
+              const time =
+                rotating || particleA || particleB
+                  ? boundedContactAdvance(
+                      a,
+                      b,
+                      pa,
+                      pb,
+                      duration,
+                      rotating || particleA || particleB
+                        ? options.maxPenetration / 4
+                        : options.contactTolerance / 4,
+                      particleA,
+                      particleB,
+                      relativeAcceleration,
+                    )
+                  : translationImpact(
+                      pa,
+                      pb,
+                      subtractVec3(starts.get(b)!, starts.get(a)!),
+                      relativeAcceleration,
+                      duration,
+                      options.contactTolerance,
+                    );
+              if (time !== null && (hit === null || time < hit)) hit = time;
+            }
+        }
+      return hit;
+    }
+    // Each accepted drift is bracketed by its own gravity half kicks. A whole-step
+    // kick around an intermediate impact changes gravitational work by an amount
+    // proportional to the impulse and the impact's offset from the midpoint.
+    // Trial support solves choose a conservative interval; rejected trials restore
+    // every physical receipt while retaining their actual computational work.
+    yield* project();
+    yield* solve(true);
+    captureSettledParticleContacts = false;
+    let remaining = options.dt;
+    while (remaining > 0) {
+      const motions = bodies.map((body) => ({
+        body,
+        velocity: body.velocity,
+        angularMomentum: body.angularMomentum,
+      }));
+      const savedExternal = [...external].map(([id, row]) => [id, { ...row }] as const);
+      const savedHeat = [...heat].map(([id, row]) => [id, { ...row }] as const);
+      const savedBoundaryP = boundaryLinearImpulse,
+        savedBoundaryL = boundaryAngularImpulse;
+      const savedGravityP = gravityLinearImpulse,
+        savedGravityL = gravityAngularImpulse;
+      const savedSupport = supportConstraintEnergy,
+        savedContacts = contactCount;
+      function restoreTrial(): void {
+        for (const { body, velocity, angularMomentum } of motions) {
+          body.velocity = velocity;
+          body.angularMomentum = angularMomentum;
+        }
+        for (const [id, row] of savedExternal) external.set(id, { ...row });
+        for (const [id, row] of savedHeat) heat.set(id, { ...row });
+        boundaryLinearImpulse = savedBoundaryP;
+        boundaryAngularImpulse = savedBoundaryL;
+        gravityLinearImpulse = savedGravityP;
+        gravityAngularImpulse = savedGravityL;
+        supportConstraintEnergy = savedSupport;
+        contactCount = savedContacts;
+      }
+      let duration = remaining,
+        predictedContact = false;
+      const restingPairs = new Set<string>();
+      for (let trial = 0; ; trial++) {
+        const beforeKick = kick(duration / 2);
+        restingPairs.clear();
+        yield* solve(false, beforeKick, undefined, restingPairs);
+        const hit = yield* nextImpact(duration, new Map(motions.map((m) => [m.body, m.velocity])));
+        predictedContact = hit !== null;
+        if (hit === null || hit >= duration) break;
+        if (!(hit > 0)) throw Error('Unresolved zero-time swept contact.');
+        if (trial >= options.solverIterations)
+          throw Error('Impact interval refinement did not converge.');
+        restoreTrial();
+        duration = hit;
+      }
+      if (predictedContact && ++events > options.maxEvents)
+        throw Error('Rigid impact event limit exceeded.');
+      drift(duration);
+      remaining -= duration;
+      const beforeLastKick = kick(duration / 2);
+      yield* project();
+      // Use pre-kick approach/slip to distinguish an impact from resting support;
+      // restitution and physical heat use the actual velocity at contact time.
+      yield* solve(true, beforeLastKick, restingPairs);
+    }
+    for (const body of bodies) sync(body);
+
+    const changes = parcels.map((p) => {
+      const start = initial.get(p.id)!,
+        momentum = scaleVec3(p.velocity, p.mass);
+      return {
+        id: p.id,
+        linear: subtractVec3(momentum, start.momentum),
+        angular: subtractVec3(
+          addVec3(p.intrinsicAngularMomentum, crossVec3(p.center, momentum)),
+          start.angular,
+        ),
+      };
+    });
+    const loadDemands = rigidLoadDemands3D(
+      parcels,
+      retained(),
+      [...anchors],
+      changes,
+      [...external].map(([id, v]) => ({ id, ...v })),
+    );
+    if (!options.deferFracture) {
+      const fracture = fractureRigidBonds3D(parcels, retained(), loadDemands, options.dt);
+      let next = fracture.next();
+      while (!next.done) {
+        yield progress('fracture');
+        next = fracture.next();
+      }
+      for (const bond of next.value) broken.add(bond);
+    }
+    const afterEnergy = parcelEnergy(),
+      afterMomentum = parcelMomentum();
+    const numericalLinearMomentumResidual = addVec3(
+      subtractVec3(subtractVec3(afterMomentum.linear, beforeMomentum.linear), gravityLinearImpulse),
+      boundaryLinearImpulse,
+    );
+    const numericalAngularMomentumResidual = addVec3(
+      subtractVec3(
+        subtractVec3(afterMomentum.angular, beforeMomentum.angular),
+        gravityAngularImpulse,
+      ),
+      boundaryAngularImpulse,
+    );
+    for (const vector of [
+      afterMomentum.linear,
+      afterMomentum.angular,
+      gravityLinearImpulse,
+      gravityAngularImpulse,
+      boundaryLinearImpulse,
+      boundaryAngularImpulse,
+      numericalLinearMomentumResidual,
+      numericalAngularMomentumResidual,
+    ])
+      assertFiniteVec3(vector, 'aggregate momentum receipt');
+    const dissipatedEnergyByParcel = [...heat.values()].filter(
+      (row) => row.impact > 0 || row.friction > 0,
+    );
+    const physicalHeat = dissipatedEnergyByParcel.reduce(
+      (sum, row) => sum + row.impact + row.friction,
+      0,
+    );
+    for (const parcel of parcels) readParcel(parcel);
+    return {
+      parcels,
+      loadDemands,
+      bonds: retained(),
+      brokenBonds: bonds.filter((b) => broken.has(b)),
+      components: componentIds(parcels, retained()),
+      dissipatedEnergyByParcel,
+      boundaryLinearImpulse,
+      boundaryAngularImpulse,
+      numericalEnergyResidual: finite(afterEnergy - beforeEnergy + physicalHeat),
+      numericalLinearMomentumResidual,
+      numericalAngularMomentumResidual,
+      supportConstraintEnergy: finite(supportConstraintEnergy),
+      report: { work, events, contacts: contactCount },
+    };
+  }
+}

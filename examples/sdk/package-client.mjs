@@ -26,9 +26,48 @@ assert.equal(world.energyBalance().driftQ, 0n);
 assert.equal(final.packedCells[3 + 8 * (6 + 8 * 3)] & 255, MAT.STONE);
 assert.throws(() => world.restore({ ...final, rulesVersion: 'bad' }));
 assert.deepEqual(world.snapshot(), final);
+const {
+  solveReferenceCircuit3D,
+  cuboidMassProperties,
+  partitionMaterialParcel3D,
+  parcelConservation3D,
+} = await import('state-space-engine/experimental/3d/multiphysics');
+const circuit = solveReferenceCircuit3D({
+  nodeCount: 3,
+  connections: [
+    { a: 0, b: 1, resistance: 2 },
+    { a: 1, b: 2, resistance: 4 },
+  ],
+  source: { positive: 0, negative: 2, emf: 12, internalResistance: 6 },
+});
+assert.deepEqual(circuit.potentials, [6, 4, 0]);
+assert.equal(circuit.sourceCurrent, 1);
+const cube = cuboidMassProperties([0.5, 0.5, 0.5], 2);
+const parcel = {
+  id: 'source',
+  owner: 'solid',
+  material: 'copper',
+  mass: cube.mass,
+  referenceAmount: 1,
+  heatCapacity: 1,
+  thermalQ: 11,
+  latentQ: 0,
+  chemicalQ: 3,
+  center: [0, 0, 0],
+  velocity: [1, 0, 0],
+  orientation: [0, 0, 0, 1],
+  principalInertia: cube.inertia,
+  intrinsicAngularMomentum: [0, 0, 0],
+};
+const children = partitionMaterialParcel3D(parcel, [
+  { id: 'a', weight: 1 },
+  { id: 'b', weight: 1 },
+]);
+assert.deepEqual(parcelConservation3D(children), parcelConservation3D([parcel]));
 console.log(
   JSON.stringify({
     exportCount: exports.length,
+    multiphysicsReferences: true,
     structuralRestartExact: true,
     positiveFall: true,
     invalidRestoreAtomic: true,
