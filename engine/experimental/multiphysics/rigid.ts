@@ -588,73 +588,84 @@ function boundedContactAdvance<T extends RigidParcel3D>(
     ab = particleB ? 0 : changeBound(b);
   const wa = particleA ? 0 : lengthVec3(omega(a)) + aa * duration,
     wb = particleB ? 0 : lengthVec3(omega(b)) + ab * duration;
-  // A co-rotating separating plane avoids first-order false approach between
-  // newly released, co-rotating fragments. Its frame terms remain bounded for
-  // every corner pair, so this is still conservative rather than a contact skip.
+  // Either a fixed or a co-rotating plane can certify separation. Use the
+  // farther certified interval, avoiding false approach at hidden corners near
+  // small terminals while retaining the tight fixed-plane bound for large walls.
   const frameOmega =
-    !a.anchored && !b.anchored && !particleA && !particleB
-      ? scaleVec3(addVec3(omega(a), omega(b)), 0.5)
-      : ZERO;
-  const frameSpeed = lengthVec3(frameOmega);
-  const accelerationBound = lengthVec3(relativeAcceleration);
-  const relativeStartVelocity = subtractVec3(
-    subtractVec3(b.velocity, a.velocity),
-    scaleVec3(relativeAcceleration, duration / 2),
-  );
-  const relativeSpeed = lengthVec3(relativeStartVelocity) + accelerationBound * duration;
-  const span =
-    lengthVec3(subtractVec3(b.center, a.center)) + relativeSpeed * duration + a.radius + b.radius;
-  const planeAcceleration =
-    frameSpeed === 0
-      ? Math.max(0, -dotVec3(relativeAcceleration, plane.normal))
-      : accelerationBound;
-  const curvature = finite(
-    planeAcceleration +
-      wa * wa * a.radius +
-      wb * wb * b.radius +
-      2 * frameSpeed * (relativeSpeed + wa * a.radius + wb * b.radius) +
-      frameSpeed * frameSpeed * span,
-  );
-  const uncertainSpeed = finite((aa * a.radius + ab * b.radius) * duration);
-  let limit = duration;
-  const xs = particleA
-    ? [addVec3(pa.center, scaleVec3(plane.normal, Math.min(...pa.halfExtents)))]
-    : corners(pa);
-  const ys = particleB
-    ? [subtractVec3(pb.center, scaleVec3(plane.normal, Math.min(...pb.halfExtents)))]
-    : corners(pb);
-  for (const x of xs)
-    for (const y of ys) {
-      const distance = dotVec3(subtractVec3(y, x), plane.normal) + allowance;
-      if (!(distance > 0))
-        throw Error('Rotating contact requires overlap projection before advancement.');
-      const speed =
-        dotVec3(
-          subtractVec3(
+    particleA || a.anchored
+      ? omega(b)
+      : particleB || b.anchored
+        ? omega(a)
+        : scaleVec3(addVec3(omega(a), omega(b)), 0.5);
+  function certifiedInterval(frameOmega: Vec3): number {
+    const frameSpeed = lengthVec3(frameOmega);
+    const accelerationBound = lengthVec3(relativeAcceleration);
+    const relativeStartVelocity = subtractVec3(
+      subtractVec3(b.velocity, a.velocity),
+      scaleVec3(relativeAcceleration, duration / 2),
+    );
+    const relativeSpeed = lengthVec3(relativeStartVelocity) + accelerationBound * duration;
+    const span =
+      lengthVec3(subtractVec3(b.center, a.center)) + relativeSpeed * duration + a.radius + b.radius;
+    const planeAcceleration =
+      frameSpeed === 0
+        ? Math.max(0, -dotVec3(relativeAcceleration, plane.normal))
+        : accelerationBound;
+    const curvature = finite(
+      planeAcceleration +
+        wa * wa * a.radius +
+        wb * wb * b.radius +
+        2 * frameSpeed * (relativeSpeed + wa * a.radius + wb * b.radius) +
+        frameSpeed * frameSpeed * span,
+    );
+    const uncertainSpeed = finite((aa * a.radius + ab * b.radius) * duration);
+    let limit = duration;
+    const xs = particleA
+      ? [addVec3(pa.center, scaleVec3(plane.normal, Math.min(...pa.halfExtents)))]
+      : corners(pa);
+    const ys = particleB
+      ? [subtractVec3(pb.center, scaleVec3(plane.normal, Math.min(...pb.halfExtents)))]
+      : corners(pb);
+    for (const x of xs)
+      for (const y of ys) {
+        const distance = dotVec3(subtractVec3(y, x), plane.normal) + allowance;
+        if (!(distance > 0))
+          throw Error('Rotating contact requires overlap projection before advancement.');
+        const speed =
+          dotVec3(
             subtractVec3(
-              particleB ? b.velocity : pointVelocity(b, y),
-              particleA ? a.velocity : pointVelocity(a, x),
+              subtractVec3(
+                particleB ? b.velocity : pointVelocity(b, y),
+                particleA ? a.velocity : pointVelocity(a, x),
+              ),
+              addVec3(
+                crossVec3(frameOmega, subtractVec3(y, x)),
+                scaleVec3(relativeAcceleration, duration / 2),
+              ),
             ),
-            addVec3(
-              crossVec3(frameOmega, subtractVec3(y, x)),
-              scaleVec3(relativeAcceleration, duration / 2),
-            ),
-          ),
-          plane.normal,
-        ) - uncertainSpeed;
-      let bound = Infinity;
-      if (curvature === 0) {
-        if (speed < 0) bound = distance / -speed;
-      } else {
-        const root = Math.sqrt(speed * speed + 2 * curvature * distance);
-        bound = speed < 0 ? (2 * distance) / (root - speed) : (speed + root) / curvature;
+            plane.normal,
+          ) - uncertainSpeed;
+        let bound = Infinity;
+        if (curvature === 0) {
+          if (speed < 0) bound = distance / -speed;
+        } else {
+          const root = Math.sqrt(speed * speed + 2 * curvature * distance);
+          bound = speed < 0 ? (2 * distance) / (root - speed) : (speed + root) / curvature;
+        }
+        limit = Math.min(limit, bound);
       }
-      limit = Math.min(limit, bound);
-    }
+    return limit;
+  }
+  const fixed = certifiedInterval(ZERO);
+  const limit =
+    fixed === duration || lengthVec3(frameOmega) === 0
+      ? fixed
+      : Math.max(fixed, certifiedInterval(frameOmega));
   if (!(limit > 0) || !Number.isFinite(limit))
     throw Error('Rotational advancement failed to make finite progress.');
   return limit;
 }
+
 function closestEdgePoint(a: RigidParcel3D, b: RigidParcel3D, normal: Vec3): Vec3 {
   const aa = axes(a),
     bb = axes(b);

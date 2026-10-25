@@ -360,3 +360,29 @@ within 1,998 CPU tests and 24 Node tests; its serial supervisor receipt is
 `5a12ac1197784b1d8000e7f7c1910c4d`. Both tank refinement cases also passed after
 the load integration: `f0928fc7fe43406a8e3ee9752f91aa9d` (31.23 seconds).
 Type checks, structural lint and formatting passed.
+
+### Bounded electrical mechanism cases
+
+The private `demonstrations.ts` fixtures now exercise a source-paid copper heater
+that melts and releases a wax valve, a rotating copper contact that opens and can
+be reclosed by a recorded orientation edit, and a slow liquid impact that moves
+a conductor and opens its circuit. The wax starts near the end of its latent
+plateau; an otherwise identical control with its battery removed stays solid and
+bonded. These cases preserve mass and compare saved continuation. The falling
+and breaking battery is covered by the separate world-tick case above.
+
+The fluid switch uses speed `0.2` and timestep `0.001` in model units. Speed `2`
+at the same timestep produces about `-0.174` numerical energy error in the current
+pressure projection and rejects against the unchanged `0.01` limit. This is an
+unresolved accuracy limitation, not successful high-speed qualification. Collision
+advancement now takes the longer interval certified by either a fixed or rotating
+separating plane, resolving a hidden-corner stall at small fixed terminals without
+skipping their contacts. The fifth combined-failure demonstration, broader fluid
+and reactive gates, builder, and native macOS acceptance remain outstanding.
+
+The mechanism checkpoint passed 134 focused multiphysics tests inside 2,001 CPU
+tests, then 24 Node tests, with serial receipt
+`ffa5e00a23e2467b95c046e1b78b71e9`. Both tank refinement cases passed separately
+on the final collision bound: `31575f1007d04ecaaecb9d2f17a9c048` (30.97 seconds).
+Type checks, structural lint and formatting also passed. All raw evidence remains
+local. These are CPU mechanism checks, not native builder or performance results.
