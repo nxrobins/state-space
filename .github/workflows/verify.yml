@@ -49,9 +49,7 @@ jobs:
       - name: Compiler API consumers (CPU)
         run: |
           uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m engine.generate --check
-          uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest \
-            tests.test_evolution.EvaluationProperties.test_reference_provenance_tracks_both_compiler_shim_and_implementation \
-            tests.test_evolution.EvaluationProperties.test_structure_only_errors_hashes_positive_behavior_and_continuation_are_mandatory -v
+          uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest tests.test_compiler_tools -v
       - name: Supervisor regressions (no GPU)
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_verification*.py' -v
       - name: Archive restoration regressions

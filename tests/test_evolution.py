@@ -19,35 +19,13 @@ from eval.benchmark import distribution, synchronized_sample, state_digest, run_
 from eval.codec import codec_vectors
 from eval.evaluator import compare_passes, evaluate_candidate, reference_outputs, validate_reference_evidence
 from eval.policy import TARGETS, EvaluationConfig, acceptance_errors, candidate_lint, canonical, constraints, strip_comments
-from eval.provenance import capture_context, read_immutable, read_json, write_immutable
+from eval.provenance import read_immutable, read_json, write_immutable
 from eval.scenes import acceptance_cases, prepared, cell
 from evolve_ss import PHASE_CONFIG, baseline_source, check_hard_constraints
 from tests.gpu_support import requires_gpu
 
 
 class EvaluationProperties(unittest.TestCase):
-    def test_reference_provenance_tracks_both_compiler_shim_and_implementation(self):
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            shim = root / "node_modules/@typescript/typescript6/index.js"
-            implementation = shim.parent / "node_modules/@typescript/old/index.js"
-            for path in (shim, implementation):
-                path.parent.mkdir(parents=True)
-            shim.write_text("module.exports = require('@typescript/old');")
-            implementation.write_text("module.exports = {version: '6.fixture'};")
-            with patch("eval.provenance.ROOT", root), \
-                 patch("eval.provenance.context_sources", return_value={}), \
-                 patch("eval.provenance.device_identity", return_value={}):
-                previous = capture_context()["runtime"]
-                self.assertEqual(previous["typescript"], "6.fixture")
-                self.assertEqual(previous["typescriptHash"], capture_context()["runtime"]["typescriptHash"])
-                for path in (implementation, shim):
-                    path.write_text(path.read_text() + "\n// modified compiler bytes\n")
-                    current = capture_context()["runtime"]
-                    self.assertEqual(current["typescript"], previous["typescript"])
-                    self.assertNotEqual(current["typescriptHash"], previous["typescriptHash"])
-                    previous = current
-
     def test_every_gate_and_objective_is_required_and_exactly_typed(self):
         for target in TARGETS:
             fitness = {key.removesuffix("_min"): value for key, value in constraints(target).items()}
