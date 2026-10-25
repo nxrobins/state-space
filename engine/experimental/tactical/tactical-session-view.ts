@@ -75,12 +75,7 @@ export type TacticalRevision3D = {
   storageRulesVersion: string;
 };
 export type TacticalBranchStatus3D =
-  | 'ready'
-  | 'running'
-  | 'failed'
-  | 'discarded'
-  | 'stale'
-  | 'committed';
+  'ready' | 'running' | 'failed' | 'discarded' | 'stale' | 'committed';
 export type TacticalPreview3D<T extends TacticalValue> = TacticalSessionSnapshot3D<T> & {
   /** Distinguishes an inspected candidate from a committed save envelope. */
   preview: {

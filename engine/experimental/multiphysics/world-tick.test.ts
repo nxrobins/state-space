@@ -117,7 +117,10 @@ test('physical series circuit pays all external/internal Joule heat from its one
   }
   expect(result.report.battery?.drawnUnits).toBe(String(spent));
   expect(
-    parcelTemperature3D(profiles, result.snapshot.parcels.find((p) => p.id === 'core')!),
+    parcelTemperature3D(
+      profiles,
+      result.snapshot.parcels.find((p) => p.id === 'core')!,
+    ),
   ).toBeGreaterThan(20);
   expect(
     inventoryEnergyDelta3D(

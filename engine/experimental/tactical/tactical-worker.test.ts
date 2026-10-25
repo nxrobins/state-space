@@ -554,7 +554,10 @@ describe('worker framing with mock transport and inert simulation', () => {
     f.messages.setRewrite((m, side) => (side === 0 && m.kind === 'restore' ? null : m));
     const pending = f.client.restore(saved),
       rejected = expect(pending).rejects.toThrow(/timed out/);
-    f.messages.deliver(1, f.messages.sent[0].find((m) => m.kind === 'restore')!);
+    f.messages.deliver(
+      1,
+      f.messages.sent[0].find((m) => m.kind === 'restore')!,
+    );
     await f.host.close();
     await vi.advanceTimersByTimeAsync(41);
     await rejected;

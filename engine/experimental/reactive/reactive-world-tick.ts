@@ -70,8 +70,7 @@ export type ReactiveConstrainedWorldSnapshot3D = {
   holds: ReactiveHold3D[];
 };
 export type ReactiveWorldSnapshot3D =
-  | ReactiveUnconstrainedWorldSnapshot3D
-  | ReactiveConstrainedWorldSnapshot3D;
+  ReactiveUnconstrainedWorldSnapshot3D | ReactiveConstrainedWorldSnapshot3D;
 export const reactiveSnapshotHolds3D = (
   snapshot: ReactiveWorldSnapshot3D,
 ): readonly ReactiveHold3D[] => (snapshot.schemaVersion === 2 ? snapshot.holds : []);
@@ -97,11 +96,7 @@ export type ReactiveWorldTickResult3D = {
   report: ReactiveWorldTickReport3D;
 };
 export type ReactiveWorldTickPhase3D =
-  | 'evolution'
-  | 'structure-prepare'
-  | 'structure'
-  | 'publish'
-  | 'complete';
+  'evolution' | 'structure-prepare' | 'structure' | 'publish' | 'complete';
 export type ReactiveWorldTickProgress3D = {
   status: 'running' | 'complete' | 'cancelled';
   phase: ReactiveWorldTickPhase3D;

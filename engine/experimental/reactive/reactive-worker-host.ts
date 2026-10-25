@@ -66,8 +66,7 @@ export function createReactiveWorkerHost3D<T extends ReactiveGameValue3D>(
     null;
   let inspection:
     | ({ id: number; slices: number } & (
-        | { kind: 'queries'; job: ReactiveQueryJob3D }
-        | { kind: 'changes'; job: ReactiveChangeJob3D }
+        { kind: 'queries'; job: ReactiveQueryJob3D } | { kind: 'changes'; job: ReactiveChangeJob3D }
       ))
     | null = null;
   let lastInspection = 0;

@@ -550,7 +550,7 @@ export class GpuStructuralWorld3D {
         0,
         this.#banks[bank][key].size,
       );
-    for (let start = 0; start < count; ) {
+    for (let start = 0; start < count;) {
       let slots = 0;
       while (start < count && slots < 16) {
         this.#trace(e, tick);
@@ -746,7 +746,7 @@ export class GpuStructuralWorld3D {
     this.#dispatch(e, 'supportSummary', input, damage);
     const summary = await this.#control(e),
       maxDistance = summary[1];
-    for (let level = maxDistance; level >= 0; ) {
+    for (let level = maxDistance; level >= 0;) {
       if (performance.now() > deadline)
         throw Error('Structural load solve deadline exceeded; tick not committed.');
       e = this.#device.createCommandEncoder();

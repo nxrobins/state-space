@@ -27,8 +27,7 @@ export type TerrainBodyGroupOptions3D = {
   maxCarryEntries?: number;
 };
 export type BodyDisplacementResponse3D =
-  | TerrainDisplacementResult3D
-  | TranslationDisplacementResult3D;
+  TerrainDisplacementResult3D | TranslationDisplacementResult3D;
 export type TerrainBodyGroupResult3D = {
   rulesVersion: typeof TERRAIN_BODY_GROUP_RULES_3D;
   scope: 'logical-tick-domain' | 'translation';
