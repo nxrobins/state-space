@@ -1,10 +1,12 @@
 /** Extended release gates. Run explicitly under the supervisor; report each result independently. */
 import { beforeAll, expect, test } from 'vitest';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
-import { seedThermalParcel3D } from './thermal.js';
+import { seedThermalParcel3D, depositParcelHeat3D, THERMAL_FRACTION_SCALE_3D } from './thermal.js';
+import { orientedCuboidContact } from './collision.js';
 import {
   createMultiphysicsSnapshot3D,
   multiphysicsInventory3D,
+  inventoryEnergyDelta3D,
   type MultiphysicsSnapshot3D,
 } from './model.js';
 import { createMultiphysicsWorld3D } from './world.js';
@@ -180,7 +182,7 @@ test('source heating releases fluid that breaks a loaded support, while the unpo
   expect(control.bonds.some((b) => b.a === 'plate' || b.b === 'plate')).toBe(true);
 });
 
-test('overlapping liquid can freeze into admissible unbonded solids without deleting matter', () => {
+test('overlapping liquid retains its state while freezing waits, then solidifies when motion creates room', () => {
   const initial = createMultiphysicsSnapshot3D(profiles, {
     parcels: [0, 0.9].map((x, i) =>
       seedThermalParcel3D(profiles, {
@@ -193,8 +195,50 @@ test('overlapping liquid can freeze into admissible unbonded solids without dele
     ),
     settings: { gravity: [0, 0, 0], dt: 0.001 },
   });
-  const result = run(initial);
-  expect(result.snapshot.parcels.map((p) => p.material)).toEqual(['ice', 'ice']);
-  expect(result.snapshot.bonds).toEqual([]);
-  expect(multiphysicsInventory3D(result.snapshot).mass).toBe(multiphysicsInventory3D(initial).mass);
+  const held = run(initial);
+  expect(held.snapshot.parcels).toEqual(initial.parcels);
+  expect(held.report.transitions).toEqual([]);
+  expect(held.report.deferredTransitions).toEqual([
+    { id: '0', from: 'water', to: 'ice', kind: 'phase', blockedBy: ['1'] },
+    { id: '1', from: 'water', to: 'ice', kind: 'phase', blockedBy: ['0'] },
+  ]);
+  expect(multiphysicsInventory3D(held.snapshot)).toEqual(multiphysicsInventory3D(initial));
+  expect(run(JSON.parse(JSON.stringify(held.snapshot)))).toEqual(run(held.snapshot));
+
+  // Supply separating initial motion and enough cooling below the transition
+  // threshold that physical viscosity cannot reheat the pair past freezing.
+  const moving = createMultiphysicsSnapshot3D(profiles, {
+    parcels: initial.parcels.map((p, i) =>
+      depositParcelHeat3D(
+        profiles,
+        { ...p, velocity: [i === 0 ? -0.5 : 0.5, 0, 0] },
+        -256n * BigInt(THERMAL_FRACTION_SCALE_3D),
+      ),
+    ),
+    settings: initial.settings,
+  });
+  let state = moving,
+    frozenAt = -1;
+  for (let i = 0; i < 200; i++) {
+    const result = run(state);
+    state = result.snapshot;
+    if (state.parcels.every((p) => p.material === 'ice')) {
+      frozenAt = i;
+      break;
+    }
+  }
+  expect(frozenAt).toBeGreaterThan(0);
+  expect(state.parcels.map((p) => p.material)).toEqual(['ice', 'ice']);
+  expect(orientedCuboidContact(state.parcels[0], state.parcels[1])?.depth ?? 0).toBeLessThanOrEqual(
+    1e-8,
+  );
+  expect(state.bonds).toEqual([]);
+  expect(state.anchors).toEqual([]);
+  const before = multiphysicsInventory3D(moving),
+    after = multiphysicsInventory3D(state);
+  expect(after.mass).toBe(before.mass);
+  expect(inventoryEnergyDelta3D(before, after)).toBeCloseTo(0, 8);
+  after.linearMomentum.forEach((v, i) => expect(v).toBeCloseTo(before.linearMomentum[i], 9));
+  after.angularMomentum.forEach((v, i) => expect(v).toBeCloseTo(before.angularMomentum[i], 9));
+  expect(state.accounting.externalStoredSubQ).toBe('0');
 });

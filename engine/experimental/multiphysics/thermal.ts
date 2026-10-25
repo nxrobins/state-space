@@ -243,6 +243,16 @@ export function depositParcelHeat3D(
   const parcel = readThermalParcel3D(profiles, raw);
   return withHeat(profiles, parcel, heat(parcel) + deltaSubQ);
 }
+/** Private world admission rollback: retain the current enthalpy, mechanics,
+ * and chemical store while postponing a geometrically inadmissible phase edge. */
+export function deferParcelPhase3D(
+  profiles: MultiphysicsProfiles3D,
+  parcel: ThermalParcel3D,
+  material: string,
+): ThermalParcel3D {
+  const current = readThermalParcel3D(profiles, parcel);
+  return readThermalParcel3D(profiles, withHeat(profiles, { ...current, material }, heat(current)));
+}
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 function total(parcels: readonly ThermalParcel3D[]): bigint {
   return parcels.reduce((sum, p) => sum + heat(p) + BigInt(p.chemicalQ) * S, 0n);

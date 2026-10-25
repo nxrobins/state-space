@@ -1,6 +1,11 @@
 import { beforeAll, expect, test } from 'vitest';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
-import { seedThermalParcel3D, parcelTemperature3D } from './thermal.js';
+import {
+  seedThermalParcel3D,
+  parcelTemperature3D,
+  depositParcelHeat3D,
+  THERMAL_FRACTION_SCALE_3D,
+} from './thermal.js';
 import {
   createMultiphysicsSnapshot3D,
   multiphysicsInventory3D,
@@ -490,4 +495,74 @@ test('fractured battery cores retain separate finite stores and removing one can
     BigInt(batteryStoredUnits3D(world.snapshot().battery!)),
   );
   expect(run(JSON.parse(JSON.stringify(world.snapshot())))).toEqual(continued);
+});
+
+test('touching liquid parcels freeze immediately without joining or moving', () => {
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [seed('a', 'water', [0, 3, 0], 0), seed('b', 'water', [1, 3, 0], 0)],
+    settings: { gravity: [0, 0, 0], dt: 0.001 },
+  });
+  const result = run(initial);
+  expect(result.snapshot.parcels.map((p) => p.material)).toEqual(['ice', 'ice']);
+  expect(result.snapshot.parcels.map((p) => p.center)).toEqual(
+    initial.parcels.map((p) => p.center),
+  );
+  expect(result.report.deferredTransitions).toEqual([]);
+  expect(result.snapshot.bonds).toEqual([]);
+  expect(result.snapshot.anchors).toEqual([]);
+  expect(multiphysicsInventory3D(result.snapshot)).toEqual(multiphysicsInventory3D(initial));
+});
+
+test('solidification retains liquid geometry at a rotated wall', () => {
+  const liquid = seed('water', 'water', [1.1, 0, 0], 0);
+  liquid.orientation = [0, 0, Math.sin(Math.PI / 8), Math.cos(Math.PI / 8)];
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [seed('wall', 'copper', [0, 0, 0], 15), liquid],
+    anchors: ['wall'],
+    settings: { gravity: [0, 0, 0], dt: 0.001 },
+  });
+  const result = run(initial);
+  expect(result.snapshot.parcels).toEqual(initial.parcels);
+  expect(result.report.deferredTransitions).toEqual([
+    { id: 'water', from: 'water', to: 'ice', kind: 'phase', blockedBy: ['wall'] },
+  ]);
+  expect(result.report.transitions).toEqual([]);
+  expect(run(initial, 1)).toEqual(result);
+  const job = createMultiphysicsTickJob3D(profiles, initial);
+  while (job.progress().status === 'running' && job.progress().stage !== 'phase-admission')
+    job.advance(1);
+  expect(job.progress().stage).toBe('phase-admission');
+  expect(job.cancel()).toBe(true);
+  expect(() => job.result()).toThrow();
+  expect(initial.parcels.find((p) => p.id === 'water')!.material).toBe('water');
+});
+
+test('phase admission does not conceal pre-existing invalid solid penetration', () => {
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [seed('a', 'ice', [0, 3, 0], 10), seed('b', 'ice', [0.9, 3, 0], 10)],
+    settings: { gravity: [0, 0, 0], dt: 0.001 },
+  });
+  expect(() => run(initial)).toThrow(/penetration/);
+});
+
+test('postponed solidification retains the current enthalpy after conduction', () => {
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [0, 0.9].map((x, i) =>
+      depositParcelHeat3D(
+        profiles,
+        seed(String(i), 'water', [x, 3, 0], 0),
+        -BigInt((i + 1) * 256 * THERMAL_FRACTION_SCALE_3D),
+      ),
+    ),
+    settings: { gravity: [0, 0, 0], dt: 0.001 },
+  });
+  const result = run(initial);
+  expect(result.snapshot.parcels.map((p) => p.material)).toEqual(['water', 'water']);
+  expect(result.report.deferredTransitions).toHaveLength(2);
+  expect(parcelTemperature3D(profiles, result.snapshot.parcels[0])).toBeLessThan(14);
+  expect(parcelTemperature3D(profiles, result.snapshot.parcels[1])).toBeGreaterThan(13);
+  expect(multiphysicsInventory3D(result.snapshot)).toEqual(multiphysicsInventory3D(initial));
+  expect(result.snapshot.parcels.map((p) => p.center)).toEqual(
+    initial.parcels.map((p) => p.center),
+  );
 });

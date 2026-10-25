@@ -449,32 +449,30 @@ now measures the cross-product angle and prefers a face within the existing
 contact skin; geometric projection still uses the true minimum translation axis.
 Settling, resting stacks, fast impacts and released-edge regressions pass together.
 
-One extended acceptance gate remains **unpassed** in
-`engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts`:
+The extended scenarios in
+`engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts` now cover
+sustained resting liquid, a hot/cold gas column, continued coupled mechanism
+failure, and geometry-admissible freezing. The original immediate-freezing
+expectation is replaced by the explicitly selected admission policy below:
+blocked liquid retains its state, and separating liquid freezes once space
+opens. Pressure-driven crystal growth is still unimplemented.
 
-| Gate | Observed failure on the development Mac |
-| --- | --- |
-| Freezing overlapping liquid parcels | Conversion retains both parcels but the resulting solid overlap exceeds the geometric correction limit; the tick rejects. No admissible freezing geometry policy is implemented yet. |
+Run these gates explicitly and serially under the supervisor with
+`engine/vitest.multiphysics-extended-runtime.config.ts`. They are separate from
+the floating/sinking tank configuration and ordinary unit suite. Earlier
+failure receipts `71aa6059290643628b72c25dc5a9ab19` and
+`59291d9b3e804d668ad0dfd34f509708` remain local evidence of the defects. A tightly
+wedged support also exposed conflicting simultaneous restitution constraints;
+the authored combined scene supplies lateral clearance and does not qualify
+arbitrary wedged contacts. Builder and native macOS timing acceptance remain
+outstanding, and the runtime remains unexported.
 
-Run these unfinished gates explicitly and serially under the supervisor with
-`engine/vitest.multiphysics-extended-runtime.config.ts`. They are separate from the
-established floating/sinking tank configuration and the ordinary unit suite;
-green results there do not imply green release acceptance. The extended liquid/gas
-receipt is `71aa6059290643628b72c25dc5a9ab19`, and the continued-mechanism/freezing
-receipt is `59291d9b3e804d668ad0dfd34f509708`. Both report failure. Raw evidence stays
-local. A tightly wedged support also exposed conflicting simultaneous restitution
-constraints; the authored combined scene provides lateral clearance rather than
-claiming arbitrary wedged-contact qualification.
-
-The next physics work is an explicit freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
-runtime export or full milestone completion is claimed by this checkpoint.
-
-This checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
+The earlier checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
 24 Node tests (`75fc3bc1fbf3418b9f42026dad873c0f`). The established floating/sinking
 tank refinement cases passed in 31.06 seconds
 (`6397a262038442d4945ff050301ed4bb`). Type checks, structural lint, formatting and
-SDK builds passed. Manual adversarial review retained the four extended failures
-above as release blockers; they were not converted to passing tests or looser
+SDK builds passed. At that earlier checkpoint, manual adversarial review retained the four
+then-open extended failures as release blockers; they were not converted to passing tests or looser
 budgets. The automated review executable remains unavailable. These are local CPU
 checkpoints, not CI, native Worker, builder, or performance qualification.
 
@@ -563,12 +561,46 @@ energy is `1.03e-8`, below the original `1e-4` limit. This qualifies that bounde
 floor-column comparison, not a long-running atmospheric plume or arbitrary gas
 boundary scenes. Freezing geometry and native product gates remain open.
 
-Final combined checkpoint: all three completed extended gates pass together;
-only overlapping freezing fails (`46058d14e2cb43d78d86298a1ed17807`). The complete
-suite passes 2,047 CPU tests and 24 Node tests
-(`48d0327b8adc402399f77921e22f91dd`), and all SDK bundles/declarations build.
-The freezing expectation has not been weakened: two overlapping, motionless
-liquid parcels still cannot become full-size non-overlapping rigid cubes in
-place. Choosing between deferred solidification and an explicit conservative
-packing/remapping law remains a model decision. No such policy is implemented
-or counted as passed here. The private runtime remains unexported.
+Before solidification admission was added, three extended gates passed together
+and the original overlap/freezing expectation still failed
+(`46058d14e2cb43d78d86298a1ed17807`). The full suite at that point passed 2,047 CPU
+and 24 Node checks (`48d0327b8adc402399f77921e22f91dd`), and all SDK bundles and
+declarations built. That remaining geometry conflict led to the selected policy
+below.
+
+### Geometry-admissible solidification (2026-10-25)
+
+The selected policy preserves physical state while a proposed solid shape cannot
+fit. The world checks the batch of proposed shapes before changing mechanical
+ownership, both after ordinary heat transfer and after pressure work. Overlap
+postpones the material transition and is reported with the blocking parcel IDs.
+The current enthalpy—including heat transferred earlier in the tick—remains
+owned by the liquid. Mass, inertia, spin, velocity, geometry and chemical stores
+are retained; no bond or anchor is created. Existing motion can open space, at
+which point the phase change completes normally. Admission does not relax the
+rigid solver's penetration limits.
+
+This is a bounded geometric admissibility approximation, not a calibrated
+pressure/nucleation law. [Confined freezing research](https://www.nature.com/articles/s42005-020-0303-9)
+shows why pressure and phase equilibrium matter; quantitative growth would need
+phase-dependent volume/compressibility, latent heat and mechanical work coupled
+explicitly. Those capabilities remain open. The original assertion that two
+overlapping, motionless parcels immediately become non-overlapping rigid cubes
+was incompatible with retaining their geometry. Its replacement checks both
+conservative waiting and successful later freezing driven by actual separating
+motion; it does not count indefinite waiting alone as successful solidification.
+
+The new waiting/resumption scenario passes (`b4696339d3114a928354399b61535b66`).
+Manual adversarial review added immediate freezing at admissible contact,
+rotated-wall obstruction, cancellation during admission, exact work-budget
+replay, retained heat conduction, and rejection of pre-existing illegal solid
+overlap. All 21 world-tick checks pass (`77284af173414152a48963f3a3a73645`).
+
+Final verification passes 2,051 CPU and 24 Node tests
+(`75ff439b9bfc47aca542d7f5c5b6e1a6`). All four extended scenarios pass together
+under the selected admission policy (`43eea3f67a4c41ea8fcf4ce0cbf8d1b6`, 29.72
+seconds). The first three retain their original limits; the freezing scenario
+explicitly verifies waiting plus later admissible conversion. Type checks,
+structural lint, formatting, diff hygiene and SDK builds pass. No automated
+review, CI, native Worker, builder, pressure-driven freezing or full runtime
+release qualification is claimed.

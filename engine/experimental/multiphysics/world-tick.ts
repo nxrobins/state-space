@@ -7,6 +7,7 @@ import { orientedCuboidContact, cuboidBounds, type AxisAlignedBounds } from './c
 import {
   createRigidStep3D,
   rigidContactPatchArea3D,
+  particleBoxGeometry,
   fractureRigidBonds3D,
   type RigidBond3D,
 } from './rigid.js';
@@ -15,6 +16,7 @@ import { depositMechanicalHeat3D } from './coupling-energy.js';
 import {
   advanceParcelThermal3D,
   settleThermalPhases3D,
+  deferParcelPhase3D,
   depositParcelHeat3D,
   parcelTemperature3D,
   type ThermalParcel3D,
@@ -51,6 +53,8 @@ export type MultiphysicsTickReport3D = {
   work: number;
   contacts: number;
   transitions: ThermalTransition3D[];
+  /** Requested solidification held at its current enthalpy until geometry fits. */
+  deferredTransitions: (ThermalTransition3D & { blockedBy: string[] })[];
   burns: ThermalBurn3D[];
   brokenBonds: RigidBond3D[];
   battery: null | {
@@ -326,10 +330,62 @@ export function createMultiphysicsTickJob3D(
         network,
       };
     }
+    const deferredTransitions = new Map<string, ThermalTransition3D & { blockedBy: string[] }>();
+    function* admitSolidification(
+      oldParcels: readonly ThermalParcel3D[],
+      transitions: ThermalTransition3D[],
+    ): Generator<string, void> {
+      const old = new Map(oldParcels.map((p) => [p.id, p]));
+      const rigid = state.parcels.map((p) => isRigidMaterial3D(profiles, p));
+      const proposed = new Map(
+        transitions
+          .filter(
+            (t) =>
+              t.kind === 'phase' &&
+              readMultiphysicsProfile3D(profiles, t.to).phase === 'solid' &&
+              !isRigidMaterial3D(profiles, old.get(t.id)!),
+          )
+          .map((t) => [t.id, t]),
+      );
+      if (!proposed.size) return;
+      const blocked = new Map<string, string[]>();
+      // Inspect all proposed shapes together, before rolling any phase back.
+      // This prevents parcel iteration order from choosing which one freezes.
+      for (let i = 0; i < state.parcels.length; i++)
+        for (let j = i + 1; j < state.parcels.length; j++) {
+          const a = state.parcels[i],
+            b = state.parcels[j];
+          if ((proposed.has(a.id) || proposed.has(b.id)) && nearBounds(bounds[i], bounds[j])) {
+            const depth =
+              rigid[i] && rigid[j]
+                ? (orientedCuboidContact(a, b)?.depth ?? 0)
+                : -particleBoxGeometry(a, b, !rigid[i]).gap;
+            // Admit only touching shapes within the existing contact skin.
+            // Large phase-generated overlap is not a geometric correction.
+            if (depth > 1e-8)
+              for (const [parcel, other] of [
+                [a, b],
+                [b, a],
+              ])
+                if (proposed.has(parcel.id))
+                  blocked.set(parcel.id, [...(blocked.get(parcel.id) ?? []), other.id]);
+          }
+          yield 'phase-admission';
+        }
+      state.parcels = state.parcels.map((p) => {
+        const blockedBy = blocked.get(p.id);
+        if (!blockedBy) return p;
+        deferredTransitions.set(p.id, { ...proposed.get(p.id)!, blockedBy });
+        return deferParcelPhase3D(profiles, p, old.get(p.id)!.material);
+      });
+      const admitted = transitions.filter((t) => !blocked.has(t.id));
+      transitions.splice(0, transitions.length, ...admitted);
+    }
     const previous = state.parcels;
     yield 'thermal';
     const thermal = advanceParcelThermal3D(profiles, state.parcels, contacts, dt);
     state.parcels = thermal.parcels;
+    yield* admitSolidification(previous, thermal.transitions);
     const phaseBroken: RigidBond3D[] = [];
     function refreshPhaseOwnership(oldParcels: readonly ThermalParcel3D[]): void {
       const byId = new Map(state.parcels.map((p) => [p.id, p]));
@@ -370,6 +426,7 @@ export function createMultiphysicsTickJob3D(
     const beforeSettlement = state.parcels;
     const settled = settleThermalPhases3D(profiles, state.parcels);
     state.parcels = settled.parcels;
+    yield* admitSolidification(beforeSettlement, settled.transitions);
     thermal.transitions.push(...settled.transitions);
     refreshPhaseOwnership(beforeSettlement);
     yield 'pressure-phase-ownership';
@@ -507,6 +564,9 @@ export function createMultiphysicsTickJob3D(
         work: 0,
         contacts: contacts.length,
         transitions: thermal.transitions,
+        deferredTransitions: [...deferredTransitions.values()].sort((a, b) =>
+          compareIdentity3D(a.id, b.id),
+        ),
         burns: thermal.burns,
         brokenBonds,
         battery: batteryReport,
