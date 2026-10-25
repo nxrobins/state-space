@@ -165,6 +165,17 @@ export interface FluidReferenceJob3D {
   cancel(): boolean;
   result(): FluidReferenceResult3D;
 }
+/** Private study capture. Copies cannot alter the reference solve. Capturing
+ * retains dense operator data, so use a separate run for reference timing. */
+export type FluidProjectionFaceCapture3D = {
+  gradients: number[][];
+  responses: number[][];
+  indices: number[];
+  rhs: number[];
+  candidate: number[];
+  kind: 'density' | 'divergence';
+  iteration: number;
+};
 const ZERO: Vec3 = [0, 0, 0];
 const axes: readonly Vec3[] = [
   [1, 0, 0],
@@ -493,7 +504,10 @@ type Constraint = {
   walls: { s: number; gradient: Vec3; point?: Vec3 }[];
 };
 
-function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceResult3D> {
+function* solve(
+  input: FluidReferenceInput3D,
+  capture?: (face: FluidProjectionFaceCapture3D) => void,
+): Generator<string, FluidReferenceResult3D> {
   const { particles: p, bodies, boundaries, dt, smoothingRadius: h } = input;
   const n = p.length,
     bodyIndex = new Map(bodies.map((b, i) => [b.id, i]));
@@ -1097,6 +1111,8 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   // pumping resting liquid or removing unrelated motion at a boundary.
   const constraints = [...contactRows.map((c) => c.row), ...rows];
   const lambdas = constraints.map(() => 0);
+  let capturedGradients: number[][] = [],
+    capturedResponses: number[][] = [];
   // Build J M^-1 J^T once at frozen geometry. Aggregate sample gradients
   // belonging to the same body before applying its full inverse inertia.
   function* buildGram(): Generator<string, number[][]> {
@@ -1138,6 +1154,10 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       gradients.push(gradient);
       responses.push(response);
       yield 'projection-gradients';
+    }
+    if (capture) {
+      capturedGradients = gradients.map((row) => Array.from(row));
+      capturedResponses = responses.map((row) => Array.from(row));
     }
     const result = constraints.map(() => constraints.map(() => 0));
     let work = 0;
@@ -1218,6 +1238,18 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
           candidate[indices[a]] = value / factor[a][a];
           yield 'projection-backsolve';
         }
+        if (capture)
+          capture(
+            structuredClone({
+              gradients: capturedGradients,
+              responses: capturedResponses,
+              indices,
+              rhs: indices.map((i) => initialRates[i] - targets[i]),
+              candidate: indices.map((i) => candidate[i]),
+              kind,
+              iteration,
+            }),
+          );
         let step = 1,
           limiting = -1;
         for (const k of indices)
@@ -1386,9 +1418,12 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
 }
 
 /** Input copies/validation are bounded setup; each work unit visits one bounded pair or row. */
-export function createFluidReferenceJob3D(raw: FluidReferenceInput3D): FluidReferenceJob3D {
+export function createFluidReferenceJob3D(
+  raw: FluidReferenceInput3D,
+  capture?: (face: FluidProjectionFaceCapture3D) => void,
+): FluidReferenceJob3D {
   const input = readInput(raw),
-    generator = solve(input);
+    generator = solve(input, capture);
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +
     2 * (input.particles.length + (input.contacts?.length ?? 0)) ** 2 +
