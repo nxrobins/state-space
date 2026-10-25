@@ -1,5 +1,4 @@
 import { type LatencyProfiler, type Trace } from './latency.js';
-/// <reference types="@webgpu/types" />
 /** Persistent per-chunk face lists. Physics owns invalidation, never visibility. */
 import { DRAW } from './3d-renderer.js';
 import type { makeCavernAppearance } from './cavern-appearance.js';

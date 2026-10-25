@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Exact presentation worklist. Keep source order and omit only absent emitters. */
 export const LIGHT_LIST_QUERIES = `
 @group(0) @binding(11) var<storage,read> lightList:array<u32>;

@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 import { openChamber, loadChamber, type ChamberClient } from './client.js';
 import {
   CHAMBER,

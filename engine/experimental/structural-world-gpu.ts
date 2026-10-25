@@ -1,5 +1,3 @@
-/// <reference types="@webgpu/types" preserve="true" />
-/// <reference types="@webgpu/types" />
 /** Independent M5 GPU solver. The committed bank is never a scratch output. */
 import { buildColdTable } from '../generated/materials.js';
 import { checkedInteger, stateCopyTargets } from '../validation.js';

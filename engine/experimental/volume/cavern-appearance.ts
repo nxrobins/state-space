@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Optional presentation only. The physical grid is bound read-only in every pass. */
 import type { LatencyProfiler, Trace } from './latency.js';
 import { makeLightList } from './light-list.js';

@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** DOM adapter. Mounting binds controls only; Start is guarded before native acquisition. */
 import {
   createTacticalWorkerClient3D,

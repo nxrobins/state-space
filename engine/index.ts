@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" preserve="true" />
 /** Supported browser/Node package entry point. */
 export {
   createStateSpaceField,

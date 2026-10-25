@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Internal small GPU probes; not a public runtime option. */
 import { makeLightList, LIGHT_LIST_QUERIES } from './light-list.js';
 import { CELL_FRUSTUM_CULL } from './surface-cull.js';

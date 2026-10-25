@@ -93,7 +93,7 @@ def generated_outputs(root: Path = ROOT) -> dict[Path, str]:
     node = shutil.which("node")
     if node is None:
         raise RuntimeError("Node.js and the root npm dependencies are required to generate browser runtime assets")
-    transpile = "const ts=require('typescript'); let s=''; process.stdin.setEncoding('utf8'); process.stdin.on('data',c=>s+=c); process.stdin.on('end',()=>process.stdout.write(ts.transpileModule(s,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText));"
+    transpile = "const ts=require('@typescript/typescript6'); let s=''; process.stdin.setEncoding('utf8'); process.stdin.on('data',c=>s+=c); process.stdin.on('end',()=>process.stdout.write(ts.transpileModule(s,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText));"
     for name in ("validation", "registry", "thermal", "pressure", "structure", "contracts"):
         source = (root / "engine" / f"{name}.ts").read_text(encoding="utf-8")
         compiled = subprocess.run([node, "-e", transpile], input=source, capture_output=True, text=True,

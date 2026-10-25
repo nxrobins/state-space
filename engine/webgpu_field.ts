@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Portable WebGPU field. Await step before accessing or editing its complete state. */
 import { FieldState, type StateSpaceField } from './browser_state_space.js';
 import { DEFAULT_REGISTRY, requireRegistry, type MaterialRegistry } from './registry.js';

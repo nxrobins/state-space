@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Fixed 8-cubed native browser acceptance. Invoked only by the bounded Mac stage. */
 import {
   MAT,

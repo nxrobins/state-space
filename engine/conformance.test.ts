@@ -8,7 +8,7 @@ import { runCpuPass, runCpuTick } from './cpu_physics.js';
 import { MAT, buildColdTable } from './generated/materials.js';
 import { seedState, energyLedger } from './thermal.js';
 import { KERNEL_SPECS } from './generated/schedule.js';
-import { seedStructureState } from './structure.js';
+import { seedStructureState, type StructuralState } from './structure.js';
 import { DEFAULT_REGISTRY } from './registry.js';
 
 interface Case {
@@ -41,7 +41,7 @@ describe('native GPU and browser CPU conformance', () => {
     expect(cases.length).toBeGreaterThanOrEqual(24);
     const observed = new Set<string>();
     for (const fixture of cases) {
-      let state = {
+      let state: StructuralState = {
         grid: Uint32Array.from(fixture.cells),
         energyQ: Uint32Array.from(fixture.energyQ),
         structure: Uint32Array.from(fixture.structure),
@@ -95,7 +95,7 @@ describe('native GPU and browser CPU conformance', () => {
 
   it('matches native state after every pass through the complete tick path', () => {
     for (const fixture of cases) {
-      let state = {
+      let state: StructuralState = {
         grid: Uint32Array.from(fixture.cells),
         energyQ: Uint32Array.from(fixture.energyQ),
         structure: Uint32Array.from(fixture.structure),

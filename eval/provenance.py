@@ -50,13 +50,18 @@ def capture_context() -> dict:
     if node is None:
         raise RuntimeError("Node.js and checkout npm dependencies are required for independent CPU evaluation")
     node_version = subprocess.run([node, "--version"], capture_output=True, text=True, timeout=10, check=True).stdout.strip()
-    compiler_version = subprocess.run([node, "-p", "require('typescript').version"], cwd=ROOT,
-                                      capture_output=True, text=True, timeout=10, check=True).stdout.strip()
-    compiler_hash = digest((ROOT / "node_modules/typescript/lib/typescript.js").read_bytes())
+    # The compatibility shim forwards to a separate compiler implementation;
+    # bind evidence to both, including when npm installs that dependency nested.
+    compiler = json.loads(subprocess.run([node, "-e", """
+const api = require.resolve('@typescript/typescript6');
+const implementation = require('node:module').createRequire(api).resolve('@typescript/old');
+process.stdout.write(JSON.stringify({version: require(api).version, files: [api, implementation]}));
+"""], cwd=ROOT, capture_output=True, text=True, timeout=10, check=True).stdout)
+    compiler_hash = digest(canonical([digest(Path(path).read_bytes()) for path in compiler["files"]]))
     host = {"node": platform.node(), "processor": platform.processor(), "logicalCpus": os.cpu_count()}
     return {"policy": POLICY_VERSION, "sourceHashes": {name: digest(source) for name, source in context_sources().items()},
             "device": device_identity(), "runtime": {"python": sys.version, "platform": platform.platform(), "node": node_version,
-              "typescript": compiler_version, "typescriptHash": compiler_hash,
+              "typescript": compiler["version"], "typescriptHash": compiler_hash,
               "hostHash": digest(canonical(host)), "processor": host["processor"], "logicalCpus": host["logicalCpus"],
               **{name: importlib.metadata.version(name) for name in ("numpy", "wgpu", "wasmtime")}}}
 

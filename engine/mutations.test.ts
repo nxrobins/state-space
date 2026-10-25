@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import ts from 'typescript';
+import ts from '@typescript/typescript6';
 import { describe, expect, it } from 'vitest';
 import { MAT, buildColdTable } from './generated/materials.js';
 import { packVoxel } from './browser_state_space.js';

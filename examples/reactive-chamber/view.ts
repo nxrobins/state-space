@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Owns canvas, GPU resources and frame scheduling. No physics or session authority. */
 import { createFramePump } from '../shared/frame-pump.js';
 import { createChamberRenderer } from './renderer.js';

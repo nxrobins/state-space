@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import ts from 'typescript';
+import ts from '@typescript/typescript6';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const temp = await mkdtemp(join(tmpdir(), 'state-space-reference-'));

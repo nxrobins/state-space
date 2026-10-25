@@ -437,7 +437,7 @@ describe('atomic named transport commands', () => {
     const f = fixture(),
       acquired = copy(f.initial.game),
       empty = { ...f.initial, game: { ...acquired, controls: {} } },
-      s = session(r, empty, policy),
+      s = session<Game>(r, empty, policy),
       b = s.branch({ horizonTicks: 0 });
     b.enqueue({ kind: 'game', game: acquired });
     b.enqueue(command());

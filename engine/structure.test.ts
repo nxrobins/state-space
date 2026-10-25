@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-import ts from 'typescript';
+import ts from '@typescript/typescript6';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
 import * as S from './structure.js';

@@ -1,5 +1,4 @@
 export { verifyLightList, verifyLightImages } from '../volume/light-list-probe.js';
-/// <reference types="@webgpu/types" />
 /** Internal bounded verification bundle, not a public SDK entry or demo. */
 import { structuralShaders } from './structural-shader.js';
 import { createStateSpaceStructuralWorld3DGPU } from '../structural-world-gpu.js';
