@@ -3,8 +3,11 @@
 import { DEFAULT_CATALOG, MATERIAL_CATALOG_HASH } from './materials.generated.js';
 import { checkedInteger } from './validation.generated.js';
 const sameKeys = (value, keys, label) => {
-    if (!value || typeof value !== 'object' || Array.isArray(value) ||
-        Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) {
+    if (!value ||
+        typeof value !== 'object' ||
+        Array.isArray(value) ||
+        Object.keys(value).length !== keys.length ||
+        keys.some((key) => !Object.hasOwn(value, key))) {
         throw new Error(`${label} has missing or unexpected fields.`);
     }
 };
@@ -19,7 +22,10 @@ export function canonicalCatalog(catalog) {
         if (Array.isArray(value))
             return `[${value.map(stable).join(',')}]`;
         if (value && typeof value === 'object') {
-            return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`;
+            return `{${Object.keys(value)
+                .sort()
+                .map((key) => `${JSON.stringify(key)}:${stable(value[key])}`)
+                .join(',')}}`;
         }
         return JSON.stringify(value);
     };
@@ -42,10 +48,15 @@ export function validateCatalog(value) {
     for (const [name, expected] of Object.entries(DEFAULT_CATALOG.bit_fields)) {
         const field = catalog.bit_fields[name];
         sameKeys(field, ['shift', 'bits', 'signed'], `bit_fields.${name}`);
-        if (field.shift !== expected.shift || field.bits !== expected.bits || field.signed !== expected.signed)
+        if (field.shift !== expected.shift ||
+            field.bits !== expected.bits ||
+            field.signed !== expected.signed)
             throw new Error('Packed layout requires a new schema version.');
     }
-    for (const [label, table] of [['phases', catalog.phases], ['flags', catalog.flags]]) {
+    for (const [label, table] of [
+        ['phases', catalog.phases],
+        ['flags', catalog.flags],
+    ]) {
         if (!table || typeof table !== 'object' || Array.isArray(table))
             throw new Error(`Invalid ${label}.`);
         const values = new Set();
@@ -61,10 +72,12 @@ export function validateCatalog(value) {
             if (table[name] !== id)
                 throw new Error(`Changing existing ${label} requires a new schema version.`);
         }
-        if (label === 'flags' && Object.keys(table).length !== Object.keys(DEFAULT_CATALOG.flags).length)
+        if (label === 'flags' &&
+            Object.keys(table).length !== Object.keys(DEFAULT_CATALOG.flags).length)
             throw new Error('Invalid flags.');
     }
-    if (!Array.isArray(catalog.cold_fields) || catalog.cold_fields.length !== DEFAULT_CATALOG.cold_fields.length ||
+    if (!Array.isArray(catalog.cold_fields) ||
+        catalog.cold_fields.length !== DEFAULT_CATALOG.cold_fields.length ||
         Array.from(catalog.cold_fields).some((name, i) => name !== DEFAULT_CATALOG.cold_fields[i]))
         throw new Error('Cold table offsets require a new schema version.');
     if (!Array.isArray(catalog.materials) || !catalog.materials.length)
@@ -96,15 +109,33 @@ export function validateCatalog(value) {
         if (records.get(builtin.id)?.name !== builtin.name)
             throw new Error('Changing existing material IDs requires a new schema version.');
     }
-    const up = (p) => [p.boils_into || p.melts_into, p.boils_into ? p.boil_point : p.melt_point];
-    const down = (p) => [p.freezes_into || p.condenses_into, p.freezes_into ? p.freeze_point : p.condense_point];
+    const up = (p) => [
+        p.boils_into || p.melts_into,
+        p.boils_into ? p.boil_point : p.melt_point,
+    ];
+    const down = (p) => [
+        p.freezes_into || p.condenses_into,
+        p.freezes_into ? p.freeze_point : p.condense_point,
+    ];
     for (const record of records.values()) {
         const p = record.properties;
-        for (const name of ['melts_into', 'boils_into', 'freezes_into', 'condenses_into', 'burns_into', 'smoke_product']) {
+        for (const name of [
+            'melts_into',
+            'boils_into',
+            'freezes_into',
+            'condenses_into',
+            'burns_into',
+            'smoke_product',
+        ]) {
             if (!records.has(p[name]))
                 throw new Error(`Undefined target ${record.name}.${name}.`);
         }
-        for (const [threshold, target] of [['melt_point', 'melts_into'], ['boil_point', 'boils_into'], ['freeze_point', 'freezes_into'], ['condense_point', 'condenses_into']]) {
+        for (const [threshold, target] of [
+            ['melt_point', 'melts_into'],
+            ['boil_point', 'boils_into'],
+            ['freeze_point', 'freezes_into'],
+            ['condense_point', 'condenses_into'],
+        ]) {
             if (p[target] && !p[threshold])
                 throw new Error('Transition target requires a threshold.');
         }
@@ -117,7 +148,10 @@ export function validateCatalog(value) {
         const upward = up(p), downward = down(p);
         if (upward[0] && downward[0] && downward[1] >= upward[1])
             throw new Error('Material phase intervals overlap.');
-        for (const [transition, direction] of [[upward, 1], [downward, -1]]) {
+        for (const [transition, direction] of [
+            [upward, 1],
+            [downward, -1],
+        ]) {
             const [id, threshold] = transition;
             if (!id)
                 continue;
@@ -130,7 +164,9 @@ export function validateCatalog(value) {
             if (target.fuel_energy !== p.fuel_energy || target.oxidizer !== p.oxidizer)
                 throw new Error('Phase changes must preserve chemical and oxidizer identity.');
             const reverse = direction > 0 ? down(target) : up(target);
-            if (reverse[0] && (reverse[0] !== record.id || (direction > 0 ? reverse[1] >= threshold : threshold >= reverse[1]))) {
+            if (reverse[0] &&
+                (reverse[0] !== record.id ||
+                    (direction > 0 ? reverse[1] >= threshold : threshold >= reverse[1]))) {
                 throw new Error('Reverse phase edges require original identity and positive hysteresis.');
             }
         }
@@ -153,18 +189,20 @@ class ValidatedRegistry {
     constructor(catalog, hash) {
         this.hash = hash;
         this.#catalog = catalog;
-        this.#records = new Map(catalog.materials.map(record => [record.id, record]));
+        this.#records = new Map(catalog.materials.map((record) => [record.id, record]));
         this.materialIds = Object.freeze([...this.#records.keys()].sort((a, b) => a - b));
         this.#cold = new Uint32Array(catalog.capacity * catalog.cold_stride);
         for (const record of catalog.materials) {
-            this.#cold.set(catalog.cold_fields.map(name => record.properties[name]), record.id * catalog.cold_stride);
+            this.#cold.set(catalog.cold_fields.map((name) => record.properties[name]), record.id * catalog.cold_stride);
             Object.freeze(record.properties);
             Object.freeze(record);
         }
         registries.add(this);
         Object.freeze(this);
     }
-    has(material) { return this.#records.has(material); }
+    has(material) {
+        return this.#records.has(material);
+    }
     material(material) {
         integer(material, 0, 255, 'material');
         const record = this.#records.get(material);
@@ -172,10 +210,17 @@ class ValidatedRegistry {
             throw new Error(`Undefined material: ${material}`);
         return record;
     }
-    toCatalog() { return structuredClone(this.#catalog); }
-    coldTable() { return this.#cold.slice(); }
+    toCatalog() {
+        return structuredClone(this.#catalog);
+    }
+    coldTable() {
+        return this.#cold.slice();
+    }
     extend(materials) {
-        return createMaterialRegistry({ ...this.toCatalog(), materials: [...this.toCatalog().materials, ...materials] });
+        return createMaterialRegistry({
+            ...this.toCatalog(),
+            materials: [...this.toCatalog().materials, ...materials],
+        });
     }
 }
 export function requireRegistry(registry) {
@@ -190,6 +235,6 @@ export async function createMaterialRegistry(value) {
     const catalog = structuredClone(value);
     validateCatalog(catalog);
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonicalCatalog(catalog)));
-    const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
     return new ValidatedRegistry(catalog, hash);
 }

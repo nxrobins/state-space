@@ -7,6 +7,14 @@ import shutil
 from scripts.verification_guard import ROOT
 
 
+def recorded(receipt, *paths):
+    """Hash a receipt recorded for a source that may since have moved; the first known path wins."""
+    for path in paths:
+        if path in receipt['sourceHashes']:
+            return receipt['sourceHashes'][path]
+    raise KeyError(f'None of {paths} is in the recorded source hashes.')
+
+
 def main():
     out = ROOT / 'docs/checkpoints/volume-m4'
     out.mkdir(parents=True, exist_ok=True)
@@ -77,8 +85,8 @@ def main():
         retain((base / (stage + '.json')).relative_to(ROOT), f'recovery/{stage}.json')
         if stage in ('gameplay-probe', 'gameplay128', 'frames128gpu', 'timing128gpu', 'probe', 'gate64', 'continuation128', 'frames32', 'frames64', 'frames128', 'timing128'):
             proof = json.loads((ROOT / record['evidence']).read_text(encoding='utf-8'))
-            for path in ('engine/experimental/gameplay-gpu.ts','engine/experimental/gameplay-shader.ts','engine/experimental/gameplay-view.ts','engine/experimental/world-renderer.ts','engine/experimental/3d-gpu-core.ts', 'engine/experimental/3d-shader.ts',
-                         'engine/experimental/active-shader.ts', 'dist/sdk/state-space-3d-gpu.js',
+            for path in ('engine/experimental/gameplay/gameplay-gpu.ts','engine/experimental/gameplay/gameplay-shader.ts','engine/experimental/gameplay/gameplay-view.ts','engine/experimental/volume/world-renderer.ts','engine/experimental/volume/3d-gpu-core.ts', 'engine/experimental/volume/3d-shader.ts',
+                         'engine/experimental/volume/active-shader.ts', 'dist/sdk/state-space-3d-gpu.js',
                          'dist/sdk/state-space-world-gpu.js', 'dist/sdk/state-space-active-world-gpu.js'):
                 if proof['sourceHashes'].get(path) != hashlib.sha256((ROOT / path).read_bytes()).hexdigest():
                     raise ValueError(f'Stale GPU kernel proof: {stage}: {path}')
@@ -127,8 +135,8 @@ def main():
                          for p in ('engine/experimental/3d-core.ts',
                                    'examples/active-cavern/scene.js')},
                       'gpuKernelOptimization': {
-                         'beforeShaderSha256': before['sourceHashes']['engine/experimental/3d-shader.ts'],
-                         'afterShaderSha256': hashlib.sha256((ROOT / 'engine/experimental/3d-shader.ts').read_bytes()).hexdigest(),
+                         'beforeShaderSha256': recorded(before, 'engine/experimental/3d-shader.ts', 'engine/experimental/volume/3d-shader.ts'),
+                         'afterShaderSha256': hashlib.sha256((ROOT / 'engine/experimental/volume/3d-shader.ts').read_bytes()).hexdigest(),
                          'proofs': ['recovery/probe.json', 'gate64.json.gz', 'continuation128.json.gz'],
                          'currentKernelHashesVerified': True},
                       'gameSetupRefactor': {'changedInputs': reference.get('changedInputs'),
@@ -212,7 +220,7 @@ def main():
     manifest['files']['sub8-latency.json']={'derivedFrom':[v['report'] for r in sub8['attempts'].values() for v in r.values()],
         'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)}
     ui_gpu=json.loads((base/'ui-gpu.json').read_text(encoding='utf-8'));retain(Path(ui_gpu['evidence']).parent/'cavern.png','resident-gameplay.png')
-    files = list((ROOT / 'engine/experimental').glob('*.ts'))
+    files = list((ROOT / 'engine/experimental').rglob('*.ts'))
     files += list((ROOT / 'examples/active-cavern').glob('*'))
     files += [ROOT / p for p in ('scripts/verification_guard.py', 'scripts/verification_health.py',
               'scripts/verification_guard.mjs', 'scripts/verify_checks.mjs', 'scripts/recover_m4_verification.py',

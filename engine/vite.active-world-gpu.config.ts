@@ -1,2 +1,2 @@
 import { sdkConfig } from './sdk-build.mjs';
-export default sdkConfig("./experimental/3d/active-world/gpu");
+export default sdkConfig('./experimental/3d/active-world/gpu');

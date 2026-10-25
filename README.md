@@ -48,7 +48,7 @@ On macOS, start with the [local setup and bounded verification guide](docs/MACOS
 
 Install Python **3.10+**, Node.js/npm, and `uv`. From the repository root:
 
-```powershell
+```sh
 uv sync
 npm ci
 npm run build:sdk
@@ -232,7 +232,7 @@ their own gameplay simulations and engine snapshot integrations.
 
 After the root dependency installation above, install the game dependencies:
 
-```powershell
+```sh
 npm --prefix game ci
 npm --prefix tower-defense-rogue ci
 ```
@@ -246,10 +246,13 @@ continues to require them. See the [incident diagnosis and staged recovery](docs
 On an isolated verification host, with `agent-browser` on `PATH`, the complete
 verification entry is:
 
-```powershell
-$env:STATE_SPACE_RUN_LEGACY_DEMOS = 'isolated-host'
+```sh
+export STATE_SPACE_RUN_LEGACY_DEMOS=isolated-host
 uv run python -m engine.verify --report docs/checkpoints/local-verification.json
 ```
+
+In PowerShell, use `$env:STATE_SPACE_RUN_LEGACY_DEMOS = 'isolated-host'` for the
+first line.
 
 Alternatively, set `STATE_SPACE_BROWSER_CLI` to the browser tool's executable or
 JavaScript launcher path. Full verification requires native GPU and hardware

@@ -8,8 +8,12 @@ export function fluidKind(packed) {
 export function updatePressure(grid, energy, words, width, height, rules) {
     const count = grid.length, kinds = Uint8Array.from(grid, fluidKind), seen = new Uint8Array(count);
     const result = words.slice(), queue = new Uint32Array(count);
-    const adjacent = (i) => [i >= width ? i - width : -1, i % width ? i - 1 : -1,
-        i % width + 1 < width ? i + 1 : -1, i + width < count ? i + width : -1];
+    const adjacent = (i) => [
+        i >= width ? i - width : -1,
+        i % width ? i - 1 : -1,
+        (i % width) + 1 < width ? i + 1 : -1,
+        i + width < count ? i + width : -1,
+    ];
     const relax = (i, target) => {
         const old = words[i] >>> 16, delta = Math.min(65535, target) - old;
         result[i] = (old + Math.sign(delta) * Math.ceil(Math.abs(delta) / 4)) * 65536;
@@ -24,7 +28,7 @@ export function updatePressure(grid, energy, words, width, height, rules) {
             for (let cursor = 0; cursor < tail; cursor += 1) {
                 const i = queue[cursor];
                 if (kind === 1)
-                    sum += Math.min(66559, Math.floor((Math.floor(rules.temperature(grid[i], energy[i]) / 256) + 64) * 1024 / 84));
+                    sum += Math.min(66559, Math.floor(((Math.floor(rules.temperature(grid[i], energy[i]) / 256) + 64) * 1024) / 84));
                 else
                     top = Math.min(top, Math.floor(i / width));
                 for (const j of adjacent(i)) {
@@ -41,13 +45,18 @@ export function updatePressure(grid, energy, words, width, height, rules) {
             const gasTarget = Math.max(0, Math.floor(sum / tail) - 1024);
             for (let cursor = 0; cursor < tail; cursor += 1) {
                 const i = queue[cursor];
-                relax(i, kind === 1 ? gasTarget : headPressure + (Math.floor(i / width) - top + 1) * Math.max(1, Math.ceil(rules.material(grid[i]).density / 64)) * 16);
+                relax(i, kind === 1
+                    ? gasTarget
+                    : headPressure +
+                        (Math.floor(i / width) - top + 1) *
+                            Math.max(1, Math.ceil(rules.material(grid[i]).density / 64)) *
+                            16);
             }
         }
     return result;
 }
 export function pressureLoad(words, i, width) {
     const p = (j) => words[j] >>> 16;
-    return Math.abs((i % width ? p(i - 1) : 0) - (i % width + 1 < width ? p(i + 1) : 0))
-        + Math.abs((i >= width ? p(i - width) : 0) - (i + width < words.length ? p(i + width) : 0));
+    return (Math.abs((i % width ? p(i - 1) : 0) - ((i % width) + 1 < width ? p(i + 1) : 0)) +
+        Math.abs((i >= width ? p(i - width) : 0) - (i + width < words.length ? p(i + width) : 0)));
 }

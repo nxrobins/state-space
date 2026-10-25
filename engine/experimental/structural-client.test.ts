@@ -2,100 +2,294 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 // Import the real application, clock and frame pump. Only SDK/DOM boundaries are
 // mocked: rejected frames and recovery run through the actual browser handlers.
-const mocks=vi.hoisted(()=>({create:vi.fn(),validate:vi.fn(),scene:vi.fn(),legacy:false}));
-vi.mock('../../dist/sdk/state-space-structural-world-gpu.js',()=>({createStateSpaceStructuralWorld3DGPU:mocks.create,validateStructuralGameplayState3D:mocks.validate}));
-vi.mock('../../dist/sdk/state-space-structural-world.js',()=>({MAT:{AIR:0},MATERIALS_3D:[]}));
-vi.mock('../../examples/structural-cavern/scene.js',()=>({createStructuralLevel:mocks.scene,structuralAction:()=>[],fixtureEdits:()=>[],scriptedInput:()=>({}),SCENE_VERSION:'test'}));
+const mocks = vi.hoisted(() => ({
+  create: vi.fn(),
+  validate: vi.fn(),
+  scene: vi.fn(),
+  legacy: false,
+}));
+vi.mock('../../dist/sdk/state-space-structural-world-gpu.js', () => ({
+  createStateSpaceStructuralWorld3DGPU: mocks.create,
+  validateStructuralGameplayState3D: mocks.validate,
+}));
+vi.mock('../../dist/sdk/state-space-structural-world.js', () => ({
+  MAT: { AIR: 0 },
+  MATERIALS_3D: [],
+}));
+vi.mock('../../examples/structural-cavern/scene.js', () => ({
+  createStructuralLevel: mocks.scene,
+  structuralAction: () => [],
+  fixtureEdits: () => [],
+  scriptedInput: () => ({}),
+  SCENE_VERSION: 'test',
+}));
 
-type ElementStub={id:string;value:string;textContent:string;hidden:boolean;checked:boolean;disabled:boolean;onclick:()=>void|Promise<unknown>;addEventListener:ReturnType<typeof vi.fn>};
-type Api={ready:Promise<void>;lightingMode:string;stop:()=>Promise<void>;restore:(s:unknown)=>Promise<void>;present:()=>Promise<void>};
-let elements:Map<string,ElementStub>,callbacks:Map<number,FrameRequestCallback>,nextHandle:number,api:Api;
-let field:{tick:number;restore:ReturnType<typeof vi.fn>;close:ReturnType<typeof vi.fn>},driver:{step:ReturnType<typeof vi.fn>;present:ReturnType<typeof vi.fn>;restore:ReturnType<typeof vi.fn>};
-let status:'playing'|'won'|'lost';
-let setLightingMode:ReturnType<typeof vi.fn>;
-const element=(id:string)=>elements.get(id)!;
-const actor=()=>({player:{x:3000,y:2000,z:5000},status,look:[256,0,0],carved:false,iceWalk:false});
-function fire(now:number){const pending=[...callbacks.values()];callbacks.clear();pending.forEach(fn=>fn(now));}
-async function drain(){for(let i=0;i<24;i++)await Promise.resolve();}
-async function playFrame(){element('play').onclick();fire(0);await drain();fire(1000/60);await drain();}
+type ElementStub = {
+  id: string;
+  value: string;
+  textContent: string;
+  hidden: boolean;
+  checked: boolean;
+  disabled: boolean;
+  onclick: () => void | Promise<unknown>;
+  addEventListener: ReturnType<typeof vi.fn>;
+};
+type Api = {
+  ready: Promise<void>;
+  lightingMode: string;
+  stop: () => Promise<void>;
+  restore: (s: unknown) => Promise<void>;
+  present: () => Promise<void>;
+};
+let elements: Map<string, ElementStub>,
+  callbacks: Map<number, FrameRequestCallback>,
+  nextHandle: number,
+  api: Api;
+let field: { tick: number; restore: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn> },
+  driver: {
+    step: ReturnType<typeof vi.fn>;
+    present: ReturnType<typeof vi.fn>;
+    restore: ReturnType<typeof vi.fn>;
+  };
+let status: 'playing' | 'won' | 'lost';
+let setLightingMode: ReturnType<typeof vi.fn>;
+const element = (id: string) => elements.get(id)!;
+const actor = () => ({
+  player: { x: 3000, y: 2000, z: 5000 },
+  status,
+  look: [256, 0, 0],
+  carved: false,
+  iceWalk: false,
+});
+function fire(now: number) {
+  const pending = [...callbacks.values()];
+  callbacks.clear();
+  pending.forEach((fn) => fn(now));
+}
+async function drain() {
+  for (let i = 0; i < 24; i++) await Promise.resolve();
+}
+async function playFrame() {
+  element('play').onclick();
+  fire(0);
+  await drain();
+  fire(1000 / 60);
+  await drain();
+}
 
-beforeEach(async()=>{
-  vi.resetModules();vi.clearAllMocks();mocks.legacy=false;status='playing';callbacks=new Map();nextHandle=0;
-  elements=new Map(['world','size','scene','dimension','mode','error','tick','play','frame','solve','target','tool','energy','expectation','step','reset','script','cut','heat','melt','appearance','lighting','camera','crosshair','inspect','export','import','file','remember','resume','checkpoint-status'].map(id=>[id,{id,value:'',textContent:'',hidden:true,checked:false,disabled:false,onclick:()=>{},addEventListener:vi.fn()}]));
-  vi.stubGlobal('document',{getElementById:(id:string)=>element(id),querySelectorAll:()=>[...elements.values()],activeElement:null});
-  vi.stubGlobal('location',{search:''});vi.stubGlobal('window',{addEventListener:vi.fn()});
-  vi.stubGlobal('requestAnimationFrame',(fn:FrameRequestCallback)=>{callbacks.set(++nextHandle,fn);return nextHandle;});
-  vi.stubGlobal('cancelAnimationFrame',(id:number)=>callbacks.delete(id));
-  mocks.validate.mockImplementation(value=>value);
-  mocks.scene.mockImplementation(()=>({size:32,scenario:'control',actor:actor(),deckY:14,rules:{goal:{minX:2304,maxY:2048,minZ:1536,maxZ:2560}},field:{snapshot:()=>({chunkSize:8})}}));
-  mocks.create.mockImplementation(async()=>{
-    setLightingMode=vi.fn(async()=>{});
-    driver={step:vi.fn(async()=>{field.tick++;return actor();}),present:vi.fn(async()=>actor()),restore:vi.fn(async()=>{}),...{inspect:actor,close:vi.fn()}};
-    field={tick:0,restore:vi.fn(async(saved:{tick?:number})=>{if(Number.isInteger(saved.tick))field.tick=saved.tick!;}),close:vi.fn(),...{snapshot:async()=>({tick:field.tick}),inspectSolve:()=>({planReused:true}),createGameplay:async()=>driver,
-      createRenderer:async()=>({setAppearance:async()=>{},...(mocks.legacy?{}:{setLightingMode}),setHeatDistortion:async()=>{},close:vi.fn()})}};
+beforeEach(async () => {
+  vi.resetModules();
+  vi.clearAllMocks();
+  mocks.legacy = false;
+  status = 'playing';
+  callbacks = new Map();
+  nextHandle = 0;
+  elements = new Map(
+    [
+      'world',
+      'size',
+      'scene',
+      'dimension',
+      'mode',
+      'error',
+      'tick',
+      'play',
+      'frame',
+      'solve',
+      'target',
+      'tool',
+      'energy',
+      'expectation',
+      'step',
+      'reset',
+      'script',
+      'cut',
+      'heat',
+      'melt',
+      'appearance',
+      'lighting',
+      'camera',
+      'crosshair',
+      'inspect',
+      'export',
+      'import',
+      'file',
+      'remember',
+      'resume',
+      'checkpoint-status',
+    ].map((id) => [
+      id,
+      {
+        id,
+        value: '',
+        textContent: '',
+        hidden: true,
+        checked: false,
+        disabled: false,
+        onclick: () => {},
+        addEventListener: vi.fn(),
+      },
+    ]),
+  );
+  vi.stubGlobal('document', {
+    getElementById: (id: string) => element(id),
+    querySelectorAll: () => [...elements.values()],
+    activeElement: null,
+  });
+  vi.stubGlobal('location', { search: '' });
+  vi.stubGlobal('window', { addEventListener: vi.fn() });
+  vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => {
+    callbacks.set(++nextHandle, fn);
+    return nextHandle;
+  });
+  vi.stubGlobal('cancelAnimationFrame', (id: number) => callbacks.delete(id));
+  mocks.validate.mockImplementation((value) => value);
+  mocks.scene.mockImplementation(() => ({
+    size: 32,
+    scenario: 'control',
+    actor: actor(),
+    deckY: 14,
+    rules: { goal: { minX: 2304, maxY: 2048, minZ: 1536, maxZ: 2560 } },
+    field: { snapshot: () => ({ chunkSize: 8 }) },
+  }));
+  mocks.create.mockImplementation(async () => {
+    setLightingMode = vi.fn(async () => {});
+    driver = {
+      step: vi.fn(async () => {
+        field.tick++;
+        return actor();
+      }),
+      present: vi.fn(async () => actor()),
+      restore: vi.fn(async () => {}),
+      ...{ inspect: actor, close: vi.fn() },
+    };
+    field = {
+      tick: 0,
+      restore: vi.fn(async (saved: { tick?: number }) => {
+        if (Number.isInteger(saved.tick)) field.tick = saved.tick!;
+      }),
+      close: vi.fn(),
+      ...{
+        snapshot: async () => ({ tick: field.tick }),
+        inspectSolve: () => ({ planReused: true }),
+        createGameplay: async () => driver,
+        createRenderer: async () => ({
+          setAppearance: async () => {},
+          ...(mocks.legacy ? {} : { setLightingMode }),
+          setHeatDistortion: async () => {},
+          close: vi.fn(),
+        }),
+      },
+    };
     return field;
   });
   // @ts-expect-error The public example is JavaScript, exercised as shipped.
   await import('../../examples/structural-cavern/app.js');
-  api=(window as unknown as {structuralCavern:Api}).structuralCavern;await api.ready;
+  api = (window as unknown as { structuralCavern: Api }).structuralCavern;
+  await api.ready;
 });
-afterEach(async()=>{await api?.stop().catch(()=>{});vi.unstubAllGlobals();});
+afterEach(async () => {
+  await api?.stop().catch(() => {});
+  vi.unstubAllGlobals();
+});
 
-test('frame rejection, reset and Play resume ticks with one frame pump',async()=>{
+test('frame rejection, reset and Play resume ticks with one frame pump', async () => {
   driver.step.mockRejectedValueOnce(Error('injected frame failure'));
-  await playFrame();expect(element('error').hidden).toBe(false);expect(callbacks.size).toBe(0);expect(field.tick).toBe(0);
-  await element('reset').onclick();expect(mocks.create).toHaveBeenCalledTimes(2);expect(element('error').hidden).toBe(true);expect(callbacks.size).toBe(1);
-  await playFrame();expect(field.tick).toBe(1);expect(callbacks.size).toBe(1);
-  await element('reset').onclick();expect(callbacks.size).toBe(1);
+  await playFrame();
+  expect(element('error').hidden).toBe(false);
+  expect(callbacks.size).toBe(0);
+  expect(field.tick).toBe(0);
+  await element('reset').onclick();
+  expect(mocks.create).toHaveBeenCalledTimes(2);
+  expect(element('error').hidden).toBe(true);
+  expect(callbacks.size).toBe(1);
+  await playFrame();
+  expect(field.tick).toBe(1);
+  expect(callbacks.size).toBe(1);
+  await element('reset').onclick();
+  expect(callbacks.size).toBe(1);
 });
 
-test('successful checkpoint recovery restarts frames while failed reset stays stopped',async()=>{
-  driver.step.mockRejectedValueOnce(Error('injected frame failure'));await playFrame();
-  await api.restore({version:'test',size:32,scenario:'control',field:{},actor:actor()});
-  expect(callbacks.size).toBe(1);await playFrame();expect(field.tick).toBe(1);
-  driver.step.mockRejectedValueOnce(Error('second failure'));fire(1000/30);await drain();expect(callbacks.size).toBe(0);
-  mocks.create.mockRejectedValueOnce(Error('recovery failed'));await element('reset').onclick();
-  expect(element('error').hidden).toBe(false);expect(callbacks.size).toBe(0);
+test('successful checkpoint recovery restarts frames while failed reset stays stopped', async () => {
+  driver.step.mockRejectedValueOnce(Error('injected frame failure'));
+  await playFrame();
+  await api.restore({ version: 'test', size: 32, scenario: 'control', field: {}, actor: actor() });
+  expect(callbacks.size).toBe(1);
+  await playFrame();
+  expect(field.tick).toBe(1);
+  driver.step.mockRejectedValueOnce(Error('second failure'));
+  fire(1000 / 30);
+  await drain();
+  expect(callbacks.size).toBe(0);
+  mocks.create.mockRejectedValueOnce(Error('recovery failed'));
+  await element('reset').onclick();
+  expect(element('error').hidden).toBe(false);
+  expect(callbacks.size).toBe(0);
 });
 
-test('HUD follows committed status, including out-of-lane actors and losses',async()=>{
+test('HUD follows committed status, including out-of-lane actors and losses', async () => {
   // The stub meets X/Y but is outside Z: the old HUD falsely declared a win.
-  await api.present();expect(element('mode').textContent).toBe('PAUSED');
-  status='won';await api.present();expect(element('mode').textContent).toBe('CROSSING COMPLETE');
-  status='lost';await api.present();expect(element('mode').textContent).toBe('FELL / RESET TO RETRY');
+  await api.present();
+  expect(element('mode').textContent).toBe('PAUSED');
+  status = 'won';
+  await api.present();
+  expect(element('mode').textContent).toBe('CROSSING COMPLETE');
+  status = 'lost';
+  await api.present();
+  expect(element('mode').textContent).toBe('FELL / RESET TO RETRY');
 });
 
-test('lighting A/B presents the same tick and survives checkpoint restore without stepping',async()=>{
-  expect(api.lightingMode).toBe('reference');expect(setLightingMode).toHaveBeenLastCalledWith('reference');
-  const tick=field.tick;driver.step.mockClear();field.restore.mockClear();
+test('lighting A/B presents the same tick and survives checkpoint restore without stepping', async () => {
+  expect(api.lightingMode).toBe('reference');
+  expect(setLightingMode).toHaveBeenLastCalledWith('reference');
+  const tick = field.tick;
+  driver.step.mockClear();
+  field.restore.mockClear();
   await element('lighting').onclick();
-  expect(api.lightingMode).toBe('cached');expect(setLightingMode).toHaveBeenLastCalledWith('cached');
-  expect(driver.step).not.toHaveBeenCalled();expect(field.restore).not.toHaveBeenCalled();expect(field.tick).toBe(tick);
-  await api.restore({version:'test',size:32,scenario:'control',field:{},actor:actor()});
-  expect(api.lightingMode).toBe('cached');expect(field.tick).toBe(tick);
-  await element('lighting').onclick();expect(api.lightingMode).toBe('reference');
-});
-
-test('rejected lighting mode change leaves the selected mode and physics untouched',async()=>{
-  setLightingMode.mockRejectedValueOnce(Error('injected cache setup failure'));driver.step.mockClear();
+  expect(api.lightingMode).toBe('cached');
+  expect(setLightingMode).toHaveBeenLastCalledWith('cached');
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(field.restore).not.toHaveBeenCalled();
+  expect(field.tick).toBe(tick);
+  await api.restore({ version: 'test', size: 32, scenario: 'control', field: {}, actor: actor() });
+  expect(api.lightingMode).toBe('cached');
+  expect(field.tick).toBe(tick);
   await element('lighting').onclick();
-  expect(api.lightingMode).toBe('reference');expect(element('error').hidden).toBe(false);
-  expect(driver.step).not.toHaveBeenCalled();expect(field.tick).toBe(0);
+  expect(api.lightingMode).toBe('reference');
 });
 
-test('an older SDK can still present reference lighting without the optional cache API',async()=>{
-  mocks.legacy=true;await element('reset').onclick();
-  expect(element('error').hidden).toBe(true);expect(element('lighting').disabled).toBe(true);
-  expect(api.lightingMode).toBe('reference');expect(driver.present).toHaveBeenCalled();
-  expect(driver.step).not.toHaveBeenCalled();expect(field.tick).toBe(0);
+test('rejected lighting mode change leaves the selected mode and physics untouched', async () => {
+  setLightingMode.mockRejectedValueOnce(Error('injected cache setup failure'));
+  driver.step.mockClear();
+  await element('lighting').onclick();
+  expect(api.lightingMode).toBe('reference');
+  expect(element('error').hidden).toBe(false);
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(field.tick).toBe(0);
 });
 
+test('an older SDK can still present reference lighting without the optional cache API', async () => {
+  mocks.legacy = true;
+  await element('reset').onclick();
+  expect(element('error').hidden).toBe(true);
+  expect(element('lighting').disabled).toBe(true);
+  expect(api.lightingMode).toBe('reference');
+  expect(driver.present).toHaveBeenCalled();
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(field.tick).toBe(0);
+});
 
-test('remember and restore preserve the saved tick and reset clears the remembered checkpoint',async()=>{
-  await element('step').onclick();expect(field.tick).toBe(1);
-  await element('remember').onclick();expect(element('resume').disabled).toBe(false);
-  await element('step').onclick();expect(field.tick).toBe(2);
-  await element('resume').onclick();expect(field.tick).toBe(1);
+test('remember and restore preserve the saved tick and reset clears the remembered checkpoint', async () => {
+  await element('step').onclick();
+  expect(field.tick).toBe(1);
+  await element('remember').onclick();
+  expect(element('resume').disabled).toBe(false);
+  await element('step').onclick();
+  expect(field.tick).toBe(2);
+  await element('resume').onclick();
+  expect(field.tick).toBe(1);
   expect(element('checkpoint-status').textContent).toContain('tick 1');
-  await element('reset').onclick();expect(field.tick).toBe(0);expect(element('resume').disabled).toBe(true);
+  await element('reset').onclick();
+  expect(field.tick).toBe(0);
+  expect(element('resume').disabled).toBe(true);
 });

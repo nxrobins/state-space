@@ -1,8 +1,14 @@
-import functools,http.server,json,threading,uuid,hashlib
+import functools
+import http.server
+import json
+import threading
+import uuid
+import hashlib
 from pathlib import Path
 from scripts.verify_browser import run_captured
 from engine.verify import ROOT
-import argparse,shutil
+import argparse
+import shutil
 from scripts.verification_guard import guarded_entry
 
 def main():

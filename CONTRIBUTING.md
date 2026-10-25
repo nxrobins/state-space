@@ -7,7 +7,9 @@ to the repository itself.
 
 ## Set up and check a change
 
-Install Node.js (CI uses 22), Python 3.10+ and uv. From the repository root:
+Install Node.js (CI uses 22), Python 3.10+ and uv. `.python-version` selects
+CPython 3.13 for `uv sync` and CI; the package itself still supports 3.10+.
+From the repository root:
 
 ```sh
 uv sync --locked
@@ -24,21 +26,35 @@ through the public package declarations. Do not run SDK rebuilding concurrently
 with those consumers. `npm test` rebuilds the SDK and runs the supervised CPU
 suite; it does not start native workloads or the quarantined legacy demos.
 
+`npm run format` applies Prettier to the hand-written engine, example, script
+and test sources; `npm run format:check` is the CI gate. `.prettierignore`
+lists what stays byte-exact: generated code, vendored files, built output,
+archived evidence and the frozen material-law sources.
+
 For a focused check, use the file's current path and the bounded CPU config:
 
 ```sh
 uv run python -m scripts.verification_guard --kind cpu --timeout 30 -- \
-  node node_modules/vitest/vitest.mjs run engine/portable-data.test.ts \
+  node node_modules/vitest/vitest.mjs run --reporter=dot engine/portable-data.test.ts \
   --config engine/vitest.bounded.config.ts
 ```
+
+Pass `--reporter=dot` to a focused vitest run under the supervisor. The default
+reporter prints nothing per test when stdout is a pipe, and the supervisor stops a
+child that is silent for 40 seconds. The CPU suites that `npm test` selects already
+use that reporter; the native macOS stages keep their own fixed commands.
 
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
 all public npm entries. Rebuild affected examples with `npm run build:reactive-chamber`
 or `npm run build:tactical-slab`. [CI](.github/workflows/verify.yml) also checks the
-supervisor, archive restoration and configured Python lint rules.
+supervisor, archive restoration and the configured Python lint rules with
+`uv run ruff check .`.
 
-Native checks use the explicit bounded stages in the [macOS guide](docs/MACOS.md).
+Python tests that need a native adapter skip on hosts without one. Set
+`STATE_SPACE_REQUIRE_GPU=1` on a GPU host so a missing adapter fails instead;
+`python -m engine.verify` sets it. Native checks use the explicit bounded stages
+in the [macOS guide](docs/MACOS.md).
 A passing CPU mock suite does not authorize a held runtime fixture. Keep native
 fixtures and `.runtime-cases.ts` outside the normal CPU selection.
 

@@ -1,0 +1,63 @@
+name: GPU verification
+# Hosted runners have no GPU. This workflow targets a self-hosted runner that
+# carries the `gpu` label, a usable WebGPU adapter and NVIDIA telemetry for
+# exactly one GPU: the `gpu` supervisor kind and `npm run test:native` refuse
+# to launch without nvidia-smi. A Mac host uses the bounded Metal stages in docs/MACOS.md
+# instead. Register the runner under
+# Settings > Actions > Runners, then run the workflow by hand. Enable the
+# schedule below only after the runner is registered; a scheduled job with no
+# matching runner queues until GitHub cancels it.
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '23 4 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: gpu-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native:
+    name: Native GPU tests and fixtures
+    runs-on: [self-hosted, gpu]
+    timeout-minutes: 45
+    env:
+      # Fail closed: a GPU test that cannot find an adapter must error, not skip.
+      STATE_SPACE_REQUIRE_GPU: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.28'
+          enable-cache: true
+      - run: uv sync --locked
+      - run: npm ci
+      - run: npm run build:sdk
+      - name: Native Python GPU tests
+        # The supervisor applies the same host preflight, deadline and sampled RSS
+        # limits as the CPU suites; the gpu kind also samples NVIDIA telemetry when
+        # nvidia-smi exists. The runner must be idle when the job starts.
+        run: uv run python -B -m scripts.verification_guard --kind gpu --timeout 600 -- uv run --no-sync python -B -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Native conformance fixture
+        run: npm run test:native -- --file engine/conformance.test.ts
+      - name: Native structure fixture
+        run: npm run test:native -- --file engine/structure.test.ts
+      - name: Native SDK fixture
+        run: npm run test:native -- --file engine/sdk.test.ts
+      - name: Retain receipts and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: gpu-evidence-${{ github.sha }}
+          path: dist/verification/
+          retention-days: 14
+          if-no-files-found: warn

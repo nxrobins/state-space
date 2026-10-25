@@ -2,16 +2,30 @@
 /** Strict validation shared by browser clients and snapshot transports. */
 import { RULES_VERSION, SCHEMA_VERSION } from './materials.generated.js';
 import { DEFAULT_REGISTRY, requireRegistry } from './registry.generated.js';
-export { MAX_CELLS, checkedInteger, validateDimensions, validatePackedCells } from './validation.generated.js';
+export { MAX_CELLS, checkedInteger, validateDimensions, validatePackedCells, } from './validation.generated.js';
 import { checkedInteger, validateDimensions } from './validation.generated.js';
 import { rulesForRegistry, validateStructure } from './structure.generated.js';
 export function validateSnapshot(snapshot, registry = DEFAULT_REGISTRY) {
     requireRegistry(registry);
-    const keys = ['schemaVersion', 'rulesVersion', 'materialCatalogHash', 'width', 'height', 'tick', 'packedCells', 'energyQ', 'structure'];
-    if (!snapshot || Object.keys(snapshot).length !== keys.length || keys.some(key => !Object.hasOwn(snapshot, key))) {
+    const keys = [
+        'schemaVersion',
+        'rulesVersion',
+        'materialCatalogHash',
+        'width',
+        'height',
+        'tick',
+        'packedCells',
+        'energyQ',
+        'structure',
+    ];
+    if (!snapshot ||
+        Object.keys(snapshot).length !== keys.length ||
+        keys.some((key) => !Object.hasOwn(snapshot, key))) {
         throw new Error('Snapshot contains missing or unexpected fields.');
     }
-    if (snapshot.schemaVersion !== SCHEMA_VERSION || snapshot.rulesVersion !== RULES_VERSION || snapshot.materialCatalogHash !== registry.hash) {
+    if (snapshot.schemaVersion !== SCHEMA_VERSION ||
+        snapshot.rulesVersion !== RULES_VERSION ||
+        snapshot.materialCatalogHash !== registry.hash) {
         throw new Error('Incompatible snapshot version or material catalog.');
     }
     checkedInteger(snapshot.tick, 0, Number.MAX_SAFE_INTEGER, 'tick');

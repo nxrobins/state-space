@@ -604,3 +604,15 @@ explicitly verifies waiting plus later admissible conversion. Type checks,
 structural lint, formatting, diff hygiene and SDK builds pass. No automated
 review, CI, native Worker, builder, pressure-driven freezing or full runtime
 release qualification is claimed.
+
+### Integration with current main (2026-10-25)
+
+After integrating main at `eb2f4cb`, verification passes 2,099 CPU and 26 Node
+tests (`7e5040518260404bba2f44a043ee23aa`), all four extended scenarios
+(`61570f1176564b13b789be729f363bd6`) and both tank refinement cases
+(`532721a3e22b479288ae96f5f87bcd90`). The installed-package client exercises the
+new reference API and all 15 package declaration entry points
+(`packages-cfec5f9e2771`, supervised by `d884f1bcbb6f471a9ca9c97ff47ff020`).
+SDK and chamber builds, type checks, structural lint, Python lint and formatting
+also pass. These are local CPU checks; the runtime release boundaries above
+remain unchanged.

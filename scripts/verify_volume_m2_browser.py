@@ -42,7 +42,7 @@ def main():
     ]
     if 'm2' == 'm3':
         reference_paths += ['dist/sdk/state-space-world.js', 'engine/experimental/world.ts',
-                            'engine/experimental/world-core.ts', 'examples/cavern/scene.js']
+                            'engine/experimental/volume/world-core.ts', 'examples/cavern/scene.js']
     else:
         reference_paths += ['examples/volume-lab/scenes.js', 'examples/first-person/scene.js']
     reference_hashes = {p: expected['sourceHashes'][p] for p in reference_paths}

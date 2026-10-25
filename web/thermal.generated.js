@@ -25,7 +25,9 @@ export function temperatureQ(voxel, energy, cold) {
     return temperature;
 }
 export function thermalView(voxel, energy, cold) {
-    return ((voxel & 0xffff00ff) | (Math.min(255, Math.floor(temperatureQ(voxel, energy, cold) / ENERGY_SCALE)) << 8)) >>> 0;
+    return (((voxel & 0xffff00ff) |
+        (Math.min(255, Math.floor(temperatureQ(voxel, energy, cold) / ENERGY_SCALE)) << 8)) >>>
+        0);
 }
 export function seedState(values, cold = C.buildColdTable(), registry = DEFAULT_REGISTRY) {
     const grid = validatePackedCells(values, values.length);
@@ -34,7 +36,9 @@ export function seedState(values, cold = C.buildColdTable(), registry = DEFAULT_
         const v = grid[i];
         if (!registry.has(v & 255))
             throw new Error('Undefined material in initial state.');
-        energyQ[i] = (((v >>> 8) & 255) + prop(v, cold, C.COLD_PHASE_ENERGY) + prop(v, cold, C.COLD_FUEL_ENERGY)) * ENERGY_SCALE;
+        energyQ[i] =
+            (((v >>> 8) & 255) + prop(v, cold, C.COLD_PHASE_ENERGY) + prop(v, cold, C.COLD_FUEL_ENERGY)) *
+                ENERGY_SCALE;
         grid[i] = thermalView(v, energyQ[i], cold);
     }
     return { grid, energyQ };
@@ -59,7 +63,7 @@ export function validateEnergyState(cells, energies, length, cold = C.buildColdT
 export function exchangeEnergy(a, b, ea, eb, cold) {
     const ta = temperatureQ(a, ea, cold), tb = temperatureQ(b, eb, cold);
     const ca = prop(a, cold, C.COLD_CONDUCTIVITY), cb = prop(b, cold, C.COLD_CONDUCTIVITY);
-    const k = ca + cb ? Math.floor(2 * ca * cb / (ca + cb)) : 0;
+    const k = ca + cb ? Math.floor((2 * ca * cb) / (ca + cb)) : 0;
     const difference = Math.abs(ta - tb);
     let flux = Math.floor(difference / 512) * k + Math.floor(((difference % 512) * k + 511) / 512);
     flux = Math.min(flux, Math.floor(difference / 2));
@@ -75,21 +79,30 @@ export function phaseMaterial(v, energy, cold) {
     const boil = prop(v, cold, C.COLD_BOILS_INTO);
     const up = boil || prop(v, cold, C.COLD_MELTS_INTO);
     if (up) {
-        const boundary = chemical + (prop(up, cold, C.COLD_PHASE_ENERGY) + prop(v, cold, boil ? C.COLD_BOIL_POINT : C.COLD_MELT_POINT)) * ENERGY_SCALE;
+        const boundary = chemical +
+            (prop(up, cold, C.COLD_PHASE_ENERGY) +
+                prop(v, cold, boil ? C.COLD_BOIL_POINT : C.COLD_MELT_POINT)) *
+                ENERGY_SCALE;
         if (energy >= boundary)
             return up;
     }
     const freeze = prop(v, cold, C.COLD_FREEZES_INTO);
     const down = freeze || prop(v, cold, C.COLD_CONDENSES_INTO);
     if (down) {
-        const boundary = chemical + (prop(down, cold, C.COLD_PHASE_ENERGY) + prop(v, cold, freeze ? C.COLD_FREEZE_POINT : C.COLD_CONDENSE_POINT)) * ENERGY_SCALE;
+        const boundary = chemical +
+            (prop(down, cold, C.COLD_PHASE_ENERGY) +
+                prop(v, cold, freeze ? C.COLD_FREEZE_POINT : C.COLD_CONDENSE_POINT)) *
+                ENERGY_SCALE;
         if (energy <= boundary)
             return down;
     }
     return v & 255;
 }
 export function rewriteMaterial(voxel, material, energy, cold) {
-    const packed = ((voxel & 0xf0ff0000) | material | (prop(material, cold, C.COLD_DEFAULT_PHASE) << C.PHASE_SHIFT)) >>> 0;
+    const packed = ((voxel & 0xf0ff0000) |
+        material |
+        (prop(material, cold, C.COLD_DEFAULT_PHASE) << C.PHASE_SHIFT)) >>>
+        0;
     return thermalView(packed, energy, cold);
 }
 export function energyLedger(state, cold = C.buildColdTable()) {

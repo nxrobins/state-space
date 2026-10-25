@@ -19,15 +19,44 @@ export interface PassReport {
   readonly after: Readonly<ReturnType<typeof energyLedger>>;
   readonly structure?: StructuralPlan;
 }
-export interface StepOptions { inspect?: boolean }
+export interface StepOptions {
+  inspect?: boolean;
+}
 
-export function inspectPass(before: StructuralState, after: StructuralState, cold: Uint32Array, tick: number, passId: string, structure?: StructuralPlan): PassReport {
+export function inspectPass(
+  before: StructuralState,
+  after: StructuralState,
+  cold: Uint32Array,
+  tick: number,
+  passId: string,
+  structure?: StructuralPlan,
+): PassReport {
   const changes: CellChange[] = [];
   for (let i = 0; i < before.grid.length; i += 1) {
-    if (before.grid[i] !== after.grid[i] || before.energyQ[i] !== after.energyQ[i] || before.structure[i] !== after.structure[i]) {
-      changes.push(Object.freeze({ index: i, beforePacked: before.grid[i], afterPacked: after.grid[i], beforeEnergyQ: before.energyQ[i], afterEnergyQ: after.energyQ[i], beforeStructure: before.structure[i], afterStructure: after.structure[i] }));
+    if (
+      before.grid[i] !== after.grid[i] ||
+      before.energyQ[i] !== after.energyQ[i] ||
+      before.structure[i] !== after.structure[i]
+    ) {
+      changes.push(
+        Object.freeze({
+          index: i,
+          beforePacked: before.grid[i],
+          afterPacked: after.grid[i],
+          beforeEnergyQ: before.energyQ[i],
+          afterEnergyQ: after.energyQ[i],
+          beforeStructure: before.structure[i],
+          afterStructure: after.structure[i],
+        }),
+      );
     }
   }
-  return Object.freeze({ tick, passId, changes: Object.freeze(changes), structure,
-    before: Object.freeze(energyLedger(before, cold)), after: Object.freeze(energyLedger(after, cold)) });
+  return Object.freeze({
+    tick,
+    passId,
+    changes: Object.freeze(changes),
+    structure,
+    before: Object.freeze(energyLedger(before, cold)),
+    after: Object.freeze(energyLedger(after, cold)),
+  });
 }

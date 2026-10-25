@@ -50,6 +50,53 @@ const restoredRegistry = await createReactiveMaterialRegistry3D(decoded.catalog)
 const restoredBlock = readReactiveMaterialBlock3D(restoredRegistry, decoded.block);
 ```
 
+Readers reject holes, accessors, hidden or extra keys, symbols and typed arrays
+in plain arrays and records without running caller code, so every result is
+reproducible for plain data. A Proxy is read through its traps: they run, and
+they decide what is read. When a trap answers an array method, such as `map`,
+with a result of its own instead of the one the method would compute (another
+object, a typed array, or an array holding values the reader's callback would
+reject), the engine works on that result as returned, and later steps may read
+it differently than earlier engine versions did, so results for such inputs may
+differ between versions. Both guarantees assume an unmodified JavaScript realm.
+
+When a caller replaces or adds members of built-in objects, their prototypes or
+their constructors, the engine makes no guarantee: errors, progress at a throw
+and outputs may differ between engine versions, and a tick may publish or commit
+a state that an unmodified realm would not compute. Hooks, such as an accessor on
+`Array.prototype` or `Object.prototype`, see engine arrays and records while the
+engine works; they can steer it and can keep what they see, and caller code that
+changes a kept engine object can change the world's state. Earlier engine
+versions did not guard against this either. This version adds three defenses:
+
+- At creation, at each advance, and in `result()`, `motion()` and commit, a
+  world tick checks that these built-ins still read as the ones the SDK loaded
+  with, and fails if one does not: the global `Array`, `Map`, `Set`,
+  `Int32Array`, `Uint32Array`, `Uint16Array` and `Uint8Array`; `Array.isArray`
+  and `Array[Symbol.species]`; the `slice`, `map`, `filter`, `flatMap`, `concat`,
+  `push`, `sort`, `some`, `every`, `includes`, `fill`, `constructor` and iterator
+  of `Array.prototype`, and the array iterator's `next`; `get`, `set` and `has`
+  of `Map.prototype`; `add`, `has` and the iterator of `Set.prototype`; the four
+  typed arrays' `constructor` and species; and the typed-array `slice`, `fill`
+  and `set`, read through each of the four typed-array prototypes. It reads the
+  global constructors by their global names and the well-known symbols as the
+  SDK loaded them, as the tick does. The check reads no other getter (such as a
+  typed array's `length` or a set's `size`) and no other built-in (such as
+  `WeakMap`), and it does not see a replacement that reads as the original (an
+  accessor that answers with it), one that caller code makes and undoes while
+  a tick call runs, or one made before the SDK loaded.
+- A world's `snapshot()` and `commitTick()`, the `result()` and `motion()` of
+  world tick jobs, and the `result()` of evolution, reaction and structure jobs
+  copy with built-ins captured when the SDK loaded, and define each element and
+  field of a copy before storing into it, so no prototype setter sees a copy,
+  also where a hook left a hole or an own `__proto__` key. This does not cover
+  engine objects that a hook replaced during a tick, for example with a Proxy.
+  Other methods, such as those of translations, holds, transfers and domain
+  sets, copy as before.
+- A world tick job's `advance()` fails, and its `cancel()` returns `false`, if
+  caller code calls them while `advance()` runs. The tick jobs of a domain set
+  have no such guard.
+
 Registry reads are isolated, records immutable, and catalog inputs are owned
 before asynchronous SHA-256 hashing. The hash includes the profile's schema/rules,
 the entire property catalog and sorted active IDs; `sourceCatalogHash` identifies
@@ -298,7 +345,9 @@ neighbors, or one blocking dependency edge; the complete solve uses at most
 are O(cells), bounded by the 32,768-cell block limit, and outside this work-unit
 claim. This is an operation bound, not a measured wall-clock latency guarantee.
 `progress()` exposes stage, status and completed work; `cancel()` discards staged
-work. `result()` returns isolated data only after the complete solve.
+work. `result()` returns isolated data only after the complete solve. Each
+`advance()` call also has a fixed cost, so `advance(1)` is the slowest way to
+drive a job; larger budgets finish it in less total time.
 
 The frozen schedule is support roots and complete BFS, weight initialization,
 reverse-BFS load distribution, one damage application, reciprocal bond pruning,

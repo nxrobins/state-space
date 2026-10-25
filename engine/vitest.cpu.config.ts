@@ -3,7 +3,7 @@ import { sourceAliases } from './vitest.shared.js';
 
 // Native parity fixtures have their own explicit, single-file entry point.
 export default defineConfig({
-  resolve: {alias: sourceAliases},
+  resolve: { alias: sourceAliases },
   test: {
     environment: 'node',
     include: ['engine/**/*.test.ts'],

@@ -28,19 +28,22 @@ describe('bounded portable data', () => {
     const getter = vi.fn(() => 1),
       cycle: PortableValue[] = [];
     cycle.push(cycle);
-    const objectCycle: Record<string, PortableValue> = {}; objectCycle.self = objectCycle;
+    const objectCycle: Record<string, PortableValue> = {};
+    objectCycle.self = objectCycle;
     const accessor = Object.defineProperty({}, 'x', { get: getter, enumerable: true });
     const hidden = Object.defineProperty({}, 'x', { value: 1 });
     const arrayAccessor = Object.defineProperty([0], '0', { get: getter });
     for (const bad of [
-      cycle, objectCycle,
+      cycle,
+      objectCycle,
       accessor,
       hidden,
       arrayAccessor,
       [, ,],
       Object.assign([0], { extra: 1 }),
       { [Symbol()]: 0 },
-      new Date(), new Map(),
+      new Date(),
+      new Map(),
       new Uint8Array(1),
       undefined,
       NaN,
@@ -48,7 +51,8 @@ describe('bounded portable data', () => {
       1n,
       () => {},
     ]) {
-      for (const value of [bad, {nested: bad}]) expect(() => copy(value as PortableValue)).toThrow();
+      for (const value of [bad, { nested: bad }])
+        expect(() => copy(value as PortableValue)).toThrow();
     }
     expect(getter).not.toHaveBeenCalled();
   });

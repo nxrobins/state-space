@@ -114,6 +114,9 @@ appearance settings are not stored in physical snapshots.
 
 The first naturalistic selection loads the optional module, compiles its pipelines
 and uploads bundled CC0 rock maps with mip chains; later A/B changes reuse them.
+The rock maps ship once, as `state-space-engine/experimental/3d/rock-textures`;
+the appearance chunk of every GPU world bundle imports that sibling file when it
+loads, instead of carrying its own copy.
 Diagnostic startup does not load that payload. Call it while the field is idle.
 Invalid modes and calls during another
 field operation reject without changing the selected appearance. Closing the

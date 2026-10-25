@@ -1,21 +1,44 @@
 /** Exact integer reference for ca-v3. Inputs remain immutable within each pass. */
 import * as C from './generated/materials.js';
-import { exchangeEnergy, phaseMaterial, rewriteMaterial, temperatureQ, thermalView, ENERGY_SCALE, MAX_ENERGY_Q } from './thermal.js';
-import { ANCHOR, INTEGRITY_MASK, cloneStructure, planStructure, normalizeBonds, rewrittenStructure, rulesForRegistry, validateStructure,
-  type StructuralState, type StructuralPlan, type StructuralRules } from './structure.js';
+import {
+  exchangeEnergy,
+  phaseMaterial,
+  rewriteMaterial,
+  temperatureQ,
+  thermalView,
+  ENERGY_SCALE,
+  MAX_ENERGY_Q,
+} from './thermal.js';
+import {
+  ANCHOR,
+  INTEGRITY_MASK,
+  cloneStructure,
+  planStructure,
+  normalizeBonds,
+  rewrittenStructure,
+  rulesForRegistry,
+  validateStructure,
+  type StructuralState,
+  type StructuralPlan,
+  type StructuralRules,
+} from './structure.js';
 import { checkedInteger, validateDimensions } from './validation.js';
 import { KERNEL_SPECS, movementScheduleForTick } from './generated/schedule.js';
 import { DEFAULT_REGISTRY, type MaterialRegistry } from './registry.js';
 import { compiledStructuralPlan } from './structure_compiled.js';
 import { fluidKind, MOVED } from './pressure.js';
 
-const SPECS = new Map(KERNEL_SPECS.map(spec => [spec.id, spec]));
+const SPECS = new Map(KERNEL_SPECS.map((spec) => [spec.id, spec]));
 const coldReferences = new WeakMap<MaterialRegistry, Uint32Array>();
 function validateCold(cold: Uint32Array, registry: MaterialRegistry): Uint32Array {
   rulesForRegistry(registry);
   let expected = coldReferences.get(registry);
-  if (!expected) { expected = registry.coldTable(); coldReferences.set(registry, expected); }
-  if (!cold || cold.length !== expected.length || expected.some((value, i) => cold[i] !== value)) throw new Error('Cold table must match the supplied validated registry.');
+  if (!expected) {
+    expected = registry.coldTable();
+    coldReferences.set(registry, expected);
+  }
+  if (!cold || cold.length !== expected.length || expected.some((value, i) => cold[i] !== value))
+    throw new Error('Cold table must match the supplied validated registry.');
   // Use the private registry copy after checking the caller's table. An observer
   // can change its own table, but cannot change physics midway through a tick.
   return expected;
@@ -37,7 +60,16 @@ export type PassObserver = (passId: string, state: StructuralState, plan?: Struc
 
 /** `committed` is only for a field's own committed state, which was validated at
  * commit. Every other input is validated by the first (structural) pass. */
-export function runCpuTick(state: StructuralState, width: number, height: number, cold: Uint32Array, tick: number, observer?: PassObserver, registry: MaterialRegistry = DEFAULT_REGISTRY, committed = false): StructuralState {
+export function runCpuTick(
+  state: StructuralState,
+  width: number,
+  height: number,
+  cold: Uint32Array,
+  tick: number,
+  observer?: PassObserver,
+  registry: MaterialRegistry = DEFAULT_REGISTRY,
+  committed = false,
+): StructuralState {
   checkedInteger(tick, 0, Number.MAX_SAFE_INTEGER, 'tick');
   cold = validateCold(cold, registry);
   const rules = rulesForRegistry(registry);
@@ -47,14 +79,28 @@ export function runCpuTick(state: StructuralState, width: number, height: number
     // The first (structural) pass validates and owns the complete tick input.
     // Later passes only consume engine-produced state, including pending FRESH
     // bonds until normalize. Public single-pass calls still validate every input.
-    const plan = passId === 'structure' && observer ? planStructure(current, width, height, rules) : undefined;
+    const plan =
+      passId === 'structure' && observer ? planStructure(current, width, height, rules) : undefined;
     if (plan) current = plan.apply(current, width, height);
-    else if (passId === 'structure') current = compiledStructuralPlan(current, width, height, registry, committed).apply();
+    else if (passId === 'structure')
+      current = compiledStructuralPlan(current, width, height, registry, committed).apply();
     else {
       // Both buffers are private to this tick. Each pass reads one and writes
       // the other; observers receive copies, and no caller storage is reused.
-      spare ??= { grid: new Uint32Array(current.grid.length), energyQ: new Uint32Array(current.grid.length), structure: new Uint32Array(current.grid.length) };
-      const next = runValidatedCpuPass(current, width, height, cold, SPECS.get(passId)!, rules, spare);
+      spare ??= {
+        grid: new Uint32Array(current.grid.length),
+        energyQ: new Uint32Array(current.grid.length),
+        structure: new Uint32Array(current.grid.length),
+      };
+      const next = runValidatedCpuPass(
+        current,
+        width,
+        height,
+        cold,
+        SPECS.get(passId)!,
+        rules,
+        spare,
+      );
       if (passId !== 'normalize') spare = current;
       current = next;
     }
@@ -63,78 +109,142 @@ export function runCpuTick(state: StructuralState, width: number, height: number
   return current;
 }
 
-export function runCpuPass(state: StructuralState, width: number, height: number, cold: Uint32Array, passId: string, registry: MaterialRegistry = DEFAULT_REGISTRY): StructuralState {
+export function runCpuPass(
+  state: StructuralState,
+  width: number,
+  height: number,
+  cold: Uint32Array,
+  passId: string,
+  registry: MaterialRegistry = DEFAULT_REGISTRY,
+): StructuralState {
   const spec = SPECS.get(passId);
   if (!spec) throw new Error(`Unknown engine pass: ${passId}`);
   cold = validateCold(cold, registry);
   validateDimensions(width, height);
   const rules = rulesForRegistry(registry);
-  if (passId === 'structure') return planStructure(state, width, height, rules).apply(state, width, height);
+  if (passId === 'structure')
+    return planStructure(state, width, height, rules).apply(state, width, height);
   const validated = validateStructure(state, width, height, rules, false);
   return runValidatedCpuPass(validated, width, height, cold, spec, rules);
 }
 
 /** Private execution on owned, validated state; never a public input boundary. */
-function runValidatedCpuPass(state: StructuralState, width: number, height: number, cold: Uint32Array, spec: (typeof KERNEL_SPECS)[number], rules: StructuralRules, reusable?: StructuralState): StructuralState {
-  if (spec.id === 'normalize') return { ...state, structure: normalizeBonds(state.grid, state.structure, width, height, rules) };
+function runValidatedCpuPass(
+  state: StructuralState,
+  width: number,
+  height: number,
+  cold: Uint32Array,
+  spec: (typeof KERNEL_SPECS)[number],
+  rules: StructuralRules,
+  reusable?: StructuralState,
+): StructuralState {
+  if (spec.id === 'normalize')
+    return {
+      ...state,
+      structure: normalizeBonds(state.grid, state.structure, width, height, rules),
+    };
   const input = state.grid;
   const inputEnergy = state.energyQ;
   const inputStructure = state.structure;
   const output = reusable?.grid ?? input.slice();
   const outputEnergy = reusable?.energyQ ?? inputEnergy.slice();
   const outputStructure = reusable?.structure ?? inputStructure.slice();
-  if (reusable) { output.set(input); outputEnergy.set(inputEnergy); outputStructure.set(inputStructure); }
-  const finish = (): StructuralState => ({ grid: output, energyQ: outputEnergy, structure: outputStructure });
+  if (reusable) {
+    output.set(input);
+    outputEnergy.set(inputEnergy);
+    outputStructure.set(inputStructure);
+  }
+  const finish = (): StructuralState => ({
+    grid: output,
+    energyQ: outputEnergy,
+    structure: outputStructure,
+  });
   const prop = (voxel: number, field: number) => cold[material(voxel) * C.COLD_STRIDE + field];
   const density = (v: number) => prop(v, C.COLD_DENSITY);
-  const bound = (index: number) => rules.eligible(input[index]) && (inputStructure[index] & (ANCHOR | INTEGRITY_MASK)) !== 0;
+  const bound = (index: number) =>
+    rules.eligible(input[index]) && (inputStructure[index] & (ANCHOR | INTEGRITY_MASK)) !== 0;
   const canFall = (source: number, target: number) =>
-    (falling(phase(input[source])) || structural(phase(input[source]))) && !bound(source) && !bound(target) && density(input[source]) > density(input[target]);
+    (falling(phase(input[source])) || structural(phase(input[source]))) &&
+    !bound(source) &&
+    !bound(target) &&
+    density(input[source]) > density(input[target]);
   const swap = (a: number, b: number) => {
-    output[a] = input[b]; output[b] = input[a];
-    outputEnergy[a] = inputEnergy[b]; outputEnergy[b] = inputEnergy[a];
-    outputStructure[a] = inputStructure[b]; outputStructure[b] = inputStructure[a];
+    output[a] = input[b];
+    output[b] = input[a];
+    outputEnergy[a] = inputEnergy[b];
+    outputEnergy[b] = inputEnergy[a];
+    outputStructure[a] = inputStructure[b];
+    outputStructure[b] = inputStructure[a];
   };
-  const hasFall = (x: number, y: number) => y < height - 1 && (
-    canFall(y * width + x, (y + 1) * width + x) ||
-    (x > 0 && canFall(y * width + x, (y + 1) * width + x - 1)) ||
-    (x < width - 1 && canFall(y * width + x, (y + 1) * width + x + 1)));
-  const gasRank = (index: number) => Math.floor(temperatureQ(input[index], inputEnergy[index], cold) / ENERGY_SCALE) * 2 - density(input[index]);
+  const hasFall = (x: number, y: number) =>
+    y < height - 1 &&
+    (canFall(y * width + x, (y + 1) * width + x) ||
+      (x > 0 && canFall(y * width + x, (y + 1) * width + x - 1)) ||
+      (x < width - 1 && canFall(y * width + x, (y + 1) * width + x + 1)));
+  const gasRank = (index: number) =>
+    Math.floor(temperatureQ(input[index], inputEnergy[index], cold) / ENERGY_SCALE) * 2 -
+    density(input[index]);
   const canRise = (source: number, target: number) => {
-    const v = input[source], other = input[target];
-    return material(v) !== C.MAT.AIR && gas(phase(v)) && !structural(phase(other)) &&
-      (material(other) === C.MAT.AIR || gas(phase(other))) && gasRank(source) > gasRank(target) + 16;
+    const v = input[source],
+      other = input[target];
+    return (
+      material(v) !== C.MAT.AIR &&
+      gas(phase(v)) &&
+      !structural(phase(other)) &&
+      (material(other) === C.MAT.AIR || gas(phase(other))) &&
+      gasRank(source) > gasRank(target) + 16
+    );
   };
   const pairPhase = spec.constants.MOVE_PHASE ?? spec.constants.GRAVITY_PHASE ?? 0;
   const salt = spec.constants.MOVE_SALT ?? 0;
 
-  const velocity = (index: number, axis: number) => (((input[index] >>> (16 + axis * 4)) & 15) ^ 8) - 8;
+  const velocity = (index: number, axis: number) =>
+    (((input[index] >>> (16 + axis * 4)) & 15) ^ 8) - 8;
   if (spec.source_file === 'phase_2f_impulse.wgsl') {
     for (let i = 0; i < input.length; i += 1) {
-      let vx = 0, vy = 0;
+      let vx = 0,
+        vy = 0;
       if (!bound(i)) {
         const own = inputStructure[i] >>> 16;
-        const head = fluidKind(input[i]) === 2 ? Math.max(1, Math.ceil(density(input[i]) / 64)) * 16 : 0;
-        const p = (j: number, correction: number) => j < 0 || !fluidKind(input[j]) ? own : (inputStructure[j] >>> 16) + correction;
-        const fx = p(i % width ? i - 1 : -1, 0) - p(i % width + 1 < width ? i + 1 : -1, 0);
-        const fy = p(i >= width ? i - width : -1, head) - p(i + width < input.length ? i + width : -1, -head);
-        const impulse = (old: number, force: number) => Math.max(-4, Math.min(4, old - Math.sign(old) + Math.max(-4, Math.min(4, Math.trunc(force / 64)))));
-        vx = impulse(velocity(i, 0), fx); vy = impulse(velocity(i, 1), fy);
+        const head =
+          fluidKind(input[i]) === 2 ? Math.max(1, Math.ceil(density(input[i]) / 64)) * 16 : 0;
+        const p = (j: number, correction: number) =>
+          j < 0 || !fluidKind(input[j]) ? own : (inputStructure[j] >>> 16) + correction;
+        const fx = p(i % width ? i - 1 : -1, 0) - p((i % width) + 1 < width ? i + 1 : -1, 0);
+        const fy =
+          p(i >= width ? i - width : -1, head) -
+          p(i + width < input.length ? i + width : -1, -head);
+        const impulse = (old: number, force: number) =>
+          Math.max(
+            -4,
+            Math.min(4, old - Math.sign(old) + Math.max(-4, Math.min(4, Math.trunc(force / 64)))),
+          );
+        vx = impulse(velocity(i, 0), fx);
+        vy = impulse(velocity(i, 1), fy);
       }
       output[i] = (input[i] & 0xff00ffff) | ((vx & 15) << 16) | ((vy & 15) << 20);
     }
     return finish();
   }
   if (spec.source_file === 'phase_2f_velocity.wgsl') {
-    const axis = spec.constants.MOVE_AXIS ?? 0, stride = axis ? width : 1;
+    const axis = spec.constants.MOVE_AXIS ?? 0,
+      stride = axis ? width : 1;
     for (let y = axis ? pairPhase : 0; y < height; y += axis ? 2 : 1) {
       for (let x = axis ? 0 : pairPhase; x < width; x += axis ? 1 : 2) {
         if (axis ? y + 1 >= height : x + 1 >= width) continue;
-        const a = y * width + x, b = a + stride;
-        const request = (s: number, t: number, sign: number) => !bound(s) && !bound(t) && fluidKind(input[t]) !== 0 && velocity(s, axis) * sign > salt;
-        if (((inputStructure[a] | inputStructure[b]) & MOVED) === 0 && (request(a, b, 1) || request(b, a, -1))) {
+        const a = y * width + x,
+          b = a + stride;
+        const request = (s: number, t: number, sign: number) =>
+          !bound(s) && !bound(t) && fluidKind(input[t]) !== 0 && velocity(s, axis) * sign > salt;
+        if (
+          ((inputStructure[a] | inputStructure[b]) & MOVED) === 0 &&
+          (request(a, b, 1) || request(b, a, -1))
+        ) {
           swap(a, b);
-          if (!pairPhase) { outputStructure[a] |= MOVED; outputStructure[b] |= MOVED; }
+          if (!pairPhase) {
+            outputStructure[a] |= MOVED;
+            outputStructure[b] |= MOVED;
+          }
         }
       }
     }
@@ -142,12 +252,20 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
     return finish();
   }
 
-  if (spec.source_file === 'phase_2b_winner.wgsl' || spec.source_file === 'phase_2b_gas_buoyancy_winner.wgsl') {
+  if (
+    spec.source_file === 'phase_2b_winner.wgsl' ||
+    spec.source_file === 'phase_2b_gas_buoyancy_winner.wgsl'
+  ) {
     for (let y = pairPhase; y < height - 1; y += 2) {
       for (let x = 0; x < width; x += 1) {
         const upper = y * width + x;
         const lower = upper + width;
-        if (spec.source_file === 'phase_2b_winner.wgsl' ? canFall(upper, lower) : canRise(lower, upper)) swap(upper, lower);
+        if (
+          spec.source_file === 'phase_2b_winner.wgsl'
+            ? canFall(upper, lower)
+            : canRise(lower, upper)
+        )
+          swap(upper, lower);
       }
     }
     return finish();
@@ -165,14 +283,20 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
     }
     return finish();
   }
-  if (spec.source_file === 'phase_2b_liquid_winner.wgsl' || spec.source_file === 'phase_2b_gas_spread_winner.wgsl') {
+  if (
+    spec.source_file === 'phase_2b_liquid_winner.wgsl' ||
+    spec.source_file === 'phase_2b_gas_spread_winner.wgsl'
+  ) {
     for (let y = 0; y < height; y += 1) {
       for (let x = pairPhase; x < width - 1; x += 2) {
         const left = y * width + x;
         const right = left + 1;
         if (spec.source_file === 'phase_2b_liquid_winner.wgsl') {
-          const canSpread = (v: number, dst: number) => liquid(phase(v)) && !structural(phase(dst)) &&
-            (phase(dst) === C.PHASE.GAS || material(dst) === C.MAT.AIR) && density(v) > density(dst);
+          const canSpread = (v: number, dst: number) =>
+            liquid(phase(v)) &&
+            !structural(phase(dst)) &&
+            (phase(dst) === C.PHASE.GAS || material(dst) === C.MAT.AIR) &&
+            density(v) > density(dst);
           const leftCan = !hasFall(x, y) && canSpread(input[left], input[right]);
           const rightCan = !hasFall(x + 1, y) && canSpread(input[right], input[left]);
           if (leftCan || rightCan) swap(left, right);
@@ -180,10 +304,15 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
           const leftwardSource = (hashPair(x, y, salt) & 1) === 0;
           const source = leftwardSource ? left : right;
           const target = leftwardSource ? right : left;
-          const v = input[source], dst = input[target];
+          const v = input[source],
+            dst = input[target];
           const blocked = y === 0 || !canRise(source, source - width);
-          const canSpread = material(v) !== C.MAT.AIR && gas(phase(v)) && !structural(phase(dst)) &&
-            (material(dst) === C.MAT.AIR || (gas(phase(dst)) && gasRank(source) > gasRank(target) + 16));
+          const canSpread =
+            material(v) !== C.MAT.AIR &&
+            gas(phase(v)) &&
+            !structural(phase(dst)) &&
+            (material(dst) === C.MAT.AIR ||
+              (gas(phase(dst)) && gasRank(source) > gasRank(target) + 16));
           if (blocked && canSpread) swap(source, target);
         }
       }
@@ -192,20 +321,34 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
   }
 
   const neighbors = (index: number): number[] => {
-    const x = index % width, y = Math.floor(index / width);
-    return [x > 0 ? index - 1 : -1, x < width - 1 ? index + 1 : -1,
-      y > 0 ? index - width : -1, y < height - 1 ? index + width : -1];
+    const x = index % width,
+      y = Math.floor(index / width);
+    return [
+      x > 0 ? index - 1 : -1,
+      x < width - 1 ? index + 1 : -1,
+      y > 0 ? index - width : -1,
+      y < height - 1 ? index + width : -1,
+    ];
   };
   if (spec.source_file === 'phase_2a_winner.wgsl') {
-    const axis = spec.constants.THERMAL_AXIS ?? 0, parity = spec.constants.THERMAL_PARITY ?? 0;
+    const axis = spec.constants.THERMAL_AXIS ?? 0,
+      parity = spec.constants.THERMAL_PARITY ?? 0;
     for (let y = axis ? parity : 0; y < height; y += axis ? 2 : 1) {
       for (let x = axis ? 0 : parity; x < width; x += axis ? 1 : 2) {
         if ((!axis && x + 1 >= width) || (axis && y + 1 >= height)) continue;
-        const a = y * width + x, b = a + (axis ? width : 1);
+        const a = y * width + x,
+          b = a + (axis ? width : 1);
         // Equal energy in the same material gives exactly equal full
         // temperatures, including latent intervals: this pair has zero flux.
-        if (material(input[a]) === material(input[b]) && inputEnergy[a] === inputEnergy[b]) continue;
-        [outputEnergy[a], outputEnergy[b]] = exchangeEnergy(input[a], input[b], inputEnergy[a], inputEnergy[b], cold);
+        if (material(input[a]) === material(input[b]) && inputEnergy[a] === inputEnergy[b])
+          continue;
+        [outputEnergy[a], outputEnergy[b]] = exchangeEnergy(
+          input[a],
+          input[b],
+          inputEnergy[a],
+          inputEnergy[b],
+          cold,
+        );
         output[a] = thermalView(input[a], outputEnergy[a], cold);
         output[b] = thermalView(input[b], outputEnergy[b], cold);
       }
@@ -217,44 +360,72 @@ function runValidatedCpuPass(state: StructuralState, width: number, height: numb
       const next = phaseMaterial(input[index], inputEnergy[index], cold);
       if (next !== material(input[index])) {
         output[index] = rewriteMaterial(input[index], next, inputEnergy[index], cold);
-        outputStructure[index] = rewrittenStructure(input[index], output[index], inputStructure[index], rules);
+        outputStructure[index] = rewrittenStructure(
+          input[index],
+          output[index],
+          inputStructure[index],
+          rules,
+        );
       }
     }
     return finish();
   }
-  if (spec.source_file !== 'phase_2d_winner.wgsl') throw new Error(`No CPU implementation for ${spec.source_file}`);
+  if (spec.source_file !== 'phase_2d_winner.wgsl')
+    throw new Error(`No CPU implementation for ${spec.source_file}`);
   const priorityNeighbors = (index: number) => {
     const all = neighbors(index);
-    const order = ((index % width + Math.floor(index / width)) & 1) === 0 ? [2, 1, 3, 0] : [0, 2, 1, 3];
-    return order.map(direction => all[direction]).filter(neighbor => neighbor >= 0);
+    const order =
+      (((index % width) + Math.floor(index / width)) & 1) === 0 ? [2, 1, 3, 0] : [0, 2, 1, 3];
+    return order.map((direction) => all[direction]).filter((neighbor) => neighbor >= 0);
   };
-  const burningFuel = (index: number) => prop(input[index], C.COLD_FUEL_ENERGY) > 0 &&
-    temperatureQ(input[index], inputEnergy[index], cold) > prop(input[index], C.COLD_FLASH_POINT) * ENERGY_SCALE;
-  const chosenAir = (index: number) => priorityNeighbors(index).find(neighbor => prop(input[neighbor], C.COLD_OXIDIZER) === 1);
-  const chosenFuel = (index: number) => priorityNeighbors(index).find(neighbor => burningFuel(neighbor) && chosenAir(neighbor) === index);
+  const burningFuel = (index: number) =>
+    prop(input[index], C.COLD_FUEL_ENERGY) > 0 &&
+    temperatureQ(input[index], inputEnergy[index], cold) >
+      prop(input[index], C.COLD_FLASH_POINT) * ENERGY_SCALE;
+  const chosenAir = (index: number) =>
+    priorityNeighbors(index).find((neighbor) => prop(input[neighbor], C.COLD_OXIDIZER) === 1);
+  const chosenFuel = (index: number) =>
+    priorityNeighbors(index).find(
+      (neighbor) => burningFuel(neighbor) && chosenAir(neighbor) === index,
+    );
   const product = (index: number, nextMaterial: number, energy: number) => {
     outputEnergy[index] = energy;
     output[index] = rewriteMaterial(input[index], nextMaterial, energy, cold);
-    outputStructure[index] = rewrittenStructure(input[index], output[index], inputStructure[index], rules);
+    outputStructure[index] = rewrittenStructure(
+      input[index],
+      output[index],
+      inputStructure[index],
+      rules,
+    );
   };
   for (let index = 0; index < input.length; index += 1) {
-    const v = input[index], m = material(v);
+    const v = input[index],
+      m = material(v);
     if (burningFuel(index)) {
       const air = chosenAir(index);
       if (air !== undefined && chosenFuel(air) === index) {
-        const transfer = Math.min(Math.floor(prop(v, C.COLD_FUEL_ENERGY) * ENERGY_SCALE / 2), MAX_ENERGY_Q - inputEnergy[air]);
+        const transfer = Math.min(
+          Math.floor((prop(v, C.COLD_FUEL_ENERGY) * ENERGY_SCALE) / 2),
+          MAX_ENERGY_Q - inputEnergy[air],
+        );
         product(index, prop(v, C.COLD_BURNS_INTO), inputEnergy[index] - transfer);
       }
     } else if (prop(v, C.COLD_OXIDIZER) === 1) {
       const chosen = chosenFuel(index);
       if (chosen !== undefined) {
-        const transfer = Math.min(Math.floor(prop(input[chosen], C.COLD_FUEL_ENERGY) * ENERGY_SCALE / 2), MAX_ENERGY_Q - inputEnergy[index]);
+        const transfer = Math.min(
+          Math.floor((prop(input[chosen], C.COLD_FUEL_ENERGY) * ENERGY_SCALE) / 2),
+          MAX_ENERGY_Q - inputEnergy[index],
+        );
         product(index, prop(input[chosen], C.COLD_SMOKE_PRODUCT), inputEnergy[index] + transfer);
       }
     } else if (m === C.MAT.FIRE) {
-      const adjacent = neighbors(index).filter(neighbor => neighbor >= 0);
-      if (!adjacent.some(neighbor => prop(input[neighbor], C.COLD_FUEL_ENERGY) > 0) ||
-          adjacent.some(neighbor => material(input[neighbor]) === C.MAT.WATER) || temperatureQ(v, inputEnergy[index], cold) < 80 * ENERGY_SCALE) {
+      const adjacent = neighbors(index).filter((neighbor) => neighbor >= 0);
+      if (
+        !adjacent.some((neighbor) => prop(input[neighbor], C.COLD_FUEL_ENERGY) > 0) ||
+        adjacent.some((neighbor) => material(input[neighbor]) === C.MAT.WATER) ||
+        temperatureQ(v, inputEnergy[index], cold) < 80 * ENERGY_SCALE
+      ) {
         product(index, C.MAT.SMOKE, inputEnergy[index]);
       }
     }
