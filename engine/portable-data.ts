@@ -1,11 +1,6 @@
 /** Bounded portable data shared by session families. Legacy diagnostics are stable. */
 export type PortableValue =
-  | null
-  | boolean
-  | number
-  | string
-  | PortableValue[]
-  | { [key: string]: PortableValue };
+  null | boolean | number | string | PortableValue[] | { [key: string]: PortableValue };
 export const PORTABLE_VALUE_LIMITS = Object.freeze({
   nodes: 65536,
   depth: 32,

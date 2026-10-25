@@ -409,8 +409,7 @@ describe('private immutable snapshot reuse', () => {
   });
   test('translation reducer inputs and receipts cannot mutate source or published matter', () => {
     let retained:
-      | Parameters<NonNullable<TacticalSessionPolicy3D<Game>['reduceTranslation']>>[0]
-      | undefined;
+      Parameters<NonNullable<TacticalSessionPolicy3D<Game>['reduceTranslation']>>[0] | undefined;
     const f = fixture('shared', {
       policy: {
         reduceTranslation(c) {

@@ -14,13 +14,7 @@ export const CHANGE_REPORT_RULES_VERSION_3D = 'gameplay-changes-1';
 export const CHANGE_REPORT_LIMITS_3D = Object.freeze({ defaultRuns: 2048, maxRuns: 4096 });
 export type ChangeReportOptions3D = { maxRuns?: number };
 export type ChangeChannel3D =
-  | 'material'
-  | 'phase'
-  | 'energy'
-  | 'temperature'
-  | 'structure'
-  | 'constraints'
-  | 'support';
+  'material' | 'phase' | 'energy' | 'temperature' | 'structure' | 'constraints' | 'support';
 export type ChangedCells3D = {
   mode: 'unchanged' | 'runs' | 'bounds';
   count: number;

@@ -126,13 +126,7 @@ export type ReactiveSessionPolicy3D<T extends ReactiveGameValue3D> = {
   validateGame?: (snapshot: ReactiveSessionSnapshot3D<T>) => boolean;
 };
 export type ReactiveBranchStatus3D =
-  | 'preparing'
-  | 'running'
-  | 'ready'
-  | 'failed'
-  | 'discarded'
-  | 'stale'
-  | 'committed';
+  'preparing' | 'running' | 'ready' | 'failed' | 'discarded' | 'stale' | 'committed';
 export type ReactiveBranchProgress3D = {
   status: ReactiveBranchStatus3D;
   phase: 'preparing' | 'commands' | 'ticks' | 'finalize' | 'terminal';

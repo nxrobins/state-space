@@ -6,11 +6,7 @@ import type { MultiphysicsProfiles3D } from './profiles.js';
 import type { PhysicalBattery3D } from './battery.js';
 import type { Vec3 } from './math.js';
 export type MultiphysicsDemonstration3D =
-  | 'wax-valve'
-  | 'rotating-contact'
-  | 'fluid-switch'
-  | 'falling-battery'
-  | 'combined-failure';
+  'wax-valve' | 'rotating-contact' | 'fluid-switch' | 'falling-battery' | 'combined-failure';
 const battery = (energyQ: number, emf: number): PhysicalBattery3D => ({
   id: 'source',
   positive: 'positive',

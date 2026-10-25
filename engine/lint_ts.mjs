@@ -83,14 +83,12 @@ export function lintSource(source, name = 'cpu_physics.ts') {
       }
       if (structural && node.operatorToken.kind === ts.SyntaxKind.SlashToken) {
         const parent = node.parent;
-        if (
-          !(
-            ts.isCallExpression(parent) &&
-            ts.isPropertyAccessExpression(parent.expression) &&
-            parent.expression.expression.getText(file) === 'Math' &&
-            ['floor', 'ceil'].includes(parent.expression.name.text)
-          )
-        ) {
+        if (!(
+          ts.isCallExpression(parent) &&
+          ts.isPropertyAccessExpression(parent.expression) &&
+          parent.expression.expression.getText(file) === 'Math' &&
+          ['floor', 'ceil'].includes(parent.expression.name.text)
+        )) {
           errors.push('SS033 structural division must explicitly produce an integer');
         }
       }

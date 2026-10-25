@@ -48,8 +48,7 @@ import {
 export type RegionRequest3D = { origin: readonly number[]; size: readonly number[] };
 export type Region3D = { origin: number[]; size: number[]; grid: Uint32Array; tick: number };
 export type VolumeEdit3D = { x: number; y: number; z: number } & (
-  | { material: number; thermal?: number }
-  | { energyQ: number }
+  { material: number; thermal?: number } | { energyQ: number }
 );
 export type GpuStepOptions3D = { edits?: readonly VolumeEdit3D[]; region?: RegionRequest3D };
 export type Activity3D = {

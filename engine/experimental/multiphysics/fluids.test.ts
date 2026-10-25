@@ -728,14 +728,11 @@ test.each([
 );
 
 test.each([0.5, 1, 2])('resolved liquid support scales with neighborhood volume (%s)', (scale) => {
-  const points = Array.from(
-    { length: 27 },
-    (_, i): Vec3 => [
-      ((i % 3) - 1) * scale,
-      (Math.floor(i / 9) - 1) * scale,
-      ((Math.floor(i / 3) % 3) - 1) * scale,
-    ],
-  );
+  const points = Array.from({ length: 27 }, (_, i): Vec3 => [
+    ((i % 3) - 1) * scale,
+    (Math.floor(i / 9) - 1) * scale,
+    ((Math.floor(i / 3) % 3) - 1) * scale,
+  ]);
   const result = solveFluidReference3D(
     input(
       points.map((center, i) =>
