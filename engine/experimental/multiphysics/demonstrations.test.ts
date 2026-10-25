@@ -2,7 +2,12 @@ import { beforeAll, expect, test } from 'vitest';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { createMultiphysicsDemonstration3D } from './demonstrations.js';
 import { createMultiphysicsTickJob3D } from './world-tick.js';
-import { multiphysicsInventory3D, type MultiphysicsSnapshot3D } from './model.js';
+import {
+  createMultiphysicsSnapshot3D,
+  inventoryEnergyDelta3D,
+  multiphysicsInventory3D,
+  type MultiphysicsSnapshot3D,
+} from './model.js';
 import { batteryStoredUnits3D } from './battery.js';
 import { createMultiphysicsWorld3D } from './world.js';
 let profiles: MultiphysicsProfiles3D;
@@ -77,3 +82,46 @@ test.each(['rotating-contact', 'fluid-switch'] as const)(
     );
   },
 );
+
+test('fast sparse flow keeps its mechanical energy through circuit interruption and timestep refinement', () => {
+  const seed = createMultiphysicsDemonstration3D(profiles, 'fluid-switch');
+  for (const speed of [0.2, 2, 8]) {
+    const errors: number[] = [];
+    for (const dt of [0.001, 0.0005, 0.00025]) {
+      let state = createMultiphysicsSnapshot3D(profiles, {
+        parcels: seed.parcels.map((p) =>
+          p.id === 'water' ? { ...p, velocity: [speed, 0, 0] } : p,
+        ),
+        bonds: seed.bonds,
+        anchors: seed.anchors,
+        battery: seed.battery,
+        settings: { ...seed.settings, dt },
+      });
+      const before = multiphysicsInventory3D(state);
+      let worst = 0;
+      for (let i = 0; i < Math.round(0.004 / dt); i++) {
+        const result = run(state);
+        state = result.snapshot;
+        worst = Math.max(worst, Math.abs(result.report.numericalEnergy));
+        expect(Math.hypot(...result.report.numericalLinearMomentum)).toBeLessThan(1e-8);
+        // Reuse the geometric-contact angular budget from the tank acceptance.
+        expect(Math.hypot(...result.report.numericalAngularMomentum)).toBeLessThan(1e-6);
+        expect(result.report.fluid!.convergence.densityError).toBeLessThanOrEqual(1e-4);
+      }
+      expect(state.settings.numericalEnergyLimit).toBe(0.01);
+      expect(worst).toBeLessThan(1e-5 * Math.max(1, (speed * speed) / 4));
+      const after = multiphysicsInventory3D(state);
+      expect(after.mass).toBe(before.mass);
+      expect(state.accounting.externalStoredSubQ).toBe('0');
+      expect(inventoryEnergyDelta3D(before, after)).toBeCloseTo(
+        state.accounting.numericalEnergy,
+        10,
+      );
+      errors.push(Math.abs(state.accounting.numericalEnergy));
+      expect(run(JSON.parse(JSON.stringify(state)))).toEqual(run(state));
+    }
+    expect(errors[1]).toBeLessThanOrEqual(errors[0] + 1e-10);
+    expect(errors[2]).toBeLessThanOrEqual(errors[1] + 1e-10);
+    console.log(JSON.stringify({ speed, refinementEnergyErrors: errors }));
+  }
+});

@@ -88,6 +88,11 @@ export const FLUID_REFERENCE_LIMITS_3D = Object.freeze({
   iterations: 512,
   densityTolerance: 1e-4,
   divergenceTolerance: 1e-7,
+  // With unit spacing and h=1.5, bulk support is ~0.95, a flat free
+  // surface ~0.87, and a lone sample ~0.46. Retain surface support while
+  // excluding deficient spray from the extra zero-divergence constraint.
+  // Every sample still receives the predicted-density guard.
+  divergenceSupportRatio: 0.8,
   gamma: 1.4,
   energyQPerMechanicalUnit: 256,
   gasIterations: 96,
@@ -138,6 +143,9 @@ export type FluidReferenceResult3D = {
     divergenceError: number;
     gasVolumeResidual: number;
     contactError: number;
+    divergenceRows: number;
+    freeSurfaceRows: number;
+    freeSurfaceCompressionRate: number;
   };
 };
 export type FluidReferenceProgress3D = {
@@ -1038,6 +1046,8 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     particle.parcel.velocity = addVec3(particle.parcel.velocity, prediction);
   for (const body of bodies)
     if (body.inverseMass) body.velocity = addVec3(body.velocity, prediction);
+  const divergenceSupported = (row: Constraint) =>
+    density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity;
   const beforeProjection = kinetic();
   const predictionKineticChange = beforeProjection - beforePrediction;
   const convergence = {
@@ -1047,6 +1057,9 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     divergenceError: 0,
     gasVolumeResidual,
     contactError: 0,
+    divergenceRows: rows.filter(divergenceSupported).length,
+    freeSurfaceRows: rows.filter((row) => !divergenceSupported(row)).length,
+    freeSurfaceCompressionRate: 0,
   };
   const passes: ('density' | 'divergence')[] = input.projectionOnly
     ? ['divergence']
@@ -1065,11 +1078,9 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       for (const row of rows) {
         const densityTarget = (p[row.i].restDensity - density[row.i]) / dt;
         const target =
-          kind === 'density'
+          kind === 'density' || !divergenceSupported(row)
             ? densityTarget
-            : input.projectionOnly
-              ? 0
-              : Math.min(0, densityTarget);
+            : Math.min(0, densityTarget);
         project(row, target);
         yield `${kind}-projection`;
       }
@@ -1080,7 +1091,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         const error =
           kind === 'density'
             ? densityError
-            : (input.projectionOnly ? change : Math.max(densityError, change)) / dt;
+            : Math.max(densityError, divergenceSupported(row) ? change : 0) / dt;
         maximum = Math.max(maximum, error / p[row.i].restDensity);
         yield `${kind}-residual`;
       }
@@ -1109,7 +1120,13 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       convergence.densityError,
       (density[row.i] + change - rest) / rest,
     );
-    convergence.divergenceError = Math.max(convergence.divergenceError, change / (dt * rest));
+    if (divergenceSupported(row))
+      convergence.divergenceError = Math.max(convergence.divergenceError, change / (dt * rest));
+    else
+      convergence.freeSurfaceCompressionRate = Math.max(
+        convergence.freeSurfaceCompressionRate,
+        change / (dt * rest),
+      );
   }
   projectionKineticChange = kinetic() - beforeProjection + contactNumerical;
   const residual =

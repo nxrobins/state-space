@@ -4,6 +4,7 @@ import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './pro
 import { seedThermalParcel3D } from './thermal.js';
 import { createMultiphysicsSnapshot3D, type MultiphysicsSnapshot3D } from './model.js';
 import { createMultiphysicsWorld3D } from './world.js';
+import { createMultiphysicsDemonstration3D } from './demonstrations.js';
 import { createMultiphysicsWorkerHost3D } from './worker-host.js';
 import { createMultiphysicsWorkerClient3D } from './worker-client.js';
 import type { MultiphysicsWorkerMessage3D } from './worker-wire.js';
@@ -42,34 +43,42 @@ function setup(work = 7, source?: MultiphysicsSnapshot3D) {
     },
   };
 }
-test('Worker preview, commit, and JSON restart exactly match direct execution across work budgets', async () => {
-  for (const work of [1, 256]) {
-    const h = setup(work);
-    try {
-      await h.bus.settle(h.client.ready);
-      const direct = createMultiphysicsWorld3D(profiles, h.initial),
-        edits = [{ kind: 'heat' as const, id: 'a', energyQ: 3 }];
-      const expected = direct.prepare(edits, 2);
-      while (expected.progress().status === 'running') expected.advance(31);
-      const expectedResult = expected.result(),
-        preview = await h.bus.settle(h.client.preview(edits, 2));
-      expect(preview.result).toEqual(expectedResult);
-      preview.result.snapshot.parcels[0].mass = 999; // presentation cannot rewrite host candidate
-      const committed = await h.bus.settle(h.client.commit(preview));
-      expect(committed.result).toEqual(expectedResult);
-      await expect(h.client.commit(preview)).rejects.toThrow(/stale/);
-      const saved = JSON.parse(JSON.stringify(committed.result.snapshot));
-      expect((await h.bus.settle(h.client.restore(saved))).snapshot).toEqual(saved);
-      const restarted = await h.bus.settle(h.client.preview([], 1));
-      const next = createMultiphysicsWorld3D(profiles, saved).prepare([], 1);
-      while (next.progress().status === 'running') next.advance(256);
-      expect(restarted.result).toEqual(next.result());
-      expect(h.bus.maximum()).toBe(1);
-    } finally {
-      h.close();
+test.each(['freefall', 'fluid-switch'] as const)(
+  '%s Worker preview, commit, and JSON restart exactly match direct execution across work budgets',
+  async (scene) => {
+    for (const work of [1, 256]) {
+      const h = setup(
+        work,
+        scene === 'fluid-switch' ? createMultiphysicsDemonstration3D(profiles, scene) : undefined,
+      );
+      try {
+        await h.bus.settle(h.client.ready);
+        const direct = createMultiphysicsWorld3D(profiles, h.initial),
+          edits = [
+            { kind: 'heat' as const, id: scene === 'freefall' ? 'a' : 'bridge', energyQ: 3 },
+          ];
+        const expected = direct.prepare(edits, 2);
+        while (expected.progress().status === 'running') expected.advance(31);
+        const expectedResult = expected.result(),
+          preview = await h.bus.settle(h.client.preview(edits, 2));
+        expect(preview.result).toEqual(expectedResult);
+        preview.result.snapshot.parcels[0].mass = 999; // presentation cannot rewrite host candidate
+        const committed = await h.bus.settle(h.client.commit(preview));
+        expect(committed.result).toEqual(expectedResult);
+        await expect(h.client.commit(preview)).rejects.toThrow(/stale/);
+        const saved = JSON.parse(JSON.stringify(committed.result.snapshot));
+        expect((await h.bus.settle(h.client.restore(saved))).snapshot).toEqual(saved);
+        const restarted = await h.bus.settle(h.client.preview([], 1));
+        const next = createMultiphysicsWorld3D(profiles, saved).prepare([], 1);
+        while (next.progress().status === 'running') next.advance(256);
+        expect(restarted.result).toEqual(next.result());
+        expect(h.bus.maximum()).toBe(1);
+      } finally {
+        h.close();
+      }
     }
-  }
-});
+  },
+);
 test('cancel during work and cancel after ready both preserve live state and reject stale tokens', async () => {
   const h = setup();
   try {

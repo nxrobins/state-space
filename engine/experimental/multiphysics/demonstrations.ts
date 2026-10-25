@@ -73,10 +73,8 @@ export function createMultiphysicsDemonstration3D(
       angularVelocity: name === 'rotating-contact' ? [0, 0, 1] : [0, 0, 0],
     }),
   ];
-  // This bounded mechanism uses slow flow. At speed 2, the current pressure
-  // projection exceeds the unchanged 0.01 world-energy error budget.
   if (name === 'fluid-switch')
-    parcels.push(parcel('water', 'water', [-1, -0.5, 0.4], { velocity: [0.2, 0, 0] }));
+    parcels.push(parcel('water', 'water', [-1, -0.5, 0.4], { velocity: [2, 0, 0] }));
   return createMultiphysicsSnapshot3D(profiles, {
     parcels,
     anchors: ['core'],

@@ -451,39 +451,78 @@ function pairAxes(a: RigidParcel3D, b: RigidParcel3D): { a: Vec3[]; b: Vec3[]; a
     }
   return { a: aa, b: bb, all };
 }
-/** Exact interval clipping for the constant-orientation, constant-velocity drift. */
+/** Exact interval clipping for constant-orientation motion, including its gravity arc. */
 function translationImpact(
   a: RigidParcel3D,
   b: RigidParcel3D,
   velocity: Vec3,
+  acceleration: Vec3,
   duration: number,
   tolerance: number,
 ): number | null {
   const directions = pairAxes(a, b),
     offset = subtractVec3(b.center, a.center);
-  let enter = 0,
-    exit = duration;
+  let intervals: [number, number][] = [[0, duration]];
   for (const axis of directions.all) {
     const radius =
-      projectionRadius(a, directions.a, axis) + projectionRadius(b, directions.b, axis);
-    const distance = dotVec3(offset, axis),
-      speed = dotVec3(velocity, axis);
-    if (speed === 0) {
-      if (Math.abs(distance) > radius + tolerance) return null;
-    } else {
-      const low = (-radius - distance) / speed,
-        high = (radius - distance) / speed;
-      enter = Math.max(enter, Math.min(low, high));
-      exit = Math.min(exit, Math.max(low, high));
-      if (enter > exit || exit < 0) return null;
+        projectionRadius(a, directions.a, axis) + projectionRadius(b, directions.b, axis),
+      distance = dotVec3(offset, axis),
+      speed = dotVec3(velocity, axis),
+      quadratic = dotVec3(acceleration, axis) / 2;
+    const times = [0, duration];
+    for (const boundary of [-radius, radius]) {
+      const constant = distance - boundary;
+      const roots: number[] = [];
+      if (quadratic === 0) {
+        if (speed !== 0) roots.push(-constant / speed);
+      } else {
+        const discriminant = speed * speed - 4 * quadratic * constant;
+        if (discriminant >= 0) {
+          // Stable quadratic roots, including a root at time zero.
+          const q = -0.5 * (speed + (speed < 0 ? -1 : 1) * Math.sqrt(discriminant));
+          if (q === 0) roots.push(-speed / (2 * quadratic));
+          else roots.push(q / quadratic, constant / q);
+        }
+      }
+      for (const root of roots) if (root > 0 && root < duration) times.push(root);
     }
+    times.sort((x, y) => x - y);
+    const admitted: [number, number][] = [];
+    for (let i = 1; i < times.length; i++) {
+      const mid = (times[i - 1] + times[i]) / 2;
+      if (times[i] === times[i - 1]) continue;
+      // A stationary near-touching axis must not discard a face manifold because
+      // of transform roundoff. Moving axes use the actual contact roots.
+      const margin = speed === 0 && quadratic === 0 ? tolerance : 0;
+      if (Math.abs(distance + mid * (speed + quadratic * mid)) <= radius + margin)
+        for (const [lo, hi] of intervals) {
+          const enter = Math.max(lo, times[i - 1]),
+            exit = Math.min(hi, times[i]);
+          if (enter <= exit) admitted.push([enter, exit]);
+        }
+    }
+    // Closed intervals include a contact exactly at the end of the drift,
+    // and a quadratic tangent even when neither adjacent interval overlaps.
+    const roundoff = 16 * Number.EPSILON * Math.max(1, radius, Math.abs(distance));
+    for (const time of times)
+      if (Math.abs(distance + time * (speed + quadratic * time)) <= radius + roundoff)
+        for (const [lo, hi] of intervals) if (time >= lo && time <= hi) admitted.push([time, time]);
+    admitted.sort((x, y) => x[0] - y[0]);
+    intervals = [];
+    for (const interval of admitted) {
+      const last = intervals.at(-1);
+      if (last && interval[0] <= last[1]) last[1] = Math.max(last[1], interval[1]);
+      else intervals.push(interval);
+    }
+    if (intervals.length === 0) return null;
   }
-  if (enter > duration) return null;
-  if (enter === 0) {
-    const contact = contactWithinTolerance(a, b, tolerance);
-    if (contact && dotVec3(velocity, contact.normal) >= -tolerance) return null;
+  intervals.sort((x, y) => x[0] - y[0]);
+  const contact = contactWithinTolerance(a, b, tolerance);
+  for (const [enter] of intervals) {
+    if (enter === 0 && contact && dotVec3(velocity, contact.normal) >= -tolerance) continue;
+    return enter;
   }
-  return enter;
+  return null;
 }
 function corners(parcel: RigidParcel3D): Vec3[] {
   return Array.from({ length: 8 }, (_, bits) =>
@@ -1141,7 +1180,10 @@ export function createRigidStep3D<T extends RigidParcel3D>(
               for (const pb of b.members) {
                 yield progress('contact');
                 const contact = contactGeometry(pa, pb, 0);
-                if (!contact || contact.depth <= options.contactTolerance) continue;
+                // Leave strictly more clearance than the smallest swept allowance
+                // (contactTolerance / 4). Accepting a full contactTolerance of
+                // overlap can consume that allowance and stall a settling body.
+                if (!contact || contact.depth <= options.contactTolerance / 8) continue;
                 if (contact.depth > options.maxPenetration)
                   throw Error('Rigid penetration exceeds geometric correction limit.');
                 const total = inverseMass(a) + inverseMass(b);
@@ -1433,7 +1475,6 @@ export function createRigidStep3D<T extends RigidParcel3D>(
             ),
             2 / duration,
           );
-          const accelerating = lengthVec3(relativeAcceleration) > 0;
           const rotating =
             lengthVec3(omega(a)) * duration * a.radius > options.contactTolerance / 4 ||
             lengthVec3(omega(b)) * duration * b.radius > options.contactTolerance / 4;
@@ -1443,7 +1484,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
               const particleA = particleIds.has(pa.id),
                 particleB = particleIds.has(pb.id);
               const time =
-                rotating || particleA || particleB || accelerating
+                rotating || particleA || particleB
                   ? boundedContactAdvance(
                       a,
                       b,
@@ -1460,7 +1501,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                   : translationImpact(
                       pa,
                       pb,
-                      subtractVec3(b.velocity, a.velocity),
+                      subtractVec3(starts.get(b)!, starts.get(a)!),
+                      relativeAcceleration,
                       duration,
                       options.contactTolerance,
                     );

@@ -335,8 +335,8 @@ under the verification supervisor; it is outside the ordinary CPU suite.
 
 This is short-duration, resolution-specific evidence, not general hydrostatic or
 long-running fluid qualification. A smaller tank can artificially support a body
-on one coarse fluid layer. Longer support/no-heat runs, heated plumes, the full
-reactive capability matrix, and admissible solid geometry
+on one coarse fluid layer. Longer support/no-heat runs, heated plumes, sustained coupled
+reactive behavior, and admissible solid geometry
 for overlapping freezing samples remain open. An atomic rejection is not a
 successful physical result. The numerical energy limit remains unchanged.
 
@@ -365,20 +365,47 @@ Type checks, structural lint and formatting passed.
 
 The private `demonstrations.ts` fixtures now exercise a source-paid copper heater
 that melts and releases a wax valve, a rotating copper contact that opens and can
-be reclosed by a recorded orientation edit, and a slow liquid impact that moves
+be reclosed by a recorded orientation edit, and a liquid impact that moves
 a conductor and opens its circuit. The wax starts near the end of its latent
 plateau; an otherwise identical control with its battery removed stays solid and
 bonded. These cases preserve mass and compare saved continuation. The falling
 and breaking battery is covered by the separate world-tick case above.
 
-The fluid switch uses speed `0.2` and timestep `0.001` in model units. Speed `2`
-at the same timestep produces about `-0.174` numerical energy error in the current
-pressure projection and rejects against the unchanged `0.01` limit. This is an
-unresolved accuracy limitation, not successful high-speed qualification. Collision
-advancement now takes the longer interval certified by either a fixed or rotating
-separating plane, resolving a hidden-corner stall at small fixed terminals without
-skipping their contacts. The fifth combined-failure demonstration, broader fluid
-and reactive gates, builder, and native macOS acceptance remain outstanding.
+The fluid switch now uses speed `2` and timestep `0.001` in model units.
+The former `-0.174` projection error came from imposing zero divergence on a
+particle with deficient neighbor support. The candidate now applies that extra
+constraint only above `0.8` of rest density, while retaining the predicted-density
+guard and mechanical contact constraints for every sample. At unit spacing and
+smoothing radius `1.5`, bulk support is approximately `0.95`, a flat surface
+`0.87`, and a lone particle `0.46`. Reports distinguish constrained rows from
+underfilled rows and expose the latter's compression rate. This criterion is
+specific to this candidate, not a universal SPH parameter. The
+[SPlisHSPlasH DFSPH implementation](https://github.com/InteractiveComputerGraphics/SPlisHSPlasH/blob/master/SPlisHSPlasH/DFSPH/TimeStepDFSPH.cpp)
+also suppresses divergence solving for deficient particles, using neighbor
+counts; our density criterion and sequential solver are not that implementation.
+
+The switch passes speeds `0.2`, `2`, and `8` at timesteps `0.001`, `0.0005`, and
+`0.00025` over `0.004` model seconds. Accumulated energy error decreases under
+refinement, with unchanged `0.01` world tolerance, the tank's momentum budgets,
+and an explicit density bound. Work-budget, mock-Worker preview/commit and JSON
+restart agree exactly at the default speed. This is bounded sparse-flow evidence,
+not high-speed qualification for arbitrary liquid scenes.
+
+Whole-world checks now cover all 17 phase edges, five fuel reactions, extinction,
+and independent sand/ash settling. A settling regression exposed a mismatch
+between accepted overlap and swept clearance, plus repeated artificial micro-
+impacts caused by advancing a translating gravity arc into an overlap allowance.
+Constant-orientation sweeps now clip the exact quadratic arc; rotating sweeps
+retain their conservative bounds. Geometric correction leaves clearance below
+the smallest swept allowance. Existing ceiling strikes, same-floor returns,
+fast impacts and resting-stack oracles pass unchanged. Freezing overlapping
+samples, longer fluid support and heated-plume qualification remain open.
+
+Collision advancement takes the longer interval certified by either a fixed or
+rotating separating plane, resolving a hidden-corner stall at small fixed
+terminals without skipping their contacts. The fifth combined-failure
+demonstration, broader fluid gates, builder, and native macOS acceptance remain
+outstanding.
 
 The mechanism checkpoint passed 134 focused multiphysics tests inside 2,001 CPU
 tests, then 24 Node tests, with serial receipt
@@ -386,3 +413,11 @@ tests, then 24 Node tests, with serial receipt
 on the final collision bound: `31575f1007d04ecaaecb9d2f17a9c048` (30.97 seconds).
 Type checks, structural lint and formatting also passed. All raw evidence remains
 local. These are CPU mechanism checks, not native builder or performance results.
+
+The fast-flow and settling checkpoint passed 160 focused checks within 2,027 CPU
+tests, then 24 Node tests (`61e1a62e5226479b8fb074821c87493f`). The unchanged two
+resolved-tank refinement cases passed in 31.44 seconds after both fixes
+(`fc3d8c7d0d7345b3a893fba673a79644`). Type checks, structural lint, formatting and
+manual adversarial source review passed. The `no-mistakes` executable is absent
+on this host, so no automated reviewer or CI result is claimed. Raw receipts stay
+local; the public runtime remains gated.

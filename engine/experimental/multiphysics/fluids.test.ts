@@ -319,14 +319,17 @@ test('gas boundary pressure funds translation and off-center rotation and conser
 });
 
 test('liquid density and divergence constraints converge and report correction energy separately from heat', () => {
+  const rho = fluidDensityKernel3D([0, 0, 0], 2).value + fluidDensityKernel3D([1, 0, 0], 2).value;
   const a = particle('a', [0, 0, 0], {
     phase: 'liquid',
     volume: null,
+    restDensity: rho,
     parcel: parcel('a', [0, 0, 0], { velocity: [1, 0, 0] }),
   });
   const b = particle('b', [1, 0, 0], {
     phase: 'liquid',
     volume: null,
+    restDensity: rho,
     parcel: parcel('b', [1, 0, 0], { velocity: [-1, 0, 0] }),
   });
   const result = solveFluidReference3D(input([a, b]));
@@ -340,7 +343,7 @@ test('liquid density and divergence constraints converge and report correction e
   expect(result.convergence.divergenceError).toBeLessThanOrEqual(
     FLUID_REFERENCE_LIMITS_3D.divergenceTolerance,
   );
-  const rho = fluidDensityKernel3D([0, 0, 0], 2).value + fluidDensityKernel3D([1, 0, 0], 2).value;
+
   const compressed = solveFluidReference3D(
     input(
       [a, b].map((p) => ({
@@ -358,9 +361,12 @@ test('liquid density and divergence constraints converge and report correction e
 });
 
 test('a moving rigid boundary receives the density reaction and off-center torque using its effective inertia', () => {
+  const rest =
+    fluidDensityKernel3D([0, 0, 0], 2).value / (1 - fluidDensityKernel3D([1, 0, 0], 2).value);
   const fluid = particle('a', [0, 0, 0], {
     phase: 'liquid',
     volume: null,
+    restDensity: rest,
     parcel: parcel('a', [0, 0, 0], { velocity: [1, 0, 0] }),
   });
   const scene = input([fluid], {
@@ -649,4 +655,34 @@ test('gravity prediction and repeated pressure corrections do not increase physi
   expect(predicted.energy.contactHeat).toBeCloseTo(base.energy.contactHeat, 12);
   expect(predicted.energy.predictionKineticChange).toBeCloseTo(0.02, 12);
   expect(predicted.energy.impulseWorkResidual).toBeCloseTo(0, 12);
+});
+
+test('under-filled free surface retains approach motion until its predicted density reaches the limit', () => {
+  const pair = [
+    particle('a', [0, 0, 0], {
+      phase: 'liquid',
+      volume: null,
+      parcel: parcel('a', [0, 0, 0], { velocity: [4, 0, 0] }),
+    }),
+    particle('b', [1, 0, 0], {
+      phase: 'liquid',
+      volume: null,
+      parcel: parcel('b', [1, 0, 0], { velocity: [-4, 0, 0] }),
+    }),
+  ];
+  for (const projectionOnly of [false, true]) {
+    const free = solveFluidReference3D(input(pair, { projectionOnly }));
+    expect(free.particles.map((p) => p.parcel.velocity)).toEqual(
+      pair.map((p) => p.parcel.velocity),
+    );
+    expect(free.energy.projectionKineticChange).toBe(0);
+    expect(free.convergence.freeSurfaceRows).toBe(2);
+    expect(free.convergence.divergenceRows).toBe(0);
+    expect(free.convergence.freeSurfaceCompressionRate).toBeGreaterThan(0);
+    const constrained = solveFluidReference3D(input(pair, { projectionOnly, dt: 1 }));
+    expect(constrained.particles[0].parcel.velocity[0]).toBeLessThan(4);
+    expect(constrained.convergence.densityError).toBeLessThanOrEqual(1e-4);
+    expect(constrained.energy.projectionKineticChange).toBeLessThan(0);
+    expect(constrained.energy.contactHeat).toBe(0);
+  }
 });
