@@ -36,7 +36,7 @@
     "format": "prettier --write \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\""
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.5",
     "prettier": "3.9.10",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
