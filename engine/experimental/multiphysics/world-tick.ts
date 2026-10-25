@@ -4,7 +4,12 @@ import { createCircuitSolveJob3D } from './circuit.js';
 import type { ResistiveConnection3D } from './circuit-reference.js';
 import { batteryStoredUnits3D, stepBatteryEnergy3D } from './battery.js';
 import { orientedCuboidContact, cuboidBounds, type AxisAlignedBounds } from './collision.js';
-import { createRigidStep3D, rigidContactPatchArea3D, type RigidBond3D } from './rigid.js';
+import {
+  createRigidStep3D,
+  rigidContactPatchArea3D,
+  fractureRigidBonds3D,
+  type RigidBond3D,
+} from './rigid.js';
 import { createFluidCoupling3D, type FluidCouplingResult3D } from './fluid-coupling.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
 import {
@@ -360,6 +365,7 @@ export function createMultiphysicsTickJob3D(
       restitution: state.settings.restitution,
       friction: state.settings.friction,
       resolvedParticleContacts: true,
+      deferFracture: true,
       nonCollidingParticleIds: state.parcels
         .filter((p) => !isRigidMaterial3D(profiles, p))
         .map((p) => p.id),
@@ -398,6 +404,30 @@ export function createMultiphysicsTickJob3D(
     // Finish at a full-step velocity boundary. Otherwise the last gravity half
     // kick survives in resting liquid and appears as artificial kinetic energy.
     const postFluid = yield* createFluidCoupling3D(profiles, state, true);
+    const demands = new Map(
+      state.parcels.map((p) => [
+        p.id,
+        { id: p.id, linear: [0, 0, 0] as Vec3, angular: [0, 0, 0] as Vec3 },
+      ]),
+    );
+    for (const loads of [fluidReceipt.loadDemands, rigid.loadDemands, postFluid.loadDemands])
+      for (const row of loads) {
+        const total = demands.get(row.id)!;
+        total.linear = addVec3(total.linear, row.linear);
+        total.angular = addVec3(total.angular, row.angular);
+      }
+    const fracture = fractureRigidBonds3D(state.parcels, rigid.bonds, [...demands.values()], dt);
+    let fractureResult = fracture.next();
+    while (!fractureResult.done) {
+      yield 'coupled-fracture';
+      fractureResult = fracture.next();
+    }
+    const coupledBroken = fractureResult.value;
+    const brokenKeys = new Set(coupledBroken.map(key));
+    const beforeCoupledFracture = state.parcels;
+    state.bonds = state.bonds.filter((b) => !brokenKeys.has(key(b)));
+    rebuildOwners3D(profiles, state, beforeCoupledFracture);
+
     const fluidBoundaryP = addVec3(
       fluidReceipt.boundaryLinearImpulse,
       postFluid.boundaryLinearImpulse,
@@ -445,7 +475,7 @@ export function createMultiphysicsTickJob3D(
     const snapshot = readMultiphysicsSnapshot3D(profiles, state);
     const brokenBonds = [
       ...phaseBroken,
-      ...rigid.brokenBonds.map((b) => ({ ...originals.get(key(b))! })),
+      ...[...rigid.brokenBonds, ...coupledBroken].map((b) => ({ ...originals.get(key(b))! })),
     ].sort((a, b) => compareIdentity3D(a.a, b.a) || compareIdentity3D(a.b, b.b));
     return {
       snapshot,

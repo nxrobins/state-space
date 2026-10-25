@@ -346,3 +346,60 @@ test('a falling tilted battery fractures physically and then pays its bounded co
   expect(state.battery!.failed).toBe(true);
   expect(multiphysicsInventory3D(state).mass).toBe(mass);
 });
+
+test.each(['water', 'air'])(
+  'fluid-driven %s loads break a weak conductor bond and preserve matter and momentum',
+  (material) => {
+    const scene = (strength: number, offset: Vec3 = [0, 0, 0], anchored = false, driven = true) => {
+      const position = (x: number, y: number): Vec3 => [x + offset[0], y + offset[1], offset[2]];
+      return createMultiphysicsSnapshot3D(profiles, {
+        parcels: [
+          seed(
+            'fluid',
+            material,
+            position(0, 0),
+            driven || material === 'water' ? 20 : 0,
+            driven && material === 'water' ? [2, 0, 0] : [0, 0, 0],
+          ),
+          seed('lower', 'copper', position(1, 0), 0),
+          seed('upper', 'copper', position(1, 1), 0),
+        ],
+        bonds: [{ a: 'lower', b: 'upper', strength, restLength: 1 }],
+        anchors: anchored ? ['upper'] : [],
+        settings: { gravity: [0, 0, 0], dt: 0.001 },
+      });
+    };
+    const initial = scene(0.0001),
+      weak = run(initial),
+      strong = run(scene(1e6)),
+      shifted = run(scene(0.0001, [5, -3, 2]));
+    expect(weak.report.brokenBonds).toHaveLength(1);
+    expect(weak.snapshot.bonds).toHaveLength(0);
+    expect(strong.snapshot.bonds).toHaveLength(1);
+    expect(shifted.report.brokenBonds).toEqual(weak.report.brokenBonds);
+    expect(weak.snapshot.parcels.find((p) => p.id === 'lower')!.owner).not.toBe(
+      weak.snapshot.parcels.find((p) => p.id === 'upper')!.owner,
+    );
+    for (const p of weak.snapshot.parcels) {
+      const q = shifted.snapshot.parcels.find((q) => q.id === p.id)!;
+      p.velocity.forEach((v, i) => expect(q.velocity[i]).toBeCloseTo(v, 10));
+      p.intrinsicAngularMomentum.forEach((v, i) =>
+        expect(q.intrinsicAngularMomentum[i]).toBeCloseTo(v, 10),
+      );
+      const held = strong.snapshot.parcels.find((q) => q.id === p.id)!;
+      expect(held.velocity).toEqual(p.velocity); // fracture releases the existing motion, after all coupled impulses
+      expect(held.intrinsicAngularMomentum).toEqual(p.intrinsicAngularMomentum);
+    }
+    const before = multiphysicsInventory3D(initial),
+      after = multiphysicsInventory3D(weak.snapshot);
+    expect(after.mass).toBe(before.mass);
+    after.linearMomentum.forEach((v, i) => expect(v).toBeCloseTo(before.linearMomentum[i], 10));
+    after.angularMomentum.forEach((v, i) => expect(v).toBeCloseTo(before.angularMomentum[i], 10));
+    expect(inventoryEnergyDelta3D(before, after)).toBeCloseTo(weak.report.numericalEnergy, 11);
+    expect(run(scene(0.0001, [0, 0, 0], false, false)).snapshot.bonds).toHaveLength(1);
+    const fixed = run(scene(0.0001, [0, 0, 0], true));
+    expect(fixed.snapshot.bonds).toHaveLength(0);
+    expect(Math.hypot(...fixed.report.boundaryLinearImpulse)).toBeGreaterThan(0);
+    expect(run(JSON.parse(JSON.stringify(weak.snapshot)), 1)).toEqual(run(weak.snapshot, 256));
+  },
+);

@@ -34,6 +34,8 @@ export type Matrix3 = readonly [
 ];
 export type RigidParcel3D = MaterialParcel3D & { halfExtents: Vec3 };
 export type RigidBond3D = { a: string; b: string; strength: number; restLength: number };
+/** Linear impulse and angular impulse about the fixed world origin. */
+export type RigidImpulse3D = { id: string; linear: Vec3; angular: Vec3 };
 export type RigidStepOptions3D = {
   dt: number;
   gravity?: Vec3;
@@ -42,6 +44,8 @@ export type RigidStepOptions3D = {
   nonCollidingParticleIds?: string[];
   /** The preceding fluid operator already resolved impacts at its initial contacts. */
   resolvedParticleContacts?: boolean;
+  /** A coupled caller will evaluate the sum of all operators' loads once. */
+  deferFracture?: boolean;
   solverIterations?: number;
   maxWork?: number;
   maxEvents?: number;
@@ -54,6 +58,7 @@ export type RigidStepResult3D<T extends RigidParcel3D> = {
   parcels: T[];
   bonds: RigidBond3D[];
   brokenBonds: RigidBond3D[];
+  loadDemands: RigidImpulse3D[];
   components: string[][];
   dissipatedEnergyByParcel: { id: string; impact: number; friction: number }[];
   boundaryLinearImpulse: Vec3;
@@ -332,6 +337,100 @@ function componentIds(
     }
   return groups;
 }
+/** Private adapter for admitted parcels and impulse receipts. Anchor reactions
+ * balance free members; directly applied loads on an anchored parcel are local. */
+export function rigidLoadDemands3D(
+  parcels: readonly RigidParcel3D[],
+  bonds: readonly RigidBond3D[],
+  anchors: readonly string[],
+  changes: readonly RigidImpulse3D[],
+  applied: readonly RigidImpulse3D[],
+): RigidImpulse3D[] {
+  const byId = new Map(parcels.map((p) => [p.id, p]));
+  const byChange = new Map(changes.map((v) => [v.id, v]));
+  const external = new Map(parcels.map((p) => [p.id, { id: p.id, linear: ZERO, angular: ZERO }]));
+  for (const row of applied) external.set(row.id, { ...row });
+  const fixed = new Set(anchors);
+  for (const ids of componentIds(parcels, bonds)) {
+    const pins = ids.filter((id) => fixed.has(id));
+    if (!pins.length) continue;
+    const free = ids.filter((id) => !fixed.has(id));
+    const force = free.reduce<Vec3>((sum, id) => addVec3(sum, external.get(id)!.linear), ZERO);
+    const torque = free.reduce<Vec3>((sum, id) => addVec3(sum, external.get(id)!.angular), ZERO);
+    for (const id of pins)
+      external.set(id, {
+        id,
+        linear: scaleVec3(force, -1 / pins.length),
+        angular: scaleVec3(torque, -1 / pins.length),
+      });
+  }
+  return [...byId.keys()].map((id) => {
+    const change = byChange.get(id) ?? { linear: ZERO, angular: ZERO },
+      load = external.get(id)!;
+    const linear = subtractVec3(change.linear, load.linear),
+      angular = subtractVec3(change.angular, load.angular);
+    assertFiniteVec3(linear, 'internal linear impulse');
+    assertFiniteVec3(angular, 'internal angular impulse');
+    return { id, linear, angular };
+  });
+}
+
+/** Canonical graph-cut strength model, not continuum stress or elastic strain.
+ * Origin-based loads can be summed across operators without moving their torque. */
+export function* fractureRigidBonds3D(
+  parcels: readonly RigidParcel3D[],
+  bonds: readonly RigidBond3D[],
+  loads: readonly RigidImpulse3D[],
+  dt: number,
+): Generator<void, RigidBond3D[], void> {
+  const byId = new Map(parcels.map((p) => [p.id, p])),
+    byLoad = new Map(loads.map((v) => [v.id, v]));
+  const broken = new Set<RigidBond3D>();
+  for (const ids of componentIds(parcels, bonds)) {
+    const members = ids.map((id) => byId.get(id)!),
+      memberIds = new Set(ids);
+    const localBonds = bonds.filter((b) => memberIds.has(b.a) && memberIds.has(b.b));
+    if (!localBonds.length) continue;
+    const adjacency = new Map(members.map((p) => [p.id, [] as string[]]));
+    for (const b of localBonds) {
+      adjacency.get(b.a)!.push(b.b);
+      adjacency.get(b.b)!.push(b.a);
+    }
+    for (const list of adjacency.values()) list.sort(lexical);
+    const root = members[0].id,
+      order = [root],
+      parent = new Map<string, string>();
+    for (let i = 0; i < order.length; i++)
+      for (const next of adjacency.get(order[i])!)
+        if (next !== root && !parent.has(next)) {
+          parent.set(next, order[i]);
+          order.push(next);
+        }
+    for (const child of order.slice(1)) {
+      yield;
+      const cut = new Set<string>([child]);
+      for (const id of order) if (parent.has(id) && cut.has(parent.get(id)!)) cut.add(id);
+      const crossing = localBonds.filter((b) => cut.has(b.a) !== cut.has(b.b));
+      const pivot = scaleVec3(
+        addVec3(byId.get(child)!.center, byId.get(parent.get(child)!)!.center),
+        0.5,
+      );
+      let force: Vec3 = ZERO,
+        torque: Vec3 = ZERO;
+      for (const id of cut) {
+        const demand = byLoad.get(id)!;
+        force = addVec3(force, demand.linear);
+        torque = addVec3(torque, subtractVec3(demand.angular, crossVec3(pivot, demand.linear)));
+      }
+      const capacity = crossing.reduce((sum, b) => sum + b.strength, 0),
+        lever = crossing.reduce((sum, b) => sum + b.restLength, 0) / crossing.length;
+      if ((lengthVec3(force) + lengthVec3(torque) / lever) / dt > capacity)
+        for (const b of crossing) broken.add(b);
+    }
+  }
+  return bonds.filter((b) => broken.has(b));
+}
+
 function axes(p: RigidParcel3D): Vec3[] {
   return BASIS.map((axis) => rotateVector(p.orientation, axis));
 }
@@ -848,6 +947,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     typeof options.resolvedParticleContacts !== 'boolean'
   )
     throw Error('Invalid resolved particle contact mode.');
+  if (options.deferFracture !== undefined && typeof options.deferFracture !== 'boolean')
+    throw Error('Invalid deferred fracture mode.');
   const particleList = options.nonCollidingParticleIds ?? [];
   if (!Array.isArray(particleList) || particleList.length > parcels.length)
     throw Error('Invalid non-colliding particle list.');
@@ -889,7 +990,13 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     const initial = new Map(
       parcels.map((p) => [
         p.id,
-        { momentum: scaleVec3(p.velocity, p.mass), spin: p.intrinsicAngularMomentum },
+        {
+          momentum: scaleVec3(p.velocity, p.mass),
+          angular: addVec3(
+            p.intrinsicAngularMomentum,
+            crossVec3(p.center, scaleVec3(p.velocity, p.mass)),
+          ),
+        },
       ]),
     );
     const heat = new Map(parcels.map((p) => [p.id, { id: p.id, impact: 0, friction: 0 }]));
@@ -949,7 +1056,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     function record(parcel: T, impulse: Vec3, point: Vec3): void {
       const row = external.get(parcel.id)!;
       row.linear = addVec3(row.linear, impulse);
-      row.angular = addVec3(row.angular, crossVec3(subtractVec3(point, parcel.center), impulse));
+      row.angular = addVec3(row.angular, crossVec3(point, impulse));
     }
     function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3): void {
       record(parcel, impulse, point);
@@ -1416,88 +1523,33 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     }
     for (const body of bodies) sync(body);
 
-    // A declared graph model: each canonical spanning-tree cut is supported by
-    // every original bond crossing that cut, including cycle edges. Demand combines
-    // force and couple/rest-length. This is not continuum stress or elastic strain.
-    for (const body of bodies) {
-      const memberIds = new Set(body.members.map((p) => p.id)),
-        localBonds = retained().filter((b) => memberIds.has(b.a) && memberIds.has(b.b));
-      if (!localBonds.length) continue;
-      const fixed = body.members.filter((p) => anchors.has(p.id));
-      if (fixed.length) {
-        // Each fixed parcel supports its own load locally. Share the remaining
-        // force/couple equally between fixed parcels; each pin also fixes rotation.
-        // This is a declared graph reaction convention, not elastic stress recovery.
-        const free = body.members.filter((p) => !anchors.has(p.id));
-        const force = free.reduce<Vec3>((sum, p) => addVec3(sum, external.get(p.id)!.linear), ZERO);
-        const torque = free.reduce<Vec3>(
-          (sum, p) =>
-            addVec3(
-              sum,
-              addVec3(
-                external.get(p.id)!.angular,
-                crossVec3(subtractVec3(p.center, body.center), external.get(p.id)!.linear),
-              ),
-            ),
-          ZERO,
-        );
-        for (const anchor of fixed) {
-          const row = external.get(anchor.id)!;
-          row.linear = scaleVec3(force, -1 / fixed.length);
-          row.angular = subtractVec3(
-            scaleVec3(torque, -1 / fixed.length),
-            crossVec3(subtractVec3(anchor.center, body.center), row.linear),
-          );
-        }
-      }
-      const adjacency = new Map(body.members.map((p) => [p.id, [] as string[]]));
-      for (const b of localBonds) {
-        adjacency.get(b.a)!.push(b.b);
-        adjacency.get(b.b)!.push(b.a);
-      }
-      for (const list of adjacency.values()) list.sort(lexical);
-      const root = body.members[0].id,
-        order = [root],
-        parent = new Map<string, string>();
-      for (let i = 0; i < order.length; i++)
-        for (const next of adjacency.get(order[i])!)
-          if (next !== root && !parent.has(next)) {
-            parent.set(next, order[i]);
-            order.push(next);
-          }
-      for (const child of order.slice(1)) {
+    const changes = parcels.map((p) => {
+      const start = initial.get(p.id)!,
+        momentum = scaleVec3(p.velocity, p.mass);
+      return {
+        id: p.id,
+        linear: subtractVec3(momentum, start.momentum),
+        angular: subtractVec3(
+          addVec3(p.intrinsicAngularMomentum, crossVec3(p.center, momentum)),
+          start.angular,
+        ),
+      };
+    });
+    const loadDemands = rigidLoadDemands3D(
+      parcels,
+      retained(),
+      [...anchors],
+      changes,
+      [...external].map(([id, v]) => ({ id, ...v })),
+    );
+    if (!options.deferFracture) {
+      const fracture = fractureRigidBonds3D(parcels, retained(), loadDemands, options.dt);
+      let next = fracture.next();
+      while (!next.done) {
         yield progress('fracture');
-        const cut = new Set<string>([child]);
-        for (const id of order) if (parent.has(id) && cut.has(parent.get(id)!)) cut.add(id);
-        const crossing = localBonds.filter((b) => cut.has(b.a) !== cut.has(b.b));
-        const pivot = scaleVec3(
-          addVec3(byId.get(child)!.center, byId.get(parent.get(child)!)!.center),
-          0.5,
-        );
-        let force: Vec3 = ZERO,
-          torque: Vec3 = ZERO;
-        for (const id of cut) {
-          const p = byId.get(id)!,
-            start = initial.get(id)!,
-            applied = external.get(id)!;
-          const demand = subtractVec3(
-            subtractVec3(scaleVec3(p.velocity, p.mass), start.momentum),
-            applied.linear,
-          );
-          force = addVec3(force, demand);
-          torque = addVec3(
-            torque,
-            addVec3(
-              crossVec3(subtractVec3(p.center, pivot), demand),
-              subtractVec3(subtractVec3(p.intrinsicAngularMomentum, start.spin), applied.angular),
-            ),
-          );
-        }
-        const capacity = crossing.reduce((sum, b) => sum + b.strength, 0),
-          lever = crossing.reduce((sum, b) => sum + b.restLength, 0) / crossing.length;
-        if ((lengthVec3(force) + lengthVec3(torque) / lever) / options.dt > capacity)
-          for (const b of crossing) broken.add(b);
+        next = fracture.next();
       }
+      for (const bond of next.value) broken.add(bond);
     }
     const afterEnergy = parcelEnergy(),
       afterMomentum = parcelMomentum();
@@ -1533,6 +1585,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     for (const parcel of parcels) readParcel(parcel);
     return {
       parcels,
+      loadDemands,
       bonds: retained(),
       brokenBonds: bonds.filter((b) => broken.has(b)),
       components: componentIds(parcels, retained()),

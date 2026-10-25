@@ -293,6 +293,15 @@ impacts, an intervening ceiling strike, return to the same floor, and resting
 stacks. The falling tilted battery case now breaks its bonds, preserves mass,
 and pays bounded failure heat from its cores through continued motion.
 
+Fluid and rigid operators now report internal impulse demands about one fixed
+world origin. Their contributions add before a single graph-cut fracture test,
+including the final fluid correction. Anchors balance loads on free members;
+loads applied directly to a fixed parcel are supported locally. Liquid impact
+and gas-pressure cases break weak bonds while strong and unloaded controls hold.
+Tests also cover translation invariance, fixed supports, conservation, release of
+existing motion, JSON continuation, and exact mock-Worker preview/commit results
+at work budgets 1 and 256. This is a graph strength model, not continuum stress.
+
 Finite-face electrical transport
 uses geometric contact area, so edge/vertex touching cannot create a conducting
 shortcut. Resting-contact tolerance does not enlarge that electrical area.
@@ -327,7 +336,7 @@ under the verification supervisor; it is outside the ordinary CPU suite.
 This is short-duration, resolution-specific evidence, not general hydrostatic or
 long-running fluid qualification. A smaller tank can artificially support a body
 on one coarse fluid layer. Longer support/no-heat runs, heated plumes, the full
-reactive capability matrix, fluid-driven bond loads, and admissible solid geometry
+reactive capability matrix, and admissible solid geometry
 for overlapping freezing samples remain open. An atomic rejection is not a
 successful physical result. The numerical energy limit remains unchanged.
 
@@ -345,3 +354,9 @@ tests on 2026-10-24. Its local supervisor receipt is
 SDK build, type checks, structural lint and formatting passed separately. Earlier diagnostic probes that reported rejected
 candidates are not positive acceptance evidence. No native, performance or full
 reactive-parity qualification is implied by these checks.
+
+The subsequent coupled-load checkpoint passed 131 focused multiphysics tests
+within 1,998 CPU tests and 24 Node tests; its serial supervisor receipt is
+`5a12ac1197784b1d8000e7f7c1910c4d`. Both tank refinement cases also passed after
+the load integration: `f0928fc7fe43406a8e3ee9752f91aa9d` (31.23 seconds).
+Type checks, structural lint and formatting passed.

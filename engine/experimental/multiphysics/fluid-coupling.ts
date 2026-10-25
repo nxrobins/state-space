@@ -6,7 +6,12 @@ import {
   type FluidMatrix3D,
   type FluidReferenceResult3D,
 } from './fluids.js';
-import { validateRigidAssemblyMotion3D, particleBoxGeometry } from './rigid.js';
+import {
+  validateRigidAssemblyMotion3D,
+  particleBoxGeometry,
+  rigidLoadDemands3D,
+  type RigidImpulse3D,
+} from './rigid.js';
 import {
   baseParcel3D,
   bondedComponents3D,
@@ -32,6 +37,7 @@ const ZERO: Vec3 = [0, 0, 0];
 const ZERO_MATRIX: FluidMatrix3D = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 export type FluidCouplingResult3D = {
   numericalEnergy: number;
+  loadDemands: RigidImpulse3D[];
   boundaryLinearImpulse: Vec3;
   boundaryAngularImpulse: Vec3;
   report:
@@ -50,12 +56,26 @@ export function* createFluidCoupling3D(
   if (!liquidGas.length)
     return {
       numericalEnergy: 0,
+      loadDemands: [],
       boundaryLinearImpulse: ZERO,
       boundaryAngularImpulse: ZERO,
       report: null,
     };
   const before = multiphysicsInventory3D(state),
     solids = state.parcels.filter((p) => isRigidMaterial3D(profiles, p));
+  const beforeSolid = new Map(
+    solids.map((p) => [
+      p.id,
+      {
+        linear: scaleVec3(p.velocity, p.mass),
+        angular: addVec3(
+          p.intrinsicAngularMomentum,
+          crossVec3(p.center, scaleVec3(p.velocity, p.mass)),
+        ),
+      },
+    ]),
+  );
+  const applied = new Map(solids.map((p) => [p.id, { id: p.id, linear: ZERO, angular: ZERO }]));
   const byId = new Map(state.parcels.map((p) => [p.id, p])),
     volumes = new Map(state.gasVolumes.map((g) => [g.id, g.volume]));
   const bodies: FluidBoundaryBody3D[] = [],
@@ -248,6 +268,12 @@ export function* createFluidCoupling3D(
     boundaryAngularImpulse: Vec3 = ZERO;
   const fixedBodies = new Set(bodies.filter((b) => b.inverseMass === 0).map((b) => b.id));
   for (const transfer of result.boundaryTransfers) {
+    const load = applied.get(sampleOwners.get(transfer.id)!)!;
+    load.linear = addVec3(load.linear, transfer.impulse);
+    load.angular = addVec3(
+      load.angular,
+      addVec3(crossVec3(transfer.position, transfer.impulse), transfer.angularImpulse),
+    );
     depositMechanicalHeat3D(
       profiles,
       state,
@@ -297,8 +323,23 @@ export function* createFluidCoupling3D(
     1e-7 * Math.max(1, Math.abs(numericalEnergy))
   )
     throw Error('Fluid/world energy transfer mismatch.');
+  const changes = solids.map((p) => {
+    const start = beforeSolid.get(p.id)!,
+      momentum = scaleVec3(p.velocity, p.mass);
+    return {
+      id: p.id,
+      linear: subtractVec3(momentum, start.linear),
+      angular: subtractVec3(
+        addVec3(p.intrinsicAngularMomentum, crossVec3(p.center, momentum)),
+        start.angular,
+      ),
+    };
+  });
   return {
     numericalEnergy,
+    loadDemands: rigidLoadDemands3D(solids, state.bonds, state.anchors, changes, [
+      ...applied.values(),
+    ]),
     boundaryLinearImpulse,
     boundaryAngularImpulse,
     report: {

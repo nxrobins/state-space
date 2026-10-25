@@ -2,7 +2,7 @@ import { beforeAll, expect, test, vi } from 'vitest';
 import { createWorkerBus } from '../../test-support/worker-bus.js';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { seedThermalParcel3D } from './thermal.js';
-import { createMultiphysicsSnapshot3D } from './model.js';
+import { createMultiphysicsSnapshot3D, type MultiphysicsSnapshot3D } from './model.js';
 import { createMultiphysicsWorld3D } from './world.js';
 import { createMultiphysicsWorkerHost3D } from './worker-host.js';
 import { createMultiphysicsWorkerClient3D } from './worker-client.js';
@@ -11,18 +11,20 @@ let profiles: MultiphysicsProfiles3D;
 beforeAll(async () => {
   profiles = await createMultiphysicsProfiles3D();
 });
-function setup(work = 7) {
-  const initial = createMultiphysicsSnapshot3D(profiles, {
-    parcels: [
-      seedThermalParcel3D(profiles, {
-        id: 'a',
-        material: 'copper',
-        owner: 'start',
-        center: [0, 2, 0],
-        angularVelocity: [0, 1, 0],
-      }),
-    ],
-  });
+function setup(work = 7, source?: MultiphysicsSnapshot3D) {
+  const initial =
+    source ??
+    createMultiphysicsSnapshot3D(profiles, {
+      parcels: [
+        seedThermalParcel3D(profiles, {
+          id: 'a',
+          material: 'copper',
+          owner: 'start',
+          center: [0, 2, 0],
+          angularVelocity: [0, 1, 0],
+        }),
+      ],
+    });
   const bus = createWorkerBus<MultiphysicsWorkerMessage3D>(10000);
   const host = createMultiphysicsWorkerHost3D(bus.ports[1], profiles, initial, {
     work,
@@ -183,5 +185,35 @@ test('scheduler failure and malformed host envelopes never publish a candidate',
     expect(h.bus.closed[1]).toBe(true);
   } finally {
     h.close();
+  }
+});
+
+test('coupled fluid fracture matches Worker previews and committed continuation across budgets', async () => {
+  const seed = (id: string, material: string, center: readonly [number, number, number]) =>
+    seedThermalParcel3D(profiles, { id, material, center, owner: 'authored', temperature: 20 });
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [
+      seed('gas', 'air', [0, 0, 0]),
+      seed('lower', 'copper', [1, 0, 0]),
+      seed('upper', 'copper', [1, 1, 0]),
+    ],
+    bonds: [{ a: 'lower', b: 'upper', strength: 0.0001, restLength: 1 }],
+    settings: { dt: 0.001, gravity: [0, 0, 0] },
+  });
+  const direct = createMultiphysicsWorld3D(profiles, initial).prepare([], 2);
+  while (direct.progress().status === 'running') direct.advance(17);
+  const expected = direct.result();
+  expect(expected.snapshot.bonds).toHaveLength(0);
+  for (const work of [1, 256]) {
+    const h = setup(work, initial);
+    try {
+      await h.bus.settle(h.client.ready);
+      const preview = await h.bus.settle(h.client.preview([], 2));
+      expect(preview.result).toEqual(expected);
+      expect((await h.bus.settle(h.client.commit(preview))).result).toEqual(expected);
+      expect((await h.bus.settle(h.client.snapshot())).snapshot).toEqual(expected.snapshot);
+    } finally {
+      h.close();
+    }
   }
 });
