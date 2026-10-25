@@ -176,6 +176,11 @@ export type FluidProjectionFaceCapture3D = {
   kind: 'density' | 'divergence';
   iteration: number;
 };
+/** Private comparison controls; not part of the public SDK or saved world state. */
+export type FluidReferenceTuning3D = {
+  coordinateProjection?: boolean;
+  zeroViscosity?: boolean;
+};
 const ZERO: Vec3 = [0, 0, 0];
 const axes: readonly Vec3[] = [
   [1, 0, 0],
@@ -498,15 +503,27 @@ function gasEntropyDifference(curve: GasThermalCurve3D, before: number, after: n
 type Endpoint = { particle: number } | { boundary: number };
 type Pair = { i: number; j: number; gradient: Vec3 };
 type WallPair = { i: number; s: number; gradient: Vec3 };
+type CompiledConstraint = {
+  terms: { parcel: MaterialParcel3D; inverseMass: number; gradient: Vec3 }[];
+  walls: {
+    s: number;
+    body: FluidBoundaryBody3D;
+    gradient: Vec3;
+    lever: Vec3;
+    sampleLever: Vec3;
+  }[];
+};
 type Constraint = {
   i: number;
   terms: { i: number; gradient: Vec3 }[];
   walls: { s: number; gradient: Vec3; point?: Vec3 }[];
+  compiled?: CompiledConstraint;
 };
 
 function* solve(
   input: FluidReferenceInput3D,
   capture?: (face: FluidProjectionFaceCapture3D) => void,
+  tuning: FluidReferenceTuning3D = {},
 ): Generator<string, FluidReferenceResult3D> {
   const { particles: p, bodies, boundaries, dt, smoothingRadius: h } = input;
   const n = p.length,
@@ -941,21 +958,20 @@ function* solve(
   if (!input.projectionOnly) {
     for (let i = 0; i < n; i++) {
       for (let j = i + 1; j < n; j++) {
-        const offset = subtractVec3(p[i].parcel.center, p[j].parcel.center);
-        const weight = (viscousWeight(i, offset) + viscousWeight(j, offset)) / 2;
-        if (weight)
-          viscousPair(
-            i,
-            { particle: j },
-            p[j].parcel.center,
-            (p[i].viscosity + p[j].viscosity) / 2,
-            weight,
-          );
+        const relaxation = (p[i].viscosity + p[j].viscosity) / 2;
+        if (tuning.zeroViscosity === false || relaxation !== 0) {
+          const offset = subtractVec3(p[i].parcel.center, p[j].parcel.center);
+          const weight = (viscousWeight(i, offset) + viscousWeight(j, offset)) / 2;
+          if (weight) viscousPair(i, { particle: j }, p[j].parcel.center, relaxation, weight);
+        }
         yield 'viscosity';
       }
       for (let s = 0; s < boundaries.length; s++) {
-        const weight = viscousWeight(i, subtractVec3(p[i].parcel.center, boundaries[s].position));
-        if (weight) viscousPair(i, { boundary: s }, boundaries[s].position, p[i].viscosity, weight);
+        if (tuning.zeroViscosity === false || p[i].viscosity !== 0) {
+          const weight = viscousWeight(i, subtractVec3(p[i].parcel.center, boundaries[s].position));
+          if (weight)
+            viscousPair(i, { boundary: s }, boundaries[s].position, p[i].viscosity, weight);
+        }
         yield 'boundary-viscosity';
       }
     }
@@ -980,7 +996,7 @@ function* solve(
       rows.push({ i, terms, walls: wallTerms });
       yield 'constraints';
     }
-  function rate(row: Constraint): number {
+  function referenceRate(row: Constraint): number {
     return finite(
       row.terms.reduce((s, t) => s + dotVec3(t.gradient, p[t.i].parcel.velocity), 0) +
         row.walls.reduce(
@@ -1022,7 +1038,7 @@ function* solve(
     }
     return effective;
   }
-  function applyConstraint(row: Constraint, lambda: number): void {
+  function referenceApplyConstraint(row: Constraint, lambda: number): void {
     for (const t of row.terms)
       impulse({ particle: t.i }, p[t.i].parcel.center, scaleVec3(t.gradient, -lambda));
     for (const t of row.walls)
@@ -1032,6 +1048,95 @@ function* solve(
         scaleVec3(t.gradient, -lambda),
       );
   }
+  // Geometry and ownership are frozen for this job. Retain every original term
+  // and its order: aggregating shared-body impulses changes Float64 rounding.
+  function compiled(row: Constraint): CompiledConstraint {
+    return (row.compiled ??= {
+      terms: row.terms.map((t) => ({
+        parcel: p[t.i].parcel,
+        inverseMass: 1 / p[t.i].parcel.mass,
+        gradient: t.gradient,
+      })),
+      walls: row.walls.map((t) => ({
+        s: t.s,
+        body: bodies[atBody[t.s]],
+        gradient: t.gradient,
+        lever: subtractVec3(t.point ?? boundaries[t.s].position, bodies[atBody[t.s]].center),
+        sampleLever: subtractVec3(t.point ?? boundaries[t.s].position, boundaries[t.s].position),
+      })),
+    });
+  }
+  function compiledRate(row: Constraint): number {
+    const prepared = compiled(row);
+    let particles = 0,
+      walls = 0;
+    for (const t of prepared.terms) particles += dotVec3(t.gradient, t.parcel.velocity);
+    for (const t of prepared.walls) {
+      const v = t.body.velocity,
+        w = t.body.angularVelocity,
+        r = t.lever,
+        g = t.gradient;
+      const x = v[0] + (w[1] * r[2] - w[2] * r[1]);
+      const y = v[1] + (w[2] * r[0] - w[0] * r[2]);
+      const z = v[2] + (w[0] * r[1] - w[1] * r[0]);
+      walls += g[0] * x + g[1] * y + g[2] * z;
+    }
+    return finite(particles + walls);
+  }
+  function compiledApplyConstraint(row: Constraint, lambda: number): void {
+    const prepared = compiled(row),
+      scale = -lambda;
+    for (const t of prepared.terms) {
+      const x = t.gradient[0] * scale,
+        y = t.gradient[1] * scale,
+        z = t.gradient[2] * scale;
+      const v = t.parcel.velocity,
+        spin = t.parcel.intrinsicAngularMomentum;
+      t.parcel.velocity = [
+        v[0] + x * t.inverseMass,
+        v[1] + y * t.inverseMass,
+        v[2] + z * t.inverseMass,
+      ];
+      // The reference applies a center impulse, including its zero-lever spin
+      // update. Keep its arithmetic for signed zeros and nonfinite rejection.
+      t.parcel.intrinsicAngularMomentum = [
+        spin[0] + (0 * z - 0 * y),
+        spin[1] + (0 * x - 0 * z),
+        spin[2] + (0 * y - 0 * x),
+      ];
+    }
+    for (const t of prepared.walls) {
+      const x = t.gradient[0] * scale,
+        y = t.gradient[1] * scale,
+        z = t.gradient[2] * scale;
+      const r = t.lever,
+        q = t.sampleLever,
+        b = t.body,
+        v = b.velocity,
+        w = b.angularVelocity;
+      const tx = r[1] * z - r[2] * y,
+        ty = r[2] * x - r[0] * z,
+        tz = r[0] * y - r[1] * x;
+      const m = b.inverseInertia,
+        impulse = wallImpulse[t.s],
+        couple = wallCouple[t.s];
+      b.velocity = [v[0] + x * b.inverseMass, v[1] + y * b.inverseMass, v[2] + z * b.inverseMass];
+      b.angularVelocity = [
+        w[0] + (m[0] * tx + m[1] * ty + m[2] * tz),
+        w[1] + (m[3] * tx + m[4] * ty + m[5] * tz),
+        w[2] + (m[6] * tx + m[7] * ty + m[8] * tz),
+      ];
+      wallImpulse[t.s] = [impulse[0] + x, impulse[1] + y, impulse[2] + z];
+      wallCouple[t.s] = [
+        couple[0] + (q[1] * z - q[2] * y),
+        couple[1] + (q[2] * x - q[0] * z),
+        couple[2] + (q[0] * y - q[1] * x),
+      ];
+    }
+  }
+  const rate = tuning.coordinateProjection === false ? referenceRate : compiledRate;
+  const applyConstraint =
+    tuning.coordinateProjection === false ? referenceApplyConstraint : compiledApplyConstraint;
   function project(row: Constraint, target: number): number {
     const error = rate(row) - target;
     if (error <= 0) return 0;
@@ -1421,9 +1526,10 @@ function* solve(
 export function createFluidReferenceJob3D(
   raw: FluidReferenceInput3D,
   capture?: (face: FluidProjectionFaceCapture3D) => void,
+  tuning: FluidReferenceTuning3D = {},
 ): FluidReferenceJob3D {
   const input = readInput(raw),
-    generator = solve(input, capture);
+    generator = solve(input, capture, { ...tuning });
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +
     2 * (input.particles.length + (input.contacts?.length ?? 0)) ** 2 +

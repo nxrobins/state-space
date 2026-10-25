@@ -13,9 +13,16 @@ Each send, logged message and delivery owns a separate structured clone.
 - `maximum()` records peak outstanding request sequences. Duplicate replies
   cannot decrement the count twice. `settle()` preserves falsy rejection reasons.
 - Both helpers have bounded progress. They do not advance clocks; use fake timers
-  explicitly for timeout behavior. Domain-specific fixtures/assertions stay in
-  their own tests.
+  explicitly for timeout behavior. Domain assertions stay in their own tests;
+  shared input builders are described below.
 
 The tactical suite's microtask transport and the chamber's browser Worker shim
 exercise different scheduling boundaries and remain separate. Native browser
 acceptance continues to test the real Worker/event-loop boundary.
+
+## Frozen multiphysics inputs
+
+`multiphysics-fluid-fixtures.ts` supplies fresh plain input objects shared by the
+fluid regression and explicitly selected CPU profiling cases. It does not advance
+physics or export an SDK API. Domain assertions remain in their respective suites;
+the 27/64-particle cases keep the same geometry for before/after comparisons.

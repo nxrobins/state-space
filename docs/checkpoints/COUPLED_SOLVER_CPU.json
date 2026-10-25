@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "recordedOn": "2026-10-25",
+  "scope": "One bounded Windows CPU run of frozen liquid/rigid steps; not world, GPU or tail-latency qualification.",
+  "baseline": {
+    "commit": "7fa4e20968898d4bed4803b9773a019c00c2f1e8",
+    "manifest": {
+      "sourceBase": "e19b8f015468262c07b8f3b3ed74b471b9ebf51e plus observational study hook",
+      "node": "v22.22.3",
+      "esbuild": "0.25.12",
+      "bundleOptions": {
+        "platform": "node",
+        "format": "esm",
+        "target": "es2022",
+        "bundle": true
+      },
+      "bundleSha256": "df91808660770c46ea8bbcbbc2b1479c6cd26c499fd93eb25dcd923a43fdceed",
+      "sources": {
+        "engine/portable-data.ts": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c",
+        "engine/experimental/multiphysics/math.ts": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f",
+        "engine/experimental/multiphysics/conservation.ts": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65",
+        "engine/experimental/multiphysics/fluids.ts": "ca4b00003f31666494a2618dbe746b450b1e706c9dd084e5b8b8a08df9f1ab07"
+      }
+    }
+  },
+  "method": {
+    "warmupRounds": 5,
+    "pairedRounds": 15,
+    "order": "Rotating four variants; assertions outside timed windows.",
+    "speedup": "Median of per-round baseline/variant time ratios.",
+    "timedScope": "Input validation/copying, full frozen solver step and result cloning."
+  },
+  "validation": {
+    "fluidRegressionTestsPassed": 37,
+    "comparisonCasesPassed": 2,
+    "supervisorPassed": true,
+    "exitCode": 0,
+    "sourceAndBundleHashesUnchanged": true
+  },
+  "supervisor": {
+    "id": "1990f293cedc410a8ad5292dd2b029f7",
+    "kind": "cpu",
+    "memoryLimitMiB": 4096,
+    "cpuLimitPercent": 6,
+    "timeoutSeconds": 90.0,
+    "stallSeconds": 40,
+    "containment": "Windows job",
+    "independentWatchdog": {
+      "armed": true,
+      "heartbeatSeconds": 3,
+      "deadlineSeconds": 90.0,
+      "transport": "pagefile-backed mapping"
+    },
+    "maxMonitorLagMs": 35.0
+  },
+  "jobPeakMemoryMiB": 423.0546875,
+  "results": [
+    {
+      "particles": 27,
+      "exactResults": true,
+      "exactProgressStages": true,
+      "exactCanonicalReversal": true,
+      "cancellationNoPublication": true,
+      "inputUnchanged": true,
+      "completedWork": 2521,
+      "maxTotalWork": 170791,
+      "convergence": {
+        "densityIterations": 1,
+        "divergenceIterations": 17,
+        "densityError": 0,
+        "divergenceError": 2.111853866781921e-08,
+        "gasVolumeResidual": 0,
+        "contactError": 4.707795542291393e-09,
+        "divergenceRows": 11,
+        "freeSurfaceRows": 16,
+        "freeSurfaceCompressionRate": 0.26461731163053837
+      },
+      "energy": {
+        "gasMechanicalWork": 0,
+        "viscousHeat": 0,
+        "contactHeat": 0,
+        "projectionKineticChange": -3.2078653844022913,
+        "predictionKineticChange": 0,
+        "impulseWorkResidual": 0
+      },
+      "summary": {
+        "baseline": {
+          "medianMs": 4.472100000000182,
+          "p25Ms": 4.251100000000065,
+          "p75Ms": 4.5828500000000645,
+          "minMs": 3.981699999999819,
+          "maxMs": 5.158800000000042,
+          "medianPairedSpeedup": 1,
+          "wins": 0
+        },
+        "coordinate": {
+          "medianMs": 4.247500000000173,
+          "p25Ms": 4.162499999999966,
+          "p75Ms": 4.428000000000054,
+          "minMs": 3.942700000000059,
+          "maxMs": 5.686300000000074,
+          "medianPairedSpeedup": 1.0508444911175256,
+          "wins": 9
+        },
+        "zero-viscosity": {
+          "medianMs": 4.265800000000127,
+          "p25Ms": 4.07770000000005,
+          "p75Ms": 4.386300000000006,
+          "minMs": 3.8052999999999884,
+          "maxMs": 4.945199999999886,
+          "medianPairedSpeedup": 1.031181208401261,
+          "wins": 10
+        },
+        "combined": {
+          "medianMs": 3.719600000000014,
+          "p25Ms": 3.6783000000000357,
+          "p75Ms": 3.8544499999999857,
+          "minMs": 3.600400000000036,
+          "maxMs": 4.7509000000000015,
+          "medianPairedSpeedup": 1.1480985045599,
+          "wins": 14
+        }
+      }
+    },
+    {
+      "particles": 64,
+      "exactResults": true,
+      "exactProgressStages": true,
+      "exactCanonicalReversal": true,
+      "cancellationNoPublication": true,
+      "inputUnchanged": true,
+      "completedWork": 10641,
+      "maxTotalWork": 392976,
+      "convergence": {
+        "densityIterations": 1,
+        "divergenceIterations": 27,
+        "densityError": 0,
+        "divergenceError": 1.8841439575201235e-08,
+        "gasVolumeResidual": 0,
+        "contactError": 7.528961842862003e-09,
+        "divergenceRows": 40,
+        "freeSurfaceRows": 24,
+        "freeSurfaceCompressionRate": 0.5244724763187355
+      },
+      "energy": {
+        "gasMechanicalWork": 0,
+        "viscousHeat": 0,
+        "contactHeat": 0,
+        "projectionKineticChange": -7.767523547717314,
+        "predictionKineticChange": 0,
+        "impulseWorkResidual": 0
+      },
+      "summary": {
+        "baseline": {
+          "medianMs": 13.510000000000218,
+          "p25Ms": 12.773949999999786,
+          "p75Ms": 14.379650000000083,
+          "minMs": 11.893500000000131,
+          "maxMs": 360.16370000000006,
+          "medianPairedSpeedup": 1,
+          "wins": 0
+        },
+        "coordinate": {
+          "medianMs": 11.915100000000166,
+          "p25Ms": 11.605299999999943,
+          "p75Ms": 12.653050000000121,
+          "minMs": 9.920599999999922,
+          "maxMs": 239.31470000000036,
+          "medianPairedSpeedup": 1.1577759522677489,
+          "wins": 13
+        },
+        "zero-viscosity": {
+          "medianMs": 10.890300000000025,
+          "p25Ms": 10.742250000000013,
+          "p75Ms": 11.373850000000175,
+          "minMs": 10.283899999999903,
+          "maxMs": 16.85039999999981,
+          "medianPairedSpeedup": 1.2129346112732136,
+          "wins": 14
+        },
+        "combined": {
+          "medianMs": 10.615800000000036,
+          "p25Ms": 10.390699999999924,
+          "p75Ms": 11.372699999999895,
+          "minMs": 9.678399999999783,
+          "maxMs": 26.792500000000018,
+          "medianPairedSpeedup": 1.2726927951011373,
+          "wins": 14
+        }
+      }
+    }
+  ],
+  "measuredSourceSha256": {
+    "engine/portable-data.ts": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c",
+    "engine/experimental/multiphysics/math.ts": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f",
+    "engine/experimental/multiphysics/conservation.ts": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65",
+    "engine/experimental/multiphysics/fluids.ts": "f170c63631d92f3dfa3e3888322af6e2114c1821913b21cf8ce08a207603499d",
+    "engine/experimental/multiphysics/fluid-study-fixtures.ts": "025abc5327602948419698a7f788898a4a425dab9e89183281a7a45c0170ebc2",
+    "engine/experimental/multiphysics/fluids.test.ts": "0de046c91e8669d956a66763e0ed479a20a5f8b1f2ac26341e608efd526d7319",
+    "engine/experimental/multiphysics/fluids-coordinate.test.ts": "f93fac498a24161787a8e6e0084e70256130e7de5db4e4dfbe040abc7b6c63ca",
+    "engine/experimental/multiphysics/fluid-optimization.runtime-cases.ts": "1882d5bc6e4f7d0c2a9f80fd268b4cf5d940099f0459fb021c04fc990c8ef7d1",
+    "engine/vitest.fluid-optimization.config.ts": "3865d77e572926f88e34461cd907baa98a42ebb8284ce55850f293b71c7ae641",
+    "engine/vitest.shared.ts": "8adcf3b82bc021fddbb3e19128481b9b5b25f3a400d2ac6d3f2badb0b60b8e4d",
+    "scripts/compare_fluid_optimizations.mjs": "638488d5b3eb15b570e78b436119bbb5a8e93d776ac06d7f82f37f461fb4cbf7",
+    "scripts/verification_guard.mjs": "ddd8ee5619641a0e0f9419306617c232f47c6a48a0ea2e16fa9a2d371759c517",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "package-lock.json": "a5871b70bcfb0060ac22be0c722d2302ac8513fbfa373b1e651662f397e7a93a"
+  },
+  "measuredBundleSha256": {
+    "baseline": "df91808660770c46ea8bbcbbc2b1479c6cd26c499fd93eb25dcd923a43fdceed",
+    "coordinate": "a9c8c5b2b751fdc422206b57ebd435c79398169ccb4ad25aa904b606ec53f28d",
+    "zero-viscosity": "de5435d0cf58812281212a03548e773ea55cb5417a97dbed01be412fcbbc12ba",
+    "combined": "6b5813024274166cc0ae2f85a3b3c7cf07d216082578929bc1d6533ddd79e30a"
+  },
+  "artifacts": [
+    {
+      "path": "dist/verification/coupled-solver-study/coordinate-comparison-0111f91c-f1dc-4d4c-a87a-a9e56222f8d9/provenance.json",
+      "bytes": 3677,
+      "sha256": "94cbd206c51c92203384b514c3873dd4e9ddee9811a46f02bdf4e8bb2e87192d"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/coordinate-comparison-0111f91c-f1dc-4d4c-a87a-a9e56222f8d9/completion.json",
+      "bytes": 40,
+      "sha256": "1e12c5582faca35c691c9eabd621caf5027e2404db2478e341c78575d3041f9c"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/coordinate-comparison-0111f91c-f1dc-4d4c-a87a-a9e56222f8d9/comparison-27.json",
+      "bytes": 9625,
+      "sha256": "de2869188a32045551835085f1a6b3177811f2391261b48c5922df11a5863775"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/coordinate-comparison-0111f91c-f1dc-4d4c-a87a-a9e56222f8d9/comparison-64.json",
+      "bytes": 9692,
+      "sha256": "c3b44298221ea97a6d68cd46885b973ec01c2bd2b3987539bf206ba5f6ae5297"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/review-comparison-7f52e2b9e0fc43c582ca1e8df04c8db5/supervisor/report.json",
+      "bytes": 1305,
+      "sha256": "73edaf8104abd61dba6cea0e46231e89cc63dce20383986446d7abee4fd2e0e2"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/review-comparison-7f52e2b9e0fc43c582ca1e8df04c8db5/supervisor/stdout.log",
+      "bytes": 3143,
+      "sha256": "f58d30658836b03e1fc03123e192756294118988f5794f16a6df8bc73f37917b"
+    },
+    {
+      "path": "dist/verification/coupled-solver-study/review-comparison-7f52e2b9e0fc43c582ca1e8df04c8db5/supervisor/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "packaging": {
+    "fixtureRelocation": {
+      "from": "engine/experimental/multiphysics/fluid-study-fixtures.ts",
+      "to": "engine/test-support/multiphysics-fluid-fixtures.ts",
+      "measuredSha256": "025abc5327602948419698a7f788898a4a425dab9e89183281a7a45c0170ebc2",
+      "packagedSha256": "1eecc68ce7bb5ecd936230ba6613bb5f08b0de335689a553f10e6bc6761fd38e",
+      "fixtureBodyUnchanged": true
+    },
+    "pathOnlyChanges": [
+      {
+        "path": "engine/experimental/multiphysics/fluids-coordinate.test.ts",
+        "measuredSha256": "f93fac498a24161787a8e6e0084e70256130e7de5db4e4dfbe040abc7b6c63ca",
+        "packagedSha256": "f3643c06baf1ab87185d44650ce4d803d342e053af4cb40fbea4642431c73d70",
+        "change": "Fixture import/provenance path only; verified by reversing the relocation."
+      },
+      {
+        "path": "engine/experimental/multiphysics/fluid-optimization.runtime-cases.ts",
+        "measuredSha256": "1882d5bc6e4f7d0c2a9f80fd268b4cf5d940099f0459fb021c04fc990c8ef7d1",
+        "packagedSha256": "67a9b58400d267b2c2066501498218273fa4b7cbe3ac30add1e06286601ca067",
+        "change": "Fixture import/provenance path only; verified by reversing the relocation."
+      },
+      {
+        "path": "scripts/compare_fluid_optimizations.mjs",
+        "measuredSha256": "638488d5b3eb15b570e78b436119bbb5a8e93d776ac06d7f82f37f461fb4cbf7",
+        "packagedSha256": "0f54561d4f3e82c44173536d6946cfaed6182843351c77b78b492d2eef7052ea",
+        "change": "Fixture import/provenance path only; verified by reversing the relocation."
+      }
+    ],
+    "numericalSolverSourceUnchanged": true,
+    "localSafetyHoldAndOldWorktreePreserved": true,
+    "baselineReconstructedFromGit": true,
+    "reconstructedBundleSha256": "df91808660770c46ea8bbcbbc2b1479c6cd26c499fd93eb25dcd923a43fdceed"
+  },
+  "limitations": [
+    "Single host/run and fifteen paired rounds per case.",
+    "Large raw timing outliers retained, including 360.164 ms baseline and 239.315 ms coordinate-only at 64 particles.",
+    "No tail-latency, memory-reduction, native/GPU or whole-world speedup claim.",
+    "Raw captures remain in ignored dist/verification; this is the compact retained summary and provenance."
+  ],
+  "measuredToolchain": {
+    "node": "v22.22.3",
+    "esbuild": "0.25.12"
+  }
+}
