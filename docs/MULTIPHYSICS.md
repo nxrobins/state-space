@@ -449,12 +449,11 @@ now measures the cross-product angle and prefers a face within the existing
 contact skin; geometric projection still uses the true minimum translation axis.
 Settling, resting stacks, fast impacts and released-edge regressions pass together.
 
-Four extended acceptance gates remain **unpassed** in
+Three extended acceptance gates remain **unpassed** in
 `engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts`:
 
 | Gate | Observed failure on the development Mac |
 | --- | --- |
-| Resting 27-sample liquid tank for 0.5 model seconds | Cumulative numerical energy `+0.01123067` at `dt=1/120`, `+0.00561695` at `1/240`; maximum speeds `0.00045396` and `0.00022702`. Refinement improves the error, but the fixed no-drift/no-heat acceptance does not pass. |
 | Heated gas over a floor for 0.03 model seconds | Cold/hot cumulative energy errors `-0.05271275`/`-0.04530049`. The tracked hot parcel expands more but does not rise. This is not a qualified plume. |
 | Combined electrical/thermal/fluid/structural mechanism | Heating melts the valve and fluid breaks the support, but continued flow rejects at tick 31 with `-0.81624965` numerical energy against the unchanged `0.01` per-tick limit. |
 | Freezing overlapping liquid parcels | Conversion retains both parcels but the resulting solid overlap exceeds the geometric correction limit; the tick rejects. No admissible freezing geometry policy is implemented yet. |
@@ -469,9 +468,8 @@ local. A tightly wedged support also exposed conflicting simultaneous restitutio
 constraints; the authored combined scene provides lateral clearance rather than
 claiming arbitrary wedged-contact qualification.
 
-The next physics work is coupled liquid boundary/gravity stabilization and
-compatible gas pressure/contact work, followed by a conservative freezing geometry
-rule. These precede the builder and fresh macOS timing acceptance. No public
+The next physics work is sparse-liquid support classification, compatible gas
+pressure/contact work, and a conservative freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
 runtime export or full milestone completion is claimed by this checkpoint.
 
 This checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
@@ -482,3 +480,35 @@ SDK builds passed. Manual adversarial review retained the four extended failures
 above as release blockers; they were not converted to passing tests or looser
 budgets. The automated review executable remains unavailable. These are local CPU
 checkpoints, not CI, native Worker, builder, or performance qualification.
+
+### Coupled resting-liquid correction (2026-10-25)
+
+One-way pressure/contact clipping could retain an obsolete impulse after another
+constraint changed the velocity. The numerical correction now solves the
+mass-metric closest feasible velocity with accumulated nonnegative impulses.
+It starts with bounded coordinate sweeps and, if needed, solves the active
+constraints directly. Shared rigid-body linear and angular reactions are summed
+before applying inertia. The original 512-iteration cap and residual tolerances
+remain; the declared work bound includes matrix assembly and factorization.
+Physical impact heat remains a separate operation.
+
+The unchanged 27-sample, 0.5-second resting gate now passes at both timesteps:
+maximum speed below `4.71e-8`, movement below `1.24e-8`, heat below `4.19e-18`,
+and absolute cumulative numerical energy below `1.87e-7`.
+Receipt `afba83d9e508408c9925e7e720b7c2b2` also retains the still-failing combined
+mechanism. Its loss is isolated to post-drift fluid projection when a sparse
+molten-wax parcel crosses the density-only divergence-support cutoff.
+
+Adversarial checks use independent closest-point answers, reversed constraint
+ordering, duplicate constraints and a narrow feasible wedge. The wedge exposed
+an overly broad diagonal regularizer; only near-zero factor pivots now receive
+a floor, with acceptance checked against the original constraint equations.
+This does not clear the remaining gas, mechanism or freezing gates.
+
+Validation: 2,040 CPU and 24 Node checks passed
+(`a811625212fe43849b486f6b96bc049b`); the final duplicate/reversed/wedge checks
+passed (`2cb205ad926f4402b0addbc213af468e`). The floating/sinking refinement
+cases passed in 31.59 seconds (`627c44d7ce9048beb936a9ac857afffc`), with coarse
+cumulative absolute energy errors `1.35e-5` and `1.07e-4`, decreasing at each
+refinement. Type checks, structural lint and diff hygiene passed. Review was
+manual; the automated review executable remains unavailable.

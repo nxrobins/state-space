@@ -966,9 +966,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     );
   }
   const effectiveMasses = new WeakMap<Constraint, number>();
-  function project(row: Constraint, target: number): number {
-    const error = rate(row) - target;
-    if (error <= 0) return 0;
+  function effectiveMass(row: Constraint): number {
     let effective = effectiveMasses.get(row);
     if (effective === undefined) {
       effective = row.terms.reduce(
@@ -993,7 +991,9 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         throw Error('Liquid density constraint has no movable support.');
       effectiveMasses.set(row, effective);
     }
-    const lambda = error / effective;
+    return effective;
+  }
+  function applyConstraint(row: Constraint, lambda: number): void {
     for (const t of row.terms)
       impulse({ particle: t.i }, p[t.i].parcel.center, scaleVec3(t.gradient, -lambda));
     for (const t of row.walls)
@@ -1002,6 +1002,13 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         t.point ?? boundaries[t.s].position,
         scaleVec3(t.gradient, -lambda),
       );
+  }
+  function project(row: Constraint, target: number): number {
+    const error = rate(row) - target;
+    if (error <= 0) return 0;
+    const effective = effectiveMass(row),
+      lambda = error / effective;
+    applyConstraint(row, lambda);
     return lambda * (error + target) - 0.5 * lambda * lambda * effective;
   }
   const contactRows = (input.contacts ?? []).map((c) => {
@@ -1069,43 +1076,193 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   const passes: ('density' | 'divergence')[] = input.projectionOnly
     ? ['divergence']
     : ['density', 'divergence'];
+  // Accumulated unilateral impulses may decrease as neighboring constraints
+  // change. One-way clipping can reach a feasible but over-corrected velocity,
+  // pumping resting liquid or removing unrelated motion at a boundary.
+  const constraints = [...contactRows.map((c) => c.row), ...rows];
+  const lambdas = constraints.map(() => 0);
+  // Build J M^-1 J^T once at frozen geometry. Aggregate sample gradients
+  // belonging to the same body before applying its full inverse inertia.
+  function* buildGram(): Generator<string, number[][]> {
+    const width = 3 * n + 6 * bodies.length;
+    const gradients: Float64Array[] = [],
+      responses: Float64Array[] = [];
+    for (const row of constraints) {
+      const gradient = new Float64Array(width),
+        response = new Float64Array(width);
+      for (const t of row.terms)
+        for (let axis = 0; axis < 3; axis++) gradient[3 * t.i + axis] += t.gradient[axis];
+      for (const t of row.walls) {
+        const b = atBody[t.s],
+          start = 3 * n + 6 * b,
+          torque = crossVec3(
+            subtractVec3(t.point ?? boundaries[t.s].position, bodies[b].center),
+            t.gradient,
+          );
+        for (let axis = 0; axis < 3; axis++) {
+          gradient[start + axis] += t.gradient[axis];
+          gradient[start + 3 + axis] += torque[axis];
+        }
+      }
+      for (let i = 0; i < n; i++)
+        for (let axis = 0; axis < 3; axis++)
+          response[3 * i + axis] = gradient[3 * i + axis] / p[i].parcel.mass;
+      for (let b = 0; b < bodies.length; b++) {
+        const start = 3 * n + 6 * b,
+          angular = matrix(bodies[b].inverseInertia, [
+            gradient[start + 3],
+            gradient[start + 4],
+            gradient[start + 5],
+          ]);
+        for (let axis = 0; axis < 3; axis++) {
+          response[start + axis] = gradient[start + axis] * bodies[b].inverseMass;
+          response[start + 3 + axis] = angular[axis];
+        }
+      }
+      gradients.push(gradient);
+      responses.push(response);
+      yield 'projection-gradients';
+    }
+    const result = constraints.map(() => constraints.map(() => 0));
+    let work = 0;
+    for (let i = 0; i < constraints.length; i++)
+      for (let j = 0; j <= i; j++) {
+        let value = 0;
+        for (let k = 0; k < width; k++) value += gradients[i][k] * responses[j][k];
+        result[i][j] = result[j][i] = value;
+        if (++work % 8 === 0) yield 'projection-gram';
+      }
+    return result;
+  }
+  let gram: number[][] | null = null;
+  const initialRates = constraints.map(rate);
   for (const kind of passes) {
-    let converged = rows.length === 0 && contactRows.length === 0;
+    const targets = constraints.map((row, k) => {
+      if (k < contactRows.length) return 0;
+      const densityTarget = (p[row.i].restDensity - density[row.i]) / dt;
+      return kind === 'density' || !divergenceSupported(row)
+        ? densityTarget
+        : Math.min(0, densityTarget);
+    });
+    let converged = constraints.length === 0;
+    let active: boolean[] = [];
     for (
       let iteration = 0;
       !converged && iteration < FLUID_REFERENCE_LIMITS_3D.iterations;
       iteration++
     ) {
-      for (const contact of contactRows) {
-        project(contact.row, 0);
-        yield 'contact-projection';
+      if (iteration < 32) {
+        for (let k = 0; k < constraints.length; k++) {
+          const row = constraints[k],
+            error = rate(row) - targets[k];
+          const next =
+            error <= 0 && lambdas[k] === 0
+              ? 0
+              : Math.max(0, lambdas[k] + error / effectiveMass(row));
+          applyConstraint(row, next - lambdas[k]);
+          lambdas[k] = next;
+          yield `${kind}-projection`;
+        }
+      } else {
+        if (gram === null) {
+          gram = yield* buildGram();
+          active = lambdas.map((value) => value > 0);
+        }
+        if (!active.length) active = lambdas.map((value) => value > 0);
+        const indices = constraints.flatMap((_, k) => (active[k] ? [k] : []));
+        // Solve the current nonnegative face. Only near-zero Cholesky
+        // pivots receive a floor for redundant rows; acceptance uses the
+        // original KKT residual, never the factorized system's residual.
+        const factor: number[][] = [],
+          forward: number[] = [];
+        for (let a = 0; a < indices.length; a++) {
+          const i = indices[a],
+            values: number[] = [];
+          for (let b = 0; b <= a; b++) {
+            const j = indices[b];
+            let value = gram[i][j];
+            for (let c = 0; c < b; c++) value -= values[c] * (a === b ? values[c] : factor[b][c]);
+            values.push(
+              a === b ? Math.sqrt(Math.max(value, gram[i][i] * 1e-12)) : value / factor[b][b],
+            );
+          }
+          if (!(values[a] > 0) || !Number.isFinite(values[a]))
+            throw Error('Invalid fluid projection factor.');
+          factor.push(values);
+          let value = initialRates[i] - targets[i];
+          for (let b = 0; b < a; b++) value -= values[b] * forward[b];
+          forward.push(value / values[a]);
+          yield 'projection-factor';
+        }
+        const candidate = constraints.map(() => 0);
+        for (let a = indices.length - 1; a >= 0; a--) {
+          let value = forward[a];
+          for (let b = a + 1; b < indices.length; b++)
+            value -= factor[b][a] * candidate[indices[b]];
+          candidate[indices[a]] = value / factor[a][a];
+          yield 'projection-backsolve';
+        }
+        let step = 1,
+          limiting = -1;
+        for (const k of indices)
+          if (candidate[k] < 0 && lambdas[k] / (lambdas[k] - candidate[k]) <= step) {
+            step = lambdas[k] / (lambdas[k] - candidate[k]);
+            limiting = k;
+          }
+        for (let k = 0; k < constraints.length; k++) {
+          const next =
+            k === limiting ? 0 : Math.max(0, lambdas[k] + step * (candidate[k] - lambdas[k]));
+          applyConstraint(constraints[k], next - lambdas[k]);
+          lambdas[k] = next;
+          yield `${kind}-projection`;
+        }
+        if (limiting >= 0) active[limiting] = false;
+        else {
+          let worst = -1,
+            maximum = 1;
+          for (let k = 0; k < constraints.length; k++) {
+            const tolerance =
+              k < contactRows.length
+                ? 1e-8
+                : p[constraints[k].i].restDensity *
+                  (kind === 'density'
+                    ? FLUID_REFERENCE_LIMITS_3D.densityTolerance / dt
+                    : FLUID_REFERENCE_LIMITS_3D.divergenceTolerance);
+            const error = (rate(constraints[k]) - targets[k]) / tolerance;
+            if (!active[k] && error > maximum) {
+              worst = k;
+              maximum = error;
+            }
+          }
+          if (worst >= 0) active[worst] = true;
+        }
       }
-      for (const row of rows) {
-        const densityTarget = (p[row.i].restDensity - density[row.i]) / dt;
-        const target =
-          kind === 'density' || !divergenceSupported(row)
-            ? densityTarget
-            : Math.min(0, densityTarget);
-        project(row, target);
-        yield `${kind}-projection`;
-      }
-      let maximum = 0;
-      for (const row of rows) {
-        const change = dt * rate(row);
-        const densityError = density[row.i] + change - p[row.i].restDensity;
-        const error =
-          kind === 'density'
-            ? densityError
-            : Math.max(densityError, divergenceSupported(row) ? change : 0) / dt;
-        maximum = Math.max(maximum, error / p[row.i].restDensity);
+      let maximum = 0,
+        contactError = 0;
+      for (let k = 0; k < constraints.length; k++) {
+        const row = constraints[k],
+          error = rate(row) - targets[k];
+        // Projected KKT residual also detects unnecessary retained impulses.
+        const residual =
+          error >= 0
+            ? error
+            : lambdas[k] === 0
+              ? 0
+              : Math.min(-error, lambdas[k] * effectiveMass(row));
+        if (k < contactRows.length) contactError = Math.max(contactError, residual);
+        else
+          maximum = Math.max(
+            maximum,
+            (residual * (kind === 'density' ? dt : 1)) / p[row.i].restDensity,
+          );
         yield `${kind}-residual`;
       }
       convergence[kind === 'density' ? 'densityIterations' : 'divergenceIterations'] =
         iteration + 1;
       convergence[kind === 'density' ? 'densityError' : 'divergenceError'] = maximum;
-      convergence.contactError = Math.max(0, ...contactRows.map((c) => rate(c.row)));
+      convergence.contactError = contactError;
       converged =
-        convergence.contactError <= 1e-8 &&
+        contactError <= 1e-8 &&
         maximum <=
           FLUID_REFERENCE_LIMITS_3D[
             kind === 'density' ? 'densityTolerance' : 'divergenceTolerance'
@@ -1218,7 +1375,8 @@ export function createFluidReferenceJob3D(raw: FluidReferenceInput3D): FluidRefe
     generator = solve(input);
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +
-    5 *
+    2 * (input.particles.length + (input.contacts?.length ?? 0)) ** 2 +
+    9 *
       FLUID_REFERENCE_LIMITS_3D.iterations *
       (input.particles.length + (input.contacts?.length ?? 0)) +
     16;

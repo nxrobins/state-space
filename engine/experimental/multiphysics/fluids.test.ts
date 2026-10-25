@@ -696,3 +696,63 @@ test('vanishing gas support converges within the same work bound without an over
   expect(result.energy.impulseWorkResidual).toBeCloseTo(0, 20);
   expect(result.convergence.gasVolumeResidual).toBeLessThan(1e-12);
 });
+
+test.each([
+  { reverse: false, angle: Math.PI / 4, velocity: [-1, -0.1, 0] as Vec3 },
+  { reverse: true, angle: Math.PI / 4, velocity: [-1, -0.1, 0] as Vec3 },
+  { reverse: false, angle: Math.PI - 0.001, velocity: [-1, -1, 0] as Vec3 },
+  { reverse: true, angle: Math.PI - 0.001, velocity: [-1, -1, 0] as Vec3 },
+])(
+  'intersecting boundary constraints release obsolete impulses ($angle, reverse $reverse)',
+  ({ reverse, angle, velocity }) => {
+    const normal: Vec3 = [Math.cos(angle), Math.sin(angle), 0];
+    const result = solveFluidReference3D(
+      input([particle('a', [0, 0, 0], { parcel: parcel('a', [0, 0, 0], { velocity }) })], {
+        projectionOnly: true,
+        bodies: [
+          body({
+            id: 'fixed',
+            center: [0, 0, 0],
+            inverseMass: 0,
+            inverseInertia: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          }),
+        ],
+        boundaries: [
+          { id: 'angled', bodyId: 'fixed', position: scaleVec3(normal, -1), volume: 1 },
+          { id: 'flat', bodyId: 'fixed', position: [-1, 0, 0], volume: 1 },
+        ],
+        contacts: [
+          {
+            id: reverse ? 'b' : 'a',
+            particleId: 'a',
+            boundaryId: 'angled',
+            point: [0, 0, 0] as Vec3,
+            normal,
+            impact: false,
+          },
+          {
+            id: reverse ? 'a' : 'b',
+            particleId: 'a',
+            boundaryId: 'flat',
+            point: [0, 0, 0] as Vec3,
+            normal: [1, 0, 0] as Vec3,
+            impact: false,
+          },
+        ].flatMap((contact) => [contact, { ...contact, id: `${contact.id}-duplicate` }]),
+      }),
+    );
+    // Independent 2D closest-point oracle: both feasible cones lie in the
+    // polar half-plane of the incoming velocity, so the minimizer is zero.
+    closeVector(result.particles[0].parcel.velocity, [0, 0, 0], 7);
+    expect(result.energy.projectionKineticChange).toBeCloseTo(
+      -0.5 * dotVec3(velocity, velocity),
+      12,
+    );
+    expect(result.energy.contactHeat).toBe(0);
+    closeVector(
+      result.boundaryTransfers.reduce((sum, row) => addVec3(sum, row.impulse), [0, 0, 0] as Vec3),
+      velocity,
+      7,
+    );
+  },
+);
