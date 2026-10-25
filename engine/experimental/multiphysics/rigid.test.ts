@@ -100,6 +100,95 @@ describe('bounded rigid candidate foundations', () => {
     expect(result.parcels[0]).toMatchObject({ tag: 'a', thermalQ: 100 });
   });
 
+  test.each([0.01, 0.05, 0.09])(
+    'gravity impact at time %s agrees with the ballistic restitution solution',
+    (impactTime) => {
+      const dt = 0.1,
+        g = 10,
+        speed = 2;
+      for (const restitution of [0.5, 1]) {
+        const source = parcel(
+          'falling',
+          [0, 1 + speed * impactTime + (g * impactTime * impactTime) / 2, 0],
+          [0, -speed, 0],
+        );
+        const floor = parcel('floor', [0, 0, 0], [0, 0, 0], [4, 0.5, 4]);
+        const result = run(
+          [source, floor],
+          { dt, gravity: [0, -g, 0], friction: 0, restitution },
+          [],
+          ['floor'],
+        );
+        const incoming = speed + g * impactTime,
+          outgoing = restitution * incoming,
+          tail = dt - impactTime;
+        const body = result.parcels.find((p) => p.id === 'falling')!;
+        expect(body.center[1]).toBeCloseTo(1 + outgoing * tail - (g * tail * tail) / 2, 6);
+        expect(body.velocity[1]).toBeCloseTo(outgoing - g * tail, 6);
+        expect(heat(result)).toBeCloseTo(
+          ((1 - restitution * restitution) * incoming * incoming) / 2,
+          6,
+        );
+        expect(Math.abs(result.numericalEnergyResidual)).toBeLessThan(1e-7);
+      }
+    },
+  );
+
+  test('a gravity arc cannot pass through a ceiling and return between clear endpoints', () => {
+    const source = parcel('thrown', [0, 0, 0], [0, 4, 0]);
+    const ceiling = parcel('ceiling', [0, 1.7, 0], [0, 0, 0], [4, 0.5, 4]);
+    const result = run(
+      [source, ceiling],
+      { dt: 0.8, gravity: [0, -10, 0], friction: 0, restitution: 1 },
+      [],
+      ['ceiling'],
+    );
+    const impactTime = (4 - Math.sqrt(2)) / 10,
+      tail = 0.8 - impactTime;
+    const body = result.parcels.find((p) => p.id === 'thrown')!;
+    expect(body.center[1]).toBeCloseTo(0.7 - Math.sqrt(2) * tail - 5 * tail * tail, 6);
+    expect(body.velocity[1]).toBeCloseTo(-Math.sqrt(2) - 10 * tail, 6);
+    expect(heat(result)).toBeLessThan(1e-7);
+    expect(Math.abs(result.numericalEnergyResidual)).toBeLessThan(1e-7);
+  });
+
+  test('a separating body can return to the same floor within a gravity step and rebound', () => {
+    const source = parcel('thrown', [0, 1, 0], [0, 0.4, 0]);
+    const floor = parcel('floor', [0, 0, 0], [0, 0, 0], [4, 0.5, 4]);
+    const result = run(
+      [source, floor],
+      { dt: 0.1, gravity: [0, -10, 0], friction: 0, restitution: 0.5 },
+      [],
+      ['floor'],
+    );
+    const body = result.parcels.find((p) => p.id === 'thrown')!;
+    expect(body.center[1]).toBeCloseTo(1.002, 6);
+    expect(body.velocity[1]).toBeCloseTo(0, 6);
+    expect(heat(result)).toBeCloseTo(0.06, 6);
+    expect(Math.abs(result.numericalEnergyResidual)).toBeLessThan(1e-7);
+  });
+
+  test('co-rotating released fragments advance without false contact impulses or stalling', () => {
+    const orientation = integrateOrientation(IDENTITY_QUATERNION, [0, 0, 1], 0.25);
+    const source = [-0.5, 0.5].map((x, i) => {
+      const p = parcel(String(i), rotateVector(orientation, [x, 0, 0]));
+      p.orientation = orientation;
+      p.velocity = crossVec3([0, 0, 1.5], p.center);
+      p.intrinsicAngularMomentum = [0, 0, 1.5 * p.principalInertia[2]];
+      return p;
+    });
+    const result = run(source, { dt: 1 / 120, gravity: [0, -9.8, 0] });
+    expect(heat(result)).toBeLessThan(1e-10);
+    expect(result.report.events).toBeLessThan(64);
+    expect(Math.abs(result.numericalEnergyResidual)).toBeLessThan(1e-10);
+    for (const p of source)
+      close(
+        result.parcels.find((q) => q.id === p.id)!.velocity,
+        [p.velocity[0], p.velocity[1] - 9.8 / 120, p.velocity[2]],
+        10,
+      );
+  });
+
   test('a free spinning bonded assembly retains its finite parcel spin and world geometry', () => {
     const angular: Vec3 = [0, 0, 1];
     const parcels = [-1, 1].map((x, i) => {

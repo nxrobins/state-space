@@ -2,10 +2,11 @@
 import {
   createFluidReferenceJob3D,
   type FluidBoundaryBody3D,
+  type FluidBoundaryContact3D,
   type FluidMatrix3D,
   type FluidReferenceResult3D,
 } from './fluids.js';
-import { validateRigidAssemblyMotion3D } from './rigid.js';
+import { validateRigidAssemblyMotion3D, particleBoxGeometry } from './rigid.js';
 import {
   baseParcel3D,
   bondedComponents3D,
@@ -43,6 +44,7 @@ export type FluidCouplingResult3D = {
 export function* createFluidCoupling3D(
   profiles: MultiphysicsProfiles3D,
   state: MultiphysicsSnapshot3D,
+  projectionOnly = false,
 ): Generator<string, FluidCouplingResult3D, void> {
   const liquidGas = state.parcels.filter((p) => !isRigidMaterial3D(profiles, p));
   if (!liquidGas.length)
@@ -90,7 +92,7 @@ export function* createFluidCoupling3D(
   // one huge SPH point falsely multiplies local density and pressure.
   const h = 1.5,
     dt = state.settings.dt,
-    gravityPrediction = scaleVec3(state.settings.gravity, dt / 2);
+    gravityPrediction = projectionOnly ? ZERO : scaleVec3(state.settings.gravity, dt / 2);
   const boundaries: { id: string; bodyId: string; position: Vec3; volume: number }[] = [];
   const sampleOwners = new Map<string, string>();
   for (const [index, p] of solids.entries()) {
@@ -126,13 +128,41 @@ export function* createFluidCoupling3D(
           yield 'fluid-boundary-samples';
         }
   }
+  // Resolve solid exclusion in the same iterative system as liquid density.
+  // A later independent contact projection otherwise undoes incompressibility.
+  const contacts: FluidBoundaryContact3D[] = [];
+  for (const fluid of liquidGas)
+    for (const solid of solids) {
+      const contact = particleBoxGeometry(fluid, solid, true);
+      if (contact.gap <= 1e-8) {
+        if (contact.gap < -1e-5) throw Error('Fluid boundary starts with excessive penetration.');
+        const samples = boundaries.filter((s) => sampleOwners.get(s.id) === solid.id);
+        samples.sort(
+          (a, b) =>
+            lengthVec3(subtractVec3(a.position, contact.point)) -
+            lengthVec3(subtractVec3(b.position, contact.point)),
+        );
+        if (!samples.length) throw Error('Fluid contact has no boundary sample.');
+        const body = bodies.find((b) => b.id === solid.owner)!;
+        const normal = scaleVec3(contact.normal, -1);
+        const bodyVelocity = addVec3(
+          body.velocity,
+          crossVec3(body.angularVelocity, subtractVec3(contact.point, body.center)),
+        );
+        contacts.push({
+          id: JSON.stringify([fluid.id, solid.id]),
+          particleId: fluid.id,
+          boundaryId: samples[0].id,
+          point: contact.point,
+          normal,
+          impact:
+            !projectionOnly && dotVec3(subtractVec3(fluid.velocity, bodyVelocity), normal) < -1e-8,
+        });
+      }
+      yield 'fluid-contact-constraints';
+    }
   const sampledBodies = new Set(boundaries.map((s) => s.bodyId));
-  const nearbyBodies = bodies
-    .filter((b) => sampledBodies.has(b.id))
-    .map((b) => ({
-      ...b,
-      velocity: b.inverseMass ? addVec3(b.velocity, gravityPrediction) : b.velocity,
-    }));
+  const nearbyBodies = bodies.filter((b) => sampledBodies.has(b.id));
   const particles = liquidGas.map((p) => {
     const profile = readMultiphysicsProfile3D(profiles, p.material);
     const destination = profile.condensesInto
@@ -149,7 +179,7 @@ export function* createFluidCoupling3D(
         : null;
     return {
       thermalCurve,
-      parcel: { ...baseParcel3D(p), velocity: addVec3(p.velocity, gravityPrediction) },
+      parcel: baseParcel3D(p),
       phase: profile.phase as 'liquid' | 'gas',
       restDensity: profile.restDensity,
       viscosity: profile.viscosity,
@@ -178,6 +208,9 @@ export function* createFluidCoupling3D(
     particles,
     bodies: nearbyBodies,
     boundaries,
+    contacts,
+    projectionOnly,
+    velocityPrediction: gravityPrediction,
     dt,
     smoothingRadius: h,
   });
@@ -215,7 +248,12 @@ export function* createFluidCoupling3D(
     boundaryAngularImpulse: Vec3 = ZERO;
   const fixedBodies = new Set(bodies.filter((b) => b.inverseMass === 0).map((b) => b.id));
   for (const transfer of result.boundaryTransfers) {
-    depositMechanicalHeat3D(profiles, state, sampleOwners.get(transfer.id)!, transfer.viscousHeat);
+    depositMechanicalHeat3D(
+      profiles,
+      state,
+      sampleOwners.get(transfer.id)!,
+      transfer.viscousHeat + transfer.contactHeat,
+    );
     if (fixedBodies.has(transfer.bodyId)) {
       boundaryLinearImpulse = addVec3(boundaryLinearImpulse, transfer.impulse);
       boundaryAngularImpulse = addVec3(
@@ -226,7 +264,7 @@ export function* createFluidCoupling3D(
     yield 'fluid-boundary-heat';
   }
   for (const heat of result.thermalWork) {
-    depositMechanicalHeat3D(profiles, state, heat.id, heat.pressure + heat.viscous);
+    depositMechanicalHeat3D(profiles, state, heat.id, heat.pressure + heat.viscous + heat.contact);
     const expected = result.particles.find((p) => p.parcel.id === heat.id)!;
     if (expected.phase === 'gas') {
       const updated = state.parcels.find((p) => p.id === heat.id)!;
@@ -242,10 +280,18 @@ export function* createFluidCoupling3D(
   }
   state.gasVolumes = result.gasVolumes.map((g) => ({ id: g.id, volume: g.volume }));
   const numericalEnergy = inventoryEnergyDelta3D(before, multiphysicsInventory3D(state));
-  // The pressure solve sees the velocity at the upcoming mechanical drift.
-  // Undo only the predicted gravity kick when publishing impulses; the rigid
-  // integrator applies it once. Static boundary work needs this exact cross term.
-  const gravityPredictionWork = dotVec3(gravityPrediction, boundaryLinearImpulse);
+  // Remove exactly the predictor's kinetic work. Physical impacts occur before
+  // prediction, so their boundary impulses must not receive a gravity cross term.
+  const undoPrediction = (mass: number, velocity: Vec3) =>
+    mass *
+    (dotVec3(gravityPrediction, velocity) - 0.5 * dotVec3(gravityPrediction, gravityPrediction));
+  const predictedWork =
+    result.particles.reduce((sum, p) => sum + undoPrediction(p.parcel.mass, p.parcel.velocity), 0) +
+    result.bodies.reduce(
+      (sum, b) => sum + (b.inverseMass ? undoPrediction(1 / b.inverseMass, b.velocity) : 0),
+      0,
+    );
+  const gravityPredictionWork = result.energy.predictionKineticChange - predictedWork;
   if (
     Math.abs(numericalEnergy - result.energy.projectionKineticChange - gravityPredictionWork) >
     1e-7 * Math.max(1, Math.abs(numericalEnergy))

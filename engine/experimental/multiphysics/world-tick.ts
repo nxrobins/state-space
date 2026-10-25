@@ -57,6 +57,7 @@ export type MultiphysicsTickReport3D = {
     sourceCurrent: number;
   };
   fluid: FluidCouplingResult3D['report'];
+  fluidPostProjection: FluidCouplingResult3D['report'];
   mechanicalHeat: number;
   numericalEnergy: number;
   numericalLinearMomentum: Vec3;
@@ -358,6 +359,7 @@ export function createMultiphysicsTickJob3D(
       gravity: state.settings.gravity,
       restitution: state.settings.restitution,
       friction: state.settings.friction,
+      resolvedParticleContacts: true,
       nonCollidingParticleIds: state.parcels
         .filter((p) => !isRigidMaterial3D(profiles, p))
         .map((p) => p.id),
@@ -393,13 +395,27 @@ export function createMultiphysicsTickJob3D(
       yield 'mechanical-heat';
     }
     rebuildOwners3D(profiles, state, beforeFracture);
+    // Finish at a full-step velocity boundary. Otherwise the last gravity half
+    // kick survives in resting liquid and appears as artificial kinetic energy.
+    const postFluid = yield* createFluidCoupling3D(profiles, state, true);
+    const fluidBoundaryP = addVec3(
+      fluidReceipt.boundaryLinearImpulse,
+      postFluid.boundaryLinearImpulse,
+    );
+    const fluidBoundaryL = addVec3(
+      fluidReceipt.boundaryAngularImpulse,
+      postFluid.boundaryAngularImpulse,
+    );
+
     if (state.battery) {
       state.battery.failed ||= !batteryIntact(profiles, state);
       if (batteryReport) batteryReport.failed = state.battery.failed;
     }
     const after = multiphysicsInventory3D(state),
       numericalEnergy = finite(inventoryEnergyDelta3D(before, after));
-    const expectedNumerical = finite(rigid.numericalEnergyResidual + fluidReceipt.numericalEnergy);
+    const expectedNumerical = finite(
+      rigid.numericalEnergyResidual + fluidReceipt.numericalEnergy + postFluid.numericalEnergy,
+    );
     // Conversion is explicit; neither projection error nor integration drift becomes heat.
     if (Math.abs(numericalEnergy) > state.settings.numericalEnergyLimit)
       throw Error(
@@ -410,8 +426,8 @@ export function createMultiphysicsTickJob3D(
       1e-7 * Math.max(1, Math.abs(expectedNumerical), Math.abs(numericalEnergy))
     )
       throw Error('World numerical energy receipts disagree.');
-    const physicalP = vector(subtractVec3(physicalLinear, fluidReceipt.boundaryLinearImpulse));
-    const physicalL = vector(subtractVec3(physicalAngular, fluidReceipt.boundaryAngularImpulse));
+    const physicalP = vector(subtractVec3(physicalLinear, fluidBoundaryP));
+    const physicalL = vector(subtractVec3(physicalAngular, fluidBoundaryL));
     const numericalP = vector(
       subtractVec3(subtractVec3(after.linearMomentum, before.linearMomentum), physicalP),
     );
@@ -442,16 +458,13 @@ export function createMultiphysicsTickJob3D(
         brokenBonds,
         battery: batteryReport,
         fluid: fluidReceipt.report,
+        fluidPostProjection: postFluid.report,
         mechanicalHeat,
         numericalEnergy,
         numericalLinearMomentum: numericalP,
         numericalAngularMomentum: numericalL,
-        boundaryLinearImpulse: vector(
-          addVec3(rigid.boundaryLinearImpulse, fluidReceipt.boundaryLinearImpulse),
-        ),
-        boundaryAngularImpulse: vector(
-          addVec3(rigid.boundaryAngularImpulse, fluidReceipt.boundaryAngularImpulse),
-        ),
+        boundaryLinearImpulse: vector(addVec3(rigid.boundaryLinearImpulse, fluidBoundaryP)),
+        boundaryAngularImpulse: vector(addVec3(rigid.boundaryAngularImpulse, fluidBoundaryL)),
       },
     };
   }

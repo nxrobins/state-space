@@ -40,6 +40,8 @@ export type RigidStepOptions3D = {
   restitution?: number;
   friction?: number;
   nonCollidingParticleIds?: string[];
+  /** The preceding fluid operator already resolved impacts at its initial contacts. */
+  resolvedParticleContacts?: boolean;
   solverIterations?: number;
   maxWork?: number;
   maxEvents?: number;
@@ -400,7 +402,7 @@ function corners(parcel: RigidParcel3D): Vec3[] {
 /** Round fluid exclusion against a solid OBB; finite spin/inertia stays authoritative.
  * Particle-particle exclusion is supplied by pressure, not this contact kernel.
  */
-function particleBoxGeometry(a: RigidParcel3D, b: RigidParcel3D, first: boolean) {
+export function particleBoxGeometry(a: RigidParcel3D, b: RigidParcel3D, first: boolean) {
   const particle = first ? a : b,
     box = first ? b : a,
     q = box.orientation;
@@ -455,15 +457,16 @@ function separationPlane(a: RigidParcel3D, b: RigidParcel3D): { normal: Vec3; ga
   return { normal, gap };
 }
 /**
- * A fixed separating plane stays valid independently of later support-feature
- * changes. Bound every corner-pair projection, including currently hidden corners.
+ * Bound every corner-pair projection, including currently hidden corners, against
+ * a fixed or co-rotating separating plane. Include the trial gravity arc as well
+ * as rotation, so clear drift endpoints cannot conceal an intermediate collision.
  * The midpoint axis satisfies |omegaMid - omega0| <= A h, where
  * A = ||I^-1||F |omega0 cross L| / 2. This retains the exact zero bound
  * for principal-axis spin; a global |L|/Imin bound would stall slender rods.
  * Use A*duration as a velocity uncertainty and (|omega0|+A*duration)^2 R
  * as curvature, valid for every shorter drift and every support-feature switch.
  */
-function rotationalAdvance<T extends RigidParcel3D>(
+function boundedContactAdvance<T extends RigidParcel3D>(
   a: Body<T>,
   b: Body<T>,
   pa: T,
@@ -472,6 +475,7 @@ function rotationalAdvance<T extends RigidParcel3D>(
   allowance: number,
   particleA = false,
   particleB = false,
+  relativeAcceleration: Vec3 = ZERO,
 ): number {
   const plane =
     particleA || particleB ? particleBoxGeometry(pa, pb, particleA) : separationPlane(pa, pb);
@@ -485,7 +489,33 @@ function rotationalAdvance<T extends RigidParcel3D>(
     ab = particleB ? 0 : changeBound(b);
   const wa = particleA ? 0 : lengthVec3(omega(a)) + aa * duration,
     wb = particleB ? 0 : lengthVec3(omega(b)) + ab * duration;
-  const curvature = finite(wa * wa * a.radius + wb * wb * b.radius);
+  // A co-rotating separating plane avoids first-order false approach between
+  // newly released, co-rotating fragments. Its frame terms remain bounded for
+  // every corner pair, so this is still conservative rather than a contact skip.
+  const frameOmega =
+    !a.anchored && !b.anchored && !particleA && !particleB
+      ? scaleVec3(addVec3(omega(a), omega(b)), 0.5)
+      : ZERO;
+  const frameSpeed = lengthVec3(frameOmega);
+  const accelerationBound = lengthVec3(relativeAcceleration);
+  const relativeStartVelocity = subtractVec3(
+    subtractVec3(b.velocity, a.velocity),
+    scaleVec3(relativeAcceleration, duration / 2),
+  );
+  const relativeSpeed = lengthVec3(relativeStartVelocity) + accelerationBound * duration;
+  const span =
+    lengthVec3(subtractVec3(b.center, a.center)) + relativeSpeed * duration + a.radius + b.radius;
+  const planeAcceleration =
+    frameSpeed === 0
+      ? Math.max(0, -dotVec3(relativeAcceleration, plane.normal))
+      : accelerationBound;
+  const curvature = finite(
+    planeAcceleration +
+      wa * wa * a.radius +
+      wb * wb * b.radius +
+      2 * frameSpeed * (relativeSpeed + wa * a.radius + wb * b.radius) +
+      frameSpeed * frameSpeed * span,
+  );
   const uncertainSpeed = finite((aa * a.radius + ab * b.radius) * duration);
   let limit = duration;
   const xs = particleA
@@ -502,8 +532,14 @@ function rotationalAdvance<T extends RigidParcel3D>(
       const speed =
         dotVec3(
           subtractVec3(
-            particleB ? b.velocity : pointVelocity(b, y),
-            particleA ? a.velocity : pointVelocity(a, x),
+            subtractVec3(
+              particleB ? b.velocity : pointVelocity(b, y),
+              particleA ? a.velocity : pointVelocity(a, x),
+            ),
+            addVec3(
+              crossVec3(frameOmega, subtractVec3(y, x)),
+              scaleVec3(relativeAcceleration, duration / 2),
+            ),
           ),
           plane.normal,
         ) - uncertainSpeed;
@@ -807,6 +843,11 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   ])
     if (!Number.isInteger(value) || value < 1 || value > maximum)
       throw Error('Invalid rigid work bound.');
+  if (
+    options.resolvedParticleContacts !== undefined &&
+    typeof options.resolvedParticleContacts !== 'boolean'
+  )
+    throw Error('Invalid resolved particle contact mode.');
   const particleList = options.nonCollidingParticleIds ?? [];
   if (!Array.isArray(particleList) || particleList.length > parcels.length)
     throw Error('Invalid non-colliding particle list.');
@@ -1006,9 +1047,13 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       }
       throw Error('Rigid geometric projection did not converge.');
     }
+    const settledParticlePairs = new Set<string>();
+    let captureSettledParticleContacts = options.resolvedParticleContacts === true;
     function* solve(
       impact: boolean,
       prior?: Map<Body<T>, { velocity: Vec3; angular: Vec3 }>,
+      restingPairs?: Set<string>,
+      collectPairs?: Set<string>,
     ): Generator<RigidWork3D, void, void> {
       const contacts: Contact<T>[] = [];
       for (let i = 0; i < bodies.length; i++)
@@ -1023,7 +1068,10 @@ export function createRigidStep3D<T extends RigidParcel3D>(
               if (!contact) continue;
               if (contact.depth > options.maxPenetration)
                 throw Error('Rigid penetration exceeds correction-free candidate limit.');
+              const pairKey = JSON.stringify([pa.id, pb.id]);
               const particleBoundary = particleIds.has(pa.id) || particleIds.has(pb.id);
+              if (captureSettledParticleContacts && particleBoundary)
+                settledParticlePairs.add(pairKey);
               const friction = particleBoundary ? 0 : options.friction,
                 restitution = particleBoundary ? 0 : options.restitution;
               const n = contact.normal,
@@ -1041,21 +1089,41 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                 : manifold(pa, pb, n, options.contactTolerance, options.contactTolerance);
               if (points.length === 0)
                 throw Error(`Unresolved contact manifold between ${pa.id} and ${pb.id}.`);
+              const beforeKickVelocity = (body: Body<T>, point: Vec3) => {
+                const motion = prior?.get(body);
+                return motion
+                  ? addVec3(
+                      motion.velocity,
+                      crossVec3(motion.angular, subtractVec3(point, body.center)),
+                    )
+                  : pointVelocity(body, point);
+              };
+              // Require the entire manifold to lift off beyond the solver's
+              // residual band; dropping individual corners destabilizes stacks.
+              const separating = points.every(
+                (point) =>
+                  dotVec3(
+                    subtractVec3(beforeKickVelocity(b, point), beforeKickVelocity(a, point)),
+                    n,
+                  ) >
+                  4 * options.velocityTolerance,
+              );
+              if (!separating) collectPairs?.add(pairKey);
+              if (!impact && separating && !settledParticlePairs.has(pairKey)) continue;
               for (const point of points) {
                 const speed = dotVec3(
                   subtractVec3(pointVelocity(b, point), pointVelocity(a, point)),
                   n,
                 );
-                const beforeKickVelocity = (body: Body<T>) => {
-                  const motion = prior?.get(body);
-                  return motion
-                    ? addVec3(
-                        motion.velocity,
-                        crossVec3(motion.angular, subtractVec3(point, body.center)),
-                      )
-                    : pointVelocity(body, point);
-                };
-                const previousRelative = subtractVec3(beforeKickVelocity(b), beforeKickVelocity(a));
+                const previousRelative = subtractVec3(
+                  beforeKickVelocity(b, point),
+                  beforeKickVelocity(a, point),
+                );
+                const physicalImpact =
+                  impact &&
+                  !settledParticlePairs.has(pairKey) &&
+                  !restingPairs?.has(pairKey) &&
+                  speed < -options.velocityTolerance;
                 const previousTangent = subtractVec3(
                   previousRelative,
                   scaleVec3(n, dotVec3(previousRelative, n)),
@@ -1071,13 +1139,12 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                   tangent2,
                   normalImpulse: 0,
                   tangentImpulse: ZERO,
-                  target: impact && speed < -options.velocityTolerance ? -restitution * speed : 0,
+                  target: physicalImpact ? -restitution * speed : 0,
                   friction,
                   restitution,
-                  impact: impact && speed < -options.velocityTolerance,
+                  impact: physicalImpact,
                   physicalFriction:
-                    (impact && speed < -options.velocityTolerance) ||
-                    lengthVec3(previousTangent) > options.velocityTolerance,
+                    physicalImpact || lengthVec3(previousTangent) > options.velocityTolerance,
                   normalWork: 0,
                   frictionWork: 0,
                 });
@@ -1217,14 +1284,10 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         }
     }
 
-    // Resolve authored impacts before gravity. Gravity support impulses are separate
-    // from impact loss so a resting floor never creates heat from kick arithmetic.
-    yield* project();
-    yield* solve(true);
-    const beforeFirstKick = kick(options.dt / 2);
-    yield* solve(false, beforeFirstKick);
-    let remaining = options.dt;
-    while (remaining > 0) {
+    function* nextImpact(
+      duration: number,
+      starts: Map<Body<T>, Vec3>,
+    ): Generator<RigidWork3D, number | null, void> {
       let hit: number | null = null;
       for (let i = 0; i < bodies.length; i++)
         for (let j = i + 1; j < bodies.length; j++) {
@@ -1232,70 +1295,125 @@ export function createRigidStep3D<T extends RigidParcel3D>(
             b = bodies[j];
           if (skipPair(a, b)) continue;
           const swept = (body: Body<T>) => {
-            const end = addVec3(body.center, scaleVec3(body.velocity, remaining));
+            const end = addVec3(body.center, scaleVec3(body.velocity, duration));
+            const padding = scaleVec3(subtractVec3(body.velocity, starts.get(body)!), duration / 4);
             return {
               min: body.center.map(
-                (v, axis) => Math.min(v, end[axis]) - body.radius,
+                (v, axis) => Math.min(v, end[axis]) - body.radius - Math.abs(padding[axis]),
               ) as unknown as Vec3,
               max: body.center.map(
-                (v, axis) => Math.max(v, end[axis]) + body.radius,
+                (v, axis) => Math.max(v, end[axis]) + body.radius + Math.abs(padding[axis]),
               ) as unknown as Vec3,
             };
           };
           yield progress('sweep');
           if (!boundsOverlap(swept(a), swept(b))) continue;
+          const relativeAcceleration = scaleVec3(
+            subtractVec3(
+              subtractVec3(b.velocity, starts.get(b)!),
+              subtractVec3(a.velocity, starts.get(a)!),
+            ),
+            2 / duration,
+          );
+          const accelerating = lengthVec3(relativeAcceleration) > 0;
           const rotating =
-            lengthVec3(omega(a)) * remaining * a.radius > options.contactTolerance / 4 ||
-            lengthVec3(omega(b)) * remaining * b.radius > options.contactTolerance / 4;
+            lengthVec3(omega(a)) * duration * a.radius > options.contactTolerance / 4 ||
+            lengthVec3(omega(b)) * duration * b.radius > options.contactTolerance / 4;
           for (const pa of a.members)
             for (const pb of b.members) {
               yield progress('sweep');
               const particleA = particleIds.has(pa.id),
                 particleB = particleIds.has(pb.id);
               const time =
-                rotating || particleA || particleB
-                  ? rotationalAdvance(
+                rotating || particleA || particleB || accelerating
+                  ? boundedContactAdvance(
                       a,
                       b,
                       pa,
                       pb,
-                      remaining,
-                      options.maxPenetration / 4,
+                      duration,
+                      rotating || particleA || particleB
+                        ? options.maxPenetration / 4
+                        : options.contactTolerance / 4,
                       particleA,
                       particleB,
+                      relativeAcceleration,
                     )
                   : translationImpact(
                       pa,
                       pb,
                       subtractVec3(b.velocity, a.velocity),
-                      remaining,
+                      duration,
                       options.contactTolerance,
                     );
               if (time !== null && (hit === null || time < hit)) hit = time;
             }
         }
-      if (hit === null) {
-        drift(remaining);
-        remaining = 0;
-      } else {
-        if (++events > options.maxEvents) throw Error('Rigid impact event limit exceeded.');
-        if (hit < 0 || hit > remaining) throw Error('Invalid swept impact time.');
-        drift(hit);
-        remaining -= hit;
-        yield* project();
-        const previous = bodies.map((body) => [...body.velocity, ...body.angularMomentum]);
-        yield* solve(true);
-        if (
-          hit === 0 &&
-          bodies.every((body, i) =>
-            [...body.velocity, ...body.angularMomentum].every((v, axis) => v === previous[i][axis]),
-          )
-        )
-          throw Error('Unresolved zero-time swept contact.');
-      }
+      return hit;
     }
-    const beforeLastKick = kick(options.dt / 2);
-    yield* solve(false, beforeLastKick);
+    // Each accepted drift is bracketed by its own gravity half kicks. A whole-step
+    // kick around an intermediate impact changes gravitational work by an amount
+    // proportional to the impulse and the impact's offset from the midpoint.
+    // Trial support solves choose a conservative interval; rejected trials restore
+    // every physical receipt while retaining their actual computational work.
+    yield* project();
+    yield* solve(true);
+    captureSettledParticleContacts = false;
+    let remaining = options.dt;
+    while (remaining > 0) {
+      const motions = bodies.map((body) => ({
+        body,
+        velocity: body.velocity,
+        angularMomentum: body.angularMomentum,
+      }));
+      const savedExternal = [...external].map(([id, row]) => [id, { ...row }] as const);
+      const savedHeat = [...heat].map(([id, row]) => [id, { ...row }] as const);
+      const savedBoundaryP = boundaryLinearImpulse,
+        savedBoundaryL = boundaryAngularImpulse;
+      const savedGravityP = gravityLinearImpulse,
+        savedGravityL = gravityAngularImpulse;
+      const savedSupport = supportConstraintEnergy,
+        savedContacts = contactCount;
+      function restoreTrial(): void {
+        for (const { body, velocity, angularMomentum } of motions) {
+          body.velocity = velocity;
+          body.angularMomentum = angularMomentum;
+        }
+        for (const [id, row] of savedExternal) external.set(id, { ...row });
+        for (const [id, row] of savedHeat) heat.set(id, { ...row });
+        boundaryLinearImpulse = savedBoundaryP;
+        boundaryAngularImpulse = savedBoundaryL;
+        gravityLinearImpulse = savedGravityP;
+        gravityAngularImpulse = savedGravityL;
+        supportConstraintEnergy = savedSupport;
+        contactCount = savedContacts;
+      }
+      let duration = remaining,
+        predictedContact = false;
+      const restingPairs = new Set<string>();
+      for (let trial = 0; ; trial++) {
+        const beforeKick = kick(duration / 2);
+        restingPairs.clear();
+        yield* solve(false, beforeKick, undefined, restingPairs);
+        const hit = yield* nextImpact(duration, new Map(motions.map((m) => [m.body, m.velocity])));
+        predictedContact = hit !== null;
+        if (hit === null || hit >= duration) break;
+        if (!(hit > 0)) throw Error('Unresolved zero-time swept contact.');
+        if (trial >= options.solverIterations)
+          throw Error('Impact interval refinement did not converge.');
+        restoreTrial();
+        duration = hit;
+      }
+      if (predictedContact && ++events > options.maxEvents)
+        throw Error('Rigid impact event limit exceeded.');
+      drift(duration);
+      remaining -= duration;
+      const beforeLastKick = kick(duration / 2);
+      yield* project();
+      // Use pre-kick approach/slip to distinguish an impact from resting support;
+      // restitution and physical heat use the actual velocity at contact time.
+      yield* solve(true, beforeLastKick, restingPairs);
+    }
     for (const body of bodies) sync(body);
 
     // A declared graph model: each canonical spanning-tree cut is supported by

@@ -566,3 +566,87 @@ test('singular density rows, inadmissible inputs and duplicate ownership fail wi
   expect(() => createFluidReferenceJob3D(invalid)).toThrow(/accessors/);
   expect(accessed).toBe(false);
 });
+
+test('wall contact and pressure converge together; physical impact heat is paid once at the actual lever arm', () => {
+  const fluid = particle('a', [0, 0, 0], {
+    phase: 'liquid',
+    volume: null,
+    parcel: parcel('a', [0, 0, 0], { velocity: [1, 0, 0] }),
+  });
+  const solid = body();
+  // The volume sample and mechanical contact point intentionally differ.
+  const scene = input([fluid], {
+    bodies: [solid],
+    boundaries: [{ id: 'sample', bodyId: 'body', position: [1, 1, 0], volume: 1 }],
+    contacts: [
+      {
+        id: 'contact',
+        particleId: 'a',
+        boundaryId: 'sample',
+        point: [1, 0, 0],
+        normal: [-1, 0, 0],
+        impact: true,
+      },
+    ],
+  });
+  const result = solveFluidReference3D(scene);
+  expect(result.convergence.contactError).toBeLessThanOrEqual(1e-8);
+  expect(result.energy.contactHeat).toBeGreaterThan(0);
+  const mechanical = parcelConservation3D(result.particles.map((p) => p.parcel));
+  const moved = result.bodies[0],
+    transfer = result.boundaryTransfers[0];
+  const finalKinetic =
+    mechanical.kineticEnergy +
+    0.5 * 2 * dotVec3(moved.velocity, moved.velocity) +
+    0.5 * dotVec3(moved.angularVelocity, moved.angularVelocity);
+  expect(
+    finalKinetic + result.energy.contactHeat - result.energy.projectionKineticChange,
+  ).toBeCloseTo(0.5, 12);
+  expect(result.thermalWork[0].contact + transfer.contactHeat).toBeCloseTo(
+    result.energy.contactHeat,
+    12,
+  );
+  closeVector(
+    addVec3(crossVec3(transfer.position, transfer.impulse), transfer.angularImpulse),
+    addVec3(crossVec3(solid.center, scaleVec3(moved.velocity, 2)), moved.angularVelocity),
+  );
+  expect(result.energy.impulseWorkResidual).toBeCloseTo(0, 12);
+  const support = solveFluidReference3D({
+    ...scene,
+    contacts: scene.contacts!.map((c) => ({ ...c, impact: false })),
+  });
+  expect(support.energy.contactHeat).toBe(0);
+  expect(support.energy.projectionKineticChange).toBeLessThan(0);
+});
+
+test('gravity prediction and repeated pressure corrections do not increase physical contact heat', () => {
+  const scene = input(
+    [
+      particle('a', [0, 0, 0], {
+        phase: 'liquid',
+        volume: null,
+        parcel: parcel('a', [0, 0, 0], { velocity: [1, 0, 0] }),
+      }),
+    ],
+    {
+      bodies: [{ ...body(), inverseMass: 0, inverseInertia: [0, 0, 0, 0, 0, 0, 0, 0, 0] }],
+      boundaries: [{ id: 'sample', bodyId: 'body', position: [1, 0, 0], volume: 2 }],
+      contacts: [
+        {
+          id: 'contact',
+          particleId: 'a',
+          boundaryId: 'sample',
+          point: [0.5, 0, 0],
+          normal: [-1, 0, 0],
+          impact: true,
+        },
+      ],
+    },
+  );
+  const base = solveFluidReference3D(scene),
+    predicted = solveFluidReference3D({ ...scene, velocityPrediction: [0.2, 0, 0] });
+  expect(base.energy.contactHeat).toBeCloseTo(0.5, 12);
+  expect(predicted.energy.contactHeat).toBeCloseTo(base.energy.contactHeat, 12);
+  expect(predicted.energy.predictionKineticChange).toBeCloseTo(0.02, 12);
+  expect(predicted.energy.impulseWorkResidual).toBeCloseTo(0, 12);
+});

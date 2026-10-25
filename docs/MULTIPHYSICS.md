@@ -267,7 +267,7 @@ is not yet a qualified implementation of the planned DFSPH release. Density
 compression tolerance is `1e-4`; divergence is now measured as a normalized
 *density-change rate*, with tolerance `1e-7` per model time unit, rather than
 relaxing velocity accuracy as the timestep shrinks. Each solve permits at most
-128 iterations. Gas uses a `gamma = 1.4` caloric pressure law with saved volume,
+512 iterations. Gas uses a `gamma = 1.4` caloric pressure law with saved volume,
 compatible midpoint pressure work, and explicit latent plateaus. Gas pair volume
 changes are limited to 10% and total step volume changes to 25%; larger changes
 reject rather than invent heat. An isolated gas sample has no resolved free
@@ -277,7 +277,23 @@ Fluid-to-solid exclusion uses a round particle of radius equal to its minimum
 half extent. Solid-to-solid contact retains oriented cuboids. Fluid samples do
 not collide with one another as rigid cubes. Their saved mass, intrinsic inertia,
 spin, and energy stores remain authoritative across this distinction. Pressure
-and viscosity carry fluid-fluid interaction. Finite-face electrical transport
+and viscosity carry fluid-fluid interaction. Physical fluid impacts are resolved
+once before the gravity predictor. Contact constraints then iterate with pressure
+without converting stabilization work into heat. The rigid stage preserves that
+ownership for initial fluid contacts; newly encountered contacts remain impacts.
+A final divergence/contact projection publishes full-step velocities.
+
+Gravity kicks bracket each accepted mechanical drift interval. Collision search
+bounds the gravity arc as well as rotation; it cannot infer a clear trajectory
+from clear endpoints alone. Rejected trial intervals restore their physical
+receipts and retain their computational cost. A co-rotating separating-plane
+bound permits freshly fractured rotating pieces to separate without exhausting
+the event budget. Analytical cases cover early/late elastic and inelastic
+impacts, an intervening ceiling strike, return to the same floor, and resting
+stacks. The falling tilted battery case now breaks its bonds, preserves mass,
+and pays bounded failure heat from its cores through continued motion.
+
+Finite-face electrical transport
 uses geometric contact area, so edge/vertex touching cannot create a conducting
 shortcut. Resting-contact tolerance does not enlarge that electrical area.
 
@@ -298,15 +314,22 @@ checks cover direct/Worker equality, work-budget independence, JSON continuation
 late cancellation, stale handles, lost replies and transport/scheduler failure.
 They do not qualify a native Worker or rendering performance.
 
-Qualification remains open. The 27-sample floor-column check passes, but a
-closed-tank submerged-body probe exposed contact degeneracy and pressure/contact
-splitting error. Roundoff contact handling and the timestep-dependent divergence
-criterion were corrected; the full hydrostatic, floating/sinking and refinement
-gates still need positive quantitative evidence. In particular, a small tank can
-artificially support a body on one coarse fluid layer, and longer coupled runs can
-exceed the unchanged numerical energy limit. Do not interpret an atomic rejection
-as successful physical qualification. Arbitrary freezing of overlapping fluid
-samples also requires an explicit admissible solid geometry policy.
+Qualification remains open. The 27-sample floor-column check and a resolved
+99-water-sample tank now pass. In the latter, wax rises and copper sinks over
+0.05 model seconds at timesteps `1/120`, `1/240`, and `1/480`. The acceptance
+requires unchanged mass, no external stored-energy injection, numerical linear
+momentum below `1e-8` per tick, angular residual below `1e-6`, and decreasing
+accumulated energy error from a coarse-step ceiling of `0.006`. Body heights must
+agree within `2e-5` and vertical speeds within `0.0005` across refinement.
+Run this explicit serial case with `engine/vitest.multiphysics-fluid-runtime.config.ts`
+under the verification supervisor; it is outside the ordinary CPU suite.
+
+This is short-duration, resolution-specific evidence, not general hydrostatic or
+long-running fluid qualification. A smaller tank can artificially support a body
+on one coarse fluid layer. Longer support/no-heat runs, heated plumes, the full
+reactive capability matrix, fluid-driven bond loads, and admissible solid geometry
+for overlapping freezing samples remain open. An atomic rejection is not a
+successful physical result. The numerical energy limit remains unchanged.
 
 The builder and its fresh macOS qualification remain outstanding. Its required
 five demonstrations are a powered wax valve; a rotating conductor; a falling,
@@ -314,11 +337,11 @@ breaking battery; fluid moving a conductor; and combined electrical, thermal,
 fluid and structural failure. The public runtime must remain gated until the
 preceding mechanics, fluid and reactive capability checks pass.
 
-The private checkpoint passed 115 focused multiphysics tests within the full
-1,982-test CPU suite, followed serially by 24 Node build/controller tests on
-2026-10-24. Type checks, structural lint and formatting passed. The local
-supervisor receipt is `e0b07a9f3e2a477697af526dc617b549`. The separate diagnostic
-probe `685385a398044e859ebc42efa14b83da` recorded the unresolved closed-tank error;
-its process completed successfully because the probe reports candidate rejections,
-not because its physical acceptance criteria passed. No native, performance or
-full reactive-parity qualification is implied by these unit checks.
+The private contact/integration checkpoint passed 128 focused multiphysics tests
+within the full 1,995-test CPU suite, followed serially by 24 Node build/controller
+tests on 2026-10-24. Its local supervisor receipt is
+`63f18ae9a44c4c589399225236a0126e`. The separate tank acceptance receipt is
+`b28bddef092245958ef9f70c618c65ac` (32.01 seconds for both refinement cases).
+SDK build, type checks, structural lint and formatting passed separately. Earlier diagnostic probes that reported rejected
+candidates are not positive acceptance evidence. No native, performance or full
+reactive-parity qualification is implied by these checks.

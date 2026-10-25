@@ -56,10 +56,25 @@ export type FluidBoundaryBody3D = {
   inverseInertia: FluidMatrix3D;
 };
 export type FluidBoundarySample3D = { id: string; bodyId: string; position: Vec3; volume: number };
+export type FluidBoundaryContact3D = {
+  id: string;
+  particleId: string;
+  boundaryId: string;
+  point: Vec3;
+  /** Unit normal from solid to fluid. */
+  normal: Vec3;
+  /** Closing motion present before the gravity predictor is physical impact. */
+  impact: boolean;
+};
 export type FluidReferenceInput3D = {
   particles: FluidParticle3D[];
   bodies: FluidBoundaryBody3D[];
   boundaries: FluidBoundarySample3D[];
+  contacts?: FluidBoundaryContact3D[];
+  /** Velocity-only correction after mechanical drift; no repeated pressure work or viscosity. */
+  projectionOnly?: boolean;
+  /** Applied after physical pressure/viscosity/contact, solely for the constraint predictor. */
+  velocityPrediction?: Vec3;
   dt: number;
   /** Liquid kernel radius; dimensionless gas support factor h / cbrt(volume). */
   smoothingRadius: number;
@@ -68,8 +83,9 @@ export const FLUID_REFERENCE_LIMITS_3D = Object.freeze({
   particles: 128,
   bodies: 128,
   boundaries: 128,
+  contacts: 256,
   advanceWork: 256,
-  iterations: 128,
+  iterations: 512,
   densityTolerance: 1e-4,
   divergenceTolerance: 1e-7,
   gamma: 1.4,
@@ -95,7 +111,7 @@ export type FluidReferenceResult3D = {
     entropyResidual: number;
   }[];
   /** Signed mechanical energy: pressure may cool gas; viscosity only heats. */
-  thermalWork: { id: string; pressure: number; viscous: number }[];
+  thermalWork: { id: string; pressure: number; viscous: number; contact: number }[];
   /** One aggregate per fixed sample. angularImpulse is a free couple in addition
    * to (sample.position - body.center) cross impulse. Root owns sampled solid heat. */
   boundaryTransfers: {
@@ -105,11 +121,14 @@ export type FluidReferenceResult3D = {
     impulse: Vec3;
     angularImpulse: Vec3;
     viscousHeat: number;
+    contactHeat: number;
   }[];
   energy: {
     gasMechanicalWork: number;
     viscousHeat: number;
+    contactHeat: number;
     projectionKineticChange: number;
+    predictionKineticChange: number;
     impulseWorkResidual: number;
   };
   convergence: {
@@ -118,6 +137,7 @@ export type FluidReferenceResult3D = {
     densityError: number;
     divergenceError: number;
     gasVolumeResidual: number;
+    contactError: number;
   };
 };
 export type FluidReferenceProgress3D = {
@@ -202,7 +222,12 @@ function inverse(m: FluidMatrix3D): FluidMatrix3D {
 }
 function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
   const data = copyPortableValue(raw as unknown as PortableValue);
-  fields(data, ['particles', 'bodies', 'boundaries', 'dt', 'smoothingRadius']);
+  assertRecordFields(
+    data,
+    ['particles', 'bodies', 'boundaries', 'dt', 'smoothingRadius'],
+    ['contacts', 'projectionOnly', 'velocityPrediction'],
+    'Invalid fluid reference fields.',
+  );
   const particles = rows(
     data.particles,
     FLUID_REFERENCE_LIMITS_3D.particles,
@@ -319,6 +344,35 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
     },
     (b) => b.id,
   );
+  const contacts = rows(
+    data.contacts ?? [],
+    FLUID_REFERENCE_LIMITS_3D.contacts,
+    (row) => {
+      fields(row, ['id', 'particleId', 'boundaryId', 'point', 'normal', 'impact']);
+      const value = {
+        id: identity(row.id),
+        particleId: identity(row.particleId),
+        boundaryId: identity(row.boundaryId),
+        point: vector(row.point),
+        normal: vector(row.normal),
+        impact: row.impact as boolean,
+      };
+      if (
+        !particles.some((p) => p.parcel.id === value.particleId) ||
+        !boundaries.some((b) => b.id === value.boundaryId) ||
+        typeof value.impact !== 'boolean' ||
+        Math.abs(lengthVec3(value.normal) - 1) > 1e-10
+      )
+        throw Error('Invalid fluid boundary contact.');
+      return value;
+    },
+    (c) => c.id,
+  );
+  if (data.projectionOnly !== undefined && typeof data.projectionOnly !== 'boolean')
+    throw Error('Invalid fluid projection mode.');
+  const velocityPrediction =
+    data.velocityPrediction === undefined ? ZERO : (data.velocityPrediction as unknown as Vec3);
+  assertFiniteVec3(velocityPrediction, 'fluid velocity prediction');
   const smoothingRadius = scalar(data.smoothingRadius, 1e-3, 16, 'kernel radius');
   for (const particle of particles)
     if (particle.volume !== null) gasSupportRadius(particle.volume, smoothingRadius);
@@ -326,6 +380,9 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
     particles,
     bodies,
     boundaries,
+    contacts,
+    projectionOnly: data.projectionOnly === true,
+    velocityPrediction,
     dt: scalar(data.dt, 1e-9, 1, 'time step'),
     smoothingRadius,
   };
@@ -420,7 +477,7 @@ type WallPair = { i: number; s: number; gradient: Vec3 };
 type Constraint = {
   i: number;
   terms: { i: number; gradient: Vec3 }[];
-  walls: { s: number; gradient: Vec3 }[];
+  walls: { s: number; gradient: Vec3; point?: Vec3 }[];
 };
 
 function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceResult3D> {
@@ -442,6 +499,9 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   const pressureWork = p.map(() => 0),
     viscousWork = p.map(() => 0),
     wallHeat = boundaries.map(() => 0);
+  const particleContactHeat = p.map(() => 0),
+    wallContactHeat = boundaries.map(() => 0);
+  let contactHeat = 0;
   const wallImpulse = boundaries.map((): Vec3 => [0, 0, 0]),
     wallCouple = boundaries.map((): Vec3 => [0, 0, 0]);
   let gasMechanicalWork = 0,
@@ -558,6 +618,10 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         matrix(body.inverseInertia, crossVec3(subtractVec3(point, body.center), value)),
       );
       wallImpulse[s] = addVec3(wallImpulse[s], value);
+      wallCouple[s] = addVec3(
+        wallCouple[s],
+        crossVec3(subtractVec3(point, boundaries[s].position), value),
+      );
     }
   }
   function pairWork(a: Endpoint, pa: Vec3, b: Endpoint, pb: Vec3, value: Vec3): number {
@@ -613,7 +677,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     }
     contribution(i, otherMass);
     if ('particle' in other) contribution(other.particle, p[i].parcel.mass);
-    if (!contributions.length) return;
+    if (!contributions.length || input.projectionOnly) return;
     const initialSpeed = dotVec3(
       subtractVec3(velocityAt(a, p[i].parcel.center), velocityAt(other, point)),
       direction,
@@ -737,14 +801,16 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   }
   // Pressure considers every bounded candidate pair: saved-volume support can
   // exceed the fixed liquid radius and can grow during this canonical sweep.
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      pressurePair(i, { particle: j }, p[j].parcel.center);
-      yield 'gas-pressure';
-    }
-    for (let s = 0; s < boundaries.length; s++) {
-      pressurePair(i, { boundary: s }, boundaries[s].position);
-      yield 'gas-boundary-pressure';
+  if (!input.projectionOnly && p.some((p) => p.phase === 'gas')) {
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        pressurePair(i, { particle: j }, p[j].parcel.center);
+        yield 'gas-pressure';
+      }
+      for (let s = 0; s < boundaries.length; s++) {
+        pressurePair(i, { boundary: s }, boundaries[s].position);
+        yield 'gas-boundary-pressure';
+      }
     }
   }
   function particleHeat(index: number, amount: number): void {
@@ -771,7 +837,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     rate: number,
     weight: number,
   ): void {
-    if (rate === 0) return;
+    if (rate === 0 || input.projectionOnly) return;
     const a: Endpoint = { particle: i };
     const point =
       'boundary' in other
@@ -830,24 +896,26 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     const radius = p[i].volume === null ? h : gasSupportRadius(p[i].volume!, h);
     return fluidDensityKernel3D(offset, radius).value / fluidDensityKernel3D(ZERO, radius).value;
   }
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      const offset = subtractVec3(p[i].parcel.center, p[j].parcel.center);
-      const weight = (viscousWeight(i, offset) + viscousWeight(j, offset)) / 2;
-      if (weight)
-        viscousPair(
-          i,
-          { particle: j },
-          p[j].parcel.center,
-          (p[i].viscosity + p[j].viscosity) / 2,
-          weight,
-        );
-      yield 'viscosity';
-    }
-    for (let s = 0; s < boundaries.length; s++) {
-      const weight = viscousWeight(i, subtractVec3(p[i].parcel.center, boundaries[s].position));
-      if (weight) viscousPair(i, { boundary: s }, boundaries[s].position, p[i].viscosity, weight);
-      yield 'boundary-viscosity';
+  if (!input.projectionOnly) {
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const offset = subtractVec3(p[i].parcel.center, p[j].parcel.center);
+        const weight = (viscousWeight(i, offset) + viscousWeight(j, offset)) / 2;
+        if (weight)
+          viscousPair(
+            i,
+            { particle: j },
+            p[j].parcel.center,
+            (p[i].viscosity + p[j].viscosity) / 2,
+            weight,
+          );
+        yield 'viscosity';
+      }
+      for (let s = 0; s < boundaries.length; s++) {
+        const weight = viscousWeight(i, subtractVec3(p[i].parcel.center, boundaries[s].position));
+        if (weight) viscousPair(i, { boundary: s }, boundaries[s].position, p[i].viscosity, weight);
+        yield 'boundary-viscosity';
+      }
     }
   }
   for (let i = 0; i < n; i++)
@@ -873,56 +941,135 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   function rate(row: Constraint): number {
     return finite(
       row.terms.reduce((s, t) => s + dotVec3(t.gradient, p[t.i].parcel.velocity), 0) +
-        row.walls.reduce((s, t) => s + dotVec3(t.gradient, bodyVelocity(t.s)), 0),
+        row.walls.reduce(
+          (s, t) =>
+            s +
+            dotVec3(
+              t.gradient,
+              t.point ? velocityAt({ boundary: t.s }, t.point) : bodyVelocity(t.s),
+            ),
+          0,
+        ),
     );
   }
-  function project(row: Constraint, target: number): void {
+  const effectiveMasses = new WeakMap<Constraint, number>();
+  function project(row: Constraint, target: number): number {
     const error = rate(row) - target;
-    if (error <= 0) return;
-    let effective = row.terms.reduce(
-      (s, t) => s + dotVec3(t.gradient, t.gradient) / p[t.i].parcel.mass,
-      0,
-    );
-    const bodyTerms = bodies.map(() => ({ linear: ZERO, angular: ZERO }));
-    for (const t of row.walls) {
-      const index = atBody[t.s],
-        body = bodies[index];
-      bodyTerms[index].linear = addVec3(bodyTerms[index].linear, t.gradient);
-      bodyTerms[index].angular = addVec3(
-        bodyTerms[index].angular,
-        crossVec3(subtractVec3(boundaries[t.s].position, body.center), t.gradient),
+    if (error <= 0) return 0;
+    let effective = effectiveMasses.get(row);
+    if (effective === undefined) {
+      effective = row.terms.reduce(
+        (s, t) => s + dotVec3(t.gradient, t.gradient) / p[t.i].parcel.mass,
+        0,
       );
+      const bodyTerms = bodies.map(() => ({ linear: ZERO, angular: ZERO }));
+      for (const t of row.walls) {
+        const index = atBody[t.s],
+          body = bodies[index];
+        bodyTerms[index].linear = addVec3(bodyTerms[index].linear, t.gradient);
+        bodyTerms[index].angular = addVec3(
+          bodyTerms[index].angular,
+          crossVec3(subtractVec3(t.point ?? boundaries[t.s].position, body.center), t.gradient),
+        );
+      }
+      for (let b = 0; b < bodies.length; b++)
+        effective +=
+          bodies[b].inverseMass * dotVec3(bodyTerms[b].linear, bodyTerms[b].linear) +
+          dotVec3(bodyTerms[b].angular, matrix(bodies[b].inverseInertia, bodyTerms[b].angular));
+      if (!(effective > 0) || !Number.isFinite(effective))
+        throw Error('Liquid density constraint has no movable support.');
+      effectiveMasses.set(row, effective);
     }
-    for (let b = 0; b < bodies.length; b++)
-      effective +=
-        bodies[b].inverseMass * dotVec3(bodyTerms[b].linear, bodyTerms[b].linear) +
-        dotVec3(bodyTerms[b].angular, matrix(bodies[b].inverseInertia, bodyTerms[b].angular));
-    if (!(effective > 0) || !Number.isFinite(effective))
-      throw Error('Liquid density constraint has no movable support.');
     const lambda = error / effective;
     for (const t of row.terms)
       impulse({ particle: t.i }, p[t.i].parcel.center, scaleVec3(t.gradient, -lambda));
     for (const t of row.walls)
-      impulse({ boundary: t.s }, boundaries[t.s].position, scaleVec3(t.gradient, -lambda));
+      impulse(
+        { boundary: t.s },
+        t.point ?? boundaries[t.s].position,
+        scaleVec3(t.gradient, -lambda),
+      );
+    return lambda * (error + target) - 0.5 * lambda * lambda * effective;
   }
+  const contactRows = (input.contacts ?? []).map((c) => {
+    const i = p.findIndex((p) => p.parcel.id === c.particleId),
+      s = boundaries.findIndex((b) => b.id === c.boundaryId);
+    return {
+      i,
+      s,
+      impact: c.impact,
+      row: {
+        i,
+        terms: [{ i, gradient: scaleVec3(c.normal, -1) }],
+        walls: [{ s, gradient: c.normal, point: c.point }],
+      } as Constraint,
+    };
+  });
+  // Only the approach present before pressure stabilization/prediction can pay
+  // physical contact heat. Repeated contact corrections inside SPH projection
+  // are numerical work, even when that contact began as a real impact.
+  const beforeContacts = kinetic();
+  if (!input.projectionOnly) {
+    for (let iteration = 0; contactRows.length; iteration++) {
+      for (const contact of contactRows) {
+        const loss = project(contact.row, 0);
+        if (contact.impact && loss > 0) {
+          const share = loss / 2;
+          particleContactHeat[contact.i] += share;
+          wallContactHeat[contact.s] += loss - share;
+          contactHeat += loss;
+          enthalpies[contact.i] += share;
+          available[contact.i] =
+            p[contact.i].thermalCurve === null
+              ? available[contact.i] + share
+              : gasSensibleEnergy(p[contact.i].thermalCurve!, enthalpies[contact.i]);
+        }
+        yield 'contact-impact';
+      }
+      if (contactRows.every((c) => rate(c.row) <= 1e-8)) break;
+      if (iteration + 1 === FLUID_REFERENCE_LIMITS_3D.iterations)
+        throw Error('Fluid impact solve did not converge.');
+    }
+  }
+  const contactNumerical = kinetic() - beforeContacts + contactHeat;
+  const beforePrediction = kinetic();
+  const prediction = input.velocityPrediction ?? ZERO;
+  for (const particle of p)
+    particle.parcel.velocity = addVec3(particle.parcel.velocity, prediction);
+  for (const body of bodies)
+    if (body.inverseMass) body.velocity = addVec3(body.velocity, prediction);
   const beforeProjection = kinetic();
+  const predictionKineticChange = beforeProjection - beforePrediction;
   const convergence = {
     densityIterations: 0,
     divergenceIterations: 0,
     densityError: 0,
     divergenceError: 0,
     gasVolumeResidual,
+    contactError: 0,
   };
-  for (const kind of ['density', 'divergence'] as const) {
-    let converged = rows.length === 0;
+  const passes: ('density' | 'divergence')[] = input.projectionOnly
+    ? ['divergence']
+    : ['density', 'divergence'];
+  for (const kind of passes) {
+    let converged = rows.length === 0 && contactRows.length === 0;
     for (
       let iteration = 0;
       !converged && iteration < FLUID_REFERENCE_LIMITS_3D.iterations;
       iteration++
     ) {
+      for (const contact of contactRows) {
+        project(contact.row, 0);
+        yield 'contact-projection';
+      }
       for (const row of rows) {
         const densityTarget = (p[row.i].restDensity - density[row.i]) / dt;
-        const target = kind === 'density' ? densityTarget : Math.min(0, densityTarget);
+        const target =
+          kind === 'density'
+            ? densityTarget
+            : input.projectionOnly
+              ? 0
+              : Math.min(0, densityTarget);
         project(row, target);
         yield `${kind}-projection`;
       }
@@ -930,19 +1077,28 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       for (const row of rows) {
         const change = dt * rate(row);
         const densityError = density[row.i] + change - p[row.i].restDensity;
-        const error = kind === 'density' ? densityError : Math.max(densityError, change) / dt;
+        const error =
+          kind === 'density'
+            ? densityError
+            : (input.projectionOnly ? change : Math.max(densityError, change)) / dt;
         maximum = Math.max(maximum, error / p[row.i].restDensity);
         yield `${kind}-residual`;
       }
       convergence[kind === 'density' ? 'densityIterations' : 'divergenceIterations'] =
         iteration + 1;
       convergence[kind === 'density' ? 'densityError' : 'divergenceError'] = maximum;
+      convergence.contactError = Math.max(0, ...contactRows.map((c) => rate(c.row)));
       converged =
+        convergence.contactError <= 1e-8 &&
         maximum <=
-        FLUID_REFERENCE_LIMITS_3D[kind === 'density' ? 'densityTolerance' : 'divergenceTolerance'];
+          FLUID_REFERENCE_LIMITS_3D[
+            kind === 'density' ? 'densityTolerance' : 'divergenceTolerance'
+          ];
     }
     if (!converged)
-      throw Error(`Liquid ${kind} projection did not converge within its work limit.`);
+      throw Error(
+        `Liquid ${kind} projection did not converge within its work limit (density ${convergence.densityError}, divergence ${convergence.divergenceError}, contact ${convergence.contactError}).`,
+      );
   }
   convergence.densityError = 0;
   convergence.divergenceError = 0;
@@ -955,9 +1111,15 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
     );
     convergence.divergenceError = Math.max(convergence.divergenceError, change / (dt * rest));
   }
-  projectionKineticChange = kinetic() - beforeProjection;
+  projectionKineticChange = kinetic() - beforeProjection + contactNumerical;
   const residual =
-    kinetic() - initialKinetic - gasMechanicalWork + viscousHeat - projectionKineticChange;
+    kinetic() -
+    initialKinetic -
+    gasMechanicalWork +
+    viscousHeat +
+    contactHeat -
+    projectionKineticChange -
+    predictionKineticChange;
   if (
     Math.abs(residual) >
       1e-9 * Math.max(1, initialKinetic, Math.abs(gasMechanicalWork), viscousHeat) ||
@@ -1005,6 +1167,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       id: v.parcel.id,
       pressure: pressureWork[i],
       viscous: viscousWork[i],
+      contact: particleContactHeat[i],
     })),
     boundaryTransfers: boundaries.map((s, i) => ({
       id: s.id,
@@ -1013,11 +1176,14 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       impulse: wallImpulse[i],
       angularImpulse: wallCouple[i],
       viscousHeat: wallHeat[i],
+      contactHeat: wallContactHeat[i],
     })),
     energy: {
       gasMechanicalWork,
       viscousHeat,
+      contactHeat,
       projectionKineticChange,
+      predictionKineticChange,
       impulseWorkResidual: residual,
     },
     convergence,
@@ -1030,7 +1196,9 @@ export function createFluidReferenceJob3D(raw: FluidReferenceInput3D): FluidRefe
     generator = solve(input);
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +
-    4 * FLUID_REFERENCE_LIMITS_3D.iterations * input.particles.length +
+    5 *
+      FLUID_REFERENCE_LIMITS_3D.iterations *
+      (input.particles.length + (input.contacts?.length ?? 0)) +
     16;
   let completedWork = 0,
     stage = 'ready',
