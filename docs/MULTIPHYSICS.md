@@ -449,13 +449,12 @@ now measures the cross-product angle and prefers a face within the existing
 contact skin; geometric projection still uses the true minimum translation axis.
 Settling, resting stacks, fast impacts and released-edge regressions pass together.
 
-Three extended acceptance gates remain **unpassed** in
+Two extended acceptance gates remain **unpassed** in
 `engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts`:
 
 | Gate | Observed failure on the development Mac |
 | --- | --- |
 | Heated gas over a floor for 0.03 model seconds | Cold/hot cumulative energy errors `-0.05271275`/`-0.04530049`. The tracked hot parcel expands more but does not rise. This is not a qualified plume. |
-| Combined electrical/thermal/fluid/structural mechanism | Heating melts the valve and fluid breaks the support, but continued flow rejects at tick 31 with `-0.81624965` numerical energy against the unchanged `0.01` per-tick limit. |
 | Freezing overlapping liquid parcels | Conversion retains both parcels but the resulting solid overlap exceeds the geometric correction limit; the tick rejects. No admissible freezing geometry policy is implemented yet. |
 
 Run these unfinished gates explicitly and serially under the supervisor with
@@ -468,8 +467,8 @@ local. A tightly wedged support also exposed conflicting simultaneous restitutio
 constraints; the authored combined scene provides lateral clearance rather than
 claiming arbitrary wedged-contact qualification.
 
-The next physics work is sparse-liquid support classification, compatible gas
-pressure/contact work, and a conservative freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
+The next physics work is compatible gas pressure/contact work and a conservative
+freezing geometry rule. These precede the builder and fresh macOS timing acceptance. No public
 runtime export or full milestone completion is claimed by this checkpoint.
 
 This checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
@@ -512,3 +511,29 @@ cases passed in 31.59 seconds (`627c44d7ce9048beb936a9ac857afffc`), with coarse
 cumulative absolute energy errors `1.35e-5` and `1.07e-4`, decreasing at each
 refinement. Type checks, structural lint and diff hygiene passed. Review was
 manual; the automated review executable remains unavailable.
+
+### Sparse support and continued failure mechanism (2026-10-25)
+
+A density-only support cutoff classified two approaching droplets as resolved
+liquid before their predicted density reached the incompressibility limit. In
+the combined mechanism this activated the extra divergence constraint abruptly
+and removed `0.81625` energy at tick 31. Divergence support now also requires a
+resolved volume of neighboring liquid/solid samples, normalized by the cube of
+the support radius. Gas neighbors do not supply incompressible support. Every
+liquid parcel still receives the predicted-density guard.
+
+The separate close-droplet reproduction failed before this fix
+(`decc668172f547fe8677ae1d53ebb115`). It now preserves unconstrained approach
+motion while rejecting compression beyond rest density. Independent scaled
+3x3x3 lattices retain the seven resolved interior/face-center rows at all three
+scales. The 177 private multiphysics checks passed
+(`a92be41f3b9d42e29ee0d9296a21eee4`), as did the unchanged powered mechanism,
+unpowered control and save/restart continuation (`081476c079c44675bc4368bca433ad1b`).
+Both tank refinement cases passed (`b23ebb3375cc4e128255f589be64d776`). The
+existing energy/momentum tolerances and work limits were retained. This bounded
+support criterion does not establish arbitrary spray or adaptive-resolution
+qualification. Manual adversarial review covered sparse/bulk separation, scale
+consistency, gas exclusion and the retained density guard.
+
+The sustained resting control also passed unchanged
+(`fdb463a412be455aa17328d93b041877`). Type checks, lint and formatting passed.

@@ -93,6 +93,11 @@ export const FLUID_REFERENCE_LIMITS_3D = Object.freeze({
   // excluding deficient spray from the extra zero-divergence constraint.
   // Every sample still receives the predicted-density guard.
   divergenceSupportRatio: 0.8,
+  // Density alone also rises when two sparse droplets approach. Require a
+  // resolved liquid/solid neighborhood: ten unit volumes at h=1.5, versus
+  // 18 neighbors in a unit bulk lattice and 13 at a flat free surface.
+  // Normalize by h^3 so scaling positions and reference volumes is consistent.
+  divergenceSupportVolume: 10 / 1.5 ** 3,
   gamma: 1.4,
   energyQPerMechanicalUnit: 256,
   gasIterations: 96,
@@ -496,6 +501,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   const inertias = bodies.map((b) => (b.inverseMass ? inverse(b.inverseInertia) : null));
   const density = p.map((v) => finite(v.parcel.mass * fluidDensityKernel3D(ZERO, h).value));
   const rows: Constraint[] = [];
+  const supportVolume = p.map(() => 0);
   const adjacentPairs = p.map(() => [] as Pair[]),
     adjacentWalls = p.map(() => [] as WallPair[]);
   const available = p.map((v) => v.thermalEnergy),
@@ -549,6 +555,8 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       if (kernel.value) {
         density[i] += p[j].parcel.mass * kernel.value;
         density[j] += p[i].parcel.mass * kernel.value;
+        if (p[j].phase === 'liquid') supportVolume[i] += p[j].parcel.mass / p[j].restDensity;
+        if (p[i].phase === 'liquid') supportVolume[j] += p[i].parcel.mass / p[i].restDensity;
         const pair = { i, j, gradient: kernel.gradient };
         adjacentPairs[i].push(pair);
         adjacentPairs[j].push(pair);
@@ -562,6 +570,7 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
       );
       if (kernel.value) {
         density[i] += p[i].restDensity * boundaries[s].volume * kernel.value;
+        supportVolume[i] += boundaries[s].volume;
         const pair = { i, s, gradient: kernel.gradient };
         adjacentWalls[i].push(pair);
       }
@@ -1059,7 +1068,8 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
   for (const body of bodies)
     if (body.inverseMass) body.velocity = addVec3(body.velocity, prediction);
   const divergenceSupported = (row: Constraint) =>
-    density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity;
+    density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity &&
+    supportVolume[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportVolume * h ** 3;
   const beforeProjection = kinetic();
   const predictionKineticChange = beforeProjection - beforePrediction;
   const convergence = {

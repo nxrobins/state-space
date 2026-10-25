@@ -657,34 +657,74 @@ test('gravity prediction and repeated pressure corrections do not increase physi
   expect(predicted.energy.impulseWorkResidual).toBeCloseTo(0, 12);
 });
 
-test('under-filled free surface retains approach motion until its predicted density reaches the limit', () => {
-  const pair = [
-    particle('a', [0, 0, 0], {
-      phase: 'liquid',
-      volume: null,
-      parcel: parcel('a', [0, 0, 0], { velocity: [4, 0, 0] }),
-    }),
-    particle('b', [1, 0, 0], {
-      phase: 'liquid',
-      volume: null,
-      parcel: parcel('b', [1, 0, 0], { velocity: [-4, 0, 0] }),
-    }),
-  ];
-  for (const projectionOnly of [false, true]) {
-    const free = solveFluidReference3D(input(pair, { projectionOnly }));
-    expect(free.particles.map((p) => p.parcel.velocity)).toEqual(
-      pair.map((p) => p.parcel.velocity),
-    );
-    expect(free.energy.projectionKineticChange).toBe(0);
-    expect(free.convergence.freeSurfaceRows).toBe(2);
-    expect(free.convergence.divergenceRows).toBe(0);
-    expect(free.convergence.freeSurfaceCompressionRate).toBeGreaterThan(0);
-    const constrained = solveFluidReference3D(input(pair, { projectionOnly, dt: 1 }));
-    expect(constrained.particles[0].parcel.velocity[0]).toBeLessThan(4);
-    expect(constrained.convergence.densityError).toBeLessThanOrEqual(1e-4);
-    expect(constrained.energy.projectionKineticChange).toBeLessThan(0);
-    expect(constrained.energy.contactHeat).toBe(0);
-  }
+test.each([
+  { distance: 1, smoothingRadius: 2 },
+  { distance: 0.4, smoothingRadius: 1.5 },
+])(
+  'under-filled free surface at $distance retains approach until predicted density reaches the limit',
+  ({ distance, smoothingRadius }) => {
+    const pair = [
+      particle('a', [0, 0, 0], {
+        phase: 'liquid',
+        volume: null,
+        parcel: parcel('a', [0, 0, 0], { velocity: [4, 0, 0] }),
+      }),
+      particle('b', [distance, 0, 0], {
+        phase: 'liquid',
+        volume: null,
+        parcel: parcel('b', [distance, 0, 0], { velocity: [-4, 0, 0] }),
+      }),
+    ];
+    for (const projectionOnly of [false, true]) {
+      const free = solveFluidReference3D(input(pair, { projectionOnly, smoothingRadius }));
+      expect(free.particles.map((p) => p.parcel.velocity)).toEqual(
+        pair.map((p) => p.parcel.velocity),
+      );
+      expect(free.energy.projectionKineticChange).toBe(0);
+      expect(free.convergence.freeSurfaceRows).toBe(2);
+      expect(free.convergence.divergenceRows).toBe(0);
+      expect(free.convergence.freeSurfaceCompressionRate).toBeGreaterThan(0);
+      const constrained = solveFluidReference3D(
+        input(pair, { projectionOnly, smoothingRadius, dt: 1 }),
+      );
+      expect(constrained.particles[0].parcel.velocity[0]).toBeLessThan(4);
+      expect(constrained.convergence.densityError).toBeLessThanOrEqual(1e-4);
+      expect(constrained.energy.projectionKineticChange).toBeLessThan(0);
+      expect(constrained.energy.contactHeat).toBe(0);
+    }
+  },
+);
+
+test.each([0.5, 1, 2])('resolved liquid support scales with neighborhood volume (%s)', (scale) => {
+  const points = Array.from(
+    { length: 27 },
+    (_, i): Vec3 => [
+      ((i % 3) - 1) * scale,
+      (Math.floor(i / 9) - 1) * scale,
+      ((Math.floor(i / 3) % 3) - 1) * scale,
+    ],
+  );
+  const result = solveFluidReference3D(
+    input(
+      points.map((center, i) =>
+        particle(String(i), center, {
+          phase: 'liquid',
+          volume: null,
+          parcel: parcel(String(i), center, {
+            mass: scale ** 3,
+            velocity: scaleVec3(center, -0.01),
+          }),
+        }),
+      ),
+      { smoothingRadius: 1.5 * scale, dt: 0.001 },
+    ),
+  );
+  // The 3x3x3 center and six face centers have resolved bulk/flat-surface
+  // neighborhoods; corners and edges retain only the predicted-density guard.
+  expect(result.convergence.divergenceRows).toBe(7);
+  expect(result.convergence.divergenceError).toBeLessThanOrEqual(1e-7);
+  expect(result.energy.projectionKineticChange).toBeLessThan(0);
+  expect(result.energy.contactHeat).toBe(0);
 });
 
 test('vanishing gas support converges within the same work bound without an oversized root bracket', () => {
