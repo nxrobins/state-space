@@ -9,6 +9,8 @@ import {
 } from './model.js';
 import { createMultiphysicsTickJob3D } from './world-tick.js';
 import { batteryStoredUnits3D } from './battery.js';
+import { createMultiphysicsWorld3D } from './world.js';
+import { createMultiphysicsDemonstration3D } from './demonstrations.js';
 import type { Vec3 } from './math.js';
 let profiles: MultiphysicsProfiles3D;
 beforeAll(async () => {
@@ -90,6 +92,24 @@ test('physical series circuit pays all external/internal Joule heat from its one
     BigInt(batteryStoredUnits3D(initial.battery!)) -
     BigInt(batteryStoredUnits3D(result.snapshot.battery!));
   expect(spent).toBeGreaterThan(0n);
+  const network = result.report.battery!.network!;
+  expect(network.sampledTick).toBe(initial.tick);
+  for (const [id, potential] of Object.entries({
+    positive: 8,
+    left: 6,
+    bridge: 4,
+    right: 2,
+    negative: 0,
+  }))
+    expect(network.nodes.find((n) => n.id === id)!.potential).toBeCloseTo(potential, 10);
+  expect(network.nodes.find((n) => n.id === 'core')!.potential).toBeNull();
+  expect(network.edges).toHaveLength(4);
+  for (const edge of network.edges) {
+    const a = network.nodes.find((n) => n.id === edge.a)!.potential!,
+      b = network.nodes.find((n) => n.id === edge.b)!.potential!;
+    expect(edge.current).toBeCloseTo((a - b) / edge.resistance, 11);
+    expect(edge.power).toBeCloseTo(4, 11);
+  }
   expect(result.report.battery?.drawnUnits).toBe(String(spent));
   expect(
     parcelTemperature3D(profiles, result.snapshot.parcels.find((p) => p.id === 'core')!),
@@ -286,50 +306,7 @@ test('burning a rotating support breaks its bond while preserving fuel products,
 });
 
 test('a falling tilted battery fractures physically and then pays its bounded core discharge', () => {
-  const angle = 0.25,
-    q = [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)] as const;
-  const part = (id: string, material: string, x: number) =>
-    seedThermalParcel3D(profiles, {
-      id,
-      material,
-      owner: 'authored',
-      center: [x * Math.cos(angle), 2 + x * Math.sin(angle), 0],
-      orientation: q,
-      temperature: 20,
-    });
-  let state = createMultiphysicsSnapshot3D(profiles, {
-    parcels: [
-      part('positive', 'copper', -1),
-      part('core', 'ceramic', 0),
-      part('negative', 'copper', 1),
-      seedThermalParcel3D(profiles, {
-        id: 'floor',
-        material: 'ceramic',
-        owner: 'fixed',
-        center: [0, 0, 0],
-        halfExtents: [4, 0.5, 4],
-        temperature: 20,
-      }),
-    ],
-    anchors: ['floor'],
-    settings: { dt: 1 / 240 },
-    bonds: [
-      { a: 'positive', b: 'core', strength: 0.001, restLength: 1 },
-      { a: 'core', b: 'negative', strength: 0.001, restLength: 1 },
-    ],
-    battery: {
-      id: 'source',
-      positive: 'positive',
-      negative: 'negative',
-      cores: [{ id: 'core', energyQ: 1000, energyFractionQ: 0 }],
-      emf: 12,
-      internalResistance: 2,
-      failureRateQPerSecond: 3,
-      failureTemperature: 180,
-      failed: false,
-      drawRemainderUnits: 0,
-    },
-  });
+  let state = createMultiphysicsDemonstration3D(profiles, 'falling-battery');
   const mass = multiphysicsInventory3D(state).mass;
   for (let step = 0; step < 240 && !state.battery!.failed; step++) state = run(state).snapshot;
   expect(state.battery!.failed).toBe(true);
@@ -403,3 +380,114 @@ test.each(['water', 'air'])(
     expect(run(JSON.parse(JSON.stringify(weak.snapshot)), 1)).toEqual(run(weak.snapshot, 256));
   },
 );
+
+test('a moving finite source depletes within the tick without extra heat or stopping its motion', () => {
+  const source = circuit();
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: source.parcels.map((p) => ({ ...p, velocity: [2, 0, 0] })),
+    bonds: source.bonds,
+    settings: source.settings,
+    battery: { ...source.battery!, cores: [{ id: 'core', energyQ: 1, energyFractionQ: 0 }] },
+  });
+  const result = run(initial),
+    next = run(result.snapshot),
+    report = result.report.battery!;
+  expect(report.depleted).toBe(true);
+  expect(report.drawnUnits).toBe('1048576');
+  expect(report.sourceCurrent).toBeCloseTo(2, 11);
+  expect(report.activeSeconds).toBeCloseTo(1 / (24 * 256), 14);
+  expect(batteryStoredUnits3D(result.snapshot.battery!)).toBe('0');
+  for (const p of result.snapshot.parcels) {
+    expect(p.center[0]).toBeCloseTo(
+      initial.parcels.find((q) => q.id === p.id)!.center[0] + 2 * initial.settings.dt,
+      12,
+    );
+    expect(p.velocity).toEqual([2, 0, 0]);
+  }
+  expect(next.report.battery!.drawnUnits).toBe('0');
+  expect(next.report.battery!.sourceCurrent).toBe(0);
+  expect(next.report.battery!.network).toBeNull();
+  expect(
+    inventoryEnergyDelta3D(
+      multiphysicsInventory3D(initial),
+      multiphysicsInventory3D(next.snapshot),
+    ),
+  ).toBeCloseTo(0, 10);
+  expect(run(JSON.parse(JSON.stringify(result.snapshot)))).toEqual(next);
+});
+
+test('a copper path remains electrically live after melting while its finite face contacts remain', () => {
+  const source = circuit();
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: source.parcels.map((p) =>
+      p.id === 'bridge' ? seed('bridge', 'copper', p.center, 160) : p,
+    ),
+    bonds: source.bonds,
+    battery: source.battery,
+    settings: source.settings,
+  });
+  const melted = run(initial),
+    liquid = run(melted.snapshot);
+  expect(melted.snapshot.parcels.find((p) => p.id === 'bridge')!.material).toBe('molten_copper');
+  expect(liquid.snapshot.parcels.find((p) => p.id === 'bridge')!.owner).toBe('fluid');
+  expect(liquid.report.battery!.sourceCurrent).toBeCloseTo(2, 10);
+  expect(
+    liquid.report.battery!.network!.nodes.find((p) => p.id === 'bridge')!.potential,
+  ).toBeCloseTo(4, 10);
+  expect(multiphysicsInventory3D(liquid.snapshot).mass).toBe(multiphysicsInventory3D(initial).mass);
+  expect(
+    inventoryEnergyDelta3D(
+      multiphysicsInventory3D(initial),
+      multiphysicsInventory3D(liquid.snapshot),
+    ),
+  ).toBeCloseTo(0, 9);
+});
+
+test('fractured battery cores retain separate finite stores and removing one cannot refill the other', () => {
+  const source = circuit();
+  const initial = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [
+      ...source.parcels,
+      seed('second-core', 'ceramic', [0, 1, 1]),
+      seed('gas', 'air', [0, 1, 2]),
+    ],
+    anchors: ['core'],
+    bonds: [...source.bonds, { a: 'core', b: 'second-core', strength: 0.0001, restLength: 1 }],
+    settings: source.settings,
+    battery: {
+      ...source.battery!,
+      cores: [
+        { id: 'core', energyQ: 600, energyFractionQ: 0 },
+        { id: 'second-core', energyQ: 400, energyFractionQ: 0 },
+      ],
+    },
+  });
+  const broken = run(initial),
+    failed = run(broken.snapshot);
+  expect(broken.snapshot.battery!.failed).toBe(true);
+  expect(failed.report.battery!.sourceCurrent).toBe(0);
+  expect(failed.report.battery!.network).toBeNull();
+  const cores = failed.snapshot.battery!.cores;
+  expect(cores).toHaveLength(2);
+  for (const core of cores)
+    expect(core.energyQ + core.energyFractionQ).toBeLessThan(core.id === 'core' ? 600 : 400);
+  expect(
+    inventoryEnergyDelta3D(
+      multiphysicsInventory3D(initial),
+      multiphysicsInventory3D(failed.snapshot),
+    ),
+  ).toBeCloseTo(failed.snapshot.accounting.numericalEnergy, 10);
+  expect(Math.abs(failed.snapshot.accounting.numericalEnergy)).toBeLessThan(1e-4);
+  const world = createMultiphysicsWorld3D(profiles, failed.snapshot);
+  const removed = world.edit([{ kind: 'remove', ids: ['core'] }]);
+  expect(removed.result.snapshot.battery!.cores).toEqual([
+    cores.find((c) => c.id === 'second-core')!,
+  ]);
+  expect(BigInt(removed.result.edits.storedSubQ)).toBeLessThan(0n);
+  const continued = run(world.snapshot());
+  expect(continued.snapshot.battery!.failed).toBe(true);
+  expect(BigInt(batteryStoredUnits3D(continued.snapshot.battery!))).toBeLessThan(
+    BigInt(batteryStoredUnits3D(world.snapshot().battery!)),
+  );
+  expect(run(JSON.parse(JSON.stringify(world.snapshot())))).toEqual(continued);
+});

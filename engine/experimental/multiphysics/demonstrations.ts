@@ -1,10 +1,16 @@
-/** Private mechanism fixtures for executable acceptance and the future builder. */
+/** Private mechanism fixtures for executable acceptance and the future builder.
+ * The combined-failure trajectory remains an unpassed extended release gate. */
 import { createMultiphysicsSnapshot3D, type MultiphysicsSnapshot3D } from './model.js';
 import { seedThermalParcel3D, type ThermalSeed3D } from './thermal.js';
 import type { MultiphysicsProfiles3D } from './profiles.js';
 import type { PhysicalBattery3D } from './battery.js';
 import type { Vec3 } from './math.js';
-export type MultiphysicsDemonstration3D = 'wax-valve' | 'rotating-contact' | 'fluid-switch';
+export type MultiphysicsDemonstration3D =
+  | 'wax-valve'
+  | 'rotating-contact'
+  | 'fluid-switch'
+  | 'falling-battery'
+  | 'combined-failure';
 const battery = (energyQ: number, emf: number): PhysicalBattery3D => ({
   id: 'source',
   positive: 'positive',
@@ -35,6 +41,47 @@ export function createMultiphysicsDemonstration3D(
       temperature: 20,
       ...options,
     });
+  if (name === 'falling-battery') {
+    const angle = 0.25,
+      orientation = [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)] as const;
+    return createMultiphysicsSnapshot3D(profiles, {
+      parcels: [
+        ...(['positive', 'core', 'negative'] as const).map((id, i) =>
+          parcel(
+            id,
+            id === 'core' ? 'ceramic' : 'copper',
+            [(i - 1) * Math.cos(angle), 2 + (i - 1) * Math.sin(angle), 0],
+            { orientation },
+          ),
+        ),
+        parcel('floor', 'ceramic', [0, 0, 0], { halfExtents: [4, 0.5, 4] }),
+      ],
+      anchors: ['floor'],
+      settings: { dt: 1 / 240 },
+      bonds: [
+        { a: 'positive', b: 'core', strength: 0.001, restLength: 1 },
+        { a: 'core', b: 'negative', strength: 0.001, restLength: 1 },
+      ],
+      battery: battery(1000, 12),
+    });
+  }
+  if (name === 'combined-failure') {
+    const valve = createMultiphysicsDemonstration3D(profiles, 'wax-valve');
+    return createMultiphysicsSnapshot3D(profiles, {
+      parcels: [
+        ...valve.parcels,
+        parcel('water', 'water', [0, 3, 1], { temperature: 40 }),
+        parcel('plate', 'copper', [0, 0.75, 1], { temperature: 40, halfExtents: [0.4, 0.5, 0.5] }),
+      ],
+      anchors: valve.anchors,
+      bonds: [
+        ...valve.bonds,
+        { a: 'core', b: 'plate', strength: 80, restLength: Math.hypot(1, 0.25) },
+      ],
+      battery: valve.battery,
+      settings: valve.settings,
+    });
+  }
   if (name === 'wax-valve') {
     // The valve begins near the end of its latent plateau, at the same actual
     // temperature as the unpowered heater. Only source-paid heat can release it.

@@ -686,3 +686,13 @@ test('under-filled free surface retains approach motion until its predicted dens
     expect(constrained.energy.contactHeat).toBe(0);
   }
 });
+
+test('vanishing gas support converges within the same work bound without an oversized root bracket', () => {
+  const result = solveFluidReference3D(
+    input([particle('a', [0, 0, 0]), particle('b', [2 * (1 - 1e-12), 0, 0])], { dt: 0.001 }),
+  );
+  expect(result.particles[0].parcel.velocity[0]).toBeLessThan(0);
+  expect(result.particles[1].parcel.velocity[0]).toBeGreaterThan(0);
+  expect(result.energy.impulseWorkResidual).toBeCloseTo(0, 20);
+  expect(result.convergence.gasVolumeResidual).toBeLessThan(1e-12);
+});

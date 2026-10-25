@@ -60,6 +60,15 @@ export type MultiphysicsTickReport3D = {
     depleted: boolean;
     /** Instantaneous current during the paid activeSeconds interval. */
     sourceCurrent: number;
+    /** Network sampled at the start of this tick, before thermal/mechanical motion.
+     * Values describe the paid active interval, not the final snapshot geometry. */
+    network: null | {
+      sampledTick: number;
+      nodes: { id: string; potential: number | null }[];
+      edges: { a: string; b: string; resistance: number; current: number; power: number }[];
+      terminalVoltage: number;
+      residual: { maxJunctionCurrent: number; power: number };
+    };
   };
   fluid: FluidCouplingResult3D['report'];
   fluidPostProjection: FluidCouplingResult3D['report'];
@@ -226,6 +235,7 @@ export function createMultiphysicsTickJob3D(
       const damaged = !batteryIntact(profiles, state),
         losses: { id: string; power: number }[] = [];
       let sourceCurrent = 0;
+      let network: NonNullable<MultiphysicsTickReport3D['battery']>['network'] = null;
       if (!state.battery.failed && !damaged && BigInt(batteryStoredUnits3D(state.battery)) > 0n) {
         const indices = new Map(state.parcels.map((p, i) => [p.id, i]));
         const connections: ResistiveConnection3D[] = [],
@@ -268,6 +278,18 @@ export function createMultiphysicsTickJob3D(
           }
           const result = job.result();
           sourceCurrent = result.sourceCurrent;
+          network = {
+            sampledTick: state.tick,
+            nodes: state.parcels.map((p, i) => ({ id: p.id, potential: result.potentials[i] })),
+            edges: endpoints.map((pair, i) => ({
+              ...pair,
+              resistance: connections[i].resistance,
+              current: result.currents[i],
+              power: result.dissipations[i],
+            })),
+            terminalVoltage: result.terminalVoltage,
+            residual: result.residual,
+          };
           for (const [i, power] of result.dissipations.entries()) {
             losses.push(
               { id: endpoints[i].a, power: power / 2 },
@@ -301,6 +323,7 @@ export function createMultiphysicsTickJob3D(
         failed: paid.battery.failed,
         depleted: paid.depleted,
         sourceCurrent: paid.activeSeconds > 0 && !paid.battery.failed ? sourceCurrent : 0,
+        network,
       };
     }
     const previous = state.parcels;

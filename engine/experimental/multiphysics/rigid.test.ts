@@ -537,3 +537,25 @@ test('roundoff-separated corner contacts keep a mechanical manifold without inve
   expect(heat(result)).toBe(0);
   expect(rigidContactPatchArea3D(a, b)).toBeLessThan(1e-10);
 });
+
+test('an almost face-aligned cross-edge contact retains its edge manifold after release', () => {
+  const a = {
+    ...parcel('a', [-2.601157270634821e-11, 2.0000000000793032, -1.0242782348862707e-10]),
+    orientation: [
+      -5.174035484196634e-11, 1.106599951105316e-12, 2.6455876670411057e-11, 1,
+    ] as const,
+  };
+  const b = {
+    ...parcel('b', [-1.0000019317318045, 0.9999999999958227, -0.000003863465609080113]),
+    orientation: [
+      -2.378800178129394e-13, 0.000002897598055242565, -1.1144305435369532e-12, 0.999999999995802,
+    ] as const,
+  };
+  const result = run([a, b], { dt: 0.001, gravity: [0, 0, 0] });
+  expect(result.parcels.map((p) => p.velocity)).toEqual([
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
+  expect(heat(result)).toBe(0);
+  expect(rigidContactPatchArea3D(a, b)).toBe(0);
+});

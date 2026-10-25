@@ -43,20 +43,25 @@ function setup(work = 7, source?: MultiphysicsSnapshot3D) {
     },
   };
 }
-test.each(['freefall', 'fluid-switch'] as const)(
+test.each([
+  'freefall',
+  'fluid-switch',
+  'wax-valve',
+  'rotating-contact',
+  'falling-battery',
+  'combined-failure',
+] as const)(
   '%s Worker preview, commit, and JSON restart exactly match direct execution across work budgets',
   async (scene) => {
     for (const work of [1, 256]) {
       const h = setup(
         work,
-        scene === 'fluid-switch' ? createMultiphysicsDemonstration3D(profiles, scene) : undefined,
+        scene === 'freefall' ? undefined : createMultiphysicsDemonstration3D(profiles, scene),
       );
       try {
         await h.bus.settle(h.client.ready);
         const direct = createMultiphysicsWorld3D(profiles, h.initial),
-          edits = [
-            { kind: 'heat' as const, id: scene === 'freefall' ? 'a' : 'bridge', energyQ: 3 },
-          ];
+          edits = [{ kind: 'heat' as const, id: h.initial.parcels[0].id, energyQ: 3 }];
         const expected = direct.prepare(edits, 2);
         while (expected.progress().status === 'running') expected.advance(31);
         const expectedResult = expected.result(),

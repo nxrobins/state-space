@@ -767,25 +767,26 @@ function contactWithinTolerance(
   b: RigidParcel3D,
   tolerance: number,
 ): { normal: Vec3; depth: number } | null {
-  const overlap = orientedCuboidContact(shape(a), shape(b));
-  if (overlap) return overlap;
   const directions = pairAxes(a, b),
     offset = subtractVec3(b.center, a.center);
-  let depth = Infinity,
-    normal: Vec3 = [1, 0, 0];
-  for (const axis of directions.all) {
+  const candidates = directions.all.map((axis) => {
     const distance = dotVec3(offset, axis);
-    const penetration =
-      projectionRadius(a, directions.a, axis) +
-      projectionRadius(b, directions.b, axis) -
-      Math.abs(distance);
-    if (penetration < -tolerance) return null;
-    if (penetration < depth) {
-      depth = penetration;
-      normal = scaleVec3(axis, distance < 0 ? -1 : 1);
-    }
-  }
-  return { normal, depth: Math.max(0, depth) };
+    return {
+      depth:
+        projectionRadius(a, directions.a, axis) +
+        projectionRadius(b, directions.b, axis) -
+        Math.abs(distance),
+      normal: scaleVec3(axis, distance < 0 ? -1 : 1),
+    };
+  });
+  const depth = Math.min(...candidates.map((c) => c.depth));
+  if (depth < -tolerance) return null;
+  // Face axes precede cross-edge axes. Prefer a face when its separation differs
+  // by less than the contact skin, so unresolved tiny rotations do not replace
+  // a resting manifold with a single ill-conditioned edge point. Projection
+  // passes zero tolerance and still uses the actual minimum translation axis.
+  const selected = candidates.find((c) => c.depth <= depth + tolerance / 4)!;
+  return { normal: selected.normal, depth: Math.max(0, depth) };
 }
 function clipPolygon(points: Vec3[], center: Vec3, axis: Vec3, extent: number): Vec3[] {
   const result: Vec3[] = [];
@@ -812,18 +813,23 @@ function manifold(
   const best = (directions: Vec3[]) =>
     directions.reduce(
       (index, axis, i) =>
-        Math.abs(dotVec3(axis, normal)) > Math.abs(dotVec3(directions[index], normal)) ? i : index,
+        lengthVec3(crossVec3(axis, normal)) < lengthVec3(crossVec3(directions[index], normal))
+          ? i
+          : index,
       0,
     );
   const ai = best(aa),
     bi = best(bb),
-    useA = Math.abs(dotVec3(aa[ai], normal)) >= Math.abs(dotVec3(bb[bi], normal));
+    useA = lengthVec3(crossVec3(aa[ai], normal)) <= lengthVec3(crossVec3(bb[bi], normal));
   const ref = useA ? a : b,
     incident = useA ? b : a,
     ra = useA ? aa : bb,
     ia = useA ? bb : aa,
     ri = useA ? ai : bi;
-  if (Math.abs(dotVec3(ra[ri], normal)) < 1 - 1e-8) return [closestEdgePoint(a, b, normal)];
+  // A cross-edge SAT axis can be almost parallel to a face while still
+  // describing an edge contact. Comparing 1 - dot loses the small angle and
+  // can clip against a fictitious face outside the actual touching edges.
+  if (lengthVec3(crossVec3(ra[ri], normal)) > 1e-10) return [closestEdgePoint(a, b, normal)];
   const outward = useA ? normal : scaleVec3(normal, -1);
   const faceCenter = addVec3(ref.center, scaleVec3(outward, ref.halfExtents[ri]));
   const ii = ia.reduce(

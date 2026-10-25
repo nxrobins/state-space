@@ -403,9 +403,8 @@ samples, longer fluid support and heated-plume qualification remain open.
 
 Collision advancement takes the longer interval certified by either a fixed or
 rotating separating plane, resolving a hidden-corner stall at small fixed
-terminals without skipping their contacts. The fifth combined-failure
-demonstration, broader fluid gates, builder, and native macOS acceptance remain
-outstanding.
+terminals without skipping their contacts. Sustained combined-failure behavior,
+broader fluid gates, builder, and native macOS acceptance remain outstanding.
 
 The mechanism checkpoint passed 134 focused multiphysics tests inside 2,001 CPU
 tests, then 24 Node tests, with serial receipt
@@ -421,3 +420,65 @@ resolved-tank refinement cases passed in 31.44 seconds after both fixes
 manual adversarial source review passed. The `no-mistakes` executable is absent
 on this host, so no automated reviewer or CI result is claimed. Raw receipts stay
 local; the public runtime remains gated.
+
+
+### Electrical inspection and extended acceptance
+
+Tick reports now include source-relative node potentials, signed branch currents,
+branch resistance/power, and solver residuals. `sampledTick` identifies the start
+of the tick, before heat and motion; `activeSeconds` identifies the paid interval.
+These values must not be presented as a network solve of the ending geometry.
+A failed or already depleted source has no solved network. A floating node has
+`null` potential. The values are derived reports, not persisted solver history.
+
+Whole-world checks cover analytical divider potentials/current directions,
+depletion partway through a moving tick, an electrically live path after copper
+melts, and two failed cores that retain separate finite stores. Removing one core
+debits its energy through the edit receipt without refilling the surviving core.
+All five named mechanism fixtures are now authored; the falling-battery test
+reuses its fixture. Exact mock-Worker preview, commit, save/restart and work-budget
+checks cover the initial two ticks of every fixture. This does not qualify their
+full trajectories or a native Worker.
+
+Review and longer probes found two further numerical defects. Near the gas
+kernel's compact-support edge, a valid tiny pressure impulse formerly spent all
+96 iterations bisecting an enormous volume-admissibility bracket. The bracket now
+also uses decreasing discrete pressure to bound the root. The work limit and
+energy tolerance remain fixed. Nearly parallel edge/face contact classification
+now measures the cross-product angle and prefers a face within the existing
+contact skin; geometric projection still uses the true minimum translation axis.
+Settling, resting stacks, fast impacts and released-edge regressions pass together.
+
+Four extended acceptance gates remain **unpassed** in
+`engine/experimental/multiphysics/fluid-qualification.runtime-cases.ts`:
+
+| Gate | Observed failure on the development Mac |
+| --- | --- |
+| Resting 27-sample liquid tank for 0.5 model seconds | Cumulative numerical energy `+0.01123067` at `dt=1/120`, `+0.00561695` at `1/240`; maximum speeds `0.00045396` and `0.00022702`. Refinement improves the error, but the fixed no-drift/no-heat acceptance does not pass. |
+| Heated gas over a floor for 0.03 model seconds | Cold/hot cumulative energy errors `-0.05271275`/`-0.04530049`. The tracked hot parcel expands more but does not rise. This is not a qualified plume. |
+| Combined electrical/thermal/fluid/structural mechanism | Heating melts the valve and fluid breaks the support, but continued flow rejects at tick 31 with `-0.81624965` numerical energy against the unchanged `0.01` per-tick limit. |
+| Freezing overlapping liquid parcels | Conversion retains both parcels but the resulting solid overlap exceeds the geometric correction limit; the tick rejects. No admissible freezing geometry policy is implemented yet. |
+
+Run these unfinished gates explicitly and serially under the supervisor with
+`engine/vitest.multiphysics-extended-runtime.config.ts`. They are separate from the
+established floating/sinking tank configuration and the ordinary unit suite;
+green results there do not imply green release acceptance. The extended liquid/gas
+receipt is `71aa6059290643628b72c25dc5a9ab19`, and the continued-mechanism/freezing
+receipt is `59291d9b3e804d668ad0dfd34f509708`. Both report failure. Raw evidence stays
+local. A tightly wedged support also exposed conflicting simultaneous restitution
+constraints; the authored combined scene provides lateral clearance rather than
+claiming arbitrary wedged-contact qualification.
+
+The next physics work is coupled liquid boundary/gravity stabilization and
+compatible gas pressure/contact work, followed by a conservative freezing geometry
+rule. These precede the builder and fresh macOS timing acceptance. No public
+runtime export or full milestone completion is claimed by this checkpoint.
+
+This checkpoint passed 169 focused checks inside 2,036 CPU tests, followed by
+24 Node tests (`75fc3bc1fbf3418b9f42026dad873c0f`). The established floating/sinking
+tank refinement cases passed in 31.06 seconds
+(`6397a262038442d4945ff050301ed4bb`). Type checks, structural lint, formatting and
+SDK builds passed. Manual adversarial review retained the four extended failures
+above as release blockers; they were not converted to passing tests or looser
+budgets. The automated review executable remains unavailable. These are local CPU
+checkpoints, not CI, native Worker, builder, or performance qualification.

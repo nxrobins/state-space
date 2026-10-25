@@ -736,8 +736,13 @@ function* solve(input: FluidReferenceInput3D): Generator<string, FluidReferenceR
         changes,
       };
     }
-    let low = evaluate(lower),
-      high = evaluate(upper);
+    let low = evaluate(lower);
+    // The admissible volume bracket can span many orders of magnitude near
+    // compact support, where the pressure impulse vanishes. Discrete pressure
+    // decreases with expansion, so twice its lower-end impulse bounds the root
+    // without spending the fixed iteration budget bisecting an enormous CFL box.
+    upper = Math.min(upper, lower + 2 * Math.max(0, low.pressureImpulse - lower));
+    let high = evaluate(upper);
     if (low.difference > 0 || high.difference < 0)
       throw Error('Gas volume step exceeds its refinement bound.');
     let value = lower,
