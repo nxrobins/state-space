@@ -131,6 +131,6 @@
     "docs/MULTIPHYSICS.md"
   ],
   "dependencies": {
-    "@webgpu/types": "^0.1.72"
+    "@webgpu/types": "^0.1.74"
   }
 }
