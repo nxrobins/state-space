@@ -562,3 +562,13 @@ expands and rises faster at both steps. Maximum cumulative absolute numerical
 energy is `1.03e-8`, below the original `1e-4` limit. This qualifies that bounded
 floor-column comparison, not a long-running atmospheric plume or arbitrary gas
 boundary scenes. Freezing geometry and native product gates remain open.
+
+Final combined checkpoint: all three completed extended gates pass together;
+only overlapping freezing fails (`46058d14e2cb43d78d86298a1ed17807`). The complete
+suite passes 2,047 CPU tests and 24 Node tests
+(`48d0327b8adc402399f77921e22f91dd`), and all SDK bundles/declarations build.
+The freezing expectation has not been weakened: two overlapping, motionless
+liquid parcels still cannot become full-size non-overlapping rigid cubes in
+place. Choosing between deferred solidification and an explicit conservative
+packing/remapping law remains a model decision. No such policy is implemented
+or counted as passed here. The private runtime remains unexported.

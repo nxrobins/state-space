@@ -1,4 +1,4 @@
-/** Unpassed extended release gates. Run explicitly under the supervisor, never as qualification evidence unless green. */
+/** Extended release gates. Run explicitly under the supervisor; report each result independently. */
 import { beforeAll, expect, test } from 'vitest';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { seedThermalParcel3D } from './thermal.js';
