@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Presentation caches only. The simulation grid and mesh invalidation are read-only. */
 import { LIGHT_LIST_QUERIES } from './light-list.js';
 

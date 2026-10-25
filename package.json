@@ -15,7 +15,7 @@
     "test": "node scripts/verify_checks.mjs",
     "test:native": "node scripts/verify_checks.mjs --suite native",
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
-    "typecheck": "tsc --noEmit -p engine/tsconfig.json && tsc --noEmit -p examples/reactive-chamber/tsconfig.json",
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit -p engine/tsconfig.json && node node_modules/typescript/bin/tsc --noEmit -p examples/reactive-chamber/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
     "build:sdk": "node scripts/build_sdk.mjs",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "@typescript/typescript6": "6.0.2",
     "prettier": "3.9.10",
     "typescript": "~7.0.2",
     "vite": "^6.3.5",
@@ -131,6 +132,6 @@
     "docs/MULTIPHYSICS.md"
   ],
   "dependencies": {
-    "@webgpu/types": "^0.1.74"
+    "@typescript/lib-dom": "npm:@types/web@0.0.359"
   }
 }

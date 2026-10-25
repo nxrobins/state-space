@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" preserve="true" />
 /** M4 resident worlds. Dense execution is an exact diagnostic reference. */
 import { checkedInteger } from '../validation.js';
 import { createResidentVolume, type GpuVolume3D } from './volume/3d-gpu-core.js';

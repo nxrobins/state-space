@@ -77,7 +77,7 @@ test('SDK metadata rejects missing roots, collisions and paths outside the packa
 });
 
 test('build CLI publishes new exports and declarations, ignores unrelated roots, and fails on type errors', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'state-space-sdk-'));
+  const root = mkdtempSync(join(tmpdir(), 'state-space sdk-'));
   try {
     for (const dir of ['engine/new', 'scripts']) mkdirSync(join(root, dir), { recursive: true });
     for (const path of [
@@ -122,10 +122,31 @@ test('build CLI publishes new exports and declarations, ignores unrelated roots,
       readFileSync(join(root, 'dist/sdk/types/new/module.d.ts'), 'utf8').trim(),
       'export declare const added = 2;',
     );
+    const bundle = readFileSync(join(root, 'dist/sdk/new-module.js'), 'utf8');
     writeFileSync(join(root, 'engine/new/module.ts'), 'export const added: string = 2;');
     const failed = emit(true);
     assert.equal(failed.status, 1);
     assert.match(failed.stderr, /TS2322/);
+    assert.equal(
+      readFileSync(join(root, 'dist/sdk/types/new/module.d.ts'), 'utf8').trim(),
+      'export declare const added = 2;',
+    );
+    writeFileSync(join(root, 'engine/new/module.ts'), 'export const added = 3;');
+    const typesOnly = emit(true);
+    assert.equal(typesOnly.status, 0, typesOnly.stderr);
+    assert.equal(
+      readFileSync(join(root, 'dist/sdk/types/new/module.d.ts'), 'utf8').trim(),
+      'export declare const added = 3;',
+    );
+    assert.equal(readFileSync(join(root, 'dist/sdk/new-module.js'), 'utf8'), bundle);
+    rmSync(join(root, 'engine/new/module.ts'));
+    const missing = emit(true);
+    assert.notEqual(missing.status, 0);
+    assert.match(missing.stderr, /TS6053/);
+    writeFileSync(join(root, 'engine/tsconfig.sdk.json'), '{');
+    const invalidConfig = emit(true);
+    assert.notEqual(invalidConfig.status, 0);
+    assert.match(invalidConfig.stderr, /TS1005/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -171,6 +192,11 @@ test('lint distinguishes browser module URLs and tooling tests from application 
     lintSource("import '../../engine/lint_ts.mjs';", 'examples/lab/lab.test.mjs'),
     [],
   );
+});
+
+test('structural lint rejects syntax its compatibility parser cannot understand', () => {
+  assert.ok(lintSource('export const =').some((issue) => issue.startsWith('SS049')));
+  assert.deepEqual(lintSource('export const valid = 1;'), []);
 });
 
 // Source-hash reports are retained evidence: nested implementation inputs must remain bound.

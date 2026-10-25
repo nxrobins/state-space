@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** GPU-resident implementation of the unchanged ca-3d-m1 rules. */
 import { buildColdTable } from '../../generated/materials.js';
 import { checkedInteger } from '../../validation.js';

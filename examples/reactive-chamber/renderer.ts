@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Bounded reactive box renderer. One submit/completion per frame; caller owns the device. */
 import { TACTICAL_CAMERA_WGSL_3D } from 'state-space-engine/experimental/3d/tactical-renderer';
 import { sceneData, type ChamberScene, type ChamberCamera } from './presentation.js';

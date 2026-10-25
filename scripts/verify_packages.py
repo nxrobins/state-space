@@ -164,29 +164,50 @@ def main():
                         "Installed native Metal and JavaScript clients differ."
                     )
                 report["nativeMatchesCpu"] = True
-            # Exercise all exported declarations through an external client.
+            # Exercise declarations with both the native and compatibility compilers.
+            compilers = [
+                ROOT / "node_modules/typescript/bin/tsc",
+                ROOT / "node_modules/@typescript/typescript6/bin/tsc6",
+            ]
+            report["typeCompilers"] = [
+                run([shutil.which("node"), str(compiler), "--version"], temp).strip()
+                for compiler in compilers
+            ]
             for i, path in enumerate(package["exports"]):
                 client = temp / f"client{i}.mts"
                 specifier = "state-space-engine" + ("" if path == "." else path[1:])
                 client.write_text(f"import * as entry from '{specifier}'; void entry;")
-                run(
-                    [
-                        shutil.which("node"),
-                        str(ROOT / "node_modules/typescript/bin/tsc"),
-                        "--noEmit",
-                        "--strict",
-                        "--target",
-                        "ES2022",
-                        "--module",
-                        "NodeNext",
-                        "--moduleResolution",
-                        "NodeNext",
-                        "--lib",
-                        "ES2022,DOM",
-                        str(client),
-                    ],
-                    temp,
-                )
+                if path == ".":
+                    with client.open("a") as source:
+                        source.write(
+                            "\nconst context: GPUCanvasContext | null = "
+                            "document.createElement('canvas').getContext('webgpu');\n"
+                            "declare const device: GPUDevice;\n"
+                            "const buffer = device.createBuffer({size: 16, usage: GPUBufferUsage.STORAGE});\n"
+                            "device.queue.writeBuffer(buffer, 0, new Uint32Array(new SharedArrayBuffer(16)));\n"
+                            "void entry.createGpuField(2, 2); void context;\n"
+                        )
+                for compiler in compilers:
+                    run(
+                        [
+                            shutil.which("node"),
+                            str(compiler),
+                            "--noEmit",
+                            "--strict",
+                            "--target",
+                            "ES2022",
+                            "--module",
+                            "NodeNext",
+                            "--moduleResolution",
+                            "NodeNext",
+                            "--lib",
+                            "ES2022,DOM",
+                            "--libReplacement",
+                            "true",
+                            str(client),
+                        ],
+                        temp,
+                    )
             report["externalTypes"] = True
         report["passed"] = True
     except Exception as error:

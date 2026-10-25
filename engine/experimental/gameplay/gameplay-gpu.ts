@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Internal resident controller resources. Public types never expose GPU handles. */
 import { checkedInteger } from '../../validation.js';
 import { createStateSpaceField3D } from '../3d.js';

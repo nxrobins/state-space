@@ -1,11 +1,16 @@
 // TypeScript structural properties for deterministic CPU physics.
-import ts from 'typescript';
+import ts from '@typescript/typescript6';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, join, relative } from 'node:path';
 
 export function lintSource(source, name = 'cpu_physics.ts') {
   const file = ts.createSourceFile(name, source, ts.ScriptTarget.Latest, true);
+  if (file.parseDiagnostics.length)
+    return file.parseDiagnostics.map(
+      (diagnostic) =>
+        `SS049 TypeScript syntax: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ')}`,
+    );
   const errors = [];
   const structural = /(?:^|[\\/])structure\.ts$/.test(name);
   const lab = /(?:^|[\\/])examples[\\/]lab[\\/]/.test(name);

@@ -19,8 +19,10 @@ format, and pass schedule. The GPU backends require a usable GPU adapter.
 The current bounded external-package check is `npm run verify:packages` after
 `npm run build:sdk`. On macOS, `uv run python -m scripts.verify_packages --native`
 also compares the installed Metal and JavaScript clients. The verifier uses a
-fresh Python environment, imports all 14 npm export paths and checks their public
-declarations. WebGPU types are included as a package dependency. See the
+fresh Python environment, imports all 15 npm export paths and checks their public
+declarations with TypeScript 7 and the TypeScript 6 compatibility compiler, without
+skipping declaration checks. Complete DOM/WebGPU types are included through the
+`@typescript/lib-dom` package alias. See the
 [current support matrix](../VALIDATION_STATUS.md) for experimental boundaries.
 
 
@@ -43,6 +45,33 @@ are complete external clients. `python scripts/verify_sdk.py` builds both
 packages, installs them into temporary directories outside the checkout, executes the
 clients, compares every reported change and final state, and compiles external
 TypeScript clients with both installed compiler versions.
+
+### TypeScript browser types
+
+TypeScript 6.0.3 and 7.0.2 ship incomplete WebGPU declarations. The SDK uses
+`@types/web` as a pinned replacement for the DOM library, following the
+[WebGPU project's guidance](https://github.com/gpuweb/types#integration-into-dom-type-definitions)
+and TypeScript's [library replacement support](https://www.typescriptlang.org/tsconfig/libReplacement.html).
+Install the alias directly in your client project so it resolves regardless of
+whether your package manager hoists transitive dependencies:
+
+```sh
+npm install --save-dev @typescript/lib-dom@npm:@types/web@0.0.359
+```
+
+```json
+{
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "libReplacement": true
+  }
+}
+```
+
+Remove any `@webgpu/types` imports, triple-slash references or `types` entries;
+that older supplement conflicts with the complete DOM library. No additional
+`skipLibCheck` setting is needed. These are compile-time declarations; browser
+GPU availability is still checked at runtime.
 
 ## Python field
 

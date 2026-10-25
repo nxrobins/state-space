@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 /** Bounded presentation diagnostics. Never used to choose physical work. */
 import type { LatencyRecord, LatencySnapshot } from './3d-view.js';
 type Slot = { query: GPUQuerySet; resolve: GPUBuffer; read: GPUBuffer; busy: boolean };

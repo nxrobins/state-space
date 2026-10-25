@@ -76,7 +76,7 @@ function decorations(
   raw: readonly TacticalDecoration3D[],
   shape: readonly number[],
   actor: boolean,
-): Float32Array {
+): Float32Array<ArrayBuffer> {
   const values = denseData(
     raw,
     actor ? TACTICAL_RENDER_LIMITS_3D.actors : TACTICAL_RENDER_LIMITS_3D.overlays,

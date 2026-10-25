@@ -1,5 +1,3 @@
-/// <reference types="@webgpu/types" preserve="true" />
-/// <reference types="@webgpu/types" />
 import {
   cameraData,
   copyStamp,

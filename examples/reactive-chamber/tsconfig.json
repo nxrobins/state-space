@@ -1,1 +1,5 @@
-{ "extends": "../../engine/tsconfig.json", "include": ["*.ts"] }
+{
+  "extends": "../../engine/tsconfig.json",
+  "compilerOptions": { "types": ["node", "vite/client"] },
+  "include": ["*.ts"]
+}

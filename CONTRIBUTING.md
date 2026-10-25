@@ -26,6 +26,21 @@ through the public package declarations. Do not run SDK rebuilding concurrently
 with those consumers. `npm test` rebuilds the SDK and runs the supervised CPU
 suite; it does not start native workloads or the quarantined legacy demos.
 
+TypeScript 7 runs type checks and emits SDK declarations through its native CLI.
+The pinned `@typescript/typescript6` compatibility package supplies the compiler
+API for structural lint, generated browser assets, mutation tests and independent
+CPU evaluation. Evaluation evidence hashes the compatibility shim and compiler.
+Use the explicit native compiler path, as the package scripts do: the compatibility
+dependency can shadow the bare `tsc` command with TypeScript 6.
+When updating either package, also run `python -m engine.generate --check` under
+the CPU supervisor and `npm run verify:packages` to check generated assets and
+external declaration consumers.
+
+The pinned `@typescript/lib-dom` alias supplies complete DOM/WebGPU declarations;
+`libReplacement` selects it in the engine config. Do not reintroduce the legacy
+`@webgpu/types` references, which conflict with TypeScript 6/7's browser types.
+External clients should follow the [SDK browser-type setup](docs/sdk/core.md#typescript-browser-types).
+
 `npm run format` applies Prettier to the hand-written engine, example, script
 and test sources; `npm run format:check` is the CI gate. `.prettierignore`
 lists what stays byte-exact: generated code, vendored files, built output,
