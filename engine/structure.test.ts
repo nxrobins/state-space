@@ -9,6 +9,7 @@ import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
 import * as S from './structure.js';
 import { compiledStructuralPlan } from './structure_compiled.js';
 import type { MaterialRegistry } from './registry.js';
+import { STRUCTURE_MUTANTS as M, type SourceMutant } from './test-support/structure-mutants.js';
 
 interface Step {
   cells: number[];
@@ -73,7 +74,7 @@ beforeAll(async () => {
   );
 }, 60_000);
 
-function loadMutant(before: string, after: string): typeof S {
+function loadMutant({ before, after }: SourceMutant): typeof S {
   const root = resolve('engine/structure.ts'),
     cache = new Map<string, { exports: unknown }>();
   function load(path: string): unknown {
@@ -304,26 +305,23 @@ describe('C6 prototype independent planner/native transport conformance', () => 
     const i = fixtures.findIndex((value) => value.name === 'floating-plate'),
       fixture = fixtures[i],
       state = stateOf(fixture);
-    const noop = loadMutant('moving[index] = 1;', 'moving[index] = 0;');
+    const noop = loadMutant(M.noMotion);
     expect(noop.planStructure(state, fixture.width, fixture.height, models[i]).sources).not.toEqual(
       fixture.steps[0].sources,
     );
-    const energy = loadMutant('Uint32Array.from(sources, i => energyQ[i])', 'energyQ.slice()');
+    const energy = loadMutant(M.lostEnergy);
     const broken = energy
       .planStructure(state, fixture.width, fixture.height, models[i])
       .apply(state, fixture.width, fixture.height);
     expect([...broken.energyQ]).not.toEqual(fixture.steps[0].energyQ);
     const j = fixtures.findIndex((value) => value.name === 'contact-without-welding'),
       contact = stateOf(fixtures[j]);
-    const welding = loadMutant(
-      'if (reciprocal || ((structure[i] | structure[j]) & FRESH))',
-      'if (true)',
-    );
+    const welding = loadMutant(M.automaticWelding);
     expect(welding.normalizeBonds(contact.grid, contact.structure, 3, 5, models[j])).not.toEqual(
       contact.structure,
     );
     const k = fixtures.findIndex((value) => value.name === 'exact-odd-load-split');
-    const remainder = loadMutant('share + (rank < remainder ? 1 : 0)', 'share');
+    const remainder = loadMutant(M.missingLoadRemainder);
     expect(() => remainder.planStructure(stateOf(fixtures[k]), 3, 3, models[k])).toThrow(/balance/);
   });
 
@@ -331,20 +329,13 @@ describe('C6 prototype independent planner/native transport conformance', () => 
     const i = fixtures.findIndex((value) => value.name === 'high-id-warm-capacity'),
       fixture = fixtures[i];
     const state = stateOf(fixture);
-    const before = 'Math.floor(nominal * integrity * remaining / (255 * 64 * ENERGY_SCALE))';
-    const fractional = loadMutant(
-      before,
-      '(nominal * integrity * remaining / (255 * 64 * ENERGY_SCALE))',
-    );
+    const fractional = loadMutant(M.fractionalCapacity);
     expect(
       fractional
         .planStructure(state, 5, 3, models[i])
         .capacities.some((value) => !Number.isSafeInteger(value)),
     ).toBe(true);
-    const narrow = loadMutant(
-      before,
-      'Math.floor((nominal * integrity * remaining | 0) / (255 * 64 * ENERGY_SCALE))',
-    );
+    const narrow = loadMutant(M.narrowCapacity);
     expect(narrow.planStructure(state, 5, 3, models[i]).capacities).not.toEqual(
       fixture.steps[0].capacities,
     );
