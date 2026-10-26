@@ -61,12 +61,12 @@ struct Volume{@location(0) scattering:vec4f,@location(1) distance:f32,@location(
   let p=camera.eye.xyz+ray*((f32(i)+.5)*step);let m=cell(vec3i(floor(p)))&255u;
   if(m!=0u&&m!=9u){continue;}
   let extinction=density(p);let transmit=exp(-extinction*step);
-  var radiance=vec3f(.026,.043,.063);
+  var radiance=vec3f(.026,.043,.063)*style.lighting.x;
   for(var source=0u;source<2u;source++){
    let k=chosen[source];if(k==0xffffffffu){continue;}
    let light=lights[k];let delta=light.position.xyz-p;let d=length(delta);
    if(d<22.){let falloff=pow(max(0.,1.-d/22.),2.)/(1.+.2*d*d);let cosine=dot(ray,delta/max(d,.001));let phase=.6+.6*pow(max(0.,cosine),4.);
-    let visible=shadow(p,light.position.xyz);radiance+=light.color.rgb*(falloff*phase*visible);
+    let visible=shadow(p,light.position.xyz);radiance+=light.color.rgb*style.lighting.z*(falloff*phase*visible);
     if(optics.y>.5){
      let heat=plume(p,light.position.xyz)*clamp(light.color.r/24.,0.,1.)*visible;
      if(heat>.001){

@@ -1,0 +1,141 @@
+{
+  "scope": "Static source/declaration checks and explicitly approved focused CPU/mock tests; no browser or native GPU workloads",
+  "localDate": "2026-10-25",
+  "timezone": "America/Los_Angeles",
+  "baseCommit": "96ba00489d83faaa7869ede486478149debae9e9",
+  "status": "implemented-static-and-focused-cpu-checks-passed-native-runtime-held",
+  "fullyAccepted": false,
+  "staticChecks": {
+    "sdkBuild": true,
+    "typecheck": true,
+    "lint": true,
+    "formatCheck": true,
+    "publicDeclarationsTS7": true,
+    "publicDeclarationsTS6": true,
+    "pythonRuff": true,
+    "exampleSyntax": true,
+    "diffWhitespace": true
+  },
+  "sourceBoundary": {
+    "unchangedTrackedEngineFiles": 380,
+    "physicsWrappersOnlyAddTypesAndSerializedStyleForwarding": [
+      "engine/experimental/3d-gpu.ts",
+      "engine/experimental/active-world-gpu.ts",
+      "engine/experimental/structural-world-gpu.ts",
+      "engine/experimental/volume/3d-gpu-core.ts",
+      "engine/experimental/world-gpu.ts"
+    ],
+    "meshComputeShaderUnchanged": true,
+    "newRuntimeModules": [
+      "terrain-style.ts",
+      "terrain-style-shader.ts"
+    ]
+  },
+  "runtimeChecks": {
+    "focusedMockAndUnitTests": "passed",
+    "installedPackageWorkload": "not-run-held",
+    "nativeWGSLCompilation": "not-run-held",
+    "visualAcceptance": "not-run-held",
+    "physicsRuntimeEquivalence": "not-run-held",
+    "gpuPerformance": "not-run-held"
+  },
+  "safetyHold": {
+    "blockRecovery": true,
+    "incidentIdentityUnchanged": true,
+    "unusedRecoveryPermit": false,
+    "executionLockPresent": false,
+    "byteIdentical": false,
+    "metadataChange": "lastRecovery records the consumed, explicitly approved focused CPU permit; incident and runtime hold remain unchanged.",
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "preRunSha256": "061839134c79c2ba28b42d5bf4e35ce3e9dfcd472fa636273d783ea7d9e3e26e",
+    "historicalStaticReview": "dist/verification/terrain-material-lighting/static-review.json"
+  },
+  "sourceHashes": {
+    "engine/experimental/3d-gpu.ts": "f29752209c85a92c7ea263f5a22d190e6f634d445117b2a2e6e146b195671796",
+    "engine/experimental/active-world-gpu.ts": "2bdab9efc382a04ae5a28bb0394732842c2700304953a538d37eb9a2e31c4b21",
+    "engine/experimental/structural-client.test.ts": "7cedab4d42aa05667915a1ae1c924df53a45b0b6a232ac6d22645aa7ab164e15",
+    "engine/experimental/structural-world-gpu.ts": "a08c0b45bf47ab99b7d8fa5963bd99d0d606e9f925320079a52a91d26bc9ad95",
+    "engine/experimental/volume/3d-gpu-core.ts": "bf901a7d623d72f8915590f4d9a2f54926d5bdf658faff60023dcb8d32cab638",
+    "engine/experimental/volume/3d-view.ts": "b893c449bd70e4e35e978ea760df568ce51a39ff5c2eaaa62b1a82d1c1cdfd65",
+    "engine/experimental/volume/cavern-appearance.test.ts": "88dc40d0f05d001f6db77d97199062997151ffb858f9ebd0966e3df110025b33",
+    "engine/experimental/volume/cavern-appearance.ts": "cd9cd98c83c1c934fbda3809c36d3c86904f6565366b796727f143f680893191",
+    "engine/experimental/volume/cavern-haze.ts": "48c925b46a3e76618adb7ba75d74755ec8160a3e07e1f6e2b933743801f31906",
+    "engine/experimental/volume/cavern-optics.ts": "77ae8c991cd44359cab1347d85bbde2071a92250fb658fb6ecbaa2d847538c7f",
+    "engine/experimental/volume/terrain-style-shader.ts": "e040cb4893cbff7704f847f3b2ede2d538609b4df6f1293678d78140a4207972",
+    "engine/experimental/volume/terrain-style.test.ts": "989f6e5a846f3fdf0a02e4d2de6a25d90c8931e08d89091054da3fbafcc30c6a",
+    "engine/experimental/volume/terrain-style.ts": "b061be1944a1ee53fcbd753a8d854d24817cf159b776c6a247f9e96d5e47980a",
+    "engine/experimental/volume/world-renderer.ts": "2ea8e479fa08b0e73a254ec4ecc93855b3373768c9d43ceeba089ddda8df9969",
+    "engine/experimental/world-gpu.ts": "022dbf84ba6e2f5b20c4df7509f4157d130ad648e53556a9d6618c332d4689dc",
+    "engine/vitest.lighting.config.ts": "b54abd21aea1c266bee9996a8fe3124f955b23dd9e9ef95c7c1d373444d1270d",
+    "examples/structural-cavern/app.js": "7f1ae0cd9ad1e318331259bcd985e08834b92ddf510e3f403db877f43c1ffa92",
+    "examples/structural-cavern/benchmark.js": "ba80114df6083e670328a5827794aeb0ce98f63e76cf841b6a453672e196873f",
+    "examples/structural-cavern/index.html": "5290c61091782426f074a333ac0b34c50ed54bdfb756a4e5088fc586577d0185",
+    "scripts/verify_packages.py": "976d7822d45f5b896938268ae5b242ad8cd9bdc0daba651e6229b384d3e6b870"
+  },
+  "logs": "dist/verification/terrain-material-lighting/",
+  "focusedCpuRun": {
+    "finishedAtUTC": "2026-10-26T04:57:37.691957+00:00",
+    "reviewId": "review-regressions-ac4299e1675d45d79390de3e8e96280d",
+    "command": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--reporter=dot",
+      "--reporter=json",
+      "--outputFile=dist/verification/terrain-material-lighting/approved-regressions-vitest.json",
+      "--config",
+      "engine/vitest.lighting.config.ts"
+    ],
+    "supervisorPassed": true,
+    "exitCode": 0,
+    "testsPassed": 28,
+    "testsFailed": 0,
+    "testFiles": [
+      {
+        "path": "engine/experimental/structural-client.test.ts",
+        "testsPassed": 9,
+        "status": "passed"
+      },
+      {
+        "path": "engine/experimental/volume/cavern-appearance.test.ts",
+        "testsPassed": 7,
+        "status": "passed"
+      },
+      {
+        "path": "engine/experimental/volume/lighting-cache.test.ts",
+        "testsPassed": 7,
+        "status": "passed"
+      },
+      {
+        "path": "engine/experimental/volume/terrain-style.test.ts",
+        "testsPassed": 5,
+        "status": "passed"
+      }
+    ],
+    "limits": {
+      "cpuPercent": 6,
+      "memoryMiB": 4096,
+      "deadlineSeconds": 30.0,
+      "maxConcurrentWorkers": 1,
+      "independentWatchdogArmed": true
+    },
+    "quietWindow": {
+      "passed": true,
+      "requiredSeconds": 30,
+      "cpuThresholdPercent": 30,
+      "minimumFreeMemoryMiB": 8192,
+      "sampledSeconds": 30.035,
+      "maximumSampledCpuPercent": 22.226562500000004,
+      "minimumSampledFreeMemoryMiB": 107068.16796875
+    },
+    "vitestReportedDurationSeconds": 1.4,
+    "supervisedElapsedSeconds": 5.129,
+    "recordedPeakJobMemoryMiB": 256.921875,
+    "pinnedSourceCount": 377,
+    "sourceHashesVerified": true,
+    "supervisorReceipt": "dist/verification/terrain-material-lighting/review-regressions-ac4299e1675d45d79390de3e8e96280d/supervisor/report.json",
+    "testReceipt": "dist/verification/terrain-material-lighting/review-regressions-ac4299e1675d45d79390de3e8e96280d/vitest.json",
+    "provenanceReceipt": "dist/verification/terrain-material-lighting/review-regressions-ac4299e1675d45d79390de3e8e96280d/review.json",
+    "limitations": "Pure CPU and inert GPU/DOM mocks only; no native shader, visual, integrated physics runtime or GPU performance acceptance."
+  }
+}

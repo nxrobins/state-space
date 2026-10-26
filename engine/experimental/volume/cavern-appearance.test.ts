@@ -1,13 +1,22 @@
 /** Source-level renderer integration with inert GPU objects. No native device. */
 import { afterEach, expect, test, vi } from 'vitest';
 import { makeCavernAppearance } from './cavern-appearance.js';
+import { makeChunkRenderer } from './world-renderer.js';
+import { resolveTerrainStyle, TERRAIN_STYLE_BYTES } from './terrain-style.js';
 
 // Texture decoding/upload is outside this fixture. No fetch or image decoder.
 vi.mock('../rock-textures.js', () => ({ ROCK_TEXTURES: [] }));
 afterEach(() => vi.unstubAllGlobals());
 
 function fakeRendererDevice() {
-  vi.stubGlobal('GPUBufferUsage', { STORAGE: 128, COPY_DST: 8, COPY_SRC: 4, UNIFORM: 64 });
+  vi.stubGlobal('GPUBufferUsage', {
+    STORAGE: 128,
+    COPY_DST: 8,
+    COPY_SRC: 4,
+    UNIFORM: 64,
+    INDEX: 16,
+    INDIRECT: 256,
+  });
   vi.stubGlobal('GPUTextureUsage', { RENDER_ATTACHMENT: 16, TEXTURE_BINDING: 4 });
   const shaders: string[] = [],
     buffers: { size: number; destroy: ReturnType<typeof vi.fn> }[] = [];
@@ -93,7 +102,7 @@ test('reference setup and rendering do not compile, allocate or bind the experim
   expect(
     fake.shaders.every((s) => !s.includes('visibilityNodes') && !s.includes('candidatesMain')),
   ).toBe(true);
-  expect(fake.buffers.map((b) => b.size)).toEqual([8 * 32, 9 * 4, 16]);
+  expect(fake.buffers.map((b) => b.size)).toEqual([8 * 32, 9 * 4, 16, TERRAIN_STYLE_BYTES]);
   for (const [descriptor] of fake.raw.createBindGroup.mock.calls)
     expect(Array.from(descriptor.entries).every((e) => e.binding !== 9 && e.binding !== 10)).toBe(
       true,
@@ -184,4 +193,68 @@ test('failed light-list initialization releases the source buffer', async () => 
   ).rejects.toThrow('injected light-list failure');
   expect(fake.buffers).toHaveLength(1);
   expect(fake.buffers[0].destroy).toHaveBeenCalledTimes(1);
+});
+
+test('style changes upload one owned uniform, share it across passes and add no submission', async () => {
+  const { fake, appearance, prepare } = await fixture();
+  const styleBuffer = fake.buffers.find((b) => b.size === TERRAIN_STYLE_BYTES)!;
+  const input = resolveTerrainStyle({ profile: 'geological', tone: { exposureEV: -1 } });
+  appearance.setStyle(input);
+  input.tone.exposureEV = 4;
+  fake.raw.queue.writeBuffer.mockClear();
+  fake.raw.queue.submit.mockClear();
+  prepare();
+  const writes = fake.raw.queue.writeBuffer.mock.calls as unknown as [
+    unknown,
+    number,
+    Float32Array,
+  ][];
+  const uploaded = writes.filter(([buffer]) => buffer === styleBuffer);
+  expect(uploaded).toHaveLength(1);
+  expect(uploaded[0][2][0]).toBeCloseTo(1.65 / 2);
+  const styledGroups = fake.raw.createBindGroup.mock.calls
+    .map(([d]) => Array.from(d.entries))
+    .filter((entries) => entries.some((e) => e.binding === 12));
+  expect(styledGroups).toHaveLength(3);
+  for (const entries of styledGroups)
+    expect(entries.find((e) => e.binding === 12)?.resource).toEqual({ buffer: styleBuffer });
+  prepare();
+  expect(
+    fake.raw.queue.writeBuffer.mock.calls.filter(([buffer]) => buffer === styleBuffer),
+  ).toHaveLength(1);
+  expect(fake.raw.queue.submit).not.toHaveBeenCalled();
+  const returned = appearance.inspectStyle();
+  returned.tone.exposureEV = 2;
+  expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
+  expect(() => appearance.setStyle({ ...input, profile: 'bad' } as never)).toThrow();
+  expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
+  appearance.close();
+  expect(styleBuffer.destroy).toHaveBeenCalledTimes(1);
+  expect(() => appearance.setStyle(input)).toThrow('closed');
+});
+
+test('chunk renderer retains style before lazy setup and across diagnostic switches without touching physics', async () => {
+  const fake = fakeRendererDevice();
+  vi.stubGlobal('navigator', { gpu: { getPreferredCanvasFormat: () => 'bgra8unorm' } });
+  const context = { configure: vi.fn(), unconfigure: vi.fn() };
+  const canvas = { getContext: () => context } as unknown as HTMLCanvasElement;
+  const state = vi.fn(() => ({ grid: {} as GPUBuffer, shape: [8, 8, 8] }));
+  const renderer = await makeChunkRenderer(fake.device, canvas, state, {} as GPUBuffer, 4);
+  state.mockClear();
+  fake.raw.queue.writeBuffer.mockClear();
+  const count = fake.buffers.length;
+  const next = resolveTerrainStyle({ profile: 'geological' });
+  await renderer.setStyle!(next);
+  next.materials.rockTextureScale = 4;
+  await expect(renderer.setStyle!({ tone: { exposureEV: Infinity } })).rejects.toThrow();
+  expect((await renderer.inspectStyle!()).materials.rockTextureScale).toBe(0.28);
+  expect(fake.buffers).toHaveLength(count);
+  expect(fake.raw.queue.writeBuffer).not.toHaveBeenCalled();
+  await renderer.setAppearance!('naturalistic');
+  await renderer.setAppearance!('diagnostic');
+  await renderer.setAppearance!('naturalistic');
+  expect((await renderer.inspectStyle!()).profile).toBe('geological');
+  expect(state).not.toHaveBeenCalled();
+  renderer.close();
+  await expect(renderer.inspectStyle!()).rejects.toThrow('closed');
 });

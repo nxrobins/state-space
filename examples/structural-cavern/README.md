@@ -21,6 +21,11 @@ request and one displayed frame may be in flight.
 - Reaching the goal commits `status: 'won'` and one `crossed` event. M5 does not
   require the older controller's carve/freeze objectives. Paused presentation
   cannot complete the crossing; lost actors cannot win.
+- Style switches between the existing classic tuning and the opt-in geological
+  material/direct-light profile. Exposure adjusts brightness in stops. Both use
+  the shared SDK renderer, pause playback, and retain the physical tick. Reset
+  keeps the selected style. These new shaders await native visual acceptance
+  under the existing hold; see [terrain appearance](../../docs/TERRAIN_APPEARANCE.md).
 - After a frame error, Reset or a successful checkpoint recovery restarts the
   display loop in the paused state. Press Play to resume.
 

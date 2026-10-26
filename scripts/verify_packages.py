@@ -187,6 +187,21 @@ def main():
                             "device.queue.writeBuffer(buffer, 0, new Uint32Array(new SharedArrayBuffer(16)));\n"
                             "void entry.createGpuField(2, 2); void context;\n"
                         )
+                if path in {
+                    "./experimental/3d/gpu",
+                    "./experimental/3d/world/gpu",
+                    "./experimental/3d/active-world/gpu",
+                    "./experimental/3d/structural-world/gpu",
+                }:
+                    with client.open("a") as source:
+                        source.write(
+                            "\nconst style: entry.TerrainStyleOptions = {profile: 'geological', "
+                            "tone: {exposureEV: -0.5}, materials: {rockTint: [0.3, 0.4, 0.5]}};\n"
+                            "declare const renderer: entry.TerrainRenderer;\n"
+                            "void renderer.setStyle?.(style);\n"
+                            "const settings: Promise<entry.TerrainStyleSettings> | undefined = "
+                            "renderer.inspectStyle?.(); void settings;\n"
+                        )
                 for compiler in compilers:
                     run(
                         [

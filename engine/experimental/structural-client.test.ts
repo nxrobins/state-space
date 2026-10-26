@@ -32,11 +32,14 @@ type ElementStub = {
   checked: boolean;
   disabled: boolean;
   onclick: () => void | Promise<unknown>;
+  onchange: () => void | Promise<unknown>;
   addEventListener: ReturnType<typeof vi.fn>;
 };
 type Api = {
   ready: Promise<void>;
   lightingMode: string;
+  styleProfile: string;
+  exposureEV: number;
   stop: () => Promise<void>;
   restore: (s: unknown) => Promise<void>;
   present: () => Promise<void>;
@@ -53,6 +56,7 @@ let field: { tick: number; restore: ReturnType<typeof vi.fn>; close: ReturnType<
   };
 let status: 'playing' | 'won' | 'lost';
 let setLightingMode: ReturnType<typeof vi.fn>;
+let setStyle: ReturnType<typeof vi.fn>;
 const element = (id: string) => elements.get(id)!;
 const actor = () => ({
   player: { x: 3000, y: 2000, z: 5000 },
@@ -108,6 +112,9 @@ beforeEach(async () => {
       'melt',
       'appearance',
       'lighting',
+      'style',
+      'exposure',
+      'exposure-value',
       'camera',
       'crosshair',
       'inspect',
@@ -127,6 +134,7 @@ beforeEach(async () => {
         checked: false,
         disabled: false,
         onclick: () => {},
+        onchange: () => {},
         addEventListener: vi.fn(),
       },
     ]),
@@ -154,6 +162,7 @@ beforeEach(async () => {
   }));
   mocks.create.mockImplementation(async () => {
     setLightingMode = vi.fn(async () => {});
+    setStyle = vi.fn(async () => {});
     driver = {
       step: vi.fn(async () => {
         field.tick++;
@@ -175,7 +184,7 @@ beforeEach(async () => {
         createGameplay: async () => driver,
         createRenderer: async () => ({
           setAppearance: async () => {},
-          ...(mocks.legacy ? {} : { setLightingMode }),
+          ...(mocks.legacy ? {} : { setLightingMode, setStyle }),
           setHeatDistortion: async () => {},
           close: vi.fn(),
         }),
@@ -273,10 +282,40 @@ test('an older SDK can still present reference lighting without the optional cac
   await element('reset').onclick();
   expect(element('error').hidden).toBe(true);
   expect(element('lighting').disabled).toBe(true);
+  expect(element('style').disabled).toBe(true);
+  expect(element('exposure').disabled).toBe(true);
   expect(api.lightingMode).toBe('reference');
   expect(driver.present).toHaveBeenCalled();
   expect(driver.step).not.toHaveBeenCalled();
   expect(field.tick).toBe(0);
+});
+
+test('style and exposure changes stay outside physical state and survive reset', async () => {
+  driver.step.mockClear();
+  field.restore.mockClear();
+  await element('style').onclick();
+  expect(api.styleProfile).toBe('geological');
+  expect(api.exposureEV).toBe(-0.25);
+  expect(setStyle).toHaveBeenLastCalledWith({ profile: 'geological', tone: { exposureEV: -0.25 } });
+  element('exposure').value = '-1';
+  await element('exposure').onchange();
+  expect(api.exposureEV).toBe(-1);
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(field.restore).not.toHaveBeenCalled();
+  expect(field.tick).toBe(0);
+  await element('reset').onclick();
+  expect(setStyle).toHaveBeenLastCalledWith({ profile: 'geological', tone: { exposureEV: -1 } });
+  expect(api.styleProfile).toBe('geological');
+  expect(field.tick).toBe(0);
+});
+
+test('failed style updates preserve the selected style and exposure', async () => {
+  setStyle.mockRejectedValueOnce(Error('injected style failure'));
+  await element('style').onclick();
+  expect(api.styleProfile).toBe('classic');
+  expect(api.exposureEV).toBe(0);
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(element('error').hidden).toBe(false);
 });
 
 test('remember and restore preserve the saved tick and reset clears the remembered checkpoint', async () => {

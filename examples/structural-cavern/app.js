@@ -7,10 +7,19 @@ const $=id=>document.getElementById(id),canvas=$('world'),params=new URLSearchPa
 const names=new Map(MATERIALS_3D.map(m=>[m.id,m.name]));
 let field,renderer,driver,level,initial,active=Promise.resolve(),pump,playing=false,exclusive=false,failed=false,pendingEdits=[];
 let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=13,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
+let styleProfile='classic',exposureEV=0;
 function controls(){
  for(const element of document.querySelectorAll('aside button, aside select, aside input'))element.disabled=exclusive||(failed&&element.id!=='reset');
  $('resume').disabled=exclusive||failed||!remembered;
  $('lighting').disabled=exclusive||failed||!renderer?.setLightingMode;
+ $('style').disabled=exclusive||failed||!renderer?.setStyle;
+ $('exposure').disabled=exclusive||failed||!renderer?.setStyle;
+}
+function styleControls(){text('style',`Style · ${styleProfile==='geological'?'Geological':'Classic'}`);$('exposure').value=String(exposureEV);text('exposure-value',`${exposureEV.toFixed(2)} EV`);}
+async function applyStyle(profile,ev){
+ if(!renderer?.setStyle)throw Error('This SDK does not support terrain style controls.');
+ await renderer.setStyle({profile,tone:{exposureEV:ev}});
+ styleProfile=profile;exposureEV=ev;styleControls();
 }
 function checkpointText(){text('checkpoint-status',remembered?`Remembered tick ${remembered.field.tick}. Restore returns to this world and actor.`:'No remembered checkpoint.');}
 
@@ -62,7 +71,7 @@ async function frame(now,interval){
   if(scripted){yaw=Math.PI/2;pitch=0;}
   await advance(command,edits);lastView='';return;
  }
- const key=[field.tick,yaw,pitch,orbit,orbitYaw,orbitPitch,distance,appearance,lightingMode].join(',');if(key!==lastView){await present();lastView=key;}
+ const key=[field.tick,yaw,pitch,orbit,orbitYaw,orbitPitch,distance,appearance,lightingMode,styleProfile,exposureEV].join(',');if(key!==lastView){await present();lastView=key;}
 }
 async function exclusiveOperation(fn){
  if(exclusive)throw Error('Another operation is in flight.');exclusive=true;playing=false;keys.clear();controls();
@@ -76,6 +85,7 @@ async function load(){
  delete level.field;
  field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active',profiling:params.get('profile')==='gpu',gpuTiming:params.get('profile')==='gpu'});
  await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);await applyLightingMode(lightingMode);
+ if(renderer.setStyle)await applyStyle(styleProfile,exposureEV);styleControls();
  $('lighting').disabled=!renderer.setLightingMode; text('lighting',renderer.setLightingMode?(lightingMode==='cached'?'Lighting B · Cached':'Lighting A · Reference'):'Lighting A · SDK update needed for B');
  driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=13;orbit=false;text('camera','Orbit view');$('crosshair').hidden=false;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
  text('dimension',`${size}³`);text('energy','Not inspected');
@@ -95,6 +105,8 @@ for(const id of ['reset','scene','size'])$(id)[id==='reset'?'onclick':'onchange'
 for(const action of ['cut','heat','melt'])$(action).onclick=()=>notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),structuralAction(level,action))));
 $('appearance').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=appearance==='naturalistic'?'diagnostic':'naturalistic';await renderer.setAppearance(next);appearance=next;text('appearance',`A/B · ${appearance==='naturalistic'?'Naturalistic':'Diagnostic'}`);await present();}));
 $('lighting').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=lightingMode==='reference'?'cached':'reference';await applyLightingMode(next);lightingMode=next;text('lighting',next==='cached'?'Lighting B · Cached':'Lighting A · Reference');await present();}));
+$('style').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=styleProfile==='classic'?'geological':'classic';await applyStyle(next,next==='geological'?-.25:0);await present();}));
+$('exposure').onchange=()=>notify(()=>exclusiveOperation(async()=>{try{await applyStyle(styleProfile,Number($('exposure').value));await present();}finally{styleControls();}}));
 $('camera').onclick=()=>{orbit=!orbit;text('camera',orbit?'First-person view':'Orbit view');$('crosshair').hidden=orbit;lastView='';};
 $('inspect').onclick=()=>notify(()=>exclusiveOperation(async()=>{const balance=await field.energyBalance();text('energy',`${balance.driftQ} Q @ ${field.tick}`);}));
 $('remember').onclick=()=>notify(()=>exclusiveOperation(async()=>{remembered=await snapshot();checkpointText();}));
@@ -108,6 +120,7 @@ canvas.addEventListener('wheel',e=>{if(orbit){e.preventDefault();distance=Math.m
 window.addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;keys.add(e.code);if(['Space','KeyE'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&!e.repeat&&!exclusive){pendingEdits.push(...targetEdit());if(!playing)notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),pendingEdits.splice(0))));}});
 window.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>{keys.clear();playing=false;clock.reset();});
 const api={get lightingMode(){return lightingMode;},get field(){return field;},get renderer(){return renderer;},get driver(){return driver;},get level(){return level;},advance,present,snapshot,restore,
+ get styleProfile(){return styleProfile;},get exposureEV(){return exposureEV;},
  stop:async()=>{playing=false;pump?.stop();await active;},hud,view,ready:null};window.structuralCavern=api;
 api.runBenchmark=()=>exclusiveOperation(async()=>{const {benchmarkStructuralGameplay}=await import('./benchmark.js');return benchmarkStructuralGameplay(api);});
 api.runScaleProbe=()=>exclusiveOperation(async()=>{const {probeStructuralScale}=await import('./scale-probe.js');return probeStructuralScale(api);});
