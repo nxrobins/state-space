@@ -37,12 +37,17 @@ import type {
   TerrainCamera,
   TerrainAppearance,
   TerrainLightingMode,
+  TerrainStyleOptions,
 } from './volume/3d-view.js';
 export type {
   TerrainRenderer,
   TerrainCamera,
   TerrainAppearance,
   TerrainLightingMode,
+  TerrainStyleOptions,
+  TerrainStyleSettings,
+  TerrainStyleProfile,
+  TerrainStyleColor,
 } from './volume/3d-view.js';
 import type {
   GameplayState3D,
@@ -1062,6 +1067,8 @@ export class GpuStructuralWorld3D {
       );
       let closed = false;
       const wrapped: TerrainRenderer = {
+        setStyle: (value: TerrainStyleOptions) => this.#run(() => renderer.setStyle!(value)),
+        inspectStyle: () => this.#run(() => renderer.inspectStyle!()),
         render: (camera: TerrainCamera) => this.#run(() => renderer.render(camera)),
         setAppearance: (value: TerrainAppearance) =>
           this.#run(() => renderer.setAppearance!(value)),

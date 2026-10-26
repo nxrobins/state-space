@@ -42,6 +42,7 @@ import {
   type TerrainRenderer,
   type TerrainAppearance,
   type TerrainLightingMode,
+  type TerrainStyleOptions,
 } from './3d-view.js';
 
 export type RegionRequest3D = { origin: readonly number[]; size: readonly number[] };
@@ -99,6 +100,10 @@ export type {
   TerrainRenderer,
   TerrainAppearance,
   TerrainLightingMode,
+  TerrainStyleOptions,
+  TerrainStyleSettings,
+  TerrainStyleProfile,
+  TerrainStyleColor,
 } from './3d-view.js';
 const EMPTY_EDITS = new Uint32Array(0);
 const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase'];
@@ -1121,6 +1126,12 @@ class ResidentVolume implements GpuVolume3D {
           );
       let rendererClosed = false;
       const wrapped = {
+        ...(renderer.setStyle
+          ? { setStyle: (value: TerrainStyleOptions) => this.#run(() => renderer.setStyle!(value)) }
+          : {}),
+        ...(renderer.inspectStyle
+          ? { inspectStyle: () => this.#run(() => renderer.inspectStyle!()) }
+          : {}),
         ...(renderer.setLightingMode
           ? {
               setLightingMode: (value: TerrainLightingMode) =>

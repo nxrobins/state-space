@@ -105,6 +105,24 @@ Chunked GPU terrain renderers expose
 remains diagnostic. The active cavern example selects naturalistic on startup.
 The unchunked M1/M2 renderer does not expose this optional method.
 
+Chunked renderers also expose `setStyle(options)` and `inspectStyle()` for reusable
+material, exposure and lighting controls. For example:
+
+```ts
+await renderer.setStyle?.({
+  profile: 'geological',
+  tone: { exposureEV: -0.25 },
+  lighting: { lampIntensity: 0.7 },
+});
+```
+
+Style replaces the complete profile, changes presentation only, and persists
+across appearance switches and physical restores. The default is `classic`;
+diagnostic rendering ignores style. The geological profile is implemented but
+awaits native visual/runtime acceptance under the active incident hold. See
+[terrain appearance](../TERRAIN_APPEARANCE.md) for ranges, ownership, cost and
+validation limits.
+
 Naturalistic presentation reads committed material/thermal cells to shade rock,
 wet contacts, ice and lava, extract one exposed hot light per storage chunk,
 sample bounded shadows and apply HDR tone mapping/bloom. It uses the same face

@@ -8,6 +8,7 @@ export async function benchmarkStructuralGameplay(api,{warmup=60,frames=600}={})
  await api.stop();document.body.classList.add('benchmark');
  const report={passed:false,complete:false,lightingMode:api.lightingMode??'reference',scope:'Full display-paced gameplay: scripted input/edit generation, exact structural/material physics, resident integer controller, mesh invalidation and uploads, all naturalistic effects, draw, HUD update, validation and GPU queue completion. Excludes initial setup and retained snapshot compression.',
   size:api.level.size,scenario:api.level.scenario,execution:api.field.mode,resolution:[1920,1080],viewport:[innerWidth,innerHeight],appearance:'naturalistic',heatDistortion:true,targetHz:60,warmup:[],samples:[],userAgent:navigator.userAgent,backendInfo:api.field.backendInfo,startedAt:new Date().toISOString()};
+ report.style=await api.renderer.inspectStyle?.()??null;
  const profiling=api.field.inspectLatency?.().enabled;
  const timings=new Map();let latencyCursor=0;
  const collectTimings=()=>{if(!profiling)return;let pending=false;for(const record of api.field.inspectLatency(latencyCursor).records){timings.set(record.id,record);pending ||= record.gpu.status==='pending';if(!pending)latencyCursor=record.id;}};

@@ -40,19 +40,19 @@ fn rayColor(ray:OpticalRay)->vec3f{
  if(ray.hit){
   let m=ray.word&255u;let p=ray.point;let n=ray.normal;
   var uv=p.xy;if(abs(n.x)>.5){uv=p.zy;}if(abs(n.y)>.5){uv=p.xz;}
-  let rock=textureSampleLevel(rockColor,rockSampler,uv*.28,1.5).rgb;
-  var albedo=rock*vec3f(.44,.48,.51);if(m==3u){albedo=vec3f(.43,.31,.16);}if(m==11u){albedo=vec3f(.1,.19,.2);}
+  let rock=textureSampleLevel(rockColor,rockSampler,uv*style.rock.w,1.5).rgb;
+  var albedo=rock*style.rock.rgb;if(m==1u&&style.finish.w>0.){albedo*=rockVariation(p);}if(m==3u){albedo=style.sand.rgb;}if(m==11u){albedo=vec3f(.1,.19,.2);}
   let toLamp=camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p;
-  var irradiance=vec3f(.065,.095,.135)+vec3f(1.,.87,.69)*max(0.,dot(n,normalize(toLamp)))*24./(3.+dot(toLamp,toLamp));
+  var irradiance=vec3f(.065,.095,.135)*style.lighting.x+style.lamp.rgb*style.lighting.y*max(0.,dot(n,safeDirection(toLamp)))*24./(3.+dot(toLamp,toLamp));
   // Secondary surfaces use bounded unshadowed direct illumination. The ray
   // itself still stops at the first opaque voxel, including offscreen ones.
   for(var slot=0u;slot<regionalCount(p,false);slot++){
    let k=regionalSource(p,false,slot);
    let light=lights[k];let d=light.position.xyz-p;let d2=dot(d,d);
-   if(light.position.w>0.&&d2>.01&&d2<484.){irradiance+=light.color.rgb*max(0.,dot(n,normalize(d)))*pow(1.-d2/484.,2.)/(1.+d2);}
+   if(light.position.w>0.&&d2>.01&&d2<484.){irradiance+=light.color.rgb*style.lighting.z*max(0.,dot(n,normalize(d)))*pow(1.-d2/484.,2.)/(1.+d2);}
   }
   color=albedo*irradiance;
-  if(m==10u||m==17u){let hot=clamp((f32((ray.word>>8u)&255u)-170.)/85.,0.,1.);let crust=smoothstep(.39,.64,noise(p*2.9)+noise(p*9.7)*.12);color+=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot;}
+  if(m==10u||m==17u){let hot=clamp((f32((ray.word>>8u)&255u)-170.)/85.,0.,1.);let crust=smoothstep(.39,.64,noise(p*2.9)+noise(p*9.7)*.12);color+=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}
   color=mix(color,vec3f(.028,.045,.06),1.-exp(-ray.distance*.012));
  }
  let absorption=exp(-vec3f(.24,.075,.035)*ray.water-vec3f(.13,.045,.025)*ray.ice);
@@ -80,12 +80,18 @@ fn waterIce(v:Out,view:vec3f)->vec3f{
  if(frozen){
   let crack=pow(1.-abs(2.*noise(p*3.7)-1.),38.);
   let edge=1.-smoothstep(0.,.12,min(min(v.uv.x,1.-v.uv.x),min(v.uv.y,1.-v.uv.y)));
-  let frost=clamp(crack*.4+edge*.12+pow(noise(p*17.),8.)*.3,0.,.65);
-  color=mix(color,vec3f(.4,.58,.64)*v.irradiance,frost);
+  let frost=clamp((crack*.4+edge*.12+pow(noise(p*17.),8.)*.3)*style.sand.w,0.,.65);
+  var frostColor=style.ice.rgb*v.irradiance;
+  if(style.tone.w>.5){
+   let direction=safeDirection(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);
+   frostColor+=style.ice.rgb*style.lamp.rgb*max(0.,dot(normal,direction))*v.surface.z+hotSurface(v,normal,view,style.ice.rgb,1.,vec3f(0));
+  }
+  color=mix(color,frostColor,frost);
  }
- let lamp=normalize(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);
- let halfVector=normalize(view+lamp);let highlight=pow(max(0.,dot(normal,halfVector)),select(260.,120.,frozen));
- color+=vec3f(1.,.87,.69)*highlight*v.surface.z*.35;
+ let lamp=safeDirection(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);
+ let halfVector=safeDirection(view+lamp);let highlight=pow(max(0.,dot(normal,halfVector)),select(260.,120.,frozen));
+ color+=style.lamp.rgb*highlight*v.surface.z*.35;
+ if(style.tone.w>.5){color+=hotSurface(v,normal,view,vec3f(0),select(.17,.24,frozen),vec3f(f0));}
  return color;
 }
 `;

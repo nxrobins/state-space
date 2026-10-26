@@ -6,6 +6,13 @@ import { ROCK_TEXTURES } from '../rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
 import { CAVERN_HAZE } from './cavern-haze.js';
 import {
+  packTerrainStyle,
+  resolveTerrainStyle,
+  TERRAIN_STYLE_BYTES,
+  type TerrainStyleSettings,
+} from './terrain-style.js';
+import { TERRAIN_STYLE_UNIFORM, TERRAIN_MATERIAL_SHADING } from './terrain-style-shader.js';
+import {
   lightingCacheQueries,
   makeLightingCache,
   REFERENCE_LIGHTING_QUERIES,
@@ -20,6 +27,7 @@ export function cavernShaders(
   const chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3;
   const queries = cached ? lightingCacheQueries(shape) : REFERENCE_LIGHTING_QUERIES;
   const common = `
+${TERRAIN_STYLE_UNIFORM}
 struct Camera {eye:vec4f,right:vec4f,up:vec4f,forward:vec4f,projection:vec4f,shape:vec4u}
 struct Light {position:vec4f,color:vec4f}
 @group(0) @binding(0) var<storage,read> grid:array<u32>;
@@ -61,7 +69,7 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
 @group(0) @binding(6) var rockRoughness:texture_2d<f32>;
 @group(0) @binding(7) var rockSampler:sampler;
 ${queries}
-struct Out{@builtin(position) position:vec4f,@location(0) world:vec3f,@location(1) normal:vec3f,@location(2) uv:vec2f,@location(3) irradiance:vec3f,@location(4) surface:vec3f,@location(5) @interpolate(flat) word:u32,@location(6) @interpolate(flat) selected:u32}
+struct Out{@builtin(position) position:vec4f,@location(0) world:vec3f,@location(1) normal:vec3f,@location(2) uv:vec2f,@location(3) irradiance:vec3f,@location(4) surface:vec3f,@location(5) @interpolate(flat) word:u32,@location(6) @interpolate(flat) selected:u32,@location(7) hotVisibility:vec2f,@location(8) @interpolate(flat) hotIndices:vec2u}
 ${CELL_FRUSTUM_QUERY}
 // Short bounded voxel rays. Endpoint cells are excluded so emitting lava does
 // not occlude itself. Two receiver rays approximate a finite lamp/source size.
@@ -86,17 +94,39 @@ fn visibility(p:vec3f,source:vec3f)->f32{
  let ao=1.-.22*(opaque(outside+a)+opaque(outside+b)+opaque(outside+a+b));
  var wet=0.;for(var j=0u;j<6u;j++){wet=max(wet,select(0.,1.,(cell(vec3i(coordinate(i))+normals[j])&255u)==2u));}
  let receiver=world+n*.09+(vec3f(.5)-local)*.04;
- var light=vec3f(.065,.095,.135)*(.65+.35*max(0.,-n.y))*ao;
+ var light=vec3f(.065,.095,.135)*(.65+.35*max(0.,-n.y))*ao*style.lighting.x;
  let lamp=camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35;let ld=lamp-receiver;let distance=length(ld);
  let lampShadow=.5*(visibility(receiver,lamp)+visibility(receiver,lamp+camera.up.xyz*.22));
  let facing=max(0.,dot(n,normalize(ld)));let cone=.45+.55*pow(max(0.,dot(-normalize(ld),camera.forward.xyz)),2.);
- let lampPower=lampShadow*cone*24./(3.+distance*distance);
- light+=vec3f(1.,.87,.69)*facing*lampPower;
- for(var slot=0u;slot<regionalCount(receiver,false);slot++){let k=regionalSource(receiver,false,slot);let source=lights[k];if(source.position.w==0.){continue;}let d=source.position.xyz-receiver;let d2=dot(d,d);if(d2>484.||d2<.01){continue;}let cosine=max(0.,dot(n,normalize(d)));if(cosine<=0.){continue;}let shadow=.5*(visibility(receiver,source.position.xyz)+visibility(receiver,source.position.xyz+vec3f(0,-.3,0)));light+=source.color.rgb*cosine*shadow*pow(1.-d2/484.,2.)/(1.+d2);}
+ let lampPower=lampShadow*cone*24./(3.+distance*distance)*style.lighting.y;
+ if(style.tone.w<.5){light+=style.lamp.rgb*facing*lampPower;}
+ // Selection is identical at every corner of a face: choose at its center,
+ // with stable source-index ties. Fragment shading adds no visibility rays.
+ out.hotIndices=vec2u(0xffffffffu);out.hotVisibility=vec2f(0);
+ if(style.tone.w>.5){
+  let center=c+vec3f(.5)+n*.59;var score=vec2f(0);
+  for(var slot=0u;slot<regionalCount(center,false);slot++){
+   let k=regionalSource(center,false,slot);let source=lights[k];let d=source.position.xyz-center;let d2=dot(d,d);
+   if(source.position.w==0.||d2<.01||d2>=484.||dot(n,d)<=0.){continue;}
+   let power=max(source.color.r,max(source.color.g,source.color.b))*pow(1.-d2/484.,2.)/(1.+d2);
+   if(power>score.x||(power==score.x&&k<out.hotIndices.x)){score.y=score.x;out.hotIndices.y=out.hotIndices.x;score.x=power;out.hotIndices.x=k;}
+   else if(power>score.y||(power==score.y&&k<out.hotIndices.y)){score.y=power;out.hotIndices.y=k;}
+  }
+ }
+ for(var slot=0u;slot<regionalCount(receiver,false);slot++){
+  let k=regionalSource(receiver,false,slot);let source=lights[k];if(source.position.w==0.){continue;}
+  let d=source.position.xyz-receiver;let d2=dot(d,d);if(d2>484.||d2<.01){continue;}
+  let cosine=max(0.,dot(n,normalize(d)));if(cosine<=0.){continue;}
+  let shadow=.5*(visibility(receiver,source.position.xyz)+visibility(receiver,source.position.xyz+vec3f(0,-.3,0)));
+  if(k==out.hotIndices.x){out.hotVisibility.x=shadow;}
+  else if(k==out.hotIndices.y){out.hotVisibility.y=shadow;}
+  else{light+=source.color.rgb*style.lighting.z*cosine*shadow*pow(1.-d2/484.,2.)/(1.+d2);}
+ }
  out.world=world;out.normal=n;out.uv=uv;out.irradiance=light;out.surface=vec3f(ao,wet,lampPower);out.word=word;let cc=coordinate(i);out.selected=select(0u,1u,cc.x+SHAPE.x*(cc.y+SHAPE.y*cc.z)==camera.shape.w);return out;
 }
 fn hash(p:vec3f)->f32{var q=fract(p*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
 fn noise(p:vec3f)->f32{let i=floor(p);let f=fract(p);let u=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3f(1,0,0)),u.x),mix(hash(i+vec3f(0,1,0)),hash(i+vec3f(1,1,0)),u.x),u.y),mix(mix(hash(i+vec3f(0,0,1)),hash(i+vec3f(1,0,1)),u.x),mix(hash(i+vec3f(0,1,1)),hash(i+vec3f(1,1,1)),u.x),u.y),u.z);}
+${TERRAIN_MATERIAL_SHADING}
 ${CAVERN_OPTICS}
 @fragment fn fragment(v:Out)->@location(0) vec4f{
  let p=v.world;let broad=noise(p*.43);
@@ -115,7 +145,7 @@ ${CAVERN_OPTICS}
  var tangent=vec3f(1,0,0);var bitangent=vec3f(0,sign(v.normal.z),0);
  if(abs(v.normal.x)>.5){tangent=vec3f(0,0,1);bitangent=vec3f(0,-sign(v.normal.x),0);}
  if(abs(v.normal.y)>.5){bitangent=vec3f(0,0,-sign(v.normal.y));}
- let texUV=vec2f(dot(p,tangent),dot(p,bitangent))*.28;
+ let texUV=vec2f(dot(p,tangent),dot(p,bitangent))*style.rock.w;
  let rock=textureSample(rockColor,rockSampler,texUV).rgb;
  let detail=textureSample(rockNormal,rockSampler,texUV).xyz*2.-1.;
  let rough=textureSample(rockRoughness,rockSampler,texUV).r;
@@ -123,16 +153,25 @@ ${CAVERN_OPTICS}
  var albedo=mix(vec3f(.075,.09,.10),vec3f(.23,.21,.18),broad*.55+vein*.35)*(.65+.5*grain+.18*fine+.06*strata)*(1.-fissure*.27-pores*.6);
  var roughness=.83;var emission=vec3f(0);var f0=vec3f(.045);
  if(m==2u){albedo=vec3f(.018,.085,.11);roughness=.17;f0=vec3f(.02);}
- if(m==3u){albedo=vec3f(.43,.31,.16)*(.8+.3*grain);roughness=.96;}
+ if(m==3u){albedo=style.sand.rgb*(.8+.3*grain);roughness=.96;}
  if(m==8u){albedo=mix(vec3f(.12,.29,.36),vec3f(.57,.68,.7),pow(grain,4.)*.75);roughness=.24;}
  if(m==11u){albedo=vec3f(.1,.19,.2);roughness=.16;}
  if(m==9u){discard;} // Steam contributes in the volume pass, never to surface depth.
- if(m==10u||m==17u){let crust=smoothstep(.39,.64,noise(p*2.9)+grain*.12);albedo=vec3f(.065,.035,.025);roughness=.68;emission=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot;}
- if(m==1u){albedo=rock*vec3f(.44,.48,.51)*(.85+.25*broad)*mix(1.,.57,v.surface.y);roughness=mix(clamp(rough,.58,.96),.38,v.surface.y);n=normalize(v.normal*max(detail.z,.35)+tangent*detail.x*.55-bitangent*detail.y*.55);}
- let view=normalize(camera.eye.xyz-p);let lamp=normalize(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);let halfVector=normalize(view+lamp);
+ if(m==10u||m==17u){let crust=smoothstep(.39,.64,noise(p*2.9)+grain*.12);albedo=vec3f(.065,.035,.025);roughness=.68;emission=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}
+ if(m==1u){
+  albedo=rock*style.rock.rgb*(.85+.25*broad)*mix(1.,1.-style.finish.y,v.surface.y);
+  if(style.finish.w>0.){albedo*=rockVariation(p);}
+  roughness=mix(clamp(rough*style.finish.x,.58,.96),style.finish.z,v.surface.y);
+  n=normalize(v.normal*max(detail.z,.35)+tangent*detail.x*style.lighting.w-bitangent*detail.y*style.lighting.w);
+ }
+ let view=safeDirection(camera.eye.xyz-p);let lamp=safeDirection(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);let halfVector=safeDirection(view+lamp);
  let nl=max(0.,dot(n,lamp));let nv=max(.01,dot(n,view));let nh=max(0.,dot(n,halfVector));let vh=max(0.,dot(view,halfVector));let a2=pow(roughness,4.);let d=a2/(3.141593*pow(nh*nh*(a2-1.)+1.,2.));let k=pow(roughness+1.,2.)/8.;let g=nv/(nv*(1.-k)+k)*nl/(nl*(1.-k)+k);let fresnel=f0+(1.-f0)*pow(1.-vh,5.);
- let specular=d*g*fresnel/max(4.*nl*nv,.01)*nl*v.surface.z*vec3f(1.,.87,.69);
+ let specular=d*g*fresnel/max(4.*nl*nv,.01)*nl*v.surface.z*style.lamp.rgb;
  var color=albedo*v.irradiance*(.84+.16*dot(n,v.normal))+specular+emission;
+ if(style.tone.w>.5){
+  let lampVisible=select(0.,v.surface.z,dot(v.normal,lamp)>0.);
+  color=albedo*v.irradiance+(albedo*nl+surfaceSpecular(n,view,lamp,roughness,f0))*style.lamp.rgb*lampVisible+hotSurface(v,n,view,albedo,roughness,f0)+emission;
+ }
  if(m==2u||m==8u){color=waterIce(v,view);}
  if(v.selected==1u){let border=select(0.,1.,any(v.uv<vec2f(.025))||any(v.uv>vec2f(.975)));color=mix(color,vec3f(.65,.40,.15),border*.65);}
  return vec4f(color,1.);
@@ -141,6 +180,7 @@ ${CAVERN_OPTICS}
 }
 
 const POST = `
+${TERRAIN_STYLE_UNIFORM}
 @group(0) @binding(0) var color:texture_2d<f32>;
 @group(0) @binding(1) var volume:texture_2d<f32>;
 @group(0) @binding(2) var volumeDepth:texture_2d<f32>;
@@ -182,8 +222,8 @@ fn refractedAt(c:vec2i,heat:vec4f)->vec3f{
  let f=fract(q);return mix(mix(sampleAt(base),sampleAt(base+vec2i(1,0)),f.x),mix(sampleAt(base+vec2i(0,1)),sampleAt(base+vec2i(1,1)),f.x),f.y);
 }
 @fragment fn fragment(@builtin(position) p:vec4f)->@location(0) vec4f{
- let c=vec2i(p.xy);var bloom=vec3f(0);for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){bloom+=max(sampleAt(c+vec2i(x,y)*5)-vec3f(1.2),vec3f(0));}}
- let atmosphere=hazeAt(c);let hdr=(refractedAt(c,atmosphere.heat)*atmosphere.haze.a+atmosphere.haze.rgb+bloom*(.14/9.))*1.65;
+ let c=vec2i(p.xy);var bloom=vec3f(0);for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){bloom+=max(sampleAt(c+vec2i(x,y)*5)-vec3f(style.tone.z),vec3f(0));}}
+ let atmosphere=hazeAt(c);let hdr=(refractedAt(c,atmosphere.heat)*atmosphere.haze.a+atmosphere.haze.rgb+bloom*(style.tone.y/9.))*style.tone.x;
  let mapped=clamp((hdr*(2.51*hdr+.03))/(hdr*(2.43*hdr+.59)+.14),vec3f(0),vec3f(1));
  let srgb=select(12.92*mapped,1.055*pow(mapped,vec3f(1./2.4))-.055,mapped>vec3f(.0031308));return vec4f(srgb,1.);
 }`;
@@ -358,7 +398,14 @@ export async function makeCavernAppearance(
       size: 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     }),
-    opticalData = new Float32Array(4);
+    opticalData = new Float32Array(4),
+    styleUniform = device.createBuffer({
+      size: TERRAIN_STYLE_BYTES,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+  let style = resolveTerrainStyle(),
+    styleData = packTerrainStyle(style),
+    styleDirty = true;
   const bindings = new Map<GPUBuffer, { extract: GPUBindGroup; draw: GPUBindGroup }>();
   let hdr: GPUTexture | undefined,
     volume: GPUTexture | undefined,
@@ -371,6 +418,18 @@ export async function makeCavernAppearance(
     boundDepth: GPUTexture | undefined;
   const hazeBindings = new Map<GPUBuffer, GPUBindGroup>();
   return {
+    setStyle(value: TerrainStyleSettings) {
+      if (closed) throw Error('Cavern appearance is closed.');
+      const next = resolveTerrainStyle(value),
+        packed = packTerrainStyle(next);
+      style = next;
+      styleData = packed;
+      styleDirty = true;
+    },
+    inspectStyle() {
+      if (closed) throw Error('Cavern appearance is closed.');
+      return resolveTerrainStyle(style);
+    },
     async prepareLighting(cached: boolean) {
       if (closed) throw Error('Cavern appearance is closed.');
       if (!cached || cachedAppearance) return;
@@ -420,6 +479,7 @@ export async function makeCavernAppearance(
       activeHaze = cached ? cachedAppearance!.haze : haze;
       const cacheEntries = [
         { binding: 11, resource: { buffer: lightList.buffer } },
+        { binding: 12, resource: { buffer: styleUniform } },
         ...(cached
           ? [
               { binding: 9, resource: { buffer: cache!.hierarchy } },
@@ -436,6 +496,10 @@ export async function makeCavernAppearance(
       opticalData[1] = heatDistortion ? 1 : 0;
       opticalData[2] = cached ? 1 : 0;
       device.queue.writeBuffer(opticalUniform, 0, opticalData);
+      if (styleDirty) {
+        device.queue.writeBuffer(styleUniform, 0, styleData);
+        styleDirty = false;
+      }
       if (!hdr || width !== w || height !== h || boundDepth !== depth) {
         hdr?.destroy();
         volume?.destroy();
@@ -471,6 +535,7 @@ export async function makeCavernAppearance(
             { binding: 3, resource: depth.createView() },
             { binding: 4, resource: { buffer: uniform } },
             { binding: 5, resource: distortion.createView() },
+            { binding: 12, resource: { buffer: styleUniform } },
           ],
         });
       }
@@ -570,6 +635,7 @@ export async function makeCavernAppearance(
       lights.destroy();
       lightList.close();
       opticalUniform.destroy();
+      styleUniform.destroy();
       rock.textures.forEach((t) => t.destroy());
       bindings.clear();
     },

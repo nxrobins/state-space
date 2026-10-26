@@ -1,4 +1,11 @@
 /** Public presentation types contain no native GPU handles. */
+import type { TerrainStyleOptions, TerrainStyleSettings } from './terrain-style.js';
+export type {
+  TerrainStyleOptions,
+  TerrainStyleSettings,
+  TerrainStyleProfile,
+  TerrainStyleColor,
+} from './terrain-style.js';
 export type TerrainCamera = {
   eye: readonly number[];
   forward: readonly number[];
@@ -15,6 +22,9 @@ export interface TerrainRenderer {
   setAppearance?(appearance: TerrainAppearance): Promise<void>;
   setLightingMode?(mode: TerrainLightingMode): Promise<void>;
   setHeatDistortion?(enabled: boolean): Promise<void>;
+  /** Replaces naturalistic presentation settings; diagnostic rendering ignores them. */
+  setStyle?(options: TerrainStyleOptions): Promise<void>;
+  inspectStyle?(): Promise<TerrainStyleSettings>;
   inspectMesh?(): Promise<{ faces: number[][]; rebuilt: number[]; meshDispatch?: number[] }>;
 }
 

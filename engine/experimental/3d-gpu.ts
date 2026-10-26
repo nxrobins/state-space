@@ -13,6 +13,10 @@ export type {
   TerrainRenderer,
   TerrainAppearance,
   TerrainLightingMode,
+  TerrainStyleOptions,
+  TerrainStyleSettings,
+  TerrainStyleProfile,
+  TerrainStyleColor,
 } from './volume/3d-gpu-core.js';
 export async function createGpuField3D(
   width: number,

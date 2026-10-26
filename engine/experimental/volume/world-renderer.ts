@@ -3,6 +3,7 @@ import { type LatencyProfiler, type Trace } from './latency.js';
 import { DRAW } from './3d-renderer.js';
 import type { makeCavernAppearance } from './cavern-appearance.js';
 import type { TerrainCamera, TerrainRenderer, TerrainLightingMode } from './3d-view.js';
+import { resolveTerrainStyle } from './terrain-style.js';
 
 export interface ResidentChunkRenderer extends TerrainRenderer {
   validateCamera(camera: TerrainCamera): void;
@@ -160,6 +161,7 @@ ${mapping}
     height = 0,
     closed = false;
   let heatDistortion = true;
+  let style = resolveTerrainStyle();
   let lightingMode: TerrainLightingMode = 'reference';
   let appearance: 'diagnostic' | 'naturalistic' = 'diagnostic',
     natural: Awaited<ReturnType<typeof makeCavernAppearance>> | undefined;
@@ -303,6 +305,16 @@ ${mapping}
     }
   }
   const renderer: ResidentChunkRenderer = {
+    async setStyle(value) {
+      if (closed) throw new Error('Terrain renderer is closed.');
+      const next = resolveTerrainStyle(value);
+      natural?.setStyle(next);
+      style = next;
+    },
+    async inspectStyle() {
+      if (closed) throw new Error('Terrain renderer is closed.');
+      return resolveTerrainStyle(style);
+    },
     async setLightingMode(value) {
       if (closed) throw new Error('Terrain renderer is closed.');
       if (value !== 'reference' && value !== 'cached')
@@ -332,6 +344,7 @@ ${mapping}
           uniform,
           rebuild,
         );
+        natural.setStyle(style);
       }
       if (value === 'naturalistic') await natural!.prepareLighting(lightingMode === 'cached');
       appearance = value;
