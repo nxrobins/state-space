@@ -20,6 +20,14 @@ The tactical suite's microtask transport and the chamber's browser Worker shim
 exercise different scheduling boundaries and remain separate. Native browser
 acceptance continues to test the real Worker/event-loop boundary.
 
+## Structure negative controls
+
+`structure-mutants.ts` holds the exact source edits that the native negative
+controls in `engine/structure.test.ts` apply to `engine/structure.ts` in memory.
+Those controls run only in the native suite. `structure-mutants.test.ts` runs in
+the CPU suite and checks that each edit still finds its anchor once, so a
+formatting change fails hosted CI instead of silently disabling a control.
+
 ## Frozen multiphysics inputs
 
 `multiphysics-fluid-fixtures.ts` supplies fresh plain input objects shared by the
