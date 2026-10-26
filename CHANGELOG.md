@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-22)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-26)
 
 ### Added
 
@@ -75,6 +75,8 @@ date of the last change in the section.
 
 ### Fixed
 
+- The native structure tests' negative controls match the formatted source
+  again, and the CPU suite checks their anchors (#71).
 - Default water stays liquid at the reference temperature (#15).
 - Historical source-hash collectors retain nested modules (#33).
 - Frame-clock wording in the heat performance report (#12).
