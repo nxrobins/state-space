@@ -11,6 +11,24 @@ from the TypeScript sources in that checkout. The public SDK has no dependency
 on the evaluator or an LLM provider. The evaluation context records both the
 installed TypeScript compiler version and the compiler file's content hash.
 
+## What the search can and cannot find
+
+The gates admit only candidates whose packed cells, energy and structure match
+the independent reference after every pass. The search therefore finds faster
+implementations of the current laws, never different laws, tie-breakers,
+stencils or approximations. A candidate is one kernel file. Storage bindings,
+the `io_*` adapters, the material property table and the shared `temperature_q`
+law stay host-owned and are prepended to every kernel. The thermal and phase
+targets are thin entries whose arithmetic (`pair_energy`, `phase_material`) is
+host-owned, and the structure and normalize targets apply host plans; under the
+current boundary those four targets have little or no optimization headroom.
+The movement and combustion targets own their neighbour selection and swap
+logic. The C5 and later evidence records admitted production baselines and
+rejected negative controls, not a staged replacement of a production kernel.
+The measured objectives are host wall times of the whole composed tick at 32x32
+and 65x33, in which one pass is a small share, so a timing difference between
+qualified candidates needs repeated confirmation before it means anything.
+
 ## Local evaluation and bounded search
 
 ```powershell

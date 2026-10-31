@@ -250,7 +250,7 @@ no integrated world speedup.
 - [Multiphysics contracts and release gates](docs/MULTIPHYSICS.md)
 - [Terrain materials, exposure and direct lighting](docs/TERRAIN_APPEARANCE.md)
 - [Rendering guide and native Python API](docs/RENDERING.md)
-- [Evolution acceptance and benchmark protocol](docs/EVOLUTION.md) and the [original research brief](ss_program.md)
+- [Evolution acceptance and benchmark protocol](docs/EVOLUTION.md); the [April 2026 research brief](ss_program.md) is historical ca-v1 context, not the current candidate contract
 - [Checkpoint evidence index](docs/checkpoints/README.md) and [roadmap history](ENGINE_ROADMAP.md)
 - [Third-party assets](docs/THIRD_PARTY.md)
 

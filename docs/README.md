@@ -9,7 +9,7 @@
 | Understand the physics and save contract | [Engine contract](../ENGINE_CONTRACT.md), [capabilities](CAPABILITIES.md), [structures](STRUCTURES.md), [pressure](PRESSURE.md) |
 | Understand presentation | [Rendering](RENDERING.md) and [3D SDK rendering](sdk/worlds.md#optional-naturalistic-terrain-appearance) |
 | Inspect a historical result | [Checkpoint index](checkpoints/README.md) and [archive restoration](ARCHIVES.md) |
-| Work on mutation/evolution research | [Evolution protocol](EVOLUTION.md) and [original research brief](../ss_program.md) |
+| Work on mutation/evolution research | [Evolution protocol](EVOLUTION.md); the [April 2026 brief](../ss_program.md) is historical ca-v1 context only |
 
 The support page summarizes current evidence; checkpoint reports describe the
 sources, host and workload measured at that time. API guides describe usage and
