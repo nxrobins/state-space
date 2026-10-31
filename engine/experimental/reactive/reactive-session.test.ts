@@ -510,6 +510,95 @@ describe('atomic reactive ability previews', () => {
     expect(reducer).toHaveBeenCalledTimes(2);
     expect(out.snapshot).toEqual({ ...preview.state, revision: 1 });
   });
+  test('ready commits match a full save read across budgets, reservoirs and restored revisions', () => {
+    for (const horizon of [0, 1, 2]) {
+      for (const budget of [1, 7, 256]) {
+        const s = session(initial([place(0, 0, MAT.WATER, 40)]), { reduceTick: nextGame }),
+          b = s.branch({ horizonTicks: horizon });
+        b.enqueue(spend());
+        b.enqueue(transfer());
+        const preview = finish(b, budget),
+          expected = read<Game>(r, { ...preview.state, revision: s.revision.revision + 1 }),
+          out = s.commit(b);
+        expect(out.snapshot).toEqual(expected);
+        expect(Object.keys(out.snapshot)).toEqual(Object.keys(expected));
+        expect(JSON.stringify(out.snapshot)).toBe(JSON.stringify(expected));
+        expect(s.energyBalance().driftQ).toBe(0n);
+
+        s.restore(JSON.parse(JSON.stringify(out.snapshot)));
+        const resumed = s.branch({ horizonTicks: 0 }),
+          resumedPreview = finish(resumed, budget),
+          resumedExpected = read<Game>(r, {
+            ...resumedPreview.state,
+            revision: s.revision.revision + 1,
+          });
+        expect(s.commit(resumed).snapshot).toEqual(resumedExpected);
+        expect(s.energyBalance().driftQ).toBe(0n);
+      }
+    }
+  });
+  test('validation observations and ready-preview copies cannot change a later commit', () => {
+    const observed: ReactiveSessionSnapshot3D<Game>[] = [],
+      s = session(initial(), {
+        validateGame: (value) => {
+          observed.push(value);
+          return valid(value);
+        },
+      }),
+      b = s.branch({ horizonTicks: 0 });
+    b.enqueue(spend());
+    b.enqueue(transfer());
+    const preview = finish(b),
+      expected = read<Game>(r, { ...preview.state, revision: 1 });
+    expect(observed).toHaveLength(2);
+    for (const value of [...observed, preview.state, b.inspect().state, s.snapshot()]) {
+      value.game.ap = -1;
+      value.game.units[0].x = 999;
+      value.domains.world.block.packedCells.fill(0);
+      value.domains.world.block.energyQ.fill(0);
+      value.domains.reservoirs[0].world.block.structure.fill(0);
+      value.accounting.externalQ = '999';
+    }
+    expect(() => b.advance()).toThrow(/cannot advance/);
+    expect(() => b.enqueue(spend(0))).toThrow(/sealed/);
+    expect(b.progress().status).toBe('ready');
+    const out = s.commit(b);
+    expect(observed).toHaveLength(3);
+    expect(observed[2]).toEqual(expected);
+    expect(out.snapshot).toEqual(expected);
+    observed[2].domains.reservoirs[0].world.block.energyQ.fill(0);
+    out.snapshot.game.units[0].x = -1;
+    expect(s.snapshot()).toEqual(expected);
+    expect(s.energyBalance().driftQ).toBe(0n);
+  });
+  test('swallowed commit-validation reentry rejects the branch and preserves a ready sibling', () => {
+    let armed = false,
+      target: ReactiveBranch3D<Game>;
+    const s = session(initial(), {
+        validateGame: () => {
+          if (armed) {
+            try {
+              target.discard();
+            } catch {}
+          }
+          return true;
+        },
+      }),
+      before = s.snapshot(),
+      sibling = s.branch({ horizonTicks: 0 });
+    target = s.branch({ horizonTicks: 0 });
+    target.enqueue(spend());
+    target.enqueue(transfer());
+    finish(target);
+    const expectedSibling = read<Game>(r, { ...finish(sibling).state, revision: 1 });
+    armed = true;
+    expect(() => s.commit(target)).toThrow(/reentry/);
+    expect(s.snapshot()).toEqual(before);
+    expect(target.progress().status).toBe('failed');
+    expect(sibling.progress().status).toBe('ready');
+    armed = false;
+    expect(s.commit(sibling).snapshot).toEqual(expectedSibling);
+  });
   test('synchronous policy errors after physical work roll back the complete paid ability', () => {
     let count = 0;
     const s = session(initial(), {
