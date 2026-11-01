@@ -39,8 +39,9 @@ date of the last change in the section.
   a 256-entry palette from the world's law with gas cutouts and catalog-derived
   flame/melt glow, `inspectMaterials()` on structural worlds, and the
   `burning-bridge` and `thermal-valve` scenes (with a ceramic toggle) behind a
-  `catalog` parameter, with pinned tick windows in the pilots and replays
-  (pending PR).
+  `catalog` parameter, with pinned tick windows in the pilots and replays;
+  supervised macOS qualification stages `m6-gameplay-*` and `m6-replay-*` for
+  those chambers at 32³ and 64³ (pending PR).
 
 ### Changed
 

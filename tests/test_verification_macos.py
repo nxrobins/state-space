@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from scripts.verification_macos import STAGES, SANDBOX_STAGES, require_preceding_stage, validate_qualification
+from scripts.verification_macos import M6_SCENES, M6_STAGES, STAGES, SANDBOX_STAGES, m6_stage, require_preceding_stage, validate_qualification
 
 
 class MacQualificationPolicyTests(unittest.TestCase):
@@ -22,14 +22,22 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            self.assertEqual(scope["maxDimension"], 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
-            self.assertEqual(scope["maxFrames"], 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660)
+            m6 = m6_stage(stage)
+            self.assertEqual(scope["maxDimension"], m6[1] if m6 else 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
+            self.assertEqual(scope["maxFrames"], 32 if m6 and m6[0] == "gameplay" else 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660)
+            self.assertEqual(scope["maxReplayTicks"], (32 if m6[0] == "gameplay" else 1024 if m6[1] == 32 else 256) if m6 else 128 if stage == "chamber-visible" or stage in SANDBOX_STAGES else 1024)
+        self.assertEqual(len(M6_STAGES), 12)
+        self.assertEqual(m6_stage("m6-replay-64-thermal-valve-ceramic"), ("replay", 64, "thermal-valve-ceramic"))
+        self.assertIsNone(m6_stage("replay-64-cut-long"))
+        self.assertTrue(all(scene in M6_SCENES for _, _, scene in map(m6_stage, M6_STAGES)))
         for timeout in [0, -1, 301, float("nan"), float("inf")]:
             with self.assertRaises(RuntimeError):
                 validate_qualification(command, timeout, platform="darwin")
         for change in [
             command + ["--large"],
             command[:-1] + ["replay-128-cut"],
+            command[:-1] + ["m6-replay-128-burning-bridge"],
+            command[:-1] + ["m6-gameplay-32-cut"],
             [sys.executable, "-c", "print(1)"],
         ]:
             with self.assertRaises(RuntimeError):
@@ -52,7 +60,11 @@ class MacScalePrerequisiteTests(unittest.TestCase):
             root = Path(folder)
             hashes = {"physics": "current"}
             self.assertIsNone(require_preceding_stage(root, "pilot", hashes))
-            for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")]:
+            for stage in M6_STAGES:
+                if m6_stage(stage)[1] == 32:
+                    self.assertIsNone(require_preceding_stage(root, stage, hashes))
+            m6_pairs = [(stage, stage.replace("-64-", "-32-")) for stage in M6_STAGES if m6_stage(stage)[1] == 64]
+            for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")] + m6_pairs:
                 root = Path(folder) / target
                 root.mkdir()
                 with self.assertRaises(RuntimeError):
@@ -63,7 +75,14 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                 receipt_path = root / job / "report.json"
                 receipt_path.parent.mkdir(exist_ok=True)
                 result = {"passed": True, "done": True, "energyDriftQ": "0", "backendInfo": {"isFallbackAdapter": False}, "scenario": "cut"}
-                if prior == "chamber-visible":
+                m6 = m6_stage(prior)
+                if m6:
+                    result.update(size=32, scenario=m6[2], catalog="thermal", rulesVersion="ca-3d-m6")
+                    if m6[0] == "replay":
+                        result.update(ticks=1024, runs=[{"mode": mode, "start": 0, "end": 1024, "exact": True} for mode in ("dense", "active")])
+                    else:
+                        result.update(frames=32, physicsExact=True)
+                elif prior == "chamber-visible":
                     result.update(size=8, journeys=[str(i) for i in range(13)], render={"frames": [1] * 120})
                 elif target == "scale-128-visible":
                     result.update(size=64, ticks=1024, runs=[{"mode": mode, "start": 0, "end": 1024, "exact": True} for mode in ("dense", "active")])
@@ -85,6 +104,7 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                     (report, path, "supervisorJob", "../outside"),
                     (report, path, "result", {**result, "energyDriftQ": "1"}),
                     (report, path, "result", {**result, "runs": [], "frames": [], "journeys": []}),
+                    *([(report, path, "result", {**result, "catalog": None})] if m6 else []),
                     (receipt, receipt_path, "passed", False),
                     (receipt, receipt_path, "exitCode", 1),
                 ]:

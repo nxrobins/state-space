@@ -110,6 +110,11 @@ current acceptance status, complete-state replay and full-frame receipts, and
 CPU references, gameplay pilots and trajectory replays at 32³ and 64³.
 Runtime verification must use one bounded stage at a time through
 `scripts.recover_m5_verification`; the reactive chambers take `--catalog thermal`
-(`--probe gameplay` and `--probe level-trajectory` in the browser script). The
-workstation incident hold remains active. Do not run aggregate native suites or
-quarantined legacy demo trajectories, and do not run the reactive chambers at 128³.
+(`--probe gameplay` and `--probe level-trajectory` in the browser script). On the
+Mac workstation the supervised stages are `npm run verify:macos -- --stage
+m6-gameplay-{32,64}-{scene}` (the 32-frame pilot) and `m6-replay-{32,64}-{scene}`
+(CPU oracle versus dense and active GPU, 1,024 ticks at 32³ and 256 at 64³,
+action tick 16); a 64³ stage needs the same chamber's passing 32³ stage within
+24 hours. The workstation incident hold remains active. Do not run aggregate
+native suites or quarantined legacy demo trajectories, and do not run the
+reactive chambers at 128³.
