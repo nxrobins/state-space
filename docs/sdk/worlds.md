@@ -297,7 +297,18 @@ Active GPU worlds keep a tile awake while it holds burning fuel next to an
 oxidizer, an oxidizer next to burning fuel, or fire that would extinguish. The
 plan-reuse certificate is unchanged: a consumed support changes a structural word
 and invalidates the retained plan; gas, fire and smoke changes away from intact
-cells and contacts do not. Limits: the terrain renderer's palette colors only the
-nine M1 materials, so wood, ash, fire, smoke and pack materials render black; motion traces and paths
-report 28 observed passes, combustion moving nothing; qualification covers the
-bounded fixtures in [the M6 checkpoint](../checkpoints/3D_M6.md) only.
+cells and contacts do not.
+
+The GPU world's terrain renderer follows the bound law: `inspectMaterials()` on
+either world lists the active materials with their catalog colors, and
+`createRenderer` colors every active ID from them, draws gases (air excepted) as
+see-through cutouts that never occlude what collapses behind them, and gives
+flames and melts a temperature glow in the diagnostic and naturalistic styles.
+Roles come from the catalog, not from pack IDs: a gas is a cutout, a fuel's
+`smoke_product` is a flame, and a molten-phase material, or a viscous one that
+freezes into a cohesive solid, is a melt whose glow starts 40 units under its
+freezing point. Worlds without a registry keep the frozen `ca-3d-m5` palette
+and shading byte for byte. Limits: motion traces and paths report 28 observed
+passes, combustion moving nothing; qualification covers the bounded fixtures and
+the structural cavern's reactive chambers at 32³ and 64³ in
+[the M6 checkpoint](../checkpoints/3D_M6.md) only.

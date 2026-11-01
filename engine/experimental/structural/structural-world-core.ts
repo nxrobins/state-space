@@ -23,10 +23,12 @@ import {
 } from '../3d-core.js';
 import {
   structuralLaw3D,
+  structuralMaterials3D,
   structuralSchedule3D,
   STRUCTURAL_RULES_VERSION_3D,
   STRUCTURAL_REACTIVE_RULES_VERSION_3D,
   type StructuralLaw3D,
+  type StructuralMaterialView3D,
 } from './structural-law.js';
 import type { ReactiveMaterialRegistry3D } from '../reactive/reactive-registry.js';
 import {
@@ -58,6 +60,7 @@ import {
 } from '../gameplay/motion-paths.js';
 
 export { STRUCTURAL_RULES_VERSION_3D, STRUCTURAL_REACTIVE_RULES_VERSION_3D };
+export type { StructuralMaterialView3D };
 export const STRUCTURAL_SCHEMA_VERSION_3D = 2;
 export const STRUCTURAL_WORLD_VERSION_3D = 'finite-structural-1';
 /** A validated reactive registry selects the ca-3d-m6 law; without one the world runs ca-3d-m5. */
@@ -615,6 +618,10 @@ export class CpuStructuralWorld3D {
   }
   inspectStructure() {
     return solveStructure3D(this.#state, this, this.#law.cold);
+  }
+  /** The bound catalog's active materials: id, name, color and default phase/thermal. */
+  inspectMaterials(): readonly StructuralMaterialView3D[] {
+    return structuralMaterials3D(this.#law);
   }
 }
 export const createStateSpaceStructuralWorld3D = (options: StructuralWorldOptions3D = {}) =>

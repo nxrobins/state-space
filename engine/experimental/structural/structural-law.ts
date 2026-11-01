@@ -35,9 +35,13 @@ export const STRUCTURAL_COMBUSTION_PASS_3D: Readonly<StructuralPass3D> = Object.
 });
 export type StructuralMaterialRecord3D = Readonly<{
   name: string;
+  /** The catalog's `#rrggbb` presentation color; physics never reads it. */
+  color: string;
   defaultThermal: number;
   defaultPhase: number;
 }>;
+/** One active material of a world's law, as `inspectMaterials()` reports it. */
+export type StructuralMaterialView3D = StructuralMaterialRecord3D & Readonly<{ id: number }>;
 export type StructuralLaw3D = Readonly<{
   rulesVersion: typeof STRUCTURAL_RULES_VERSION_3D | typeof STRUCTURAL_REACTIVE_RULES_VERSION_3D;
   materialCatalogHash: string;
@@ -73,11 +77,16 @@ const M5_LAW: StructuralLaw3D = Object.freeze({
     const m = DEFAULT_REGISTRY.material(id);
     return {
       name: m.name,
+      color: m.color,
       defaultThermal: m.default_thermal,
       defaultPhase: m.properties.default_phase,
     };
   },
 });
+/** Frozen, owned views of every active material in law order. */
+export function structuralMaterials3D(law: StructuralLaw3D): readonly StructuralMaterialView3D[] {
+  return Object.freeze(law.materialIds.map((id) => Object.freeze({ id, ...law.record(id) })));
+}
 
 /** Reads only the registry's public contract; the reactive module is never loaded by structural worlds. */
 function checkedReactiveRegistry(value: unknown): ReactiveMaterialRegistry3D {
@@ -126,6 +135,8 @@ export function reactiveStructuralLaw3D(registry: unknown): StructuralLaw3D {
     if (
       !m ||
       typeof m.name !== 'string' ||
+      typeof m.color !== 'string' ||
+      !/^#[0-9a-fA-F]{6}$/.test(m.color) ||
       m.properties.default_phase !== phase ||
       !M1_PHASES.includes(phase)
     )
@@ -140,7 +151,12 @@ export function reactiveStructuralLaw3D(registry: unknown): StructuralLaw3D {
     }
     records.set(
       id,
-      Object.freeze({ name: m.name, defaultThermal: m.default_thermal, defaultPhase: phase }),
+      Object.freeze({
+        name: m.name,
+        color: m.color,
+        defaultThermal: m.default_thermal,
+        defaultPhase: phase,
+      }),
     );
   }
   const frozenIds = Object.freeze(ids);

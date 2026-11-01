@@ -4,9 +4,12 @@ import { energyLedger, temperatureQ } from '../thermal.js';
 import { activeWorldGeometry, checkedActiveWorldRegion } from './volume/active-world-core.js';
 import {
   structuralLaw3D,
+  structuralMaterials3D,
   structuralSchedule3D,
   type StructuralLaw3D,
+  type StructuralMaterialView3D,
 } from './structural/structural-law.js';
+import { materialPresentation3D } from './volume/material-presentation.js';
 import type { RegionRequest3D } from './volume/3d-gpu-core.js';
 import { structuralShaders, STRUCTURAL_LIST_STAGES } from './structural/structural-shader.js';
 import { structuralActivityShaders } from './structural/structural-active-shader.js';
@@ -1068,9 +1071,21 @@ export class GpuStructuralWorld3D {
   energyLedger() {
     return this.#run(async () => energyLedger(await this.#readState(), this.#law.cold));
   }
+  /** The bound catalog's active materials: id, name, color and default phase/thermal. */
+  inspectMaterials(): readonly StructuralMaterialView3D[] {
+    return structuralMaterials3D(this.#law);
+  }
   createRenderer(canvas: HTMLCanvasElement): Promise<TerrainRenderer> {
     return this.#run(async () => {
       if (this.#renderers.size) throw Error('A structural world supports one terrain cache.');
+      // Presentation follows the law: catalog colors for every active ID, gases as cutouts,
+      // flames and melts as emitters. The frozen ca-3d-m5 catalog keeps its legacy shaders.
+      const law = this.#law,
+        presentation = materialPresentation3D({
+          cold: law.cold,
+          materials: this.inspectMaterials(),
+          reactive: law.reactive,
+        });
       const renderer = await makeChunkRenderer(
         this.#device,
         canvas,
@@ -1082,6 +1097,7 @@ export class GpuStructuralWorld3D {
         this.chunkSize,
         this.#profiler,
         () => this.#tick,
+        presentation,
       );
       let closed = false;
       const wrapped: TerrainRenderer = {

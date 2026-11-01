@@ -35,6 +35,12 @@ date of the last change in the section.
   (builtins, custom definitions or the thermal pack) binds its cold table into
   the M5 CPU, dense GPU and active GPU backends and adds the six-neighbor
   combustion pass with consumed supports; `ca-3d-m5` is unchanged (pending PR).
+- Catalog-driven terrain rendering and two reactive structural cavern chambers:
+  a 256-entry palette from the world's law with gas cutouts and catalog-derived
+  flame/melt glow, `inspectMaterials()` on structural worlds, and the
+  `burning-bridge` and `thermal-valve` scenes (with a ceramic toggle) behind a
+  `catalog` parameter, with pinned tick windows in the pilots and replays
+  (pending PR).
 
 ### Changed
 
