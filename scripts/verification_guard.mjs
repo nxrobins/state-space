@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { pythonInterpreter } from '../engine/test-support/python-interpreter.mjs';
 /** All entry points share one OS lease and one bounded descendant process tree. */
 export async function guardNode(kind, timeout = 600) {
   const hold = new URL('../dist/verification/safety-hold.json', import.meta.url);
@@ -15,12 +15,8 @@ export async function guardNode(kind, timeout = 600) {
       throw Error('Runtime verification remains blocked pending incident review');
   }
   if (process.env.STATE_SPACE_VERIFICATION_JOB) return;
-  const localPython =
-    process.platform === 'win32' ? '.venv/Scripts/python.exe' : '.venv/bin/python';
-  const python =
-    process.env.STATE_SPACE_PYTHON ?? (existsSync(localPython) ? resolve(localPython) : 'python');
   const child = spawn(
-    python,
+    pythonInterpreter(),
     [
       '-m',
       'scripts.verification_guard',

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import ts from '@typescript/typescript6';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { pythonInterpreter } from './test-support/python-interpreter.js';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
 import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
 import * as S from './structure.js';
 import { compiledStructuralPlan } from './structure_compiled.js';

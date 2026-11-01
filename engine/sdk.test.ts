@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
 import { DEFAULT_CATALOG, MAT } from './generated/materials.js';
 import {
   createMaterialRegistry,
@@ -13,7 +13,7 @@ import {
 import { createStateSpaceField } from './browser_state_space.js';
 
 const extensions = JSON.parse(readFileSync('examples/sdk/materials.json', 'utf8'));
-const python = process.env.STATE_SPACE_PYTHON ?? resolve('.venv/Scripts/python.exe');
+const python = pythonInterpreter();
 
 describe('portable registries and field APIs', () => {
   it('copies complete state into reusable caller storage without exposing field arrays', () => {

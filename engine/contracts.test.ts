@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { pythonInterpreter } from './test-support/python-interpreter.js';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
 import { createStateSpaceField, packVoxel, unpackVoxel } from './browser_state_space.js';
 import { validateDimensions, validatePackedCells, validateSnapshot } from './contracts.js';
 import {

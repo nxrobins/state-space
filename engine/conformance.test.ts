@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { pythonInterpreter } from './test-support/python-interpreter.js';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
 import { createStateSpaceField, packVoxel } from './browser_state_space.js';
 import { runCpuPass, runCpuTick } from './cpu_physics.js';
 import { MAT, buildColdTable } from './generated/materials.js';
