@@ -22,7 +22,11 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 4,
+    "spanOnFloorFrom": 8
+   }
   },
   {
    "name": "sealed",
@@ -38,7 +42,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "vented",
@@ -54,7 +61,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "valve",
@@ -70,7 +80,13 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 12,
+    "plugMelted": 13,
+    "waterHeldThrough": 13,
+    "waterReleased": 14
+   }
   },
   {
    "name": "barrier",
@@ -86,7 +102,11 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 48,
+    "waterHeldThrough": 48
+   }
   },
   {
    "name": "uniform",
@@ -102,7 +122,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "dormant",
@@ -118,7 +141,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "unchangedThrough": 16
+   }
   },
   {
    "name": "bridge",
@@ -134,7 +160,11 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 4,
+    "spanOnFloorFrom": 16
+   }
   },
   {
    "name": "sealed",
@@ -150,7 +180,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "vented",
@@ -166,7 +199,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "valve",
@@ -182,7 +218,13 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 12,
+    "plugMelted": 13,
+    "waterHeldThrough": 13,
+    "waterReleased": 14
+   }
   },
   {
    "name": "barrier",
@@ -198,7 +240,11 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 48,
+    "waterHeldThrough": 48
+   }
   },
   {
    "name": "uniform",
@@ -214,7 +260,10 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
   },
   {
    "name": "dormant",
@@ -230,7 +279,11 @@
     "peakChunks": 8
    },
    "planReused": true,
-   "planReusable": true
+   "planReusable": true,
+   "windows": {
+    "unchangedThrough": 16
+   }
   }
- ]
+ ],
+ "windowsNote": "Tick windows measured on the CPU oracle during the active re-run of 2026-11-01 and pinned in structural-reactive-fixtures.ts; the dense run's trajectories are identical."
 }

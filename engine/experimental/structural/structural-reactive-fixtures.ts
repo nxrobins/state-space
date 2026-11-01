@@ -13,6 +13,21 @@ export const REACTIVE_FIXTURE_NAMES_3D = [
   'dormant',
 ] as const;
 export type ReactiveFixtureName3D = (typeof REACTIVE_FIXTURE_NAMES_3D)[number];
+/** Deterministic tick windows each fixture must meet, like the M5 chamber failure windows. */
+export type ReactiveExpectation3D = {
+  /** The exact tick after which ash first exists. */
+  firstReactionTick?: number;
+  /** From this tick on, every wood cell except the pinned one rests on the closed floor row. */
+  spanOnFloorFrom?: number;
+  /** The plug is still solid wax after this tick and no longer wax by plugMeltsBy. */
+  plugSolidThrough?: number;
+  plugMeltsBy?: number;
+  /** Water fills exactly its two column cells through this tick and reaches y >= 4 by waterReleasedBy. */
+  waterHeldThrough?: number;
+  waterReleasedBy?: number;
+  /** All three coordinates equal the initial state after every tick through this one. */
+  unchangedThrough?: number;
+};
 export type ReactiveFixture3D = {
   name: ReactiveFixtureName3D;
   size: number;
@@ -25,6 +40,7 @@ export type ReactiveFixture3D = {
   ticks: number;
   /** Named cells the tests and probes inspect. */
   cells: Record<string, [number, number, number]>;
+  expected: ReactiveExpectation3D;
 };
 const place = (
   x: number,
@@ -89,7 +105,8 @@ export function reactiveFixture3D(name: ReactiveFixtureName3D, size: 8 | 16): Re
     scripted = new Map<number, StructuralEdit3D[]>(),
     cells: ReactiveFixture3D['cells'] = {};
   let initial: StructuralEdit3D[] = [],
-    ticks = 48;
+    ticks = 48,
+    expected: ReactiveExpectation3D = {};
   if (name === 'bridge') {
     // A wooden cantilever pinned at x = 1. Igniting x = 2 and x = 3 consumes the supports of the
     // remaining span, which then falls as one bonded fragment toward the closed floor.
@@ -103,10 +120,14 @@ export function reactiveFixture3D(name: ReactiveFixtureName3D, size: 8 | 16): Re
     cells.ignition = [2, 2, zc];
     cells.spanEnd = [size - 2, 2, zc];
     ticks = size === 8 ? 40 : 64;
+    // Heating breaks the two cells at the tick-4 solve, they burn in that tick's combustion
+    // pass, and the span falls one cell per tick from y = 2 to the floor row y = size - 1.
+    expected = { firstReactionTick: 4, spanOnFloorFrom: size };
   } else if (name === 'sealed' || name === 'vented') {
     initial = [...shell(size, name === 'vented'), ...fuelFill(size)];
     cells.pocket = [2, 2, 2];
     ticks = 40;
+    expected = { firstReactionTick: 1 };
   } else if (name === 'uniform' || name === 'dormant') {
     // Every cell at one temperature: no heat flux, no movement, so every tile is locally quiet
     // under the M5 predicate. Above wood's flash point the fuel/oxidizer pair must still react on
@@ -121,6 +142,7 @@ export function reactiveFixture3D(name: ReactiveFixtureName3D, size: 8 | 16): Re
     cells.fuel = [zc, zc, zc];
     cells.fuelEnd = [zc + 1, zc, zc];
     ticks = 16;
+    expected = name === 'uniform' ? { firstReactionTick: 1 } : { unchangedThrough: 16 };
   } else {
     // A water column held by a wax plug inside ceramic walls, so the copper rod is the only
     // effective heat path. A sustained source below copper's melting point melts the plug; a
@@ -152,6 +174,103 @@ export function reactiveFixture3D(name: ReactiveFixtureName3D, size: 8 | 16): Re
     cells.waterBottom = [4, 2, zc];
     cells.cavity = [4, 4, zc];
     ticks = 48;
+    expected =
+      name === 'valve'
+        ? { plugSolidThrough: 12, plugMeltsBy: 13, waterHeldThrough: 13, waterReleasedBy: 14 }
+        : { plugSolidThrough: 48, waterHeldThrough: 48 };
   }
-  return { name, size, chunkSize, initial, scripted, ticks, cells };
+  return { name, size, chunkSize, initial, scripted, ticks, cells, expected };
+}
+
+type Coordinates = { grid: Uint32Array; energyQ: Uint32Array; structure: Uint32Array };
+/** Feeds one complete tick at a time; check() throws on the first violated window. */
+export function observeReactiveFixture3D(f: ReactiveFixture3D, initial: Coordinates) {
+  const size = f.size,
+    at = (c: [number, number, number]) => c[0] + size * (c[1] + size * c[2]),
+    yOf = (i: number) => Math.floor(i / size) % size,
+    start = {
+      grid: initial.grid.slice(),
+      energyQ: initial.energyQ.slice(),
+      structure: initial.structure.slice(),
+    };
+  let firstReaction = -1,
+    spanOnFloorFrom = -1,
+    plugSolidThrough = 0,
+    plugMelted = -1,
+    waterHeldThrough = 0,
+    waterReleased = -1,
+    unchangedThrough = 0,
+    last = 0;
+  return {
+    tick(tick: number, s: Coordinates) {
+      if (tick !== last + 1) throw Error(`${f.name} ${size}: ticks must be observed in order`);
+      last = tick;
+      let ash = 0,
+        spanOnFloor = true,
+        waterHeld = true,
+        unchanged = true;
+      const water: number[] = [];
+      for (let i = 0; i < s.grid.length; i++) {
+        const m = s.grid[i] & 255;
+        if (m === MAT.ASH) ash++;
+        if (m === MAT.WOOD && f.cells.anchor && i !== at(f.cells.anchor) && yOf(i) !== size - 1)
+          spanOnFloor = false;
+        if (m === MAT.WATER) water.push(i);
+        if (
+          s.grid[i] !== start.grid[i] ||
+          s.energyQ[i] !== start.energyQ[i] ||
+          s.structure[i] !== start.structure[i]
+        )
+          unchanged = false;
+      }
+      if (ash && firstReaction < 0) firstReaction = tick;
+      if (f.cells.anchor)
+        spanOnFloorFrom = spanOnFloor ? (spanOnFloorFrom < 0 ? tick : spanOnFloorFrom) : -1;
+      if (f.cells.plug) {
+        const solid = (s.grid[at(f.cells.plug)] & 255) === THERMAL_MAT_3D.WAX;
+        if (solid && plugSolidThrough === tick - 1) plugSolidThrough = tick;
+        if (!solid && plugMelted < 0) plugMelted = tick;
+        const held = [at(f.cells.waterTop), at(f.cells.waterBottom)].sort((a, b) => a - b);
+        waterHeld = water.length === 2 && water[0] === held[0] && water[1] === held[1];
+        if (waterHeld && waterHeldThrough === tick - 1) waterHeldThrough = tick;
+        if (waterReleased < 0 && water.some((i) => yOf(i) >= 4)) waterReleased = tick;
+      }
+      if (unchanged && unchangedThrough === tick - 1) unchangedThrough = tick;
+    },
+    check() {
+      const e = f.expected,
+        label = `${f.name} ${size}^3`,
+        fail = (what: string) => {
+          throw Error(`${label}: ${what}`);
+        };
+      if (e.firstReactionTick !== undefined && firstReaction !== e.firstReactionTick)
+        fail(`first reaction at tick ${firstReaction}, expected ${e.firstReactionTick}`);
+      if (e.spanOnFloorFrom !== undefined && spanOnFloorFrom !== e.spanOnFloorFrom)
+        fail(`span rests on the floor from tick ${spanOnFloorFrom}, expected ${e.spanOnFloorFrom}`);
+      if (e.plugSolidThrough !== undefined && plugSolidThrough < e.plugSolidThrough)
+        fail(`plug solid only through tick ${plugSolidThrough}, expected ${e.plugSolidThrough}`);
+      if (e.plugMeltsBy !== undefined && (plugMelted < 0 || plugMelted > e.plugMeltsBy))
+        fail(`plug melted at tick ${plugMelted}, expected by ${e.plugMeltsBy}`);
+      if (e.waterHeldThrough !== undefined && waterHeldThrough < e.waterHeldThrough)
+        fail(`water held only through tick ${waterHeldThrough}, expected ${e.waterHeldThrough}`);
+      if (
+        e.waterReleasedBy !== undefined &&
+        (waterReleased < 0 || waterReleased > e.waterReleasedBy)
+      )
+        fail(`water released at tick ${waterReleased}, expected by ${e.waterReleasedBy}`);
+      if (e.unchangedThrough !== undefined && unchangedThrough < e.unchangedThrough)
+        fail(
+          `state changed after tick ${unchangedThrough}, expected unchanged through ${e.unchangedThrough}`,
+        );
+      return {
+        firstReaction,
+        spanOnFloorFrom,
+        plugSolidThrough,
+        plugMelted,
+        waterHeldThrough,
+        waterReleased,
+        unchangedThrough,
+      };
+    },
+  };
 }

@@ -8,6 +8,7 @@ import {
 import { structuralSchedule3D, structuralLaw3D } from './structural/structural-law.js';
 import {
   reactiveFixture3D,
+  observeReactiveFixture3D,
   sealedAirCells3D,
   type ReactiveFixture3D,
 } from './structural/structural-reactive-fixtures.js';
@@ -59,7 +60,12 @@ const positions = (w: CpuStructuralWorld3D, id: number) => {
 function run(f: ReactiveFixture3D, registry: ReactiveMaterialRegistry3D) {
   const w = world(f.size, f.chunkSize, registry);
   w.edit(f.initial);
-  const before = w.energyLedger();
+  const before = w.energyLedger(),
+    observer = observeReactiveFixture3D(f, {
+      grid: w.grid,
+      energyQ: w.energyQ,
+      structure: w.structure,
+    });
   for (let t = 0; t < f.ticks; t++) {
     w.step(1, { edits: f.scripted.get(t) ?? [] });
     expect(w.energyBalance().driftQ).toBe(0n);
@@ -67,8 +73,10 @@ function run(f: ReactiveFixture3D, registry: ReactiveMaterialRegistry3D) {
       structure = w.structure;
     for (let i = 0; i < grid.length; i++)
       if (NON_STRUCTURAL.includes(grid[i] & 255)) expect(structure[i]).toBe(0);
+    observer.tick(w.tick, { grid, energyQ: w.energyQ, structure });
   }
-  return { w, before, after: w.energyLedger() };
+  const windows = observer.check();
+  return { w, before, after: w.energyLedger(), windows };
 }
 
 describe('ca-3d-m6 law binding', () => {
@@ -231,16 +239,14 @@ describe('ca-3d-m6 combustion in structural worlds (8^3 and 16^3)', () => {
   for (const size of [8, 16] as const)
     test(`${size}^3 uniform temperature: burning fuel reacts without any heat flux, dormant fuel never does`, () => {
       const uniform = run(reactiveFixture3D('uniform', size), thermal),
-        dormant = reactiveFixture3D('dormant', size),
-        w = world(size, dormant.chunkSize, thermal);
+        dormant = run(reactiveFixture3D('dormant', size), thermal);
       expect(counts(uniform.w.grid)(MAT.ASH)).toBeGreaterThan(0);
+      expect(uniform.windows.firstReaction).toBe(1);
       expect(uniform.before.chemicalQ - uniform.after.chemicalQ).toBe(
         BigInt(counts(uniform.w.grid)(MAT.ASH)) * WOOD_CHEMICAL_Q,
       );
-      w.edit(dormant.initial);
-      const before = w.snapshot();
-      w.step(dormant.ticks);
-      expect(w.snapshot()).toEqual({ ...before, tick: dormant.ticks });
+      expect(dormant.windows.unchangedThrough).toBe(16);
+      expect(dormant.after).toEqual(dormant.before);
     });
   test('motion traces and paths cover a reacting tick without counting combustion as movement', () => {
     const f = reactiveFixture3D('bridge', 8),

@@ -10,7 +10,11 @@ import {
 import { MAT } from '../../generated/materials.js';
 import { solveStructure3D } from '../structural-mechanics.js';
 import { createThermalMaterialRegistry3D } from '../reactive/thermal-materials.js';
-import { reactiveFixture3D, REACTIVE_FIXTURE_NAMES_3D } from './structural-reactive-fixtures.js';
+import {
+  reactiveFixture3D,
+  observeReactiveFixture3D,
+  REACTIVE_FIXTURE_NAMES_3D,
+} from './structural-reactive-fixtures.js';
 export async function verifyM5ShaderCompile() {
   if (!navigator.gpu) throw Error('WebGPU unavailable.');
   const adapter = await navigator.gpu.requestAdapter();
@@ -755,11 +759,21 @@ export async function verifyM6GpuTiny(mode: 'dense' | 'active' = 'dense') {
           throw Error(`${name} ${size}: GPU world does not bind the ca-3d-m6 catalog`);
         await gpu.restore(cpu.snapshot());
         equalState(await gpu.snapshot(), cpu.snapshot(), `${name} ${size} initial`);
+        const observer = observeReactiveFixture3D(f, {
+          grid: cpu.grid,
+          energyQ: cpu.energyQ,
+          structure: cpu.structure,
+        });
         for (let t = 0; t < f.ticks; t++) {
           const edits = f.scripted.get(t) ?? [];
           cpu.step(1, { edits });
           await gpu.step(1, { edits });
           equalState(await gpu.snapshot(), cpu.snapshot(), `${name} ${size} tick ${t + 1}`);
+          observer.tick(cpu.tick, {
+            grid: cpu.grid,
+            energyQ: cpu.energyQ,
+            structure: cpu.structure,
+          });
           const balance = await gpu.energyBalance();
           if (balance.driftQ !== 0n) throw Error(`${name} ${size} tick ${t + 1}: energy drift`);
           if (t % 8 === 0) status(`M6 ${mode} ${name} ${size}^3: tick ${t + 1}/${f.ticks}`);
@@ -780,6 +794,7 @@ export async function verifyM6GpuTiny(mode: 'dense' | 'active' = 'dense') {
           size,
           ticks: f.ticks,
           finalHash: await digest(cpu.snapshot()),
+          windows: observer.check(),
           activity,
           solve: gpu.inspectSolve(),
           backendInfo: gpu.backendInfo,
