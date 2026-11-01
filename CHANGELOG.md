@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-26)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-01)
 
 ### Added
 
@@ -41,7 +41,8 @@ date of the last change in the section.
   `burning-bridge` and `thermal-valve` scenes (with a ceramic toggle) behind a
   `catalog` parameter, with pinned tick windows in the pilots and replays;
   supervised macOS qualification stages `m6-gameplay-*` and `m6-replay-*` for
-  those chambers at 32³ and 64³ (pending PR).
+  those chambers at 32³ and 64³, and `m6-tiny-dense` / `m6-tiny-active` for the
+  8³/16³ parity probes from the structural probe bundle (pending PR).
 
 ### Changed
 
@@ -86,6 +87,10 @@ date of the last change in the section.
 
 ### Fixed
 
+- Python-backed Vitest fixtures and the Node verification guard resolve one
+  interpreter (`PYTHON`, `STATE_SPACE_PYTHON`, the checkout's venv, `python3`,
+  `python`) instead of a bare `python`, so `npm test` passes on hosts whose
+  default interpreter lacks numpy (pending PR).
 - The native structure tests' negative controls match the formatted source
   again, and the CPU suite checks their anchors (#71).
 - Default water stays liquid at the reference temperature (#15).
