@@ -10,7 +10,7 @@ from engine.contracts import checked_integer
 from engine.schedule import KERNEL_SPECS
 
 
-POLICY_VERSION = "ca-v4-evaluation-1"
+POLICY_VERSION = "ca-v4-evaluation-2"
 TARGETS = {
     "codec": "phase_1a_winner.wgsl", "thermal": "phase_2a_winner.wgsl",
     "gravity": "phase_2b_winner.wgsl", "diagonal": "phase_2b_diagonal_winner.wgsl",
@@ -20,7 +20,9 @@ TARGETS = {
     "structure": "phase_2e_structure.wgsl", "normalize": "phase_2e_normalize.wgsl",
 }
 ALIASES = {"1a": "codec", "2a": "thermal", "2b": "gravity", "2c": "phase", "2d": "combustion"}
-OBJECTIVES = ("end_to_end_ms", "sync_tick_ms")
+OBJECTIVES = ("end_to_end_ms", "sync_tick_ms", "kernel_ms")
+# Isolated kernel timing shapes; the first is also the probe shape that guards every larger batch.
+KERNEL_SHAPES = ((256, 256), (512, 512))
 
 
 def target_name(value: str) -> str:
@@ -45,10 +47,13 @@ class EvaluationConfig:
     samples: int = 7
     ticks: int = 4
     timeout_seconds: int = 180
+    kernel_dispatches: int = 256
+    kernel_probe_budget_ms: int = 6
 
     def __post_init__(self):
         for name, low, high in (("seed", 0, 2**32 - 1), ("warmup", 1, 20), ("samples", 3, 50),
-                                ("ticks", 4, 64), ("timeout_seconds", 30, 600)):
+                                ("ticks", 4, 64), ("timeout_seconds", 30, 600),
+                                ("kernel_dispatches", 32, 1024), ("kernel_probe_budget_ms", 1, 100)):
             checked_integer(getattr(self, name), low, high, name)
 
     def to_dict(self):
@@ -58,6 +63,19 @@ class EvaluationConfig:
 def target_variants(target: str) -> set[str]:
     target = target_name(target)
     return {spec.id for spec in KERNEL_SPECS if target == "codec" or spec.source_file == TARGETS[target]}
+
+
+def kernel_variants(target: str) -> list[str]:
+    """Pass variants timed in isolation. A kernel target times every variant of its source.
+    The codec is linked into every kernel, so it times one variant per kernel source instead
+    of every salt, parity and phase of the same text."""
+    target = target_name(target)
+    if target != "codec":
+        return sorted(target_variants(target))
+    representatives = {}
+    for spec in KERNEL_SPECS:
+        representatives.setdefault(spec.source_file, spec.id)
+    return sorted(representatives.values())
 
 
 def constraints(target: str) -> dict[str, int]:
