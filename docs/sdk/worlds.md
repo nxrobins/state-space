@@ -297,7 +297,7 @@ Active GPU worlds keep a tile awake while it holds burning fuel next to an
 oxidizer, an oxidizer next to burning fuel, or fire that would extinguish. The
 plan-reuse certificate is unchanged: a consumed support changes a structural word
 and invalidates the retained plan; gas, fire and smoke changes away from intact
-cells and contacts do not. Limits: the terrain renderer's palette covers the 18
-builtin IDs, so pack materials have no dedicated color; motion traces and paths
+cells and contacts do not. Limits: the terrain renderer's palette colors only the
+nine M1 materials, so wood, ash, fire, smoke and pack materials render black; motion traces and paths
 report 28 observed passes, combustion moving nothing; qualification covers the
 bounded fixtures in [the M6 checkpoint](../checkpoints/3D_M6.md) only.
