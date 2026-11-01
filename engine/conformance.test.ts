@@ -1,8 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { pythonInterpreter } from './test-support/python-interpreter.js';
 import { createStateSpaceField, packVoxel } from './browser_state_space.js';
 import { runCpuPass, runCpuTick } from './cpu_physics.js';
 import { MAT, buildColdTable } from './generated/materials.js';
@@ -25,9 +24,7 @@ interface Case {
 
 let cases: Case[] = [];
 beforeAll(async () => {
-  const python =
-    process.env.STATE_SPACE_PYTHON ??
-    (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
+  const python = pythonInterpreter();
   const { stdout } = await promisify(execFile)(python, ['-m', 'engine.conformance'], {
     encoding: 'utf8',
     timeout: 120_000,

@@ -1,10 +1,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import ts from '@typescript/typescript6';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { pythonInterpreter } from './test-support/python-interpreter.js';
 import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
 import * as S from './structure.js';
 import { compiledStructuralPlan } from './structure_compiled.js';
@@ -43,9 +44,7 @@ const stateOf = (value: Pick<Fixture, 'cells' | 'energyQ' | 'structure'>): S.Str
 });
 
 beforeAll(async () => {
-  const python =
-    process.env.STATE_SPACE_PYTHON ??
-    (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
+  const python = pythonInterpreter();
   const { stdout } = await promisify(execFile)(python, ['-m', 'engine.structure_conformance'], {
     encoding: 'utf8',
     timeout: 60_000,
