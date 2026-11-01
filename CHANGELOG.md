@@ -31,6 +31,10 @@ date of the last change in the section.
   (#34); the opt-in thermal material pack with three reactive scenes (#35).
 - macOS qualification stages, portable CI and installed SDK checks (#25);
   bulk evidence archives with verified restoration (#26).
+- Experimental `ca-3d-m6` structural worlds: a validated reactive catalog
+  (builtins, custom definitions or the thermal pack) binds its cold table into
+  the M5 CPU, dense GPU and active GPU backends and adds the six-neighbor
+  combustion pass with consumed supports; `ca-3d-m5` is unchanged (pending PR).
 
 ### Changed
 

@@ -82,6 +82,8 @@ def finish_resources(report, browser, server, journal):
 def invocation_for(args):
     module = '/dist/volume-m5/structural-probe.js'
     invocation = 'verifyM5ShaderCompile()' if args.probe == 'compile' else 'verifyM5GpuTiny(' + json.dumps('active' if args.probe == 'active-tiny' else 'dense') + ')'
+    if args.probe in ('m6-tiny', 'm6-active-tiny'):
+        invocation = 'verifyM6GpuTiny(' + json.dumps('active' if args.probe == 'm6-active-tiny' else 'dense') + ')'
     if args.probe == 'trajectory':
         url = '/' + args.reference.resolve().relative_to(ROOT).as_posix()
         invocation = 'verifyM5GpuTrajectory(' + json.dumps(args.mode) + ',' + json.dumps(url) + ')'
@@ -139,7 +141,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-executable', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--probe', choices=('review', 'compile', 'tiny', 'active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
+    parser.add_argument('--probe', choices=('review', 'compile', 'tiny', 'active-tiny', 'm6-tiny', 'm6-active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--replay-part', choices=('all', 'main', 'restarts'), default='all')

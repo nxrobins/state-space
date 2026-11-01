@@ -178,7 +178,10 @@ IDs 32–36 belong to this pack; the separate SDK teaching examples keep their o
 IDs. The v1 factory is a fixed definition: changing its parameters requires a new
 pack version. Catalog hashes bind the complete definitions, not just names or IDs.
 Save the catalog rather than assuming a future default can read an old world.
-These are reactive CPU materials; this factory does not extend M5/GPU contracts.
+Any validated reactive registry, including this pack, also binds the experimental
+`ca-3d-m6` structural worlds on the CPU, dense GPU and active GPU backends; see
+[the structural world guide](../worlds.md#experimental-ca-3d-m6-reactive-structural-worlds).
+The `ca-3d-m5` contract itself is unchanged.
 
 The [three material scenes](../../../examples/reactive-chamber/README.md) demonstrate
 conduction, insulation and a wax valve in sparse 16³ worlds. They share the pack

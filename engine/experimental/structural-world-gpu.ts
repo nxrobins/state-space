@@ -1,17 +1,21 @@
 /** Independent M5 GPU solver. The committed bank is never a scratch output. */
-import { buildColdTable } from '../generated/materials.js';
 import { checkedInteger, stateCopyTargets } from '../validation.js';
 import { energyLedger, temperatureQ } from '../thermal.js';
-import { DEFAULT_REGISTRY } from '../registry.js';
-import { volumeSchedule } from './3d-core.js';
 import { activeWorldGeometry, checkedActiveWorldRegion } from './volume/active-world-core.js';
+import {
+  structuralLaw3D,
+  structuralSchedule3D,
+  type StructuralLaw3D,
+} from './structural/structural-law.js';
 import type { RegionRequest3D } from './volume/3d-gpu-core.js';
 import { structuralShaders, STRUCTURAL_LIST_STAGES } from './structural/structural-shader.js';
 import { structuralActivityShaders } from './structural/structural-active-shader.js';
 import {
   CpuStructuralWorld3D,
   prepareStructuralEdits3D,
-  validateStructuralSnapshot3D,
+  validateStructuralSnapshotFor3D,
+  STRUCTURAL_SCHEMA_VERSION_3D,
+  STRUCTURAL_WORLD_VERSION_3D,
   type StructuralWorldOptions3D,
   type StructuralSnapshot3D,
   type StructuralEdit3D,
@@ -69,7 +73,7 @@ export type {
 } from './structural/structural-view.js';
 export { checkedGameplayState as validateStructuralGameplayState3D } from './gameplay/gameplay-gpu.js';
 
-const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase'];
+const KINDS = ['gravity', 'diagonal', 'liquid', 'buoyancy', 'gas', 'heat', 'phase', 'combustion'];
 const BINDINGS = {
   main: [0, 1, 2, 3, 4, 5, 6, 7, 8],
   supportInit: [0, 4, 7, 9],
@@ -100,7 +104,6 @@ type Stage = keyof typeof BINDINGS;
 const listStages = new Set<Stage>(STRUCTURAL_LIST_STAGES);
 type Bank = { grid: GPUBuffer; energyQ: GPUBuffer; structure: GPUBuffer };
 type Pipelines = Record<Stage, GPUComputePipeline>;
-const cold = buildColdTable();
 const total = (values: ArrayLike<number>) => {
   let sum = 0;
   for (let i = 0; i < values.length; i++) sum += values[i];
@@ -139,6 +142,9 @@ export class GpuStructuralWorld3D {
   readonly chunkSize: number;
   readonly backendInfo: Readonly<Record<string, string | boolean>>;
   readonly mode: 'dense' | 'active';
+  readonly rulesVersion: string;
+  readonly materialCatalogHash: string;
+  #law: StructuralLaw3D;
   #device: GPUDevice;
   #pipelines: Pipelines;
   #banks: Bank[] = [];
@@ -190,6 +196,7 @@ export class GpuStructuralWorld3D {
   };
   constructor(
     initial: StructuralSnapshot3D,
+    law: StructuralLaw3D,
     device: GPUDevice,
     pipelines: Pipelines,
     info: Record<string, string | boolean>,
@@ -202,6 +209,9 @@ export class GpuStructuralWorld3D {
     this.height = initial.height;
     this.depth = initial.depth;
     this.chunkSize = initial.chunkSize;
+    this.#law = law;
+    this.rulesVersion = law.rulesVersion;
+    this.materialCatalogHash = law.materialCatalogHash;
     this.#device = device;
     this.#pipelines = pipelines;
     this.backendInfo = Object.freeze({ ...info });
@@ -220,8 +230,8 @@ export class GpuStructuralWorld3D {
         energyQ: buffer(bytes, storage()),
         structure: buffer(bytes, storage()),
       });
-    this.#cold = buffer(cold.byteLength, storage());
-    device.queue.writeBuffer(this.#cold, 0, cold);
+    this.#cold = buffer(law.cold.byteLength, storage());
+    device.queue.writeBuffer(this.#cold, 0, law.cold);
     this.#work = buffer(64 + bytes * 7, storage());
     this.#dirty = buffer((bytes / this.chunkSize ** 3) * 3 + 16, storage());
     this.#indirect = buffer(12, storage() | GPUBufferUsage.INDIRECT);
@@ -238,7 +248,7 @@ export class GpuStructuralWorld3D {
     this.#controlRead = buffer(64, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
     this.#receiptRead = buffer(65536 * 8, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
     this.#fullRead = buffer(bytes * 3, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
-    this.#memberBound = this.#upload(0, validateStructuralSnapshot3D(initial));
+    this.#memberBound = this.#upload(0, validateStructuralSnapshotFor3D(initial, law));
     this.#tick = initial.tick;
     this.#initial = total(initial.energyQ);
     device.queue.writeBuffer(this.#dirty, 0, new Uint32Array(this.#dirty.size / 4).fill(1));
@@ -248,7 +258,16 @@ export class GpuStructuralWorld3D {
     void device.lost.then((info) => {
       this.#fault = info.message || info.reason;
     });
-    for (const key of ['width', 'height', 'depth', 'chunkSize', 'backendInfo', 'mode'])
+    for (const key of [
+      'width',
+      'height',
+      'depth',
+      'chunkSize',
+      'backendInfo',
+      'mode',
+      'rulesVersion',
+      'materialCatalogHash',
+    ])
       Object.defineProperty(this, key, { writable: false, configurable: false });
     // Prepare the edit pipeline and its buffers before the first interaction.
     // The empty batch writes no state and never touches the committed bank.
@@ -289,14 +308,15 @@ export class GpuStructuralWorld3D {
   }
   inspectActivity() {
     return this.#run(async () => {
-      const chunks = (this.width * this.height * this.depth) / this.chunkSize ** 3;
+      const chunks = (this.width * this.height * this.depth) / this.chunkSize ** 3,
+        passes = structuralSchedule3D(this.#tick, this.#law.reactive).length;
       if (this.mode === 'dense')
         return {
           mode: this.mode,
           tick: this.#tick,
           totalChunks: chunks,
           finalAwake: chunks,
-          dispatchedChunks: chunks * 27,
+          dispatchedChunks: chunks * passes,
           peakChunks: chunks,
         };
       const e = this.#device.createCommandEncoder();
@@ -828,7 +848,7 @@ export class GpuStructuralWorld3D {
     // Compute dispatches retain their order and individual resource-usage
     // scopes. Copies/clears stay outside the pass; input/output banks still
     // swap after every material pass. Avoid one native wrapper per dispatch.
-    const schedule = volumeSchedule(this.#tick);
+    const schedule = structuralSchedule3D(this.#tick, this.#law.reactive);
     const materialPass = (p: (typeof schedule)[number]) => {
       this.#parameters(slot, [
         KINDS.indexOf(p.kind),
@@ -883,6 +903,7 @@ export class GpuStructuralWorld3D {
     const commands = prepareStructuralEdits3D(
       options.edits === undefined ? [] : options.edits,
       this,
+      this.#law,
     );
     return this.#run(async () => {
       if (!ticks && commands.length) {
@@ -935,15 +956,12 @@ export class GpuStructuralWorld3D {
   }
   snapshot() {
     return this.#run(async () => {
-      const state = await this.#readState(),
-        template = new CpuStructuralWorld3D({
-          width: 4,
-          height: 4,
-          depth: 4,
-          chunkSize: 4,
-        }).snapshot();
+      const state = await this.#readState();
       return {
-        ...template,
+        schemaVersion: STRUCTURAL_SCHEMA_VERSION_3D,
+        rulesVersion: this.#law.rulesVersion,
+        worldVersion: STRUCTURAL_WORLD_VERSION_3D,
+        materialCatalogHash: this.#law.materialCatalogHash,
         width: this.width,
         height: this.height,
         depth: this.depth,
@@ -956,7 +974,7 @@ export class GpuStructuralWorld3D {
     });
   }
   restore(snapshot: StructuralSnapshot3D) {
-    const state = validateStructuralSnapshot3D(snapshot),
+    const state = validateStructuralSnapshotFor3D(snapshot, this.#law),
       tick = snapshot.tick;
     if (
       snapshot.width !== this.width ||
@@ -1024,11 +1042,11 @@ export class GpuStructuralWorld3D {
         word = s.structure[0];
       return {
         material: v & 255,
-        materialName: DEFAULT_REGISTRY.material(v & 255).name,
+        materialName: this.#law.record(v & 255).name,
         phase: (v >>> 24) & 15,
         thermal: (v >>> 8) & 255,
         energyQ: q,
-        temperatureQ: temperatureQ(v, q, cold),
+        temperatureQ: temperatureQ(v, q, this.#law.cold),
         structure: word,
         integrity: word & INTEGRITY_3D,
         anchored: Boolean(word & ANCHOR_3D),
@@ -1048,7 +1066,7 @@ export class GpuStructuralWorld3D {
     });
   }
   energyLedger() {
-    return this.#run(async () => energyLedger(await this.#readState(), cold));
+    return this.#run(async () => energyLedger(await this.#readState(), this.#law.cold));
   }
   createRenderer(canvas: HTMLCanvasElement): Promise<TerrainRenderer> {
     return this.#run(async () => {
@@ -1156,6 +1174,7 @@ export class GpuStructuralWorld3D {
         const edits = prepareStructuralEdits3D(
           options.edits === undefined ? [] : options.edits,
           this,
+          this.#law,
         );
         if (!command && edits.length) throw Error('Presentation cannot edit physics.');
         let renderer: ResidentChunkRenderer | undefined, camera: TerrainCamera | undefined;
@@ -1287,8 +1306,11 @@ export async function createStateSpaceStructuralWorld3DGPU(
     solveBatchLimit: requestedLimit,
     profiling,
     gpuTiming,
+    registry,
     ...geometry
   } = options;
+  // The law validates the registry before any GPU resource exists.
+  const law = structuralLaw3D(registry);
   if (mode !== 'dense' && mode !== 'active') throw Error('Invalid structural execution mode.');
   if (profiling !== undefined && typeof profiling !== 'boolean')
     throw Error('Invalid profiling option.');
@@ -1304,7 +1326,9 @@ export async function createStateSpaceStructuralWorld3DGPU(
         : 32
       : requestedLimit;
   checkedInteger(solveBatchLimit, 1, 64, 'solve batch limit');
-  const initial = new CpuStructuralWorld3D(geometry).snapshot();
+  const initial = new CpuStructuralWorld3D(
+    registry === undefined ? geometry : { ...geometry, registry },
+  ).snapshot();
   if (!globalThis.navigator?.gpu) throw Error('WebGPU unavailable.');
   const adapter = await navigator.gpu.requestAdapter();
   if (!adapter) throw Error('No WebGPU adapter.');
@@ -1314,13 +1338,14 @@ export async function createStateSpaceStructuralWorld3DGPU(
       profiling && gpuTiming && adapter.features.has('timestamp-query') ? ['timestamp-query'] : [],
   });
   try {
-    const base = structuralShaders(g.chunkSize, [g.width, g.height, g.depth]),
+    const base = structuralShaders(g.chunkSize, [g.width, g.height, g.depth], law.reactive),
       active =
         mode === 'active'
           ? structuralActivityShaders(
               base.physics,
               g.chunkSize,
               (g.width * g.height * g.depth) / g.chunkSize ** 3,
+              law.reactive,
             )
           : undefined;
     const codes = {
@@ -1361,6 +1386,7 @@ export async function createStateSpaceStructuralWorld3DGPU(
     const info = adapter.info;
     const world = new GpuStructuralWorld3D(
       initial,
+      law,
       device,
       pipelines,
       {

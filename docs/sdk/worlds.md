@@ -255,3 +255,49 @@ The existing 3D resident-controller description above applies to M1–M4. M5 use
 structural edit batches and may need additional completion boundaries when its
 global support solve cannot be reused. Combustion, pressure, stored velocity,
 rotation, elasticity and reciprocal player forces are outside M5.
+
+### Experimental ca-3d-m6 reactive structural worlds
+
+Passing a validated reactive material registry to `createStateSpaceStructuralWorld3D`
+or `createStateSpaceStructuralWorld3DGPU` selects rules identity `ca-3d-m6`. The
+world binds that catalog's hash and 24-property cold table in the CPU oracle and
+the dense and active GPU kernels, accepts the catalog's active materials (the
+default reactive builtins, custom definitions or the opt-in thermal pack), and
+appends one combustion pass after the 27 M1 material passes and before bond
+normalization. Without a registry the world runs `ca-3d-m5` unchanged; a
+`ca-3d-m6` world built from the nine M1 materials reproduces `ca-3d-m5`
+trajectories exactly. Snapshots carry the selected identity and catalog hash, and
+the two identities reject each other's snapshots.
+
+```ts
+import { createThermalMaterialRegistry3D } from 'state-space-engine/experimental/3d/reactive-materials';
+import { createStateSpaceStructuralWorld3D } from 'state-space-engine/experimental/3d/structural-world';
+
+const registry = await createThermalMaterialRegistry3D();
+const world = createStateSpaceStructuralWorld3D({ width: 16, height: 16, depth: 16, chunkSize: 8, registry });
+// Save registry.toCatalog() with the snapshot; restoring needs the same registry.
+```
+
+The combustion pass is the `reactive-reactions-1` law over six neighbors: at cell
+`(x, y, z)` the direction order starts at `(x + 2y + 3z + tick % 6) % 6`; a fuel
+above its flash temperature proposes to its first oxidizer, an oxidizer accepts
+its first proposer, and only mutual pairs react. The fuel becomes `burns_into`,
+the oxidizer `smoke_product`, and `min(floor(fuel_energy * 256 / 2), MAX_ENERGY_Q -
+oxidizer energyQ)` moves to the oxidizer, so the integer energy ledger does not
+drift. Builtin fire without adjacent fuel, next to builtin water, or below 80
+temperature units becomes smoke. A consumed cohesive cell loses its structural
+word and the tick-end normalization drops its neighbors' bonds, so the next
+support solve observes the gap. Products that are cohesive solids seed integrity
+255 with the fresh marker, as M5 solidification does; this differs from the
+standalone reactive kernel, which never joins produced solids. The law requires
+each active material to be a fuel or an oxidizer, not both, and rejects catalogs
+whose inactive rows are not zero.
+
+Active GPU worlds keep a tile awake while it holds burning fuel next to an
+oxidizer, an oxidizer next to burning fuel, or fire that would extinguish. The
+plan-reuse certificate is unchanged: a consumed support changes a structural word
+and invalidates the retained plan; gas, fire and smoke changes away from intact
+cells and contacts do not. Limits: the terrain renderer's palette covers the 18
+builtin IDs, so pack materials have no dedicated color; motion traces and paths
+report 28 observed passes, combustion moving nothing; qualification covers the
+bounded fixtures in [the M6 checkpoint](../checkpoints/3D_M6.md) only.
