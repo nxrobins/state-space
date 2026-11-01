@@ -59,7 +59,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-gameplay-32-thermal-valve",
@@ -120,7 +121,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-gameplay-32-thermal-valve-ceramic",
@@ -179,7 +181,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-gameplay-64-burning-bridge",
@@ -244,7 +247,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-gameplay-64-thermal-valve",
@@ -311,7 +315,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-gameplay-64-thermal-valve-ceramic",
@@ -376,7 +381,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": true
   },
   {
    "stage": "m6-replay-32-burning-bridge",
@@ -472,7 +478,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   },
   {
    "stage": "m6-replay-32-thermal-valve",
@@ -570,7 +577,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   },
   {
    "stage": "m6-replay-32-thermal-valve-ceramic",
@@ -666,7 +674,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   },
   {
    "stage": "m6-replay-64-burning-bridge",
@@ -768,7 +777,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   },
   {
    "stage": "m6-replay-64-thermal-valve",
@@ -872,7 +882,8 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   },
   {
    "stage": "m6-replay-64-thermal-valve-ceramic",
@@ -974,7 +985,9 @@
     "device": "",
     "description": "",
     "isFallbackAdapter": false
-   }
+   },
+   "reportRetained": false
   }
- ]
+ ],
+ "retention": "Gameplay reports and every supervisor receipt are retained in full. The six replay reports carry 1,025 reference digests and about 2,000 per-tick GPU checks each, so only their SHA-256, windows, runs and tick-end digest are kept here; the raw files remain in dist/verification on the workstation and any stage is reproducible with npm run verify:macos -- --stage <name>."
 }
