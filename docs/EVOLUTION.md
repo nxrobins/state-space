@@ -20,8 +20,8 @@ python evolve_ss.py search --target thermal --candidate candidate-a.wgsl --candi
 ```
 
 Targets are `codec`, `thermal`, `gravity`, `diagonal`, `liquid`, `buoyancy`,
-`spread`, `phase`, and `combustion`. Historical aliases 1a/2a/2b/2c/2d select the
-corresponding current target. The old 1b synchronization and 1c spatial experiments
+`spread`, `phase`, `combustion`, `structure`, and `normalize`. Historical aliases
+1a/2a/2b/2c/2d select the corresponding current target. The old 1b synchronization and 1c spatial experiments
 are absent from the ca-v3 production schedule and cannot be promoted. Active-region
 dispatch will need its own composed equivalence and measured-work contract.
 
@@ -46,12 +46,18 @@ Proposal records preserve model/request identity, usage, response, and prompt ha
 ## Candidate contract and evidence
 
 Physics candidates contain one `tick` entry with `@workgroup_size(16,16)` and the
-target's required override constants. The host owns storage bindings, common
-physical helpers, and the complete pass schedule. Output writes use `io_copy` or
-`io_write` so both state arrays travel together. Codec candidates contain
-`pack_voxel`, `unpack_voxel`, and `exchange_thermal` helpers, without bindings or
-entry points. The legacy thermal helper retains its specified bit-operation
-behavior; production thermodynamics uses the separate conserved enthalpy law.
+target's required override constants. The host owns storage bindings, the `io_*`
+storage adapter, `property()`, the shared `temperature_q` law, and the complete
+pass schedule. Everything else in the kernel file is candidate-owned, helper
+functions included: the thermal kernel owns `pair_energy` and the phase kernel
+owns `phase_material`, so heat exchange and phase selection arithmetic may be
+restructured as long as every output bit is unchanged. `temperature_q` stays
+host-owned because `io_write`, gas buoyancy, gas spread and combustion read it.
+Output writes use `io_copy` or `io_write` so all three state arrays travel
+together. Codec candidates contain `pack_voxel`, `unpack_voxel`, and
+`exchange_thermal` helpers, without bindings or entry points. The legacy thermal
+helper retains its specified bit-operation behavior; production thermodynamics
+uses the separate conserved enthalpy law.
 
 The local optimization language excludes barriers and unbounded loops. Literal
 bounded `for` loops cannot alter or alias their induction variable in the body.
@@ -83,6 +89,23 @@ fresh evaluation even when its GPU model is the same.
 Changing sources, policy, device, seed, or measurement settings invalidates reuse.
 An archive's mutable `fitness` field never authorizes a parent or influences ranking.
 
+## What the search can and cannot find
+
+The search can only improve work that the candidate file contains. The six
+movement kernels and combustion own their logic. Since policy `ca-v4-evaluation-2`
+the thermal and phase kernels own `pair_energy` and `phase_material`; before that
+they were wrappers around host-owned functions with no arithmetic a candidate
+could change, so their receipts measured nothing. The standalone thermodynamics
+probe (`engine/shaders/enthalpy.wgsl`) keeps its own copies of both functions, so
+historical verification is decoupled from the evolvable surface, and the composed
+CPU-equivalence gate covers the production copies in `locked/`.
+
+`structure` and `normalize` remain targets for coverage. Each calls one host-owned
+adapter (`io_apply_structure`, `io_normalize_structure`) and has little headroom.
+A candidate cannot change the schedule, the bindings, the adapter, the workgroup
+size, or the dispatch geometry, so savings that need them, such as active-region
+dispatch, fused passes, or workgroup tiling, are outside the search.
+
 ## Review and release
 
 ```powershell
@@ -105,9 +128,11 @@ python -m eval.verify --benchmark
 ```
 
 Candidate evaluation uses sparse, dense-flow, thermal, and reactive workloads at
-32x32 and 65x33. The standalone baseline matrix uses 32x32, 128x128, 257x129, and
+32x32 and 65x33 for the composed tick, and at 256x256 and 512x512 for isolated
+kernel timing. The standalone baseline matrix uses 32x32, 128x128, 257x129, and
 512x512. Each repetition starts from the identical seeded full state and absolute
-tick. Defaults are two discarded warmups and seven measured four-tick runs.
+tick. Defaults are two discarded warmups and seven measured four-tick runs, or
+seven measured batches for a kernel row.
 
 The report retains samples, median, mean, min/max, p95, and standard deviation.
 The measured quantities are host wall times with GPU completion included:
@@ -115,13 +140,38 @@ The measured quantities are host wall times with GPU completion included:
 - `syncTickMs`: encoding, submission, and a completion read at each tick boundary.
 - `endToEndMs`: the complete native composed call, including input validation,
   buffer allocation, upload, synchronized stepping, and both full-state readbacks.
+- `kernelMs`: one target pass variant alone. A row uploads one seeded workload
+  once, then submits N back-to-back dispatches (default 256, in command buffers
+  of 32) of the same pipeline through the same bind group: every dispatch reads
+  the unchanged input arrays and overwrites the same output arrays. The queue is
+  drained before the clock and a small readback after the batch completes the
+  fence, so one submit and one completion wait are amortized over N dispatches.
+  Rows cover the four workloads at both shapes for every variant of the target,
+  or one variant per kernel source for the codec, which is linked into all of
+  them. The objective `kernel_ms` is the mean of the row medians per dispatch.
 
 Shader compilation, catalog construction, scene generation, reference checking,
-and evidence serialization are outside these timing intervals. Values are not GPU
-timestamp measurements and do not establish browser SDK or cross-device throughput.
-The browser SDK's full-readback boundary remains an explicit future optimization
-target. Timing comparisons need identical contexts and repeated confirmation;
-candidate-written work counters are never an objective.
+and evidence serialization are outside these timing intervals. Kernel rows also
+exclude host planning, uploads, the other 22 passes, readback, validation, and
+command encoding, which happens before the clock. Values are not GPU timestamp
+measurements and do not establish browser SDK or cross-device throughput; the
+kernel rows share this host's completion-wait floor, which is amortized but not
+subtracted. The browser SDK's full-readback boundary remains an explicit future
+optimization target. Timing comparisons need identical contexts and repeated
+confirmation; candidate-written work counters are never an objective.
+
+The kernel input stays immutable on purpose. A ping-ponged loop would consume
+the eligible transitions of `phase`, `combustion`, or a single-parity thermal
+pass on the first dispatch and then time early-exit work. Before any batch, one
+synchronized dispatch of each variant at 256x256 must finish within the probe
+budget (default 6 ms, retried once at the same size). A slower candidate fails
+closed with the measured time recorded and nothing larger is submitted, because
+the candidate lint bounds each `for` loop but not their nesting. The three output
+arrays are hashed once after the batch and must equal the single-dispatch result.
+`end_to_end_ms` and `sync_tick_ms` remain objectives, so a kernel that is faster
+alone but slows the composed tick does not rank ahead. Receipt admission
+recomputes every kernel row: shapes and order, dispatch count, warmups, sample
+count, distribution, probe result, hash equality, and the stated aggregate.
 
 The native host boundary uses bulk signed-integer projection and accounting,
 differential-tested against the scalar thermodynamic reference. Validation still
@@ -141,7 +191,9 @@ planning and all three transfers. ca-v2 receipts cannot authorize ca-v3 work.
 ## ca-v4 compatibility
 
 Pressure and velocity change the physical contract. The current evaluation policy
-is `ca-v4-evaluation-1`; earlier receipts cannot authorize these rules. The new
-pressure/velocity kernels are fixed production dependencies, not mutation targets.
+is `ca-v4-evaluation-2`; earlier receipts cannot authorize these rules, including
+`ca-v4-evaluation-1` receipts, which measured no isolated kernel time and treated
+the thermal and phase arithmetic as host-owned. The new pressure/velocity kernels
+are fixed production dependencies, not mutation targets.
 Reference trajectories include these passes and source identity includes their
 implementation. See [PRESSURE.md](PRESSURE.md) for causal acceptance properties.

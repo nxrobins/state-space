@@ -1,6 +1,7 @@
 """Evaluate exact candidate text in the full ca-v3 pipeline against the CPU law."""
 
 import json
+import math
 import shutil
 import statistics
 import subprocess
@@ -19,12 +20,12 @@ from engine.state import validate_state
 from engine.structure import INTERNAL_MASK
 from engine.structure_bulk import validate_structure_bulk
 from engine.validation import validate_packed
-from eval.benchmark import benchmark_engine, distribution, run_scene, state_digest
+from eval.benchmark import benchmark_engine, benchmark_kernel, distribution, run_scene, state_digest
 from eval.codec import codec_trial, codec_vectors
-from eval.policy import (POLICY_VERSION, TARGETS, EvaluationConfig, acceptance_errors, candidate_lint,
-                         canonical, digest, target_name, target_variants)
+from eval.policy import (KERNEL_SHAPES, POLICY_VERSION, TARGETS, EvaluationConfig, acceptance_errors, candidate_lint,
+                         canonical, digest, kernel_variants, target_name, target_variants)
 from eval.provenance import ROOT, capture_context, context_sources, device_identity, read_immutable, read_json, write_immutable
-from eval.scenes import acceptance_cases
+from eval.scenes import KINDS, acceptance_cases
 
 
 def reference_outputs(cases: list[dict]) -> list[dict]:
@@ -189,6 +190,11 @@ def execute_candidate(source: str, target: str, config: EvaluationConfig, contex
             report["benchmarks"] = benchmark_engine(engine, config)
             fitness["end_to_end_ms"] = statistics.mean(row["endToEndMs"]["median"] for row in report["benchmarks"])
             fitness["sync_tick_ms"] = statistics.mean(row["syncTickMs"]["median"] for row in report["benchmarks"])
+            # Rows are appended as they complete, so a probe failure or a nondeterministic
+            # batch leaves the measured rows and its recorded reason in the report.
+            report["kernelBenchmarks"] = []
+            benchmark_kernel(engine, target, config, on_row=report["kernelBenchmarks"].append)
+            fitness["kernel_ms"] = statistics.mean(row["kernelMs"]["median"] for row in report["kernelBenchmarks"])
             report["errors"] = acceptance_errors(fitness, target)
             report["passed"] = not report["errors"]
     except Exception as error:
@@ -287,6 +293,25 @@ def accepted_receipt(directory: Path, key: str, source: str, target: str, contex
                     return None
         if (report["fitness"]["end_to_end_ms"] != statistics.mean(row["endToEndMs"]["median"] for row in rows)
                 or report["fitness"]["sync_tick_ms"] != statistics.mean(row["syncTickMs"]["median"] for row in rows)):
+            return None
+        kernel_rows = report["kernelBenchmarks"]
+        expected_rows = [(width, height, f"{kind}-{width}x{height}", variant)
+                         for width, height in KERNEL_SHAPES for kind in KINDS for variant in kernel_variants(target)]
+        if [(row["width"], row["height"], row["scene"], row["variant"]) for row in kernel_rows] != expected_rows:
+            return None
+        for row in kernel_rows:
+            probed = (row["width"], row["height"]) == KERNEL_SHAPES[0]
+            probe = row["probeMs"]
+            if (row["warmup"] != config.warmup or row["dispatches"] != config.kernel_dispatches
+                    or row["probeBudgetMs"] != config.kernel_probe_budget_ms or row["probed"] is not probed
+                    or row["singleHash"] != row["batchHash"]
+                    or row["kernelMs"]["count"] != config.samples or distribution(row["kernelMs"]["samples"]) != row["kernelMs"]):
+                return None
+            if (type(probe) is not list or not 1 <= len(probe) <= 2
+                    or any(type(value) not in (int, float) or not math.isfinite(value) or value <= 0 for value in probe)
+                    or (probed and min(probe) > config.kernel_probe_budget_ms)):
+                return None
+        if report["fitness"]["kernel_ms"] != statistics.mean(row["kernelMs"]["median"] for row in kernel_rows):
             return None
         return report
     except (ValueError, TypeError, KeyError, OSError):
