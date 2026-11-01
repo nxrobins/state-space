@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from scripts.verification_macos import M6_SCENES, M6_STAGES, STAGES, SANDBOX_STAGES, m6_stage, require_preceding_stage, validate_qualification
+from scripts.verification_macos import M6_PROBE_STAGES, M6_SCENES, M6_STAGES, STAGES, SANDBOX_STAGES, m6_stage, require_preceding_stage, stage_bounds, validate_qualification
 
 
 class MacQualificationPolicyTests(unittest.TestCase):
@@ -22,11 +22,30 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            m6 = m6_stage(stage)
-            self.assertEqual(scope["maxDimension"], m6[1] if m6 else 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
-            self.assertEqual(scope["maxFrames"], 32 if m6 and m6[0] == "gameplay" else 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660)
-            self.assertEqual(scope["maxReplayTicks"], (32 if m6[0] == "gameplay" else 1024 if m6[1] == 32 else 256) if m6 else 128 if stage == "chamber-visible" or stage in SANDBOX_STAGES else 1024)
+            self.assertEqual((scope["maxDimension"], scope["maxReplayTicks"], scope["maxFrames"]), stage_bounds(stage))
+            self.assertLessEqual(scope["maxDimension"], 128)
+        # Every stage's bounds are a fixed table, never a request parameter.
+        for stage, bounds in {
+            "chamber-visible": (8, 128, 256),
+            "sandbox-wax-visible": (16, 128, 512),
+            "pilot": (64, 1024, 660),
+            "structural-exact": (64, 1024, 660),
+            "replay-32-cut": (64, 1024, 660),
+            "scale-128-visible": (128, 1024, 8),
+            "gameplay-128-visible": (128, 1024, 660),
+            "gameplay-128-profile-visible": (128, 1024, 660),
+            "gameplay-64-visible": (64, 1024, 660),
+            "m6-gameplay-32-burning-bridge": (32, 32, 32),
+            "m6-gameplay-64-thermal-valve": (64, 32, 32),
+            "m6-replay-32-thermal-valve": (32, 1024, 660),
+            "m6-replay-64-thermal-valve-ceramic": (64, 256, 660),
+            "m6-tiny-dense": (16, 64, 0),
+            "m6-tiny-active": (16, 64, 0),
+        }.items():
+            self.assertEqual(stage_bounds(stage), bounds, stage)
         self.assertEqual(len(M6_STAGES), 12)
+        self.assertEqual(M6_PROBE_STAGES, ("m6-tiny-dense", "m6-tiny-active"))
+        self.assertTrue(all(m6_stage(stage) is None for stage in M6_PROBE_STAGES))
         self.assertEqual(m6_stage("m6-replay-64-thermal-valve-ceramic"), ("replay", 64, "thermal-valve-ceramic"))
         self.assertIsNone(m6_stage("replay-64-cut-long"))
         self.assertTrue(all(scene in M6_SCENES for _, _, scene in map(m6_stage, M6_STAGES)))
@@ -38,6 +57,8 @@ class MacQualificationPolicyTests(unittest.TestCase):
             command[:-1] + ["replay-128-cut"],
             command[:-1] + ["m6-replay-128-burning-bridge"],
             command[:-1] + ["m6-gameplay-32-cut"],
+            command[:-1] + ["m6-tiny-32-dense"],
+            command[:-1] + ["m6-tiny"],
             [sys.executable, "-c", "print(1)"],
         ]:
             with self.assertRaises(RuntimeError):
@@ -63,6 +84,8 @@ class MacScalePrerequisiteTests(unittest.TestCase):
             for stage in M6_STAGES:
                 if m6_stage(stage)[1] == 32:
                     self.assertIsNone(require_preceding_stage(root, stage, hashes))
+            for stage in M6_PROBE_STAGES:
+                self.assertIsNone(require_preceding_stage(root, stage, hashes))
             m6_pairs = [(stage, stage.replace("-64-", "-32-")) for stage in M6_STAGES if m6_stage(stage)[1] == 64]
             for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")] + m6_pairs:
                 root = Path(folder) / target

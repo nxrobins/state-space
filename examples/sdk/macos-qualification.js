@@ -95,6 +95,23 @@ async function m6Gameplay(size,scenario){
  check(result.passed===true&&result.backendInfo.isFallbackAdapter===false,'Hardware GPU required');
  report={...report,...result};
 }
+/** The ca-3d-m6 tiny parity probes: every reactive fixture at 8³ and 16³, GPU equal to the CPU oracle after every tick. */
+async function m6Tiny(mode){
+ const probe=await import('../../dist/volume-m5/structural-probe.js');
+ // The probe reports each fixture and tick through #status; mirror it into the journaled report so
+ // the supervisor's stall deadline sees progress between fixtures.
+ const mirror=new MutationObserver(()=>{report.progress=status.textContent;save();});
+ mirror.observe(status,{childList:true,characterData:true,subtree:true});
+ try{
+  progress('ca-3d-m6 tiny parity probes: '+mode);
+  const result=await probe.verifyM6GpuTiny(mode);
+  const names=new Set(result.results.map(r=>r.name));
+  check(result.passed===true&&result.mode===mode&&result.rulesVersion==='ca-3d-m6'&&names.size>=7,'Tiny ca-3d-m6 probe incomplete');
+  check([8,16].every(size=>result.results.filter(r=>r.size===size).length===names.size),'Every fixture must run at 8³ and 16³');
+  check(result.results.every(r=>r.backendInfo.isFallbackAdapter===false),'Exact probes require hardware GPU');
+  report={...report,...result,fixtures:names.size,backendInfo:result.results[0].backendInfo,energyDriftQ:'0'};
+ }finally{mirror.disconnect();}
+}
 async function structuralExact(){
  const probe=await import('../../dist/volume-m5/structural-probe.js');report.probes=[];
  for(const mode of ['dense','active']){
@@ -193,6 +210,7 @@ window.macQualification={ready:true,run(stage){
   else if(stage==='replay-64-cut-long')await replay(64,'cut',1024);
   else if(/^replay-(32|64)-(control|cut|heat|ice-control|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
   else if(stage==='lighting')await lighting();
+  else if(stage==='m6-tiny-dense'||stage==='m6-tiny-active')await m6Tiny(stage.slice(8));
   else if(stage==='frames-reference'||stage==='frames-cached'||stage==='frames-visible')await frames(stage==='frames-visible'?'reference':stage.slice(7));
   else if(/^m6-(gameplay|replay)-(32|64)-/.test(stage)){
    const [,kind,size,scenario]=stage.match(/^m6-(gameplay|replay)-(32|64)-(.+)$/);

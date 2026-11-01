@@ -22,6 +22,10 @@ M6_STAGES = tuple(
     for size in (32, 64)
     for scene in M6_SCENES
 )
+# The ca-3d-m6 tiny parity probes from the structural probe bundle (dist/volume-m5/structural-probe.js):
+# every reactive fixture at 8^3 and 16^3 (at most 64 ticks), the GPU snapshot equal to the CPU oracle
+# after every tick, one stage per storage mode, no frames.
+M6_PROBE_STAGES = tuple(f"m6-tiny-{mode}" for mode in ("dense", "active"))
 STAGES = (
     *SANDBOX_STAGES,
     "chamber-visible",
@@ -43,6 +47,7 @@ STAGES = (
     "gameplay-64-cached-visible",
     "gameplay-64-profile-visible",
     *M6_STAGES,
+    *M6_PROBE_STAGES,
 )
 
 
@@ -52,6 +57,25 @@ def m6_stage(stage):
         return None
     _, kind, size, scene = stage.split("-", 3)
     return kind, int(size), scene
+
+
+def stage_bounds(stage):
+    """(maxDimension, maxReplayTicks, maxFrames) that one fixed stage may reach."""
+    m6 = m6_stage(stage)
+    if stage in M6_PROBE_STAGES:
+        return 16, 64, 0
+    if m6:
+        kind, size, _ = m6
+        return size, 32 if kind == "gameplay" else 1024 if size == 32 else 256, 32 if kind == "gameplay" else 660
+    if stage == "chamber-visible":
+        return 8, 128, 256
+    if stage in SANDBOX_STAGES:
+        return 16, 128, 512
+    if stage == "scale-128-visible":
+        return 128, 1024, 8
+    if stage in ("gameplay-128-visible", "gameplay-128-profile-visible"):
+        return 128, 1024, 660
+    return 64, 1024, 660
 
 
 def validate_qualification(command, timeout, *, platform=None, executable=None):
@@ -74,12 +98,12 @@ def validate_qualification(command, timeout, *, platform=None, executable=None):
         stage = command[4]
     else:
         raise RuntimeError("Mac qualification permits only fixed bounded stages.")
-    m6 = m6_stage(stage)
+    dimension, ticks, frames = stage_bounds(stage)
     return {
         "stage": stage,
-        "maxDimension": m6[1] if m6 else 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64,
-        "maxReplayTicks": (32 if m6[0] == "gameplay" else 1024 if m6[1] == 32 else 256) if m6 else 128 if stage == "chamber-visible" or stage in SANDBOX_STAGES else 1024,
-        "maxFrames": 32 if m6 and m6[0] == "gameplay" else 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660,
+        "maxDimension": dimension,
+        "maxReplayTicks": ticks,
+        "maxFrames": frames,
         "gpuTelemetryAvailable": False,
         "independentWatchdog": True,
         "sampledRssLimitMiB": 8192,
