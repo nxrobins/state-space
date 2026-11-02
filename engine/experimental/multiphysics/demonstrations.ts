@@ -171,3 +171,43 @@ export function createMultiphysicsResolvedTank3D(
     settings: { dt },
   });
 }
+/** Timed heavy loads: a closed cup of water, n samples on a side, whose upper-middle sample
+ * is a wax body. The 3-wide cup (26 liquid samples) is the qualified interactive load; the
+ * 4-wide cup (63) is measured but misses the preview target; the 99-sample resolved tank
+ * stays the offline refinement gate. */
+export function createMultiphysicsTimedCup3D(
+  profiles: MultiphysicsProfiles3D,
+  width: 3 | 4 = 3,
+): MultiphysicsSnapshot3D {
+  const seed = (id: string, material: string, center: Vec3, halfExtents: Vec3 = [0.5, 0.5, 0.5]) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material,
+      owner: 'authored',
+      center,
+      halfExtents,
+      temperature: 20,
+    });
+  const w = width / 2,
+    offset = (width - 1) / 2,
+    body: Vec3 = [width === 3 ? 0 : 0.5, width - 1, width === 3 ? 0 : 0.5];
+  const walls = [
+    seed('floor', 'ceramic', [0, 0, 0], [w, 0.5, w]),
+    seed('left', 'ceramic', [-w - 0.5, w + 0.5, 0], [0.5, w, w]),
+    seed('right', 'ceramic', [w + 0.5, w + 0.5, 0], [0.5, w, w]),
+    seed('front', 'ceramic', [0, w + 0.5, -w - 0.5], [w + 1, w, 0.5]),
+    seed('back', 'ceramic', [0, w + 0.5, w + 0.5], [w + 1, w, 0.5]),
+  ];
+  const water = Array.from({ length: width ** 3 }, (_, i) =>
+    seed(`w${i}`, 'water', [
+      (i % width) - offset,
+      1 + Math.floor(i / width ** 2),
+      (Math.floor(i / width) % width) - offset,
+    ]),
+  ).filter((p) => !p.center.every((v, k) => v === body[k]));
+  return createMultiphysicsSnapshot3D(profiles, {
+    parcels: [...walls, ...water, seed('body', 'wax', body)],
+    anchors: walls.map((p) => p.id),
+    settings: { dt: 1 / 120 },
+  });
+}

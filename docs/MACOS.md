@@ -356,7 +356,7 @@ npm run verify:macos -- --stage multiphysics-worker-rotating-contact
 npm run verify:macos -- --stage multiphysics-worker-fluid-switch
 npm run verify:macos -- --stage multiphysics-worker-falling-battery
 npm run verify:macos -- --stage multiphysics-worker-combined-failure
-npm run verify:macos -- --stage multiphysics-worker-resolved-tank
+npm run verify:macos -- --stage multiphysics-worker-timed-cup
 ```
 
 Each stage starts the module Worker from `dist/multiphysics/` and computes a

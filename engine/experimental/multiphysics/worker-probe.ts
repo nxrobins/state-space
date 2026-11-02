@@ -4,7 +4,7 @@ import { createMultiphysicsWorld3D, type MultiphysicsPreviewResult3D } from './w
 import type { MultiphysicsSnapshot3D } from './model.js';
 import {
   createMultiphysicsDemonstration3D,
-  createMultiphysicsResolvedTank3D,
+  createMultiphysicsTimedCup3D,
   type MultiphysicsDemonstration3D,
 } from './demonstrations.js';
 import {
@@ -18,7 +18,7 @@ export const MULTIPHYSICS_WORKER_SCENES_3D = Object.freeze([
   'fluid-switch',
   'falling-battery',
   'combined-failure',
-  'resolved-tank',
+  'timed-cup',
 ] as const);
 export type MultiphysicsWorkerScene3D = (typeof MULTIPHYSICS_WORKER_SCENES_3D)[number];
 /** Original fixed 16-cubed macOS targets; never derived from measurements. */
@@ -72,8 +72,8 @@ const exact = (actual: unknown, expected: unknown, text: string) => {
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 function sceneSnapshot(profiles: MultiphysicsProfiles3D, scene: MultiphysicsWorkerScene3D) {
   if (!MULTIPHYSICS_WORKER_SCENES_3D.includes(scene)) throw Error('Unknown multiphysics scene.');
-  return scene === 'resolved-tank'
-    ? createMultiphysicsResolvedTank3D(profiles)
+  return scene === 'timed-cup'
+    ? createMultiphysicsTimedCup3D(profiles)
     : createMultiphysicsDemonstration3D(profiles, scene as MultiphysicsDemonstration3D);
 }
 /** Start a module Worker from a snapshot and return its connected client. */

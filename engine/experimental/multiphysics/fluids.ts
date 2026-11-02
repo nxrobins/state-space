@@ -1286,7 +1286,13 @@ function* solve(
   }
   let gram: number[][] | null = null;
   const initialRates = constraints.map(rate);
+  // Cholesky row a depends only on the face's first a+1 indices, so rows before the first
+  // changed index are reused across active-set iterations and passes, unchanged bit for bit.
+  let factorIndices: number[] = [];
+  const factor: Float64Array[] = [];
   for (const kind of passes) {
+    let forwardIndices: number[] = [];
+    const forward: number[] = [];
     const targets = constraints.map((row, k) => {
       if (k < contactRows.length) return 0;
       const densityTarget = (p[row.i].restDensity - density[row.i]) / dt;
@@ -1323,27 +1329,47 @@ function* solve(
         // Solve the current nonnegative face. Only near-zero Cholesky
         // pivots receive a floor for redundant rows; acceptance uses the
         // original KKT residual, never the factorized system's residual.
-        const factor: number[][] = [],
-          forward: number[] = [];
+        let reuse = 0;
+        while (
+          reuse < indices.length &&
+          reuse < factorIndices.length &&
+          indices[reuse] === factorIndices[reuse]
+        )
+          reuse++;
+        let reuseForward = 0;
+        while (
+          reuseForward < reuse &&
+          reuseForward < forwardIndices.length &&
+          indices[reuseForward] === forwardIndices[reuseForward]
+        )
+          reuseForward++;
         for (let a = 0; a < indices.length; a++) {
-          const i = indices[a],
-            values: number[] = [];
-          for (let b = 0; b <= a; b++) {
-            const j = indices[b];
-            let value = gram[i][j];
-            for (let c = 0; c < b; c++) value -= values[c] * (a === b ? values[c] : factor[b][c]);
-            values.push(
-              a === b ? Math.sqrt(Math.max(value, gram[i][i] * 1e-12)) : value / factor[b][b],
-            );
+          const i = indices[a];
+          if (a >= reuse) {
+            const values = new Float64Array(a + 1);
+            for (let b = 0; b <= a; b++) {
+              const j = indices[b],
+                previous = factor[b];
+              let value = gram[i][j];
+              for (let c = 0; c < b; c++) value -= values[c] * (a === b ? values[c] : previous[c]);
+              values[b] =
+                a === b ? Math.sqrt(Math.max(value, gram[i][i] * 1e-12)) : value / previous[b];
+            }
+            if (!(values[a] > 0) || !Number.isFinite(values[a]))
+              throw Error('Invalid fluid projection factor.');
+            factor[a] = values;
           }
-          if (!(values[a] > 0) || !Number.isFinite(values[a]))
-            throw Error('Invalid fluid projection factor.');
-          factor.push(values);
-          let value = initialRates[i] - targets[i];
-          for (let b = 0; b < a; b++) value -= values[b] * forward[b];
-          forward.push(value / values[a]);
+          if (a >= reuseForward) {
+            const values = factor[a];
+            let value = initialRates[i] - targets[i];
+            for (let b = 0; b < a; b++) value -= values[b] * forward[b];
+            forward[a] = value / values[a];
+          }
+          // Work accounting is per factor row, whether computed or reused.
           yield 'projection-factor';
         }
+        factor.length = forward.length = indices.length;
+        factorIndices = forwardIndices = indices;
         const candidate = constraints.map(() => 0);
         for (let a = indices.length - 1; a >= 0; a--) {
           let value = forward[a];

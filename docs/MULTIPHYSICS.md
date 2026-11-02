@@ -235,8 +235,10 @@ The original fixed 16³ macOS targets remain qualification targets: two-tick
 preview p95 at most 250 ms, cancellation p95 at most 100 ms, completed application
 frames at most 16.667 ms. The 16³ load is a world of extent 16 inside the model
 caps (256 parcels, 768 bonds, 128 fluid samples, 128 solid boundary samples),
-timed on six named scenes: the five demonstrations and the 99-sample resolved
-tank. Timing transfers to no scene heavier than the heaviest one measured. No existing 64³/128³ or GPU qualification transfers to
+timed on six named scenes: the five demonstrations and the timed cup (26 liquid
+samples and a wax body in a closed 3-wide cup). Timing transfers to no scene
+heavier than the heaviest one measured. The 99-sample resolved tank is the
+offline refinement gate, not an interactive load. No existing 64³/128³ or GPU qualification transfers to
 this model. Raw verification artifacts remain local under the current publication
 policy. Each milestone receives adversarial review before dependent work is
 admitted.
@@ -265,7 +267,7 @@ stall deadline).
 | Liquids | Sustained rest (extended) | Speed and movement below `1e-6`, heat below `1e-9`, absolute energy below `1e-6`, two timesteps over 0.5 s | Pass |
 | Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement | Pass, 26.7 s |
 | Liquids | Displaced liquid (tank) | Mean acceleration from rest is positive and at most the Archimedes value `g (rho_l - rho_s) / rho_s` | Pass: about 0.48 (wax) and 0.36 (copper) of that bound |
-| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 3.67% then 3.64% |
+| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 2.49% then 2.46%; clockwise spin `-0.19` |
 | Liquids | Viscous decay (`world-tick.test.ts`) | Shear decreases every tick; heat equals kinetic loss within `1e-12`; halving `dt` changes the loss by under 1% | Pass |
 | Liquids | Equal and opposite impulses (`fluids.test.ts`, `world-tick.test.ts`) | Moving boundary, gas wall and liquid-to-conductor transfers match analytic impulse and torque, digits 11–12 | Pass |
 | Gas/reactive | Pressure work (`fluids.test.ts`) | Midpoint/adiabatic oracle and reflected-wall equivalence | Pass |
@@ -273,17 +275,19 @@ stall deadline).
 | Dissipation | Rest and impact heat (`rigid.test.ts`, `fluids.test.ts`) | Resting heat exactly 0; impact heat paid once at the lever arm | Pass |
 | Electrical | Networks and batteries (`circuit*.test.ts`, `battery.test.ts`, `world-tick.test.ts`) | Dense-oracle agreement digits 12; finite store bounds all Joule heat | Pass |
 | Integration | Direct, mock Worker, budgets, cancel, save (`demonstrations.test.ts`) | Exact snapshot equality over the first two ticks of each demonstration | Pass |
-| Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six scenes |
+| Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six timed scenes |
 
 Open liquid findings, not converted to passing budgets:
 
-- At plate speed 1, the moving-paddle tick is rejected when the plate is still
-  0.37 from the liquid: one tick's correction energy reaches `-0.021` against the
-  `0.01` world limit. The tick fails atomically. At 0.25 and 0.5 the case passes.
-- The paddle's unpaid correction barely changes under refinement (3.67% to
-  3.64%). It is an activation loss in the projection, not integration error.
-  It is visible in `accounting.numericalEnergy` as the Dissipation gate requires,
-  but it is not heat.
+- At plate speed 1 the moving paddle is still rejected, now at impact rather
+  than at a distance. The plate pays `0.20` and `0.23` of physical impact heat
+  on two ticks, and on the second a wetted row becomes divergence-supported and
+  the post-drift projection removes `-0.041` unpaid, against the `0.01` limit.
+  Whether part of an incompressible impact's projection loss is paid as heat is
+  an open energy-policy decision. At 0.5 the case passes.
+- The paddle's unpaid correction at 0.5 barely changes under refinement (2.49%
+  to 2.46%). It is visible in `accounting.numericalEnergy` as the Dissipation
+  gate requires, but it is not heat.
 
 ## Implementation evidence
 
@@ -674,30 +678,56 @@ remain unchanged.
 The missing Solids and Liquids cases now have named tests, and the
 [published budgets](#published-gate-budgets) table lists every gate case. The
 SPH density/divergence candidate is accepted as the release liquid solver under
-its own name. On current sources the tank refinement cases pass (27.3 seconds,
-`6f5648861183451f9acb8e86d9100294`) and all five extended cases pass, including
-the new moving paddle (49.1 seconds, `4a787056be70432aaf351236d69f931e`).
-`npm test` passes 2,148 CPU checks (`4b5ccea7ccd3409d98be7a1cebec0504`).
+its own name.
+
+A solid's boundary samples now count toward a liquid row's resolved support
+volume only while that particle touches the solid. They still add density.
+Before, an approaching plate switched on the facing rows' zero-divergence
+constraint at a distance of 0.37 and removed `-0.021` in one tick. Now the
+approach costs below `1.2e-5` per tick, and the paddle case uses a plate whose
+wetted face is genuinely below its centre. The earlier clockwise spin came from
+that at-distance clamp on rows below a centred plate.
+
+Two exact speedups leave every snapshot and report bit-identical (key-order-
+independent digests, negative zero distinguished, over 30 ticks of each
+demonstration and 6 of the tank): thermal parcel reads validate their owned
+copy without a second copy, inventories of validated state skip per-parcel
+copies, a tick result is copied rather than re-validated, and the active-set
+Cholesky factor reuses its unchanged leading rows in typed arrays while keeping
+the per-row work accounting. Direct ticks: 99-sample tank 377 to 314 ms,
+demonstrations 20–30% faster. Raising the 32-sweep coordinate cap does not help:
+every tank still needs about 13 dense iterations after any cap of 32, 48 or 64,
+and 128 sweeps are slower. The cap is unchanged.
+
+On final sources the tank refinement cases pass (20.2 seconds,
+`e708e60fed224e31bbb1c5b889cb641c`), all five extended cases pass (38.8 seconds,
+`6872951785a043bcae3ec08f911c4cce`), and `npm test` passes 2,148 CPU checks
+(`32a8b3d00e8b4fbcb54abe1da7de187a`).
 
 `worker-entry.ts` is a real module Worker. It receives one bootstrap snapshot,
 then speaks only the existing host protocol, yielding through a `MessageChannel`
 queue so no nested timer clamp applies. `worker-probe.ts` drives it from a page;
 `npm run build:multiphysics-probe` bundles both into `dist/multiphysics/`. The
 `multiphysics-worker-<scene>` Mac stages (see [macOS](MACOS.md)) produced these
-page-observed latencies over 24 samples on the M3 Ultra:
+page-observed latencies over 24 samples on the M3 Ultra, on final sources:
 
 | Scene | Parcels | Direct preview p95 | Worker preview p50 / p95 | Cancellation p95 | Stage |
 | --- | --- | --- | --- | --- | --- |
-| `wax-valve` | 8 | 22.7 ms | 17.8 / 21.2 ms | 3.7 ms | Pass (`9bed333659e243d1b6db8fb949db0ca0`) |
-| `rotating-contact` | 4 | 9.1 ms | 7.5 / 8.9 ms | 5.4 ms | Pass (`4b09a45479f742b1aa8e579eea16c6b0`) |
-| `fluid-switch` | 5 | 15.1 ms | 12.4 / 14.2 ms | 2.8 ms | Pass (`c8f0a69a8fcc4bb6bcbd0fcaf395e87e`) |
-| `falling-battery` | 4 | 9.2 ms | 7.7 / 8.4 ms | 5.5 ms | Pass (`80b4bdb0d6db4f5fac3792defa1b6e03`) |
-| `combined-failure` | 10 | 27.0 ms | 22.8 / 28.0 ms | 3.8 ms | Pass (`2469536e28db464798b45c6573ed5922`) |
-| `resolved-tank` | 105 (99 liquid) | 703.8 ms | 580.1 / 727.6 ms | 1.7 ms | **Fail: preview 2.9x over** (`9efa114e5165474d84c1a9ccd1b2ec84`) |
+| `wax-valve` | 8 | 18.8 ms | 14.0 / 17.1 ms | 3.0 ms | Pass (`c07f12ad7c11436cb0e6e074e3d1aa04`) |
+| `rotating-contact` | 4 | 7.1 ms | 5.3 / 6.7 ms | 3.6 ms | Pass (`c854227476b24ab4860983a3eb1ddaa7`) |
+| `fluid-switch` | 5 | 12.7 ms | 9.7 / 12.0 ms | 2.1 ms | Pass (`97e7493050a549879045c16ccccda3d0`) |
+| `falling-battery` | 4 | 7.0 ms | 5.7 / 6.6 ms | 4.3 ms | Pass (`f15daf7585df414695f43ff99f8b7da2`) |
+| `combined-failure` | 10 | 22.7 ms | 18.0 / 23.3 ms | 2.7 ms | Pass (`d42e4d4c65184a56a6b5ba77e65ab732`) |
+| `timed-cup` | 32 (26 liquid) | 135.3 ms | 121.1 / 142.3 ms | 1.4 ms | Pass (`b6414d2d3c0e4f78864b9c2ba20f35ed`) |
 
-Every stage, including the tank, was exact across work budgets, cancel/retry and
-save/restart. The Worker adds about 4% to the direct cost, so the tank miss is
-solver work (about 118,000 work units per tick), not scheduling. The 250 ms
-preview target therefore holds only for the five demonstrations, not for the
-16³ envelope. The runtime stays unexported, and Builder work waits for a solver
-speedup or a reviewed change to the timed load. The targets are unchanged.
+Every stage was exact across work budgets 1 and 256, cancel/retry and
+save/restart. Two heavier loads were measured on the Mac and miss the preview
+target, so they are not interactive scenes:
+
+- 4-wide cup, 63 liquid samples and a wax body (exact speedups in place):
+  preview p95 279.2 ms, about 12% over (`aeef72f6ab774845939a9e68d2b8185f`).
+- 99-sample resolved tank (before the speedups): preview p95 727.6 ms
+  (`9efa114e5165474d84c1a9ccd1b2ec84`).
+
+The Worker adds about 4% to direct cost; the misses are solver work. The runtime
+stays unexported until the Builder stages pass. The targets are unchanged.

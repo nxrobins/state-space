@@ -28,9 +28,9 @@ M6_STAGES = tuple(
 M6_PROBE_STAGES = tuple(f"m6-tiny-{mode}" for mode in ("dense", "active"))
 # The private multiphysics module Worker (dist/multiphysics/), headless: per scene, direct versus Worker
 # exactness across work budgets, cancel/retry and save/restart, plus two-tick preview and cancellation
-# latency over 24 samples. The five demonstrations and the 99-sample resolved tank; no frames.
+# latency over 24 samples. The five demonstrations and the 26-sample timed cup; no frames.
 MULTIPHYSICS_WORKER_SCENES = (
-    "wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "resolved-tank",
+    "wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "timed-cup",
 )
 MULTIPHYSICS_WORKER_STAGES = tuple(f"multiphysics-worker-{scene}" for scene in MULTIPHYSICS_WORKER_SCENES)
 STAGES = (

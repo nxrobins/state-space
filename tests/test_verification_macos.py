@@ -97,7 +97,7 @@ class MacQualificationPolicyTests(unittest.TestCase):
             "m6-tiny-dense": (16, 64, 0),
             "m6-tiny-active": (16, 64, 0),
             "multiphysics-worker-wax-valve": (16, 64, 0),
-            "multiphysics-worker-resolved-tank": (16, 64, 0),
+            "multiphysics-worker-timed-cup": (16, 64, 0),
         }.items():
             self.assertEqual(stage_bounds(stage), bounds, stage)
         self.assertEqual(len(M6_STAGES), 12)
@@ -108,7 +108,7 @@ class MacQualificationPolicyTests(unittest.TestCase):
             MULTIPHYSICS_WORKER_STAGES,
             tuple(
                 f"multiphysics-worker-{scene}"
-                for scene in ("wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "resolved-tank")
+                for scene in ("wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "timed-cup")
             ),
         )
         self.assertEqual(m6_stage("m6-replay-64-thermal-valve-ceramic"), ("replay", 64, "thermal-valve-ceramic"))
