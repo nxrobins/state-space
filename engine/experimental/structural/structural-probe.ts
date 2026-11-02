@@ -764,11 +764,16 @@ export async function verifyM6GpuTiny(mode: 'dense' | 'active' = 'dense') {
           energyQ: cpu.energyQ,
           structure: cpu.structure,
         });
+        let dormantDispatches = 0;
         for (let t = 0; t < f.ticks; t++) {
           const edits = f.scripted.get(t) ?? [];
           cpu.step(1, { edits });
           await gpu.step(1, { edits });
           equalState(await gpu.snapshot(), cpu.snapshot(), `${name} ${size} tick ${t + 1}`);
+          // inspectActivity reports one tick, so a dormant world is summed tick by tick. Only the
+          // first tick may dispatch: the restore above marks every tile awake.
+          if (mode === 'active' && name === 'dormant' && t > 0)
+            dormantDispatches += (await gpu.inspectActivity()).dispatchedChunks;
           observer.tick(cpu.tick, {
             grid: cpu.grid,
             energyQ: cpu.energyQ,
@@ -779,16 +784,8 @@ export async function verifyM6GpuTiny(mode: 'dense' | 'active' = 'dense') {
           if (t % 8 === 0) status(`M6 ${mode} ${name} ${size}^3: tick ${t + 1}/${f.ticks}`);
         }
         const activity = await gpu.inspectActivity();
-        // A dormant world must sleep: material passes may dispatch its tiles at most once, on the
-        // tick that follows the restore which marks every tile awake.
-        if (
-          mode === 'active' &&
-          name === 'dormant' &&
-          activity.dispatchedChunks > activity.totalChunks * 28
-        )
-          throw Error(
-            `${name} ${size}: dormant tiles were dispatched ${activity.dispatchedChunks} times`,
-          );
+        if (dormantDispatches !== 0)
+          throw Error(`${name} ${size}: dormant tiles were dispatched ${dormantDispatches} times`);
         results.push({
           name,
           size,

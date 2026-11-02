@@ -3,7 +3,7 @@
   "id": "4387f9a8a7aa4659a57dd050623f2643",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -43,7 +43,7 @@
     "kernelMemoryCap": false
   },
   "childPid": 74111,
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/dist/verification/macos-m6-replay-32-burning-bridge-d793fcd2514d/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-replay-32-burning-bridge-d793fcd2514d/report.json",
   "lastHealth": {
     "host": {
       "time": 1793565800.255796,

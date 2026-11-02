@@ -3,7 +3,7 @@
   "id": "eaa66242eaf24a8ea720e336eb71b167",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -43,7 +43,7 @@
     "kernelMemoryCap": false
   },
   "childPid": 11817,
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/dist/verification/macos-m6-gameplay-32-burning-bridge-d838d4dd374a/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-gameplay-32-burning-bridge-d838d4dd374a/report.json",
   "lastHealth": {
     "host": {
       "time": 1793570258.958581,

@@ -61,7 +61,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "60c7ce55313f173a32c910a31e668e924c5f0274e50b95fe93dc3ca5288d5412"
     },
     {
       "stage": "m6-gameplay-32-thermal-valve",
@@ -124,7 +125,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "6ac2420eee2ac30e485f0cc03a7d5fa658ab494ddc481a6f15af527045e0f8d4"
     },
     {
       "stage": "m6-gameplay-32-thermal-valve-ceramic",
@@ -185,7 +187,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "abaa1677215b79ef164aa7b781ab6d1191116ea5c89e1505914623f578103b02"
     },
     {
       "stage": "m6-gameplay-64-burning-bridge",
@@ -252,7 +255,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "2542a535f5d4759461a5f0bf0e15c39bfc372ac6456af4e7bc3b3e1ae2899a8e"
     },
     {
       "stage": "m6-gameplay-64-thermal-valve",
@@ -321,7 +325,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "395b309b090b7a264792981fe04f8c82b7188b1c68b350814ce9ffb523840c80"
     },
     {
       "stage": "m6-gameplay-64-thermal-valve-ceramic",
@@ -388,7 +393,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "1ed9dc19804d8f6f9662654d7da8fe32ece8ae9d121126da11efc202291b645f"
     },
     {
       "stage": "m6-replay-32-burning-bridge",
@@ -486,7 +492,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "eca28c9279fd47b6a66dec401ccc5f18dad07c7795ae1c21fcc6f4a54c751f20"
     },
     {
       "stage": "m6-replay-32-thermal-valve",
@@ -586,7 +593,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "49c3f9f669f7831cece400160eaef94babfab2b4320c031ba2f18b554fd800a4"
     },
     {
       "stage": "m6-replay-32-thermal-valve-ceramic",
@@ -684,7 +692,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "9ced6ed12e77db4771f24c1554e4248d25219daa0351939adede1965d3d98bec"
     },
     {
       "stage": "m6-replay-64-burning-bridge",
@@ -788,7 +797,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "19595eaa73697870bfd0c479f54c58bc361fdaa79919a9fbf305505a7cc46e09"
     },
     {
       "stage": "m6-replay-64-thermal-valve",
@@ -894,7 +904,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "f08d1146a38695baf5a60f6078bdf6f75c3405dccf18da4131f1f10509b6643c"
     },
     {
       "stage": "m6-replay-64-thermal-valve-ceramic",
@@ -998,7 +1009,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "dded9449a7b78b441841c45b1aa157fcbebf08a597a09147745af2731460ffcd"
     },
     {
       "stage": "m6-tiny-dense",
@@ -1216,7 +1228,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "155afa663836c00b02b35d097b5ca5c64564ea9698fe87e5765d48bd4a07e791"
     },
     {
       "stage": "m6-tiny-active",
@@ -1434,7 +1447,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "9597572ca453e2e48cb07540f85fa5c9f5961ac4611cbcbbf971caa6a7e4e91e"
     },
     {
       "stage": "m6-gameplay-32-burning-bridge",
@@ -1495,7 +1509,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "a2772c3cfd401834e31ec041affed395cc3d91552bcb5fdfd568b36fdda3a3e8"
     },
     {
       "stage": "m6-replay-32-burning-bridge",
@@ -1593,7 +1608,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "7ef83043536db4a11f19375789e87f4767c8c85eed5a7f1c18674267379ea3d3"
     },
     {
       "stage": "m6-gameplay-32-thermal-valve",
@@ -1656,7 +1672,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "202f7032e95b3b1c221a063994e11623f93d41aa3ec60e480600359c56c03f11"
     },
     {
       "stage": "m6-replay-32-thermal-valve",
@@ -1756,7 +1773,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "db7948c1a064c313c8bd43d6357f987b44ad020b0ff3e16a6b2f6c28da2898ca"
     },
     {
       "stage": "m6-gameplay-32-thermal-valve-ceramic",
@@ -1817,7 +1835,8 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": true
+      "reportRetained": true,
+      "retainedSupervisorSha256": "e6e99860153471715ced3fba5edcc27903033e5a7cf17b7478c5dc7a27309b5e"
     },
     {
       "stage": "m6-replay-32-thermal-valve-ceramic",
@@ -1915,10 +1934,11 @@
         "description": "",
         "isFallbackAdapter": false
       },
-      "reportRetained": false
+      "reportRetained": false,
+      "retainedSupervisorSha256": "0278ea0af82b801a5469fd45388925271f214b7ce76a985d6f44ca72442b60f0"
     }
   ],
-  "retention": "Gameplay and tiny-probe reports and every supervisor receipt are retained in full. The nine replay reports carry 1,025 reference digests and about 2,000 per-tick GPU checks each, so only their SHA-256, windows, runs and tick-end digest are kept here; the raw files remain in dist/verification on the workstation and any stage is reproducible with npm run verify:macos -- --stage <name>. sourceHashesSha256 is the SHA-256 of each report's sourceHashes map serialized with sorted keys and no whitespace; sourceSets lists the two sets and the hashed paths that differ between them.",
+  "retention": "Gameplay and tiny-probe reports and every supervisor receipt are retained in full. The nine replay reports carry 1,025 reference digests and about 2,000 per-tick GPU checks each, so only their SHA-256, windows, runs and tick-end digest are kept here; the raw files remain in dist/verification on the workstation and any stage is reproducible with npm run verify:macos -- --stage <name>. sourceHashesSha256 is the SHA-256 of each report's sourceHashes map serialized with sorted keys and no whitespace; sourceSets lists the two sets and the hashed paths that differ between them. Supervisor receipts had the workstation worktree prefix removed from their absolute paths after capture: supervisorSha256 and prerequisite hashes are the captured receipts, retainedSupervisorSha256 is the file kept here.",
   "sourceSets": [
     {
       "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",

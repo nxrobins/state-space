@@ -1,11 +1,66 @@
 """Mac qualification policy tests run without a browser, GPU or simulation."""
 
+import hashlib
 import sys
 import json
+import re
 from pathlib import Path
 import tempfile
 import unittest
 from scripts.verification_macos import M6_PROBE_STAGES, M6_SCENES, M6_STAGES, STAGES, SANDBOX_STAGES, m6_stage, require_preceding_stage, stage_bounds, validate_qualification
+
+ROOT = Path(__file__).resolve().parents[1]
+CHECKPOINTS = ROOT / "docs" / "checkpoints"
+HOME_PATH = re.compile(r"/(?:Users|home)/[^/\s\"]+/")
+# Receipts committed before this check, frozen; nothing may join them.
+HOME_PATH_LEGACY = frozenset({
+    "docs/checkpoints/c4-baseline.json",
+    "docs/checkpoints/c7-verification.json",
+    "docs/checkpoints/haze-verification.json",
+    "docs/checkpoints/heat-verification.json",
+    "docs/checkpoints/lighting-verification.json",
+    "docs/checkpoints/pacing-final-verification.json",
+    "docs/checkpoints/pacing-resident-verification.json",
+    "docs/checkpoints/pr-verification.json",
+    "docs/checkpoints/pressure-final-verification.json",
+    "docs/checkpoints/pressure-merged-verification.json",
+    "docs/checkpoints/pressure-pacing-verification.json",
+    "docs/checkpoints/pressure-release-verification.json",
+    "docs/checkpoints/pressure-verification.json",
+    "docs/checkpoints/render-verification.json",
+    "docs/checkpoints/spillway/frames-quiet/interruption.json",
+    "docs/checkpoints/volume-m1/existing-verification.json",
+    "docs/checkpoints/volume-m3/review-fix/safety/edits/report.json",
+    "docs/checkpoints/volume-m3/safety/browser/report.json",
+    "docs/checkpoints/volume-m3/safety/frames32/report.json",
+    "docs/checkpoints/volume-m3/safety/frames64/report.json",
+    "docs/checkpoints/volume-m3/safety/m2-browser/report.json",
+    "docs/checkpoints/volume-m3/safety/ui/report.json",
+    "docs/checkpoints/water-verification.json",
+})
+
+
+class RetainedEvidenceTests(unittest.TestCase):
+    def test_new_retained_evidence_has_no_home_directory_paths(self):
+        found = {
+            str(path.relative_to(ROOT))
+            for path in CHECKPOINTS.rglob("*")
+            if path.suffix in {".json", ".jsonl", ".log", ".md", ".txt"}
+            and HOME_PATH.search(path.read_text(encoding="utf-8", errors="replace"))
+        }
+        self.assertEqual(found - HOME_PATH_LEGACY, set())
+
+    def test_m6_index_hashes_match_the_retained_files(self):
+        index = json.loads((CHECKPOINTS / "volume-m6" / "mac" / "index.json").read_text(encoding="utf-8"))
+
+        def sha256(name):
+            return hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+
+        self.assertEqual(len(index["records"]), 20)
+        for record in index["records"]:
+            self.assertEqual(sha256(record["supervisorReceipt"]), record["retainedSupervisorSha256"])
+            if record["reportRetained"]:
+                self.assertEqual(sha256(record["report"]), record["reportSha256"])
 
 
 class MacQualificationPolicyTests(unittest.TestCase):

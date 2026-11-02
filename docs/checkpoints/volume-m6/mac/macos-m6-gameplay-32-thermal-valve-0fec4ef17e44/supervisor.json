@@ -3,7 +3,7 @@
   "id": "ce03b7a6a9014e69a985ff73c4792dad",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -43,7 +43,7 @@
     "kernelMemoryCap": false
   },
   "childPid": 73907,
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/dist/verification/macos-m6-gameplay-32-thermal-valve-0fec4ef17e44/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-gameplay-32-thermal-valve-0fec4ef17e44/report.json",
   "lastHealth": {
     "host": {
       "time": 1793565754.454352,
