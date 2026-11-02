@@ -87,6 +87,11 @@ date of the last change in the section.
 
 ### Fixed
 
+- `ca-3d-m6` CPU combustion rotates by the same 32-bit tick word as the GPU
+  backends, so they no longer diverge from tick 2^32; the tiny probe's dormant
+  check can now fail; retained Mac receipts use repo-relative paths (#84).
+- The verification guard keeps a complete receipt when the POSIX watchdog fires
+  on the supervisor's deadline (#84).
 - Python-backed Vitest fixtures and the Node verification guard resolve one
   interpreter (`PYTHON`, `STATE_SPACE_PYTHON`, the checkout's venv, `python3`,
   `python`) instead of a bare `python`, so `npm test` passes on hosts whose
