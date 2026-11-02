@@ -3,7 +3,7 @@
   "id": "a625e700ce6f4e399058922017f023c7",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -52,7 +52,7 @@
     "gpu": null,
     "job": null
   },
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/dist/verification/macos-m6-tiny-dense-36be0c1fe7ad/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-tiny-dense-36be0c1fe7ad/report.json",
   "exitCode": 0,
   "finishedAt": 1793570164.799525
 }

@@ -3,7 +3,7 @@
   "id": "a99aa3d9f08242bd86f4ca200ddd0eac",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -43,7 +43,7 @@
     "kernelMemoryCap": false
   },
   "childPid": 11575,
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/dist/verification/macos-m6-tiny-active-6b6a2dc2dd55/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-tiny-active-6b6a2dc2dd55/report.json",
   "lastHealth": {
     "host": {
       "time": 1793570252.429651,

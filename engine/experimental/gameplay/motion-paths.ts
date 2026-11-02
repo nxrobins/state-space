@@ -223,7 +223,8 @@ function isPair(from: number, to: number, pass: VolumePass, g: StructuralGeometr
   );
 }
 
-/** Decode before consumption. Validates chronology against a matching complete-tick trace. */
+/** Decode before consumption. Validates chronology against a matching complete-tick trace.
+ * ca-3d-m5 snapshots only: a ca-3d-m6 snapshot needs its catalog to validate and throws here. */
 export function readMotionPaths3D(
   value: MaterialMotionPaths3D,
   motionValue: MaterialMotionTrace3D,

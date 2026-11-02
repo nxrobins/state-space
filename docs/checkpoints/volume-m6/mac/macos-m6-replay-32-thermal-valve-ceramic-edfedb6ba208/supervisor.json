@@ -3,7 +3,7 @@
   "id": "6e696694cb6a48c1aa5cd296a8bf90db",
   "kind": "macos-qualification",
   "command": [
-    "/Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/.venv/bin/python3",
+    ".venv/bin/python3",
     "-m",
     "scripts.verify_macos_qualification",
     "--stage",
@@ -43,7 +43,7 @@
     "kernelMemoryCap": false
   },
   "childPid": 21004,
-  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/dist/verification/macos-m6-replay-32-thermal-valve-ceramic-edfedb6ba208/report.json",
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-replay-32-thermal-valve-ceramic-edfedb6ba208/report.json",
   "lastHealth": {
     "host": {
       "time": 1793570408.297484,

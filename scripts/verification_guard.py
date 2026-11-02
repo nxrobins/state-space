@@ -439,21 +439,31 @@ def main():
         receipt['error'] = repr(error)
         stop()
     finally:
-        stop()
-        if watchdog:
-            reason = watchdog.failure_reason()
-            if reason:
-                receipt['error'] = reason
-                receipt['passed'] = False
-            try:
-                watchdog.close(disarm=job.handle is None if job else posix_stopped)
-            except Exception as error:
-                receipt['error'] = 'Independent watchdog cleanup failed: ' + str(error)
-                receipt['passed'] = False
-        if gpu_monitor:
-            gpu_monitor.close()
-        receipt['finishedAt'] = time.time()
-        save()
+        try:
+            stop()
+            if watchdog:
+                try:
+                    reason = watchdog.failure_reason()
+                except Exception:
+                    # The watchdog can fire at the same instant as this deadline and
+                    # still be publishing its status. close() waits for it and reads
+                    # the final status, so a transient read failure is not a reason.
+                    reason = None
+                if reason:
+                    receipt['error'] = reason
+                    receipt['passed'] = False
+                try:
+                    watchdog.close(disarm=job.handle is None if job else posix_stopped)
+                except Exception as error:
+                    receipt['error'] = 'Independent watchdog cleanup failed: ' + str(error)
+                    receipt['passed'] = False
+            if gpu_monitor:
+                gpu_monitor.close()
+        finally:
+            # The receipt on disk is otherwise the last loop snapshot, which has no
+            # error, exit code or finish time; the final save must always happen.
+            receipt['finishedAt'] = time.time()
+            save()
     if 'error' in receipt:
         print('Verification stopped: ' + receipt['error'], file=sys.stderr, flush=True)
     print(f'Verification receipt: {out / "report.json"}', flush=True)

@@ -61,7 +61,8 @@ function neighborsOf(around: Int32Array, i: number, w: number, h: number, d: num
 }
 
 /** ca-3d-m6 combustion: deterministic mutual fuel/oxidizer pairing over six neighbors.
- * At cell (x,y,z) the direction order starts at (x + 2y + 3z + tick % 6) % 6. A fuel above its
+ * At cell (x,y,z) the direction order starts at (x + 2y + 3z + u32(tick) % 6) % 6, the tick word
+ * every backend sees. A fuel above its
  * flash temperature proposes to its first oxidizer; an oxidizer accepts its first proposer. Only
  * mutual pairs react: the fuel becomes burns_into, the oxidizer smoke_product, and
  * min(floor(fuel_energy * 256 / 2), MAX_ENERGY_Q - oxidizer energy) moves to the oxidizer. Builtin
@@ -89,7 +90,7 @@ function combustion(
   const burning = (i: number) =>
     fuelQ(aGrid[i]) > 0 &&
     temperatureQ(aGrid[i], aEnergy[i], cold) > cold[at(aGrid[i]) + COLD_FLASH_POINT] * ENERGY_SCALE;
-  const rotation = tick % 6,
+  const rotation = (tick >>> 0) % 6,
     around = new Int32Array(6);
   // proposed[i] = j + 1 and chosen[j] = i + 1; zero means none. Only proposed oxidizers choose.
   const proposed = new Int32Array(n),

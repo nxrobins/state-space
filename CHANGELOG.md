@@ -34,7 +34,7 @@ date of the last change in the section.
 - Experimental `ca-3d-m6` structural worlds: a validated reactive catalog
   (builtins, custom definitions or the thermal pack) binds its cold table into
   the M5 CPU, dense GPU and active GPU backends and adds the six-neighbor
-  combustion pass with consumed supports; `ca-3d-m5` is unchanged (pending PR).
+  combustion pass with consumed supports; `ca-3d-m5` is unchanged (#83).
 - Catalog-driven terrain rendering and two reactive structural cavern chambers:
   a 256-entry palette from the world's law with gas cutouts and catalog-derived
   flame/melt glow, `inspectMaterials()` on structural worlds, and the
@@ -42,7 +42,7 @@ date of the last change in the section.
   `catalog` parameter, with pinned tick windows in the pilots and replays;
   supervised macOS qualification stages `m6-gameplay-*` and `m6-replay-*` for
   those chambers at 32³ and 64³, and `m6-tiny-dense` / `m6-tiny-active` for the
-  8³/16³ parity probes from the structural probe bundle (pending PR).
+  8³/16³ parity probes from the structural probe bundle (#83).
 
 ### Changed
 
@@ -87,10 +87,15 @@ date of the last change in the section.
 
 ### Fixed
 
+- `ca-3d-m6` CPU combustion rotates by the same 32-bit tick word as the GPU
+  backends, so they no longer diverge from tick 2^32; the tiny probe's dormant
+  check can now fail; retained Mac receipts use repo-relative paths (#84).
+- The verification guard keeps a complete receipt when the POSIX watchdog fires
+  on the supervisor's deadline (#84).
 - Python-backed Vitest fixtures and the Node verification guard resolve one
   interpreter (`PYTHON`, `STATE_SPACE_PYTHON`, the checkout's venv, `python3`,
   `python`) instead of a bare `python`, so `npm test` passes on hosts whose
-  default interpreter lacks numpy (pending PR).
+  default interpreter lacks numpy (#83).
 - The native structure tests' negative controls match the formatted source
   again, and the CPU suite checks their anchors (#71).
 - Default water stays liquid at the reference temperature (#15).

@@ -12,6 +12,7 @@ import {
   sealedAirCells3D,
   type ReactiveFixture3D,
 } from './structural/structural-reactive-fixtures.js';
+import { readMotionPaths3D } from './gameplay/motion-paths.js';
 import { createReactiveMaterialRegistry3D } from './reactive/reactive-registry.js';
 import { createThermalMaterialRegistry3D, THERMAL_MAT_3D } from './reactive/thermal-materials.js';
 import type { ReactiveMaterialRegistry3D } from './reactive/reactive-registry.js';
@@ -248,13 +249,29 @@ describe('ca-3d-m6 combustion in structural worlds (8^3 and 16^3)', () => {
       expect(dormant.windows.unchangedThrough).toBe(16);
       expect(dormant.after).toEqual(dormant.before);
     });
+  test('combustion rotation wraps at 2^32 with the tick the GPU backends receive', () => {
+    const burn = (tick: number) => {
+      const f = reactiveFixture3D('uniform', 8),
+        source = world(8, f.chunkSize, thermal);
+      source.edit(f.initial);
+      const w = world(8, f.chunkSize, thermal);
+      w.restore({ ...source.snapshot(), tick });
+      w.step(1);
+      return { grid: [...w.grid], energyQ: [...w.energyQ], structure: [...w.structure] };
+    };
+    expect(burn(2 ** 32)).toEqual(burn(0));
+    expect(burn(2 ** 32 + 5)).toEqual(burn(5));
+  });
   test('motion traces and paths cover a reacting tick without counting combustion as movement', () => {
     const f = reactiveFixture3D('bridge', 8),
       w = world(8, 4, thermal);
     w.edit(f.initial);
     w.step(3);
     w.edit(f.scripted.get(3)!);
-    const { motion, paths } = w.stepWithMotionPaths();
+    const before = w.snapshot(),
+      { motion, paths } = w.stepWithMotionPaths();
+    // The decoder has no registry parameter, so m6 paths are refused rather than misread.
+    expect(() => readMotionPaths3D(paths, motion, before, w.snapshot())).toThrow('Incompatible');
     expect(motion.physicsRulesVersion).toBe('ca-3d-m6');
     expect(motion.materialCatalogHash).toBe(thermal.hash);
     expect(paths.passesObserved).toBe(28);
