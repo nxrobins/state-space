@@ -43,6 +43,11 @@ date of the last change in the section.
   supervised macOS qualification stages `m6-gameplay-*` and `m6-replay-*` for
   those chambers at 32³ and 64³, and `m6-tiny-dense` / `m6-tiny-active` for the
   8³/16³ parity probes from the structural probe bundle (#83).
+- Private multiphysics gate closure: named tipping, hydrostatic column, viscous
+  decay, moving paddle and displaced-liquid cases with a published per-gate
+  budget table; a module Worker entry and page probe bundled by
+  `npm run build:multiphysics-probe`; and headless `multiphysics-worker-<scene>`
+  macOS stages for the five demonstrations and the resolved tank (pending PR).
 
 ### Changed
 

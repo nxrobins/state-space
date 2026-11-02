@@ -247,7 +247,9 @@ Budgets are fixed before a case is marked passed and are never widened to admit
 a failure. "Digits *d*" means an absolute error below `0.5e-d`. Unit cases run
 in `npm test`; runtime cases run explicitly under the supervisor with
 `engine/vitest.multiphysics-fluid-runtime.config.ts` (tank) and
-`engine/vitest.multiphysics-extended-runtime.config.ts` (extended).
+`engine/vitest.multiphysics-extended-runtime.config.ts` (extended, with
+`--reporter=verbose` so each case reports within the supervisor's 40-second
+stall deadline).
 
 | Gate | Case (file) | Fixed budget | Measured (2026-11-01) |
 | --- | --- | --- | --- |
@@ -270,7 +272,8 @@ in `npm test`; runtime cases run explicitly under the supervisor with
 | Gas/reactive | Hot/cold column (extended) | Hot gas rises faster at both timesteps; energy error below `1e-4` | Pass |
 | Dissipation | Rest and impact heat (`rigid.test.ts`, `fluids.test.ts`) | Resting heat exactly 0; impact heat paid once at the lever arm | Pass |
 | Electrical | Networks and batteries (`circuit*.test.ts`, `battery.test.ts`, `world-tick.test.ts`) | Dense-oracle agreement digits 12; finite store bounds all Joule heat | Pass |
-| Integration | Direct, mock Worker, budgets, cancel, save (`demonstrations.test.ts`) | Exact snapshot equality over the first two ticks of each demonstration | Pass; native Worker below |
+| Integration | Direct, mock Worker, budgets, cancel, save (`demonstrations.test.ts`) | Exact snapshot equality over the first two ticks of each demonstration | Pass |
+| Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six scenes |
 
 Open liquid findings, not converted to passing budgets:
 
@@ -665,3 +668,36 @@ new reference API and all 15 package declaration entry points
 SDK and chamber builds, type checks, structural lint, Python lint and formatting
 also pass. These are local CPU checks; the runtime release boundaries above
 remain unchanged.
+
+### Native Worker and gate closure (2026-11-01)
+
+The missing Solids and Liquids cases now have named tests, and the
+[published budgets](#published-gate-budgets) table lists every gate case. The
+SPH density/divergence candidate is accepted as the release liquid solver under
+its own name. On current sources the tank refinement cases pass (27.3 seconds,
+`6f5648861183451f9acb8e86d9100294`) and all five extended cases pass, including
+the new moving paddle (49.1 seconds, `4a787056be70432aaf351236d69f931e`).
+`npm test` passes 2,148 CPU checks (`4b5ccea7ccd3409d98be7a1cebec0504`).
+
+`worker-entry.ts` is a real module Worker. It receives one bootstrap snapshot,
+then speaks only the existing host protocol, yielding through a `MessageChannel`
+queue so no nested timer clamp applies. `worker-probe.ts` drives it from a page;
+`npm run build:multiphysics-probe` bundles both into `dist/multiphysics/`. The
+`multiphysics-worker-<scene>` Mac stages (see [macOS](MACOS.md)) produced these
+page-observed latencies over 24 samples on the M3 Ultra:
+
+| Scene | Parcels | Direct preview p95 | Worker preview p50 / p95 | Cancellation p95 | Stage |
+| --- | --- | --- | --- | --- | --- |
+| `wax-valve` | 8 | 22.7 ms | 17.8 / 21.2 ms | 3.7 ms | Pass (`9bed333659e243d1b6db8fb949db0ca0`) |
+| `rotating-contact` | 4 | 9.1 ms | 7.5 / 8.9 ms | 5.4 ms | Pass (`4b09a45479f742b1aa8e579eea16c6b0`) |
+| `fluid-switch` | 5 | 15.1 ms | 12.4 / 14.2 ms | 2.8 ms | Pass (`c8f0a69a8fcc4bb6bcbd0fcaf395e87e`) |
+| `falling-battery` | 4 | 9.2 ms | 7.7 / 8.4 ms | 5.5 ms | Pass (`80b4bdb0d6db4f5fac3792defa1b6e03`) |
+| `combined-failure` | 10 | 27.0 ms | 22.8 / 28.0 ms | 3.8 ms | Pass (`2469536e28db464798b45c6573ed5922`) |
+| `resolved-tank` | 105 (99 liquid) | 703.8 ms | 580.1 / 727.6 ms | 1.7 ms | **Fail: preview 2.9x over** (`9efa114e5165474d84c1a9ccd1b2ec84`) |
+
+Every stage, including the tank, was exact across work budgets, cancel/retry and
+save/restart. The Worker adds about 4% to the direct cost, so the tank miss is
+solver work (about 118,000 work units per tick), not scheduling. The 250 ms
+preview target therefore holds only for the five demonstrations, not for the
+16³ envelope. The runtime stays unexported, and Builder work waits for a solver
+speedup or a reviewed change to the timed load. The targets are unchanged.

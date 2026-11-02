@@ -140,3 +140,34 @@ export function createMultiphysicsDemonstration3D(
     ],
   });
 }
+/** The 99-sample resolved tank: the heaviest timed load, and the floating/sinking gate's scene. */
+export function createMultiphysicsResolvedTank3D(
+  profiles: MultiphysicsProfiles3D,
+  body: 'wax' | 'copper' = 'wax',
+  dt = 1 / 120,
+): MultiphysicsSnapshot3D {
+  const seed = (id: string, material: string, center: Vec3, halfExtents: Vec3 = [0.5, 0.5, 0.5]) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material,
+      owner: 'authored',
+      center,
+      halfExtents,
+      temperature: 20,
+    });
+  const walls = [
+    seed('floor', 'ceramic', [0, 0, 0], [2.5, 0.5, 2.5]),
+    seed('left', 'ceramic', [-3, 2.5, 0], [0.5, 2, 2.5]),
+    seed('right', 'ceramic', [3, 2.5, 0], [0.5, 2, 2.5]),
+    seed('front', 'ceramic', [0, 2.5, -3], [3.5, 2, 0.5]),
+    seed('back', 'ceramic', [0, 2.5, 3], [3.5, 2, 0.5]),
+  ];
+  const water = Array.from({ length: 100 }, (_, i) =>
+    seed(`w${i}`, 'water', [(i % 5) - 2, 1 + Math.floor(i / 25), (Math.floor(i / 5) % 5) - 2]),
+  ).filter((p) => !(p.center[0] === 0 && p.center[1] === 3 && p.center[2] === 0));
+  return createMultiphysicsSnapshot3D(profiles, {
+    parcels: [...walls, ...water, seed('body', body, [0, 3, 0])],
+    anchors: walls.map((p) => p.id),
+    settings: { dt },
+  });
+}
