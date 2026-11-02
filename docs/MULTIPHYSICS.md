@@ -128,8 +128,11 @@ failure. Existing integer support loads do not become physical stress by adding
 angular velocity. Bond demands need their own force/torque and failure contract.
 See [Catto's constraint and continuous-collision references](https://box2d.org/publications/).
 
-Liquids use [DFSPH](https://animation.rwth-aachen.de/media/papers/2015-SCA-DFSPH.pdf)
-with both density and divergence constraints. Boundary impulses go back to the
+Liquids use the release's own mass-metric SPH density/divergence projection,
+described under the private runtime checkpoint below. It borrows the two
+constraints of [DFSPH](https://animation.rwth-aachen.de/media/papers/2015-SCA-DFSPH.pdf)
+but is not that solver, and the release names it as its own approximation
+(decision recorded 2026-11-01). Boundary impulses go back to the
 solid assembly at the sampled contact positions; fluids cannot push fixed
 obstacles and then ignore their forces when those obstacles become movable.
 Buoyancy, displaced liquid, drag, torque, and pressure-driven failure require
@@ -223,16 +226,61 @@ Use these independent acceptance cases, in addition to existing regression tests
 | Builder | All five planned coupled demonstrations, finite edits with receipts, inspect/preview/compare/commit/save/reload |
 
 Every solver gate must publish fixed numerical error budgets and measured residuals
-before it is marked passed; none are implied by these reference cases. Exact
+before it is marked passed; none are implied by these reference cases. The
+[published budgets](#published-gate-budgets) list them case by case. Exact
 Q-store and identity bookkeeping, measured mass/momentum residuals, and atomic
 failure are mandatory at every gate. Reference mass and mechanical totals are
 Float64 values; they do not carry an exact-integer conservation claim.
 The original fixed 16³ macOS targets remain qualification targets: two-tick
 preview p95 at most 250 ms, cancellation p95 at most 100 ms, completed application
-frames at most 16.667 ms. No existing 64³/128³ or GPU qualification transfers to
+frames at most 16.667 ms. The 16³ load is a world of extent 16 inside the model
+caps (256 parcels, 768 bonds, 128 fluid samples, 128 solid boundary samples),
+timed on six named scenes: the five demonstrations and the 99-sample resolved
+tank. Timing transfers to no scene heavier than the heaviest one measured. No existing 64³/128³ or GPU qualification transfers to
 this model. Raw verification artifacts remain local under the current publication
 policy. Each milestone receives adversarial review before dependent work is
 admitted.
+
+### Published gate budgets
+
+Budgets are fixed before a case is marked passed and are never widened to admit
+a failure. "Digits *d*" means an absolute error below `0.5e-d`. Unit cases run
+in `npm test`; runtime cases run explicitly under the supervisor with
+`engine/vitest.multiphysics-fluid-runtime.config.ts` (tank) and
+`engine/vitest.multiphysics-extended-runtime.config.ts` (extended).
+
+| Gate | Case (file) | Fixed budget | Measured (2026-11-01) |
+| --- | --- | --- | --- |
+| Solids | Free fall (`rigid.test.ts`) | Position and velocity digits 12; heat exactly 0 | Pass |
+| Solids | Off-center impact (`rigid.test.ts`) | Impulse, spin and heat digits 6 at both timesteps | Pass |
+| Solids | Tipping (`rigid.test.ts`) | Return/fall direction by critical angle; spin within 3% of `m g d t / I_pivot`; pivot slip below `1e-3` | Pass at 8° and 25° |
+| Solids | Sliding (`rigid.test.ts`) | Friction heat `0.88`, digits 6 | Pass |
+| Solids | Resting stack (`rigid.test.ts`) | Height and speed digits 7 at `dt` 0.02 and 0.01; heat exactly 0 | Pass |
+| Solids | Swept fast impact (`rigid.test.ts`) | Stops at the face, digits 6; impact heat digits 5 | Pass |
+| Solids | Heated fracture (`world-tick.test.ts`) | Bond breaks with products, mass and spin preserved | Pass |
+| Solids | Refinement (`rigid.test.ts`, symmetric top) | Halving `dt` cuts orientation error below 0.4× and energy error below 0.6× | Pass |
+| Liquids | Hydrostatic column (`world-tick.test.ts`) | Anchor reaction minus empty-cup control equals column weight × `dt` within `1e-6` relative; lateral below `1e-8` | Pass, 6 ticks |
+| Liquids | Sustained rest (extended) | Speed and movement below `1e-6`, heat below `1e-9`, absolute energy below `1e-6`, two timesteps over 0.5 s | Pass |
+| Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement | Pass, 26.7 s |
+| Liquids | Displaced liquid (tank) | Mean acceleration from rest is positive and at most the Archimedes value `g (rho_l - rho_s) / rho_s` | Pass: about 0.48 (wax) and 0.36 (copper) of that bound |
+| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 3.67% then 3.64% |
+| Liquids | Viscous decay (`world-tick.test.ts`) | Shear decreases every tick; heat equals kinetic loss within `1e-12`; halving `dt` changes the loss by under 1% | Pass |
+| Liquids | Equal and opposite impulses (`fluids.test.ts`, `world-tick.test.ts`) | Moving boundary, gas wall and liquid-to-conductor transfers match analytic impulse and torque, digits 11–12 | Pass |
+| Gas/reactive | Pressure work (`fluids.test.ts`) | Midpoint/adiabatic oracle and reflected-wall equivalence | Pass |
+| Gas/reactive | Hot/cold column (extended) | Hot gas rises faster at both timesteps; energy error below `1e-4` | Pass |
+| Dissipation | Rest and impact heat (`rigid.test.ts`, `fluids.test.ts`) | Resting heat exactly 0; impact heat paid once at the lever arm | Pass |
+| Electrical | Networks and batteries (`circuit*.test.ts`, `battery.test.ts`, `world-tick.test.ts`) | Dense-oracle agreement digits 12; finite store bounds all Joule heat | Pass |
+| Integration | Direct, mock Worker, budgets, cancel, save (`demonstrations.test.ts`) | Exact snapshot equality over the first two ticks of each demonstration | Pass; native Worker below |
+
+Open liquid findings, not converted to passing budgets:
+
+- At plate speed 1, the moving-paddle tick is rejected when the plate is still
+  0.37 from the liquid: one tick's correction energy reaches `-0.021` against the
+  `0.01` world limit. The tick fails atomically. At 0.25 and 0.5 the case passes.
+- The paddle's unpaid correction barely changes under refinement (3.67% to
+  3.64%). It is an activation loss in the projection, not integration error.
+  It is visible in `accounting.numericalEnergy` as the Dissipation gate requires,
+  but it is not heat.
 
 ## Implementation evidence
 
@@ -262,8 +310,9 @@ two fixed ticks, with at most 256 yielded work units per call and three million
 units per tick. Work units bound deterministic operations, not wall-clock time.
 
 The liquid candidate uses a mass-metric SPH density/divergence projection with
-canonical sequential constraint updates and full rigid effective inertia. This
-is not yet a qualified implementation of the planned DFSPH release. Density
+canonical sequential constraint updates and full rigid effective inertia. It
+is the release's liquid solver, qualified only within the budgets and envelope
+below, and not a DFSPH implementation. Density
 compression tolerance is `1e-4`; divergence is now measured as a normalized
 *density-change rate*, with tolerance `1e-7` per model time unit, rather than
 relaxing velocity accuracy as the timestep shrinks. Each solve permits at most

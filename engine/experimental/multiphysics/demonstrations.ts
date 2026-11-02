@@ -1,5 +1,5 @@
-/** Private mechanism fixtures for executable acceptance and the future builder.
- * The combined-failure trajectory remains an unpassed extended release gate. */
+/** Private mechanism fixtures for executable acceptance, Worker timing and the future builder.
+ * The combined-failure trajectory passes the extended gate in fluid-qualification.runtime-cases.ts. */
 import { createMultiphysicsSnapshot3D, type MultiphysicsSnapshot3D } from './model.js';
 import { seedThermalParcel3D, type ThermalSeed3D } from './thermal.js';
 import type { MultiphysicsProfiles3D } from './profiles.js';

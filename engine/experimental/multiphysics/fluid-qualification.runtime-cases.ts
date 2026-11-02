@@ -242,3 +242,88 @@ test('overlapping liquid retains its state while freezing waits, then solidifies
   after.angularMomentum.forEach((v, i) => expect(v).toBeCloseTo(before.angularMomentum[i], 9));
   expect(state.accounting.externalStoredSubQ).toBe('0');
 });
+
+test('moving paddle: an off-center plate drives resting liquid with equal and opposite momentum and torque', () => {
+  const seed = (id: string, material: string, center: Vec3, halfExtents: Vec3, velocity: Vec3) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material,
+      center,
+      halfExtents,
+      velocity,
+      owner: 'authored',
+      temperature: 20,
+    });
+  const water = Array.from({ length: 27 }, (_, i) =>
+    seed(
+      `w${i}`,
+      'water',
+      [(i % 3) - 1, Math.floor(i / 9) - 1, (Math.floor(i / 3) % 3) - 1],
+      [0.5, 0.5, 0.5],
+      [0, 0, 0],
+    ),
+  );
+  const measured: { dt: number; energy: number }[] = [];
+  for (const dt of [1 / 120, 1 / 240]) {
+    // The plate's centre sits 0.5 above the block's, so the liquid's reaction twists it.
+    let state = createMultiphysicsSnapshot3D(profiles, {
+      parcels: [seed('paddle', 'copper', [-2.5, 0.5, 0], [0.25, 1, 1.5], [0.5, 0, 0]), ...water],
+      settings: { gravity: [0, 0, 0], dt },
+    });
+    const before = multiphysicsInventory3D(state),
+      paddleMomentum = () => {
+        const p = state.parcels.find((q) => q.id === 'paddle')!;
+        return p.mass * p.velocity[0];
+      },
+      start = paddleMomentum(),
+      kinetic = before.mechanicalEnergy;
+    let impactHeat = 0,
+      viscousHeat = 0;
+    for (let step = 0; step < Math.round(220 / 120 / dt); step++) {
+      const job = createMultiphysicsTickJob3D(profiles, state);
+      while (job.progress().status === 'running') job.advance(256);
+      const result = job.result();
+      state = result.snapshot;
+      impactHeat += result.report.mechanicalHeat;
+      viscousHeat +=
+        result.report.fluid!.energy.viscousHeat +
+        result.report.fluidPostProjection!.energy.viscousHeat;
+    }
+    const after = multiphysicsInventory3D(state),
+      paddle = state.parcels.find((p) => p.id === 'paddle')!,
+      liquidMomentum = state.parcels
+        .filter((p) => p.material === 'water')
+        .reduce((sum, p) => sum + p.mass * p.velocity[0], 0),
+      energy = inventoryEnergyDelta3D(before, after);
+    console.log(
+      JSON.stringify({
+        case: 'moving-paddle',
+        dt,
+        paddle: paddle.velocity[0],
+        liquidMomentum,
+        spin: paddle.intrinsicAngularMomentum[2],
+        impactHeat,
+        viscousHeat,
+        energy,
+        kinetic,
+      }),
+    );
+    // The plate reached the liquid and gave it most of its momentum.
+    expect(paddle.center[0]).toBeGreaterThan(-1.8);
+    expect(liquidMomentum).toBeGreaterThan(0.5 * start);
+    expect(Math.abs(paddleMomentum() - start + liquidMomentum)).toBeLessThan(1e-12);
+    for (let k = 0; k < 3; k++)
+      expect(after.linearMomentum[k]).toBeCloseTo(before.linearMomentum[k], 12);
+    // Reaction below the plate's centre: clockwise spin, with total angular momentum retained.
+    expect(paddle.intrinsicAngularMomentum[2]).toBeLessThan(-1e-3);
+    expect(
+      Math.hypot(...after.angularMomentum.map((v, k) => v - before.angularMomentum[k])),
+    ).toBeLessThan(1e-5);
+    expect(impactHeat).toBeGreaterThan(0);
+    expect(viscousHeat).toBeGreaterThan(0);
+    // Unpaid projection correction stays under 5% of the plate's kinetic energy.
+    expect(Math.abs(energy)).toBeLessThan(0.05 * kinetic);
+    measured.push({ dt, energy: Math.abs(energy) });
+  }
+  expect(measured[1].energy).toBeLessThan(measured[0].energy);
+}, 60000);

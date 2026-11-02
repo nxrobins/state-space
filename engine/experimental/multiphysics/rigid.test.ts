@@ -7,6 +7,8 @@ import {
   integrateOrientation,
   rotateVector,
   multiplyQuaternions,
+  subtractVec3,
+  addVec3,
   IDENTITY_QUATERNION,
 } from './math.js';
 import {
@@ -558,4 +560,47 @@ test('an almost face-aligned cross-edge contact retains its edge manifold after 
   ]);
   expect(heat(result)).toBe(0);
   expect(rigidContactPatchArea3D(a, b)).toBe(0);
+});
+
+test('tipping: a block tilted on its edge returns inside the critical angle and falls beyond it', () => {
+  // Half extents 0.25 x 1: the centre of mass passes over the pivot at atan(0.25), about 14 degrees.
+  const halfExtents: Vec3 = [0.25, 1, 0.25],
+    pivot: Vec3 = [0.25, 0.5, 0],
+    inertiaZ = (halfExtents[0] ** 2 + halfExtents[1] ** 2) / 3,
+    pivotInertia = inertiaZ + halfExtents[0] ** 2 + halfExtents[1] ** 2;
+  for (const [degrees, sign] of [
+    [8, 1],
+    [25, -1],
+  ] as const) {
+    const theta = (degrees * Math.PI) / 180,
+      orientation = integrateOrientation(IDENTITY_QUATERNION, [0, 0, -1], theta);
+    const block = {
+      ...parcel(
+        'block',
+        subtractVec3(pivot, rotateVector(orientation, [0.25, -1, 0])),
+        [0, 0, 0],
+        halfExtents,
+      ),
+      orientation,
+    };
+    let state: RigidParcel3D[] = [parcel('floor', [0, 0, 0], [0, 0, 0], [4, 0.5, 4]), block];
+    const dt = 0.005,
+      steps = 20;
+    for (let i = 0; i < steps; i++)
+      state = run(
+        state,
+        { dt, gravity: [0, -10, 0], friction: 1, solverIterations: 256 },
+        [],
+        ['floor'],
+      ).parcels;
+    const moved = state.find((p) => p.id === 'block')!;
+    // Rotation about a fixed edge: alpha = m g d / I_pivot, d = signed horizontal lever arm.
+    const lever = Math.sin(theta) - halfExtents[0] * Math.cos(theta),
+      expected = (-10 * lever * dt * steps) / pivotInertia,
+      spin = moved.intrinsicAngularMomentum[2] / inertiaZ;
+    expect(Math.sign(spin)).toBe(sign);
+    expect(Math.abs(spin - expected)).toBeLessThan(0.03 * Math.abs(expected));
+    const edge = addVec3(moved.center, rotateVector(moved.orientation, [0.25, -1, 0]));
+    expect(Math.hypot(...subtractVec3(edge, pivot))).toBeLessThan(1e-3);
+  }
 });

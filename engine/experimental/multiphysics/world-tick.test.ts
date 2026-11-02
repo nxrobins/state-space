@@ -16,7 +16,7 @@ import { createMultiphysicsTickJob3D } from './world-tick.js';
 import { batteryStoredUnits3D } from './battery.js';
 import { createMultiphysicsWorld3D } from './world.js';
 import { createMultiphysicsDemonstration3D } from './demonstrations.js';
-import type { Vec3 } from './math.js';
+import { subtractVec3, type Vec3 } from './math.js';
 let profiles: MultiphysicsProfiles3D;
 beforeAll(async () => {
   profiles = await createMultiphysicsProfiles3D();
@@ -568,4 +568,84 @@ test('postponed solidification retains the current enthalpy after conduction', (
   expect(result.snapshot.parcels.map((p) => p.center)).toEqual(
     initial.parcels.map((p) => p.center),
   );
+});
+
+test('hydrostatic column: the anchored cup carries exactly the liquid weight each tick', () => {
+  const cup = (id: string, center: Vec3, halfExtents: Vec3) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material: 'ceramic',
+      owner: 'authored',
+      center,
+      halfExtents,
+    });
+  const walls = [
+    cup('floor', [0, 0, 0], [1.5, 0.5, 1.5]),
+    cup('left', [-2, 2, 0], [0.5, 1.5, 1.5]),
+    cup('right', [2, 2, 0], [0.5, 1.5, 1.5]),
+    cup('front', [0, 2, -2], [2.5, 1.5, 0.5]),
+    cup('back', [0, 2, 2], [2.5, 1.5, 0.5]),
+  ];
+  const water = Array.from({ length: 27 }, (_, i) =>
+    seed(`w${i}`, 'water', [(i % 3) - 1, 1 + Math.floor(i / 9), (Math.floor(i / 3) % 3) - 1]),
+  );
+  // The empty cup supports only its own weight; the difference is the column.
+  const empty = run(
+    createMultiphysicsSnapshot3D(profiles, { parcels: walls, anchors: walls.map((p) => p.id) }),
+  ).report.boundaryLinearImpulse;
+  let state = createMultiphysicsSnapshot3D(profiles, {
+    parcels: [...walls, ...water],
+    anchors: walls.map((p) => p.id),
+  });
+  const weightImpulse =
+    water.reduce((sum, p) => sum + p.mass, 0) * state.settings.dt * state.settings.gravity[1];
+  for (let i = 0; i < 6; i++) {
+    const result = run(state);
+    state = result.snapshot;
+    const [x, y, z] = subtractVec3(result.report.boundaryLinearImpulse, empty);
+    expect(Math.abs(y - weightImpulse)).toBeLessThan(1e-6 * Math.abs(weightImpulse));
+    expect(Math.hypot(x, z)).toBeLessThan(1e-8);
+    expect(Math.hypot(...result.report.numericalLinearMomentum)).toBeLessThan(1e-12);
+  }
+  for (const p of state.parcels.filter((p) => p.material === 'water'))
+    expect(Math.hypot(...p.velocity)).toBeLessThan(1e-6);
+});
+
+test('viscous decay: sheared liquid slows monotonically and every lost joule becomes heat', () => {
+  const losses = [];
+  for (const dt of [1 / 120, 1 / 240]) {
+    let state = createMultiphysicsSnapshot3D(profiles, {
+      parcels: [
+        seed('a', 'water', [-0.5, 0, 0], 20, [0, 1, 0]),
+        seed('b', 'water', [0.5, 0, 0], 20, [0, -1, 0]),
+      ],
+      settings: { gravity: [0, 0, 0], dt },
+    });
+    const before = multiphysicsInventory3D(state);
+    let heat = 0,
+      shear = 2;
+    for (let i = 0; i < Math.round(0.1 / dt); i++) {
+      const { snapshot, report } = run(state);
+      state = snapshot;
+      heat +=
+        report.fluid!.energy.viscousHeat +
+        report.fluidPostProjection!.energy.viscousHeat +
+        report.mechanicalHeat;
+      const next = state.parcels[0].velocity[1] - state.parcels[1].velocity[1];
+      expect(next).toBeLessThan(shear);
+      shear = next;
+    }
+    const after = multiphysicsInventory3D(state),
+      loss = before.mechanicalEnergy - after.mechanicalEnergy;
+    expect(loss).toBeGreaterThan(1e-4);
+    expect(Math.abs(heat - loss)).toBeLessThan(1e-12);
+    expect(inventoryEnergyDelta3D(before, after)).toBeCloseTo(0, 12);
+    for (let k = 0; k < 3; k++) {
+      expect(after.linearMomentum[k]).toBeCloseTo(before.linearMomentum[k], 12);
+      expect(after.angularMomentum[k]).toBeCloseTo(before.angularMomentum[k], 12);
+    }
+    losses.push(loss);
+  }
+  // Halving the step changes the dissipated energy by under one percent.
+  expect(Math.abs(losses[0] - losses[1])).toBeLessThan(0.01 * losses[1]);
 });
