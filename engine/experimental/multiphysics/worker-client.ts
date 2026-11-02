@@ -9,6 +9,7 @@ import {
   integer,
   owned,
   type MultiphysicsWorkerTransport3D,
+  MULTIPHYSICS_WORKER_BOOTSTRAP_3D,
 } from './worker-wire.js';
 export type MultiphysicsWorkerState3D = { revision: number; snapshot: MultiphysicsSnapshot3D };
 export type MultiphysicsWorkerPreview3D = {
@@ -275,3 +276,43 @@ export function multiphysicsBrowserWorkerTransport3D(
     },
   };
 }
+/** Page-side start: create a module Worker from `url`, bootstrap it from `snapshot`, and
+ * return its connected client. The Worker module must call serveMultiphysicsWorker3D. */
+export async function startMultiphysicsWorker3D(
+  url: URL | string,
+  profiles: MultiphysicsProfiles3D,
+  snapshot: MultiphysicsSnapshot3D,
+  options: { work?: number; timeoutMs?: number } = {},
+) {
+  const worker = new Worker(url, { type: 'module' });
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const done = (event: MessageEvent) => {
+        worker.removeEventListener('message', done);
+        worker.removeEventListener('error', failed);
+        const data = event.data as { kind?: unknown; ready?: unknown; error?: unknown };
+        if (data?.kind === MULTIPHYSICS_WORKER_BOOTSTRAP_3D && data.ready === true) resolve();
+        else reject(Error(String(data?.error ?? 'Multiphysics Worker did not start.')));
+      };
+      const failed = () => reject(Error('Multiphysics Worker failed to load.'));
+      worker.addEventListener('message', done);
+      worker.addEventListener('error', failed);
+      worker.postMessage({
+        kind: MULTIPHYSICS_WORKER_BOOTSTRAP_3D,
+        snapshot,
+        work: integer(options.work ?? 128, 1, 256),
+      });
+    });
+  } catch (error) {
+    worker.terminate();
+    throw error;
+  }
+  const client = createMultiphysicsWorkerClient3D(
+    multiphysicsBrowserWorkerTransport3D(worker),
+    profiles,
+    { timeoutMs: options.timeoutMs },
+  );
+  await client.ready;
+  return client;
+}
+export type MultiphysicsWorkerClient3D = Awaited<ReturnType<typeof startMultiphysicsWorker3D>>;

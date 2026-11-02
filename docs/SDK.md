@@ -27,7 +27,7 @@ For host-specific setup and runtime limits, use the [macOS guide](MACOS.md).
 | M1–M5 3D | Finite, active and structural worlds with separate versioned contracts | [Worlds and backends](sdk/worlds.md) |
 | Tactical | Speculative edits, game transactions, geometry, provenance and workers over structural worlds | [Sessions and previews](sdk/tactical/sessions.md) |
 | Reactive | Catalog-aware materials, bounded CPU evolution, gameplay and worker previews | [Materials and worlds](sdk/reactive/materials.md) |
-| Multiphysics foundation | Independent conservation, finite-cuboid and DC reference calculations | [Physical contracts and release gates](MULTIPHYSICS.md) |
+| Multiphysics | Reference calculations, the bounded parcel world with edit receipts and two-tick previews, and its module Worker; the [builder](../examples/multiphysics-builder/) is the example client | [Physical contracts, qualified envelope and release gates](MULTIPHYSICS.md) |
 
 A reactive snapshot is not an M5 snapshot. Keep each family's registry, save
 schema and rules identity together. Examples consume the public entries listed

@@ -48,6 +48,13 @@ date of the last change in the section.
   budget table; a module Worker entry and page probe bundled by
   `npm run build:multiphysics-probe`; and headless `multiphysics-worker-<scene>`
   macOS stages for the five demonstrations and a 26-sample timed cup (pending PR).
+- The multiphysics runtime is public: the world, edit receipts, previews, tick
+  jobs, demonstrations and the module Worker are exported from
+  `experimental/3d/multiphysics`, with `serveMultiphysicsWorker3D` and
+  `startMultiphysicsWorker3D`. The interactive multiphysics builder
+  (`npm run build:multiphysics-builder`) has an oriented renderer, edits with
+  receipts, compare, cancel, save and load, and visible
+  `multiphysics-builder-<scene>-visible` macOS stages (pending PR).
 
 ### Changed
 
