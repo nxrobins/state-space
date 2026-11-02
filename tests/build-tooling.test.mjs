@@ -25,6 +25,7 @@ import {
 } from '../engine/sdk-build.mjs';
 import { lintProject, lintSource } from '../engine/lint_ts.mjs';
 import { STREAMING_REPORTER, VITEST, selectChecks } from '../scripts/verify_checks.mjs';
+import { CHECKOUT, pythonInterpreter } from '../engine/test-support/python-interpreter.mjs';
 
 test('SDK entries preserve existing build targets and reject unknown entries', () => {
   for (const entry of SDK_ENTRIES) {
@@ -275,4 +276,47 @@ test('supervised vitest checks select a reporter that streams one mark per compl
   const control = run(null);
   assert.equal(control.status, 0, control.stderr);
   assert.equal(marks(control.stdout), 0, control.stdout);
+});
+
+test('Python-backed checks resolve one interpreter: override, supervisor, checkout venv, then bare names', () => {
+  const root = mkdtempSync(join(tmpdir(), 'state-space-python-'));
+  try {
+    const never = () => false;
+    assert.equal(CHECKOUT, fileURLToPath(new URL('../', import.meta.url)));
+    assert.equal(
+      pythonInterpreter(
+        { PYTHON: '/opt/py', STATE_SPACE_PYTHON: '/venv/py' },
+        'darwin',
+        root,
+        never,
+      ),
+      '/opt/py',
+    );
+    assert.equal(
+      pythonInterpreter({ STATE_SPACE_PYTHON: '/venv/py' }, 'linux', root, never),
+      '/venv/py',
+    );
+    assert.equal(pythonInterpreter({}, 'darwin', root, never), 'python');
+    assert.equal(
+      pythonInterpreter({}, 'darwin', root, (name) => name === 'python3'),
+      'python3',
+    );
+    assert.equal(
+      pythonInterpreter({}, 'win32', root, (name) => name === 'python'),
+      'python',
+    );
+    mkdirSync(join(root, '.venv/bin'), { recursive: true });
+    writeFileSync(join(root, '.venv/bin/python'), '');
+    assert.equal(pythonInterpreter({}, 'darwin', root, never), join(root, '.venv/bin/python'));
+    assert.equal(pythonInterpreter({}, 'win32', root, never), 'python');
+    mkdirSync(join(root, '.venv/Scripts'), { recursive: true });
+    writeFileSync(join(root, '.venv/Scripts/python.exe'), '');
+    assert.equal(
+      pythonInterpreter({}, 'win32', root, never),
+      join(root, '.venv/Scripts/python.exe'),
+    );
+    assert.equal(pythonInterpreter({ PYTHON: 'py' }, 'win32', root, never), 'py');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });

@@ -1,6 +1,6 @@
 import {createStateSpaceStructuralWorld3DGPU} from '../../dist/sdk/state-space-structural-world-gpu.js';
 import {MAT} from '../../dist/sdk/state-space-structural-world.js';
-import {createStructuralLevel,fixtureEdits,scriptedInput} from '../structural-cavern/scene.js';
+import {createStructuralLevel,fixtureEdits,scriptedInput,observeStructuralLevel,expectedWindows,REACTIVE_SCENARIOS} from '../structural-cavern/scene.js';
 import {structuralStateDigest} from '../structural-cavern/state-evidence.js';
 import {createFramePump,waitForDisplayBoundary} from '../../web/frame-pump.js';
 const status=document.getElementById('status'),output=document.getElementById('report');
@@ -48,6 +48,69 @@ async function replay(size,scenario,ticks){
   }finally{gpu.close();}
  }
  report.energyDriftQ='0';report.invalidRestoreAtomic=true;
+}
+/** The thermal pack binds ca-3d-m6; loaded only by the m6 stages so legacy stages keep their module graph. */
+async function thermalCatalog(){const {createThermalMaterialRegistry3D}=await import('../../dist/sdk/state-space-reactive-materials.js');return createThermalMaterialRegistry3D();}
+async function m6Replay(size,scenario,ticks){
+ const catalog=await thermalCatalog(),level=createStructuralLevel(size,scenario,undefined,catalog),cpu=level.field,initial=cpu.snapshot(),digests=[await structuralStateDigest(initial)],checkpoints=new Map([[0,initial]]),actionTick=16;
+ const observer=observeStructuralLevel(level,actionTick);
+ report={...report,size,scenario,ticks,actionTick,catalog:'thermal',rulesVersion:cpu.rulesVersion,materialCatalogHash:cpu.materialCatalogHash,expected:expectedWindows(level,actionTick),checks:[],runs:[]};save();
+ for(let tick=1;tick<=ticks;tick++){
+  cpu.step(1,{edits:fixtureEdits(level,tick,actionTick)});
+  const state=cpu.snapshot();digests.push(await structuralStateDigest(state));observer.tick(tick,state);
+  if([3,actionTick-1].includes(tick))checkpoints.set(tick,state);
+  if(tick%8===0){progress('CPU '+size+'³ '+scenario+' '+tick+'/'+ticks);await pause();}
+ }
+ // The pinned windows are checked on the CPU oracle; every GPU state must then equal it.
+ report.windows=observer.check();
+ check(cpu.energyBalance().driftQ===0n,'CPU conservation failure');
+ report.referenceFinalHash=digests.at(-1);report.referenceDigests=digests;save();
+ for(const mode of ['dense','active']){
+  const gpu=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:mode==='dense'?16:8,mode,registry:catalog});
+  try{
+   check(gpu.backendInfo.isFallbackAdapter===false,'Hardware GPU required');report.backendInfo=gpu.backendInfo;
+   check(gpu.rulesVersion==='ca-3d-m6'&&gpu.materialCatalogHash===catalog.hash,'GPU world does not bind the ca-3d-m6 catalog');
+   for(const [start,end] of [[0,ticks],[3,11],[actionTick-1,actionTick+5]]){
+    await gpu.restore(checkpoints.get(start));
+    for(let tick=start+1;tick<=end;tick++){
+     await gpu.step(1,{edits:fixtureEdits(level,tick,actionTick)});
+     const digest=await structuralStateDigest(await gpu.snapshot());
+     check(digest===digests[tick],mode+' complete state differs at '+tick+' from restart '+start);
+     report.checks.push({mode,start,tick,digest});
+     if(tick%4===0||tick===end){progress(mode+' '+size+'³ '+scenario+' '+tick+'/'+end);await pause();}
+    }
+    check((await gpu.energyBalance()).driftQ===0n,'GPU conservation failure');
+    report.runs.push({mode,start,end,exact:true});
+   }
+   const before=await gpu.snapshot();let rejected=false;
+   try{await gpu.restore({...before,rulesVersion:'ca-3d-m5'});}catch{rejected=true;}
+   check(rejected&&JSON.stringify(before)===JSON.stringify(await gpu.snapshot()),'Invalid restore was not atomic');
+  }finally{gpu.close();}
+ }
+ report.energyDriftQ='0';report.invalidRestoreAtomic=true;
+}
+async function m6Gameplay(size,scenario){
+ const {verifyStructuralGameplay}=await import('../structural-cavern/verify.js');
+ const result=await verifyStructuralGameplay({size,scenario,mode:'active',catalog:'thermal',frames:32});
+ check(result.passed===true&&result.backendInfo.isFallbackAdapter===false,'Hardware GPU required');
+ report={...report,...result};
+}
+/** The ca-3d-m6 tiny parity probes: every reactive fixture at 8³ and 16³, GPU equal to the CPU oracle after every tick. */
+async function m6Tiny(mode){
+ const probe=await import('../../dist/volume-m5/structural-probe.js');
+ // The probe reports each fixture and tick through #status; mirror it into the journaled report so
+ // the supervisor's stall deadline sees progress between fixtures.
+ const mirror=new MutationObserver(()=>{report.progress=status.textContent;save();});
+ mirror.observe(status,{childList:true,characterData:true,subtree:true});
+ try{
+  progress('ca-3d-m6 tiny parity probes: '+mode);
+  const result=await probe.verifyM6GpuTiny(mode);
+  const names=new Set(result.results.map(r=>r.name));
+  check(result.passed===true&&result.mode===mode&&result.rulesVersion==='ca-3d-m6'&&names.size>=7,'Tiny ca-3d-m6 probe incomplete');
+  check([8,16].every(size=>result.results.filter(r=>r.size===size).length===names.size),'Every fixture must run at 8³ and 16³');
+  check(result.results.every(r=>r.backendInfo.isFallbackAdapter===false),'Exact probes require hardware GPU');
+  report={...report,...result,fixtures:names.size,backendInfo:result.results[0].backendInfo,energyDriftQ:'0'};
+ }finally{mirror.disconnect();}
 }
 async function structuralExact(){
  const probe=await import('../../dist/volume-m5/structural-probe.js');report.probes=[];
@@ -147,7 +210,13 @@ window.macQualification={ready:true,run(stage){
   else if(stage==='replay-64-cut-long')await replay(64,'cut',1024);
   else if(/^replay-(32|64)-(control|cut|heat|ice-control|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
   else if(stage==='lighting')await lighting();
+  else if(stage==='m6-tiny-dense'||stage==='m6-tiny-active')await m6Tiny(stage.slice(8));
   else if(stage==='frames-reference'||stage==='frames-cached'||stage==='frames-visible')await frames(stage==='frames-visible'?'reference':stage.slice(7));
+  else if(/^m6-(gameplay|replay)-(32|64)-/.test(stage)){
+   const [,kind,size,scenario]=stage.match(/^m6-(gameplay|replay)-(32|64)-(.+)$/);
+   if(!REACTIVE_SCENARIOS.includes(scenario))throw Error('Unknown fixed stage');
+   if(kind==='gameplay')await m6Gameplay(Number(size),scenario);else await m6Replay(Number(size),scenario,Number(size)===32?1024:256);
+  }
   else throw Error('Unknown fixed stage');
   report.passed=true;
  }catch(error){report.error=String(error.stack||error);}finally{report.done=true;report.finishedAt=new Date().toISOString();progress(report.passed?'Stage complete: '+stage:'Stage failed: '+report.error);}})();

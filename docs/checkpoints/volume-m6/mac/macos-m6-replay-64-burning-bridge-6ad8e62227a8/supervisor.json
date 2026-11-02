@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "id": "78f7e4640e494148bd12bd6d479d2288",
+  "kind": "macos-qualification",
+  "command": [
+    "/Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/.venv/bin/python3",
+    "-m",
+    "scripts.verify_macos_qualification",
+    "--stage",
+    "m6-replay-64-burning-bridge"
+  ],
+  "startedAt": 1793565821.1274052,
+  "passed": true,
+  "memoryLimitMiB": null,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 55.137,
+  "containment": "POSIX process group",
+  "metalSmokeScope": {
+    "stage": "m6-replay-64-burning-bridge",
+    "maxDimension": 64,
+    "maxReplayTicks": 256,
+    "maxFrames": 660,
+    "gpuTelemetryAvailable": false,
+    "independentWatchdog": true,
+    "sampledRssLimitMiB": 8192
+  },
+  "preflight": {
+    "host": {
+      "time": 1793565822.151647,
+      "hostCpuPercent": 7.5,
+      "freeMemoryMiB": 46711.734375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 300.0,
+    "sampledRssLimitMiB": 8192,
+    "transport": "owned pipe",
+    "kernelMemoryCap": false
+  },
+  "childPid": 75876,
+  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/dist/verification/macos-m6-replay-64-burning-bridge-6ad8e62227a8/report.json",
+  "lastHealth": {
+    "host": {
+      "time": 1793565866.32217,
+      "hostCpuPercent": 5.5,
+      "freeMemoryMiB": 46674.890625
+    },
+    "gpu": null,
+    "job": null
+  },
+  "exitCode": 0,
+  "finishedAt": 1793565866.577307
+}

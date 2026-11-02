@@ -1,0 +1,289 @@
+{
+ "passed": true,
+ "mode": "active",
+ "rulesVersion": "ca-3d-m6",
+ "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+ "scope": "8^3 and 16^3 ca-3d-m6 fixtures, active GPU equal to the CPU oracle after every tick; not larger worlds, frames or gameplay",
+ "recordedAt": "2026-10-31",
+ "host": "Apple M3 Ultra, macOS 26.6.2, Claude desktop built-in Chromium pane, Metal WebGPU (vendor apple, architecture metal-3)",
+ "procedure": "python3 -m http.server on 127.0.0.1; dist/volume-m5/structural-probe.js verifyM6GpuTiny('active'); development check outside the guarded verification harness",
+ "results": [
+  {
+   "name": "bridge",
+   "size": 8,
+   "ticks": 40,
+   "finalHash": "ada7e91ba04c1b3d8f0a19ce518a986c0e484c67729e6407f4d025336dadab55",
+   "activity": {
+    "mode": "active",
+    "tick": 40,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 4,
+    "spanOnFloorFrom": 8
+   }
+  },
+  {
+   "name": "sealed",
+   "size": 8,
+   "ticks": 40,
+   "finalHash": "2905a7c693ed5be0310009124113a2539bc92ea1331dbc53a0d211e737f1006a",
+   "activity": {
+    "mode": "active",
+    "tick": 40,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "vented",
+   "size": 8,
+   "ticks": 40,
+   "finalHash": "742aa86c4cf412b659166be9f72330cf6366ab50ebb45054d203fb29a878396a",
+   "activity": {
+    "mode": "active",
+    "tick": 40,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "valve",
+   "size": 8,
+   "ticks": 48,
+   "finalHash": "38f1fc919c3eba031792b8dc7f018459c4e85a0a43715fa99a6744e00cad818c",
+   "activity": {
+    "mode": "active",
+    "tick": 48,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 12,
+    "plugMelted": 13,
+    "waterHeldThrough": 13,
+    "waterReleased": 14
+   }
+  },
+  {
+   "name": "barrier",
+   "size": 8,
+   "ticks": 48,
+   "finalHash": "17f6602a4e2815d680312090a2c5f4b92bd43aec964bf7a6e21532eabb6d5650",
+   "activity": {
+    "mode": "active",
+    "tick": 48,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 48,
+    "waterHeldThrough": 48
+   }
+  },
+  {
+   "name": "uniform",
+   "size": 8,
+   "ticks": 16,
+   "finalHash": "1ac238d0a98104ce6a21342b494960a1b5d32a31c5db701c8150fd17b12f3bf0",
+   "activity": {
+    "mode": "active",
+    "tick": 16,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "dormant",
+   "size": 8,
+   "ticks": 16,
+   "finalHash": "919b27ccb48d0ee8f031797bc9fda3189cf446d53d1e5e04680de45e20c27d20",
+   "activity": {
+    "mode": "active",
+    "tick": 16,
+    "totalChunks": 8,
+    "finalAwake": 0,
+    "dispatchedChunks": 0,
+    "peakChunks": 0
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "unchangedThrough": 16
+   }
+  },
+  {
+   "name": "bridge",
+   "size": 16,
+   "ticks": 64,
+   "finalHash": "a08e2047985165d86b7727def3f9501b5ba94e817e7ea3f0d6a59debeb009ee8",
+   "activity": {
+    "mode": "active",
+    "tick": 64,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 4,
+    "spanOnFloorFrom": 16
+   }
+  },
+  {
+   "name": "sealed",
+   "size": 16,
+   "ticks": 40,
+   "finalHash": "911be9642cfe8deef7278b225c7268719cff49071f4a13da0c7a61641c4deea8",
+   "activity": {
+    "mode": "active",
+    "tick": 40,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "vented",
+   "size": 16,
+   "ticks": 40,
+   "finalHash": "61d2c19f0597b184adbfa69ade9fd38e984945d96888435735ab4677e594750d",
+   "activity": {
+    "mode": "active",
+    "tick": 40,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "valve",
+   "size": 16,
+   "ticks": 48,
+   "finalHash": "77dd9647b4b46238a178db2ef29bac83b7cbcd7eacc48952696f8f7df8780a29",
+   "activity": {
+    "mode": "active",
+    "tick": 48,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 12,
+    "plugMelted": 13,
+    "waterHeldThrough": 13,
+    "waterReleased": 14
+   }
+  },
+  {
+   "name": "barrier",
+   "size": 16,
+   "ticks": 48,
+   "finalHash": "4e75b0e2a2e4d1b50b89f42a08bf5e73a2aa95fec183176d090aac632fadb995",
+   "activity": {
+    "mode": "active",
+    "tick": 48,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "plugSolidThrough": 48,
+    "waterHeldThrough": 48
+   }
+  },
+  {
+   "name": "uniform",
+   "size": 16,
+   "ticks": 16,
+   "finalHash": "55bb0300773b1d8a2e0b57e6c338306255e7132894ac6ca9fe3cf40aded7db86",
+   "activity": {
+    "mode": "active",
+    "tick": 16,
+    "totalChunks": 8,
+    "finalAwake": 8,
+    "dispatchedChunks": 224,
+    "peakChunks": 8
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "firstReaction": 1
+   }
+  },
+  {
+   "name": "dormant",
+   "size": 16,
+   "ticks": 16,
+   "finalHash": "5423ae269fc40d9f1cc100c567e9ed16894aece367dfd8724d940af3e0fc220a",
+   "activity": {
+    "mode": "active",
+    "tick": 16,
+    "totalChunks": 8,
+    "finalAwake": 0,
+    "dispatchedChunks": 0,
+    "peakChunks": 0
+   },
+   "planReused": true,
+   "planReusable": true,
+   "windows": {
+    "unchangedThrough": 16
+   }
+  }
+ ],
+ "windowsNote": "Tick windows measured on the CPU oracle during the active re-run of 2026-11-01 and pinned in structural-reactive-fixtures.ts; the dense run's trajectories are identical."
+}

@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "id": "13afa495f1f24f0485b272917283291d",
+  "kind": "macos-qualification",
+  "command": [
+    "/Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/.venv/bin/python3",
+    "-m",
+    "scripts.verify_macos_qualification",
+    "--stage",
+    "m6-gameplay-32-thermal-valve"
+  ],
+  "startedAt": 1793570309.676757,
+  "passed": true,
+  "memoryLimitMiB": null,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 6.144,
+  "containment": "POSIX process group",
+  "metalSmokeScope": {
+    "stage": "m6-gameplay-32-thermal-valve",
+    "maxDimension": 32,
+    "maxReplayTicks": 32,
+    "maxFrames": 32,
+    "gpuTelemetryAvailable": false,
+    "independentWatchdog": true,
+    "sampledRssLimitMiB": 8192
+  },
+  "preflight": {
+    "host": {
+      "time": 1793570310.695885,
+      "hostCpuPercent": 11.5,
+      "freeMemoryMiB": 48549.859375
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 300.0,
+    "sampledRssLimitMiB": 8192,
+    "transport": "owned pipe",
+    "kernelMemoryCap": false
+  },
+  "childPid": 14138,
+  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/goofy-aryabhata-4ee0eb/dist/verification/macos-m6-gameplay-32-thermal-valve-b476a5623122/report.json",
+  "lastHealth": {
+    "host": {
+      "time": 1793570312.750295,
+      "hostCpuPercent": 13.0,
+      "freeMemoryMiB": 46719.1875
+    },
+    "gpu": null,
+    "job": null
+  },
+  "exitCode": 0,
+  "finishedAt": 1793570312.971481
+}

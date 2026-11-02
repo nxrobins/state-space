@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "id": "38b01f870ad848b9a928e5e297703484",
+  "kind": "macos-qualification",
+  "command": [
+    "/Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/.venv/bin/python3",
+    "-m",
+    "scripts.verify_macos_qualification",
+    "--stage",
+    "m6-replay-32-thermal-valve-ceramic"
+  ],
+  "startedAt": 1793565549.5716438,
+  "passed": true,
+  "memoryLimitMiB": null,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 40.403,
+  "containment": "POSIX process group",
+  "metalSmokeScope": {
+    "stage": "m6-replay-32-thermal-valve-ceramic",
+    "maxDimension": 32,
+    "maxReplayTicks": 1024,
+    "maxFrames": 660,
+    "gpuTelemetryAvailable": false,
+    "independentWatchdog": true,
+    "sampledRssLimitMiB": 8192
+  },
+  "preflight": {
+    "host": {
+      "time": 1793565550.596701,
+      "hostCpuPercent": 9.0,
+      "freeMemoryMiB": 46600.28125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 300.0,
+    "sampledRssLimitMiB": 8192,
+    "transport": "owned pipe",
+    "kernelMemoryCap": false
+  },
+  "childPid": 68821,
+  "lastOutput": "Mac qualification report: /Users/nigel/Projects/state-space/.claude/worktrees/youthful-shamir-ae9f56/dist/verification/macos-m6-replay-32-thermal-valve-ceramic-47dcbe20ce41/report.json",
+  "lastHealth": {
+    "host": {
+      "time": 1793565589.217806,
+      "hostCpuPercent": 8.3,
+      "freeMemoryMiB": 46645.453125
+    },
+    "gpu": null,
+    "job": null
+  },
+  "exitCode": 0,
+  "finishedAt": 1793565589.451475
+}

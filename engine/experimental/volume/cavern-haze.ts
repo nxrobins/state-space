@@ -1,10 +1,28 @@
 /** Presentation-only single scattering. Fixed work and no temporal history. */
-export const CAVERN_HAZE = `
+import {
+  DEFAULT_MATERIAL_PRESENTATION_3D,
+  type MaterialPresentation3D,
+} from './material-presentation.js';
+/** The frozen catalog scatters steam only; a reactive catalog scatters every haze gas in its color. */
+export function cavernHaze(p: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D) {
+  const medium = p.reactive
+      ? `fn steam(c:vec3i)->f32{return select(0.,1.,hazeOnly(cell(c)&255u));}
+fn tint(c:vec3i)->vec3f{let m=cell(c)&255u;return select(vec3f(0),colors[m],hazeOnly(m));}
+fn albedo(p:vec3f)->vec3f{
+ let q=p-.5;let c=vec3i(floor(q));let f=fract(q);let u=f*f*(3.-2.*f);
+ let a=mix(mix(tint(c),tint(c+vec3i(1,0,0)),u.x),mix(tint(c+vec3i(0,1,0)),tint(c+vec3i(1,1,0)),u.x),u.y);
+ let b=mix(mix(tint(c+vec3i(0,0,1)),tint(c+vec3i(1,0,1)),u.x),mix(tint(c+vec3i(0,1,1)),tint(c+vec3i(1,1,1)),u.x),u.y);
+ let w=mix(mix(mix(steam(c),steam(c+vec3i(1,0,0)),u.x),mix(steam(c+vec3i(0,1,0)),steam(c+vec3i(1,1,0)),u.x),u.y),mix(mix(steam(c+vec3i(0,0,1)),steam(c+vec3i(1,0,1)),u.x),mix(steam(c+vec3i(0,1,1)),steam(c+vec3i(1,1,1)),u.x),u.y),u.z);
+ return select(vec3f(1.),mix(a,b,u.z)/max(w,.0001),w>.0001);
+}`
+      : 'fn steam(c:vec3i)->f32{return select(0.,1.,(cell(c)&255u)==9u);}',
+    scattering = p.reactive ? 'radiance*=albedo(p);' : '';
+  return `
 @group(0) @binding(3) var<storage,read> lights:array<Light>;
 @group(0) @binding(4) var sceneDepth:texture_depth_2d;
 @group(0) @binding(8) var<uniform> optics:vec4f;
 @vertex fn vertex(@builtin(vertex_index) i:u32)->@builtin(position) vec4f{let p=array<vec2f,3>(vec2f(-1,-1),vec2f(3,-1),vec2f(-1,3));return vec4f(p[i],0,1);}
-fn steam(c:vec3i)->f32{return select(0.,1.,(cell(c)&255u)==9u);}
+${medium}
 fn density(p:vec3f)->f32{
  let q=p-.5;let c=vec3i(floor(q));let f=fract(q);let u=f*f*(3.-2.*f);
  let a=mix(mix(steam(c),steam(c+vec3i(1,0,0)),u.x),mix(steam(c+vec3i(0,1,0)),steam(c+vec3i(1,1,0)),u.x),u.y);
@@ -59,7 +77,7 @@ struct Volume{@location(0) scattering:vec4f,@location(1) distance:f32,@location(
  let step=distance/32.;var transmittance=1.;var scatter=vec3f(0);var bend=vec2f(0);var heatFront=48.;var heatAmount=0.;
  for(var i=0u;i<32u;i++){
   let p=camera.eye.xyz+ray*((f32(i)+.5)*step);let m=cell(vec3i(floor(p)))&255u;
-  if(m!=0u&&m!=9u){continue;}
+  if(!seeThrough(m)){continue;}
   let extinction=density(p);let transmit=exp(-extinction*step);
   var radiance=vec3f(.026,.043,.063)*style.lighting.x;
   for(var source=0u;source<2u;source++){
@@ -75,7 +93,7 @@ struct Volume{@location(0) scattering:vec4f,@location(1) distance:f32,@location(
      }
     }}
   }
-  scatter+=transmittance*(1.-transmit)*radiance;transmittance*=transmit;
+  ${scattering}scatter+=transmittance*(1.-transmit)*radiance;transmittance*=transmit;
  }
  var out:Volume;out.scattering=vec4f(scatter,transmittance);out.distance=distance;
  // UV displacement: capped at six vertical-resolution pixels at 1080p.
@@ -83,3 +101,4 @@ struct Volume{@location(0) scattering:vec4f,@location(1) distance:f32,@location(
  let maximum=6./1080.;let aspect=vec2f(f32(size.x)/f32(size.y),1.);
  out.distortion=vec4f(uvBend*min(1.,maximum/max(length(uvBend*aspect),.000001)),heatFront,heatAmount);return out;
 }`;
+}

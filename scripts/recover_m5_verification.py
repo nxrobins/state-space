@@ -18,7 +18,8 @@ def main():
     parser.add_argument('--browser-executable', type=Path)
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
-    parser.add_argument('--scene', choices=('control','cut','heat','ice-control','ice-heat'), default='control')
+    parser.add_argument('--scene', choices=('control','cut','heat','ice-control','ice-heat','burning-bridge','thermal-valve','thermal-valve-ceramic'), default='control')
+    parser.add_argument('--catalog', choices=('thermal',), help='reactive chambers bind the thermal catalog (ca-3d-m6)')
     parser.add_argument('--size', type=int, choices=(32,64,128), default=32)
     parser.add_argument('--ticks', type=int, choices=(32,64,256,512,768,1024), default=32)
     parser.add_argument('--resume',type=Path)
@@ -54,6 +55,7 @@ def main():
         command = [node, 'node_modules/vite/bin/vite.js', 'build', '--config', f'engine/vite.{args.sdk_entry}.config.ts']
     elif args.stage == 'level-pilot':
         command = [node,'scripts/verify_volume_m5_level.mjs','--size',str(args.size),'--scene',args.scene,'--ticks',str(args.ticks),'--action-tick','16' if args.ticks<=64 else '180','--output',str(out/'evidence')]
+        if args.catalog: command += ['--catalog', args.catalog]
         if args.resume:
             reference=args.resume.resolve();reference.relative_to(ROOT)
             if not (reference/'report.json').is_file(): parser.error('Missing CPU continuation receipt')
@@ -68,6 +70,7 @@ def main():
         command += ['--probe', {'review-gpu':'review','shader-probe':'compile','gpu-tiny':'tiny','gpu-active-tiny':'active-tiny','gpu-trajectory':'trajectory','gpu-seams':'seams','gameplay-pilot':'gameplay','ui-pilot':'ui','frames':'frames','gpu-fallback':'fallback','gpu-order':'order','level-trajectory':'level-trajectory','scale-pilot':'scale'}[args.stage]]
         if args.stage in ('gameplay-pilot','ui-pilot','frames','level-trajectory','scale-pilot'):
             command += ['--mode',args.mode,'--size',str(args.size),'--scene',args.scene]
+            if args.catalog: command += ['--catalog', args.catalog]
         if args.stage == 'gpu-seams':
             command += ['--mode', args.mode]
         if args.stage in ('gpu-trajectory','level-trajectory'):

@@ -1,5 +1,22 @@
 /** M5 local-pass activity. Structural dependencies solve globally to completion. */
-export function structuralActivityShaders(physics: string, edge: number, chunks: number) {
+export function structuralActivityShaders(
+  physics: string,
+  edge: number,
+  chunks: number,
+  reactive = false,
+) {
+  // ca-3d-m6: a cell that could react this tick keeps its tile awake. Burning fuel next to any
+  // oxidizer, an oxidizer next to burning fuel, and fire that would extinguish are never quiet.
+  const combustion = reactive
+    ? `
+fn reactiveActive(i:u32)->bool{
+ let v=cells[i];if((v&255u)==FIRE_ID&&extinguishes(i)){return true;}
+ if(burningAt(i)){for(var f=0u;f<6u;f++){let j=neighbor(i,f);if(j!=INF&&prop(cells[j],21u)==1u){return true;}}}
+ if(prop(v,21u)==1u){for(var f=0u;f<6u;f++){let j=neighbor(i,f);if(j!=INF&&burningAt(j)){return true;}}}
+ return false;
+}
+`
+    : '';
   const declarations = `
 const M5_CHUNKS=${chunks}u;
 const M5_AWAKE=M5_CHUNKS;
@@ -18,11 +35,12 @@ fn wakeLocal(c:vec3i){
   }
  }}}
 }
+${combustion}
 // Every parity/direction is considered. Tick order alone cannot awaken a tile.
 fn locallyQuiet(i:u32)->bool{
  let v=cells[i];let q=energies[i];let c=coordinate(i);let immovable=bound(i);
  if(thermal(v,q)!=v||transition(v,q)!=(v&255u)){return false;}
- for(var f=0u;f<6u;f++){
+${reactive ? ' if(reactiveActive(i)){return false;}\n' : ''} for(var f=0u;f<6u;f++){
   let t=c+NORMALS[f];if(!inside(t)){continue;}let j=index(t);let other=cells[j];
   if(((v&255u)!=(other&255u)||q!=energies[j])&&pairEnergy(v,other,q,energies[j])!=q){return false;}
   if(immovable){continue;}

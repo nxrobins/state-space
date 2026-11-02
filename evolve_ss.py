@@ -66,11 +66,19 @@ def mutate_with_llm(parents: list[Candidate], target: str, model: str, seed: int
     if not key:
         raise RuntimeError("Set ANTHROPIC_API_KEY to explicitly enable the requested paid mutation call")
     sources = ShaderBundle.load()
-    prompt = (f"Optimize the {target} kernel of State Space ca-v3. Return only complete WGSL. "
-              "Preserve exact packed cells AND energyQ after every composed pass. This is an optimization, not a new physical law. "
-              "Storage bindings and the schedule are host owned. Physics entries use @workgroup_size(16,16). "
-              "Use io_copy/io_write for both output arrays. Codec candidates contain pack_voxel, unpack_voxel, exchange_thermal helpers only. "
+    prompt = (f"Optimize the {target} kernel of State Space ca-v4. Return only complete WGSL. "
+              "Preserve exact packed cells, energyQ AND structure after every composed pass. This is an optimization, not a new physical law. "
+              "Host-owned and immutable: storage bindings, the io_* storage adapter, property(), the shared temperature_q law, "
+              "the codec helpers prepended from locked/phase_1a_winner.wgsl, and the pass schedule. "
+              "Candidate-owned: the whole kernel file, including its helper functions. The thermal kernel owns pair_energy and the "
+              "phase kernel owns phase_material, so their arithmetic may be restructured as long as every output bit is unchanged. "
+              "The structure and normalize kernels only call io_apply_structure/io_normalize_structure and have little headroom. "
+              "Physics entries use @workgroup_size(16,16). Use io_copy/io_write for all three output arrays. "
+              "Codec candidates contain pack_voxel, unpack_voxel, exchange_thermal helpers only. "
               "No barriers, while/loop, or data-dependent for loops. A for loop may use var i=0u; i<4u; i+=1u with an unchanged induction variable. "
+              "Fitness includes kernel_ms, the device-side time of this kernel's pass variants over N back-to-back dispatches on immutable "
+              "input at 256x256 and 512x512, next to the composed tick's host wall time. One probe dispatch slower than the configured "
+              "budget fails the candidate closed, so nested loops that multiply work are rejected rather than measured. "
               f"Exploration seed: {seed}. Parent candidates:\n" + "\n\n".join(parent.source for parent in parents) +
               "\n\nHost sources (immutable):\n" + "\n".join(value for _, value in sources.shaders))
     client = anthropic.Anthropic(api_key=key, timeout=60, max_retries=0)
@@ -138,8 +146,14 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=8173)
     parser.add_argument("--warmup", type=int, default=2)
     parser.add_argument("--samples", type=int, default=7)
+    defaults = EvaluationConfig()
+    parser.add_argument("--kernel-dispatches", type=int, default=defaults.kernel_dispatches,
+                        help="back-to-back dispatches per isolated kernel batch")
+    parser.add_argument("--kernel-probe-budget-ms", type=int, default=defaults.kernel_probe_budget_ms,
+                        help="wall-time budget for one probe dispatch at 256x256 before any kernel batch is submitted")
     args = parser.parse_args()
-    config = EvaluationConfig(seed=args.seed, warmup=args.warmup, samples=args.samples)
+    config = EvaluationConfig(seed=args.seed, warmup=args.warmup, samples=args.samples,
+                              kernel_dispatches=args.kernel_dispatches, kernel_probe_budget_ms=args.kernel_probe_budget_ms)
     if args.command in ("evaluate", "search") and args.target is None:
         parser.error("--target is required")
     if args.command == "evaluate":

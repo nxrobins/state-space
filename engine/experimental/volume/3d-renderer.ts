@@ -1,17 +1,22 @@
 import { type LatencyProfiler } from './latency.js';
-import { MATERIALS_3D } from '../3d.js';
 import { type TerrainCamera, type TerrainRenderer } from './3d-view.js';
-const palette = Array.from({ length: 18 }, (_, i) => {
-  const m = MATERIALS_3D.find((m) => m.id === i);
-  return `vec3f(${[1, 3, 5].map((k) => (m ? parseInt(m.color.slice(k, k + 2), 16) / 255 : 0)).join(',')})`;
-}).join(',');
-const COMMON = `
+import {
+  DEFAULT_MATERIAL_PRESENTATION_3D,
+  materialPredicates,
+  paletteConstant,
+  type MaterialPresentation3D,
+} from './material-presentation.js';
+/** Shared declarations plus the catalog's role predicates (see-through, cutout, emitters). */
+export function terrainCommon(p: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D) {
+  return `
 struct Camera { eye:vec4f, right:vec4f, up:vec4f, forward:vec4f, projection:vec4f, shape:vec4u }
 const normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,0),vec3i(0,0,-1),vec3i(0,0,1));
-`;
-export const MESH =
-  COMMON +
-  `
+${materialPredicates(p)}`;
+}
+export function meshShader(p: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D) {
+  return (
+    terrainCommon(p) +
+    `
 @group(0) @binding(0) var<storage,read> grid:array<u32>;
 @group(0) @binding(1) var<storage,read_write> faces:array<u32>;
 struct Draw { vertices:u32, count:atomic<u32>, first:u32, instance:u32 }
@@ -23,17 +28,24 @@ struct Draw { vertices:u32, count:atomic<u32>, first:u32, instance:u32 }
  let c=vec3i(vec3u(i%shape.x,(i/shape.x)%shape.y,i/(shape.x*shape.y)));
  for(var f=0u;f<6u;f++){
   let t=c+normals[f];var exposed=true;
-  if(m!=9u&&all(t>=vec3i(0))&&all(t<vec3i(shape))){let n=grid[u32(t.x)+shape.x*(u32(t.y)+shape.y*u32(t.z))]&255u;exposed=n==0u||n==9u;}
+  if(!cutout(m)&&all(t>=vec3i(0))&&all(t<vec3i(shape))){let n=grid[u32(t.x)+shape.x*(u32(t.y)+shape.y*u32(t.z))]&255u;exposed=seeThrough(n);}
   if(exposed){let slot=atomicAdd(&args.count,1u);faces[slot]=i*6u+f;}
  }
-}`;
-export const DRAW =
-  COMMON +
-  `
+}`
+  );
+}
+/** The diagnostic draw: flat catalog colors; reactive catalogs add a glow on flames and melts. */
+export function drawShader(p: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D) {
+  const glow = p.reactive
+    ? 'if(emitter(m)){color+=colors[m]*clamp((f32((v>>8u)&255u)-glowFloor(m))/glowSpan(m),0.,1.)*.9;}'
+    : '';
+  return (
+    terrainCommon(p) +
+    `
 @group(0) @binding(0) var<storage,read> grid:array<u32>;
 @group(0) @binding(1) var<storage,read> faces:array<u32>;
 @group(0) @binding(2) var<uniform> camera:Camera;
-const colors=array<vec3f,18>(${palette});
+${paletteConstant(p)}
 struct Out{@builtin(position) position:vec4f,@location(0) color:vec3f,@location(1) fog:f32,@location(2) uv:vec2f}
 @vertex fn vertex(@builtin(vertex_index) vertex:u32,@builtin(instance_index) instance:u32)->Out{
  let face=faces[instance];let i=face/6u;let f=face%6u;let shape=camera.shape.xyz;
@@ -43,17 +55,22 @@ struct Out{@builtin(position) position:vec4f,@location(0) color:vec3f,@location(
  case 0u:{local=vec3f(0,uv.y,uv.x);}case 1u:{local=vec3f(1,uv.y,1-uv.x);}
  case 2u:{local=vec3f(uv.x,0,1-uv.y);}case 3u:{local=vec3f(uv.x,1,uv.y);}
  case 4u:{local=vec3f(1-uv.x,uv.y,0);}default:{local=vec3f(uv.x,uv.y,1);}}
- let v=grid[i];let m=v&255u;if(m==9u){local=vec3f(.39)+local*.22;}
+ let v=grid[i];let m=v&255u;if(cutout(m)){local=vec3f(.39)+local*.22;}
  let p=c+local-camera.eye.xyz;let z=dot(p,camera.forward.xyz);
  var out:Out;out.position=vec4f(dot(p,camera.right.xyz)/camera.projection.x,dot(p,camera.up.xyz)/camera.projection.y,camera.projection.z*z+camera.projection.w,z);
  let light=.30+.70*max(0.,dot(vec3f(normals[f]),normalize(vec3f(.4,-.85,.3))));
  let heat=clamp((f32((v>>8u)&255u)-170.)/85.,0.,1.);
- var color=colors[m]*light+heat*vec3f(.3,.05,0);
+ var color=colors[m]*light+heat*vec3f(.3,.05,0);${glow}
  if(i==camera.shape.w){color=mix(color,vec3f(1,.7,.22),.38);}
  out.color=color;out.fog=clamp(z/90.,0.,.7);out.uv=uv;return out;
 }
 @fragment fn fragment(v:Out)->@location(0) vec4f{let edge=select(1.,.78,any(v.uv<vec2f(.02))||any(v.uv>vec2f(.98)));return vec4f(mix(v.color*edge,vec3f(.065,.10,.15),v.fog),1);}
-`;
+`
+  );
+}
+/** The frozen ca-3d-m1 catalog's shaders, reused by worlds without a reactive law. */
+export const MESH = meshShader();
+export const DRAW = drawShader();
 
 async function moduleFor(device: GPUDevice, code: string) {
   const module = device.createShaderModule({ code });

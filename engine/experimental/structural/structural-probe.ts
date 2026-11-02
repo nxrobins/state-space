@@ -9,6 +9,12 @@ import {
 } from './structural-world-core.js';
 import { MAT } from '../../generated/materials.js';
 import { solveStructure3D } from '../structural-mechanics.js';
+import { createThermalMaterialRegistry3D } from '../reactive/thermal-materials.js';
+import {
+  reactiveFixture3D,
+  observeReactiveFixture3D,
+  REACTIVE_FIXTURE_NAMES_3D,
+} from './structural-reactive-fixtures.js';
 export async function verifyM5ShaderCompile() {
   if (!navigator.gpu) throw Error('WebGPU unavailable.');
   const adapter = await navigator.gpu.requestAdapter();
@@ -734,4 +740,76 @@ export async function verifyM5FullComponents() {
   } finally {
     GPUDevice.prototype.createShaderModule = original;
   }
+}
+
+/** ca-3d-m6 parity: every tick of every bounded reactive fixture, GPU against the CPU oracle. */
+export async function verifyM6GpuTiny(mode: 'dense' | 'active' = 'dense') {
+  const registry = await createThermalMaterialRegistry3D(),
+    results = [];
+  for (const size of [8, 16] as const)
+    for (const name of REACTIVE_FIXTURE_NAMES_3D) {
+      const f = reactiveFixture3D(name, size),
+        geometry = { width: size, height: size, depth: size, chunkSize: f.chunkSize };
+      status(`M6 ${mode} ${name} ${size}^3: creating`);
+      const cpu = new CpuStructuralWorld3D({ ...geometry, registry });
+      cpu.edit(f.initial);
+      const gpu = await createStateSpaceStructuralWorld3DGPU({ ...geometry, mode, registry });
+      try {
+        if (gpu.rulesVersion !== 'ca-3d-m6' || gpu.materialCatalogHash !== registry.hash)
+          throw Error(`${name} ${size}: GPU world does not bind the ca-3d-m6 catalog`);
+        await gpu.restore(cpu.snapshot());
+        equalState(await gpu.snapshot(), cpu.snapshot(), `${name} ${size} initial`);
+        const observer = observeReactiveFixture3D(f, {
+          grid: cpu.grid,
+          energyQ: cpu.energyQ,
+          structure: cpu.structure,
+        });
+        for (let t = 0; t < f.ticks; t++) {
+          const edits = f.scripted.get(t) ?? [];
+          cpu.step(1, { edits });
+          await gpu.step(1, { edits });
+          equalState(await gpu.snapshot(), cpu.snapshot(), `${name} ${size} tick ${t + 1}`);
+          observer.tick(cpu.tick, {
+            grid: cpu.grid,
+            energyQ: cpu.energyQ,
+            structure: cpu.structure,
+          });
+          const balance = await gpu.energyBalance();
+          if (balance.driftQ !== 0n) throw Error(`${name} ${size} tick ${t + 1}: energy drift`);
+          if (t % 8 === 0) status(`M6 ${mode} ${name} ${size}^3: tick ${t + 1}/${f.ticks}`);
+        }
+        const activity = await gpu.inspectActivity();
+        // A dormant world must sleep: material passes may dispatch its tiles at most once, on the
+        // tick that follows the restore which marks every tile awake.
+        if (
+          mode === 'active' &&
+          name === 'dormant' &&
+          activity.dispatchedChunks > activity.totalChunks * 28
+        )
+          throw Error(
+            `${name} ${size}: dormant tiles were dispatched ${activity.dispatchedChunks} times`,
+          );
+        results.push({
+          name,
+          size,
+          ticks: f.ticks,
+          finalHash: await digest(cpu.snapshot()),
+          windows: observer.check(),
+          activity,
+          solve: gpu.inspectSolve(),
+          backendInfo: gpu.backendInfo,
+        });
+      } finally {
+        gpu.close();
+      }
+    }
+  return {
+    passed: true,
+    scope:
+      '8^3 and 16^3 ca-3d-m6 fixtures, GPU equal to the CPU oracle after every tick; not larger worlds, frames or gameplay',
+    mode,
+    rulesVersion: 'ca-3d-m6',
+    materialCatalogHash: registry.hash,
+    results,
+  };
 }
