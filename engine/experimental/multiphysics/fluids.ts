@@ -580,6 +580,15 @@ function* solve(
     return finite(total);
   }
   const initialKinetic = kinetic();
+  // A solid supports a liquid row's incompressible neighborhood only while touching it.
+  // Approaching, non-contacting samples still add density, but cannot switch on the
+  // zero-divergence row ahead of physical contact.
+  const touching = new Set(
+    (input.contacts ?? []).map(
+      (c) =>
+        `${p.findIndex((q) => q.parcel.id === c.particleId)}:${atBody[boundaries.findIndex((b) => b.id === c.boundaryId)]}`,
+    ),
+  );
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const kernel = fluidDensityKernel3D(subtractVec3(p[i].parcel.center, p[j].parcel.center), h);
@@ -601,7 +610,7 @@ function* solve(
       );
       if (kernel.value) {
         density[i] += p[i].restDensity * boundaries[s].volume * kernel.value;
-        supportVolume[i] += boundaries[s].volume;
+        if (touching.has(`${i}:${atBody[s]}`)) supportVolume[i] += boundaries[s].volume;
         const pair = { i, s, gradient: kernel.gradient };
         adjacentWalls[i].push(pair);
       }
