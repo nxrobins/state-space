@@ -7,11 +7,7 @@ import {
   createMultiphysicsTimedCup3D,
   type MultiphysicsDemonstration3D,
 } from './demonstrations.js';
-import {
-  createMultiphysicsWorkerClient3D,
-  multiphysicsBrowserWorkerTransport3D,
-} from './worker-client.js';
-import { MULTIPHYSICS_WORKER_BOOTSTRAP_3D } from './worker-wire.js';
+import { startMultiphysicsWorker3D } from './worker-client.js';
 export const MULTIPHYSICS_WORKER_SCENES_3D = Object.freeze([
   'wax-valve',
   'rotating-contact',
@@ -76,39 +72,6 @@ function sceneSnapshot(profiles: MultiphysicsProfiles3D, scene: MultiphysicsWork
     ? createMultiphysicsTimedCup3D(profiles)
     : createMultiphysicsDemonstration3D(profiles, scene as MultiphysicsDemonstration3D);
 }
-/** Start a module Worker from a snapshot and return its connected client. */
-async function startWorker(
-  url: URL,
-  profiles: MultiphysicsProfiles3D,
-  snapshot: MultiphysicsSnapshot3D,
-  work: number,
-) {
-  const worker = new Worker(url, { type: 'module' });
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const done = (event: MessageEvent) => {
-        worker.removeEventListener('message', done);
-        worker.removeEventListener('error', failed);
-        const data = event.data as { kind?: unknown; ready?: unknown; error?: unknown };
-        if (data?.kind === MULTIPHYSICS_WORKER_BOOTSTRAP_3D && data.ready === true) resolve();
-        else reject(Error(String(data?.error ?? 'Multiphysics Worker did not start.')));
-      };
-      const failed = () => reject(Error('Multiphysics Worker failed to load.'));
-      worker.addEventListener('message', done);
-      worker.addEventListener('error', failed);
-      worker.postMessage({ kind: MULTIPHYSICS_WORKER_BOOTSTRAP_3D, snapshot, work });
-    });
-  } catch (error) {
-    worker.terminate();
-    throw error;
-  }
-  const client = createMultiphysicsWorkerClient3D(
-    multiphysicsBrowserWorkerTransport3D(worker),
-    profiles,
-  );
-  await client.ready;
-  return client;
-}
 /** Direct, same-thread trajectory of committed two-tick previews: the exactness reference.
  * Yields after each sample so the page stays responsive to the supervisor. */
 async function directTrajectory(
@@ -158,7 +121,7 @@ export async function runMultiphysicsWorkerProbe3D(options: {
   const budgets: Record<string, boolean> = {};
   for (const work of [1, 256]) {
     progress(`Work budget ${work}`);
-    const client = await startWorker(workerUrl, profiles, initial, work);
+    const client = await startMultiphysicsWorker3D(workerUrl, profiles, initial, { work });
     try {
       const preview = await client.preview([], PREVIEW_TICKS);
       exact(preview.result, direct.results[0], `Work budget ${work} preview differs`);
@@ -173,7 +136,7 @@ export async function runMultiphysicsWorkerProbe3D(options: {
     }
   }
   report.workBudgetsExact = budgets;
-  const client = await startWorker(workerUrl, profiles, initial, 128);
+  const client = await startMultiphysicsWorker3D(workerUrl, profiles, initial);
   const previewMs: number[] = [],
     cancellationMs: number[] = [],
     cancelledWhileRunning: boolean[] = [];
@@ -205,7 +168,7 @@ export async function runMultiphysicsWorkerProbe3D(options: {
     client.close();
   }
   progress('Save and restart');
-  const restarted = await startWorker(workerUrl, profiles, saved, 128);
+  const restarted = await startMultiphysicsWorker3D(workerUrl, profiles, saved);
   try {
     const preview = await restarted.preview([], PREVIEW_TICKS);
     exact(preview.result, direct.results[SAMPLES], 'Restarted Worker differs');

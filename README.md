@@ -165,7 +165,7 @@ preview, cancellation, and frame timings per scene.
 | M1–M5 3D | Finite, active and structural worlds with separate versioned contracts | [Worlds and backends](docs/sdk/worlds.md) |
 | Tactical | Speculative edits, game transactions, geometry, provenance and workers over structural worlds | [Sessions and previews](docs/sdk/tactical/sessions.md) |
 | Reactive | Catalog-aware materials, bounded CPU evolution, gameplay and worker previews | [Materials and worlds](docs/sdk/reactive/materials.md) |
-| Multiphysics foundation | Independent conservation, finite-cuboid and DC reference calculations; the world runtime is not exported | [Physical contracts and release gates](docs/MULTIPHYSICS.md) |
+| Multiphysics | Reference calculations, the bounded parcel world and its module Worker; `npm run build:multiphysics-builder` builds the interactive builder | [Physical contracts, qualified envelope and release gates](docs/MULTIPHYSICS.md) |
 
 The core 2D API has three runtimes:
 

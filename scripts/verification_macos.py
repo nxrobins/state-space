@@ -33,6 +33,10 @@ MULTIPHYSICS_WORKER_SCENES = (
     "wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "timed-cup",
 )
 MULTIPHYSICS_WORKER_STAGES = tuple(f"multiphysics-worker-{scene}" for scene in MULTIPHYSICS_WORKER_SCENES)
+# The visible multiphysics builder (dist/multiphysics-builder/), one per timed scene: the real controls
+# drive 24 preview/cancel/commit rounds, an edit receipt, compare, an atomic rejection and save/restart
+# while the camera orbits every frame. Each requires that scene's passing Worker stage from the same sources.
+MULTIPHYSICS_BUILDER_STAGES = tuple(f"multiphysics-builder-{scene}-visible" for scene in MULTIPHYSICS_WORKER_SCENES)
 STAGES = (
     *SANDBOX_STAGES,
     "chamber-visible",
@@ -56,6 +60,7 @@ STAGES = (
     *M6_STAGES,
     *M6_PROBE_STAGES,
     *MULTIPHYSICS_WORKER_STAGES,
+    *MULTIPHYSICS_BUILDER_STAGES,
 )
 
 
@@ -74,6 +79,8 @@ def stage_bounds(stage):
         return 16, 64, 0
     if stage in MULTIPHYSICS_WORKER_STAGES:
         return 16, 64, 0
+    if stage in MULTIPHYSICS_BUILDER_STAGES:
+        return 16, 128, 4096
     if m6:
         kind, size, _ = m6
         return size, 32 if kind == "gameplay" else 1024 if size == 32 else 256, 32 if kind == "gameplay" else 660
@@ -131,6 +138,9 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
     # A 64^3 ca-3d-m6 stage follows the same chamber's passing 32^3 stage.
     if m6 and m6[1] == 64:
         required = stage.replace("-64-", "-32-")
+    if stage in MULTIPHYSICS_BUILDER_STAGES:
+        required = stage.replace("multiphysics-builder-", "multiphysics-worker-").removesuffix("-visible")
+    worker = required in MULTIPHYSICS_WORKER_STAGES
     if required is None:
         return None
     now = time.time() if now is None else now
@@ -150,8 +160,8 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
                 and report.get("sourceHashes") == source_hashes
                 and result.get("passed") is True
                 and result.get("done") is True
-                and result.get("energyDriftQ") == "0"
-                and result.get("backendInfo", result.get("render", {}).get("backendInfo", {})).get("isFallbackAdapter") is False
+                and (worker or result.get("energyDriftQ") == "0")
+                and (worker or result.get("backendInfo", result.get("render", {}).get("backendInfo", {})).get("isFallbackAdapter") is False)
                 and receipt.get("passed") is True
                 and receipt.get("id") == job
                 and receipt.get("kind") == "macos-qualification"
@@ -160,7 +170,11 @@ def require_preceding_stage(root, stage, source_hashes, *, now=None):
                 and 0 <= now - receipt["finishedAt"] <= 86400
             ):
                 continue
-            if required == "replay-64-cut-long":
+            if worker:
+                # The headless Worker stage proves exactness and latency, not GPU state or frames.
+                if result.get("scene") != required.removeprefix("multiphysics-worker-") or result.get("exact") is not True or result.get("timingPassed") is not True:
+                    continue
+            elif required == "replay-64-cut-long":
                 if result.get("size") != 64 or result.get("ticks") != 1024 or result.get("scenario") != "cut":
                     continue
                 if not all(

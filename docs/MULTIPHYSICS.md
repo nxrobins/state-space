@@ -275,6 +275,7 @@ stall deadline).
 | Dissipation | Rest and impact heat (`rigid.test.ts`, `fluids.test.ts`) | Resting heat exactly 0; impact heat paid once at the lever arm | Pass |
 | Electrical | Networks and batteries (`circuit*.test.ts`, `battery.test.ts`, `world-tick.test.ts`) | Dense-oracle agreement digits 12; finite store bounds all Joule heat | Pass |
 | Integration | Direct, mock Worker, budgets, cancel, save (`demonstrations.test.ts`) | Exact snapshot equality over the first two ticks of each demonstration | Pass |
+| Builder | Visible builder, six Mac stages (`examples/multiphysics-builder/`) | Preview p95 at most 250 ms and cancellation p95 at most 100 ms through the controls; every completed frame at most 16.667 ms over at least 180 frames; receipt, compare, atomic rejection and save/restart journeys | Pass on all six timed scenes |
 | Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six timed scenes |
 
 Open liquid findings, not converted to passing budgets:
@@ -310,8 +311,8 @@ remain behind their own gates and are not exported by this checkpoint.
 
 The private modules in `engine/experimental/multiphysics/` now connect rigid
 motion, profile-aware heat/phase/combustion, finite DC sources, and fluid operators
-in an atomic world tick. None of these runtime APIs are exported by the public
-entry. The model currently admits 256 material parcels, 768 bonds, 128 fluid
+in an atomic world tick. They were private at this checkpoint; the
+[builder checkpoint](#builder-and-public-runtime-2026-11-02) exports them. The model currently admits 256 material parcels, 768 bonds, 128 fluid
 samples and 128 nearby solid-volume boundary samples. A preview advances at most
 two fixed ticks, with at most 256 yielded work units per call and three million
 units per tick. Work units bound deterministic operations, not wall-clock time.
@@ -729,5 +730,55 @@ target, so they are not interactive scenes:
 - 99-sample resolved tank (before the speedups): preview p95 727.6 ms
   (`9efa114e5165474d84c1a9ccd1b2ec84`).
 
-The Worker adds about 4% to direct cost; the misses are solver work. The runtime
-stays unexported until the Builder stages pass. The targets are unchanged.
+The Worker adds about 4% to direct cost; the misses are solver work. The targets
+are unchanged.
+
+### Builder and public runtime (2026-11-02)
+
+`state-space-engine/experimental/3d/multiphysics` now exports the runtime: profiles,
+snapshots and inventories, the world with edit batches, receipts and two-tick
+previews, tick jobs, the demonstrations and the timed cup, and the module Worker.
+`serveMultiphysicsWorker3D` runs inside a module Worker and
+`startMultiphysicsWorker3D` starts one from the page. The installed-package
+client previews and commits a world through the packed entry
+(`packages-4dc715ed9b05`, supervised by `fe87ce0c597e4eb489d6507b5771e48b`).
+
+[`examples/multiphysics-builder/`](../examples/multiphysics-builder/) compiles
+only against that public entry (`npm run build:multiphysics-builder`). It draws
+oriented cuboids from each parcel's quaternion, and liquid and gas samples as
+discs at their exclusion radius. Overlays show bonds, battery terminals, and the
+tick report's branch currents and node potentials. The camera orbits on display
+frames and never advances a tick. The controls cover all eight edit kinds, with
+receipts: place, remove, heat, transform, anchor, bond, cut and battery
+replacement. They also cover inspect, two-tick preview, compare, commit, cancel,
+and JSON save and load. Compare shows a seven-row ledger: thermal, latent and
+chemical stores, battery, conversion remainders, mechanical energy and the
+numerical residual. A rejected candidate appears as a notice and leaves the
+committed world unchanged.
+
+Every `multiphysics-builder-<scene>-visible` stage passed on final sources, each
+after its scene's Worker stage from the same source hashes:
+
+| Scene | Worker preview / cancel p95 | Builder preview / cancel p95 | Worst frame (count) | Worker / builder receipts |
+| --- | --- | --- | --- | --- |
+| `wax-valve` | 16.1 / 2.8 ms | 19.2 / 4.8 ms | 7.4 ms (180) | `de8d247a7ab64ba3a20e93e01e20171f` / `c3d3ed3e01954c11b47317d3cd49fed7` |
+| `rotating-contact` | 7.2 / 4.0 ms | 7.3 / 4.9 ms | 3.5 ms (181) | `88ed290bc98b487d941d1460e940aa93` / `eeafc98b2cbc46e9a39194cb73c7b718` |
+| `fluid-switch` | 11.4 / 2.5 ms | 12.5 / 2.8 ms | 8.1 ms (180) | `89ce39e30a2b406c9bc401a671d170ec` / `327bf79cca1d4f62b4038a102c9fd88b` |
+| `falling-battery` | 6.5 / 4.4 ms | 8.0 / 6.1 ms | 8.4 ms (181) | `db58c956bf93473c9f29fc8b77a9cb60` / `bbcbcc4d7225452596e4accfb227db21` |
+| `combined-failure` | 23.7 / 2.9 ms | 23.2 / 3.8 ms | 5.5 ms (181) | `1e77b8cf2bc449d694716c9af756e626` / `f521cc9f5eb1411492edf13359869749` |
+| `timed-cup` | 140.2 / 0.9 ms | 147.3 / 3.9 ms | 5.1 ms (262) | `578cc36d44634e30a6b02bcc59696292` / `f6b0e391e39c4cf8b55228dd462db7d1` |
+
+Frames are completed application frames, from encode through GPU completion,
+measured while the controls ran. The worst display-frame gap was 17.8 ms in
+every stage.
+
+In `combined-failure`, after the stage's 2,048 Q heat edit and 48 committed
+ticks, the next preview is rejected with an unpaid correction of `-0.472`
+against the `0.01` limit. The builder shows this as a normal rejection, and a
+restarted Worker reproduces the same rejection exactly. That world cannot
+advance further without an edit, so it marks a reachable edge of the qualified
+mechanism, not a passing trajectory.
+
+These results cover six fixed scenes on the tested Mac host, in visible Chrome.
+They do not qualify arbitrary user-built worlds, heavier liquid loads, other
+hosts or other browsers.

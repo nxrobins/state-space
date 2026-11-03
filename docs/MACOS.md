@@ -369,3 +369,30 @@ target fails the stage and keeps the measured distributions in the report.
 There is no UI, so the 16.667 ms frame target belongs to the later Builder
 stages. The stages have no prerequisite. The bundle is hashed with the other
 sources and must not change during a run.
+
+The visible builder stages follow, each after its scene's Worker stage:
+
+```sh
+npm run build:multiphysics-builder
+npm run verify:macos -- --stage multiphysics-builder-wax-valve-visible
+```
+
+Replace `wax-valve` with any of the six scene names above. Each stage opens
+`dist/multiphysics-builder/` in visible Chrome and drives the real controls. It
+runs 24 rounds of preview, cancel, preview and commit while the camera orbits
+every display frame. Then it applies a heat edit and checks its receipt, the
+seven-row compare ledger, an atomic rejection, and save, restart and continue in
+a fresh Worker. It also checks that an invalid save is rejected and leaves the
+world in place. Gates: preview p95 at most 250 ms, cancellation p95 at most
+100 ms, every completed frame at most 16.667 ms over at least 180 frames, and no
+display-frame gap of 100 ms or more. A stage refuses to start without a passing
+Worker receipt for the same scene from identical sources within 24 hours.
+
+To use the builder interactively, serve the repository root and open
+`dist/multiphysics-builder/?scene=wax-valve`:
+
+```sh
+npm run build:sdk
+npm run build:multiphysics-builder
+uv run python -m http.server 8000 --bind 127.0.0.1
+```

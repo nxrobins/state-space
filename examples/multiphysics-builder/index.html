@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Multiphysics Builder · State Space</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="wordmark">
+          <span class="mark">◈</span> STATE SPACE <span class="tag">MULTIPHYSICS BUILDER</span>
+        </div>
+        <span class="status" id="status" role="status">Starting…</span>
+      </header>
+      <div class="workspace">
+        <section class="viewport">
+          <div class="viewbar">
+            <span id="view-label">COMMITTED WORLD</span><span id="tick-label">TICK 0</span>
+          </div>
+          <canvas id="world" width="1100" height="680" aria-label="Multiphysics world"></canvas>
+          <div class="legend">
+            <span><i class="positive"></i>Positive terminal</span>
+            <span><i class="negative"></i>Negative terminal</span>
+            <span>Bonds white · circuit coloured by current and potential</span>
+            <span class="gesture">Drag to orbit · scroll to zoom</span>
+          </div>
+          <p class="notice" id="notice" role="alert"></p>
+        </section>
+        <aside>
+          <div class="panel">
+            <label for="scene">Scene</label>
+            <select id="scene"></select>
+          </div>
+          <div class="panel">
+            <label for="parcel">Inspect</label>
+            <select id="parcel"></select>
+            <pre id="inspection"></pre>
+            <div class="row toggles">
+              <label><input type="checkbox" id="bonds" checked /> Bonds</label>
+              <label><input type="checkbox" id="circuit" checked /> Circuit</label>
+            </div>
+          </div>
+          <div class="panel">
+            <label for="edit-kind">Edit</label>
+            <select id="edit-kind">
+              <option value="heat">Heat a parcel</option>
+              <option value="place">Place a parcel</option>
+              <option value="remove">Remove a parcel</option>
+              <option value="transform">Move or rotate</option>
+              <option value="anchor">Anchor or release</option>
+              <option value="bond">Bond two parcels</option>
+              <option value="cut">Cut a bond</option>
+              <option value="battery">Replace or remove the battery</option>
+            </select>
+            <textarea id="edit" rows="7" spellcheck="false" aria-label="Edit batch JSON"></textarea>
+            <div class="row">
+              <button id="preview-edit" class="primary">Preview edit + 2 ticks</button>
+              <button id="preview">Preview 2 ticks</button>
+            </div>
+            <div class="row">
+              <button id="commit">Commit</button>
+              <button id="cancel">Cancel</button>
+              <button id="compare">Show committed</button>
+            </div>
+          </div>
+          <div class="panel">
+            <label>Compare</label>
+            <table id="ledger"></table>
+            <pre id="receipt"></pre>
+          </div>
+          <div class="panel">
+            <div class="row">
+              <button id="save">Save JSON</button>
+              <label class="file"
+                >Load JSON<input type="file" id="load" accept="application/json,.json"
+              /></label>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <pre id="report" hidden></pre>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

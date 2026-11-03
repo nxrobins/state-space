@@ -15,7 +15,7 @@
     "test": "node scripts/verify_checks.mjs",
     "test:native": "node scripts/verify_checks.mjs --suite native",
     "test:demos": "node scripts/verify_checks.mjs --suite demos",
-    "typecheck": "node node_modules/typescript/bin/tsc --noEmit -p engine/tsconfig.json && node node_modules/typescript/bin/tsc --noEmit -p examples/reactive-chamber/tsconfig.json",
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit -p engine/tsconfig.json && node node_modules/typescript/bin/tsc --noEmit -p examples/reactive-chamber/tsconfig.json && node node_modules/typescript/bin/tsc --noEmit -p examples/multiphysics-builder/tsconfig.json",
     "benchmark:cpu": "npm run build:sdk && node scripts/benchmark_cpu.mjs",
     "build:sdk": "node scripts/build_sdk.mjs",
     "verify:3d": "npm run build:sdk && node scripts/verify_volume.mjs",
@@ -32,6 +32,7 @@
     "verify:packages": "uv run python -m scripts.verify_packages",
     "verify:macos": "uv run python -m scripts.verify_macos_qualification",
     "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs",
+    "build:multiphysics-builder": "node scripts/build_multiphysics_builder.mjs",
     "build:multiphysics-probe": "node node_modules/vite/bin/vite.js build --config engine/vite.multiphysics-probe.config.ts",
     "format:check": "prettier --check \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\"",
     "format": "prettier --write \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\""
