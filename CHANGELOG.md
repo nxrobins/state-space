@@ -47,7 +47,7 @@ date of the last change in the section.
   decay, moving paddle and displaced-liquid cases with a published per-gate
   budget table; a module Worker entry and page probe bundled by
   `npm run build:multiphysics-probe`; and headless `multiphysics-worker-<scene>`
-  macOS stages for the five demonstrations and a 26-sample timed cup (pending PR).
+  macOS stages for the five demonstrations and a 26-sample timed cup (#90).
 
 ### Changed
 
@@ -95,7 +95,7 @@ date of the last change in the section.
 - Multiphysics: a solid counts toward a liquid row's resolved support only while
   touching it, so an approaching plate no longer switches on the zero-divergence
   constraint at a distance; parcel reads, inventories and the active-set factor
-  avoid redundant copies and refactoring with bit-identical results (pending PR).
+  avoid redundant copies and refactoring with bit-identical results (#90).
 - `ca-3d-m6` CPU combustion rotates by the same 32-bit tick word as the GPU
   backends, so they no longer diverge from tick 2^32; the tiny probe's dormant
   check can now fail; retained Mac receipts use repo-relative paths (#84).
