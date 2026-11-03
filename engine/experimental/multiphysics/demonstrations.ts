@@ -1,5 +1,5 @@
-/** Private mechanism fixtures for executable acceptance and the future builder.
- * The combined-failure trajectory remains an unpassed extended release gate. */
+/** Private mechanism fixtures for executable acceptance, Worker timing and the future builder.
+ * The combined-failure trajectory passes the extended gate in fluid-qualification.runtime-cases.ts. */
 import { createMultiphysicsSnapshot3D, type MultiphysicsSnapshot3D } from './model.js';
 import { seedThermalParcel3D, type ThermalSeed3D } from './thermal.js';
 import type { MultiphysicsProfiles3D } from './profiles.js';
@@ -138,5 +138,76 @@ export function createMultiphysicsDemonstration3D(
         restLength: Math.hypot(...negative.map((v, i) => v - core[i])),
       },
     ],
+  });
+}
+/** The 99-sample resolved tank: the heaviest timed load, and the floating/sinking gate's scene. */
+export function createMultiphysicsResolvedTank3D(
+  profiles: MultiphysicsProfiles3D,
+  body: 'wax' | 'copper' = 'wax',
+  dt = 1 / 120,
+): MultiphysicsSnapshot3D {
+  const seed = (id: string, material: string, center: Vec3, halfExtents: Vec3 = [0.5, 0.5, 0.5]) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material,
+      owner: 'authored',
+      center,
+      halfExtents,
+      temperature: 20,
+    });
+  const walls = [
+    seed('floor', 'ceramic', [0, 0, 0], [2.5, 0.5, 2.5]),
+    seed('left', 'ceramic', [-3, 2.5, 0], [0.5, 2, 2.5]),
+    seed('right', 'ceramic', [3, 2.5, 0], [0.5, 2, 2.5]),
+    seed('front', 'ceramic', [0, 2.5, -3], [3.5, 2, 0.5]),
+    seed('back', 'ceramic', [0, 2.5, 3], [3.5, 2, 0.5]),
+  ];
+  const water = Array.from({ length: 100 }, (_, i) =>
+    seed(`w${i}`, 'water', [(i % 5) - 2, 1 + Math.floor(i / 25), (Math.floor(i / 5) % 5) - 2]),
+  ).filter((p) => !(p.center[0] === 0 && p.center[1] === 3 && p.center[2] === 0));
+  return createMultiphysicsSnapshot3D(profiles, {
+    parcels: [...walls, ...water, seed('body', body, [0, 3, 0])],
+    anchors: walls.map((p) => p.id),
+    settings: { dt },
+  });
+}
+/** Timed heavy loads: a closed cup of water, n samples on a side, whose upper-middle sample
+ * is a wax body. The 3-wide cup (26 liquid samples) is the qualified interactive load; the
+ * 4-wide cup (63) is measured but misses the preview target; the 99-sample resolved tank
+ * stays the offline refinement gate. */
+export function createMultiphysicsTimedCup3D(
+  profiles: MultiphysicsProfiles3D,
+  width: 3 | 4 = 3,
+): MultiphysicsSnapshot3D {
+  const seed = (id: string, material: string, center: Vec3, halfExtents: Vec3 = [0.5, 0.5, 0.5]) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material,
+      owner: 'authored',
+      center,
+      halfExtents,
+      temperature: 20,
+    });
+  const w = width / 2,
+    offset = (width - 1) / 2,
+    body: Vec3 = [width === 3 ? 0 : 0.5, width - 1, width === 3 ? 0 : 0.5];
+  const walls = [
+    seed('floor', 'ceramic', [0, 0, 0], [w, 0.5, w]),
+    seed('left', 'ceramic', [-w - 0.5, w + 0.5, 0], [0.5, w, w]),
+    seed('right', 'ceramic', [w + 0.5, w + 0.5, 0], [0.5, w, w]),
+    seed('front', 'ceramic', [0, w + 0.5, -w - 0.5], [w + 1, w, 0.5]),
+    seed('back', 'ceramic', [0, w + 0.5, w + 0.5], [w + 1, w, 0.5]),
+  ];
+  const water = Array.from({ length: width ** 3 }, (_, i) =>
+    seed(`w${i}`, 'water', [
+      (i % width) - offset,
+      1 + Math.floor(i / width ** 2),
+      (Math.floor(i / width) % width) - offset,
+    ]),
+  ).filter((p) => !p.center.every((v, k) => v === body[k]));
+  return createMultiphysicsSnapshot3D(profiles, {
+    parcels: [...walls, ...water, seed('body', 'wax', body)],
+    anchors: walls.map((p) => p.id),
+    settings: { dt: 1 / 120 },
   });
 }

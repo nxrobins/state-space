@@ -26,6 +26,13 @@ M6_STAGES = tuple(
 # every reactive fixture at 8^3 and 16^3 (at most 64 ticks), the GPU snapshot equal to the CPU oracle
 # after every tick, one stage per storage mode, no frames.
 M6_PROBE_STAGES = tuple(f"m6-tiny-{mode}" for mode in ("dense", "active"))
+# The private multiphysics module Worker (dist/multiphysics/), headless: per scene, direct versus Worker
+# exactness across work budgets, cancel/retry and save/restart, plus two-tick preview and cancellation
+# latency over 24 samples. The five demonstrations and the 26-sample timed cup; no frames.
+MULTIPHYSICS_WORKER_SCENES = (
+    "wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "timed-cup",
+)
+MULTIPHYSICS_WORKER_STAGES = tuple(f"multiphysics-worker-{scene}" for scene in MULTIPHYSICS_WORKER_SCENES)
 STAGES = (
     *SANDBOX_STAGES,
     "chamber-visible",
@@ -48,6 +55,7 @@ STAGES = (
     "gameplay-64-profile-visible",
     *M6_STAGES,
     *M6_PROBE_STAGES,
+    *MULTIPHYSICS_WORKER_STAGES,
 )
 
 
@@ -63,6 +71,8 @@ def stage_bounds(stage):
     """(maxDimension, maxReplayTicks, maxFrames) that one fixed stage may reach."""
     m6 = m6_stage(stage)
     if stage in M6_PROBE_STAGES:
+        return 16, 64, 0
+    if stage in MULTIPHYSICS_WORKER_STAGES:
         return 16, 64, 0
     if m6:
         kind, size, _ = m6

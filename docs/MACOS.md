@@ -343,3 +343,29 @@ bundles) must not change while a stage runs. Receipts and the source-bound index
 are retained under [volume-m6/mac](checkpoints/volume-m6/mac/) and summarized in
 the [M6 checkpoint](checkpoints/3D_M6.md). These scoped results do not clear an
 incident hold or relax the legacy-demo quarantine.
+
+## Multiphysics native Worker
+
+The private multiphysics runtime has one headless stage per timed scene. Build the
+probe bundle, then run the stages one at a time with the host otherwise idle:
+
+```sh
+npm run build:multiphysics-probe
+npm run verify:macos -- --stage multiphysics-worker-wax-valve
+npm run verify:macos -- --stage multiphysics-worker-rotating-contact
+npm run verify:macos -- --stage multiphysics-worker-fluid-switch
+npm run verify:macos -- --stage multiphysics-worker-falling-battery
+npm run verify:macos -- --stage multiphysics-worker-combined-failure
+npm run verify:macos -- --stage multiphysics-worker-timed-cup
+```
+
+Each stage starts the module Worker from `dist/multiphysics/` and computes a
+direct reference in the page. It requires exact equality across work budgets 1
+and 256 and across 24 committed two-tick previews, each after cancelling a
+part-run preview and retrying. It also requires an exact restart of a fresh
+Worker from the saved snapshot. Latency is measured from the page: two-tick
+preview p95 at most 250 ms and cancellation p95 at most 100 ms. Failing either
+target fails the stage and keeps the measured distributions in the report.
+There is no UI, so the 16.667 ms frame target belongs to the later Builder
+stages. The stages have no prerequisite. The bundle is hashed with the other
+sources and must not change during a run.

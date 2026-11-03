@@ -1,6 +1,10 @@
 /** Owned parcel heat/reaction kernel. Contacts and mechanical ownership belong to the world solver. */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import { rotateVector, normalizeQuaternion, type Vec3, type Quat } from './math.js';
 import {
   readMultiphysicsProfile3D,
@@ -141,7 +145,8 @@ export function readThermalParcel3D(
   const owned = data(raw);
   if (!owned || typeof owned !== 'object') throw Error('Invalid thermal parcel.');
   const { halfExtents, thermalRemainder, ...base } = owned;
-  const parcel = readMaterialParcel3D(base),
+  // `base` is a fresh plain record from the owned copy above; validating it needs no second copy.
+  const parcel = readOwnedMaterialParcel3D(base),
     profile = readMultiphysicsProfile3D(profiles, parcel.material),
     half = vector(halfExtents);
   if (

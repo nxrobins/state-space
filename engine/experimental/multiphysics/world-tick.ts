@@ -198,8 +198,11 @@ export function createMultiphysicsTickJob3D(
     },
     result() {
       if (status !== 'ready' || !completed) throw Error('World tick result is not ready.');
+      // The completed snapshot was validated at the end of the tick; callers receive an owned copy.
       return {
-        snapshot: readMultiphysicsSnapshot3D(profiles, completed.snapshot),
+        snapshot: copyPortableValue(
+          completed.snapshot as unknown as PortableValue,
+        ) as unknown as MultiphysicsSnapshot3D,
         report: copyPortableValue(
           completed.report as unknown as PortableValue,
         ) as unknown as MultiphysicsTickReport3D,

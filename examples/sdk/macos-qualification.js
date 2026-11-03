@@ -183,6 +183,15 @@ async function frames(lightingMode){
   report.finalHash=await structuralStateDigest(await gpu.snapshot());report.finalActor=driver.inspect();report.measuredFrames=report.samples.length;
  }finally{driver?.close();renderer?.close();gpu.close();}
 }
+/** Headless native-Worker probe for the private multiphysics runtime; latency gated by the original 16³ targets. */
+async function multiphysicsWorker(scene){
+ const probe=await import('../../dist/multiphysics/multiphysics-probe.js');
+ check(probe.MULTIPHYSICS_WORKER_SCENES_3D.includes(scene),'Unknown fixed stage');
+ const result=await probe.runMultiphysicsWorkerProbe3D({scene,workerUrl:new URL('../../dist/multiphysics/multiphysics-worker.js',import.meta.url),progress});
+ report={...report,...result};save();
+ check(result.exact===true,'Multiphysics Worker exactness failure');
+ check(result.timingPassed===true,'Multiphysics Worker latency above target: preview p95 '+result.preview.p95.toFixed(1)+' ms, cancellation p95 '+result.cancellation.p95.toFixed(1)+' ms');
+}
 async function lighting(){
  const probe=await import('../../dist/volume-m5/structural-probe.js');
  progress('Exact light source worklist');report.lightList=await probe.verifyLightList();
@@ -211,6 +220,7 @@ window.macQualification={ready:true,run(stage){
   else if(/^replay-(32|64)-(control|cut|heat|ice-control|ice-heat)$/.test(stage)){const [,size,...parts]=stage.split('-');await replay(Number(size),parts.join('-'),Number(size)===32?1024:256);}
   else if(stage==='lighting')await lighting();
   else if(stage==='m6-tiny-dense'||stage==='m6-tiny-active')await m6Tiny(stage.slice(8));
+  else if(stage.startsWith('multiphysics-worker-'))await multiphysicsWorker(stage.slice(20));
   else if(stage==='frames-reference'||stage==='frames-cached'||stage==='frames-visible')await frames(stage==='frames-visible'?'reference':stage.slice(7));
   else if(/^m6-(gameplay|replay)-(32|64)-/.test(stage)){
    const [,kind,size,scenario]=stage.match(/^m6-(gameplay|replay)-(32|64)-(.+)$/);

@@ -39,6 +39,7 @@ def main():
         ROOT / "scripts/build_sdk.mjs",
         *ROOT.glob("dist/sdk/*"),
         *ROOT.glob("dist/volume-m5/*.js"),
+        *ROOT.glob("dist/multiphysics/*.js"),
         *ROOT.glob("examples/sdk/*"),
         *ROOT.glob("examples/structural-cavern/*"),
         *ROOT.glob("examples/reactive-chamber/*"),
