@@ -104,7 +104,7 @@ date of the last change in the section.
   `npm test` selects; the structure negative controls plan their corpus with
   the bulk Python planner (`tests.structure_cpu_cases`) instead of the native
   transport. `tests/test_enthalpy*.py` import `tests.enthalpy_cases`, so
-  `python -m unittest tests.test_enthalpy` resolves.
+  `python -m unittest tests.test_enthalpy` resolves (#92).
 
 ### Fixed
 
