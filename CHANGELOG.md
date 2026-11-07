@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-01)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-06)
 
 ### Added
 
@@ -96,6 +96,15 @@ date of the last change in the section.
   `advance()`; the reactive materials guide gives the scope and limits of
   each. A standalone structure job driven one work unit per `advance()`
   call is slower than before (#68).
+- Hosted CI runs the complete Python test suite and `python -m engine.lint`
+  under the CPU supervisor, and a second job installs, tests and builds the
+  `game/` and `tower-defense-rogue/` prototypes. The CPU-only cases of the
+  native Vitest fixtures move to `engine/sdk.cpu.test.ts`,
+  `engine/structure.cpu.test.ts` and `engine/conformance.cpu.test.ts`, which
+  `npm test` selects; the structure negative controls plan their corpus with
+  the bulk Python planner (`tests.structure_cpu_cases`) instead of the native
+  transport. `tests/test_enthalpy*.py` import `tests.enthalpy_cases`, so
+  `python -m unittest tests.test_enthalpy` resolves (#92).
 
 ### Fixed
 
