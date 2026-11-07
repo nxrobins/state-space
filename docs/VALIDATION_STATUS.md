@@ -21,10 +21,16 @@ CPU checks does not replace a fresh native or whole-product release gate.
 [Engine verification](../.github/workflows/verify.yml) builds SDK bundles and
 declarations, builds the reactive chamber, checks types/lint/formatting, runs
 sequential CPU and controller suites, exercises supervisor failure paths, checks
-archive restoration, and installs npm/wheel artifacts in independent projects.
-All 14 npm entry points and their public declarations are checked. CI retains
-receipts and package artifacts for 14 days, including failures. Hosted CI runs no
-GPU workloads.
+archive restoration, runs the complete Python test suite
+(`unittest discover -s tests`) and the engine structural lint
+(`python -m engine.lint`) under the CPU supervisor, and installs npm/wheel
+artifacts in independent projects. A second job installs, tests and builds the
+two game prototypes (`game/`, `tower-defense-rogue/`) against the checked-out
+engine sources. All 14 npm entry points and their public declarations are
+checked. CI retains receipts, package artifacts and the prototype bundles for
+14 days, including failures. Hosted CI runs no GPU workloads; the CPU-only
+cases that share a subject with the native Vitest fixtures run in the CPU
+suite from `engine/*.cpu.test.ts`.
 
 CI uses Node.js 22 and Ubuntu 24.04 with the existing 8 GiB available-memory
 preflight. Windows containment checks remain platform-specific. See the

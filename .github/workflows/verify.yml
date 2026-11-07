@@ -52,6 +52,13 @@ jobs:
           uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest tests.test_compiler_tools -v
       - name: Supervisor regressions (no GPU)
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_verification*.py' -v
+      - name: Python engine tests (adapter tests skip without a GPU)
+        # The whole suite, including the evolution and release regressions. Tests
+        # marked with tests/gpu_support.requires_gpu skip here and say why; the
+        # longer stall allowance covers single tests that run quietly.
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 300 --stall 120 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Engine structural lint
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 120 -- .venv/bin/python -B -m engine.lint
       - name: Archive restoration regressions
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 30 -- .venv/bin/python -B -m unittest tests.test_evidence_archive -v
       - name: Installed CPU package client
@@ -69,5 +76,44 @@ jobs:
             dist/verification/
             dist/packages/*.whl
             dist/packages/*.tgz
+          retention-days: 14
+          if-no-files-found: warn
+  games:
+    name: Game prototypes (CPU)
+    # Both prototypes import engine sources through relative paths, so they need
+    # the checkout but neither dist/sdk nor the supervisor.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            game/package-lock.json
+            tower-defense-rogue/package-lock.json
+      - name: Element Fighter
+        working-directory: game
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Tower Defense Rogue
+        working-directory: tower-defense-rogue
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Retain prototype bundles and failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: game-prototypes-${{ github.sha }}
+          path: |
+            game/dist/
+            tower-defense-rogue/dist/
           retention-days: 14
           if-no-files-found: warn
