@@ -20,6 +20,21 @@ the engine lab runs on the CPU, and the showcase, Spillway and the experimental 
 worlds need WebGPU. The site is built from `main` and serves the same pages as the
 [runnable clients](#runnable-clients) below, apart from the held tactical slab.
 
+## At a glance
+
+Each result belongs to the source, host and workload that produced it; the linked
+report has the details, and [validation status](docs/VALIDATION_STATUS.md) says how
+far each one reaches.
+
+| What it does | Measured result |
+| --- | --- |
+| **Replays exactly** | All 62 rendered and replayed 2D trajectories matched the CPU reference exactly, including pressure and velocity. [Demo refresh](docs/checkpoints/DEMO_REFRESH.md) |
+| **Conserves energy exactly** | Zero thermal, latent and chemical drift over those trajectories. Edits are booked as external input or output, so the ledger always balances. [Engine contract](ENGINE_CONTRACT.md) |
+| **Holds 60 Hz with every effect on** | 4,200 full 1920 × 1080 frames of a 256 × 256 world, all 23 physics passes included, with no missed deadline and a worst frame of 14.4 ms on an RTX 4090. [Measured performance](#measured-performance) |
+| **Scales to 3D** | A 128³ structural cut scene held 60 Hz for 1,800 frames with no missed deadline and zero energy drift on an Apple M3 Ultra. [Mac 128³](docs/checkpoints/MACOS_128.md) |
+| **Skips quiet regions without changing the answer** | In the 64³ gate, sparse execution skipped 97.61% of tile passes while the CPU, dense-GPU and sparse-GPU results agreed exactly. At 128³ both GPU modes matched the CPU oracle and sparse restarts continued exactly. [M4](docs/checkpoints/3D_M4.md) |
+| **Saves and continues anywhere** | A snapshot carries cells, energy, structure, the tick and the registry identity. It restores on another backend and continues the same simulation. [Engine contract](ENGINE_CONTRACT.md) |
+
 Version **0.4** (rules `ca-v4`) provides native Python GPU, browser WebGPU, and
 browser/Node.js CPU backends with a shared state contract. Separately versioned
 experimental 3D, structural, tactical, reactive, and multiphysics APIs build on
