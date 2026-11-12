@@ -1,6 +1,6 @@
 # Current validation and support status
 
-This page summarizes the latest retained evidence as of 2026-10-25. State Space
+This page summarizes the latest retained evidence as of 2026-11-01. State Space
 has a public v0.4 (`ca-v4`) 2D API and separately versioned experimental 3D APIs.
 Qualification belongs to the recorded source, host and workload. Passing current
 CPU checks does not replace a fresh native or whole-product release gate.
@@ -11,8 +11,9 @@ CPU checks does not replace a fresh native or whole-product release gate.
 | M1–M4 material/chunk/active 3D | [M1](checkpoints/3D_M1.md), [M2](checkpoints/3D_M2.md), [M3](checkpoints/3D_M3.md), [M4](checkpoints/3D_M4.md) | Experimental, separately versioned APIs; historical qualification is source-bound |
 | M5 structures at 32³/64³ | [Final replay and timing regressions](checkpoints/MACOS_128.md) compare CPU/dense/active state and restarts | Exactness covers the recorded scenarios and tick ranges; not arbitrary-world qualification |
 | M5 fixed 128³ cut scene | [Three consecutive strict 60 Hz runs](checkpoints/MACOS_128.md), 1,800 measured frames total, zero deadline misses or energy drift | M3 Ultra, visible Chrome, 1920×1080; bounded state/continuation checks, not full 128³ replay or a universal frame-rate guarantee |
+| M6 reactive structural worlds | [Bounded ca-3d-m6 fixtures and cavern scenes](checkpoints/3D_M6.md): CPU tests at 8³/16³ and M1-subset equality with ca-3d-m5; supervised macOS qualification receipts ([volume-m6/mac](checkpoints/volume-m6/mac/)) for the dense and active 8³/16³ parity probes (`m6-tiny-*`: every fixture, GPU equal to the CPU oracle after every tick) and for the burning bridge and thermal valve chambers' gameplay pilots and 1,024-tick dense/active replays at 32³ with pinned tick windows (`m6-gameplay-32-*`, `m6-replay-32-*`), all on the branch's final sources, plus the same chamber stages at 64³ (256-tick replays) from an earlier source set of the same branch; legacy renders unchanged by readback hash | The earlier desktop WebGPU pane runs (tiny parity, chamber pilots and 1,024-tick trajectories at 32³ and 64³) are development checks outside the guarded harness that the supervised receipts supersede; 64³ receipts stay bound to their earlier source set; no 128³ or frame-rate evidence; the incident hold is untouched |
 | Reactive sandbox | [Thermal pack and 16³ native acceptance](checkpoints/THERMAL_MATERIALS.md): six scenarios, real Worker evolution, native presentation, cancellation, exact replay and the 8³ regression | Fixed sparse 8³/16³ scenes, one actor and the tested Mac host; not arbitrary dense worlds, larger reactive sizes or cross-platform qualification |
-| Multiphysics foundation | Public analytical references; private world and Worker CPU checks; [contracts and open gates](MULTIPHYSICS.md) | Tank refinement, resting support, heated floor-column, mechanism continuation and admissible freezing pass; pressure-driven solidification remains open. Runtime is unexported, with no builder or electrical release |
+| Multiphysics | Public references, world runtime and module Worker; CPU gate cases with [published budgets](MULTIPHYSICS.md#published-gate-budgets); supervised macOS Worker and visible builder stages for the five demonstrations and the 26-sample timed cup ([evidence](MULTIPHYSICS.md#builder-and-public-runtime-2026-11-02)) | Six fixed scenes on the tested Mac host; heavier liquid loads miss the preview target; the speed-1 paddle impact and pressure-driven solidification remain open; no cross-platform qualification |
 | Other tactical/reactive surfaces | Bounded CPU/mock contracts and installed SDK checks; [original acceptance history](checkpoints/TACTICAL_INTERVENTIONS.md) | The chamber result does not clear the separate tactical slab, held physical/replay fixtures or every worker API |
 
 ## Automated pull-request checks
@@ -20,10 +21,16 @@ CPU checks does not replace a fresh native or whole-product release gate.
 [Engine verification](../.github/workflows/verify.yml) builds SDK bundles and
 declarations, builds the reactive chamber, checks types/lint/formatting, runs
 sequential CPU and controller suites, exercises supervisor failure paths, checks
-archive restoration, and installs npm/wheel artifacts in independent projects.
-All 14 npm entry points and their public declarations are checked. CI retains
-receipts and package artifacts for 14 days, including failures. Hosted CI runs no
-GPU workloads.
+archive restoration, runs the complete Python test suite
+(`unittest discover -s tests`) and the engine structural lint
+(`python -m engine.lint`) under the CPU supervisor, and installs npm/wheel
+artifacts in independent projects. A second job installs, tests and builds the
+two game prototypes (`game/`, `tower-defense-rogue/`) against the checked-out
+engine sources. Every entry point declared in `package.json` exports and its
+public declarations are checked. CI retains receipts, package artifacts and the
+prototype bundles for 14 days, including failures. Hosted CI runs no GPU
+workloads; the CPU-only cases that share a subject with the native Vitest
+fixtures run in the CPU suite from `engine/*.cpu.test.ts`.
 
 CI uses Node.js 22 and Ubuntu 24.04 with the existing 8 GiB available-memory
 preflight. Windows containment checks remain platform-specific. See the

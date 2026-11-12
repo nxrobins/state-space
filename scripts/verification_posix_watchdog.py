@@ -18,6 +18,18 @@ import time
 import psutil
 
 
+def write_status(path, payload):
+    """Publish the status atomically. The supervisor may read it at the same
+    instant the watchdog fires, so it must never observe a truncated file."""
+    path = Path(path)
+    pending = path.with_name(path.name + ".tmp")
+    with pending.open("w", encoding="utf-8") as stream:
+        stream.write(json.dumps(payload))
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(pending, path)
+
+
 class PosixWatchdog:
     def __init__(self, child, timeout, output, memory_mib=8192, heartbeat=3):
         self.status = Path(output) / "posix-watchdog.json"
@@ -99,9 +111,7 @@ def main():
             if ready:
                 message = os.read(sys.stdin.fileno(), 4096)
                 if b"D" in message:
-                    args.status.write_text(
-                        json.dumps({"disarmed": True, "peakRssMiB": peak})
-                    )
+                    write_status(args.status, {"disarmed": True, "peakRssMiB": peak})
                     return 0
                 if not message:
                     raise RuntimeError("Independent POSIX watchdog lost supervisor")
@@ -135,9 +145,7 @@ def main():
             os.killpg(args.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
-        args.status.write_text(
-            json.dumps({"disarmed": False, "error": reason, "peakRssMiB": peak})
-        )
+        write_status(args.status, {"disarmed": False, "error": reason, "peakRssMiB": peak})
         return 1
 
 

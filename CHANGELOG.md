@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-10-26)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-06)
 
 ### Added
 
@@ -31,9 +31,45 @@ date of the last change in the section.
   (#34); the opt-in thermal material pack with three reactive scenes (#35).
 - macOS qualification stages, portable CI and installed SDK checks (#25);
   bulk evidence archives with verified restoration (#26).
+- Experimental `ca-3d-m6` structural worlds: a validated reactive catalog
+  (builtins, custom definitions or the thermal pack) binds its cold table into
+  the M5 CPU, dense GPU and active GPU backends and adds the six-neighbor
+  combustion pass with consumed supports; `ca-3d-m5` is unchanged (#83).
+- Catalog-driven terrain rendering and two reactive structural cavern chambers:
+  a 256-entry palette from the world's law with gas cutouts and catalog-derived
+  flame/melt glow, `inspectMaterials()` on structural worlds, and the
+  `burning-bridge` and `thermal-valve` scenes (with a ceramic toggle) behind a
+  `catalog` parameter, with pinned tick windows in the pilots and replays;
+  supervised macOS qualification stages `m6-gameplay-*` and `m6-replay-*` for
+  those chambers at 32³ and 64³, and `m6-tiny-dense` / `m6-tiny-active` for the
+  8³/16³ parity probes from the structural probe bundle (#83).
+- Private multiphysics gate closure: named tipping, hydrostatic column, viscous
+  decay, moving paddle and displaced-liquid cases with a published per-gate
+  budget table; a module Worker entry and page probe bundled by
+  `npm run build:multiphysics-probe`; and headless `multiphysics-worker-<scene>`
+  macOS stages for the five demonstrations and a 26-sample timed cup (#90).
+- The multiphysics runtime is public: the world, edit receipts, previews, tick
+  jobs, demonstrations and the module Worker are exported from
+  `experimental/3d/multiphysics`, with `serveMultiphysicsWorker3D` and
+  `startMultiphysicsWorker3D`. The interactive multiphysics builder
+  (`npm run build:multiphysics-builder`) has an oriented renderer, edits with
+  receipts, compare, cancel, save and load, and visible
+  `multiphysics-builder-<scene>-visible` macOS stages (#91).
+- A hosted demo site on GitHub Pages, built from `main`: a landing page and the
+  engine lab, showcase, Spillway, the five 3D world clients, the reactive
+  sandbox and the multiphysics builder. `npm run build:site` copies only the
+  files those pages reference into `dist/site/` and fails on a missing
+  reference or one outside the published trees; the held tactical slab is not
+  published (#98).
 
 ### Changed
 
+- Vite 8 builds the SDK. `esbuild`, which the chamber, slab, multiphysics
+  builder and fluid-study scripts import directly and Vite 6 used to bring in,
+  is now an explicit development dependency at 0.28.2, the newest release Vite
+  8 accepts. The completed coupled-solver study's comparison scripts refuse to
+  run on this compiler, because their frozen baseline was built with 0.25.12
+  (#75).
 - GPU tick and global-support optimization for the public 256x256 backends
   (#8); browser frame pacing and pooled tick buffers (#13); one validation
   per tick with a dedicated solver marker (#11).
@@ -72,9 +108,47 @@ date of the last change in the section.
   `advance()`; the reactive materials guide gives the scope and limits of
   each. A standalone structure job driven one work unit per `advance()`
   call is slower than before (#68).
+- Hosted CI runs the complete Python test suite and `python -m engine.lint`
+  under the CPU supervisor, and a second job installs, tests and builds the
+  `game/` and `tower-defense-rogue/` prototypes. The CPU-only cases of the
+  native Vitest fixtures move to `engine/sdk.cpu.test.ts`,
+  `engine/structure.cpu.test.ts` and `engine/conformance.cpu.test.ts`, which
+  `npm test` selects; the structure negative controls plan their corpus with
+  the bulk Python planner (`tests.structure_cpu_cases`) instead of the native
+  transport. `tests/test_enthalpy*.py` import `tests.enthalpy_cases`, so
+  `python -m unittest tests.test_enthalpy` resolves (#92).
 
 ### Fixed
 
+- The hosted demo site serves a released hold status of its own at
+  `dist/verification/safety-hold.json`. The reactive sandbox and the
+  multiphysics builder request that file at startup and stop unless the answer
+  is a 404 or a released hold, and GitHub Pages sometimes answers a missing
+  file with 503. A checkout's own `dist/verification` is still never
+  published (#99).
+- The incident hold now stops the unsupervised benchmark and direct
+  verification entry points (`scripts.benchmark_gpu`, `benchmark_frames`,
+  `benchmark_browser`, `benchmark_spillway`, `verify_browser`,
+  `verify_volume_browser`, and `npm run verify:3d`, `benchmark:cpu`,
+  `benchmark:3d`) before they parse arguments or start work. M4 staged
+  recovery refuses a hard hold before writing anything and records its
+  permit atomically, as M5 recovery does. `python -m engine.verify` prints a
+  heartbeat while a captured step runs, so its supervisor no longer stops it
+  after 40 silent seconds, and it saves the report after every step, marked
+  incomplete until the gate finishes (#97).
+- Multiphysics: a solid counts toward a liquid row's resolved support only while
+  touching it, so an approaching plate no longer switches on the zero-divergence
+  constraint at a distance; parcel reads, inventories and the active-set factor
+  avoid redundant copies and refactoring with bit-identical results (#90).
+- `ca-3d-m6` CPU combustion rotates by the same 32-bit tick word as the GPU
+  backends, so they no longer diverge from tick 2^32; the tiny probe's dormant
+  check can now fail; retained Mac receipts use repo-relative paths (#84).
+- The verification guard keeps a complete receipt when the POSIX watchdog fires
+  on the supervisor's deadline (#84).
+- Python-backed Vitest fixtures and the Node verification guard resolve one
+  interpreter (`PYTHON`, `STATE_SPACE_PYTHON`, the checkout's venv, `python3`,
+  `python`) instead of a bare `python`, so `npm test` passes on hosts whose
+  default interpreter lacks numpy (#83).
 - The native structure tests' negative controls match the formatted source
   again, and the CPU suite checks their anchors (#71).
 - Default water stays liquid at the reference temperature (#15).

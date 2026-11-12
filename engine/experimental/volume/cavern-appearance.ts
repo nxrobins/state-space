@@ -4,7 +4,14 @@ import { makeLightList } from './light-list.js';
 import { CELL_FRUSTUM_QUERY, CELL_FRUSTUM_CULL } from './surface-cull.js';
 import { ROCK_TEXTURES } from '../rock-textures.js';
 import { CAVERN_OPTICS } from './cavern-optics.js';
-import { CAVERN_HAZE } from './cavern-haze.js';
+import { cavernHaze } from './cavern-haze.js';
+import {
+  DEFAULT_MATERIAL_PRESENTATION_3D,
+  materialPredicates,
+  materialShading,
+  paletteConstant,
+  type MaterialPresentation3D,
+} from './material-presentation.js';
 import {
   packTerrainStyle,
   resolveTerrainStyle,
@@ -23,9 +30,18 @@ export function cavernShaders(
   edge: number,
   capacity: number,
   cached = false,
+  presentation: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D,
 ) {
   const chunks = shape.reduce((a, b) => a * b, 1) / edge ** 3;
   const queries = cached ? lightingCacheQueries(shape) : REFERENCE_LIGHTING_QUERIES;
+  // Reactive catalogs color every surface from the palette and draw flames; the frozen
+  // ca-3d-m1 catalog keeps its bespoke M1 shading with these slots empty.
+  const surfaceAlbedo = presentation.reactive
+      ? 'if(surface(m)){albedo=colors[m]*(.65+.5*grain+.18*fine+.06*strata)*(1.-pores*.35);}'
+      : '',
+    flameSurface = presentation.reactive
+      ? 'if(flame(m)){albedo=vec3f(0);roughness=1.;emission=colors[m]*(1.2+2.4*hot)*style.lighting.z;}'
+      : '';
   const common = `
 ${TERRAIN_STYLE_UNIFORM}
 struct Camera {eye:vec4f,right:vec4f,up:vec4f,forward:vec4f,projection:vec4f,shape:vec4u}
@@ -37,7 +53,8 @@ const normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,
 fn coordinate(i:u32)->vec3u{let n=SHAPE/EDGE;let k=i/(EDGE*EDGE*EDGE);let l=i%(EDGE*EDGE*EDGE);return vec3u(k%n.x,(k/n.x)%n.y,k/(n.x*n.y))*EDGE+vec3u(l%EDGE,(l/EDGE)%EDGE,l/(EDGE*EDGE));}
 fn index(c:vec3u)->u32{let n=SHAPE/EDGE;let k=c/EDGE;let l=c%EDGE;return (k.x+n.x*(k.y+n.y*k.z))*EDGE*EDGE*EDGE+l.x+EDGE*(l.y+EDGE*l.z);}
 fn cell(c:vec3i)->u32{if(any(c<vec3i(0))||any(c>=vec3i(SHAPE))){return 1u;}return grid[index(vec3u(c))];}
-fn opaque(c:vec3i)->f32{let m=cell(c)&255u;return select(1.,0.,m==0u||m==9u||m==2u||m==8u||m==11u);}
+${materialPredicates(presentation)}${paletteConstant(presentation)}${materialShading(presentation)}
+fn opaque(c:vec3i)->f32{let m=cell(c)&255u;return select(1.,0.,seeThrough(m)||m==2u||m==8u||m==11u);}
 `;
   const lights =
     common +
@@ -49,15 +66,15 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  var selected=0xffffffffu;var heat=0u;var count=0u;
  for(var l=lane;l<EDGE*EDGE*EDGE;l+=64u){
   let i=group.x*EDGE*EDGE*EDGE+l;let v=grid[i];let m=v&255u;let t=(v>>8u)&255u;
-  if((m==10u||m==17u)&&t>170u){
+  if(emitter(m)&&t>glowFloorU(m)){
    let c=vec3i(coordinate(i));var exposed=false;
-   for(var f=0u;f<6u;f++){let n=cell(c+normals[f])&255u;exposed=exposed||n==0u||n==9u;}
+   for(var f=0u;f<6u;f++){let n=cell(c+normals[f])&255u;exposed=exposed||seeThrough(n);}
    if(exposed){count++;if(t>heat||(t==heat&&i<selected)){heat=t;selected=i;}}
   }
  }
  best[lane]=selected;power[lane]=heat;amount[lane]=count;workgroupBarrier();
  for(var stride=32u;stride>0u;stride/=2u){if(lane<stride){let b=lane+stride;amount[lane]+=amount[b];if(power[b]>power[lane]||(power[b]==power[lane]&&best[b]<best[lane])){best[lane]=best[b];power[lane]=power[b];}}workgroupBarrier();}
- if(lane==0u){var out:Light;out.position=vec4f(0);out.color=vec4f(0);if(amount[0]>0u){out.position=vec4f(vec3f(coordinate(best[0]))+.5,1.);let hot=f32(power[0]-170u)/85.;out.color=vec4f(vec3f(1.,.22+.22*hot,.035)*hot*(10.+min(f32(amount[0]),24.)*2.),1.);}lights[group.x]=out;}
+ if(lane==0u){var out:Light;out.position=vec4f(0);out.color=vec4f(0);if(amount[0]>0u){let bm=grid[best[0]]&255u;out.position=vec4f(vec3f(coordinate(best[0]))+.5,1.);let hot=f32(power[0]-glowFloorU(bm))/glowSpan(bm);out.color=vec4f(lightTint(bm,hot)*hot*(10.+min(f32(amount[0]),24.)*2.),1.);}lights[group.x]=out;}
 }`;
   const draw =
     common +
@@ -85,7 +102,7 @@ fn visibility(p:vec3f,source:vec3f)->f32{
  var out:Out;${CELL_FRUSTUM_CULL}
  let uvs=array<vec2f,6>(vec2f(0,0),vec2f(1,0),vec2f(1,1),vec2f(0,0),vec2f(1,1),vec2f(0,1));let uv=uvs[vertex%6u];
  var local=vec3f(0);switch f{case 0u:{local=vec3f(0,uv.y,uv.x);}case 1u:{local=vec3f(1,uv.y,1-uv.x);}case 2u:{local=vec3f(uv.x,0,1-uv.y);}case 3u:{local=vec3f(uv.x,1,uv.y);}case 4u:{local=vec3f(1-uv.x,uv.y,0);}default:{local=vec3f(uv.x,uv.y,1);}}
- let word=grid[i];if((word&255u)==9u){local=vec3f(.39)+local*.22;}
+ let word=grid[i];if(cutout(word&255u)){local=vec3f(.39)+local*.22;}
  let n=vec3f(normals[f]);let world=c+local;let p=world-camera.eye.xyz;let z=dot(p,camera.forward.xyz);
  out.position=vec4f(dot(p,camera.right.xyz)/camera.projection.x,dot(p,camera.up.xyz)/camera.projection.y,camera.projection.z*z+camera.projection.w,z);
  // Corner occlusion samples the exterior of the face, across chunk seams.
@@ -149,15 +166,15 @@ ${CAVERN_OPTICS}
  let rock=textureSample(rockColor,rockSampler,texUV).rgb;
  let detail=textureSample(rockNormal,rockSampler,texUV).xyz*2.-1.;
  let rough=textureSample(rockRoughness,rockSampler,texUV).r;
- let m=v.word&255u;let thermal=f32((v.word>>8u)&255u);let hot=clamp((thermal-170.)/85.,0.,1.);
+ let m=v.word&255u;let thermal=f32((v.word>>8u)&255u);let hot=clamp((thermal-glowFloor(m))/glowSpan(m),0.,1.);
  var albedo=mix(vec3f(.075,.09,.10),vec3f(.23,.21,.18),broad*.55+vein*.35)*(.65+.5*grain+.18*fine+.06*strata)*(1.-fissure*.27-pores*.6);
- var roughness=.83;var emission=vec3f(0);var f0=vec3f(.045);
+ var roughness=.83;var emission=vec3f(0);var f0=vec3f(.045);${surfaceAlbedo}
  if(m==2u){albedo=vec3f(.018,.085,.11);roughness=.17;f0=vec3f(.02);}
  if(m==3u){albedo=style.sand.rgb*(.8+.3*grain);roughness=.96;}
  if(m==8u){albedo=mix(vec3f(.12,.29,.36),vec3f(.57,.68,.7),pow(grain,4.)*.75);roughness=.24;}
  if(m==11u){albedo=vec3f(.1,.19,.2);roughness=.16;}
- if(m==9u){discard;} // Steam contributes in the volume pass, never to surface depth.
- if(m==10u||m==17u){let crust=smoothstep(.39,.64,noise(p*2.9)+grain*.12);albedo=vec3f(.065,.035,.025);roughness=.68;emission=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}
+ if(hazeOnly(m)){discard;} // Steam and smoke contribute in the volume pass, never to surface depth.
+ if(melt(m)){let crust=smoothstep(.39,.64,noise(p*2.9)+grain*.12);albedo=vec3f(.065,.035,.025);roughness=.68;emission=mix(emissionColor(m),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}${flameSurface}
  if(m==1u){
   albedo=rock*style.rock.rgb*(.85+.25*broad)*mix(1.,1.-style.finish.y,v.surface.y);
   if(style.finish.w>0.){albedo*=rockVariation(p);}
@@ -176,7 +193,7 @@ ${CAVERN_OPTICS}
  if(v.selected==1u){let border=select(0.,1.,any(v.uv<vec2f(.025))||any(v.uv>vec2f(.975)));color=mix(color,vec3f(.65,.40,.15),border*.65);}
  return vec4f(color,1.);
 }`;
-  return { common, lights, draw, haze: common + CAVERN_HAZE + queries };
+  return { common, lights, draw, haze: common + cavernHaze(presentation) + queries };
 }
 
 const POST = `
@@ -330,8 +347,9 @@ export async function makeCavernAppearance(
   faces: GPUBuffer,
   uniform: GPUBuffer,
   rebuilt: GPUBuffer,
+  presentation: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D,
 ) {
-  const shaders = cavernShaders(shape, edge, capacity);
+  const shaders = cavernShaders(shape, edge, capacity, false, presentation);
   async function module(code: string) {
     const m = device.createShaderModule({ code });
     const errors = (await m.getCompilationInfo()).messages.filter((m) => m.type === 'error');
@@ -437,7 +455,7 @@ export async function makeCavernAppearance(
       // Publish B only after every asynchronous setup operation has succeeded.
       if (!cacheSetup)
         cacheSetup = (async () => {
-          const source = cavernShaders(shape, edge, capacity, true);
+          const source = cavernShaders(shape, edge, capacity, true, presentation);
           const nextDraw = await surfacePipeline(source.draw),
             nextHaze = await volumePipeline(source.haze);
           if (closed) throw Error('Cavern appearance is closed.');

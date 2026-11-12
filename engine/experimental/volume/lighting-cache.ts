@@ -152,8 +152,8 @@ var<workgroup> candidateLength:atomic<u32>;
  let k=group.x;let changed=rebuildChunk(k);
  if(changed){
  for(var local=lane;local<EDGE*EDGE*EDGE;local+=64u){let i=k*EDGE*EDGE*EDGE+local;let m=grid[i]&255u;
-  if(m!=10u&&m!=17u){continue;}let c=vec3i(coordinate(i));var exposed=false;
-  for(var face=0u;face<6u;face++){let n=cell(c+normals[face])&255u;exposed=exposed||n==0u||n==9u;}
+  if(!emitter(m)){continue;}let c=vec3i(coordinate(i));var exposed=false;
+  for(var face=0u;face<6u;face++){let n=cell(c+normals[face])&255u;exposed=exposed||seeThrough(n);}
   if(exposed){let slot=atomicAdd(&candidateLength,1u);candidates[k*EDGE*EDGE*EDGE+slot]=i;}
  }
  }
@@ -170,11 +170,11 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  // candidates each presentation, including those currently below threshold.
  for(var slot=lane;slot<atomicLoad(&candidateCounts[k]);slot+=64u){
   let i=candidates[k*EDGE*EDGE*EDGE+slot];let t=(grid[i]>>8u)&255u;
-  if(t>170u){count++;if(t>heat||(t==heat&&i<selected)){heat=t;selected=i;}}
+  if(t>glowFloorU(grid[i]&255u)){count++;if(t>heat||(t==heat&&i<selected)){heat=t;selected=i;}}
  }
  best[lane]=selected;power[lane]=heat;amount[lane]=count;workgroupBarrier();
  for(var stride=32u;stride>0u;stride/=2u){if(lane<stride){let b=lane+stride;amount[lane]+=amount[b];if(power[b]>power[lane]||(power[b]==power[lane]&&best[b]<best[lane])){best[lane]=best[b];power[lane]=power[b];}}workgroupBarrier();}
- if(lane==0u){var out:Light;out.position=vec4f(0);out.color=vec4f(0);if(amount[0]>0u){out.position=vec4f(vec3f(coordinate(best[0]))+.5,1.);let hot=f32(power[0]-170u)/85.;out.color=vec4f(vec3f(1.,.22+.22*hot,.035)*hot*(10.+min(f32(amount[0]),24.)*2.),1.);}
+ if(lane==0u){var out:Light;out.position=vec4f(0);out.color=vec4f(0);if(amount[0]>0u){let bm=grid[best[0]]&255u;out.position=vec4f(vec3f(coordinate(best[0]))+.5,1.);let hot=f32(power[0]-glowFloorU(bm))/glowSpan(bm);out.color=vec4f(lightTint(bm,hot)*hot*(10.+min(f32(amount[0]),24.)*2.),1.);}
   if(force.x!=0u||any(lights[k].position!=out.position)){atomicStore(&cacheFlags[1],1u);}lights[k]=out;
  }
 }`;
@@ -194,7 +194,7 @@ var<workgroup> best:array<u32,64>;var<workgroup> power:array<u32,64>;var<workgro
  var mask=0u;
  for(var z=0u;z<4u;z++){for(var y=0u;y<4u;y++){for(var x=0u;x<4u;x++){
   let c=base+vec3u(x,y,z);if(any(c>=SHAPE)){continue;}let m=cell(vec3i(c))&255u;
-  if(m!=0u&&m!=9u){mask|=2u;if(m!=2u&&m!=8u&&m!=11u){mask|=1u;}}
+  if(!seeThrough(m)){mask|=2u;if(m!=2u&&m!=8u&&m!=11u){mask|=1u;}}
  }}}
  hierarchy[id.x]=mask;atomicStore(&cacheFlags[0],1u);
 }`;

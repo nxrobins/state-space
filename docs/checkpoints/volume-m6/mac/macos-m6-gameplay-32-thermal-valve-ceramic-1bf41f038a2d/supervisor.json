@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "id": "25f138ed92114bca9550eeb88a385d33",
+  "kind": "macos-qualification",
+  "command": [
+    ".venv/bin/python3",
+    "-m",
+    "scripts.verify_macos_qualification",
+    "--stage",
+    "m6-gameplay-32-thermal-valve-ceramic"
+  ],
+  "startedAt": 1793570361.665399,
+  "passed": true,
+  "memoryLimitMiB": null,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 25.488,
+  "containment": "POSIX process group",
+  "metalSmokeScope": {
+    "stage": "m6-gameplay-32-thermal-valve-ceramic",
+    "maxDimension": 32,
+    "maxReplayTicks": 32,
+    "maxFrames": 32,
+    "gpuTelemetryAvailable": false,
+    "independentWatchdog": true,
+    "sampledRssLimitMiB": 8192
+  },
+  "preflight": {
+    "host": {
+      "time": 1793570362.68157,
+      "hostCpuPercent": 18.5,
+      "freeMemoryMiB": 46584.640625
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 300.0,
+    "sampledRssLimitMiB": 8192,
+    "transport": "owned pipe",
+    "kernelMemoryCap": false
+  },
+  "childPid": 20712,
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-gameplay-32-thermal-valve-ceramic-1bf41f038a2d/report.json",
+  "lastHealth": {
+    "host": {
+      "time": 1793570364.750325,
+      "hostCpuPercent": 18.2,
+      "freeMemoryMiB": 46910.5
+    },
+    "gpu": null,
+    "job": null
+  },
+  "exitCode": 0,
+  "finishedAt": 1793570365.178375
+}

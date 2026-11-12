@@ -7,7 +7,7 @@ import {
   type MultiphysicsProfiles3D,
 } from './profiles.js';
 import { readPhysicalBattery3D, batteryStoredUnits3D, type PhysicalBattery3D } from './battery.js';
-import { parcelConservation3D, type MaterialParcel3D } from './conservation.js';
+import { validatedParcelConservation3D, type MaterialParcel3D } from './conservation.js';
 import { validateRigidAssemblyMotion3D, type RigidBond3D } from './rigid.js';
 import { addVec3, assertFiniteVec3, type Vec3 } from './math.js';
 
@@ -172,9 +172,8 @@ export function multiphysicsInventory3D(
       (BigInt(p.thermalQ) + BigInt(p.latentQ) + BigInt(p.chemicalQ)) * scale +
       BigInt(p.thermalRemainder * THERMAL_FRACTION_SCALE_3D);
   if (state.battery) stored += BigInt(batteryStoredUnits3D(state.battery));
-  const mechanical = parcelConservation3D(state.parcels.map(baseParcel3D), {
-    gravity: state.settings.gravity,
-  });
+  // Callers pass validated world state; the reference reader's per-parcel copies are redundant here.
+  const mechanical = validatedParcelConservation3D(state.parcels, state.settings.gravity);
   return {
     storedSubQ: String(stored),
     conversionRemainderSubQ: state.conversionRemainders.reduce((sum, row) => sum + row.subQ, 0),

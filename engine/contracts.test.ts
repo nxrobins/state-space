@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
 import { createStateSpaceField, packVoxel, unpackVoxel } from './browser_state_space.js';
 import { validateDimensions, validatePackedCells, validateSnapshot } from './contracts.js';
 import {
@@ -14,9 +13,7 @@ import {
 
 describe('portable engine contracts', () => {
   it('matches every Python cold-table slot, including optical and reserved data', () => {
-    const python =
-      process.env.STATE_SPACE_PYTHON ??
-      (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
+    const python = pythonInterpreter();
     const source =
       'import json; from engine.schema import build_cold_table_buffer; print(json.dumps(build_cold_table_buffer().tolist()))';
     const expected = JSON.parse(

@@ -1,11 +1,22 @@
 import {createStateSpaceStructuralWorld3DGPU,validateStructuralGameplayState3D} from '../../dist/sdk/state-space-structural-world-gpu.js';
 import {MAT,MATERIALS_3D} from '../../dist/sdk/state-space-structural-world.js';
-import {createStructuralLevel,structuralAction,fixtureEdits,scriptedInput,SCENE_VERSION} from './scene.js';
+import {createStructuralLevel,structuralAction,fixtureEdits,scriptedInput,REACTIVE_SCENARIOS} from './scene.js';
 import {createFramePump} from '../../web/frame-pump.js';
 import {FrameClock} from '../../web/frame-clock.js';
 const $=id=>document.getElementById(id),canvas=$('world'),params=new URLSearchParams(location.search),keys=new Set(),clock=new FrameClock();
-const names=new Map(MATERIALS_3D.map(m=>[m.id,m.name]));
+let names=new Map(MATERIALS_3D.map(m=>[m.id,m.name])),catalog;
 let field,renderer,driver,level,initial,active=Promise.resolve(),pump,playing=false,exclusive=false,failed=false,pendingEdits=[];
+/** The thermal pack catalog binds ca-3d-m6; it is loaded once, only for a reactive chamber. */
+async function loadCatalog(){
+ if(!catalog){const {createThermalMaterialRegistry3D}=await import('../../dist/sdk/state-space-reactive-materials.js');catalog=await createThermalMaterialRegistry3D();}
+ return catalog;
+}
+function expectationText(scenario,e){
+ if(scenario==='burning-bridge')return `Script: ignite the wooden supports at tick ${e.ignitionTick}. They burn that tick and the span rests on the basin floor from tick ${e.spanOnFloorTick}.`;
+ if(scenario==='thermal-valve')return `Script: heat the copper rod from tick ${e.sourceWindow[0]}. The wax plug melts at tick ${e.plugMeltTick} and the water releases at tick ${e.waterReleaseTick}.`;
+ if(scenario==='thermal-valve-ceramic')return `Script: heat the rod from tick ${e.sourceWindow[0]}; its ceramic segment blocks the heat, so the plug and water hold through tick ${e.plugSolidThrough}.`;
+ return scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.';
+}
 let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=13,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
 let styleProfile='classic',exposureEV=0;
 function controls(){
@@ -80,21 +91,24 @@ async function exclusiveOperation(fn){
 async function load(){
  driver?.close();renderer?.close();field?.close();field=renderer=driver=undefined;
  remembered=undefined;checkpointText();
- const size=Number($('size').value),scenario=$('scene').value;level=createStructuralLevel(size,scenario);initial=level.field.snapshot();
+ const size=Number($('size').value),scenario=$('scene').value,registry=REACTIVE_SCENARIOS.includes(scenario)?await loadCatalog():undefined;
+ level=createStructuralLevel(size,scenario,undefined,registry);initial=level.field.snapshot();
  // The setup oracle is not retained alongside the GPU world during play.
  delete level.field;
- field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active',profiling:params.get('profile')==='gpu',gpuTiming:params.get('profile')==='gpu'});
+ field=await createStateSpaceStructuralWorld3DGPU({width:size,height:size,depth:size,chunkSize:initial.chunkSize,mode:'active',profiling:params.get('profile')==='gpu',gpuTiming:params.get('profile')==='gpu',...(registry?{registry}:{})});
+ names=new Map((field.inspectMaterials?.()??MATERIALS_3D).map(m=>[m.id,m.name]));
+ text('rules',field.rulesVersion?`${field.rulesVersion} · ${String(field.materialCatalogHash).slice(0,12)}`:'—');
  await field.restore(initial);renderer=await field.createRenderer(canvas);await renderer.setAppearance(appearance);await renderer.setHeatDistortion(true);await applyLightingMode(lightingMode);
  if(renderer.setStyle)await applyStyle(styleProfile,exposureEV);styleControls();
  $('lighting').disabled=!renderer.setLightingMode; text('lighting',renderer.setLightingMode?(lightingMode==='cached'?'Lighting B · Cached':'Lighting A · Reference'):'Lighting A · SDK update needed for B');
  driver=await field.createGameplay(level.actor,level.rules);yaw=Math.PI/2;pitch=.1;distance=13;orbit=false;text('camera','Orbit view');$('crosshair').hidden=false;pendingEdits=[];lastCommit=undefined;failed=false;$('error').hidden=true;
  text('dimension',`${size}³`);text('energy','Not inspected');
- text('expectation',scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.');
+ text('expectation',expectationText(scenario,level.expected));
  await present();startFrames();
 }
-async function snapshot(){return{version:SCENE_VERSION,scenario:level.scenario,size:level.size,field:await field.snapshot(),actor:driver.inspect()};}
+async function snapshot(){return{version:level.version,scenario:level.scenario,size:level.size,...(level.catalogHash?{catalogHash:level.catalogHash}:{}),field:await field.snapshot(),actor:driver.inspect()};}
 async function restore(value){
- if(!value||value.version!==SCENE_VERSION||value.size!==level.size||value.scenario!==level.scenario)throw Error('Checkpoint belongs to a different chamber.');
+ if(!value||value.version!==level.version||value.size!==level.size||value.scenario!==level.scenario||(level.catalogHash??null)!==(value.catalogHash??null))throw Error('Checkpoint belongs to a different chamber.');
  // Validate actor before any terrain publication; terrain validates atomically.
  const actor=validateStructuralGameplayState3D(value.actor,[level.size,level.size,level.size]);
  await field.restore(value.field);await driver.restore(actor);failed=false;$('error').hidden=true;pendingEdits=[];await present();startFrames();
@@ -111,7 +125,7 @@ $('camera').onclick=()=>{orbit=!orbit;text('camera',orbit?'First-person view':'O
 $('inspect').onclick=()=>notify(()=>exclusiveOperation(async()=>{const balance=await field.energyBalance();text('energy',`${balance.driftQ} Q @ ${field.tick}`);}));
 $('remember').onclick=()=>notify(()=>exclusiveOperation(async()=>{remembered=await snapshot();checkpointText();}));
 $('resume').onclick=()=>notify(()=>exclusiveOperation(async()=>{if(!remembered)throw Error('Remember a checkpoint first.');await restore(remembered);checkpointText();}));
-$('export').onclick=()=>notify(()=>exclusiveOperation(async()=>{const value=await snapshot(),url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`m5-${level.scenario}-${field.tick}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}));
+$('export').onclick=()=>notify(()=>exclusiveOperation(async()=>{const value=await snapshot(),url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`${level.catalogHash?'m6':'m5'}-${level.scenario}-${field.tick}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}));
 $('import').onclick=()=>$('file').click();$('file').onchange=()=>notify(()=>exclusiveOperation(async()=>{const file=$('file').files[0];if(file)await restore(JSON.parse(await file.text()));$('file').value='';}));
 canvas.addEventListener('click',()=>{if(!orbit)void canvas.requestPointerLock();});
 canvas.addEventListener('pointerdown',e=>{if(orbit)drag=[e.clientX,e.clientY];});window.addEventListener('pointerup',()=>{drag=null;});

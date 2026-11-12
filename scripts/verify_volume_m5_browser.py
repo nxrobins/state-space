@@ -82,6 +82,8 @@ def finish_resources(report, browser, server, journal):
 def invocation_for(args):
     module = '/dist/volume-m5/structural-probe.js'
     invocation = 'verifyM5ShaderCompile()' if args.probe == 'compile' else 'verifyM5GpuTiny(' + json.dumps('active' if args.probe == 'active-tiny' else 'dense') + ')'
+    if args.probe in ('m6-tiny', 'm6-active-tiny'):
+        invocation = 'verifyM6GpuTiny(' + json.dumps('active' if args.probe == 'm6-active-tiny' else 'dense') + ')'
     if args.probe == 'trajectory':
         url = '/' + args.reference.resolve().relative_to(ROOT).as_posix()
         invocation = 'verifyM5GpuTrajectory(' + json.dumps(args.mode) + ',' + json.dumps(url) + ')'
@@ -94,13 +96,15 @@ def invocation_for(args):
     if args.probe == 'review':
         module = '/examples/structural-cavern/verify-review.js'
         invocation = 'verifyStructuralReview()'
+    # Reactive chambers (ca-3d-m6) name their catalog; legacy chambers pass none.
+    catalog = {'catalog': args.catalog} if args.catalog else {}
     if args.probe == 'gameplay':
         module = '/examples/structural-cavern/verify.js'
-        invocation = 'verifyStructuralGameplay(' + json.dumps({'size': args.size, 'scenario': args.scene, 'mode': args.mode}) + ')'
+        invocation = 'verifyStructuralGameplay(' + json.dumps({'size': args.size, 'scenario': args.scene, 'mode': args.mode, **catalog}) + ')'
     if args.probe == 'level-trajectory':
         module = '/examples/structural-cavern/replay.js'
         url = '/' + args.reference.resolve().relative_to(ROOT).as_posix()
-        invocation = 'verifyStructuralTrajectory(' + json.dumps({'mode': args.mode, 'base': url, 'part': args.replay_part}) + ')'
+        invocation = 'verifyStructuralTrajectory(' + json.dumps({'mode': args.mode, 'base': url, 'part': args.replay_part, **catalog}) + ')'
     if args.probe in ('frames', 'ui', 'scale'):
         action = ('window.structuralCavern.runScaleProbe()' if args.probe == 'scale' else
                   'window.structuralCavern.runBenchmark()' if args.probe == 'frames' else
@@ -139,12 +143,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-executable', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--probe', choices=('review', 'compile', 'tiny', 'active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
+    parser.add_argument('--probe', choices=('review', 'compile', 'tiny', 'active-tiny', 'm6-tiny', 'm6-active-tiny', 'trajectory', 'level-trajectory', 'seams', 'gameplay', 'frames', 'ui', 'fallback', 'order', 'scale'), default='compile')
     parser.add_argument('--mode', choices=('dense', 'active'), default='dense')
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--replay-part', choices=('all', 'main', 'restarts'), default='all')
     parser.add_argument('--size', type=int, choices=(32, 64, 128), default=32)
     parser.add_argument('--scene', default='cut')
+    parser.add_argument('--catalog', choices=('thermal',), help='bind the reactive catalog of a ca-3d-m6 chamber')
     args = parser.parse_args()
     guarded_entry('frames' if args.probe == 'frames' else 'gpu',
                   120 if args.probe in ('trajectory', 'level-trajectory', 'frames') else 60,
@@ -163,8 +168,8 @@ def main():
         expected_ranges = None
         if args.probe == 'level-trajectory':
             reference = json.loads((args.reference / 'report.json').read_text(encoding='utf-8'))
-            if reference.get('size') != args.size or reference.get('scenario') != args.scene:
-                raise ValueError('Requested replay does not match the retained scene and size')
+            if reference.get('size') != args.size or reference.get('scenario') != args.scene or reference.get('catalog') != args.catalog:
+                raise ValueError('Requested replay does not match the retained scene, size and catalog')
             action = reference['actionTick']
             restarts = [(3, 31), (action - 1, action + 3), (509, 1024)]
             expected_ranges = [(0, 1024)] if args.replay_part == 'main' else restarts if args.replay_part == 'restarts' else [(0, 1024), *restarts]

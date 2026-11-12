@@ -4,8 +4,14 @@ export {
   validateStructuralSnapshot3D,
   STRUCTURAL_SCHEMA_VERSION_3D,
   STRUCTURAL_RULES_VERSION_3D,
+  STRUCTURAL_REACTIVE_RULES_VERSION_3D,
   STRUCTURAL_WORLD_VERSION_3D,
 } from './structural/structural-world-core.js';
+export {
+  structuralSchedule3D,
+  STRUCTURAL_COMBUSTION_PASS_3D,
+} from './structural/structural-law.js';
+export type { StructuralPass3D } from './structural/structural-law.js';
 export type {
   CpuStructuralWorld3D,
   StructuralWorldOptions3D,

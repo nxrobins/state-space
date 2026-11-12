@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   validate: vi.fn(),
   scene: vi.fn(),
   legacy: false,
+  catalog: { hash: 'c'.repeat(64), material: () => ({}), materialIds: [] },
 }));
 vi.mock('../../dist/sdk/state-space-structural-world-gpu.js', () => ({
   createStateSpaceStructuralWorld3DGPU: mocks.create,
@@ -21,7 +22,10 @@ vi.mock('../../examples/structural-cavern/scene.js', () => ({
   structuralAction: () => [],
   fixtureEdits: () => [],
   scriptedInput: () => ({}),
-  SCENE_VERSION: 'test',
+  REACTIVE_SCENARIOS: ['burning-bridge'],
+}));
+vi.mock('../../dist/sdk/state-space-reactive-materials.js', () => ({
+  createThermalMaterialRegistry3D: async () => mocks.catalog,
 }));
 
 type ElementStub = {
@@ -124,6 +128,7 @@ beforeEach(async () => {
       'remember',
       'resume',
       'checkpoint-status',
+      'rules',
     ].map((id) => [
       id,
       {
@@ -152,15 +157,18 @@ beforeEach(async () => {
   });
   vi.stubGlobal('cancelAnimationFrame', (id: number) => callbacks.delete(id));
   mocks.validate.mockImplementation((value) => value);
-  mocks.scene.mockImplementation(() => ({
+  mocks.scene.mockImplementation((_size, scenario = 'control', _chunk, catalog) => ({
     size: 32,
-    scenario: 'control',
+    scenario,
+    version: catalog ? 'reactive-test' : 'test',
+    ...(catalog ? { catalogHash: catalog.hash } : {}),
     actor: actor(),
     deckY: 14,
     rules: { goal: { minX: 2304, maxY: 2048, minZ: 1536, maxZ: 2560 } },
+    expected: { ignitionTick: 180, spanOnFloorTick: 191 },
     field: { snapshot: () => ({ chunkSize: 8 }) },
   }));
-  mocks.create.mockImplementation(async () => {
+  mocks.create.mockImplementation(async (options: { registry?: unknown }) => {
     setLightingMode = vi.fn(async () => {});
     setStyle = vi.fn(async () => {});
     driver = {
@@ -179,6 +187,9 @@ beforeEach(async () => {
       }),
       close: vi.fn(),
       ...{
+        rulesVersion: options.registry ? 'ca-3d-m6' : 'ca-3d-m5',
+        materialCatalogHash: options.registry ? mocks.catalog.hash : 'a'.repeat(64),
+        inspectMaterials: () => [{ id: 7, name: 'wood' }],
         snapshot: async () => ({ tick: field.tick }),
         inspectSolve: () => ({ planReused: true }),
         createGameplay: async () => driver,
@@ -331,4 +342,35 @@ test('remember and restore preserve the saved tick and reset clears the remember
   await element('reset').onclick();
   expect(field.tick).toBe(0);
   expect(element('resume').disabled).toBe(true);
+});
+
+test('a reactive chamber binds the thermal catalog, shows its identity and keys checkpoints to it', async () => {
+  expect(element('rules').textContent).toBe('ca-3d-m5 · aaaaaaaaaaaa');
+  expect(mocks.create).toHaveBeenLastCalledWith(expect.not.objectContaining({ registry: {} }));
+  element('scene').value = 'burning-bridge';
+  await element('scene').onchange();
+  expect(element('error').hidden).toBe(true);
+  expect(mocks.scene).toHaveBeenLastCalledWith(32, 'burning-bridge', undefined, mocks.catalog);
+  expect(mocks.create.mock.lastCall?.[0]).toMatchObject({ registry: mocks.catalog });
+  expect(element('rules').textContent).toBe('ca-3d-m6 · cccccccccccc');
+  expect(element('expectation').textContent).toContain('tick 180');
+  expect(element('expectation').textContent).toContain('tick 191');
+  await expect(
+    api.restore({
+      version: 'reactive-test',
+      size: 32,
+      scenario: 'burning-bridge',
+      field: {},
+      actor: actor(),
+    }),
+  ).rejects.toThrow('different chamber');
+  await api.restore({
+    version: 'reactive-test',
+    size: 32,
+    scenario: 'burning-bridge',
+    catalogHash: mocks.catalog.hash,
+    field: {},
+    actor: actor(),
+  });
+  expect(field.tick).toBe(0);
 });

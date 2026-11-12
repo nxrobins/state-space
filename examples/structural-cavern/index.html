@@ -9,7 +9,7 @@
   <body>
     <main>
       <aside>
-        <a class="brand" href="../../">STATE SPACE <span>EXPERIMENTAL / M5</span></a>
+        <a class="brand" href="../../">STATE SPACE <span>EXPERIMENTAL / M5 · M6</span></a>
         <h1>Weight.<br />Heat.<br /><em>Consequences.</em></h1>
         <p class="intro">
           A bonded world. Walk across it, remove its supports, or change what holds it together.
@@ -21,6 +21,13 @@
           <option value="heat">Stone bridge · thermal failure</option>
           <option value="ice-control">Frozen crossing · intact control</option>
           <option value="ice-heat">Frozen crossing · melt the supports</option>
+          <option value="burning-bridge">
+            Burning bridge · ignite the wooden supports (ca-3d-m6)
+          </option>
+          <option value="thermal-valve">Thermal valve · heat the copper rod (ca-3d-m6)</option>
+          <option value="thermal-valve-ceramic">
+            Thermal valve · ceramic barrier holds (ca-3d-m6)
+          </option>
         </select>
         <label for="size">FINITE WORLD</label
         ><select id="size">
@@ -40,7 +47,7 @@
         <p id="expectation">An intact control should remain stable.</p>
         <div class="buttons">
           <button id="cut">Cut supports</button><button id="heat">Heat supports</button
-          ><button id="melt">Melt ice</button>
+          ><button id="melt">Melt ice · warm rod</button>
         </div>
         <label for="tool">AIMED TOOL · PRESS E</label
         ><select id="tool">
@@ -100,6 +107,7 @@
           <div><small>FULL FRAME</small><strong id="frame">—</strong></div>
           <div><small>SUPPORT PLAN</small><strong id="solve">—</strong></div>
           <div><small>ENERGY DRIFT</small><strong id="energy">Not inspected</strong></div>
+          <div><small>RULES · CATALOG</small><strong id="rules">—</strong></div>
         </div>
         <div class="target" id="target">Walk onto the span or inspect it from orbit.</div>
         <div id="error" role="alert" hidden></div>

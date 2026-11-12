@@ -1,11 +1,66 @@
 """Mac qualification policy tests run without a browser, GPU or simulation."""
 
+import hashlib
 import sys
 import json
+import re
 from pathlib import Path
 import tempfile
 import unittest
-from scripts.verification_macos import STAGES, SANDBOX_STAGES, require_preceding_stage, validate_qualification
+from scripts.verification_macos import MULTIPHYSICS_BUILDER_STAGES, MULTIPHYSICS_WORKER_STAGES, M6_PROBE_STAGES, M6_SCENES, M6_STAGES, STAGES, SANDBOX_STAGES, m6_stage, require_preceding_stage, stage_bounds, validate_qualification
+
+ROOT = Path(__file__).resolve().parents[1]
+CHECKPOINTS = ROOT / "docs" / "checkpoints"
+HOME_PATH = re.compile(r"/(?:Users|home)/[^/\s\"]+/")
+# Receipts committed before this check, frozen; nothing may join them.
+HOME_PATH_LEGACY = frozenset({
+    "docs/checkpoints/c4-baseline.json",
+    "docs/checkpoints/c7-verification.json",
+    "docs/checkpoints/haze-verification.json",
+    "docs/checkpoints/heat-verification.json",
+    "docs/checkpoints/lighting-verification.json",
+    "docs/checkpoints/pacing-final-verification.json",
+    "docs/checkpoints/pacing-resident-verification.json",
+    "docs/checkpoints/pr-verification.json",
+    "docs/checkpoints/pressure-final-verification.json",
+    "docs/checkpoints/pressure-merged-verification.json",
+    "docs/checkpoints/pressure-pacing-verification.json",
+    "docs/checkpoints/pressure-release-verification.json",
+    "docs/checkpoints/pressure-verification.json",
+    "docs/checkpoints/render-verification.json",
+    "docs/checkpoints/spillway/frames-quiet/interruption.json",
+    "docs/checkpoints/volume-m1/existing-verification.json",
+    "docs/checkpoints/volume-m3/review-fix/safety/edits/report.json",
+    "docs/checkpoints/volume-m3/safety/browser/report.json",
+    "docs/checkpoints/volume-m3/safety/frames32/report.json",
+    "docs/checkpoints/volume-m3/safety/frames64/report.json",
+    "docs/checkpoints/volume-m3/safety/m2-browser/report.json",
+    "docs/checkpoints/volume-m3/safety/ui/report.json",
+    "docs/checkpoints/water-verification.json",
+})
+
+
+class RetainedEvidenceTests(unittest.TestCase):
+    def test_new_retained_evidence_has_no_home_directory_paths(self):
+        found = {
+            str(path.relative_to(ROOT))
+            for path in CHECKPOINTS.rglob("*")
+            if path.suffix in {".json", ".jsonl", ".log", ".md", ".txt"}
+            and HOME_PATH.search(path.read_text(encoding="utf-8", errors="replace"))
+        }
+        self.assertEqual(found - HOME_PATH_LEGACY, set())
+
+    def test_m6_index_hashes_match_the_retained_files(self):
+        index = json.loads((CHECKPOINTS / "volume-m6" / "mac" / "index.json").read_text(encoding="utf-8"))
+
+        def sha256(name):
+            return hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+
+        self.assertEqual(len(index["records"]), 20)
+        for record in index["records"]:
+            self.assertEqual(sha256(record["supervisorReceipt"]), record["retainedSupervisorSha256"])
+            if record["reportRetained"]:
+                self.assertEqual(sha256(record["report"]), record["reportSha256"])
 
 
 class MacQualificationPolicyTests(unittest.TestCase):
@@ -22,14 +77,58 @@ class MacQualificationPolicyTests(unittest.TestCase):
             self.assertEqual(scope["stage"], stage)
             self.assertFalse(scope["gpuTelemetryAvailable"])
             self.assertTrue(scope["independentWatchdog"])
-            self.assertEqual(scope["maxDimension"], 8 if stage == "chamber-visible" else 16 if stage in SANDBOX_STAGES else 128 if stage in ("scale-128-visible", "gameplay-128-visible", "gameplay-128-profile-visible") else 64)
-            self.assertEqual(scope["maxFrames"], 256 if stage == "chamber-visible" else 512 if stage in SANDBOX_STAGES else 8 if stage == "scale-128-visible" else 660)
+            self.assertEqual((scope["maxDimension"], scope["maxReplayTicks"], scope["maxFrames"]), stage_bounds(stage))
+            self.assertLessEqual(scope["maxDimension"], 128)
+        # Every stage's bounds are a fixed table, never a request parameter.
+        for stage, bounds in {
+            "chamber-visible": (8, 128, 256),
+            "sandbox-wax-visible": (16, 128, 512),
+            "pilot": (64, 1024, 660),
+            "structural-exact": (64, 1024, 660),
+            "replay-32-cut": (64, 1024, 660),
+            "scale-128-visible": (128, 1024, 8),
+            "gameplay-128-visible": (128, 1024, 660),
+            "gameplay-128-profile-visible": (128, 1024, 660),
+            "gameplay-64-visible": (64, 1024, 660),
+            "m6-gameplay-32-burning-bridge": (32, 32, 32),
+            "m6-gameplay-64-thermal-valve": (64, 32, 32),
+            "m6-replay-32-thermal-valve": (32, 1024, 660),
+            "m6-replay-64-thermal-valve-ceramic": (64, 256, 660),
+            "m6-tiny-dense": (16, 64, 0),
+            "m6-tiny-active": (16, 64, 0),
+            "multiphysics-worker-wax-valve": (16, 64, 0),
+            "multiphysics-worker-timed-cup": (16, 64, 0),
+            "multiphysics-builder-timed-cup-visible": (16, 128, 4096),
+        }.items():
+            self.assertEqual(stage_bounds(stage), bounds, stage)
+        self.assertEqual(len(M6_STAGES), 12)
+        self.assertEqual(M6_PROBE_STAGES, ("m6-tiny-dense", "m6-tiny-active"))
+        self.assertTrue(all(m6_stage(stage) is None for stage in M6_PROBE_STAGES))
+        # The page and probe share one scene list; the five demonstrations plus the timed heavy load.
+        self.assertEqual(
+            MULTIPHYSICS_WORKER_STAGES,
+            tuple(
+                f"multiphysics-worker-{scene}"
+                for scene in ("wax-valve", "rotating-contact", "fluid-switch", "falling-battery", "combined-failure", "timed-cup")
+            ),
+        )
+        self.assertEqual(m6_stage("m6-replay-64-thermal-valve-ceramic"), ("replay", 64, "thermal-valve-ceramic"))
+        self.assertIsNone(m6_stage("replay-64-cut-long"))
+        self.assertTrue(all(scene in M6_SCENES for _, _, scene in map(m6_stage, M6_STAGES)))
         for timeout in [0, -1, 301, float("nan"), float("inf")]:
             with self.assertRaises(RuntimeError):
                 validate_qualification(command, timeout, platform="darwin")
         for change in [
             command + ["--large"],
             command[:-1] + ["replay-128-cut"],
+            command[:-1] + ["m6-replay-128-burning-bridge"],
+            command[:-1] + ["m6-gameplay-32-cut"],
+            command[:-1] + ["m6-tiny-32-dense"],
+            command[:-1] + ["m6-tiny"],
+            command[:-1] + ["multiphysics-worker"],
+            command[:-1] + ["multiphysics-worker-capacity"],
+            command[:-1] + ["multiphysics-builder-timed-cup"],
+            command[:-1] + ["multiphysics-builder-resolved-tank-visible"],
             [sys.executable, "-c", "print(1)"],
         ]:
             with self.assertRaises(RuntimeError):
@@ -52,7 +151,14 @@ class MacScalePrerequisiteTests(unittest.TestCase):
             root = Path(folder)
             hashes = {"physics": "current"}
             self.assertIsNone(require_preceding_stage(root, "pilot", hashes))
-            for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")]:
+            for stage in M6_STAGES:
+                if m6_stage(stage)[1] == 32:
+                    self.assertIsNone(require_preceding_stage(root, stage, hashes))
+            for stage in M6_PROBE_STAGES + MULTIPHYSICS_WORKER_STAGES:
+                self.assertIsNone(require_preceding_stage(root, stage, hashes))
+            m6_pairs = [(stage, stage.replace("-64-", "-32-")) for stage in M6_STAGES if m6_stage(stage)[1] == 64]
+            builder_pairs = [(stage, stage.replace("builder", "worker").removesuffix("-visible")) for stage in MULTIPHYSICS_BUILDER_STAGES]
+            for target, prior in [(target, "chamber-visible") for target in SANDBOX_STAGES] + [("scale-128-visible", "replay-64-cut-long"), ("gameplay-128-visible", "scale-128-visible"), ("gameplay-128-profile-visible", "scale-128-visible")] + m6_pairs + builder_pairs:
                 root = Path(folder) / target
                 root.mkdir()
                 with self.assertRaises(RuntimeError):
@@ -63,7 +169,17 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                 receipt_path = root / job / "report.json"
                 receipt_path.parent.mkdir(exist_ok=True)
                 result = {"passed": True, "done": True, "energyDriftQ": "0", "backendInfo": {"isFallbackAdapter": False}, "scenario": "cut"}
-                if prior == "chamber-visible":
+                m6 = m6_stage(prior)
+                worker = prior in MULTIPHYSICS_WORKER_STAGES
+                if worker:
+                    result = {"passed": True, "done": True, "scene": prior.removeprefix("multiphysics-worker-"), "exact": True, "timingPassed": True}
+                elif m6:
+                    result.update(size=32, scenario=m6[2], catalog="thermal", rulesVersion="ca-3d-m6")
+                    if m6[0] == "replay":
+                        result.update(ticks=1024, runs=[{"mode": mode, "start": 0, "end": 1024, "exact": True} for mode in ("dense", "active")])
+                    else:
+                        result.update(frames=32, physicsExact=True)
+                elif prior == "chamber-visible":
                     result.update(size=8, journeys=[str(i) for i in range(13)], render={"frames": [1] * 120})
                 elif target == "scale-128-visible":
                     result.update(size=64, ticks=1024, runs=[{"mode": mode, "start": 0, "end": 1024, "exact": True} for mode in ("dense", "active")])
@@ -83,8 +199,19 @@ class MacScalePrerequisiteTests(unittest.TestCase):
                     (report, path, "passed", False),
                     (report, path, "sourceUnchanged", False),
                     (report, path, "supervisorJob", "../outside"),
-                    (report, path, "result", {**result, "energyDriftQ": "1"}),
-                    (report, path, "result", {**result, "runs": [], "frames": [], "journeys": []}),
+                    *(
+                        [
+                            (report, path, "result", {**result, "exact": False}),
+                            (report, path, "result", {**result, "timingPassed": False}),
+                            (report, path, "result", {**result, "scene": "wax-valve" if result["scene"] != "wax-valve" else "timed-cup"}),
+                        ]
+                        if worker
+                        else [
+                            (report, path, "result", {**result, "energyDriftQ": "1"}),
+                            (report, path, "result", {**result, "runs": [], "frames": [], "journeys": []}),
+                        ]
+                    ),
+                    *([(report, path, "result", {**result, "catalog": None})] if m6 else []),
                     (receipt, receipt_path, "passed", False),
                     (receipt, receipt_path, "exitCode", 1),
                 ]:

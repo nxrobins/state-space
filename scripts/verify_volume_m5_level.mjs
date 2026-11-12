@@ -5,7 +5,13 @@ import { gzipSync, gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { guardNode, verificationYield } from './verification_guard.mjs';
-import { createStructuralLevel, fixtureEdits } from '../examples/structural-cavern/scene.js';
+import {
+  createStructuralLevel,
+  fixtureEdits,
+  observeStructuralLevel,
+  expectedWindows,
+  REACTIVE_SCENARIOS,
+} from '../examples/structural-cavern/scene.js';
 import { structuralStateBytes } from '../examples/structural-cavern/state-evidence.js';
 await guardNode('cpu', 120);
 const arg = (name, fallback) =>
@@ -15,16 +21,30 @@ const size = Number(arg('--size', 32)),
   ticks = Number(arg('--ticks', 32)),
   actionTick = Number(arg('--action-tick', 16)),
   out = resolve(arg('--output', 'dist/volume-m5/level')),
-  resume = arg('--resume', null);
+  resume = arg('--resume', null),
+  catalog = arg('--catalog', null);
 assert([32, 64].includes(size));
+// Reactive chambers bind the thermal pack (ca-3d-m6); the catalog name is part of the receipt.
+assert(catalog === null || catalog === 'thermal', 'Unknown structural catalog');
+assert(
+  REACTIVE_SCENARIOS.includes(scenario) === (catalog !== null),
+  'Reactive chambers need a catalog',
+);
+const registry =
+  catalog === null
+    ? undefined
+    : await (
+        await import('../dist/sdk/state-space-reactive-materials.js')
+      ).createThermalMaterialRegistry3D();
 assert(Number.isInteger(ticks) && ticks >= 1 && ticks <= 1024);
 assert(Number.isInteger(actionTick) && actionTick >= 1 && actionTick <= ticks);
 await mkdir(out, { recursive: true });
-const level = createStructuralLevel(size, scenario),
+const level = createStructuralLevel(size, scenario, undefined, registry),
   field = level.field,
   initial = field.snapshot(),
   checkpoints = new Map([[0, initial]]),
   samples = [];
+let observer = registry ? observeStructuralLevel(level, actionTick) : null;
 let firstFall = null,
   supportMelt = null;
 const [x, y, z] = level.center,
@@ -42,6 +62,16 @@ const report = {
   scenario,
   ticks,
   actionTick,
+  ...(registry
+    ? {
+        catalog,
+        rulesVersion: field.rulesVersion,
+        materialCatalogHash: field.materialCatalogHash,
+        expected: expectedWindows(level, actionTick),
+        windows: null,
+        observer: null,
+      }
+    : {}),
   checkpoints: {},
   stateDigests: [digest(initial)],
   firstFall: null,
@@ -54,6 +84,7 @@ report.implementationHashes = Object.fromEntries(
   await Promise.all(
     [
       'dist/sdk/state-space-structural-world.js',
+      ...(registry ? ['dist/sdk/state-space-reactive-materials.js'] : []),
       'examples/structural-cavern/scene.js',
       'examples/structural-cavern/state-evidence.js',
       'scripts/verify_volume_m5_level.mjs',
@@ -73,9 +104,16 @@ if (resume) {
     previous.passed &&
       previous.size === size &&
       previous.scenario === scenario &&
-      previous.actionTick === actionTick,
+      previous.actionTick === actionTick &&
+      (previous.catalog ?? null) === catalog,
     'Continuation reference differs',
   );
+  // A reactive continuation resumes the window observer, so every segment's windows cover the
+  // trajectory from tick 0.
+  if (registry) {
+    assert(previous.observer?.last === previous.ticks, 'Missing reactive observer progress');
+    observer = observeStructuralLevel(level, actionTick, previous.observer);
+  }
   assert.deepEqual(
     previous.implementationHashes,
     report.implementationHashes,
@@ -131,7 +169,9 @@ try {
       supportMelt = tick;
     const state = field.snapshot();
     report.stateDigests.push(digest(state));
-    if (scenario.endsWith('control') || tick < actionTick) {
+    observer?.tick(tick, state);
+    // The legacy deck checks describe stone and ice spans; reactive chambers use the observer.
+    if (!registry && (scenario.endsWith('control') || tick < actionTick)) {
       for (const cell of deck) {
         const i = index(cell);
         assert.equal(state.packedCells[i] & 255, material, 'Intact deck cell moved or transformed');
@@ -143,7 +183,7 @@ try {
       }
       report.fullDeckStableTicks++;
     }
-    if (firstFall === tick) {
+    if (!registry && firstFall === tick) {
       for (const cell of deck.filter((c) => c.interior))
         assert.equal(
           state.packedCells[index({ ...cell, y: y + 1 })] & 255,
@@ -169,7 +209,11 @@ try {
   assert.equal(field.energyBalance().driftQ, 0n);
   report.energyDriftQ = '0';
   report.segments.push({ start: startTick, end: ticks, energyDriftQ: '0' });
-  if (scenario.endsWith('control')) assert.equal(firstFall, null, 'Intact crossing failed');
+  if (registry) {
+    // Reactive windows are checked by the shared observer over the trajectory observed so far.
+    report.windows = observer.check();
+    report.observer = observer.progress();
+  } else if (scenario.endsWith('control')) assert.equal(firstFall, null, 'Intact crossing failed');
   else if (scenario === 'ice-heat') {
     assert(
       supportMelt !== null && supportMelt >= actionTick && supportMelt <= actionTick + 2,

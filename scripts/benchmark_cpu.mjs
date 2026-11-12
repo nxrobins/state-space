@@ -7,6 +7,10 @@ import { dirname, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
+import { assertRuntimeNotBlocked } from './verification_guard.mjs';
+
+// These runs are unsupervised; an active incident hold stops them before any work.
+assertRuntimeNotBlocked();
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const { values } = parseArgs({

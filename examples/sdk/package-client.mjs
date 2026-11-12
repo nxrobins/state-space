@@ -31,6 +31,12 @@ const {
   cuboidMassProperties,
   partitionMaterialParcel3D,
   parcelConservation3D,
+  createMultiphysicsProfiles3D,
+  createMultiphysicsDemonstration3D,
+  createMultiphysicsWorld3D,
+  readMultiphysicsSnapshot3D,
+  startMultiphysicsWorker3D,
+  serveMultiphysicsWorker3D,
 } = await import('state-space-engine/experimental/3d/multiphysics');
 const circuit = solveReferenceCircuit3D({
   nodeCount: 3,
@@ -64,10 +70,25 @@ const children = partitionMaterialParcel3D(parcel, [
   { id: 'b', weight: 1 },
 ]);
 assert.deepEqual(parcelConservation3D(children), parcelConservation3D([parcel]));
+// The exported runtime: a bounded two-tick preview commits exactly what it previewed.
+const profiles = await createMultiphysicsProfiles3D();
+const multiphysics = createMultiphysicsWorld3D(
+  profiles,
+  createMultiphysicsDemonstration3D(profiles, 'falling-battery'),
+);
+const preview = multiphysics.prepare([], 2);
+while (preview.progress().status === 'running') preview.advance(256);
+const expected = preview.result();
+assert.deepEqual(multiphysics.commit(preview).result, expected);
+assert.deepEqual(multiphysics.snapshot(), readMultiphysicsSnapshot3D(profiles, expected.snapshot));
+assert.equal(multiphysics.snapshot().tick, 2);
+assert.equal(typeof startMultiphysicsWorker3D, 'function');
+assert.equal(typeof serveMultiphysicsWorker3D, 'function');
 console.log(
   JSON.stringify({
     exportCount: exports.length,
     multiphysicsReferences: true,
+    multiphysicsRuntime: true,
     structuralRestartExact: true,
     positiveFall: true,
     invalidRestoreAtomic: true,
