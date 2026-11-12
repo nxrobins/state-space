@@ -838,6 +838,35 @@ function contactWithinTolerance(
   const selected = candidates.find((c) => c.depth <= depth + tolerance / 4)!;
   return { normal: selected.normal, depth: Math.max(0, depth) };
 }
+/** Private exact early reject for two cuboids, ahead of contactWithinTolerance. True only when
+ * a face axis of either one separates them by more than `tolerance` plus a rounding margin.
+ * That test takes its depth as a minimum over those same face axes, so it returns null for
+ * every pair accepted here. Each face axis bounds the other cuboid by its circumscribed
+ * sphere, so some separated pairs still reach the full test. An invalid orientation throws
+ * here as it would there, and non-finite or huge geometry is left to it.
+ */
+function separatedOnFaceAxis(a: RigidParcel3D, b: RigidParcel3D, tolerance: number): boolean {
+  const offset = subtractVec3(b.center, a.center),
+    radiusA = lengthVec3(a.halfExtents),
+    radiusB = lengthVec3(b.halfExtents),
+    scale = lengthVec3(offset) + radiusA + radiusB;
+  if (!(scale < 1e150) || a.orientation.length !== 4 || b.orientation.length !== 4) return false;
+  // 1e-9 of the pair's size is far above the roundoff of either test, about 1e-14 of it.
+  // The absolute floor covers subnormal sizes.
+  const margin = tolerance + 1e-9 * scale + 1e-300,
+    [ax, ay, az, aw] = a.orientation,
+    [bx, by, bz, bw] = b.orientation,
+    // The centre offset in each cuboid's own frame: component i is its face axis i dot offset.
+    inA = rotateVector([-ax, -ay, -az, aw], offset),
+    inB = rotateVector([-bx, -by, -bz, bw], offset);
+  for (let i = 0; i < 3; i++)
+    if (
+      Math.abs(inA[i]) - a.halfExtents[i] - radiusB > margin ||
+      Math.abs(inB[i]) - b.halfExtents[i] - radiusA > margin
+    )
+      return true;
+  return false;
+}
 function clipPolygon(points: Vec3[], center: Vec3, axis: Vec3, extent: number): Vec3[] {
   const result: Vec3[] = [];
   for (let i = 0; i < points.length; i++) {
@@ -1073,7 +1102,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       particleIds.has(b.members[0].id));
   function contactGeometry(a: T, b: T, tolerance: number) {
     if (!particleIds.has(a.id) && !particleIds.has(b.id))
-      return contactWithinTolerance(a, b, tolerance);
+      return separatedOnFaceAxis(a, b, tolerance) ? null : contactWithinTolerance(a, b, tolerance);
     const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
     return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
   }
