@@ -1,6 +1,14 @@
 /** Bounded rigid candidate kernel. Release qualification still requires coupled runtime evidence. */
-import { copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  copyPortableValue,
+  PORTABLE_VALUE_LIMITS,
+  type PortableValue,
+} from '../../portable-data.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import {
   type Vec3,
   type Quat,
@@ -139,6 +147,27 @@ function invertTensor(matrix: Matrix3): Matrix3 {
   }
   return result as unknown as Matrix3;
 }
+/** Private: true only when copying this owned record again could neither reject it nor change
+ * what the parcel reader decides. Every field is then a scalar or a flat array of finite
+ * numbers, inside the portable budgets. Owned arrays are plain: the portable copy or this
+ * module's arithmetic built them. Any other record keeps the copying reader. */
+function copiesUnchanged(base: Record<string, unknown>): boolean {
+  let nodes = 1,
+    characters = 0;
+  for (const key of Object.keys(base)) {
+    const value = base[key];
+    nodes++;
+    characters += key.length;
+    if (typeof value === 'string') characters += value.length;
+    else if (Array.isArray(value)) {
+      nodes += value.length;
+      for (let i = 0; i < value.length; i++) if (!Number.isFinite(value[i])) return false;
+    } else if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return false;
+    } else if (value !== null && typeof value !== 'boolean') return false;
+  }
+  return nodes <= PORTABLE_VALUE_LIMITS.nodes && characters <= PORTABLE_VALUE_LIMITS.characters;
+}
 /** Private: the caller already owns portable data; this does not admit raw input. */
 function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
   const base = Object.fromEntries(
@@ -159,7 +188,11 @@ function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
       'principalInertia',
     ].map((key) => [key, (copy as unknown as Record<string, unknown>)[key]]),
   );
-  readMaterialParcel3D(base);
+  // A second copy of a plainly portable record cannot reject it, and the reader's verdict
+  // ignores the sign of zero, so such a record is read in place. Every other record takes
+  // the copying reader, which keeps each rejection and its message as they were.
+  if (copiesUnchanged(base)) readOwnedMaterialParcel3D(base);
+  else readMaterialParcel3D(base);
   assertFiniteVec3(copy.halfExtents);
   if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
   return copy;
