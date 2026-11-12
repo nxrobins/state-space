@@ -11,11 +11,12 @@ import {
   symlinkSync,
   readFileSync,
   copyFileSync,
+  existsSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import {
   SDK_ENTRIES,
   SDK_ROOT,
@@ -26,6 +27,7 @@ import {
 import { lintProject, lintSource } from '../engine/lint_ts.mjs';
 import { STREAMING_REPORTER, VITEST, selectChecks } from '../scripts/verify_checks.mjs';
 import { CHECKOUT, pythonInterpreter } from '../engine/test-support/python-interpreter.mjs';
+import { DEMOS, assemble, collect, references } from '../scripts/build_site.mjs';
 
 test('SDK entries preserve existing build targets and reject unknown entries', () => {
   for (const entry of SDK_ENTRIES) {
@@ -319,4 +321,133 @@ test('Python-backed checks resolve one interpreter: override, supervisor, checko
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('site references cover pages, styles and modules and skip external targets', () => {
+  const html =
+    '<link rel="stylesheet" href="style.css"><a href="https://example.test/">x</a>' +
+    '<a href="#top">t</a><link rel="icon" href="data:,">' +
+    '<script type="module" src=\'./app.js?v=1\'></script>';
+  assert.deepEqual(
+    references('demo/index.html', html).map((reference) => reference.specifier),
+    ['style.css', './app.js?v=1'],
+  );
+  const css = '@import "base.css"; a { background: url(img/a.png) } b { background: url("b.png") }';
+  assert.deepEqual(
+    references('demo/style.css', css)
+      .map((reference) => reference.specifier)
+      .sort(),
+    ['b.png', 'base.css', 'img/a.png'],
+  );
+  const source = [
+    "import value from './x.js';",
+    'export * from "../y.js";',
+    "const worker = new Worker(new URL('./worker.js', import.meta.url));",
+    "const lazy = () => import('./lazy.js');",
+    "fetch('../verification/safety-hold.json');",
+    "const fs = () => import('node:fs');",
+    "new URL('./other.js', location.href);",
+    'const dynamic = (name) => import(name);',
+  ].join('\n');
+  assert.deepEqual(references('demo/app.js', source), [
+    { specifier: './x.js', module: true },
+    { specifier: '../y.js', module: true },
+    { specifier: './worker.js', module: false },
+    { specifier: './lazy.js', module: true },
+  ]);
+});
+
+test('site assembly publishes only referenced, allowed files and reports every broken reference', () => {
+  const root = mkdtempSync(join(tmpdir(), 'state-space-site-'));
+  const write = (path, text) => {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), text);
+  };
+  const demos = [
+    { entry: 'examples/demo/index.html' },
+    { entry: 'dist/reactive-chamber/index.html', whole: 'dist/reactive-chamber' },
+  ];
+  try {
+    write(
+      'site/index.html',
+      '<link rel="stylesheet" href="site.css"><a href="examples/demo/">Demo</a>' +
+        '<a href="dist/reactive-chamber/?scene=1">Chamber</a>',
+    );
+    write('site/site.css', 'body {}');
+    write(
+      'examples/demo/index.html',
+      '<a href="../../">Home</a><a href="./README.md">Guide</a>' +
+        '<script type="module" src="app.js"></script>',
+    );
+    write(
+      'examples/demo/app.js',
+      "import '../../web/pump.js'; import '../../dist/sdk/state-space.js';" +
+        " new Worker(new URL('./worker.js', import.meta.url));",
+    );
+    write('examples/demo/worker.js', '');
+    write('examples/demo/README.md', '# Demo');
+    write('examples/demo/unused.test.mjs', '');
+    write('web/pump.js', '');
+    write('dist/sdk/state-space.js', "import './chunk.js';");
+    write('dist/sdk/chunk.js', '');
+    write('dist/reactive-chamber/index.html', '<script type="module" src="./app.js"></script>');
+    write('dist/reactive-chamber/app.js', "fetch('../verification/safety-hold.json');");
+    write('dist/reactive-chamber/worker.js', '');
+    write('dist/reactive-chamber/bundle-inputs.json', '{}');
+    write('dist/verification/safety-hold.json', '{"blockRecovery":true}');
+    write('engine/private.js', '');
+    assert.deepEqual([...collect(root, demos).keys()].sort(), [
+      'dist/reactive-chamber/app.js',
+      'dist/reactive-chamber/index.html',
+      'dist/reactive-chamber/worker.js',
+      'dist/sdk/chunk.js',
+      'dist/sdk/state-space.js',
+      'examples/demo/README.md',
+      'examples/demo/app.js',
+      'examples/demo/index.html',
+      'examples/demo/worker.js',
+      'index.html',
+      'site.css',
+      'web/pump.js',
+    ]);
+    const output = join(root, 'out');
+    assert.equal(assemble(root, output, demos).files, 12);
+    assert(existsSync(join(output, 'index.html')));
+    assert(existsSync(join(output, 'examples/demo/worker.js')));
+    assert(!existsSync(join(output, 'dist/verification')));
+    assert(!existsSync(join(output, 'examples/demo/unused.test.mjs')));
+    assert.throws(() => assemble(root, output, demos), /not empty/);
+
+    write('site/index.html', '<a href="examples/demo/">Demo</a>');
+    write(
+      'examples/demo/app.js',
+      "import '/web/pump.js'; import 'state-space-engine'; import '../../engine/private.js';" +
+        " import './missing.js'; import '../../../outside.js';" +
+        " new URL('../../dist/verification/safety-hold.json', import.meta.url);",
+    );
+    assert.throws(
+      () => collect(root, demos),
+      (error) => {
+        for (const expected of [
+          /\/web\/pump\.js \(in examples\/demo\/app\.js\) is root-absolute/,
+          /state-space-engine \(in examples\/demo\/app\.js\) is a bare module specifier/,
+          /engine\/private\.js \(referenced by examples\/demo\/app\.js\) is outside the published trees/,
+          /examples\/demo\/missing\.js \(referenced by examples\/demo\/app\.js\) does not exist/,
+          /outside\.js \(in examples\/demo\/app\.js\) leaves the site root/,
+          /dist\/verification\/safety-hold\.json \(referenced by examples\/demo\/app\.js\) is outside the published trees/,
+          /dist\/reactive-chamber\/index\.html is not linked from the landing page/,
+        ])
+          assert.match(error.message, expected);
+        return true;
+      },
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the landing page links every published demo', () => {
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  for (const { entry } of DEMOS)
+    assert(html.includes(`href="${entry.replace(/index\.html$/, '')}"`), entry);
 });

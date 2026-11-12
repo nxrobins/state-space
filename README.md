@@ -15,6 +15,11 @@ tools. Movement, heat, phase changes, combustion, and structural failure share o
 replayable state: water freezes into bonded ice, fuel releases stored energy, and
 burning supports can break and drop the fragments they were holding.
 
+**[Try the live demos](https://nxrobins.github.io/state-space/)** in your browser:
+the engine lab runs on the CPU, and the showcase, Spillway and the experimental 3D
+worlds need WebGPU. The site is built from `main` and serves the same pages as the
+[runnable clients](#runnable-clients) below, apart from the held tactical slab.
+
 Version **0.4** (rules `ca-v4`) provides native Python GPU, browser WebGPU, and
 browser/Node.js CPU backends with a shared state contract. Separately versioned
 experimental 3D, structural, tactical, reactive, and multiphysics APIs build on
