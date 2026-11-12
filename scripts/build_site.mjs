@@ -34,8 +34,11 @@ export const DEMOS = Object.freeze([
   { entry: 'dist/reactive-chamber/index.html', whole: 'dist/reactive-chamber' },
   { entry: 'dist/multiphysics-builder/index.html', whole: 'dist/multiphysics-builder' },
 ]);
-/** The only trees a published file may come from. Receipts, evidence and the incident
- * hold under dist/verification are never published, whatever a page references. */
+/** The only trees a published file may come from. A checkout's receipts, evidence and
+ * incident hold under dist/verification are never published, whatever a page references.
+ * The site serves its own hold status from site/dist/verification/ instead: the bundled
+ * demos ask for it at startup and refuse to start unless the answer is a clean 404 or a
+ * released hold, and a static host does not always answer a missing file with 404. */
 export const PUBLISHED = Object.freeze([
   /^examples\//,
   /^web\//,
@@ -139,6 +142,9 @@ export function collect(root, demos = DEMOS) {
   const files = new Map();
   const problems = [];
   const queue = [{ path: 'index.html', from: 'the site root' }];
+  // Everything under site/ is site content, including files that no page links.
+  for (const path of listFiles(root, SITE_SOURCE))
+    queue.push({ path: path.slice(SITE_SOURCE.length + 1), from: 'the landing tree' });
   for (const demo of demos) {
     queue.push({ path: demo.entry, from: 'the demo list' });
     if (demo.whole)
