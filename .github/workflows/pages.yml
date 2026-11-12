@@ -1,0 +1,66 @@
+name: Demo site
+# Builds the static demo site from the SDK and the bundled demos, checks every
+# local reference, and publishes it to GitHub Pages from main. Pull requests
+# build and check the site without publishing. Building compiles and copies
+# files only: no simulation, worker, browser or GPU workload runs here.
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'examples/**'
+      - 'web/**'
+      - 'engine/**'
+      - 'scripts/build_*.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/pages.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages-${{ github.ref }}
+  # Let a deployment from main finish; replace superseded pull-request builds.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  build:
+    name: Build and check the demo site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Build the SDK and the bundled demos
+        run: |
+          npm run build:sdk
+          npm run build:reactive-chamber
+          npm run build:multiphysics-builder
+      - name: Assemble the site and check its references
+        run: npm run build:site
+      - name: Upload the Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist/site
+  deploy:
+    name: Publish to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

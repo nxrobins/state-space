@@ -33,9 +33,10 @@
     "verify:macos": "uv run python -m scripts.verify_macos_qualification",
     "build:reactive-chamber": "node scripts/build_reactive_chamber.mjs",
     "build:multiphysics-builder": "node scripts/build_multiphysics_builder.mjs",
+    "build:site": "node scripts/build_site.mjs",
     "build:multiphysics-probe": "node node_modules/vite/bin/vite.js build --config engine/vite.multiphysics-probe.config.ts",
-    "format:check": "prettier --check \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\"",
-    "format": "prettier --write \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\""
+    "format:check": "prettier --check \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" \"site/**/*.{html,css}\"",
+    "format": "prettier --write \"engine/**/*.{ts,mjs}\" \"examples/**/*.{ts,mjs,html,css,json}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" \"site/**/*.{html,css}\""
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

@@ -55,6 +55,12 @@ date of the last change in the section.
   (`npm run build:multiphysics-builder`) has an oriented renderer, edits with
   receipts, compare, cancel, save and load, and visible
   `multiphysics-builder-<scene>-visible` macOS stages (#91).
+- A hosted demo site on GitHub Pages, built from `main`: a landing page and the
+  engine lab, showcase, Spillway, the five 3D world clients, the reactive
+  sandbox and the multiphysics builder. `npm run build:site` copies only the
+  files those pages reference into `dist/site/` and fails on a missing
+  reference or one outside the published trees; the held tactical slab is not
+  published (#98).
 
 ### Changed
 

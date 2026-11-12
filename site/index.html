@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>State Space: live demos</title>
+    <meta
+      name="description"
+      content="Run the State Space deterministic cellular material engine in your browser: the engine lab, the 2D showcase and game, and the experimental 3D worlds."
+    />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <p class="eyebrow">Deterministic cellular material engine</p>
+      <h1>State Space</h1>
+      <p class="lede">
+        Movement, heat, phase change, combustion and structural failure share one replayable state.
+        Water freezes into bonded ice, fuel releases its stored energy, and a burning support can
+        break and drop what it was holding.
+      </p>
+      <p class="actions">
+        <a class="button" href="examples/lab/">Open the engine lab</a>
+        <a class="quiet" href="https://github.com/nxrobins/state-space">Source on GitHub</a>
+      </p>
+    </header>
+
+    <main>
+      <p class="notice" id="no-webgpu" hidden>
+        This browser does not expose WebGPU, so only the engine lab will run here. Try a recent
+        desktop version of Chrome or Edge for the other demos.
+      </p>
+
+      <section class="notes" aria-labelledby="before">
+        <h2 id="before">Before you start</h2>
+        <ul>
+          <li>Every demo is a static page. The simulation runs in your browser.</li>
+          <li>The engine lab runs on the CPU. Every other demo needs WebGPU.</li>
+          <li>Demos tagged <span class="tag">paused</span> wait for you to play or step.</li>
+          <li>
+            The 3D worlds use experimental APIs, and the larger ones need a capable graphics card.
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="two-d">
+        <h2 id="two-d">2D engine</h2>
+        <div class="cards">
+          <article class="card">
+            <h3><a href="examples/lab/">Engine lab</a></h3>
+            <p>
+              Five experiments on the public SDK: support, coherent fragments, burning supports,
+              phase changes and custom materials. Inspect cells and bonds, edit the scene, switch
+              backends, and export or restore a session.
+            </p>
+            <p class="tags"><span class="tag">2D</span><span class="tag">CPU or WebGPU</span></p>
+          </article>
+          <article class="card">
+            <h3><a href="web/">Burning bridge showcase</a></h3>
+            <p>
+              Six scenes with material shading, heat glow, fire and lava lighting, smoke and steam,
+              water reflections and heat distortion, all drawn from the same deterministic field.
+            </p>
+            <p class="more">
+              Jump to
+              <a href="web/?scene=haze&amp;paused">smoke and steam</a>,
+              <a href="web/?scene=heat&amp;paused">heat shimmer</a> or
+              <a href="web/?scene=pressure&amp;paused">dams and pressure vessels</a>.
+            </p>
+            <p class="tags">
+              <span class="tag">2D</span><span class="tag">WebGPU</span
+              ><span class="tag">paused</span>
+            </p>
+          </article>
+          <article class="card">
+            <h3><a href="examples/spillway/">Spillway</a></h3>
+            <p>
+              A playable reference game. Cross the terrain, cut a barricade, heat the bridge support
+              and swim through the aftermath. Every input is recorded and replays exactly.
+            </p>
+            <p class="tags"><span class="tag">2D</span><span class="tag">WebGPU</span></p>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="three-d">
+        <h2 id="three-d">3D worlds <span class="status">experimental</span></h2>
+        <div class="cards">
+          <article class="card">
+            <h3><a href="examples/volume-lab/">Volume Lab</a></h3>
+            <p>
+              Orbit a 32³ world, inspect cutaways, edit cells and energy, and export exact
+              snapshots. Physics runs in a worker on the CPU.
+            </p>
+            <p class="tags"><span class="tag">3D</span><span class="tag">WebGPU viewer</span></p>
+          </article>
+          <article class="card">
+            <h3><a href="examples/first-person/">The Crossing</a></h3>
+            <p>
+              Carve a dam, release the water, freeze a crossing and walk across it. The CPU rules
+              run exactly on the GPU, with complete save and replay.
+            </p>
+            <p class="tags"><span class="tag">3D</span><span class="tag">WebGPU</span></p>
+          </article>
+          <article class="card">
+            <h3><a href="examples/cavern/">The Cavern</a></h3>
+            <p>
+              A seeded 64³ world in eight chunks, with exact global physics and a first-person water
+              and freezing challenge.
+            </p>
+            <p class="tags"><span class="tag">3D</span><span class="tag">WebGPU</span></p>
+          </article>
+          <article class="card">
+            <h3><a href="examples/active-cavern/">The Living Cavern</a></h3>
+            <p>
+              A 128³ world that simulates only its active tiles, with a live activity inspector.
+            </p>
+            <p class="more">
+              <a href="examples/active-cavern/?gameplay=gpu">GPU gameplay mode</a> keeps movement
+              and collision on the graphics card.
+            </p>
+            <p class="tags">
+              <span class="tag">3D</span><span class="tag">WebGPU</span
+              ><span class="tag">demanding</span>
+            </p>
+          </article>
+          <article class="card">
+            <h3><a href="examples/structural-cavern/">The Structural Cavern</a></h3>
+            <p>
+              Bonds, load transfer, thermal weakening and collapse over lava. It starts at 32³; 64³
+              and 128³ are explicit choices.
+            </p>
+            <p class="tags">
+              <span class="tag">3D</span><span class="tag">WebGPU</span
+              ><span class="tag">paused</span>
+            </p>
+          </article>
+          <article class="card">
+            <h3><a href="dist/reactive-chamber/">Reactive sandbox</a></h3>
+            <p>
+              Six fixed 16³ scenarios: a burning support, melt, flow and freeze, a distant collapse,
+              and three thermal-pack scenes. Physics runs in a worker; press Start chamber to begin.
+            </p>
+            <p class="tags"><span class="tag">3D</span><span class="tag">WebGPU</span></p>
+          </article>
+          <article class="card">
+            <h3><a href="dist/multiphysics-builder/">Multiphysics builder</a></h3>
+            <p>
+              Build small coupled scenes from rigid parcels, liquids, gases, bonds and batteries.
+              Preview two ticks, compare the energy ledger, then commit or cancel.
+            </p>
+            <p class="tags"><span class="tag">3D</span><span class="tag">WebGPU</span></p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        These pages are development references built from the main branch. They are not qualified
+        releases; the
+        <a href="https://github.com/nxrobins/state-space/blob/main/docs/VALIDATION_STATUS.md"
+          >validation status</a
+        >
+        says what has been measured and where.
+      </p>
+      <p>
+        <a href="https://github.com/nxrobins/state-space#readme">Read me</a> ·
+        <a href="https://github.com/nxrobins/state-space/blob/main/docs/SDK.md">SDK guide</a> ·
+        <a href="https://github.com/nxrobins/state-space/blob/main/docs/CAPABILITIES.md"
+          >Capabilities and limits</a
+        >
+        · <a href="https://github.com/nxrobins/state-space/blob/main/LICENSE">MIT license</a>
+      </p>
+    </footer>
+
+    <script>
+      if (!navigator.gpu) document.getElementById('no-webgpu').hidden = false;
+    </script>
+  </body>
+</html>
