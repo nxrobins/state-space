@@ -5,6 +5,10 @@ import { platform, cpus } from 'node:os';
 import { createScene, SCENES } from '../examples/volume-lab/scenes.js';
 import { createStateSpaceField3D, MATERIALS_3D } from 'state-space-engine/experimental/3d';
 import { sources, hash, save } from './volume_evidence.mjs';
+import { assertRuntimeNotBlocked } from './verification_guard.mjs';
+
+// These runs are unsupervised; an active incident hold stops them before any work.
+assertRuntimeNotBlocked();
 
 const { values } = parseArgs({
   options: {
