@@ -3,7 +3,8 @@
 Start with the [architecture map](docs/ARCHITECTURE.md) for file placement and the
 [current support matrix](docs/VALIDATION_STATUS.md) for validation boundaries.
 The [SDK guide](docs/SDK.md) is for application consumers; this page is for changes
-to the repository itself.
+to the repository itself. Coding agents start with [AGENTS.md](AGENTS.md), which
+states the rules that are not visible in the code.
 
 ## Set up and check a change
 
