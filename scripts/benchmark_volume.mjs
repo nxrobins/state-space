@@ -4,6 +4,10 @@ import { performance } from 'node:perf_hooks';
 import { platform, cpus } from 'node:os';
 import { SCENES, createScene } from '../examples/volume-lab/scenes.js';
 import { sources, save, hash, distribution } from './volume_evidence.mjs';
+import { assertRuntimeNotBlocked } from './verification_guard.mjs';
+
+// These runs are unsupervised; an active incident hold stops them before any work.
+assertRuntimeNotBlocked();
 const { values } = parseArgs({
   options: { report: { type: 'string', default: 'docs/checkpoints/volume-m1/cpu.json' } },
 });

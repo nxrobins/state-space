@@ -108,6 +108,16 @@ date of the last change in the section.
 
 ### Fixed
 
+- The incident hold now stops the unsupervised benchmark and direct
+  verification entry points (`scripts.benchmark_gpu`, `benchmark_frames`,
+  `benchmark_browser`, `benchmark_spillway`, `verify_browser`,
+  `verify_volume_browser`, and `npm run verify:3d`, `benchmark:cpu`,
+  `benchmark:3d`) before they parse arguments or start work. M4 staged
+  recovery refuses a hard hold before writing anything and records its
+  permit atomically, as M5 recovery does. `python -m engine.verify` prints a
+  heartbeat while a captured step runs, so its supervisor no longer stops it
+  after 40 silent seconds, and it saves the report after every step, marked
+  incomplete until the gate finishes (#97).
 - Multiphysics: a solid counts toward a liquid row's resolved support only while
   touching it, so an approaching plate no longer switches on the zero-divergence
   constraint at a distance; parcel reads, inventories and the active-set factor

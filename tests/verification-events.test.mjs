@@ -3,6 +3,29 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { installVerificationJournal } from '../examples/structural-cavern/verification-events.js';
 import { Connection, validateRequest, withDeadline } from '../scripts/verification_browser.mjs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { assertRuntimeNotBlocked } from '../scripts/verification_guard.mjs';
+
+test('the shared hold check blocks hard and damaged holds and allows a missing or released one', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'state-space-hold-'));
+  try {
+    const hold = (text) => {
+      const path = join(directory, 'safety-hold.json');
+      if (text !== undefined) writeFileSync(path, text);
+      return pathToFileURL(path);
+    };
+    assert.doesNotThrow(() => assertRuntimeNotBlocked(hold()));
+    for (const blocked of ['{"blockRecovery":true}', '{"blockRecovery":"yes"}', '[]', 'null', '{'])
+      assert.throws(() => assertRuntimeNotBlocked(hold(blocked)), /remains blocked/, blocked);
+    for (const allowed of ['{"blockRecovery":false}', '{"status":"reviewed"}'])
+      assert.doesNotThrow(() => assertRuntimeNotBlocked(hold(allowed)), allowed);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 test('journal waits for durable acknowledgement and sends one request at a time', async () => {
   const savedFetch = globalThis.fetch,

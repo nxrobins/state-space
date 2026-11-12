@@ -27,7 +27,8 @@ from engine.schema import VoxelState, pack_voxel
 from engine.state import seed_state
 from engine.structure import ANCHOR
 from engine.structure_bulk import seed_structure_bulk
-from engine.verify import source_hashes
+from engine.verify import ROOT, source_hashes
+from scripts.verification_guard import assert_runtime_not_blocked
 from eval.benchmark import benchmark_engine, distribution, state_digest
 from eval.scenes import KINDS, workload
 
@@ -81,6 +82,8 @@ def public_steps(engine, scene, ticks, warmup):
 
 
 def main():
+    # Unsupervised workload: an active incident hold stops it before argument parsing or any work.
+    assert_runtime_not_blocked(ROOT)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--baseline-compositor", type=Path)

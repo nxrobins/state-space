@@ -59,6 +59,12 @@ reporter prints nothing per test when stdout is a pipe, and the supervisor stops
 child that is silent for 40 seconds. The CPU suites that `npm test` selects already
 use that reporter; the native macOS stages keep their own fixed commands.
 
+A host that records an incident keeps an ignored `dist/verification/safety-hold.json`.
+While its `blockRecovery` is anything but `false`, `npm test`, the supervisor, the
+benchmarks and the direct verifiers refuse to start their workloads (`npm test` still
+builds the SDK first); type checks, lint and formatting still run. The hold belongs to that checkout's `dist/`: another worktree on the same
+host does not see it.
+
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
 all public npm entries. Rebuild affected examples with `npm run build:reactive-chamber`
