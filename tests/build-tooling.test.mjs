@@ -28,6 +28,7 @@ import { lintProject, lintSource } from '../engine/lint_ts.mjs';
 import { STREAMING_REPORTER, VITEST, selectChecks } from '../scripts/verify_checks.mjs';
 import { CHECKOUT, pythonInterpreter } from '../engine/test-support/python-interpreter.mjs';
 import { DEMOS, assemble, collect, references } from '../scripts/build_site.mjs';
+import { assertRuntimeNotBlocked } from '../scripts/verification_guard.mjs';
 
 test('SDK entries preserve existing build targets and reject unknown entries', () => {
   for (const entry of SDK_ENTRIES) {
@@ -374,6 +375,7 @@ test('site assembly publishes only referenced, allowed files and reports every b
         '<a href="dist/reactive-chamber/?scene=1">Chamber</a>',
     );
     write('site/site.css', 'body {}');
+    write('site/dist/verification/safety-hold.json', '{"blockRecovery":false}');
     write(
       'examples/demo/index.html',
       '<a href="../../">Home</a><a href="./README.md">Guide</a>' +
@@ -402,6 +404,7 @@ test('site assembly publishes only referenced, allowed files and reports every b
       'dist/reactive-chamber/worker.js',
       'dist/sdk/chunk.js',
       'dist/sdk/state-space.js',
+      'dist/verification/safety-hold.json',
       'examples/demo/README.md',
       'examples/demo/app.js',
       'examples/demo/index.html',
@@ -411,10 +414,14 @@ test('site assembly publishes only referenced, allowed files and reports every b
       'web/pump.js',
     ]);
     const output = join(root, 'out');
-    assert.equal(assemble(root, output, demos).files, 12);
+    assert.equal(assemble(root, output, demos).files, 13);
     assert(existsSync(join(output, 'index.html')));
     assert(existsSync(join(output, 'examples/demo/worker.js')));
-    assert(!existsSync(join(output, 'dist/verification')));
+    // The site's own hold status is published; the checkout's hold never is.
+    assert.equal(
+      readFileSync(join(output, 'dist/verification/safety-hold.json'), 'utf8'),
+      '{"blockRecovery":false}',
+    );
     assert(!existsSync(join(output, 'examples/demo/unused.test.mjs')));
     assert.throws(() => assemble(root, output, demos), /not empty/);
 
@@ -423,7 +430,7 @@ test('site assembly publishes only referenced, allowed files and reports every b
       'examples/demo/app.js',
       "import '/web/pump.js'; import 'state-space-engine'; import '../../engine/private.js';" +
         " import './missing.js'; import '../../../outside.js';" +
-        " new URL('../../dist/verification/safety-hold.json', import.meta.url);",
+        " new URL('../../dist/verification/receipt.json', import.meta.url);",
     );
     assert.throws(
       () => collect(root, demos),
@@ -434,7 +441,7 @@ test('site assembly publishes only referenced, allowed files and reports every b
           /engine\/private\.js \(referenced by examples\/demo\/app\.js\) is outside the published trees/,
           /examples\/demo\/missing\.js \(referenced by examples\/demo\/app\.js\) does not exist/,
           /outside\.js \(in examples\/demo\/app\.js\) leaves the site root/,
-          /dist\/verification\/safety-hold\.json \(referenced by examples\/demo\/app\.js\) is outside the published trees/,
+          /dist\/verification\/receipt\.json \(referenced by examples\/demo\/app\.js\) is outside the published trees/,
           /dist\/reactive-chamber\/index\.html is not linked from the landing page/,
         ])
           assert.match(error.message, expected);
@@ -450,4 +457,11 @@ test('the landing page links every published demo', () => {
   const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
   for (const { entry } of DEMOS)
     assert(html.includes(`href="${entry.replace(/index\.html$/, '')}"`), entry);
+});
+
+test('the hosted site serves a released hold status of its own', () => {
+  const hold = new URL('../site/dist/verification/safety-hold.json', import.meta.url);
+  assert.equal(JSON.parse(readFileSync(hold, 'utf8')).blockRecovery, false);
+  // The bundled demos apply the same rule as the shared check before they start.
+  assert.doesNotThrow(() => assertRuntimeNotBlocked(hold));
 });

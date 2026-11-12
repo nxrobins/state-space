@@ -1,0 +1,5 @@
+{
+  "status": "none",
+  "blockRecovery": false,
+  "scope": "Hosted demo site. A runtime hold belongs to one development checkout; none applies to these static pages."
+}

@@ -120,6 +120,12 @@ date of the last change in the section.
 
 ### Fixed
 
+- The hosted demo site serves a released hold status of its own at
+  `dist/verification/safety-hold.json`. The reactive sandbox and the
+  multiphysics builder request that file at startup and stop unless the answer
+  is a 404 or a released hold, and GitHub Pages sometimes answers a missing
+  file with 503. A checkout's own `dist/verification` is still never
+  published (#99).
 - The incident hold now stops the unsupervised benchmark and direct
   verification entry points (`scripts.benchmark_gpu`, `benchmark_frames`,
   `benchmark_browser`, `benchmark_spillway`, `verify_browser`,
