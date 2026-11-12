@@ -1,0 +1,133 @@
+{
+  "schema": "collision-cpu-retry-status-v1",
+  "date": "2026-11-08",
+  "status": "cpu-reference-complete-comparator-pending-quiet-host",
+  "gpuAccess": {
+    "device": "NVIDIA GeForce RTX 4090",
+    "driver": "610.88",
+    "utilizationPercent": 2,
+    "temperatureC": 39,
+    "freeMemoryMiB": 10553,
+    "method": "One read-only nvidia-smi query; no GPU context, shader, browser, or simulation",
+    "additionalAccessRequired": false
+  },
+  "completedRetry": {
+    "packet": "dist/verification/collision-cpu/0e2e8816b33c477d90ef6b047f71e665",
+    "reviewSha256": "d56534066c0663d98661a4a5b35bdc20f1c838fb4491095ca22a8c22c78d00dc",
+    "containment": {
+      "startupClose": true,
+      "cancellation": true,
+      "supervisorLoss": true,
+      "cancellationFaultToEmptyJobSeconds": 2.15136300004087,
+      "supervisorLossFaultToEmptyJobSeconds": 2.998421899974346,
+      "supervisorLossWatchdogReason": 1,
+      "supervisorLossLeafExit": 125,
+      "supervisorLossWatchdogExit": 125
+    },
+    "worldReference": {
+      "fixture": "LEG-WORKER",
+      "status": "completed",
+      "horizon": 2,
+      "continuation": 1,
+      "budgets": [
+        1,
+        7,
+        256
+      ],
+      "exactSha256": "14d562172192afc514d16b1728e414bed18683fac3901f9d47f0a17d42a5d029",
+      "losslessAndJsonRestart": true,
+      "cancellationIsolationAndTokenChecks": true
+    },
+    "stateSpaceRigid": {
+      "fixtures": 7,
+      "timesteps": [
+        0.016,
+        0.008,
+        0.002
+      ],
+      "completedRows": 21,
+      "allWithinBackendReplayPassed": true,
+      "analyticalOrBarrierDiagnosticsPassed": 12,
+      "observationalRows": 9
+    },
+    "mujoco": {
+      "completedRows": 0,
+      "failedStage": "mj-free-drift",
+      "phase": "dependency import",
+      "reportSha256": "63ac82cc7e23494dd07571ef54f8d8fcf3ab31cb2dbf78dae8f91df9fbb54046",
+      "cleanupConfirmed": true
+    },
+    "comparison": {
+      "path": "dist/verification/collision-cpu/0e2e8816b33c477d90ef6b047f71e665/comparison.json",
+      "sha256": "6919dbeccd8e0cc1fea5ce6fc1bcde0cbad4eaab1da4ef0d29bf4047caa0ba5c",
+      "status": "incomplete",
+      "rows": 21,
+      "crossEngineComparisons": 0
+    },
+    "preservationAtCompletion": {
+      "holdUnchanged": true,
+      "boundSourcesUnchanged": true,
+      "protectedWorktreeUnchanged": true,
+      "originalFailedGpuReportUnchanged": true,
+      "namedJobsAbsent": true,
+      "executionLockPresent": false
+    }
+  },
+  "importScopeFix": {
+    "evidence": "dist/verification/collision-import-review-20261108",
+    "reproduction": "CPython platform.system() on Windows hits socket.gethostname and then subprocess.Popen for cmd /c ver under the original audit boundary, without importing any physics.",
+    "implementation": "Read fixed platform metadata inside the claimed CPU Job before dependency loading; pin platform.py and cmd.exe, fix ComSpec, then keep every socket event and subprocess denied during MuJoCo import/use.",
+    "additionalDiagnostics": "Leaf failures now retain the exact denied audit event and traceback.",
+    "priorHelpersPreserved": "All four changed helper/test source backups verified against the completed retry review's hashes.",
+    "staticPythonTestsPassed": 12,
+    "pythonLint": "passed",
+    "fixtureOrder": "Each fixture runs State Space then MuJoCo after all containment probes and full world replay; workloads, replay checks, thresholds and samples unchanged."
+  },
+  "freshPacket": {
+    "path": "dist/verification/collision-cpu/18d820bc310b4af38651ec54760ec0fd",
+    "reviewSha256": "cb035e9d91c33c54f80ed2ee379e60e0bac85c0e0406d56838b2049d8eecefc9",
+    "status": "prepared-no-workload-launched",
+    "quietRefusals": [
+      {
+        "path": "quiet-startup-close-refused-4daa5ee5c46744f8bcd7525ef4923ec0.json",
+        "sha256": "dc8d14d9de0406ce3ba0b1c2a408f206334310dfb94eeee352427715c675d1a8",
+        "samples": 14,
+        "peakCpuPercent": 32.11538461538461
+      },
+      {
+        "path": "quiet-startup-close-refused-b88869f12fba42af8a548c1ece151f58.json",
+        "sha256": "fc14f51aa6197608e86d61c5adcc92025a001d4c9e0802c0b719f94058e46dd1",
+        "samples": 22,
+        "peakCpuPercent": 36.82692307692308
+      },
+      {
+        "path": "quiet-startup-close-refused-d0add233b7c84b05a26e8d0bdde6be07.json",
+        "sha256": "ac20fc39b12703500cefa49f9c4b52d489d3e231bf19cf328065fbdc4282d39c",
+        "samples": 1,
+        "peakCpuPercent": 47.16796875
+      }
+    ],
+    "attemptsStarted": 0,
+    "executionLockPresent": false,
+    "nextCase": "startup-close"
+  },
+  "hold": {
+    "blockRecovery": true,
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "unchanged": true
+  },
+  "acceptance": {
+    "runtime": false,
+    "performance": false,
+    "worker": false,
+    "gpu": false,
+    "r1": false
+  },
+  "pending": [
+    "Quiet CPU window: 30 consecutive seconds at or below 30 percent, with at least 8 GiB free RAM",
+    "Rerun the complete fresh source-bound containment and benchmark sequence; do not reuse older results to skip prerequisites",
+    "Real MuJoCo import/API/replay validation and 42 comparator rows",
+    "Cross-engine/refinement interpretation; no timing or physics equivalence claim yet"
+  ],
+  "hostLoadAttribution": "A later read-only process sample did not identify the cause of the earlier spikes. No unrelated application was stopped."
+}

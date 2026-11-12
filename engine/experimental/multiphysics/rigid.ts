@@ -139,8 +139,8 @@ function invertTensor(matrix: Matrix3): Matrix3 {
   }
   return result as unknown as Matrix3;
 }
-function readParcel<T extends RigidParcel3D>(raw: T): T {
-  const copy = copyPortableValue(raw as unknown as PortableValue) as unknown as T;
+/** Private: the caller already owns portable data; this does not admit raw input. */
+function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
   const base = Object.fromEntries(
     [
       'id',
@@ -164,18 +164,28 @@ function readParcel<T extends RigidParcel3D>(raw: T): T {
   if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
   return copy;
 }
+/** Public assembly readers keep their ownership, bounds and admission boundary. */
+function admitAssembly(raw: readonly RigidParcel3D[]): RigidParcel3D[] {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
+    throw Error('Rigid assemblies require 1..256 parcels.');
+  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
+  const parcels = owned.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
+  if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
+    throw Error('Duplicate rigid parcel ID.');
+  return parcels;
+}
 export function rigidAssemblyMassProperties3D(raw: readonly RigidParcel3D[]): {
   mass: number;
   center: Vec3;
   inertia: Matrix3;
   inverseInertia: Matrix3;
 } {
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
-    throw Error('Rigid assemblies require 1..256 parcels.');
-  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
-  const parcels = owned.map(readParcel).sort((a, b) => lexical(a.id, b.id));
-  if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
-    throw Error('Duplicate rigid parcel ID.');
+  return assemblyMassPropertiesOfAdmitted(admitAssembly(raw));
+}
+/** Private: canonical, sorted, unique parcels owned and admitted by this module. */
+function assemblyMassPropertiesOfAdmitted(
+  parcels: readonly RigidParcel3D[],
+): ReturnType<typeof rigidAssemblyMassProperties3D> {
   const mass = finite(parcels.reduce((sum, p) => sum + p.mass, 0));
   const center = parcels.reduce<Vec3>(
     (sum, p) => addVec3(sum, scaleVec3(p.center, p.mass / mass)),
@@ -212,10 +222,14 @@ export function validateRigidAssemblyMotion3D(
   angularMomentum: Vec3;
   angularVelocity: Vec3;
 } {
-  const props = rigidAssemblyMassProperties3D(raw);
-  const members = (copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[])
-    .map(readParcel)
-    .sort((a, b) => lexical(a.id, b.id));
+  return assemblyMotionOfAdmitted(admitAssembly(raw), anchored);
+}
+/** Keeps all motion/anchor checks and arithmetic order; only repeated admission is omitted. */
+function assemblyMotionOfAdmitted(
+  members: readonly RigidParcel3D[],
+  anchored: boolean,
+): ReturnType<typeof validateRigidAssemblyMotion3D> {
+  const props = assemblyMassPropertiesOfAdmitted(members);
   const velocity = members.reduce<Vec3>(
     (v, p) => addVec3(v, scaleVec3(p.velocity, p.mass / props.mass)),
     ZERO,
@@ -279,6 +293,9 @@ type Contact<T extends RigidParcel3D> = {
   normal: Vec3;
   tangent1: Vec3;
   tangent2: Vec3;
+  normalDenominator: number | undefined;
+  offsetA: Vec3 | undefined;
+  offsetB: Vec3 | undefined;
   normalImpulse: number;
   tangentImpulse: Vec3;
   target: number;
@@ -903,8 +920,8 @@ export function rigidContactPatchArea3D(a: RigidParcel3D, b: RigidParcel3D): num
   return finite(area);
 }
 function effective<T extends RigidParcel3D>(contact: Contact<T>, direction: Vec3): Vec3 {
-  const ra = subtractVec3(contact.point, contact.a.center),
-    rb = subtractVec3(contact.point, contact.b.center);
+  const ra = (contact.offsetA ??= subtractVec3(contact.point, contact.a.center)),
+    rb = (contact.offsetB ??= subtractVec3(contact.point, contact.b.center));
   return addVec3(
     scaleVec3(direction, inverseMass(contact.a) + inverseMass(contact.b)),
     addVec3(
@@ -931,7 +948,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   )
     throw Error('Rigid candidate exceeds bounded input limits.');
   const ownedParcels = copyPortableValue(rawParcels as unknown as PortableValue) as unknown as T[];
-  const parcels = ownedParcels.map(readParcel).sort((a, b) => lexical(a.id, b.id));
+  const parcels = ownedParcels.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
   const byId = new Map(parcels.map((p) => [p.id, p]));
   if (byId.size !== parcels.length) throw Error('Duplicate rigid parcel ID.');
   const bonds = copyPortableValue(rawBonds as unknown as PortableValue) as unknown as RigidBond3D[];
@@ -1063,7 +1080,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       yield progress('assembly');
       const members = ids.map((id) => byId.get(id)!),
         anchored = ids.some((id) => anchors.has(id));
-      const props = validateRigidAssemblyMotion3D(members, anchored);
+      const props = assemblyMotionOfAdmitted(members, anchored);
       const body: Body<T> = {
         ...props,
         members,
@@ -1114,7 +1131,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       row.linear = addVec3(row.linear, impulse);
       row.angular = addVec3(row.angular, crossVec3(point, impulse));
     }
-    function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3): void {
+    function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3, offset?: Vec3): void {
       record(parcel, impulse, point);
       if (body.anchored) {
         boundaryLinearImpulse = addVec3(boundaryLinearImpulse, impulse);
@@ -1123,7 +1140,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         body.velocity = addVec3(body.velocity, scaleVec3(impulse, 1 / body.mass));
         body.angularMomentum = addVec3(
           body.angularMomentum,
-          crossVec3(subtractVec3(point, body.center), impulse),
+          crossVec3(offset ?? subtractVec3(point, body.center), impulse),
         );
       }
     }
@@ -1303,6 +1320,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                   normal: n,
                   tangent1,
                   tangent2,
+                  normalDenominator: undefined,
+                  offsetA: undefined,
+                  offsetB: undefined,
                   normalImpulse: 0,
                   tangentImpulse: ZERO,
                   target: physicalImpact ? -restitution * speed : 0,
@@ -1328,16 +1348,26 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         0,
       );
       const relative = (c: Contact<T>) =>
-        subtractVec3(pointVelocity(c.b, c.point), pointVelocity(c.a, c.point));
+        subtractVec3(
+          addVec3(
+            c.b.velocity,
+            crossVec3(omega(c.b), (c.offsetB ??= subtractVec3(c.point, c.b.center))),
+          ),
+          addVec3(
+            c.a.velocity,
+            crossVec3(omega(c.a), (c.offsetA ??= subtractVec3(c.point, c.a.center))),
+          ),
+        );
       const impulse = (c: Contact<T>, j: Vec3) => {
-        apply(c.a, c.pa, scaleVec3(j, -1), c.point);
-        apply(c.b, c.pb, j, c.point);
+        apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
+        apply(c.b, c.pb, j, c.point, c.offsetB);
       };
       for (let iteration = 0; iteration < options.solverIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
+          // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
           const velocity = relative(c),
-            denominator = dotVec3(c.normal, effective(c, c.normal));
+            denominator = (c.normalDenominator ??= dotVec3(c.normal, effective(c, c.normal)));
           const next = Math.max(
             0,
             c.normalImpulse + (c.target - dotVec3(velocity, c.normal)) / denominator,
@@ -1641,7 +1671,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       (sum, row) => sum + row.impact + row.friction,
       0,
     );
-    for (const parcel of parcels) readParcel(parcel);
+    for (const parcel of parcels) validateOwnedParcel(parcel);
     return {
       parcels,
       loadDemands,

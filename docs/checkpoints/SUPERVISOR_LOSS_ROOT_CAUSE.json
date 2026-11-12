@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "recordedLocalDate": "2026-10-28",
+  "status": "observer-repaired-isolated-tests-passed-native-loss-unaccepted",
+  "nativeBrowserAttemptsThisInvestigation": 0,
+  "supervisorLossAccepted": false,
+  "historicalFailure": {
+    "legacySources": {
+      "scripts/verification_scope.py": "81c99776e6ec4939b5aa4a47f1ed933388bdcff8ab42d2a70da685b6d7e030fb",
+      "scripts/verify_browser_containment.py": "12630d99b03636d9a5ebbaff1cd9588ab4c815970a9c95c4d95e54c11e6b19d0",
+      "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f"
+    },
+    "failedReport": "D:\\state-space\\dist\\verification\\browser-containment\\d40b35fb88374a749ef87c71add94948\\supervisor-loss\\report.json",
+    "failedReportSha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "faultReadyAt": 1793204132.7611766,
+    "reportFinishedAt": 1793204135.7615566,
+    "secondsFromFaultReadyToReportEnd": 3.000380039215088,
+    "interpretation": "Timing is consistent with the 3-second heartbeat expiry; original raw counters and watchdog outcome were not captured."
+  },
+  "checks": {
+    "regressionReproduction": {
+      "packet": "dist/verification/browser-containment/7090f9f714bf484d9cad5aea0cf9cc8d",
+      "passed": false,
+      "testsRun": 41,
+      "failures": 2,
+      "errors": 4,
+      "skipped": 0,
+      "observerSeconds": 2.9554078578948975,
+      "jobCpuSeconds": 1.0625,
+      "peakJobMemoryMiB": 18.84375,
+      "quietSamples": 30,
+      "peakQuietCpuPercent": 20.64393939393939,
+      "minimumQuietFreeMemoryMiB": 99825.234375,
+      "limits": {
+        "cpuPercent": 6,
+        "memoryMiB": 4096,
+        "deadlineSeconds": 30,
+        "quietSeconds": 30,
+        "quietCpuPercent": 30,
+        "freeMemoryMiB": 8192
+      },
+      "reportSha256": "6b37479e4580f2a0ddb6332740c24b29a295b6643b4a6ec59999401e8ced9f7f",
+      "supervisorReportSha256": "0f6acc4ff6813be757b9851ecef2e58ebb1290ed333a44b4d71f6b85e053c9ce",
+      "leafReportSha256": "db37ba3d0ba752904426ae46a2e7860fa6f7620bb1a55e1f58f7dff8838ad13f",
+      "reviewSha256": "be33f7e31c80a78eee73993604c4c50b3afe5b0a217dd934da4409db0fd1d3e9"
+    },
+    "repairedObserver": {
+      "packet": "dist/verification/browser-containment/a7f3587386354d078727537d58af16f9",
+      "passed": true,
+      "testsRun": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "observerSeconds": 2.8775343894958496,
+      "jobCpuSeconds": 1.125,
+      "peakJobMemoryMiB": 18.79296875,
+      "quietSamples": 30,
+      "peakQuietCpuPercent": 9.564393939393945,
+      "minimumQuietFreeMemoryMiB": 99865.09375,
+      "limits": {
+        "cpuPercent": 6,
+        "memoryMiB": 4096,
+        "deadlineSeconds": 30,
+        "quietSeconds": 30,
+        "quietCpuPercent": 30,
+        "freeMemoryMiB": 8192
+      },
+      "reportSha256": "3a341f87e7c75400ea9a1a444cabb696e815a7a2b243732ec0cccbbe5300efc4",
+      "supervisorReportSha256": "05f8d6be6e975706e3d87b6fe71e8cec48ad6149cb663fb9aa5f716448013cbe",
+      "leafReportSha256": "d49efec0f7939dbef275f7b78408002fda2753bdc5de4dcb530ffa4379266d74",
+      "reviewSha256": "cb07481cb158c026cfc93431e98fcdb988fa68bdd6072f16e0aec08811bbc56d"
+    }
+  },
+  "sources": {
+    "scripts/verification_scope.py": "a70e91052487b87bbef99d04a0e43c6ebfc8e7e82ca08b35275e901469096c7f",
+    "scripts/verification_restricted_browser.py": "7f05eb9012f87372f5ebd43608e9852f8903d7dad867226a7fce362daef697e6",
+    "scripts/verify_browser_containment.py": "b0bf6c8a79a603f3d57e22450ed6b6b40b4073cd5f2bad8e16821452260dbe76",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_verification_scope.py": "fda047a9d2880f030708a58a458f1ca9fcef490ba2bc1bd63aa8065b76596627",
+    "tests/test_restricted_browser.py": "1254de174433c2596691d7d5292856238cfe34935bb5581f4ca10d73bc5935ae",
+    "tests/test_verification_observer.py": "d4deeae3a412d71d050d69633150b5f3a4b1f6f7466d143f2d291f6109f5597c"
+  },
+  "preservation": {
+    "blockRecovery": true,
+    "holdSha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "noRecoveryPermit": true,
+    "noActiveExecutionLock": true,
+    "issuedUnitCapabilitiesConsumed": true,
+    "historicalFailureUnchanged": true,
+    "protectedWorktree": "D:\\state-space-cpu-performance",
+    "protectedHead": "c8a2b2f0aad9c40ad8e546fc7a3e829c1a80c37c",
+    "protectedBranch": "codex/native-cpu-performance",
+    "protectedFiles": 2227,
+    "protectedWorktreeUnchanged": true
+  },
+  "limitations": [
+    "Original raw process-list counters and watchdog result were not recorded.",
+    "Mock regressions establish observer failure handling, not native cancellation success.",
+    "The original GPU supervisor-loss case remains failed and was not rerun."
+  ]
+}

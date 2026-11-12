@@ -1,0 +1,817 @@
+{
+  "schema": "collision-reference-results-v1",
+  "dateLocal": "2026-11-08",
+  "timezone": "America/Los_Angeles",
+  "finalizedAtUtc": "2026-11-09T00:53:03.488Z",
+  "status": "diagnostic-complete",
+  "sourceCommit": "0af27b6c928cc3c5fbda7f66536d8b2ccb0c0cdb",
+  "review": {
+    "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/review.json",
+    "sha256": "0d26814b0055c1d2795bdd01adfbc02df8a0bdd0e1aab2fcf514e810735af4c6"
+  },
+  "benchmark": {
+    "path": "dist/verification/collision-reference-20261108-cpu-v2/packet.json",
+    "sha256": "857e7e13317334c15f70a7923975d245c56601e5c27339bbaaa6d5ba459a15df"
+  },
+  "bundleSha256": "1ad2665bec3d972673ddcddf0b505f25cff9ee47e7938d30a57b687777d8a196",
+  "sourceFiles": [
+    {
+      "path": "engine/experimental/multiphysics/battery.ts",
+      "sha256": "dd7753dcd759a518f992c5e9ea02bacc8abfa6386b35ad25ede14434aa21de4e"
+    },
+    {
+      "path": "engine/experimental/multiphysics/circuit.ts",
+      "sha256": "05f35f023343b14ae7cf129bd4c4687bf9fcd5d37ae614e55b34c55caf1adc3c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/collision.ts",
+      "sha256": "30ba7c15e740c081b89eac2381c9de103f25296fcf8670f37a24185dbf7796ee"
+    },
+    {
+      "path": "engine/experimental/multiphysics/conservation.ts",
+      "sha256": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65"
+    },
+    {
+      "path": "engine/experimental/multiphysics/coupling-energy.ts",
+      "sha256": "9ab9f6ba9819f4f41854092005440fabad419d0e69ea92e907ac9ca012de67be"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluid-coupling.ts",
+      "sha256": "029ffee57d6ae9325f6824c00f14cc6b799170738f081fd7d248c8f0f51c5c29"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluids.ts",
+      "sha256": "f170c63631d92f3dfa3e3888322af6e2114c1821913b21cf8ce08a207603499d"
+    },
+    {
+      "path": "engine/experimental/multiphysics/math.ts",
+      "sha256": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/model.ts",
+      "sha256": "5c917e9279320663aeeea6f73a2ca538430692f504825175c1ca77e357a5316c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/profiles.ts",
+      "sha256": "4bbe59c25860106d03289166f58fb691300a7cf8fa0d6f879f963e27aaf62af9"
+    },
+    {
+      "path": "engine/experimental/multiphysics/rigid.ts",
+      "sha256": "fe61b8c38c505d287513ad4e45fe997e97eac14027593fe358becd2de8df3d64"
+    },
+    {
+      "path": "engine/experimental/multiphysics/thermal.ts",
+      "sha256": "bbab5c74660f8d7bd463358f9ac153c45a4686027d169f8240e32168ecfc88a3"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world-tick.ts",
+      "sha256": "45b00c2960e3fc53abffb298233608bf48b87439ce4dce6cb800ab1f2857ed1f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world.ts",
+      "sha256": "e2c647b028633450f37c93a9fc43a1716044e243e009768ea0e1c10495734417"
+    },
+    {
+      "path": "engine/experimental/reactive/reactive-registry.ts",
+      "sha256": "9cb6059a466fdaf6882d0f07989849510ee2655152bdf2488afe3dd66d37738f"
+    },
+    {
+      "path": "engine/experimental/reactive/thermal-materials.ts",
+      "sha256": "bf87aef4438e8196f660ed0f43e3998222127bc206777abf541126bae16e86ff"
+    },
+    {
+      "path": "engine/generated/materials.ts",
+      "sha256": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead"
+    },
+    {
+      "path": "engine/portable-data.ts",
+      "sha256": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c"
+    },
+    {
+      "path": "engine/registry.ts",
+      "sha256": "bcbea8b2cb90d6b60b4c1780702351d28082d7f380dfc7dbb2e1ced6e73e60ac"
+    },
+    {
+      "path": "engine/validation.ts",
+      "sha256": "313cb8a28bfe619688d3ac9ff1f8b91b4ac4d90eff6dc3063ce7fd0e50c27881"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a5871b70bcfb0060ac22be0c722d2302ac8513fbfa373b1e651662f397e7a93a"
+    },
+    {
+      "path": "scripts/benchmark_collision_reference.mjs",
+      "sha256": "f8abcc67c487b2f6795164322d23a0618366d3e925a8834129a8cb1b3452b60c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-cpu.mjs",
+      "sha256": "db318cd9ff224065b4b8de7c6c2ea7060651008f7601aee6afe8204e63f99752"
+    },
+    {
+      "path": "scripts/collision-reference/engine-entry.ts",
+      "sha256": "028ce0aefa0f54b54b683422afe6f7f3787ad5d0850bd841e9ad343a7a69054b"
+    },
+    {
+      "path": "scripts/collision-reference/exact-state.mjs",
+      "sha256": "995d3ec8bd9d6fdb7eeb00fd42134cd76169c130f4d9645af79ccd392a13dd73"
+    },
+    {
+      "path": "scripts/collision-reference/mujoco_runner.py",
+      "sha256": "9bab5cb33a2502d5a666073ae7394c17a077f59844c616430373e7ad105c889b"
+    },
+    {
+      "path": "scripts/collision-reference/packet.mjs",
+      "sha256": "dbb58fd23d0124d255e8c09707768aade9264aba3451e6418cd02d417037ec15"
+    },
+    {
+      "path": "scripts/collision-reference/protocol.mjs",
+      "sha256": "c5d5db8abb469056cbb9d418ba6cdd08e188a1147f94c2d8d50bf0b0abced1de"
+    },
+    {
+      "path": "scripts/collision-reference/replay.mjs",
+      "sha256": "2e081e472d81fff6ab7e167e63f5be31778c9db9b9beec328268ca1769ae68f1"
+    },
+    {
+      "path": "scripts/collision-reference/report.mjs",
+      "sha256": "1dbcde51643e3c773183225f7c1ea562bfb0e74f0cda0d6331453326e876d0c0"
+    },
+    {
+      "path": "scripts/collision-reference/requirements.txt",
+      "sha256": "babe3f403ce9d9a2f26a08402eaaab0d024f58c8517afdc374bf51e7983a41e9"
+    },
+    {
+      "path": "scripts/collision-reference/scoped-runner.mjs",
+      "sha256": "77118dda732472e4faa2a8051481c375013e9617aa27dd0d313f1e3f52c3fe12"
+    },
+    {
+      "path": "scripts/collision-reference/state-space.mjs",
+      "sha256": "e4b91ce305a019eabe82953c6ecdf77251d8d9ee740300e713f76811e0f3096f"
+    },
+    {
+      "path": "scripts/verification_guard.mjs",
+      "sha256": "ddd8ee5619641a0e0f9419306617c232f47c6a48a0ea2e16fa9a2d371759c517"
+    },
+    {
+      "path": "scripts/verification_guard.py",
+      "sha256": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae"
+    },
+    {
+      "path": "scripts/verification_health.py",
+      "sha256": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b"
+    },
+    {
+      "path": "scripts/verification_journal.py",
+      "sha256": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593"
+    },
+    {
+      "path": "scripts/verification_watchdog.py",
+      "sha256": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f"
+    }
+  ],
+  "scopeSources": {
+    "scripts/collision_cpu_scope.py": "418149002c86d8bb0d62f749815b2d140734daf2a62cc462683bd3b8c1081803",
+    "scripts/verify_collision_cpu.py": "b7a6fdbe23e9213b3cfa49cd6c0ba1e2724a26b14325cf89f52a304bdfa64b27",
+    "scripts/collision_cpu_leaf.py": "22483ef7d90646ff73e42f4c533b348797b501988aa7f4cfe3ba363b05143efa",
+    "scripts/verification_scope.py": "a70e91052487b87bbef99d04a0e43c6ebfc8e7e82ca08b35275e901469096c7f",
+    "scripts/verify_browser_containment.py": "b0bf6c8a79a603f3d57e22450ed6b6b40b4073cd5f2bad8e16821452260dbe76",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_collision_cpu_scope.py": "b4c4e9068b26dec511a2e139dfcb79341044f1bf1aabc24ee6b5948c40a61dd5"
+  },
+  "evidence": {
+    "comparison": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/comparison.json",
+      "sha256": "c3472c0695a57016108eacf9c05bc6b5cb168f8f6e87c1d368d85fdb0a4e84ff"
+    },
+    "comparisonTable": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/comparison.md",
+      "sha256": "58b4b445ca7c662d9e8f039361088fe71e31e2b2c738f874c46ae4231c9e56cb"
+    },
+    "summary": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/summary.json",
+      "sha256": "c0db7d4ba0f1d191978e5308ac65001b44ea276bcd3fe7b24804a973b12908ce"
+    },
+    "summaryMethod": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/summarize.mjs",
+      "sha256": "14e67c8df8c62c622095dacf488e43624ec0cfd88e8ae9c64f248a4c308f2c45"
+    },
+    "checkpointMethod": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/finalize-checkpoint.mjs",
+      "sha256": "3ecde3aa53ae8ddf03ceff5e8c594e32346c15a392122a8ca343c6d33afe7727"
+    },
+    "host": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/host.json",
+      "sha256": "a75c740e03163b6f465c0d07353c304bfe6d7d4a31753cf33a13aa4226c06ae4"
+    },
+    "retainedQuietRefusal": {
+      "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-thin-wall-refused-first.json",
+      "sha256": "ede105d84c16c0c23b193468821d686459c535cf4848d4d247a1fbc36a6c1fc0"
+    },
+    "previousIncompleteComparison": {
+      "path": "dist/verification/collision-cpu/18d820bc310b4af38651ec54760ec0fd/comparison.json",
+      "sha256": "cff2f0659a130be287dcc56014ca576bbc585dbb8225994eab0c739019967140"
+    },
+    "previousHelperSnapshots": "dist/verification/collision-quiet-review-20261108"
+  },
+  "host": {
+    "capturedAt": "2026-11-09T00:40:33.528Z",
+    "node": "v22.22.3",
+    "platform": "win32",
+    "release": "10.0.26300",
+    "arch": "x64",
+    "cpuModel": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalCpus": 16,
+    "availableParallelism": 16,
+    "ramBytes": 137259270144
+  },
+  "limits": {
+    "cpuPercent": 6,
+    "memoryMiB": 4096,
+    "deadlineSeconds": 30,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "freeMemoryMiB": 8192
+  },
+  "supervisorDeadlineSeconds": 25,
+  "watchdogDeadlineSeconds": 30,
+  "quietObservationDeadlineSeconds": 90,
+  "preflightChange": "Observe continuously for a full 30-second quiet window within a 90-second deadline; busy/low-memory samples reset it. Missing/stale/invalid telemetry fails closed. Workload limits unchanged.",
+  "counts": {
+    "rows": 63,
+    "timingSamples": 441,
+    "comparisons": 21,
+    "refinements": 42,
+    "passedStages": 18
+  },
+  "replay": {
+    "allWithinBackendChecksPassed": true,
+    "worldExactSha256": "14d562172192afc514d16b1728e414bed18683fac3901f9d47f0a17d42a5d029",
+    "worldFixture": "LEG-WORKER",
+    "previewTicks": 2,
+    "continuationTicks": 1,
+    "budgets": [
+      1,
+      7,
+      256
+    ],
+    "stateSpaceLosslessAndJsonRestart": true,
+    "cancellationIsolationAndTokenChecks": true,
+    "mujocoCompleteIntegrationStateRestartAndRepeat": true,
+    "crossEngineExactEqualityClaimed": false
+  },
+  "groups": [
+    {
+      "backend": "state-space-rigid",
+      "rows": 21,
+      "timingSamples": 147,
+      "diagnostics": {
+        "passed": 12,
+        "failed": 0,
+        "observed": 9
+      },
+      "medianTrajectoryMsRange": [
+        1.4359000000001743,
+        53.94999999999936
+      ],
+      "largestRawTimingMs": 358.9676999999999
+    },
+    {
+      "backend": "mujoco-discrete",
+      "rows": 21,
+      "timingSamples": 147,
+      "diagnostics": {
+        "passed": 6,
+        "failed": 6,
+        "observed": 9
+      },
+      "medianTrajectoryMsRange": [
+        0.0098,
+        0.4885
+      ],
+      "largestRawTimingMs": 0.5118
+    },
+    {
+      "backend": "mujoco-speculative",
+      "rows": 21,
+      "timingSamples": 147,
+      "diagnostics": {
+        "passed": 6,
+        "failed": 6,
+        "observed": 9
+      },
+      "medianTrajectoryMsRange": [
+        0.0106,
+        0.4983999999999999
+      ],
+      "largestRawTimingMs": 0.5196
+    }
+  ],
+  "thinWall": [
+    {
+      "scene": "thin-wall",
+      "backend": "state-space-rigid",
+      "dt": 0.016,
+      "diagnostic": "passed",
+      "maximumSampledIntrusion": 8.673617379884035e-19,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.01500000000107046,
+        1.234719175157632e-38,
+        2.2705617595654172e-38
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": null,
+      "medianTrajectoryMs": 4.910800000000108,
+      "p95TrajectoryMs": 53.91109999999958
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "state-space-rigid",
+      "dt": 0.008,
+      "diagnostic": "passed",
+      "maximumSampledIntrusion": 2.6020852139652106e-18,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.015000000001070457,
+        1.2593068521113643e-38,
+        2.3157767689140532e-38
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": null,
+      "medianTrajectoryMs": 7.462600000000293,
+      "p95TrajectoryMs": 7.8771999999999025
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "state-space-rigid",
+      "dt": 0.002,
+      "diagnostic": "passed",
+      "maximumSampledIntrusion": 1.1275702593849246e-17,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.015000000001070449,
+        6.63506895116414e-39,
+        1.2201425340843013e-38
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": null,
+      "medianTrajectoryMs": 23.585300000000643,
+      "p95TrajectoryMs": 25.41250000000082
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-discrete",
+      "dt": 0.016,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.8750000000000001,
+      "fullyCrossedAtSample": true,
+      "firstFullCrossingTime": 0.016,
+      "finalCenter": [
+        0.8600000000000001,
+        0,
+        0
+      ],
+      "contactsObserved": false,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.0103,
+      "p95TrajectoryMs": 0.0174
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-speculative",
+      "dt": 0.016,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.002373737373688769,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.012626262626311254,
+        3.492127951809285e-12,
+        3.8781766545691975e-12
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.0241,
+      "p95TrajectoryMs": 0.0263
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-discrete",
+      "dt": 0.008,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.8750000000000001,
+      "fullyCrossedAtSample": true,
+      "firstFullCrossingTime": 0.008,
+      "finalCenter": [
+        0.8600000000000001,
+        0,
+        0
+      ],
+      "contactsObserved": false,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.021700000000000004,
+      "p95TrajectoryMs": 0.027499999999999997
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-speculative",
+      "dt": 0.008,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.000757575757580225,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.014865319865318017,
+        1.242131635534726e-12,
+        1.4504816456206482e-12
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.0476,
+      "p95TrajectoryMs": 0.056600000000000004
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-discrete",
+      "dt": 0.002,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.8750000000000002,
+      "fullyCrossedAtSample": true,
+      "firstFullCrossingTime": 0.006,
+      "finalCenter": [
+        0.8600000000000002,
+        0,
+        0
+      ],
+      "contactsObserved": false,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.10399999999999997,
+      "p95TrajectoryMs": 0.13210000000000002
+    },
+    {
+      "scene": "thin-wall",
+      "backend": "mujoco-speculative",
+      "dt": 0.002,
+      "diagnostic": "failed",
+      "maximumSampledIntrusion": 0.0040909090909180155,
+      "fullyCrossedAtSample": false,
+      "firstFullCrossingTime": null,
+      "finalCenter": [
+        -0.03248852157945353,
+        8.094510365897676e-13,
+        -1.20824325009827e-13
+      ],
+      "contactsObserved": true,
+      "behindContactRecords": 0,
+      "medianTrajectoryMs": 0.17709999999999995,
+      "p95TrajectoryMs": 0.18579999999999997
+    }
+  ],
+  "observationScope": "Tick-end geometry derived from retained trajectories; no new physics tolerances or qualification criteria.",
+  "stages": [
+    {
+      "case": "startup-close",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/startup-close/report.json",
+        "sha256": "ce9571106d2342d7ae0dbfaf4967a6afb10a3eb4767ab5a045b34a7cb077b68e"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-startup-close.json",
+        "sha256": "6c0c77808326ca443e8bfd9fc793a6fad9baef1fce4fb3508feb8f7c0efd57fb"
+      },
+      "result": null,
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "stalled-cpu",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/stalled-cpu/report.json",
+        "sha256": "fbfce437bc98de19a3374ff58acd36bf9766c2714b6e53396f46a429ca36766b"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-stalled-cpu.json",
+        "sha256": "b337e9b847f60a61d5538ee4b968d56bced03976d57481751ba60283eb859276"
+      },
+      "result": null,
+      "passed": true,
+      "faultToEmptyJobSeconds": 2.14821569994092
+    },
+    {
+      "case": "supervisor-loss",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/supervisor-loss/report.json",
+        "sha256": "0ab82c26af1a7e6fc7436e3e5710273f7156671740898be76753d8ee1ac2b7e1"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-supervisor-loss.json",
+        "sha256": "c235afbc5825a9ed882edbcabd9dc480022183ec02ee15b0c6f4c2963493a41f"
+      },
+      "result": null,
+      "passed": true,
+      "faultToEmptyJobSeconds": 2.9938650000840425
+    },
+    {
+      "case": "world-reference",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/world-reference/report.json",
+        "sha256": "c531ea84a9d994b17841eff80a9784737f4062f8b0bdacb23a19797a864d5897"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-world-reference.json",
+        "sha256": "039449cf1cfaf9401b59ec76fab586d1ddc586051b7f6cad3236a509f0fa0999"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/world-reference/result.json",
+        "sha256": "6bbf6574aaf211e44f4677299d152bf11bfab6e62fb845686b9adc95fabfe3cb"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-free-drift",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-free-drift/report.json",
+        "sha256": "20f5cd80b4d5d4cfff2615c6acd08cef337605aabe5f8adfb3053f8ccd377707"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-free-drift.json",
+        "sha256": "cabb1bd2ebd8eac54dc85fc17b032416b8fa7e34a23806ae830aa432f691904f"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-free-drift/result.json",
+        "sha256": "3a0d71ca830c4c1ce88ddb5ade3f958b3822933dfafb7e65dbcca2ae73564cda"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-free-drift",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-free-drift/report.json",
+        "sha256": "e4090868ef3daadd85f36333c16692e13f1db97ac903aff19c5c418278949464"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-free-drift.json",
+        "sha256": "7ffc34c9740970c7d723775278de3589cf4452e8729b6933b8cff82372ba53c3"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-free-drift/result.json",
+        "sha256": "4d5cae3d9e7006959adc80fa1aaae690ad9ce88c4bb18889edeb22df93c125b8"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-thin-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-thin-wall/report.json",
+        "sha256": "459c5691dfbe723bd7fab7834813dc81fb95f35b87f9751c3d6ee13f4ffb9e12"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-thin-wall.json",
+        "sha256": "1302e0c12191dfaa5ca797ccb66b8939a7099c31bcde95683333ddbd95dfc064"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-thin-wall/result.json",
+        "sha256": "c028defb0b77c641bf8adb0b256fb1c76398a39e45fff1d91923ded48a7bd040"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-thin-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-thin-wall/report.json",
+        "sha256": "027dc4f3891e17c00b397cdfd6a7c273675d3feac928ea1787cf8e6cc1378193"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-thin-wall.json",
+        "sha256": "075d202bd58f51551a1b2a78d387ba88e977482c45b7d749016bc6d3f70495ca"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-thin-wall/result.json",
+        "sha256": "cbef6e59a3f87c754911a01a6046240e681319a13c9a3231df328099b0161b3e"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-occluded-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-occluded-wall/report.json",
+        "sha256": "dd2e8150d901cf4dbc6c37933b2c05718bf74bad14c6d999818523f5fc6adc96"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-occluded-wall.json",
+        "sha256": "cfaf8b3f3367ef4ea1a6a0383e3d15edfbce218f1e5e20c92fc6ebfce6ec221f"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-occluded-wall/result.json",
+        "sha256": "b3711662a7ecb9bc74be29d1129d8d15636429782de9b322d4355e4ccb5ff76d"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-occluded-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-occluded-wall/report.json",
+        "sha256": "5fe10a1e19f93033e8bc862bca954e0419576bf22188492181a23ce4824586b7"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-occluded-wall.json",
+        "sha256": "03a30484e06a41e06758fb5e62364102f1a7d3a465615856829451f32416ca8e"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-occluded-wall/result.json",
+        "sha256": "1375a58f6c546afc418ba974fe9061382979a70411fef33dcf112c8406a500b8"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-grazing-clearance",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-grazing-clearance/report.json",
+        "sha256": "99ebb14f32911a087ff97057d71eafdfa1be17b9c5e3d9be6f8fa6de3a4bac6e"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-grazing-clearance.json",
+        "sha256": "390071d4660d97cb0550b8b650beada07284caeaa3865588c2eb644048e77486"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-grazing-clearance/result.json",
+        "sha256": "136c54fb9d4901088b7cf3e4e0df2a90385df6f11f005030899943b901f2554e"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-grazing-clearance",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-grazing-clearance/report.json",
+        "sha256": "31804dc936189f4dfa72d5d865964c14bdc19e7eb62cdde48f6b85be44618bdc"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-grazing-clearance.json",
+        "sha256": "a3c84fdde89a95411685b98d01f44755eb8c8dbffdabd54d7eb8f96a8d21d847"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-grazing-clearance/result.json",
+        "sha256": "89c49723aeb84cb0aeaa26a4afbc57f5f379dad67274dfad5f9069474e8ccf59"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-rotating-plate",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-rotating-plate/report.json",
+        "sha256": "2f58af554562dd452eddc16f176f2ce122d5d18d2a1da1418d8e1861510f406c"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-rotating-plate.json",
+        "sha256": "45c5a3ec8c6056ab3f528b8c638ed57780773a358d79c854bc6ab52f623da5ec"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-rotating-plate/result.json",
+        "sha256": "c54c205188d55d7c38d482b8c46336bfe1f46fb2e6883bf79d1c84cf8f9e0267"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-rotating-plate",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-rotating-plate/report.json",
+        "sha256": "7554ebd5dae12a6be634605683e3967b1408e66dcf09fe76c38f3f465c2b2d79"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-rotating-plate.json",
+        "sha256": "8d071c9ed38bae3a95c15c0b4ad2a692b370f45960cbcc137887e0960efc4107"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-rotating-plate/result.json",
+        "sha256": "4254d28cc76df2f0060cc9b732b4627c60b435ddd263431d98996f0c847c3ed8"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-impact-chain",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-impact-chain/report.json",
+        "sha256": "b0c816b3d0c60d9ebea95bd696854a761e02656c6b1d489744d07abbcddcbf91"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-impact-chain.json",
+        "sha256": "9b5f5c13c9ba4f2bca5e82df9316856213ebe560ef3f2ff8b8ae4132a791b928"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-impact-chain/result.json",
+        "sha256": "cff361362eb2f2b90bed0cc91a2a73d6ff7578e9bfb7c0ab5660eb9ad5469088"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-impact-chain",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-impact-chain/report.json",
+        "sha256": "dbb6014e78410eec5b71338ef888737919eeca35807271d8a4e664851eb6cee1"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-impact-chain.json",
+        "sha256": "dd58ad9f93e01c2713ce3b9afedb3ecb5b1fe8e7e10a2227e229505341cd9c87"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-impact-chain/result.json",
+        "sha256": "9cef8db62e3fafe811b4225635a0d2e9e3c57d3435a56881e4f973693ffe4061"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-resting-stack",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-resting-stack/report.json",
+        "sha256": "3693db2c6356209b81ea26abac06d70d0fdb2020fe8061a2f10f5695c100c5f1"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-ss-resting-stack.json",
+        "sha256": "c53ed689066799f06025f3b10f1bccfc1f0c6e8abd01123d6766c78456eb9fb6"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/ss-resting-stack/result.json",
+        "sha256": "ad6f8df63d35859d7ba34fc628afeffde903cee45a76f561f9f8662a5d973f96"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "mj-resting-stack",
+      "report": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-resting-stack/report.json",
+        "sha256": "3a52e12255fe4521e4f841259a9711b35f0b3b3216f2c923242ed714b5dd6d2a"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/quiet-mj-resting-stack.json",
+        "sha256": "3367af350f00d50d64e1c5f81c8163085779411cbeca58b194d7fbd5337272a5"
+      },
+      "result": {
+        "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/mj-resting-stack/result.json",
+        "sha256": "cafac3f035ac60b05b99ba9e96aca03c09266429e5a9a954e7413f78a24b56de"
+      },
+      "passed": true,
+      "faultToEmptyJobSeconds": null
+    }
+  ],
+  "hold": {
+    "path": "dist/verification/safety-hold.json",
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "blockRecovery": true,
+    "recoveryPermitPresent": false,
+    "unchanged": true
+  },
+  "originalFailedGpuReport": {
+    "path": "dist/verification/browser-containment/d40b35fb88374a749ef87c71add94948/supervisor-loss/report.json",
+    "sha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "remainsUnaccepted": true
+  },
+  "preservation": {
+    "boundSourcesMatchAtFinalization": true,
+    "protectedWorktreeUnchangedAtEveryStage": true,
+    "protectedWorktree": "D:\\state-space-cpu-performance",
+    "protectedSnapshotSha256": "a3d440f40ca7536dbd6999b61a1ab7337a85606ce49c17cfd8abbcf32572446b",
+    "allNamedJobsAbsentAtCompletion": true,
+    "executionLocksPresentAtFinalization": []
+  },
+  "staticValidation": {
+    "pythonTestsPassed": 17,
+    "nodeSyntheticTestsPassed": 16,
+    "pythonLint": "passed",
+    "note": "Validation recorded during implementation; finalization reads and hashes data only."
+  },
+  "qualification": {
+    "runtime": false,
+    "performance": false,
+    "gpu": false,
+    "worker": false,
+    "r1": false,
+    "purpose": "Bounded diagnostic comparison; no existing qualification gate is closed."
+  },
+  "limitations": [
+    "Small fixed cohort under a CPU cap; no normal-throughput or solver-only speedup claim.",
+    "Different contact laws; default MuJoCo refsafe changes effective stiffness with timestep.",
+    "Twelve strict barrier failures retained; diagnostic completion is not physics acceptance.",
+    "No GPU/browser workload or GPU query in this retry; Windows incident cause remains undetermined.",
+    "Raw dist artifacts are local and ignored by Git; preserve the full packet with this checkpoint."
+  ]
+}

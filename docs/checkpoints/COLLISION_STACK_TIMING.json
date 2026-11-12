@@ -1,0 +1,1167 @@
+{
+  "schema": "collision-stack-timing-checkpoint-v1",
+  "status": "diagnostic-complete",
+  "finalizedAtUtc": "2026-11-09T07:04:58.652Z",
+  "summary": {
+    "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/timing-summary.json",
+    "sha256": "4f54a52c66811f18085297a6a5e4a37dbd557bc01f59dedfe1e19689c9c5734e"
+  },
+  "review": {
+    "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/review.json",
+    "sha256": "ac46c2422ff5ff964fd82c3718aa01fe6ecd7ead6a3c70d3f2653cf7e56415cd"
+  },
+  "benchmark": {
+    "path": "dist/verification/collision-stack-timing-20261108/packet.json",
+    "sha256": "08dbf80850a9587a07a6291c9d31141bfd30c2a91debb0941a95f012faae4163"
+  },
+  "engineBundleSha256": "864cc291fc75ebfce7d6d53e6c15d1b13736679d0540c80c496298e991b19694",
+  "originalBundleSha256": "1ad2665bec3d972673ddcddf0b505f25cff9ee47e7938d30a57b687777d8a196",
+  "engineAndReplayHarnessUnchanged": true,
+  "sourceFiles": [
+    {
+      "path": "engine/experimental/multiphysics/battery.ts",
+      "sha256": "dd7753dcd759a518f992c5e9ea02bacc8abfa6386b35ad25ede14434aa21de4e"
+    },
+    {
+      "path": "engine/experimental/multiphysics/circuit.ts",
+      "sha256": "05f35f023343b14ae7cf129bd4c4687bf9fcd5d37ae614e55b34c55caf1adc3c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/collision.ts",
+      "sha256": "30ba7c15e740c081b89eac2381c9de103f25296fcf8670f37a24185dbf7796ee"
+    },
+    {
+      "path": "engine/experimental/multiphysics/conservation.ts",
+      "sha256": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65"
+    },
+    {
+      "path": "engine/experimental/multiphysics/coupling-energy.ts",
+      "sha256": "9ab9f6ba9819f4f41854092005440fabad419d0e69ea92e907ac9ca012de67be"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluid-coupling.ts",
+      "sha256": "029ffee57d6ae9325f6824c00f14cc6b799170738f081fd7d248c8f0f51c5c29"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluids.ts",
+      "sha256": "f170c63631d92f3dfa3e3888322af6e2114c1821913b21cf8ce08a207603499d"
+    },
+    {
+      "path": "engine/experimental/multiphysics/math.ts",
+      "sha256": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/model.ts",
+      "sha256": "5c917e9279320663aeeea6f73a2ca538430692f504825175c1ca77e357a5316c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/profiles.ts",
+      "sha256": "4bbe59c25860106d03289166f58fb691300a7cf8fa0d6f879f963e27aaf62af9"
+    },
+    {
+      "path": "engine/experimental/multiphysics/rigid.ts",
+      "sha256": "2a9f951f01bb4b61d22dc5ccf416f7ef734f3072c6e1a936db52e5edb626dd7a"
+    },
+    {
+      "path": "engine/experimental/multiphysics/thermal.ts",
+      "sha256": "bbab5c74660f8d7bd463358f9ac153c45a4686027d169f8240e32168ecfc88a3"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world-tick.ts",
+      "sha256": "45b00c2960e3fc53abffb298233608bf48b87439ce4dce6cb800ab1f2857ed1f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world.ts",
+      "sha256": "e2c647b028633450f37c93a9fc43a1716044e243e009768ea0e1c10495734417"
+    },
+    {
+      "path": "engine/experimental/reactive/reactive-registry.ts",
+      "sha256": "9cb6059a466fdaf6882d0f07989849510ee2655152bdf2488afe3dd66d37738f"
+    },
+    {
+      "path": "engine/experimental/reactive/thermal-materials.ts",
+      "sha256": "bf87aef4438e8196f660ed0f43e3998222127bc206777abf541126bae16e86ff"
+    },
+    {
+      "path": "engine/generated/materials.ts",
+      "sha256": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead"
+    },
+    {
+      "path": "engine/portable-data.ts",
+      "sha256": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c"
+    },
+    {
+      "path": "engine/registry.ts",
+      "sha256": "bcbea8b2cb90d6b60b4c1780702351d28082d7f380dfc7dbb2e1ced6e73e60ac"
+    },
+    {
+      "path": "engine/validation.ts",
+      "sha256": "313cb8a28bfe619688d3ac9ff1f8b91b4ac4d90eff6dc3063ce7fd0e50c27881"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a5871b70bcfb0060ac22be0c722d2302ac8513fbfa373b1e651662f397e7a93a"
+    },
+    {
+      "path": "scripts/benchmark_collision_reference.mjs",
+      "sha256": "f8abcc67c487b2f6795164322d23a0618366d3e925a8834129a8cb1b3452b60c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-cpu.mjs",
+      "sha256": "db318cd9ff224065b4b8de7c6c2ea7060651008f7601aee6afe8204e63f99752"
+    },
+    {
+      "path": "scripts/collision-reference/collect-optimized.mjs",
+      "sha256": "434f70eb0298ad39d32f0f7b4dcb8d0d2b56fdc3fa3b611d89e2f19e7d28271c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-profile.mjs",
+      "sha256": "02efb076667259a9f7b53dc41428bcdcaec9167271b5ec3dc72a7d6ce63b6c33"
+    },
+    {
+      "path": "scripts/collision-reference/collect-timing.mjs",
+      "sha256": "872388cf993e9130311d475faee7e24057ddedf99033c5ad41c99c380ac375af"
+    },
+    {
+      "path": "scripts/collision-reference/engine-entry.ts",
+      "sha256": "4ceea8a3082422579bb23399d43208352dee72c85527508b4dd0ed529f5ebb41"
+    },
+    {
+      "path": "scripts/collision-reference/exact-state.mjs",
+      "sha256": "995d3ec8bd9d6fdb7eeb00fd42134cd76169c130f4d9645af79ccd392a13dd73"
+    },
+    {
+      "path": "scripts/collision-reference/mujoco_runner.py",
+      "sha256": "9bab5cb33a2502d5a666073ae7394c17a077f59844c616430373e7ad105c889b"
+    },
+    {
+      "path": "scripts/collision-reference/optimized-runner.mjs",
+      "sha256": "15b2e658636cb795359b885723e2cb00112ba384c64f04cbf2ca16618c5b4017"
+    },
+    {
+      "path": "scripts/collision-reference/owned-regression.mjs",
+      "sha256": "3290acbfd0d9eb6891c7b446bff173d27a1675cbb2e6717cb2a57322596af465"
+    },
+    {
+      "path": "scripts/collision-reference/packet.mjs",
+      "sha256": "dbb58fd23d0124d255e8c09707768aade9264aba3451e6418cd02d417037ec15"
+    },
+    {
+      "path": "scripts/collision-reference/profile-data.mjs",
+      "sha256": "ac6c7fd74ea24eea8d1ec2bff194d574aab483e7b95d2cf11ee23010d39d981c"
+    },
+    {
+      "path": "scripts/collision-reference/profile-runner.mjs",
+      "sha256": "757dfe5ece637ff35eb6ac6545ce983424e9725d9fbdf885a19b8cb12a78c8a0"
+    },
+    {
+      "path": "scripts/collision-reference/protocol.mjs",
+      "sha256": "c5d5db8abb469056cbb9d418ba6cdd08e188a1147f94c2d8d50bf0b0abced1de"
+    },
+    {
+      "path": "scripts/collision-reference/replay.mjs",
+      "sha256": "2e081e472d81fff6ab7e167e63f5be31778c9db9b9beec328268ca1769ae68f1"
+    },
+    {
+      "path": "scripts/collision-reference/report.mjs",
+      "sha256": "1dbcde51643e3c773183225f7c1ea562bfb0e74f0cda0d6331453326e876d0c0"
+    },
+    {
+      "path": "scripts/collision-reference/requirements.txt",
+      "sha256": "babe3f403ce9d9a2f26a08402eaaab0d024f58c8517afdc374bf51e7983a41e9"
+    },
+    {
+      "path": "scripts/collision-reference/scoped-runner.mjs",
+      "sha256": "77118dda732472e4faa2a8051481c375013e9617aa27dd0d313f1e3f52c3fe12"
+    },
+    {
+      "path": "scripts/collision-reference/state-space.mjs",
+      "sha256": "e4b91ce305a019eabe82953c6ecdf77251d8d9ee740300e713f76811e0f3096f"
+    },
+    {
+      "path": "scripts/collision-reference/timing-data.mjs",
+      "sha256": "47f9ab8567cfc867b64c9d8f57d3871baa146042eeb08e411526efddd8ab536d"
+    },
+    {
+      "path": "scripts/collision-reference/timing-runner.mjs",
+      "sha256": "11c4573b641440c01091a1e0337cb48b4fdd97bcc4f81f2f88549d619abc1f62"
+    },
+    {
+      "path": "scripts/verification_guard.mjs",
+      "sha256": "ddd8ee5619641a0e0f9419306617c232f47c6a48a0ea2e16fa9a2d371759c517"
+    },
+    {
+      "path": "scripts/verification_guard.py",
+      "sha256": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae"
+    },
+    {
+      "path": "scripts/verification_health.py",
+      "sha256": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b"
+    },
+    {
+      "path": "scripts/verification_journal.py",
+      "sha256": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593"
+    },
+    {
+      "path": "scripts/verification_watchdog.py",
+      "sha256": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f"
+    }
+  ],
+  "scopeSources": {
+    "scripts/collision_cpu_scope.py": "fd0f3c40424933f69fd20243bd65d2644f628f318308bac88a9435eb613c530d",
+    "scripts/verify_collision_cpu.py": "6505685fb6e5dc1547c832bc9f3a51faaaeb2dc4b55097cb7c356232093d4eb8",
+    "scripts/collision_cpu_leaf.py": "22483ef7d90646ff73e42f4c533b348797b501988aa7f4cfe3ba363b05143efa",
+    "scripts/verification_scope.py": "a70e91052487b87bbef99d04a0e43c6ebfc8e7e82ca08b35275e901469096c7f",
+    "scripts/verify_browser_containment.py": "b0bf6c8a79a603f3d57e22450ed6b6b40b4073cd5f2bad8e16821452260dbe76",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_collision_cpu_scope.py": "963ae92c079ad62697428e3f80592aa3d500b9c609434c02df4d2c5ed928d79f",
+    "tests/collision_profile.test.mjs": "10b80d28b68f1a49dc4eebe96c92d01d59d82126b62f780fda4ca83a6b624611",
+    "tests/collision_owned.test.mjs": "357fdb32c50cb39422ccf0bd2564c75bf3c296f1b7f4dc6a90f3e986135570a9",
+    "tests/collision_timing.test.mjs": "e4faae0d409265cfaeb875ef44f2f5671ec252e1515309aa299988a8b7613248"
+  },
+  "host": {
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalCpus": 16,
+    "windows": "10.0.26300",
+    "node": "v22.22.3"
+  },
+  "counts": {
+    "passedStages": 10,
+    "rows": 30,
+    "measuredSamples": 210,
+    "observedSteps": 3888
+  },
+  "regressionChecks": 71,
+  "regression": {
+    "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-owned-regression/result.json",
+    "sha256": "3c8cd242fa30f6d62386144690e68035941c69c0f26aec21c19a2f91807cd59c"
+  },
+  "world": {
+    "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/world-reference/result.json",
+    "sha256": "743a6532dbb0b7609583657b81d2f71f58ac16f0ed143c721c0e5788cfba0e5e"
+  },
+  "historicalComparison": {
+    "path": "dist/verification/collision-cpu/b35049763d24429e86685ce0c0c6ba1d/comparison.json",
+    "sha256": "0be7ab135074ab762112db58b23af9fcd107198ca2544307fd50b8579806118b"
+  },
+  "originalOutlier": {
+    "path": "dist/verification/collision-cpu/b35049763d24429e86685ce0c0c6ba1d/ss-resting-stack/row-0.002.json",
+    "sha256": "1b1289403a711a96060df56fe0875c010881e2fb75467be92d62d5881d27d2d5"
+  },
+  "originalTelemetry": {
+    "path": "dist/verification/collision-cpu/b35049763d24429e86685ce0c0c6ba1d/ss-resting-stack/telemetry.jsonl",
+    "sha256": "5d316a0bc618a48f548494170e839550e867997ba70d0e8a9b982e611abbc690"
+  },
+  "twoMillisecondCohorts": [
+    {
+      "case": "ss-stack-plain",
+      "version": "baseline",
+      "instrumented": false,
+      "medianWallMs": 65.06949999999779,
+      "meanWallMs": 63.851799999999585,
+      "maximumWallMs": 74.09300000000076,
+      "medianThreadCpuMs": null,
+      "medianProcessCpuMs": null
+    },
+    {
+      "case": "ss-stack-plain",
+      "version": "optimized",
+      "instrumented": false,
+      "medianWallMs": 47.26730000000225,
+      "meanWallMs": 47.96180000000056,
+      "maximumWallMs": 54.968799999999646,
+      "medianThreadCpuMs": null,
+      "medianProcessCpuMs": null
+    },
+    {
+      "case": "ss-stack-clock-ab-1",
+      "version": "baseline",
+      "instrumented": true,
+      "medianWallMs": 86.49620000000141,
+      "meanWallMs": 105.41432857142925,
+      "maximumWallMs": 173.70420000000195,
+      "medianThreadCpuMs": 94,
+      "medianProcessCpuMs": 125
+    },
+    {
+      "case": "ss-stack-clock-ab-1",
+      "version": "optimized",
+      "instrumented": true,
+      "medianWallMs": 62.7150000000056,
+      "meanWallMs": 63.16262857142984,
+      "maximumWallMs": 67.84109999999782,
+      "medianThreadCpuMs": 63,
+      "medianProcessCpuMs": 62
+    },
+    {
+      "case": "ss-stack-clock-ba-1",
+      "version": "optimized",
+      "instrumented": true,
+      "medianWallMs": 60.21980000000167,
+      "meanWallMs": 61.06324285714241,
+      "maximumWallMs": 78.09490000000278,
+      "medianThreadCpuMs": 63,
+      "medianProcessCpuMs": 78
+    },
+    {
+      "case": "ss-stack-clock-ba-1",
+      "version": "baseline",
+      "instrumented": true,
+      "medianWallMs": 82.14100000000144,
+      "meanWallMs": 82.03375714285721,
+      "maximumWallMs": 86.61300000000028,
+      "medianThreadCpuMs": 94,
+      "medianProcessCpuMs": 108
+    },
+    {
+      "case": "ss-stack-clock-ab-2",
+      "version": "baseline",
+      "instrumented": true,
+      "medianWallMs": 88.9377999999997,
+      "meanWallMs": 107.73082857142903,
+      "maximumWallMs": 199.8515000000025,
+      "medianThreadCpuMs": 79,
+      "medianProcessCpuMs": 94
+    },
+    {
+      "case": "ss-stack-clock-ab-2",
+      "version": "optimized",
+      "instrumented": true,
+      "medianWallMs": 62.80399999999645,
+      "meanWallMs": 75.37662857142836,
+      "maximumWallMs": 156.3656000000001,
+      "medianThreadCpuMs": 63,
+      "medianProcessCpuMs": 78
+    },
+    {
+      "case": "ss-stack-clock-ba-2",
+      "version": "optimized",
+      "instrumented": true,
+      "medianWallMs": 45.941500000001724,
+      "meanWallMs": 70.989114285715,
+      "maximumWallMs": 215.5650999999998,
+      "medianThreadCpuMs": 46,
+      "medianProcessCpuMs": 62
+    },
+    {
+      "case": "ss-stack-clock-ba-2",
+      "version": "baseline",
+      "instrumented": true,
+      "medianWallMs": 66.64900000000034,
+      "meanWallMs": 77.0574571428572,
+      "maximumWallMs": 146.91859999999906,
+      "medianThreadCpuMs": 63,
+      "medianProcessCpuMs": 78
+    }
+  ],
+  "longSteps": {
+    "all": 31,
+    "measured": 15,
+    "measuredWithLargeWallCpuGap": 15,
+    "measuredWithoutGcOverlap": 8,
+    "measuredWithNoRecordedThreadCpu": 14,
+    "measuredSteps": [
+      {
+        "case": "ss-stack-clock-ab-1",
+        "version": "baseline",
+        "dt": 0.016,
+        "startMs": 1705.9862,
+        "endMs": 2147.0551,
+        "wallMs": 441.0689,
+        "threadStart": {
+          "user": 265000,
+          "system": 78000
+        },
+        "threadEnd": {
+          "user": 265000,
+          "system": 78000
+        },
+        "processStart": {
+          "user": 546000,
+          "system": 328000
+        },
+        "processEnd": {
+          "user": 546000,
+          "system": 328000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 416,
+        "completedWork": 416,
+        "phase": "measured",
+        "sample": 0,
+        "tick": 2,
+        "wallMinusThreadCpuMs": 441.0689,
+        "wallMinusProcessCpuMs": 441.0689,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207688837.757,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-1",
+        "version": "optimized",
+        "dt": 0.008,
+        "startMs": 3078.6302,
+        "endMs": 3328.5704,
+        "wallMs": 249.9402,
+        "threadStart": {
+          "user": 796000,
+          "system": 109000
+        },
+        "threadEnd": {
+          "user": 796000,
+          "system": 109000
+        },
+        "processStart": {
+          "user": 1562000,
+          "system": 484000
+        },
+        "processEnd": {
+          "user": 1562000,
+          "system": 484000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 2,
+        "tick": 1,
+        "wallMinusThreadCpuMs": 249.9402,
+        "wallMinusProcessCpuMs": 249.9402,
+        "gcOverlapMs": 0.4900999069213867,
+        "gcIndices": [
+          86
+        ],
+        "epochStartMs": 1794207690210.4011,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-1",
+        "version": "baseline",
+        "dt": 0.008,
+        "startMs": 4273.0038,
+        "endMs": 4516.5735,
+        "wallMs": 243.5697,
+        "threadStart": {
+          "user": 1359000,
+          "system": 109000
+        },
+        "threadEnd": {
+          "user": 1375000,
+          "system": 109000
+        },
+        "processStart": {
+          "user": 2640000,
+          "system": 546000
+        },
+        "processEnd": {
+          "user": 2671000,
+          "system": 546000
+        },
+        "threadCpuMs": 16,
+        "processCpuMs": 31,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 5,
+        "tick": 4,
+        "wallMinusThreadCpuMs": 227.5697,
+        "wallMinusProcessCpuMs": 212.5697,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207691404.775,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-1",
+        "version": "baseline",
+        "dt": 0.002,
+        "startMs": 6234.5334,
+        "endMs": 6296.5062,
+        "wallMs": 61.97279999999955,
+        "threadStart": {
+          "user": 2671000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 2671000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 4359000,
+          "system": 640000
+        },
+        "processEnd": {
+          "user": 4359000,
+          "system": 640000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 2,
+        "tick": 14,
+        "wallMinusThreadCpuMs": 61.97279999999955,
+        "wallMinusProcessCpuMs": 61.97279999999955,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207693366.3044,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-1",
+        "version": "baseline",
+        "dt": 0.002,
+        "startMs": 6797.9558,
+        "endMs": 6896.2911,
+        "wallMs": 98.33530000000064,
+        "threadStart": {
+          "user": 3125000,
+          "system": 171000
+        },
+        "threadEnd": {
+          "user": 3125000,
+          "system": 171000
+        },
+        "processStart": {
+          "user": 4859000,
+          "system": 671000
+        },
+        "processEnd": {
+          "user": 4859000,
+          "system": 671000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 6,
+        "tick": 14,
+        "wallMinusThreadCpuMs": 98.33530000000064,
+        "wallMinusProcessCpuMs": 98.33530000000064,
+        "gcOverlapMs": 0.6172001361846924,
+        "gcIndices": [
+          249
+        ],
+        "epochStartMs": 1794207693929.7268,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ba-1",
+        "version": "baseline",
+        "dt": 0.016,
+        "startMs": 2247.0872,
+        "endMs": 2613.2815,
+        "wallMs": 366.1943000000001,
+        "threadStart": {
+          "user": 437000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 437000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 1093000,
+          "system": 390000
+        },
+        "processEnd": {
+          "user": 1093000,
+          "system": 390000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 416,
+        "completedWork": 416,
+        "phase": "measured",
+        "sample": 6,
+        "tick": 1,
+        "wallMinusThreadCpuMs": 366.1943000000001,
+        "wallMinusProcessCpuMs": 366.1943000000001,
+        "gcOverlapMs": 363.2451000213623,
+        "gcIndices": [
+          64
+        ],
+        "epochStartMs": 1794207754814.1763,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ba-1",
+        "version": "baseline",
+        "dt": 0.008,
+        "startMs": 2992.3577,
+        "endMs": 3207.4052,
+        "wallMs": 215.04750000000013,
+        "threadStart": {
+          "user": 781000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 781000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 1609000,
+          "system": 406000
+        },
+        "processEnd": {
+          "user": 1609000,
+          "system": 406000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 6,
+        "tick": 5,
+        "wallMinusThreadCpuMs": 215.04750000000013,
+        "wallMinusProcessCpuMs": 215.04750000000013,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207755559.4468,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ba-1",
+        "version": "optimized",
+        "dt": 0.008,
+        "startMs": 3551.0018,
+        "endMs": 3797.3838,
+        "wallMs": 246.38200000000006,
+        "threadStart": {
+          "user": 1093000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 1093000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 2093000,
+          "system": 484000
+        },
+        "processEnd": {
+          "user": 2093000,
+          "system": 484000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 4,
+        "tick": 2,
+        "wallMinusThreadCpuMs": 246.38200000000006,
+        "wallMinusProcessCpuMs": 246.38200000000006,
+        "gcOverlapMs": 0.39260005950927734,
+        "gcIndices": [
+          122
+        ],
+        "epochStartMs": 1794207756118.0908,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-2",
+        "version": "optimized",
+        "dt": 0.016,
+        "startMs": 2084.8787,
+        "endMs": 2448.4189,
+        "wallMs": 363.5401999999999,
+        "threadStart": {
+          "user": 453000,
+          "system": 93000
+        },
+        "threadEnd": {
+          "user": 453000,
+          "system": 93000
+        },
+        "processStart": {
+          "user": 1000000,
+          "system": 281000
+        },
+        "processEnd": {
+          "user": 1000000,
+          "system": 281000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 416,
+        "completedWork": 416,
+        "phase": "measured",
+        "sample": 1,
+        "tick": 1,
+        "wallMinusThreadCpuMs": 363.5401999999999,
+        "wallMinusProcessCpuMs": 363.5401999999999,
+        "gcOverlapMs": 0.3065001964569092,
+        "gcIndices": [
+          53
+        ],
+        "epochStartMs": 1794207826663.9678,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-2",
+        "version": "optimized",
+        "dt": 0.008,
+        "startMs": 2812.9556,
+        "endMs": 3035.4725,
+        "wallMs": 222.51690000000008,
+        "threadStart": {
+          "user": 796000,
+          "system": 109000
+        },
+        "threadEnd": {
+          "user": 796000,
+          "system": 109000
+        },
+        "processStart": {
+          "user": 1515000,
+          "system": 359000
+        },
+        "processEnd": {
+          "user": 1515000,
+          "system": 359000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 6,
+        "tick": 0,
+        "wallMinusThreadCpuMs": 222.51690000000008,
+        "wallMinusProcessCpuMs": 222.51690000000008,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207827392.0447,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-2",
+        "version": "baseline",
+        "dt": 0.008,
+        "startMs": 3384.1765,
+        "endMs": 3635.0085,
+        "wallMs": 250.83199999999988,
+        "threadStart": {
+          "user": 1125000,
+          "system": 109000
+        },
+        "threadEnd": {
+          "user": 1125000,
+          "system": 109000
+        },
+        "processStart": {
+          "user": 2031000,
+          "system": 359000
+        },
+        "processEnd": {
+          "user": 2031000,
+          "system": 359000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 400,
+        "completedWork": 400,
+        "phase": "measured",
+        "sample": 1,
+        "tick": 4,
+        "wallMinusThreadCpuMs": 250.83199999999988,
+        "wallMinusProcessCpuMs": 250.83199999999988,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207827963.2656,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-2",
+        "version": "baseline",
+        "dt": 0.002,
+        "startMs": 5298.5801,
+        "endMs": 5425.2675,
+        "wallMs": 126.6873999999998,
+        "threadStart": {
+          "user": 2406000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 2406000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 3718000,
+          "system": 390000
+        },
+        "processEnd": {
+          "user": 3718000,
+          "system": 390000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 1,
+        "tick": 11,
+        "wallMinusThreadCpuMs": 126.6873999999998,
+        "wallMinusProcessCpuMs": 126.6873999999998,
+        "gcOverlapMs": 123.41449999809265,
+        "gcIndices": [
+          205
+        ],
+        "epochStartMs": 1794207829877.6692,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ab-2",
+        "version": "optimized",
+        "dt": 0.002,
+        "startMs": 7692.8011,
+        "endMs": 7786.8829,
+        "wallMs": 94.08179999999993,
+        "threadStart": {
+          "user": 4156000,
+          "system": 218000
+        },
+        "threadEnd": {
+          "user": 4156000,
+          "system": 218000
+        },
+        "processStart": {
+          "user": 5968000,
+          "system": 515000
+        },
+        "processEnd": {
+          "user": 5968000,
+          "system": 515000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 2,
+        "tick": 10,
+        "wallMinusThreadCpuMs": 94.08179999999993,
+        "wallMinusProcessCpuMs": 94.08179999999993,
+        "gcOverlapMs": 0.5959999561309814,
+        "gcIndices": [
+          330
+        ],
+        "epochStartMs": 1794207832271.8901,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ba-2",
+        "version": "optimized",
+        "dt": 0.002,
+        "startMs": 4888.9337,
+        "endMs": 5064.226,
+        "wallMs": 175.29230000000007,
+        "threadStart": {
+          "user": 1953000,
+          "system": 140000
+        },
+        "threadEnd": {
+          "user": 1953000,
+          "system": 140000
+        },
+        "processStart": {
+          "user": 3296000,
+          "system": 359000
+        },
+        "processEnd": {
+          "user": 3296000,
+          "system": 359000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 2,
+        "tick": 0,
+        "wallMinusThreadCpuMs": 175.29230000000007,
+        "wallMinusProcessCpuMs": 175.29230000000007,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207876726.6917,
+        "largeWallCpuGap": true
+      },
+      {
+        "case": "ss-stack-clock-ba-2",
+        "version": "baseline",
+        "dt": 0.002,
+        "startMs": 7355.7919,
+        "endMs": 7447.3911,
+        "wallMs": 91.59919999999966,
+        "threadStart": {
+          "user": 3609000,
+          "system": 343000
+        },
+        "threadEnd": {
+          "user": 3609000,
+          "system": 343000
+        },
+        "processStart": {
+          "user": 5406000,
+          "system": 578000
+        },
+        "processEnd": {
+          "user": 5406000,
+          "system": 578000
+        },
+        "threadCpuMs": 0,
+        "processCpuMs": 0,
+        "yielded": 368,
+        "completedWork": 368,
+        "phase": "measured",
+        "sample": 6,
+        "tick": 11,
+        "wallMinusThreadCpuMs": 91.59919999999966,
+        "wallMinusProcessCpuMs": 91.59919999999966,
+        "gcOverlapMs": 0,
+        "gcIndices": [],
+        "epochStartMs": 1794207879193.55,
+        "largeWallCpuGap": true
+      }
+    ]
+  },
+  "stages": [
+    {
+      "case": "startup-close",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/startup-close/report.json",
+        "sha256": "a2e61e1f8882bdd958d5c36f00d5d19d57c6518ad1820237bd78a6dba01bd67f"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-startup-close.json",
+        "sha256": "54be6b03005091449a4128ebe0465f61df72795ac3e06590b557deb8b6cc5047"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 21.89292543021033
+    },
+    {
+      "case": "stalled-cpu",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/stalled-cpu/report.json",
+        "sha256": "2d705bee86c4e1b8385495e23a6057836e314c5043c6c59aee2f59425d03f0c9"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-stalled-cpu.json",
+        "sha256": "ff86eed90fab5f565bfc9a77253af110d96b6feda1e0fe4a204fd02800158f58"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": 2.1490321999881417,
+      "maximumHostCpuPercent": 10.426540284360186
+    },
+    {
+      "case": "supervisor-loss",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/supervisor-loss/report.json",
+        "sha256": "ebc95724d0834545374fb67590eb51fc3935bf1123deed8d0c9600eb2bfc7346"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-supervisor-loss.json",
+        "sha256": "d6bf65dea8b5a175266e32dfeab65bd5e6d6d84556333d00b2b20678a8594513"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": 3.0432677001226693,
+      "maximumHostCpuPercent": 15.61904761904762
+    },
+    {
+      "case": "ss-owned-regression",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-owned-regression/report.json",
+        "sha256": "676d5a6910b4e74fbdceaabafbc2750e15ef223ca7a1613b272f9b3ff3e743c1"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-owned-regression.json",
+        "sha256": "cfa7a4b6d917506ebe4683840ef34fe45a7b2fc13cbf9ad87a776c29f7f390b3"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 12.96472831267874
+    },
+    {
+      "case": "world-reference",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/world-reference/report.json",
+        "sha256": "cc00e3f9b5ef6afb3ae0078c81473707322ad4c54def67b02f7ac87c08b840c3"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-world-reference.json",
+        "sha256": "d5da1a4f1f17a8b6df42fadb0afa7bb9beb6e3da48cd9e3b3589a55b1c1f6417"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 11.587147030185008
+    },
+    {
+      "case": "ss-stack-plain",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-stack-plain/report.json",
+        "sha256": "26157ca09cbfab0451d0acb08f039c3cd98d55ba0fe9967d3074fe4710421396"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-stack-plain.json",
+        "sha256": "877fbafa2cb36c0959a67b0389000378bb5c9b7e61cebdc44f42fcbe5e57d9f5"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 14.6484375
+    },
+    {
+      "case": "ss-stack-clock-ab-1",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-stack-clock-ab-1/report.json",
+        "sha256": "30f66bc8cc42b5b68b2436ffdb292f4bf4bcad99a4398defe4e1fb429ed2a5d3"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-stack-clock-ab-1.json",
+        "sha256": "c5988b295edcdceff5f517a77ba23ae291f734d9806bf87cef984e5e0960ba0e"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 41.05769230769231
+    },
+    {
+      "case": "ss-stack-clock-ba-1",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-stack-clock-ba-1/report.json",
+        "sha256": "88a2f2e4ca2208f402c5896711dcad50ea09f5cf57e8deee2f6e8b30e15d6545"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-stack-clock-ba-1.json",
+        "sha256": "3c1e5ef36eb2b624afbb1e54dd92af64cb2543a4bc46fc04cd47c749ab316284"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 36.62900188323918
+    },
+    {
+      "case": "ss-stack-clock-ab-2",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-stack-clock-ab-2/report.json",
+        "sha256": "3884eee7e0479ac18a0120be363bb2ef899c03d12c0f08eceef8962179522a50"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-stack-clock-ab-2.json",
+        "sha256": "77b60b2c68097bb391af47dd1adc808cdbc818d9be00374c61614b167dcc8f67"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 23.39805825242719
+    },
+    {
+      "case": "ss-stack-clock-ba-2",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/ss-stack-clock-ba-2/report.json",
+        "sha256": "8b22aaf0c4c6891cd2710054553e6715f9f07309ebd9393434c1f10b4f905931"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/f563007cdba34c539ff275d33ad28a00/quiet-ss-stack-clock-ba-2.json",
+        "sha256": "827ebbcb52aef4d0d198470aa8a9a35fd7128fb945aa37f744c4fd5cef51083c"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 17.129186602870817
+    }
+  ],
+  "limits": {
+    "cpuPercent": 6,
+    "memoryMiB": 4096,
+    "deadlineSeconds": 30,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "freeMemoryMiB": 8192
+  },
+  "hold": {
+    "path": "dist/verification/safety-hold.json",
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "blockRecovery": true,
+    "unchanged": true
+  },
+  "originalFailedGpuReceipt": {
+    "path": "dist/verification/browser-containment/d40b35fb88374a749ef87c71add94948/supervisor-loss/report.json",
+    "sha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "remainsUnaccepted": true
+  },
+  "protectedWorktree": "D:\\state-space-cpu-performance",
+  "protectedSnapshotSha256": "a3d440f40ca7536dbd6999b61a1ab7337a85606ce49c17cfd8abbcf32572446b",
+  "cleanup": {
+    "allNamedJobsAbsent": true,
+    "executionLocks": []
+  },
+  "interruptedPreflight": {
+    "review": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/review.json",
+      "sha256": "99fe78e4a2e5063d9c28ca95ea3b4ac787d4e6a2c9dc7945785f73d14c0c267d"
+    },
+    "audit": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/preflight-audit.json",
+      "sha256": "993681aa5c2d11da26e0a8a5b1e6b5b46b22edba7837f6ddd10ecc6866e8e128"
+    },
+    "resolution": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/preflight-resolution.json",
+      "sha256": "872cec738fb90b19dead04f3c5e58bca03ad695572beb1fe82e19a76a1d65a63"
+    },
+    "retiredLock": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/abandoned-preflight.execution-lock.json",
+      "sha256": "be0bb0d8b459bc9104b53ec005d2b541ea49491970d6b1beef42d78d7728caeb"
+    },
+    "quiet": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/quiet-supervisor-loss.json",
+      "sha256": "20e3ca75dd335719765a4278de949c688e9eab3765ba048c7e12c0639bbadb5f"
+    },
+    "temporary": {
+      "path": "dist/verification/collision-cpu/5d1017ecf838476c90efcb67f5c7181d/quiet-supervisor-loss.json.tmp",
+      "sha256": "fff0a9d3e5aa93dfe2a5d859847fa13a2610ae0a0caa897608d6367fb29a4c7b"
+    },
+    "resolver": {
+      "path": "dist/verification/collision-stack-timing-review-20261108/resolve-preflight.py",
+      "sha256": "366c0ddf6e1af6a8fd61288c8248fba1fbee23c439a7fe896a3f33d90f3ffca5"
+    }
+  },
+  "staticValidation": {
+    "nodeSyntheticChecksPassed": 6,
+    "pythonScopeTestsPassed": 25,
+    "pythonLint": "passed"
+  },
+  "qualification": {
+    "runtime": false,
+    "performance": false,
+    "gpu": false,
+    "worker": false,
+    "r1": false,
+    "purpose": "Bounded diagnostic comparison; no existing qualification gate is closed."
+  },
+  "interpretation": [
+    "Original 249.806 ms sample has no per-sample CPU/GC clocks; its exact cause cannot be retrospectively assigned.",
+    "Instrumented clocks identify elapsed time versus accounted current-main-thread/process CPU. They do not identify a particular scheduler, quota event or wait reason.",
+    "Per-step CPU deltas are coarsely accounted by the OS. Raw negative wall-minus-CPU differences remain; small intervals do not support precise CPU fractions.",
+    "GC overlap is elapsed time, may include off-CPU delay, and cannot be treated as exclusive GC CPU cost.",
+    "One plain cohort and four fixed alternating-order instrumented cohorts; no forced GC, inspector, priority/affinity/quota change or sample replacement.",
+    "Exact states and per-step deterministic work remain pinned. These diagnostics do not grant performance, runtime, Worker, GPU or R1 acceptance."
+  ]
+}

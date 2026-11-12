@@ -1,0 +1,4 @@
+# Optional, isolated comparison environment; never add MuJoCo to engine dependencies.
+# Python 3.11+; use Python 3.13 for the documented run. Installed files are hashed.
+mujoco-core==4.0.0
+numpy==2.3.4

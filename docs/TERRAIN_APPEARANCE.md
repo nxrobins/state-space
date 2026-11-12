@@ -157,3 +157,8 @@ pause/restore stability, A/B round trips, cache/reference mode, resize and clean
 Compare complete physical state and energy ledgers, then measure whole-frame cost
 including source selection. Do not treat the earlier cavern receipts as acceptance
 of these shaders or relax the existing hold to run them.
+
+The [bounded native preparation](TERRAIN_NATIVE_VALIDATION.md) fixes a shader
+stage and a three-frame, zero-physics A/B fixture. Its offline packet generator
+preserves the hard hold; execution-host, scoped-authorization and real-browser
+containment prerequisites remain explicit. Preparation is not native acceptance.

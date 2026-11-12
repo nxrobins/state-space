@@ -1,0 +1,52 @@
+{
+  "schema": "collision-reference-preparation-status-v1",
+  "date": "2026-11-08",
+  "status": "prepared-unexecuted",
+  "baselineCommit": "0af27b6c928cc3c5fbda7f66536d8b2ccb0c0cdb",
+  "packet": "dist/verification/collision-reference-20261108-v1",
+  "packetSha256": "476b2df2013ee68e32bf001b683f466b581f2caaa9f2ba00177f952e72ccfcab",
+  "sourceFilesBound": 36,
+  "collisionScenes": 7,
+  "timesteps": [0.016, 0.008, 0.002],
+  "durationPerTrajectory": 0.048,
+  "backendsPrepared": ["state-space-rigid", "mujoco-discrete", "mujoco-speculative"],
+  "worldReferencePrepared": {
+    "fixture": "LEG-WORKER",
+    "previewTicks": 2,
+    "continuationTicks": 1,
+    "workBudgets": [1, 7, 256]
+  },
+  "completedChecks": {
+    "nodeSyntheticAndStaticTests": 16,
+    "pythonXmlTranslationTests": 1,
+    "typescriptBridgeTypecheck": "passed",
+    "pythonLint": "passed",
+    "javascriptFormatting": "passed",
+    "staticBundle": "passed; not imported",
+    "packetTamperAndOverwriteRejection": "passed",
+    "hardHoldRefusalBeforePacketRead": "passed"
+  },
+  "safety": {
+    "blockRecovery": true,
+    "holdSha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "holdBytesUnchanged": true,
+    "physicsWorkloadsLaunched": 0,
+    "mujocoImported": false,
+    "gpuOrBrowserWorkloadsLaunched": 0
+  },
+  "acceptance": {
+    "runtime": false,
+    "performance": false,
+    "r1": false,
+    "worker": false,
+    "gpu": false
+  },
+  "pending": [
+    "Eligible supervised execution host; the Windows incident hold remains active",
+    "Isolated pinned MuJoCo 4.0.0 / NumPy 2.3.4 installation on that host",
+    "Actual world replay and collision trajectories",
+    "MuJoCo API/runtime validation, integration-state restart and matched-scene measurements",
+    "Measured physical comparison, refinement diagnostics and timing distributions"
+  ],
+  "scope": "Harness preparation and synthetic/static checks only. No measured collision or performance result, R1 completion, or broader engine qualification is claimed. Existing engine code, exports, test selection and incident policy are unchanged."
+}
