@@ -11,7 +11,7 @@ No Git tag marks a release yet. Each section covers the period during which
 `pyproject.toml` and `package.json` carried that version string, with the
 date of the last change in the section.
 
-## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-01)
+## 0.4.0 - unreleased (version string since 2026-10-11, entries to 2026-11-06)
 
 ### Added
 
@@ -58,6 +58,12 @@ date of the last change in the section.
 
 ### Changed
 
+- Vite 8 builds the SDK. `esbuild`, which the chamber, slab, multiphysics
+  builder and fluid-study scripts import directly and Vite 6 used to bring in,
+  is now an explicit development dependency at 0.28.2, the newest release Vite
+  8 accepts. The completed coupled-solver study's comparison scripts refuse to
+  run on this compiler, because their frozen baseline was built with 0.25.12
+  (#75).
 - GPU tick and global-support optimization for the public 256x256 backends
   (#8); browser frame pacing and pooled tick buffers (#13); one validation
   per tick with a dedicated solver marker (#11).
@@ -96,9 +102,28 @@ date of the last change in the section.
   `advance()`; the reactive materials guide gives the scope and limits of
   each. A standalone structure job driven one work unit per `advance()`
   call is slower than before (#68).
+- Hosted CI runs the complete Python test suite and `python -m engine.lint`
+  under the CPU supervisor, and a second job installs, tests and builds the
+  `game/` and `tower-defense-rogue/` prototypes. The CPU-only cases of the
+  native Vitest fixtures move to `engine/sdk.cpu.test.ts`,
+  `engine/structure.cpu.test.ts` and `engine/conformance.cpu.test.ts`, which
+  `npm test` selects; the structure negative controls plan their corpus with
+  the bulk Python planner (`tests.structure_cpu_cases`) instead of the native
+  transport. `tests/test_enthalpy*.py` import `tests.enthalpy_cases`, so
+  `python -m unittest tests.test_enthalpy` resolves (#92).
 
 ### Fixed
 
+- The incident hold now stops the unsupervised benchmark and direct
+  verification entry points (`scripts.benchmark_gpu`, `benchmark_frames`,
+  `benchmark_browser`, `benchmark_spillway`, `verify_browser`,
+  `verify_volume_browser`, and `npm run verify:3d`, `benchmark:cpu`,
+  `benchmark:3d`) before they parse arguments or start work. M4 staged
+  recovery refuses a hard hold before writing anything and records its
+  permit atomically, as M5 recovery does. `python -m engine.verify` prints a
+  heartbeat while a captured step runs, so its supervisor no longer stops it
+  after 40 silent seconds, and it saves the report after every step, marked
+  incomplete until the gate finishes (#97).
 - Multiphysics: a solid counts toward a liquid row's resolved support only while
   touching it, so an approaching plate no longer switches on the zero-divergence
   constraint at a distance; parcel reads, inventories and the active-set factor

@@ -13,7 +13,7 @@ from engine.enthalpy import ENERGY_SCALE as Q, MAX_ENERGY_Q, Thermodynamics, The
 from engine.catalog import load_catalog
 from engine.generate import constants
 from engine.lint import lint_enthalpy, lint_wgsl
-from enthalpy_cases import AIR, ICE, WATER, STEAM, METAL, WOOD, OIL, OIL_VAPOR, ASH, SMOKE, LAVA, model
+from tests.enthalpy_cases import AIR, ICE, WATER, STEAM, METAL, WOOD, OIL, OIL_VAPOR, ASH, SMOKE, LAVA, model
 
 
 class EnthalpyProperties(unittest.TestCase):

@@ -336,9 +336,12 @@ collapsed in review.
 [Engine verification](.github/workflows/verify.yml) runs on every pull request
 and push: SDK and reactive chamber builds, types, lint, formatting, Python lint,
 the smoke and unit suites, compiler API consumers, supervisor and archive
-restoration regressions, the installed CPU package client, and a Python 3.10
-floor import check. It runs on Ubuntu 24.04 with Node.js 22, retains receipts
-and package artifacts for 14 days including failures, and runs no GPU workload.
+restoration regressions, the whole Python test suite and the engine structural
+lint under the CPU supervisor, the installed CPU package client, and a Python
+3.10 floor import check; a second job installs, tests and builds the two game
+prototypes. It runs on Ubuntu 24.04 with Node.js 22, retains receipts, package
+artifacts and prototype bundles for 14 days including failures, and runs no GPU
+workload.
 [GPU verification](.github/workflows/gpu-verification.yml) is a manual workflow
 for a self-hosted runner with the `gpu` label; no such runner is registered yet,
 so it records no result until one is.

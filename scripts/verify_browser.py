@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from engine.verify import ROOT, source_hashes
+from scripts.verification_guard import assert_runtime_not_blocked
 
 
 def digest(path):
@@ -78,6 +79,8 @@ def validate_browser_evidence(results, corpus, sdk):
 
 
 def main():
+    # Unsupervised workload: an active incident hold stops it before argument parsing or any work.
+    assert_runtime_not_blocked(ROOT)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--sdk-report', type=Path, required=True)

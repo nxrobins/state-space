@@ -59,19 +59,43 @@ reporter prints nothing per test when stdout is a pipe, and the supervisor stops
 child that is silent for 40 seconds. The CPU suites that `npm test` selects already
 use that reporter; the native macOS stages keep their own fixed commands.
 
+A host that records an incident keeps an ignored `dist/verification/safety-hold.json`.
+While its `blockRecovery` is anything but `false`, `npm test`, the supervisor, the
+benchmarks and the direct verifiers refuse to start their workloads (`npm test` still
+builds the SDK first); type checks, lint and formatting still run. The hold belongs to that checkout's `dist/`: another worktree on the same
+host does not see it.
+
 Run `npm run verify:packages` when changing public types, exports, build metadata,
 or module placement. It installs both packages in independent projects and checks
 all public npm entries. Rebuild affected examples with `npm run build:reactive-chamber`
 or `npm run build:tactical-slab`. [CI](.github/workflows/verify.yml) also checks the
 supervisor, archive restoration and the configured Python lint rules with
-`uv run ruff check .`.
+`uv run ruff check .`, then runs the whole Python suite and the engine structural
+lint under the CPU supervisor:
+
+```sh
+uv run python -B -m scripts.verification_guard --kind cpu --timeout 300 --stall 120 -- \
+  .venv/bin/python -B -m unittest discover -s tests -p 'test_*.py' -v
+uv run python -B -m scripts.verification_guard --kind cpu --timeout 120 -- \
+  .venv/bin/python -B -m engine.lint
+```
+
+A separate CI job runs `npm ci`, `npm test` and `npm run build` in `game/` and
+`tower-defense-rogue/`; both prototypes import engine sources directly, so they
+need the checkout but not a built SDK.
 
 Python tests that need a native adapter skip on hosts without one. Set
 `STATE_SPACE_REQUIRE_GPU=1` on a GPU host so a missing adapter fails instead;
 `python -m engine.verify` sets it. Native checks use the explicit bounded stages
-in the [macOS guide](docs/MACOS.md).
+in the [macOS guide](docs/MACOS.md). Python test modules import shared helpers as
+`tests.<module>`, so `python -m unittest tests.test_<name>` resolves them as well
+as `unittest discover -s tests` does.
 A passing CPU mock suite does not authorize a held runtime fixture. Keep native
-fixtures and `.runtime-cases.ts` outside the normal CPU selection.
+fixtures and `.runtime-cases.ts` outside the normal CPU selection. A CPU-only case
+that belongs with a native fixture's subject goes in the sibling `*.cpu.test.ts`
+file (`engine/sdk.cpu.test.ts`, `engine/structure.cpu.test.ts`,
+`engine/conformance.cpu.test.ts`), which the CPU config selects; the native file
+names stay fixed because `npm run test:native -- --file` lists them.
 
 ## Place and review changes
 
