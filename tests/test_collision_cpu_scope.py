@@ -1,6 +1,7 @@
 """Static/refusal tests only: no physics, browser, GPU, or real OS Job execution."""
 from contextlib import ExitStack
 import json
+import os
 from pathlib import Path
 import struct
 import tempfile
@@ -12,6 +13,13 @@ from scripts import collision_cpu_scope as scope
 from scripts import verify_collision_cpu as runner
 from scripts.collision_cpu_leaf import NoGraphics, deny_external, platform_metadata
 from scripts.verification_guard import assert_runtime_not_blocked
+
+# These tests need the Windows workstation and are skipped elsewhere. The first group reads the
+# hold file or retained packets under dist/verification, which only the Windows harness produces
+# and the repository does not carry; on Windows they still fail when that evidence is missing.
+# The second group reaches code that refuses to run, or cannot launch, off Windows.
+local_evidence = unittest.skipUnless(os.name == 'nt', 'Reads retained evidence that only the Windows harness produces')
+windows_only = unittest.skipUnless(os.name == 'nt', 'Needs the Windows metadata command or process launch flags')
 
 
 class ScopeTests(unittest.TestCase):
@@ -31,6 +39,7 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(env['OMP_NUM_THREADS'], '1')
         self.assertEqual(env['ComSpec'], scope.WINDOWS_COMMAND)
 
+    @local_evidence
     def test_hard_hold_still_blocks_generic_entry_even_with_forged_job(self):
         before = scope.hold_identity()
         with patch.dict(scope.os.environ, {'STATE_SPACE_VERIFICATION_JOB': 'forged',
@@ -52,6 +61,7 @@ class ScopeTests(unittest.TestCase):
                 deny_external(event, ())
         deny_external('open', ())
 
+    @windows_only
     def test_metadata_requires_the_pinned_command_before_reading_os_identity(self):
         with patch.dict(scope.os.environ, {'ComSpec': 'unreviewed.exe'}), \
                 patch('scripts.collision_cpu_leaf.platform.uname') as query:
@@ -165,6 +175,7 @@ class ProfileScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'profile': {**scope.PROFILE_CONFIG, key: value}})
 
+    @local_evidence
     def test_profile_cannot_change_measured_engine_protocol_or_fixtures(self):
         baseline = scope.read_json(scope.ROOT / scope.PROFILE_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -201,6 +212,7 @@ class OptimizationScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'optimization': {**scope.OPTIMIZATION_CONFIG, key: value}})
 
+    @local_evidence
     def test_optimization_only_allows_rigid_source_drift_and_unchanged_protocol(self):
         baseline = scope.read_json(scope.ROOT / scope.OPTIMIZATION_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -243,6 +255,7 @@ class TimingScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'timing': {**scope.TIMING_CONFIG, key: value}})
 
+    @local_evidence
     def test_timing_freezes_all_engine_code_replay_protocol_and_bundle(self):
         baseline = scope.read_json(scope.ROOT / scope.TIMING_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -290,6 +303,7 @@ class CacheTimingScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'cacheTiming': {**scope.CACHE_TIMING_CONFIG, key: value}})
 
+    @local_evidence
     def test_every_engine_file_replay_wrapper_fixture_and_protocol_remain_frozen(self):
         baseline = scope.read_json(scope.ROOT / scope.CACHE_TIMING_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -339,6 +353,7 @@ class OffsetTimingScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'offsetTiming': {**scope.OFFSET_TIMING_CONFIG, key: value}})
 
+    @local_evidence
     def test_every_engine_file_replay_wrapper_fixture_and_protocol_remain_frozen(self):
         baseline = scope.read_json(scope.ROOT / scope.OFFSET_TIMING_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -389,6 +404,7 @@ class CacheSolverScopeTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 scope.cases_for({'cacheSolver': {**scope.CACHE_SOLVER_CONFIG, key: value}})
 
+    @local_evidence
     def test_engine_harness_and_attribution_identity_fail_on_drift(self):
         baseline = scope.read_json(scope.ROOT / scope.CACHE_SOLVER_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -459,6 +475,7 @@ class OffsetCacheScopeTests(unittest.TestCase):
                 runner.require_sequence(packet, 'ss-offset-cache-counts')
             self.assertTrue(scope.node_command(packet / 'ss-normal-cache-regression')[2].endswith('offset-cache-runner.mjs'))
 
+    @local_evidence
     def test_identity_allows_only_rigid_change_and_preserves_all_replay_and_diagnostics(self):
         baseline = scope.read_json(scope.ROOT / scope.OFFSET_CACHE_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -499,6 +516,7 @@ class NormalCacheScopeTests(unittest.TestCase):
                 runner.require_sequence(packet, 'ss-normal-cache-counts')
             self.assertTrue(scope.node_command(packet / 'ss-normal-cache-regression')[2].endswith('optimized-runner.mjs'))
 
+    @local_evidence
     def test_cache_identity_allows_only_rigid_change_and_freezes_replay(self):
         baseline = scope.read_json(scope.ROOT / scope.NORMAL_CACHE_CONFIG['baselinePacket'])
         with tempfile.TemporaryDirectory() as directory:
@@ -614,6 +632,7 @@ class CleanupTests(unittest.TestCase):
                 report = runner.observe(attempt, cap)
             return report, job, watchdog, child, mapping
 
+    @windows_only
     def test_inventory_failure_retains_outcomes_and_terminates_independently(self):
         report, job, watchdog, child, mapping = self.fault()
         self.assertFalse(report['passed'])
@@ -625,6 +644,7 @@ class CleanupTests(unittest.TestCase):
         child.close.assert_called_once()
         self.assertTrue(mapping.closed)
 
+    @windows_only
     def test_failed_cleanup_cannot_pass_and_does_not_skip_other_handles(self):
         report, job, watchdog, child, mapping = self.fault(terminate_fails=True)
         self.assertFalse(report['passed'])
