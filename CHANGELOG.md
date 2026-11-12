@@ -58,6 +58,12 @@ date of the last change in the section.
 
 ### Changed
 
+- Vite 8 builds the SDK. `esbuild`, which the chamber, slab, multiphysics
+  builder and fluid-study scripts import directly and Vite 6 used to bring in,
+  is now an explicit development dependency at 0.28.2, the newest release Vite
+  8 accepts. The completed coupled-solver study's comparison scripts refuse to
+  run on this compiler, because their frozen baseline was built with 0.25.12
+  (#75).
 - GPU tick and global-support optimization for the public 256x256 backends
   (#8); browser frame pacing and pooled tick buffers (#13); one validation
   per tick with a dedicated solver marker (#11).
