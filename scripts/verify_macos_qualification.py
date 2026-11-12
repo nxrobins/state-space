@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 
 from scripts.verification_guard import ROOT, guarded_entry
 from scripts.verification_browser import PersistentBrowser
-from scripts.verification_macos import STAGES, SANDBOX_STAGES, require_preceding_stage
+from scripts.verification_macos import STAGES, SANDBOX_STAGES, MULTIPHYSICS_BUILDER_STAGES, require_preceding_stage
 
 
 def main():
@@ -39,11 +39,15 @@ def main():
         ROOT / "scripts/build_sdk.mjs",
         *ROOT.glob("dist/sdk/*"),
         *ROOT.glob("dist/volume-m5/*.js"),
+        *ROOT.glob("dist/multiphysics/*.js"),
         *ROOT.glob("examples/sdk/*"),
         *ROOT.glob("examples/structural-cavern/*"),
         *ROOT.glob("examples/reactive-chamber/*"),
         *ROOT.glob("examples/shared/*"),
         *ROOT.glob("dist/reactive-chamber/*"),
+        *ROOT.glob("examples/multiphysics-builder/*"),
+        *ROOT.glob("dist/multiphysics-builder/*"),
+        ROOT / "scripts/build_multiphysics_builder.mjs",
         ROOT / "scripts/build_reactive_chamber.mjs",
         ROOT / "web/frame-pump.js", ROOT / "web/frame-clock.js",
         *ROOT.glob("scripts/verification*"),
@@ -89,6 +93,9 @@ def main():
         if args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
             scenario = "chamber" if args.stage == "chamber-visible" else args.stage.split("-")[1]
             page = "dist/reactive-chamber/?" + urlencode({"scenario": scenario, "profile": "1"})
+        elif args.stage in MULTIPHYSICS_BUILDER_STAGES:
+            scene = args.stage.removeprefix("multiphysics-builder-").removesuffix("-visible")
+            page = "dist/multiphysics-builder/?" + urlencode({"scene": scene})
         elif args.stage == "client" or is_gameplay or is_scale:
             query = {"lighting": "cached" if "cached" in args.stage else "reference"}
             if is_gameplay or is_scale:
@@ -152,6 +159,12 @@ def main():
                 shutil.copyfile(out / "view.png", out / "chamber-view.png")
                 report["viewSha256"] = hashlib.sha256((out / "chamber-view.png").read_bytes()).hexdigest()
                 browser.call("eval", expression="window.chamberCaptureAck = true")
+                captured_chamber = True
+            if args.stage in MULTIPHYSICS_BUILDER_STAGES and state.get("captureReady") and not captured_chamber:
+                browser.call("screenshot")
+                shutil.copyfile(out / "view.png", out / "builder-view.png")
+                report["viewSha256"] = hashlib.sha256((out / "builder-view.png").read_bytes()).hexdigest()
+                browser.call("eval", expression="window.builderCaptureAck = true")
                 captured_chamber = True
             if state.get("done"):
                 break

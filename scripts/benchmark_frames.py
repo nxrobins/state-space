@@ -20,6 +20,7 @@ import wgpu
 from engine import MaterialRenderer, create_field
 from engine.schema import MAT_LAVA, MAT_SMOKE, MAT_STEAM, MAT_WATER
 from engine.verify import ROOT, source_hashes
+from scripts.verification_guard import assert_runtime_not_blocked
 from scripts.verify_browser import digest, run_captured
 
 
@@ -216,6 +217,8 @@ fs.writeFileSync(process.argv[1],JSON.stringify(result));"""
 
 
 def main():
+    # Unsupervised workload: an active incident hold stops it before argument parsing or any work.
+    assert_runtime_not_blocked(ROOT)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser-cli', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)

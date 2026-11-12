@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "id": "fb66f4d957a045b9b708cdcc6c2b6442",
+  "kind": "macos-qualification",
+  "command": [
+    ".venv/bin/python3",
+    "-m",
+    "scripts.verify_macos_qualification",
+    "--stage",
+    "m6-gameplay-32-burning-bridge"
+  ],
+  "startedAt": 1793565747.0908742,
+  "passed": true,
+  "memoryLimitMiB": null,
+  "cpuLimitPercent": null,
+  "timeoutSeconds": 300.0,
+  "stallSeconds": 40,
+  "maxMonitorLagMs": 65.5,
+  "containment": "POSIX process group",
+  "metalSmokeScope": {
+    "stage": "m6-gameplay-32-burning-bridge",
+    "maxDimension": 32,
+    "maxReplayTicks": 32,
+    "maxFrames": 32,
+    "gpuTelemetryAvailable": false,
+    "independentWatchdog": true,
+    "sampledRssLimitMiB": 8192
+  },
+  "preflight": {
+    "host": {
+      "time": 1793565748.115987,
+      "hostCpuPercent": 8.4,
+      "freeMemoryMiB": 46254.125
+    },
+    "gpu": null
+  },
+  "independentWatchdog": {
+    "armed": true,
+    "heartbeatSeconds": 3,
+    "deadlineSeconds": 300.0,
+    "sampledRssLimitMiB": 8192,
+    "transport": "owned pipe",
+    "kernelMemoryCap": false
+  },
+  "childPid": 73748,
+  "lastOutput": "Mac qualification report: dist/verification/macos-m6-gameplay-32-burning-bridge-cf7583471d2d/report.json",
+  "lastHealth": {
+    "host": {
+      "time": 1793565750.2634518,
+      "hostCpuPercent": 7.7,
+      "freeMemoryMiB": 44569.9375
+    },
+    "gpu": null,
+    "job": null
+  },
+  "exitCode": 0,
+  "finishedAt": 1793565751.1236951
+}

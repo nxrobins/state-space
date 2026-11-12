@@ -17,9 +17,10 @@ a new package structure.
 | `scripts/` | Build/serve commands, bounded verification supervisors, package checks, benchmarks and historical audit/recovery tools |
 | `tests/` | Python and Node integration/tooling regressions; engine TypeScript tests are colocated with their subjects |
 | `web/` | Earlier browser showcase and its rendering/controller tests |
+| `site/` | Landing page of the hosted demo site; published at the site root beside the demo pages |
 | `game/`, `tower-defense-rogue/` | Independent game prototypes and their SDK integration boundaries |
 | `eval/`, `seeds/`, `locked/`, `archive/` | Mutation/evolution evaluation, seeds, frozen references and research history |
-| Root `evolve_ss.py`, `ss_program.md`, `EVOLUTION_CHRONICLE.md` | Original research workflow and its record; not the SDK entry point. The evolution CLI stays at the root because tests, provenance capture and the release verifier reference it there; the recorded phase winners (`winner_phase_*.json`) live in `archive/` |
+| Root `evolve_ss.py`, `ss_program.md`, `EVOLUTION_CHRONICLE.md` | Original research workflow and its record; not the SDK entry point. `ss_program.md` is the historical ca-v1 brief and no code reads it; the current candidate contract is `docs/EVOLUTION.md`. The evolution CLI stays at the root because tests, provenance capture and the release verifier reference it there; the recorded phase winners (`winner_phase_*.json`) live in `archive/` |
 | `docs/` | Current guides, contracts, support status and checkpoint summaries |
 | `dist/` | Local generated output; the tracked `dist/packages/evidence/` files are historical package evidence |
 
@@ -49,6 +50,10 @@ use explicit source aliases; installed-package checks validate the consumer boun
 ## Tool and document ownership
 
 - `scripts/build_sdk.mjs` derives bundles and declaration roots from package exports.
+- `scripts/build_site.mjs` owns the hosted demo list. It copies the landing page, each
+  demo page and only the files they reference into `dist/site/`, and fails on a missing
+  reference or one outside the published trees. [The Pages workflow](../.github/workflows/pages.yml)
+  builds it on pull requests and publishes it from `main`.
 - `scripts/verify_checks.mjs` selects smoke, CPU, native or quarantined demo checks;
   `scripts/verification_guard.py` owns process containment and evidence receipts.
 - `scripts/verify_macos_qualification.py` owns fixed native browser stages.

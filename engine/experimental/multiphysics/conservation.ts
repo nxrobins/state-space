@@ -77,7 +77,11 @@ function data(raw: unknown): Record<string, unknown> {
   return copyPortableValue(raw as PortableValue) as Record<string, unknown>;
 }
 export function readMaterialParcel3D(raw: unknown): MaterialParcel3D {
-  const p = data(raw);
+  return readOwnedMaterialParcel3D(data(raw));
+}
+/** Same validation for a plain record the caller already owns (a copyPortableValue result).
+ * The returned parcel shares no arrays with its input. */
+export function readOwnedMaterialParcel3D(p: Record<string, unknown>): MaterialParcel3D {
   assertRecordFields(p, fields, [], 'Invalid material parcel fields.');
   const orientation = p.orientation;
   if (
@@ -248,8 +252,24 @@ export function parcelConservation3D(
   const list = parcels(raw),
     settings = data(options);
   assertRecordFields(settings, [], ['origin', 'gravity'], 'Invalid conservation options.');
-  const origin = vector(settings.origin ?? [0, 0, 0], 'origin'),
-    gravity = vector(settings.gravity ?? [0, 0, 0], 'gravity');
+  return conservationOf(
+    list,
+    vector(settings.origin ?? [0, 0, 0], 'origin'),
+    vector(settings.gravity ?? [0, 0, 0], 'gravity'),
+  );
+}
+/** The same totals for parcels a snapshot reader already validated: no copies, same arithmetic. */
+export function validatedParcelConservation3D(
+  list: readonly MaterialParcel3D[],
+  gravity: Vec3,
+): ParcelConservation3D {
+  return conservationOf(list, [0, 0, 0], gravity);
+}
+function conservationOf(
+  list: readonly MaterialParcel3D[],
+  origin: Vec3,
+  gravity: Vec3,
+): ParcelConservation3D {
   const momenta = list.map((p) => scaleVec3(p.velocity, p.mass));
   const angular = list.map((p, i) =>
     addVec3(crossVec3(subtractVec3(p.center, origin), momenta[i]), p.intrinsicAngularMomentum),

@@ -5,6 +5,8 @@ node_modules/
 .vite/
 *.egg-info/
 dist/
+# The hosted site's own hold status sits at the path the bundled demos request.
+!/site/dist/
 build/
 *.log
 checkpoints/

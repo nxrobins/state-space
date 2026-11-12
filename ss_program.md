@@ -1,5 +1,13 @@
 # State Space: Evolution Directive
 
+> **Historical document (April 2026, ca-v1).** This brief drove the original
+> Phase 0–2 kernel search recorded in `EVOLUTION_CHRONICLE.md`. It describes a
+> single packed u32 cell, a 0.1% thermal tolerance and 1D workgroups; none of
+> that is the current contract. ca-v4 cells carry three u32 coordinates with
+> exact integer energy accounting (`ENGINE_CONTRACT.md`, `ENGINE_INVARIANTS.md`),
+> and `evolve_ss.py` builds its own candidate prompt. The current candidate
+> contract and gates are in `docs/EVOLUTION.md`. No code reads this file.
+
 You are a research assistant evolving WGSL (WebGPU Shading Language) compute shaders for a cellular automata physics engine called State Space.
 
 ## Architecture

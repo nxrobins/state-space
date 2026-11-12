@@ -29,10 +29,40 @@ request and one displayed frame may be in flight.
 - After a frame error, Reset or a successful checkpoint recovery restarts the
   display loop in the paused state. Press Play to resume.
 
+## Reactive chambers (ca-3d-m6)
+
+Three chambers bind the thermal material pack (`createThermalMaterialRegistry3D`)
+and run under rules identity `ca-3d-m6`; the HUD shows the identity and the
+catalog hash, and their checkpoints carry that hash. They start at the
+catalog's ambient temperature with a water basin, whereas the five legacy
+chambers keep their `structural-chambers-1` identity, receipts and cold lava
+basin exactly as before. Every tick window below was measured on the CPU
+oracle at both 32³ and 64³ and is asserted by the gameplay and trajectory
+probes; the windows move with the action tick (180 scripted, 16 in pilots).
+
+- `burning-bridge`: a wooden span with pinned end bands over the basin. The
+  script heats the two bands beside the pins at tick 180; they burn to ash that
+  tick (fire, then smoke), the span detaches on the same tick and rests on the
+  basin floor from tick 191. Cut/Heat act on those bands.
+- `thermal-valve`: a ceramic-walled water column over the basin, held by a wax
+  plug, with a three-cell copper rod entering beside the plug. The script holds
+  the rod's far cell at 115 units for 32 ticks from tick 180; the plug is solid
+  through tick 190, molten at 191, and the water releases at tick 192. Heat and
+  Melt apply one tick of the source; Cut removes the plug.
+- `thermal-valve-ceramic`: the same valve with a ceramic segment in the rod, so
+  the plug stays solid and the water stays held through tick 1,024.
+
+Rendering follows the bound catalog: every active material draws in its catalog
+color, gases (fire, smoke, oil vapor, steam) are see-through cutouts that never
+occlude the collapse behind them, and flames and melts (fire, lava, molten
+metal, molten copper, molten wax) glow by temperature in both the diagnostic
+and the naturalistic style. See [the M6 checkpoint](../../docs/checkpoints/3D_M6.md).
+
 The player is kinematic and exerts no structural load. Structures carry their
 own material weight. Falling fragments translate downward without rotation;
-contact does not weld fragments. Combustion, pressure, velocity, elasticity and
-reciprocal player forces are outside this milestone.
+contact does not weld fragments. Pressure, velocity, elasticity and reciprocal
+player forces are outside this milestone; combustion exists only in the
+reactive chambers.
 
 ## Public SDK boundary
 
@@ -75,7 +105,16 @@ submission and changes neither terrain physics nor the M1–M4 controller.
 ## Verification
 
 See [the M5 checkpoint](../../docs/checkpoints/3D_M5.md) for the frozen rules,
-current acceptance status, complete-state replay and full-frame receipts.
+current acceptance status, complete-state replay and full-frame receipts, and
+[the M6 checkpoint](../../docs/checkpoints/3D_M6.md) for the reactive chambers'
+CPU references, gameplay pilots and trajectory replays at 32³ and 64³.
 Runtime verification must use one bounded stage at a time through
-`scripts.recover_m5_verification`. The workstation incident hold remains active.
-Do not run aggregate native suites or quarantined legacy demo trajectories.
+`scripts.recover_m5_verification`; the reactive chambers take `--catalog thermal`
+(`--probe gameplay` and `--probe level-trajectory` in the browser script). On the
+Mac workstation the supervised stages are `npm run verify:macos -- --stage
+m6-gameplay-{32,64}-{scene}` (the 32-frame pilot) and `m6-replay-{32,64}-{scene}`
+(CPU oracle versus dense and active GPU, 1,024 ticks at 32³ and 256 at 64³,
+action tick 16); a 64³ stage needs the same chamber's passing 32³ stage within
+24 hours. The workstation incident hold remains active. Do not run aggregate
+native suites or quarantined legacy demo trajectories, and do not run the
+reactive chambers at 128³.

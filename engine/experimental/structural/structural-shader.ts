@@ -22,14 +22,54 @@ export const STRUCTURAL_RELAX_STAGES = [
   'blockRelax',
 ] as const;
 
-export function structuralShaders(edge: number, shape: readonly number[]) {
+// ca-3d-m6 combustion. Each invocation evaluates only its own role from the immutable input bank,
+// so dense and active dispatch compute the same cell results as the CPU oracle.
+const COMBUSTION_LAW = `
+const FIRE_ID=4u;const SMOKE_ID=14u;const WATER_ID=2u;
+fn burningAt(j:u32)->bool{let w=cells[j];return prop(w,16u)>0u&&temperature(w,energies[j])>prop(w,4u)*256u;}
+fn rotationOf(c:vec3i)->u32{return (u32(c.x)+2u*u32(c.y)+3u*u32(c.z)+p.tick.x%6u)%6u;}
+fn proposalOf(i:u32)->u32{
+ if(!burningAt(i)){return INF;}let offset=rotationOf(coordinate(i));
+ for(var k=0u;k<6u;k++){let j=neighbor(i,(offset+k)%6u);if(j!=INF&&prop(cells[j],21u)==1u){return j;}}
+ return INF;
+}
+fn chosenBy(j:u32)->u32{
+ if(prop(cells[j],21u)!=1u){return INF;}let offset=rotationOf(coordinate(j));
+ for(var k=0u;k<6u;k++){let i=neighbor(j,(offset+k)%6u);if(i!=INF&&proposalOf(i)==j){return i;}}
+ return INF;
+}
+fn extinguishes(i:u32)->bool{
+ var nearFuel=false;var nearWater=false;
+ for(var f=0u;f<6u;f++){let j=neighbor(i,f);if(j==INF){continue;}let w=cells[j]&255u;
+  if(prop(w,16u)>0u){nearFuel=true;}if(w==WATER_ID){nearWater=true;}}
+ return !nearFuel||nearWater||temperature(cells[i],energies[i])<80u*256u;
+}
+`;
+const COMBUSTION_BRANCH = `
+    let proposal=proposalOf(i);
+    if(proposal!=INF&&chosenBy(proposal)==i){
+      let transfer=min(prop(v,16u)*256u/2u,MAX_Q-energies[proposal]);let product=prop(v,17u);
+      outQ=q-transfer;outV=thermal((v&0xf0ff0000u)|product|(prop(product,20u)<<24u),outQ);outS=select(0u,INTEGRITY|FRESH,eligible(outV));
+    }else{
+      let proposer=chosenBy(i);
+      if(proposer!=INF){
+        let fuel=cells[proposer];let transfer=min(prop(fuel,16u)*256u/2u,MAX_Q-q);let product=prop(fuel,18u);
+        outQ=q+transfer;outV=thermal((v&0xf0ff0000u)|product|(prop(product,20u)<<24u),outQ);outS=select(0u,INTEGRITY|FRESH,eligible(outV));
+      }else if((v&255u)==FIRE_ID&&extinguishes(i)){
+        outV=thermal((v&0xf0ff0000u)|SMOKE_ID|(prop(SMOKE_ID,20u)<<24u),q);outS=select(0u,INTEGRITY|FRESH,eligible(outV));
+      }
+    }
+  `;
+
+export function structuralShaders(edge: number, shape: readonly number[], reactive = false) {
   const base = chunkShaders(edge).physics;
   const replace = (source: string, from: string, to: string) => {
     if (source.split(from).length !== 2)
       throw Error('M5 material template differs from the frozen M1 law.');
     return source.replace(from, to);
   };
-  const mechanical = `
+  const mechanical =
+    `
 @group(0) @binding(7) var<storage,read> structures:array<u32>;
 @group(0) @binding(8) var<storage,read_write> nextStructures:array<u32>;
 const INTEGRITY=255u;const ANCHOR=16384u;const FRESH=32768u;const INF=0xffffffffu;
@@ -40,7 +80,7 @@ fn intact(i:u32)->bool{return (structures[i]&INTEGRITY)!=0u;}
 fn bit(dir:u32)->u32{return 1u<<(8u+dir);}
 fn neighbor(i:u32,dir:u32)->u32{let c=coordinate(i)+NORMALS[dir];if(!inside(c)){return INF;}return index(c);}
 fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(canonical/p.shape.x)%p.shape.y,canonical/(p.shape.x*p.shape.y))));}
-`;
+` + (reactive ? COMBUSTION_LAW : '');
   let physics = replace(
     base,
     '@compute @workgroup_size(64) fn main',
@@ -72,6 +112,12 @@ fn storageOf(canonical:u32)->u32{return index(vec3i(vec3u(canonical%p.shape.x,(c
     'nextCells[i]=outV;nextEnergies[i]=outQ;',
     'nextCells[i]=outV;nextEnergies[i]=outQ;nextStructures[i]=outS;',
   );
+  if (reactive)
+    physics = replace(
+      physics,
+      '\n  else {\n    let c=coordinate(i);',
+      '\n  else if(kind==7u){' + COMBUSTION_BRANCH + '}\n  else {\n    let c=coordinate(i);',
+    );
 
   const prefix = base.slice(0, base.indexOf('@compute')) + mechanical;
   const mechanics =

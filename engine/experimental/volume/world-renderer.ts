@@ -1,9 +1,14 @@
 import { type LatencyProfiler, type Trace } from './latency.js';
 /** Persistent per-chunk face lists. Physics owns invalidation, never visibility. */
-import { DRAW } from './3d-renderer.js';
+import { drawShader } from './3d-renderer.js';
 import type { makeCavernAppearance } from './cavern-appearance.js';
 import type { TerrainCamera, TerrainRenderer, TerrainLightingMode } from './3d-view.js';
 import { resolveTerrainStyle } from './terrain-style.js';
+import {
+  DEFAULT_MATERIAL_PRESENTATION_3D,
+  materialPredicates,
+  type MaterialPresentation3D,
+} from './material-presentation.js';
 
 export interface ResidentChunkRenderer extends TerrainRenderer {
   validateCamera(camera: TerrainCamera): void;
@@ -25,6 +30,7 @@ export async function makeChunkRenderer(
   edge: number,
   profiler?: LatencyProfiler,
   tick: () => number = () => 0,
+  presentation: MaterialPresentation3D = DEFAULT_MATERIAL_PRESENTATION_3D,
 ): Promise<ResidentChunkRenderer> {
   const context = canvas.getContext('webgpu');
   if (!context) throw new Error('Cannot create WebGPU canvas.');
@@ -49,7 +55,7 @@ fn linear(c:vec3u)->u32{return c.x+camera.shape.x*(c.y+camera.shape.y*c.z);}
 @group(0) @binding(5) var<storage,read_write> rebuild:array<u32>;
 @group(0) @binding(6) var<storage,read_write> work:array<u32>;
 @group(0) @binding(7) var<storage,read_write> dispatch:array<u32>;
-${mapping}
+${mapping}${materialPredicates(presentation)}
 @compute @workgroup_size(1) fn reset(){
  var length=0u;
  for(var k=0u;k<${chunks}u;k++){
@@ -66,11 +72,12 @@ ${mapping}
  let m=grid[i]&255u;if(m==0u){return;}let c=vec3i(coordinate(i));
  let normals=array<vec3i,6>(vec3i(-1,0,0),vec3i(1,0,0),vec3i(0,-1,0),vec3i(0,1,0),vec3i(0,0,-1),vec3i(0,0,1));
  for(var f=0u;f<6u;f++){let t=c+normals[f];var exposed=true;
-  if(m!=9u&&all(t>=vec3i(0))&&all(t<vec3i(camera.shape.xyz))){let n=grid[index(vec3u(t))]&255u;exposed=n==0u||n==9u;}
+  if(!cutout(m)&&all(t>=vec3i(0))&&all(t<vec3i(camera.shape.xyz))){let n=grid[index(vec3u(t))]&255u;exposed=seeThrough(n);}
   if(exposed){let slot=atomicAdd(&args[k*5u+1u],1u);faces[k*${capacity}u+slot]=i*6u+f;}
  }
 }`;
-  const drawCode = DRAW.replace('const colors=', mapping + '\nconst colors=')
+  const drawCode = drawShader(presentation)
+    .replace('const colors=', mapping + '\nconst colors=')
     .replace('let face=faces[instance];', 'let face=faces[(vertex/6u)*' + capacity + 'u+instance];')
     .replace(
       'let c=vec3f(f32(i%shape.x),f32((i/shape.x)%shape.y),f32(i/(shape.x*shape.y)));',
@@ -343,6 +350,7 @@ ${mapping}
           faces,
           uniform,
           rebuild,
+          presentation,
         );
         natural.setStyle(style);
       }

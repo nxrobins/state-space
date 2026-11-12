@@ -1,6 +1,8 @@
 /** Private, versioned, bounded Worker transport. No browser or physics starts on import. */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
 export const MULTIPHYSICS_WORKER_PROTOCOL_3D = 'multiphysics-worker-1';
+/** One page-to-Worker message before the protocol: `{ kind, snapshot, work? }`. */
+export const MULTIPHYSICS_WORKER_BOOTSTRAP_3D = 'multiphysics-worker-bootstrap-1';
 export interface MultiphysicsWorkerTransport3D {
   /** Ordered, structured-clone isolated delivery; this endpoint is owned by the adapter. */
   send(value: unknown): void;

@@ -14,7 +14,8 @@ import subprocess
 import sys
 import time
 import uuid
-from scripts.verification_guard import ROOT, Lease
+from scripts.verification_guard import ROOT, Lease, assert_recovery_enabled, assert_runtime_not_blocked
+from scripts.verification_journal import durable_json
 
 
 def source_path(name: str) -> str:
@@ -33,6 +34,8 @@ def main():
     parser.add_argument('stage', choices=STAGES)
     parser.add_argument('--browser-cli', type=Path)
     args = parser.parse_args()
+    # Refuse before any receipt, permit or hold write, as recover_m5 does.
+    assert_runtime_not_blocked(ROOT)
     stage = args.stage
     base = ROOT / 'dist/volume-m4/recovery'
     base.mkdir(parents=True, exist_ok=True)
@@ -100,10 +103,11 @@ assert.deepEqual(w.snapshot(),end);assert.equal(w.energyBalance().driftQ,0n);con
     with Lease():
         hold = ROOT / 'dist/verification/safety-hold.json'
         state = json.loads(hold.read_text(encoding='utf-8'))
+        assert_recovery_enabled(state)
         state['recoveryPermit'] = {'command': command, 'kind': kind, 'timeoutSeconds': timeout,
                                   'expiresAt': time.time() + 60, 'stage': stage,
                                   'reason': 'Staged recovery after quarantine and supervisor regression checks'}
-        hold.write_text(json.dumps(state, indent=2) + '\n', encoding='utf-8')
+        durable_json(hold, state)
     supervisor = out / 'supervisor'
     result = subprocess.run([sys.executable, '-m', 'scripts.verification_guard', '--kind', kind,
                              '--timeout', str(timeout), '--stall', '30' if stage == 'sdk' else '15', '--output', str(supervisor),

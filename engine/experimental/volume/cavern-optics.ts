@@ -13,7 +13,7 @@ fn opticalRay(origin:vec3f,direction:vec3f)->OpticalRay{
  for(var step=0u;step<64u;step++){
   let c=vec3i(floor(p));if(any(c<vec3i(0))||any(c>=vec3i(SHAPE))){break;}
   let word=cell(c);let m=word&255u;
-  if(m!=0u&&m!=9u&&!dielectric(m)){result.point=p;result.word=word;result.hit=true;break;}
+  if(!seeThrough(m)&&!dielectric(m)){result.point=p;result.word=word;result.hit=true;break;}
   // Only air/steam blocks may be skipped. Water, ice and glass remain exact
   // interface candidates even though they do not cast opaque shadows.
   let span=emptyVisibilitySpan(c,2u);let block=floor(p/f32(span))*f32(span);
@@ -25,7 +25,7 @@ fn opticalRay(origin:vec3f,direction:vec3f)->OpticalRay{
   if(m==2u){result.water+=travel;}if(m==8u){result.ice+=travel;}result.distance+=travel;
   var normal=vec3f(0);normal[axis]=-sign(d[axis]);
   let crossing=p+d*travel;let next=vec3i(floor(crossing-normal*.001));let nextMaterial=cell(next)&255u;
-  if((dielectric(m)||dielectric(nextMaterial))&&ior(m)!=ior(nextMaterial)&&(nextMaterial==0u||nextMaterial==9u||dielectric(nextMaterial))){
+  if((dielectric(m)||dielectric(nextMaterial))&&ior(m)!=ior(nextMaterial)&&(seeThrough(nextMaterial)||dielectric(nextMaterial))){
    if(interfaces>=4u){break;}interfaces++;
    let bent=refract(d,normal,ior(m)/ior(nextMaterial));
    if(dot(bent,bent)<.000001){d=reflect(d,normal);p=crossing+normal*.001;}
@@ -41,7 +41,7 @@ fn rayColor(ray:OpticalRay)->vec3f{
   let m=ray.word&255u;let p=ray.point;let n=ray.normal;
   var uv=p.xy;if(abs(n.x)>.5){uv=p.zy;}if(abs(n.y)>.5){uv=p.xz;}
   let rock=textureSampleLevel(rockColor,rockSampler,uv*style.rock.w,1.5).rgb;
-  var albedo=rock*style.rock.rgb;if(m==1u&&style.finish.w>0.){albedo*=rockVariation(p);}if(m==3u){albedo=style.sand.rgb;}if(m==11u){albedo=vec3f(.1,.19,.2);}
+  var albedo=rock*style.rock.rgb;if(m==1u&&style.finish.w>0.){albedo*=rockVariation(p);}if(m==3u){albedo=style.sand.rgb;}if(m==11u){albedo=vec3f(.1,.19,.2);}if(surface(m)){albedo=colors[m];}
   let toLamp=camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p;
   var irradiance=vec3f(.065,.095,.135)*style.lighting.x+style.lamp.rgb*style.lighting.y*max(0.,dot(n,safeDirection(toLamp)))*24./(3.+dot(toLamp,toLamp));
   // Secondary surfaces use bounded unshadowed direct illumination. The ray
@@ -52,7 +52,7 @@ fn rayColor(ray:OpticalRay)->vec3f{
    if(light.position.w>0.&&d2>.01&&d2<484.){irradiance+=light.color.rgb*style.lighting.z*max(0.,dot(n,normalize(d)))*pow(1.-d2/484.,2.)/(1.+d2);}
   }
   color=albedo*irradiance;
-  if(m==10u||m==17u){let hot=clamp((f32((ray.word>>8u)&255u)-170.)/85.,0.,1.);let crust=smoothstep(.39,.64,noise(p*2.9)+noise(p*9.7)*.12);color+=mix(vec3f(2.8,.18,.008),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}
+  if(emitter(m)){let hot=clamp((f32((ray.word>>8u)&255u)-glowFloor(m))/glowSpan(m),0.,1.);let crust=smoothstep(.39,.64,noise(p*2.9)+noise(p*9.7)*.12);color+=mix(emissionColor(m),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}
   color=mix(color,vec3f(.028,.045,.06),1.-exp(-ray.distance*.012));
  }
  let absorption=exp(-vec3f(.24,.075,.035)*ray.water-vec3f(.13,.045,.025)*ray.ice);

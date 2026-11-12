@@ -18,9 +18,14 @@ export const FRESH_3D = 1 << 15;
 export const COMPLETE_STRUCTURE_3D = 0x7fff;
 export type StructuralGeometry = { width: number; height: number; depth: number };
 export type StructuralState3D = { grid: Uint32Array; energyQ: Uint32Array; structure: Uint32Array };
-const cold = buildColdTable();
-export const structuralDensity = (v: number) => cold[(v & 255) * COLD_STRIDE + COLD_DENSITY];
-export function structuralEligible(v: number): boolean {
+/** The frozen ca-3d-m5 catalog. ca-3d-m6 worlds pass their validated reactive cold table instead. */
+export const DEFAULT_STRUCTURAL_COLD_3D: Uint32Array = buildColdTable();
+export const structuralDensity = (v: number, cold: Uint32Array = DEFAULT_STRUCTURAL_COLD_3D) =>
+  cold[(v & 255) * COLD_STRIDE + COLD_DENSITY];
+export function structuralEligible(
+  v: number,
+  cold: Uint32Array = DEFAULT_STRUCTURAL_COLD_3D,
+): boolean {
   const phase = (v >>> PHASE_SHIFT) & 15;
   return (
     (phase === PHASE_SOLID || phase === PHASE_FROZEN) &&
@@ -57,10 +62,11 @@ export function normalizeStructure3D(
   grid: Uint32Array,
   words: Uint32Array,
   g: StructuralGeometry,
+  cold: Uint32Array = DEFAULT_STRUCTURAL_COLD_3D,
 ): Uint32Array {
   const out = new Uint32Array(grid.length);
   for (let i = 0; i < out.length; i++)
-    if (structuralEligible(grid[i])) out[i] = words[i] & (INTEGRITY_3D | ANCHOR_3D);
+    if (structuralEligible(grid[i], cold)) out[i] = words[i] & (INTEGRITY_3D | ANCHOR_3D);
   for (let i = 0; i < out.length; i++) {
     if (!(out[i] & INTEGRITY_3D)) continue;
     for (const dir of [1, 3, 5]) {
@@ -78,7 +84,12 @@ export function normalizeStructure3D(
   return out;
 }
 
-export function structuralCapacity(v: number, q: number, integrity: number): number {
+export function structuralCapacity(
+  v: number,
+  q: number,
+  integrity: number,
+  cold: Uint32Array = DEFAULT_STRUCTURAL_COLD_3D,
+): number {
   const at = (v & 255) * COLD_STRIDE,
     nominal = cold[at + COLD_COHESION] * 16,
     softening = cold[at + COLD_SOFTENING];
@@ -110,12 +121,14 @@ export type StructuralPlan3D = {
 export function solveStructure3D(
   input: StructuralState3D,
   g: StructuralGeometry,
+  cold: Uint32Array = DEFAULT_STRUCTURAL_COLD_3D,
 ): StructuralPlan3D {
   const { grid, energyQ, structure } = input,
     n = grid.length;
   const active = (i: number, words = structure) => i >= 0 && (words[i] & INTEGRITY_3D) !== 0;
   const obstructed = (i: number, j: number) =>
-    (structure[j] & ANCHOR_3D) !== 0 || structuralDensity(grid[i]) <= structuralDensity(grid[j]);
+    (structure[j] & ANCHOR_3D) !== 0 ||
+    structuralDensity(grid[i], cold) <= structuralDensity(grid[j], cold);
   const distances = new Int32Array(n).fill(-1),
     loads = new Uint32Array(n),
     reactions = new Uint32Array(n),
@@ -143,7 +156,7 @@ export function solveStructure3D(
   let supportedWeight = 0;
   for (let k = 0; k < length; k++) {
     const i = queue[k];
-    loads[i] = Math.max(1, Math.ceil(structuralDensity(grid[i]) / 64));
+    loads[i] = Math.max(1, Math.ceil(structuralDensity(grid[i], cold) / 64));
     supportedWeight += loads[i];
   }
   const supports: number[] = [];
@@ -180,7 +193,7 @@ export function solveStructure3D(
     if (active(i)) {
       const integrity = structure[i] & INTEGRITY_3D,
         nominal = cold[(grid[i] & 255) * COLD_STRIDE + COLD_COHESION] * 16;
-      const capacity = structuralCapacity(grid[i], energyQ[i], integrity);
+      const capacity = structuralCapacity(grid[i], energyQ[i], integrity, cold);
       capacities[i] = capacity;
       const loss =
         capacity === 0
@@ -191,7 +204,7 @@ export function solveStructure3D(
       damaged[i] = (damaged[i] & ~INTEGRITY_3D) | (integrity - loss);
       if (loss === integrity) brokenCells++;
     }
-  const edges = normalizeStructure3D(grid, damaged, g),
+  const edges = normalizeStructure3D(grid, damaged, g, cold),
     ids = new Int32Array(n).fill(-1);
   // Independent flood-fill component construction, canonical minimum source index.
   const members: number[][] = [],

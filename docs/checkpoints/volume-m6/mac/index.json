@@ -1,0 +1,1992 @@
+{
+  "scope": "Supervised macOS qualification stages for ca-3d-m6: the tiny parity probes from the structural probe bundle and the cavern chambers; one bounded stage per receipt, not release acceptance",
+  "host": "Apple M3 Ultra, macOS 26.6.2, owned headless Chrome under scripts.verification_guard (kind macos-qualification, 300 s), Metal WebGPU",
+  "records": [
+    {
+      "stage": "m6-gameplay-32-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-burning-bridge-cf7583471d2d/report.json",
+      "reportSha256": "24b14c1c35a10eb51aea53e5849beb4c34d574b20bf75beb63e1d015b7692d25",
+      "supervisorJob": "fb66f4d957a045b9b708cdcc6c2b6442",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-burning-bridge-cf7583471d2d/supervisor.json",
+      "supervisorSha256": "115b2c9aa2004113574d79757551617dd83051908dc0ba737483a360f08c9d82",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-burning-bridge",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "60c7ce55313f173a32c910a31e668e924c5f0274e50b95fe93dc3ca5288d5412"
+    },
+    {
+      "stage": "m6-gameplay-32-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-0fec4ef17e44/report.json",
+      "reportSha256": "1e0fa0adee4ba1c7c3f0f6f6e20bc7b243f208db0d8ff83465d4189827842fa8",
+      "supervisorJob": "ce03b7a6a9014e69a985ff73c4792dad",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-0fec4ef17e44/supervisor.json",
+      "supervisorSha256": "702907458f1a44ac5c41fb5ccba36d216523e63df68f1de7fd2c54c7307b9a0a",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-thermal-valve",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "6ac2420eee2ac30e485f0cc03a7d5fa658ab494ddc481a6f15af527045e0f8d4"
+    },
+    {
+      "stage": "m6-gameplay-32-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-ceramic-c608b3862bd6/report.json",
+      "reportSha256": "5961b0982d8e76e044c5f831ed8d20ddcad6a86324f5e832b5da7e8dd865b3a9",
+      "supervisorJob": "2005359f51a74f07b7665c495956b1a3",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-ceramic-c608b3862bd6/supervisor.json",
+      "supervisorSha256": "ace706f868a529f0724cb2fe44a1975cada1eb6603bde7c64df2a535329732ce",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-thermal-valve-ceramic",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 32,
+        "plugMelt": null,
+        "waterHeldThrough": 32,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "abaa1677215b79ef164aa7b781ab6d1191116ea5c89e1505914623f578103b02"
+    },
+    {
+      "stage": "m6-gameplay-64-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-burning-bridge-0916d208a6c6/report.json",
+      "reportSha256": "1200b34b425eec91698d28af37e224fac5bd0f1f145f6ecc784dd3f5d2f76068",
+      "supervisorJob": "0309759b37b1402583d8aa5ca6c4ac4a",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-burning-bridge-0916d208a6c6/supervisor.json",
+      "supervisorSha256": "26852812cf14637ba7bdc5da43aad845f17eb427a03a6bc2ce52f1bb55241c2a",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-64-burning-bridge",
+        "maxDimension": 64,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-gameplay-32-burning-bridge",
+        "report": "macos-m6-gameplay-32-burning-bridge-cf7583471d2d/report.json",
+        "reportSha256": "24b14c1c35a10eb51aea53e5849beb4c34d574b20bf75beb63e1d015b7692d25",
+        "receipt": "fb66f4d957a045b9b708cdcc6c2b6442/report.json",
+        "receiptSha256": "115b2c9aa2004113574d79757551617dd83051908dc0ba737483a360f08c9d82"
+      },
+      "size": 64,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "2542a535f5d4759461a5f0bf0e15c39bfc372ac6456af4e7bc3b3e1ae2899a8e"
+    },
+    {
+      "stage": "m6-gameplay-64-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-thermal-valve-4f1b864cbd18/report.json",
+      "reportSha256": "a84491ed9992d3c599e20e3fedf33a097e114ec088b410614cf5dd831bcaa286",
+      "supervisorJob": "501e105c353a48db9c0562eed7799e4f",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-thermal-valve-4f1b864cbd18/supervisor.json",
+      "supervisorSha256": "e3eef514db8047139774d898485db74551e734cf49876db9befe9e330ad4c854",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-64-thermal-valve",
+        "maxDimension": 64,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-gameplay-32-thermal-valve",
+        "report": "macos-m6-gameplay-32-thermal-valve-0fec4ef17e44/report.json",
+        "reportSha256": "1e0fa0adee4ba1c7c3f0f6f6e20bc7b243f208db0d8ff83465d4189827842fa8",
+        "receipt": "ce03b7a6a9014e69a985ff73c4792dad/report.json",
+        "receiptSha256": "702907458f1a44ac5c41fb5ccba36d216523e63df68f1de7fd2c54c7307b9a0a"
+      },
+      "size": 64,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "395b309b090b7a264792981fe04f8c82b7188b1c68b350814ce9ffb523840c80"
+    },
+    {
+      "stage": "m6-gameplay-64-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-thermal-valve-ceramic-45fb136d79e7/report.json",
+      "reportSha256": "ba0d3cdf08be0a7a31af80018d8dcd6cdad03c43aa1d969e606fbd73ecf153fd",
+      "supervisorJob": "ef8f7229191548bfa05f06c8b3e3a0fe",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-64-thermal-valve-ceramic-45fb136d79e7/supervisor.json",
+      "supervisorSha256": "ba42900a1a64ab99d9bfda2529895727f007e48c051f6e92a7372fbb756b0a93",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-64-thermal-valve-ceramic",
+        "maxDimension": 64,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-gameplay-32-thermal-valve-ceramic",
+        "report": "macos-m6-gameplay-32-thermal-valve-ceramic-c608b3862bd6/report.json",
+        "reportSha256": "5961b0982d8e76e044c5f831ed8d20ddcad6a86324f5e832b5da7e8dd865b3a9",
+        "receipt": "2005359f51a74f07b7665c495956b1a3/report.json",
+        "receiptSha256": "ace706f868a529f0724cb2fe44a1975cada1eb6603bde7c64df2a535329732ce"
+      },
+      "size": 64,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 32,
+        "plugMelt": null,
+        "waterHeldThrough": 32,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "1ed9dc19804d8f6f9662654d7da8fe32ece8ae9d121126da11efc202291b645f"
+    },
+    {
+      "stage": "m6-replay-32-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-burning-bridge-d793fcd2514d/report.json",
+      "reportSha256": "6b2ac5f213adeec2f5c2daed16ce56a8618558738281784558f35a3722c63dd8",
+      "supervisorJob": "4387f9a8a7aa4659a57dd050623f2643",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-burning-bridge-d793fcd2514d/supervisor.json",
+      "supervisorSha256": "8a579b56aceda63cd7352c3f14fb2cad09364e381a9872014fd92f487be2cd45",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-burning-bridge",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "a99d2f271b04b051822f6f826d5b73b7c8cd7b1a6aae4c42f00ab0bce426c7d6",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "eca28c9279fd47b6a66dec401ccc5f18dad07c7795ae1c21fcc6f4a54c751f20"
+    },
+    {
+      "stage": "m6-replay-32-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-7dc4cb9e924a/report.json",
+      "reportSha256": "134cedc11ea013a304817044356c0a80d8f39393fa9697c59cc30335da634883",
+      "supervisorJob": "1e778a2e51484bd6a91dfbd4c0cfc39e",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-7dc4cb9e924a/supervisor.json",
+      "supervisorSha256": "9aa4c1ca0f098616dc02e513b7f4ef211325fa78c106699f9d58b9d99389af7d",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-thermal-valve",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 1024,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "3d8228aa0e09514f3fd019e75b7ffec0998919b7a4417ed84d30f5d62818d877",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "49c3f9f669f7831cece400160eaef94babfab2b4320c031ba2f18b554fd800a4"
+    },
+    {
+      "stage": "m6-replay-32-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-ceramic-47dcbe20ce41/report.json",
+      "reportSha256": "4841e9b4cd47e06a59a56aaeaff63e0d8da67d3378ef2d0b8b45072b2073950e",
+      "supervisorJob": "38b01f870ad848b9a928e5e297703484",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-ceramic-47dcbe20ce41/supervisor.json",
+      "supervisorSha256": "52f3352b8338408552de3922780aacc8fc2c2556798406c0ef03500793607b4a",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-thermal-valve-ceramic",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 1024,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 1024,
+        "plugMelt": null,
+        "waterHeldThrough": 1024,
+        "waterRelease": null,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "5bd0edeee7a4ac4dfc6b72ae0fcbf99587e3edc2414ce37d92cef2343cd05833",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "9ced6ed12e77db4771f24c1554e4248d25219daa0351939adede1965d3d98bec"
+    },
+    {
+      "stage": "m6-replay-64-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-burning-bridge-6ad8e62227a8/report.json",
+      "reportSha256": "315fb9989fc68b8465715b1ce8f6dc61180e49bf07b389cca306dc57832efe85",
+      "supervisorJob": "78f7e4640e494148bd12bd6d479d2288",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-burning-bridge-6ad8e62227a8/supervisor.json",
+      "supervisorSha256": "c4713f398f75d09d4b2ce1cb88f646558db6e0991f55acf218fbbbdb34a2fcea",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-64-burning-bridge",
+        "maxDimension": 64,
+        "maxReplayTicks": 256,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-replay-32-burning-bridge",
+        "report": "macos-m6-replay-32-burning-bridge-d793fcd2514d/report.json",
+        "reportSha256": "6b2ac5f213adeec2f5c2daed16ce56a8618558738281784558f35a3722c63dd8",
+        "receipt": "4387f9a8a7aa4659a57dd050623f2643/report.json",
+        "receiptSha256": "8a579b56aceda63cd7352c3f14fb2cad09364e381a9872014fd92f487be2cd45"
+      },
+      "size": 64,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 256
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": 256,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "afa607f8f9bb5542618e0cbe38540319e393375c6a6a3bd1b9524fa2ace1358b",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "19595eaa73697870bfd0c479f54c58bc361fdaa79919a9fbf305505a7cc46e09"
+    },
+    {
+      "stage": "m6-replay-64-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-thermal-valve-fa21449e4b81/report.json",
+      "reportSha256": "7494e22b489d74fb3fec42b6ccb9064c47a5d66bc918357b455c4a3cad2a2064",
+      "supervisorJob": "e2e6638167054639831b058711e278f5",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-thermal-valve-fa21449e4b81/supervisor.json",
+      "supervisorSha256": "bee004df7f581cef8dbc922e6bd0b25431469aac19f2702e977354bd9611cc1f",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-64-thermal-valve",
+        "maxDimension": 64,
+        "maxReplayTicks": 256,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-replay-32-thermal-valve",
+        "report": "macos-m6-replay-32-thermal-valve-7dc4cb9e924a/report.json",
+        "reportSha256": "134cedc11ea013a304817044356c0a80d8f39393fa9697c59cc30335da634883",
+        "receipt": "1e778a2e51484bd6a91dfbd4c0cfc39e/report.json",
+        "receiptSha256": "9aa4c1ca0f098616dc02e513b7f4ef211325fa78c106699f9d58b9d99389af7d"
+      },
+      "size": 64,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 256,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 256
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": 256,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "41c338a06515f51c7411f810d64c511d1a2b1895c9e73c21a72534e4d54bf76a",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "f08d1146a38695baf5a60f6078bdf6f75c3405dccf18da4131f1f10509b6643c"
+    },
+    {
+      "stage": "m6-replay-64-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-thermal-valve-ceramic-0fa91e107c2d/report.json",
+      "reportSha256": "246a9adaf91e840c2318973192cbbb321b96bdd62fc65611e6a262addb478429",
+      "supervisorJob": "d0fbc433730448ec821c37f456a25b1a",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-64-thermal-valve-ceramic-0fa91e107c2d/supervisor.json",
+      "supervisorSha256": "defc6926f43192d611197c353909af080204eade98a3a0b191fd1fe53958d7c6",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-64-thermal-valve-ceramic",
+        "maxDimension": 64,
+        "maxReplayTicks": 256,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": {
+        "stage": "m6-replay-32-thermal-valve-ceramic",
+        "report": "macos-m6-replay-32-thermal-valve-ceramic-47dcbe20ce41/report.json",
+        "reportSha256": "4841e9b4cd47e06a59a56aaeaff63e0d8da67d3378ef2d0b8b45072b2073950e",
+        "receipt": "38b01f870ad848b9a928e5e297703484/report.json",
+        "receiptSha256": "52f3352b8338408552de3922780aacc8fc2c2556798406c0ef03500793607b4a"
+      },
+      "size": 64,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 256,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 256,
+        "plugMelt": null,
+        "waterHeldThrough": 256,
+        "waterRelease": null,
+        "observedThrough": 256
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": 256,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 256,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "d05a1a9769566fe4d2c63307da1898e61de277c5b50002f6dd8584ae2da4d5ec",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "dded9449a7b78b441841c45b1aa157fcbebf08a597a09147745af2731460ffcd"
+    },
+    {
+      "stage": "m6-tiny-dense",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-tiny-dense-36be0c1fe7ad/report.json",
+      "reportSha256": "8cdb0b19e0336281d5ef13460692bcd09aae29d3f278478b1582456bcd76c271",
+      "supervisorJob": "a625e700ce6f4e399058922017f023c7",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-tiny-dense-36be0c1fe7ad/supervisor.json",
+      "supervisorSha256": "c335b17efb14f1c14d5dc12a801949dd3b8e9283b61f50d69851842008ef190d",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-tiny-dense",
+        "maxDimension": 16,
+        "maxReplayTicks": 64,
+        "maxFrames": 0,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "mode": "dense",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "probeScope": "8^3 and 16^3 ca-3d-m6 fixtures, GPU equal to the CPU oracle after every tick; not larger worlds, frames or gameplay",
+      "fixtures": 7,
+      "probes": [
+        {
+          "name": "bridge",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "ada7e91ba04c1b3d8f0a19ce518a986c0e484c67729e6407f4d025336dadab55",
+          "windows": {
+            "firstReaction": 4,
+            "spanOnFloorFrom": 8,
+            "unchangedThrough": 3
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "sealed",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "2905a7c693ed5be0310009124113a2539bc92ea1331dbc53a0d211e737f1006a",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "vented",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "742aa86c4cf412b659166be9f72330cf6366ab50ebb45054d203fb29a878396a",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "valve",
+          "size": 8,
+          "ticks": 48,
+          "finalHash": "38f1fc919c3eba031792b8dc7f018459c4e85a0a43715fa99a6744e00cad818c",
+          "windows": {
+            "plugSolidThrough": 12,
+            "plugMelted": 13,
+            "waterHeldThrough": 13,
+            "waterReleased": 14
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "barrier",
+          "size": 8,
+          "ticks": 48,
+          "finalHash": "17f6602a4e2815d680312090a2c5f4b92bd43aec964bf7a6e21532eabb6d5650",
+          "windows": {
+            "plugSolidThrough": 48,
+            "waterHeldThrough": 48
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "uniform",
+          "size": 8,
+          "ticks": 16,
+          "finalHash": "1ac238d0a98104ce6a21342b494960a1b5d32a31c5db701c8150fd17b12f3bf0",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "dormant",
+          "size": 8,
+          "ticks": 16,
+          "finalHash": "919b27ccb48d0ee8f031797bc9fda3189cf446d53d1e5e04680de45e20c27d20",
+          "windows": {
+            "unchangedThrough": 16
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "bridge",
+          "size": 16,
+          "ticks": 64,
+          "finalHash": "a08e2047985165d86b7727def3f9501b5ba94e817e7ea3f0d6a59debeb009ee8",
+          "windows": {
+            "firstReaction": 4,
+            "spanOnFloorFrom": 16,
+            "unchangedThrough": 3
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "sealed",
+          "size": 16,
+          "ticks": 40,
+          "finalHash": "911be9642cfe8deef7278b225c7268719cff49071f4a13da0c7a61641c4deea8",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "vented",
+          "size": 16,
+          "ticks": 40,
+          "finalHash": "61d2c19f0597b184adbfa69ade9fd38e984945d96888435735ab4677e594750d",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "valve",
+          "size": 16,
+          "ticks": 48,
+          "finalHash": "77dd9647b4b46238a178db2ef29bac83b7cbcd7eacc48952696f8f7df8780a29",
+          "windows": {
+            "plugSolidThrough": 12,
+            "plugMelted": 13,
+            "waterHeldThrough": 13,
+            "waterReleased": 14
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "barrier",
+          "size": 16,
+          "ticks": 48,
+          "finalHash": "4e75b0e2a2e4d1b50b89f42a08bf5e73a2aa95fec183176d090aac632fadb995",
+          "windows": {
+            "plugSolidThrough": 48,
+            "waterHeldThrough": 48
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "uniform",
+          "size": 16,
+          "ticks": 16,
+          "finalHash": "55bb0300773b1d8a2e0b57e6c338306255e7132894ac6ca9fe3cf40aded7db86",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "dormant",
+          "size": 16,
+          "ticks": 16,
+          "finalHash": "5423ae269fc40d9f1cc100c567e9ed16894aece367dfd8724d940af3e0fc220a",
+          "windows": {
+            "unchangedThrough": 16
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        }
+      ],
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "155afa663836c00b02b35d097b5ca5c64564ea9698fe87e5765d48bd4a07e791"
+    },
+    {
+      "stage": "m6-tiny-active",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-tiny-active-6b6a2dc2dd55/report.json",
+      "reportSha256": "8508ee595da2f67522a02e5fb00df727a9a695d2c12e813639d9650b47a09e3a",
+      "supervisorJob": "a99aa3d9f08242bd86f4ca200ddd0eac",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-tiny-active-6b6a2dc2dd55/supervisor.json",
+      "supervisorSha256": "ee6975117ef14d51fb970f79f4bdd2e0109b3e82f3ef4819f015709ba1906a8e",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-tiny-active",
+        "maxDimension": 16,
+        "maxReplayTicks": 64,
+        "maxFrames": 0,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "mode": "active",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "probeScope": "8^3 and 16^3 ca-3d-m6 fixtures, GPU equal to the CPU oracle after every tick; not larger worlds, frames or gameplay",
+      "fixtures": 7,
+      "probes": [
+        {
+          "name": "bridge",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "ada7e91ba04c1b3d8f0a19ce518a986c0e484c67729e6407f4d025336dadab55",
+          "windows": {
+            "firstReaction": 4,
+            "spanOnFloorFrom": 8,
+            "unchangedThrough": 3
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "sealed",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "2905a7c693ed5be0310009124113a2539bc92ea1331dbc53a0d211e737f1006a",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "vented",
+          "size": 8,
+          "ticks": 40,
+          "finalHash": "742aa86c4cf412b659166be9f72330cf6366ab50ebb45054d203fb29a878396a",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "valve",
+          "size": 8,
+          "ticks": 48,
+          "finalHash": "38f1fc919c3eba031792b8dc7f018459c4e85a0a43715fa99a6744e00cad818c",
+          "windows": {
+            "plugSolidThrough": 12,
+            "plugMelted": 13,
+            "waterHeldThrough": 13,
+            "waterReleased": 14
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "barrier",
+          "size": 8,
+          "ticks": 48,
+          "finalHash": "17f6602a4e2815d680312090a2c5f4b92bd43aec964bf7a6e21532eabb6d5650",
+          "windows": {
+            "plugSolidThrough": 48,
+            "waterHeldThrough": 48
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "uniform",
+          "size": 8,
+          "ticks": 16,
+          "finalHash": "1ac238d0a98104ce6a21342b494960a1b5d32a31c5db701c8150fd17b12f3bf0",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "dormant",
+          "size": 8,
+          "ticks": 16,
+          "finalHash": "919b27ccb48d0ee8f031797bc9fda3189cf446d53d1e5e04680de45e20c27d20",
+          "windows": {
+            "unchangedThrough": 16
+          },
+          "dispatchedChunks": 0,
+          "totalChunks": 8,
+          "finalAwake": 0
+        },
+        {
+          "name": "bridge",
+          "size": 16,
+          "ticks": 64,
+          "finalHash": "a08e2047985165d86b7727def3f9501b5ba94e817e7ea3f0d6a59debeb009ee8",
+          "windows": {
+            "firstReaction": 4,
+            "spanOnFloorFrom": 16,
+            "unchangedThrough": 3
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "sealed",
+          "size": 16,
+          "ticks": 40,
+          "finalHash": "911be9642cfe8deef7278b225c7268719cff49071f4a13da0c7a61641c4deea8",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "vented",
+          "size": 16,
+          "ticks": 40,
+          "finalHash": "61d2c19f0597b184adbfa69ade9fd38e984945d96888435735ab4677e594750d",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "valve",
+          "size": 16,
+          "ticks": 48,
+          "finalHash": "77dd9647b4b46238a178db2ef29bac83b7cbcd7eacc48952696f8f7df8780a29",
+          "windows": {
+            "plugSolidThrough": 12,
+            "plugMelted": 13,
+            "waterHeldThrough": 13,
+            "waterReleased": 14
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "barrier",
+          "size": 16,
+          "ticks": 48,
+          "finalHash": "4e75b0e2a2e4d1b50b89f42a08bf5e73a2aa95fec183176d090aac632fadb995",
+          "windows": {
+            "plugSolidThrough": 48,
+            "waterHeldThrough": 48
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "uniform",
+          "size": 16,
+          "ticks": 16,
+          "finalHash": "55bb0300773b1d8a2e0b57e6c338306255e7132894ac6ca9fe3cf40aded7db86",
+          "windows": {
+            "firstReaction": 1
+          },
+          "dispatchedChunks": 224,
+          "totalChunks": 8,
+          "finalAwake": 8
+        },
+        {
+          "name": "dormant",
+          "size": 16,
+          "ticks": 16,
+          "finalHash": "5423ae269fc40d9f1cc100c567e9ed16894aece367dfd8724d940af3e0fc220a",
+          "windows": {
+            "unchangedThrough": 16
+          },
+          "dispatchedChunks": 0,
+          "totalChunks": 8,
+          "finalAwake": 0
+        }
+      ],
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "9597572ca453e2e48cb07540f85fa5c9f5961ac4611cbcbbf971caa6a7e4e91e"
+    },
+    {
+      "stage": "m6-gameplay-32-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-burning-bridge-d838d4dd374a/report.json",
+      "reportSha256": "3d2535c93957b23a357bb527e8c411c6ac6d0ebcad484e948567bfd8f1c1ef2c",
+      "supervisorJob": "eaa66242eaf24a8ea720e336eb71b167",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-burning-bridge-d838d4dd374a/supervisor.json",
+      "supervisorSha256": "43e6ca4639ef6435cb1b2bdc500d64cd94be41e32740f69fd587673bc67a16de",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-burning-bridge",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "a2772c3cfd401834e31ec041affed395cc3d91552bcb5fdfd568b36fdda3a3e8"
+    },
+    {
+      "stage": "m6-replay-32-burning-bridge",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-burning-bridge-9d79a3dd7c67/report.json",
+      "reportSha256": "b962f012db298a7628566850588156df43d2e413fca44cc53f527142a084bf5f",
+      "supervisorJob": "0258cd30213d4f64a366091db9f7c716",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-burning-bridge-9d79a3dd7c67/supervisor.json",
+      "supervisorSha256": "2306bb9573f3263fb1e30134ed4d8b818a5853d44404f1272c4eb69e0d4a5620",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-burning-bridge",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "burning-bridge",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": 16,
+        "stableThrough": 15,
+        "firstReaction": 16,
+        "spanOnFloorFrom": 27,
+        "plugSolidThrough": 0,
+        "plugMelt": null,
+        "waterHeldThrough": 0,
+        "waterRelease": null,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 15,
+        "failureWindow": [
+          16,
+          16
+        ],
+        "ignitionTick": 16,
+        "firstReactionTick": 16,
+        "spanOnFloorTick": 27
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "a99d2f271b04b051822f6f826d5b73b7c8cd7b1a6aae4c42f00ab0bce426c7d6",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "7ef83043536db4a11f19375789e87f4767c8c85eed5a7f1c18674267379ea3d3"
+    },
+    {
+      "stage": "m6-gameplay-32-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-b476a5623122/report.json",
+      "reportSha256": "212495620a7138de2e4157ab0fdc00140869f6829c21494d80465f5a45d8c457",
+      "supervisorJob": "13afa495f1f24f0485b272917283291d",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-b476a5623122/supervisor.json",
+      "supervisorSha256": "50dd46136468d49d0556f4900b2737494253f894b3d9a2599e3a07748b6d8344",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-thermal-valve",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "202f7032e95b3b1c221a063994e11623f93d41aa3ec60e480600359c56c03f11"
+    },
+    {
+      "stage": "m6-replay-32-thermal-valve",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-58e515fcf16b/report.json",
+      "reportSha256": "fffcb72c2ebb2ae4f807fa2a681a6037d1a98718689a3d2ff9fc3b77651febc3",
+      "supervisorJob": "c634d881069145699d74ead7d00bec4b",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-58e515fcf16b/supervisor.json",
+      "supervisorSha256": "170f0ae1e1c0ee7ca7cb70d3c40efba09807136b5ceda081a4c046494b476901",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-thermal-valve",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 1024,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 26,
+        "plugMelt": 27,
+        "waterHeldThrough": 27,
+        "waterRelease": 28,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 26,
+        "plugMeltTick": 27,
+        "waterHeldThrough": 27,
+        "waterReleaseTick": 28
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "3d8228aa0e09514f3fd019e75b7ffec0998919b7a4417ed84d30f5d62818d877",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "db7948c1a064c313c8bd43d6357f987b44ad020b0ff3e16a6b2f6c28da2898ca"
+    },
+    {
+      "stage": "m6-gameplay-32-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-ceramic-1bf41f038a2d/report.json",
+      "reportSha256": "82e93dd8d29411b46338f63fba7f56a0202dcc9bce8a4a2388c37daf468999e6",
+      "supervisorJob": "25f138ed92114bca9550eeb88a385d33",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-gameplay-32-thermal-valve-ceramic-1bf41f038a2d/supervisor.json",
+      "supervisorSha256": "3c96fd4bbe6690e9d6f45646c1b36fdc2758f74b30a4c0e81699e0479ca236ef",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-gameplay-32-thermal-valve-ceramic",
+        "maxDimension": 32,
+        "maxReplayTicks": 32,
+        "maxFrames": 32,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 32,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 32,
+        "plugMelt": null,
+        "waterHeldThrough": 32,
+        "waterRelease": null,
+        "observedThrough": 32
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": null,
+      "frames": 32,
+      "runs": null,
+      "finalHash": null,
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": true,
+      "retainedSupervisorSha256": "e6e99860153471715ced3fba5edcc27903033e5a7cf17b7478c5dc7a27309b5e"
+    },
+    {
+      "stage": "m6-replay-32-thermal-valve-ceramic",
+      "passed": true,
+      "sourceUnchanged": true,
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "report": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-ceramic-edfedb6ba208/report.json",
+      "reportSha256": "2c52f1dc5a0c33fab28ae415e48572e56afe5d008c69050aa3230c3cf4c2f985",
+      "supervisorJob": "6e696694cb6a48c1aa5cd296a8bf90db",
+      "supervisorReceipt": "docs/checkpoints/volume-m6/mac/macos-m6-replay-32-thermal-valve-ceramic-edfedb6ba208/supervisor.json",
+      "supervisorSha256": "54394a165c650118a0577a337baf052bebb9406859c443ade31456c8e57ac833",
+      "exitCode": 0,
+      "scope": {
+        "stage": "m6-replay-32-thermal-valve-ceramic",
+        "maxDimension": 32,
+        "maxReplayTicks": 1024,
+        "maxFrames": 660,
+        "gpuTelemetryAvailable": false,
+        "independentWatchdog": true,
+        "sampledRssLimitMiB": 8192
+      },
+      "prerequisite": null,
+      "size": 32,
+      "scenario": "thermal-valve-ceramic",
+      "catalog": "thermal",
+      "rulesVersion": "ca-3d-m6",
+      "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+      "windows": {
+        "firstFall": null,
+        "stableThrough": 1024,
+        "firstReaction": null,
+        "spanOnFloorFrom": null,
+        "plugSolidThrough": 1024,
+        "plugMelt": null,
+        "waterHeldThrough": 1024,
+        "waterRelease": null,
+        "observedThrough": 1024
+      },
+      "expected": {
+        "stableThrough": 1024,
+        "failureWindow": null,
+        "sourceWindow": [
+          16,
+          47
+        ],
+        "plugSolidThrough": 1024,
+        "waterHeldThrough": 1024
+      },
+      "ticks": 1024,
+      "frames": null,
+      "runs": [
+        {
+          "mode": "dense",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "dense",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 0,
+          "end": 1024,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 3,
+          "end": 11,
+          "exact": true
+        },
+        {
+          "mode": "active",
+          "start": 15,
+          "end": 21,
+          "exact": true
+        }
+      ],
+      "finalHash": "5bd0edeee7a4ac4dfc6b72ae0fcbf99587e3edc2414ce37d92cef2343cd05833",
+      "energyDriftQ": "0",
+      "backendInfo": {
+        "vendor": "apple",
+        "architecture": "metal-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "reportRetained": false,
+      "retainedSupervisorSha256": "0278ea0af82b801a5469fd45388925271f214b7ce76a985d6f44ca72442b60f0"
+    }
+  ],
+  "retention": "Gameplay and tiny-probe reports and every supervisor receipt are retained in full. The nine replay reports carry 1,025 reference digests and about 2,000 per-tick GPU checks each, so only their SHA-256, windows, runs and tick-end digest are kept here; the raw files remain in dist/verification on the workstation and any stage is reproducible with npm run verify:macos -- --stage <name>. sourceHashesSha256 is the SHA-256 of each report's sourceHashes map serialized with sorted keys and no whitespace; sourceSets lists the two sets and the hashed paths that differ between them. Supervisor receipts had the workstation worktree prefix removed from their absolute paths after capture: supervisorSha256 and prerequisite hashes are the captured receipts, retainedSupervisorSha256 is the file kept here.",
+  "sourceSets": [
+    {
+      "sourceHashesSha256": "904ce35e854e408c51f712eb2ab5efb8edd8ea8ca2b9239a081cb6b062e4b378",
+      "records": 12,
+      "stages": [
+        "m6-gameplay-32-burning-bridge",
+        "m6-gameplay-32-thermal-valve",
+        "m6-gameplay-32-thermal-valve-ceramic",
+        "m6-gameplay-64-burning-bridge",
+        "m6-gameplay-64-thermal-valve",
+        "m6-gameplay-64-thermal-valve-ceramic",
+        "m6-replay-32-burning-bridge",
+        "m6-replay-32-thermal-valve",
+        "m6-replay-32-thermal-valve-ceramic",
+        "m6-replay-64-burning-bridge",
+        "m6-replay-64-thermal-valve",
+        "m6-replay-64-thermal-valve-ceramic"
+      ],
+      "note": "The first twelve chamber stages, run on one source set whose tracked files are the tree that introduced the stages. The six 64^3 receipts and their 32^3 prerequisites are retained from this set; the 64^3 stages were not rerun afterwards because the follow-up launched nothing above 32^3."
+    },
+    {
+      "sourceHashesSha256": "0ccea30af35afcaa1dea30db03b2a4449cf25fe2ed82ba6a0659875661293b92",
+      "records": 8,
+      "stages": [
+        "m6-tiny-dense",
+        "m6-tiny-active",
+        "m6-gameplay-32-burning-bridge",
+        "m6-replay-32-burning-bridge",
+        "m6-gameplay-32-thermal-valve",
+        "m6-replay-32-thermal-valve",
+        "m6-gameplay-32-thermal-valve-ceramic",
+        "m6-replay-32-thermal-valve-ceramic"
+      ],
+      "differsFromPreviousSet": [
+        "dist/volume-m5/cavern-appearance-Dc7sZjhG.js",
+        "dist/volume-m5/frame-hash.js",
+        "dist/volume-m5/structural-probe-Bxv-Tc-v.js",
+        "dist/volume-m5/structural-probe.js",
+        "engine/conformance.test.ts",
+        "engine/contracts.test.ts",
+        "engine/sdk.test.ts",
+        "engine/structure.test.ts",
+        "engine/test-support/python-interpreter.ts",
+        "examples/sdk/macos-qualification.js",
+        "scripts/verification_guard.mjs",
+        "scripts/verification_macos.py"
+      ],
+      "note": "The tiny parity probes and the six 32^3 chamber stages rerun on the final sources of the branch: the shared Python interpreter resolver, the m6-tiny stages and the probe bundle rebuilt from them. Each 32^3 replay ends in the same tick-1,024 digest as its first-set run."
+    }
+  ]
+}

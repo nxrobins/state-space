@@ -8,6 +8,7 @@
 /examples/** -text
 /locked/** -text
 /web/** -text
+/site/** -text
 /tower-defense-rogue/** -text
 /docs/** -text
 /*.py -text

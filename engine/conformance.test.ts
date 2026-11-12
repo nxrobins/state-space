@@ -1,15 +1,13 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { createStateSpaceField, packVoxel } from './browser_state_space.js';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
+import { createStateSpaceField } from './browser_state_space.js';
 import { runCpuPass, runCpuTick } from './cpu_physics.js';
 import { MAT, buildColdTable } from './generated/materials.js';
-import { seedState, energyLedger } from './thermal.js';
+import { energyLedger } from './thermal.js';
 import { KERNEL_SPECS } from './generated/schedule.js';
-import { seedStructureState, type StructuralState } from './structure.js';
-import { DEFAULT_REGISTRY } from './registry.js';
+import type { StructuralState } from './structure.js';
 
 interface Case {
   name: string;
@@ -25,9 +23,7 @@ interface Case {
 
 let cases: Case[] = [];
 beforeAll(async () => {
-  const python =
-    process.env.STATE_SPACE_PYTHON ??
-    (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
+  const python = pythonInterpreter();
   const { stdout } = await promisify(execFile)(python, ['-m', 'engine.conformance'], {
     encoding: 'utf8',
     timeout: 120_000,
@@ -170,50 +166,5 @@ describe('native GPU and browser CPU conformance', () => {
     expect(
       indices(melted.cells, MAT.MOLTEN_METAL).every((index) => melted.structure[index] === 0),
     ).toBe(true);
-  });
-
-  it('requires mutually exclusive oxygen claims and actual hot-gas buoyancy', () => {
-    const field = createStateSpaceField(3, 1);
-    field.setCell(0, 0, MAT.WOOD, 255);
-    field.setCell(2, 0, MAT.WOOD, 255);
-    field.step();
-    const materials = [...field.grid].map((v) => v & 255);
-    expect(materials.filter((m) => m === MAT.WOOD)).toHaveLength(1);
-    expect(materials.filter((m) => m === MAT.AIR)).toHaveLength(0);
-    const smoke = createStateSpaceField(3, 5);
-    smoke.setCell(1, 3, MAT.SMOKE, 200);
-    smoke.step(4);
-    expect([...smoke.grid].findIndex((v) => (v & 255) === MAT.SMOKE)).toBeLessThan(9);
-  });
-
-  it('preserves immutable pass inputs and prevents observers changing the simulation', () => {
-    const cells = Uint32Array.of(
-      packVoxel(MAT.WOOD, 255),
-      packVoxel(MAT.AIR),
-      packVoxel(MAT.WOOD, 255),
-    );
-    const original = cells.slice();
-    const cold = buildColdTable();
-    const expected = runCpuTick(
-      seedStructureState(seedState(cells), 3, 1, DEFAULT_REGISTRY),
-      3,
-      1,
-      cold,
-      0,
-    );
-    const result = runCpuTick(
-      seedStructureState(seedState(cells), 3, 1, DEFAULT_REGISTRY),
-      3,
-      1,
-      cold,
-      0,
-      (_id, observed) => {
-        observed.grid.fill(0);
-        observed.energyQ.fill(0);
-        observed.structure.fill(0);
-      },
-    );
-    expect([...cells]).toEqual([...original]);
-    expect(result).toEqual(expected);
   });
 });

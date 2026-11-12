@@ -7,11 +7,43 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
+# The supervisor stops a child that prints nothing for 40 seconds, and each gate
+# step's own output is captured, so the gate reports liveness well inside that.
+HEARTBEAT_SECONDS = 15
+
+
+def run_with_heartbeat(run, heartbeat=HEARTBEAT_SECONDS, stream=None):
+    """Return run() from a worker thread, printing one line per heartbeat until it finishes.
+
+    Exceptions from run() are raised in the caller, including BaseException.
+    """
+    stream = stream or sys.stdout
+    outcome = {}
+
+    def target():
+        try:
+            outcome["value"] = run()
+        except BaseException as error:  # Re-raised below, in the caller's thread.
+            outcome["error"] = error
+
+    started = time.monotonic()
+    worker = threading.Thread(target=target, daemon=True)
+    worker.start()
+    while True:
+        worker.join(heartbeat)
+        if not worker.is_alive():
+            break
+        print(f"  ... still running ({time.monotonic() - started:.0f} s)", file=stream, flush=True)
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome["value"]
 
 
 def source_hashes() -> dict[str, str]:
@@ -65,13 +97,19 @@ def main() -> int:
     ]
     before = source_hashes()
     report = {"reportVersion": 1, "startedAt": datetime.now(timezone.utc).isoformat(),
-              "python": sys.version, "sourceHashes": before, "checks": []}
+              "python": sys.version, "sourceHashes": before, "checks": [], "complete": False, "passed": False}
+
+    def save():
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+
     for cwd, command in commands:
         print(f"Verify ({cwd}): {' '.join(command[1:])}", flush=True)
         deadline = 600 if "eval.verify" in command or "scripts.verify_browser" in command else 180
         try:
-            result = subprocess.run(command, cwd=ROOT / cwd, capture_output=True, text=True,
-                                    encoding="utf-8", errors="replace", timeout=deadline, check=False)
+            result = run_with_heartbeat(lambda: subprocess.run(
+                command, cwd=ROOT / cwd, capture_output=True, text=True,
+                encoding="utf-8", errors="replace", timeout=deadline, check=False))
             check = {"cwd": cwd, "command": command, "exitCode": result.returncode,
                      "stdout": result.stdout, "stderr": result.stderr}
         except subprocess.TimeoutExpired as error:
@@ -80,12 +118,14 @@ def main() -> int:
             check = {"cwd": cwd, "command": command, "exitCode": None, "error": str(error),
                      "stdout": captured(error.stdout), "stderr": captured(error.stderr)}
         report["checks"].append(check)
+        # A gate stopped by its supervisor keeps the steps it finished, marked incomplete.
+        save()
         print("  PASS" if check["exitCode"] == 0 else "  FAIL", flush=True)
     report["sourceUnchangedDuringVerification"] = before == source_hashes()
     report["passed"] = all(check["exitCode"] == 0 for check in report["checks"]) and report["sourceUnchangedDuringVerification"]
+    report["complete"] = True
     report["finishedAt"] = datetime.now(timezone.utc).isoformat()
-    args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    save()
     print(f"Report: {args.report}")
     return int(not report["passed"])
 

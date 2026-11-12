@@ -76,7 +76,14 @@ group leader exits.
 
 The supervisor selects `.venv/bin/python` on macOS and `.venv/Scripts/python.exe`
 on Windows, and propagates the selected interpreter to Python test subprocesses.
-`STATE_SPACE_PYTHON` remains an explicit override. macOS host CPU and available
+`STATE_SPACE_PYTHON` remains an explicit override. Every Node-side check that
+spawns Python (the Vitest contract, conformance, structure and SDK fixtures and
+`scripts/verification_guard.mjs`) shares one resolver,
+`engine/test-support/python-interpreter.mjs`: `PYTHON`, then `STATE_SPACE_PYTHON`,
+then the checkout's own `.venv/bin/python` (`.venv/Scripts/python.exe` on
+Windows), then the first of `python3` or `python` that runs. After
+`uv sync --locked`, `npm test` therefore runs without any PATH or environment
+change, even where the system `python` lacks numpy. macOS host CPU and available
 memory are sampled through the development dependency psutil. Missing telemetry,
 invalid measurements, less than 8 GiB available RAM, or a busy host refuse the
 run using the existing thresholds.
@@ -292,3 +299,100 @@ native color/depth checks. The stage retains the 300-second watchdog deadline,
 512 completed camera frames. The 8³ stage retains its 256-frame limit.
 See [run instructions](../examples/reactive-chamber/README.md) and the
 [measurements and scope](checkpoints/REACTIVE_SANDBOX.md).
+
+## ca-3d-m6 reactive structural worlds
+
+Build the SDK and the internal structural probe bundle, then run the fixed
+stages separately, keeping the host otherwise idle:
+
+```sh
+npm run build:sdk
+node node_modules/vite/bin/vite.js build --config engine/vite.structural-probe.config.ts
+npm run verify:macos -- --stage m6-tiny-dense
+npm run verify:macos -- --stage m6-tiny-active
+npm run verify:macos -- --stage m6-gameplay-32-burning-bridge
+npm run verify:macos -- --stage m6-replay-32-burning-bridge
+npm run verify:macos -- --stage m6-gameplay-32-thermal-valve
+npm run verify:macos -- --stage m6-replay-32-thermal-valve
+```
+
+The two `m6-tiny-*` stages run the `ca-3d-m6` parity probes from the probe
+bundle: every reactive fixture at 8³ and 16³, at most 64 ticks, no frames, the
+GPU snapshot equal to the CPU oracle after every tick with zero accounted energy
+drift, and a hardware adapter required. The chamber stages open the structural
+cavern's reactive scenes with the thermal catalog: `m6-gameplay-32-<scene>` is
+the 32-frame active pilot with the action at tick 16, and `m6-replay-32-<scene>`
+builds the CPU oracle in the page, asserts the scene's pinned tick windows on
+it, and replays dense and active GPU worlds over 1,024 ticks plus the restarts
+3..11 and 15..21. `thermal-valve-ceramic` is accepted in place of either scene
+name. The 64³ variants (`m6-gameplay-64-*`, `m6-replay-64-*`, 256-tick replays)
+each require the same chamber's passing 32³ receipt from identical sources
+within the last 24 hours; nothing above 64³ exists for `ca-3d-m6`.
+
+All of these run under the `macos-qualification` supervisor profile: a 300-second
+outer deadline, the 40-second stall deadline, host CPU and memory preflight and
+monitoring, the independent POSIX watchdog, process-group cleanup and an 8 GiB
+sampled RSS budget. The profile records that GPU telemetry is unavailable and
+does not use `nvidia-smi`. The stall deadline is why the tiny-probe page mirrors
+each fixture's progress into its journaled report, and the host monitor is why
+the host must stay idle: a concurrent process that pushes whole-host CPU above
+85 percent for two seconds stops the stage, which happened once here before the
+retained rerun. Hashed sources (`engine/`, `examples/sdk/`,
+`examples/structural-cavern/`, `scripts/verification*`, the SDK and probe
+bundles) must not change while a stage runs. Receipts and the source-bound index
+are retained under [volume-m6/mac](checkpoints/volume-m6/mac/) and summarized in
+the [M6 checkpoint](checkpoints/3D_M6.md). These scoped results do not clear an
+incident hold or relax the legacy-demo quarantine.
+
+## Multiphysics native Worker
+
+The private multiphysics runtime has one headless stage per timed scene. Build the
+probe bundle, then run the stages one at a time with the host otherwise idle:
+
+```sh
+npm run build:multiphysics-probe
+npm run verify:macos -- --stage multiphysics-worker-wax-valve
+npm run verify:macos -- --stage multiphysics-worker-rotating-contact
+npm run verify:macos -- --stage multiphysics-worker-fluid-switch
+npm run verify:macos -- --stage multiphysics-worker-falling-battery
+npm run verify:macos -- --stage multiphysics-worker-combined-failure
+npm run verify:macos -- --stage multiphysics-worker-timed-cup
+```
+
+Each stage starts the module Worker from `dist/multiphysics/` and computes a
+direct reference in the page. It requires exact equality across work budgets 1
+and 256 and across 24 committed two-tick previews, each after cancelling a
+part-run preview and retrying. It also requires an exact restart of a fresh
+Worker from the saved snapshot. Latency is measured from the page: two-tick
+preview p95 at most 250 ms and cancellation p95 at most 100 ms. Failing either
+target fails the stage and keeps the measured distributions in the report.
+There is no UI, so the 16.667 ms frame target belongs to the later Builder
+stages. The stages have no prerequisite. The bundle is hashed with the other
+sources and must not change during a run.
+
+The visible builder stages follow, each after its scene's Worker stage:
+
+```sh
+npm run build:multiphysics-builder
+npm run verify:macos -- --stage multiphysics-builder-wax-valve-visible
+```
+
+Replace `wax-valve` with any of the six scene names above. Each stage opens
+`dist/multiphysics-builder/` in visible Chrome and drives the real controls. It
+runs 24 rounds of preview, cancel, preview and commit while the camera orbits
+every display frame. Then it applies a heat edit and checks its receipt, the
+seven-row compare ledger, an atomic rejection, and save, restart and continue in
+a fresh Worker. It also checks that an invalid save is rejected and leaves the
+world in place. Gates: preview p95 at most 250 ms, cancellation p95 at most
+100 ms, every completed frame at most 16.667 ms over at least 180 frames, and no
+display-frame gap of 100 ms or more. A stage refuses to start without a passing
+Worker receipt for the same scene from identical sources within 24 hours.
+
+To use the builder interactively, serve the repository root and open
+`dist/multiphysics-builder/?scene=wax-valve`:
+
+```sh
+npm run build:sdk
+npm run build:multiphysics-builder
+uv run python -m http.server 8000 --bind 127.0.0.1
+```

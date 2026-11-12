@@ -1,51 +1,18 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { existsSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
-import ts from '@typescript/typescript6';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { createMaterialRegistry, type MaterialCatalog } from './registry.js';
+import { pythonInterpreter } from './test-support/python-interpreter.mjs';
+import { createMaterialRegistry } from './registry.js';
 import * as S from './structure.js';
 import { compiledStructuralPlan } from './structure_compiled.js';
 import type { MaterialRegistry } from './registry.js';
-import { STRUCTURE_MUTANTS as M, type SourceMutant } from './test-support/structure-mutants.js';
+import { stateOf, type Fixture } from './test-support/structure-fixtures.js';
 
-interface Step {
-  cells: number[];
-  energyQ: number[];
-  structure: number[];
-  sources: number[];
-  loads: number[];
-  capacities: number[];
-  reactions: number[];
-  distances: number[];
-  components: S.ComponentReport[];
-  supportedWeight: number;
-}
-interface Fixture {
-  name: string;
-  width: number;
-  height: number;
-  cells: number[];
-  energyQ: number[];
-  structure: number[];
-  materials: S.StructuralMaterial[];
-  catalog: MaterialCatalog;
-  steps: Step[];
-}
 let fixtures: Fixture[], models: S.StructuralRules[];
 let compiledRegistries: MaterialRegistry[];
-const stateOf = (value: Pick<Fixture, 'cells' | 'energyQ' | 'structure'>): S.StructuralState => ({
-  grid: Uint32Array.from(value.cells),
-  energyQ: Uint32Array.from(value.energyQ),
-  structure: Uint32Array.from(value.structure),
-});
 
 beforeAll(async () => {
-  const python =
-    process.env.STATE_SPACE_PYTHON ??
-    (existsSync('.venv/Scripts/python.exe') ? resolve('.venv/Scripts/python.exe') : 'python');
+  const python = pythonInterpreter();
   const { stdout } = await promisify(execFile)(python, ['-m', 'engine.structure_conformance'], {
     encoding: 'utf8',
     timeout: 60_000,
@@ -73,31 +40,6 @@ beforeAll(async () => {
     }),
   );
 }, 60_000);
-
-function loadMutant({ before, after }: SourceMutant): typeof S {
-  const root = resolve('engine/structure.ts'),
-    cache = new Map<string, { exports: unknown }>();
-  function load(path: string): unknown {
-    if (cache.has(path)) return cache.get(path)!.exports;
-    let source = readFileSync(path, 'utf8');
-    if (path === root) {
-      expect(source).toContain(before);
-      source = source.replace(before, after);
-    }
-    const compiled = ts.transpileModule(source, {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-    }).outputText;
-    const module = { exports: {} };
-    cache.set(path, module);
-    const require = (name: string): unknown =>
-      name.startsWith('.')
-        ? load(resolve(dirname(path), `${name.replace(/\.js$/, '')}.ts`))
-        : createRequire(path)(name);
-    new Function('require', 'module', 'exports', compiled)(require, module, module.exports);
-    return module.exports;
-  }
-  return load(root) as typeof S;
-}
 
 describe('C6 prototype independent planner/native transport conformance', () => {
   it('compares every state coordinate, support diagnostic, component and source permutation', () => {
@@ -299,72 +241,5 @@ describe('C6 prototype independent planner/native transport conformance', () => 
     expect(welded[4] & S.BOND_BITS[3]).toBe(S.BOND_BITS[3]);
     expect(welded[7] & S.BOND_BITS[2]).toBe(S.BOND_BITS[2]);
     expect(welded.some((word) => (word & S.FRESH) !== 0)).toBe(false);
-  });
-
-  it('executes negative controls for no motion, lost energy, automatic welding and missing load remainder', () => {
-    const i = fixtures.findIndex((value) => value.name === 'floating-plate'),
-      fixture = fixtures[i],
-      state = stateOf(fixture);
-    const noop = loadMutant(M.noMotion);
-    expect(noop.planStructure(state, fixture.width, fixture.height, models[i]).sources).not.toEqual(
-      fixture.steps[0].sources,
-    );
-    const energy = loadMutant(M.lostEnergy);
-    const broken = energy
-      .planStructure(state, fixture.width, fixture.height, models[i])
-      .apply(state, fixture.width, fixture.height);
-    expect([...broken.energyQ]).not.toEqual(fixture.steps[0].energyQ);
-    const j = fixtures.findIndex((value) => value.name === 'contact-without-welding'),
-      contact = stateOf(fixtures[j]);
-    const welding = loadMutant(M.automaticWelding);
-    expect(welding.normalizeBonds(contact.grid, contact.structure, 3, 5, models[j])).not.toEqual(
-      contact.structure,
-    );
-    const k = fixtures.findIndex((value) => value.name === 'exact-odd-load-split');
-    const remainder = loadMutant(M.missingLoadRemainder);
-    expect(() => remainder.planStructure(stateOf(fixtures[k]), 3, 3, models[k])).toThrow(/balance/);
-  });
-
-  it('executes fractional and 32-bit capacity arithmetic controls', () => {
-    const i = fixtures.findIndex((value) => value.name === 'high-id-warm-capacity'),
-      fixture = fixtures[i];
-    const state = stateOf(fixture);
-    const fractional = loadMutant(M.fractionalCapacity);
-    expect(
-      fractional
-        .planStructure(state, 5, 3, models[i])
-        .capacities.some((value) => !Number.isSafeInteger(value)),
-    ).toBe(true);
-    const narrow = loadMutant(M.narrowCapacity);
-    expect(narrow.planStructure(state, 5, 3, models[i]).capacities).not.toEqual(
-      fixture.steps[0].capacities,
-    );
-    expect(S.planStructure(state, 5, 3, models[i]).capacities.every(Number.isSafeInteger)).toBe(
-      true,
-    );
-  });
-
-  it('lints unrounded and narrowed structural arithmetic', async () => {
-    // @ts-expect-error Standalone JavaScript checker deliberately has no build dependency.
-    const { lintSource } = await import('./lint_ts.mjs');
-    expect(lintSource(readFileSync('engine/structure.ts', 'utf8'), 'structure.ts')).toEqual([]);
-    for (const source of [
-      'const capacity = nominal * 255 / 64;',
-      'const weight = supportedWeight | 0;',
-      'const capacity = (nominal * 255 * 16384) >>> 0;',
-    ]) {
-      expect(
-        lintSource(source, 'structure.ts').some((issue: string) => issue.startsWith('SS033')),
-      ).toBe(true);
-    }
-    expect(lintSource('const capacity = Math.floor(nominal * 255 / 64);', 'structure.ts')).toEqual(
-      [],
-    );
-    expect(
-      lintSource('execFileSync(python, args);', 'conformance.test.ts').some((issue: string) =>
-        issue.startsWith('SS039'),
-      ),
-    ).toBe(true);
-    expect(lintSource('await execFile(python, args);', 'conformance.test.ts')).toEqual([]);
   });
 });

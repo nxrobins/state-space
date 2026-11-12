@@ -1,0 +1,79 @@
+{
+ "kind": "trajectory",
+ "recordedAt": "2026-11-01",
+ "host": "Apple M3 Ultra, macOS 26.6.2, Claude desktop built-in Chromium pane, Metal WebGPU (vendor apple, architecture metal-3)",
+ "procedure": "examples/structural-cavern/replay.js verifyStructuralTrajectory against the retained Node reference, journal events stubbed, in the desktop WebGPU pane; development check outside the guarded verification harness",
+ "passed": true,
+ "scope": "Authored chamber: Node versus GPU complete state digest at every committed tick in the listed ranges",
+ "part": "all",
+ "size": 64,
+ "scenario": "burning-bridge",
+ "mode": "active",
+ "chunkSize": 8,
+ "ticks": 1024,
+ "runs": [
+  {
+   "start": 0,
+   "end": 1024,
+   "exact": true
+  },
+  {
+   "start": 3,
+   "end": 31,
+   "exact": true
+  },
+  {
+   "start": 179,
+   "end": 183,
+   "exact": true
+  },
+  {
+   "start": 509,
+   "end": 1024,
+   "exact": true
+  }
+ ],
+ "checks": {
+  "count": 1571,
+  "sha256": "caf310de4b57ba34f5adbaed6b6dbb130a7e54871b541ebbfc573198f5abc0ed"
+ },
+ "tickMs": {
+  "count": 1571,
+  "mean": 3.511903248191411,
+  "max": 13.100000023841858
+ },
+ "finalHash": "b01418b6d3f7dd31a1104fd763ae8985df7bc2a4a02e4cd4cf13c8d952ffac00",
+ "energyDriftQ": "0",
+ "backendInfo": {
+  "vendor": "apple",
+  "architecture": "metal-3",
+  "device": "",
+  "description": "",
+  "isFallbackAdapter": false
+ },
+ "rulesVersion": "ca-3d-m6",
+ "materialCatalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+ "catalog": "thermal",
+ "actionTick": 180,
+ "expected": {
+  "stableThrough": 179,
+  "failureWindow": [
+   180,
+   180
+  ],
+  "ignitionTick": 180,
+  "firstReactionTick": 180,
+  "spanOnFloorTick": 191
+ },
+ "windows": {
+  "firstFall": 180,
+  "stableThrough": 179,
+  "firstReaction": 180,
+  "spanOnFloorFrom": 191,
+  "plugSolidThrough": 0,
+  "plugMelt": null,
+  "waterHeldThrough": 0,
+  "waterRelease": null,
+  "observedThrough": 1024
+ }
+}
