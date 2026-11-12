@@ -1,6 +1,7 @@
 """Fault injection for observer diagnostics and independent cleanup; no OS jobs."""
 import ctypes
 import json
+import os
 from pathlib import Path
 import struct
 import tempfile
@@ -10,6 +11,12 @@ from unittest.mock import Mock, patch
 
 from scripts import verification_scope as scope
 from scripts import verify_browser_containment as runner
+
+# These tests fake Windows APIs and can only pass there. Elsewhere a DWORD is not four bytes, so
+# the faked inventory byte counts are wrong, and ctypes.get_last_error and
+# subprocess.CREATE_NO_WINDOW do not exist.
+windows_inventory = unittest.skipUnless(os.name == 'nt', 'Job inventory fake uses Windows layout and last-error')
+windows_launch = unittest.skipUnless(os.name == 'nt', 'Observer launches its supervisor with Windows flags')
 
 
 class InventoryTests(unittest.TestCase):
@@ -31,6 +38,7 @@ class InventoryTests(unittest.TestCase):
         job.k.QueryInformationJobObject.side_effect = query
         return job
 
+    @windows_inventory
     def test_transient_incomplete_snapshot_requires_complete_requery(self):
         job = self.observer([(2, 1, [111]), (0, 0, [])])
         with patch.object(scope.time, 'sleep'):
@@ -39,6 +47,7 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(job.inventory_samples[0]['assigned'], 2)
         self.assertEqual(job.inventory_samples[0]['count'], 1)
 
+    @windows_inventory
     def test_persistent_mismatch_retains_every_raw_snapshot(self):
         job = self.observer([(9, 0, [])] * 3)
         with patch.object(scope.time, 'sleep'), self.assertRaises(RuntimeError) as failure:
@@ -58,6 +67,7 @@ class InventoryTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             job.pids()
 
+    @windows_inventory
     def test_api_failure_preserves_win32_error_without_accepting_partial_data(self):
         job = self.observer([])
         job.k.QueryInformationJobObject.side_effect = None
@@ -145,6 +155,7 @@ class ObserverCleanupTests(unittest.TestCase):
                 close_gpu.assert_called_once()
             return report, job, watchdog, child, mapping, remove
 
+    @windows_launch
     def test_inventory_failure_cannot_erase_watchdog_or_skip_cleanup(self):
         report, job, watchdog, child, mapping, remove = self.run_fault()
         self.assertFalse(report['passed'])
@@ -158,6 +169,7 @@ class ObserverCleanupTests(unittest.TestCase):
         self.assertTrue(mapping.closed)
         remove.assert_called_once()
 
+    @windows_launch
     def test_termination_failure_does_not_skip_other_cleanup(self):
         report, job, watchdog, child, mapping, _ = self.run_fault(terminate_fails=True)
         self.assertFalse(report['passed'])
@@ -167,6 +179,7 @@ class ObserverCleanupTests(unittest.TestCase):
         child.close.assert_called_once()
         self.assertTrue(mapping.closed)
 
+    @windows_launch
     def test_close_failure_does_not_skip_other_handles_or_claim_success(self):
         report, job, watchdog, child, mapping, remove = self.run_fault(close_fails=True, named_job_survives=True)
         self.assertFalse(report['passed'])
@@ -176,6 +189,7 @@ class ObserverCleanupTests(unittest.TestCase):
         self.assertTrue(mapping.closed)
         remove.assert_not_called()
 
+    @windows_launch
     def test_forced_cleanup_cannot_retroactively_qualify_watchdog(self):
         report, _, _, _, _, _ = self.run_fault(watchdog_changes_during_cleanup=True)
         self.assertFalse(report['passed'])
@@ -184,6 +198,7 @@ class ObserverCleanupTests(unittest.TestCase):
         self.assertEqual(report['outcomeAfterCleanupActions']['watchdogReasonCode'], 1)
         self.assertEqual(report['outcomeAfterCleanupActions']['watchdogExitCode'], 125)
 
+    @windows_launch
     def test_mapping_close_failure_keeps_profile_but_still_closes_other_handles(self):
         report, job, watchdog, child, _, remove = self.run_fault(mapping_close_fails=True)
         self.assertFalse(report['passed'])
