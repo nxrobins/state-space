@@ -1,6 +1,14 @@
 /** Bounded rigid candidate kernel. Release qualification still requires coupled runtime evidence. */
-import { copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  copyPortableValue,
+  PORTABLE_VALUE_LIMITS,
+  type PortableValue,
+} from '../../portable-data.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import {
   type Vec3,
   type Quat,
@@ -139,6 +147,27 @@ function invertTensor(matrix: Matrix3): Matrix3 {
   }
   return result as unknown as Matrix3;
 }
+/** Private: true only when copying this owned record again could neither reject it nor change
+ * what the parcel reader decides. Every field is then a scalar or a flat array of finite
+ * numbers, inside the portable budgets. Owned arrays are plain: the portable copy or this
+ * module's arithmetic built them. Any other record keeps the copying reader. */
+function copiesUnchanged(base: Record<string, unknown>): boolean {
+  let nodes = 1,
+    characters = 0;
+  for (const key of Object.keys(base)) {
+    const value = base[key];
+    nodes++;
+    characters += key.length;
+    if (typeof value === 'string') characters += value.length;
+    else if (Array.isArray(value)) {
+      nodes += value.length;
+      for (let i = 0; i < value.length; i++) if (!Number.isFinite(value[i])) return false;
+    } else if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return false;
+    } else if (value !== null && typeof value !== 'boolean') return false;
+  }
+  return nodes <= PORTABLE_VALUE_LIMITS.nodes && characters <= PORTABLE_VALUE_LIMITS.characters;
+}
 /** Private: the caller already owns portable data; this does not admit raw input. */
 function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
   const base = Object.fromEntries(
@@ -159,7 +188,11 @@ function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
       'principalInertia',
     ].map((key) => [key, (copy as unknown as Record<string, unknown>)[key]]),
   );
-  readMaterialParcel3D(base);
+  // A second copy of a plainly portable record cannot reject it, and the reader's verdict
+  // ignores the sign of zero, so such a record is read in place. Every other record takes
+  // the copying reader, which keeps each rejection and its message as they were.
+  if (copiesUnchanged(base)) readOwnedMaterialParcel3D(base);
+  else readMaterialParcel3D(base);
   assertFiniteVec3(copy.halfExtents);
   if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
   return copy;
@@ -805,6 +838,35 @@ function contactWithinTolerance(
   const selected = candidates.find((c) => c.depth <= depth + tolerance / 4)!;
   return { normal: selected.normal, depth: Math.max(0, depth) };
 }
+/** Private exact early reject for two cuboids, ahead of contactWithinTolerance. True only when
+ * a face axis of either one separates them by more than `tolerance` plus a rounding margin.
+ * That test takes its depth as a minimum over those same face axes, so it returns null for
+ * every pair accepted here. Each face axis bounds the other cuboid by its circumscribed
+ * sphere, so some separated pairs still reach the full test. An invalid orientation throws
+ * here as it would there, and non-finite or huge geometry is left to it.
+ */
+function separatedOnFaceAxis(a: RigidParcel3D, b: RigidParcel3D, tolerance: number): boolean {
+  const offset = subtractVec3(b.center, a.center),
+    radiusA = lengthVec3(a.halfExtents),
+    radiusB = lengthVec3(b.halfExtents),
+    scale = lengthVec3(offset) + radiusA + radiusB;
+  if (!(scale < 1e150) || a.orientation.length !== 4 || b.orientation.length !== 4) return false;
+  // 1e-9 of the pair's size is far above the roundoff of either test, about 1e-14 of it.
+  // The absolute floor covers subnormal sizes.
+  const margin = tolerance + 1e-9 * scale + 1e-300,
+    [ax, ay, az, aw] = a.orientation,
+    [bx, by, bz, bw] = b.orientation,
+    // The centre offset in each cuboid's own frame: component i is its face axis i dot offset.
+    inA = rotateVector([-ax, -ay, -az, aw], offset),
+    inB = rotateVector([-bx, -by, -bz, bw], offset);
+  for (let i = 0; i < 3; i++)
+    if (
+      Math.abs(inA[i]) - a.halfExtents[i] - radiusB > margin ||
+      Math.abs(inB[i]) - b.halfExtents[i] - radiusA > margin
+    )
+      return true;
+  return false;
+}
 function clipPolygon(points: Vec3[], center: Vec3, axis: Vec3, extent: number): Vec3[] {
   const result: Vec3[] = [];
   for (let i = 0; i < points.length; i++) {
@@ -1040,7 +1102,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       particleIds.has(b.members[0].id));
   function contactGeometry(a: T, b: T, tolerance: number) {
     if (!particleIds.has(a.id) && !particleIds.has(b.id))
-      return contactWithinTolerance(a, b, tolerance);
+      return separatedOnFaceAxis(a, b, tolerance) ? null : contactWithinTolerance(a, b, tolerance);
     const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
     return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
   }
