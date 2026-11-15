@@ -21,11 +21,17 @@ request and one displayed frame may be in flight.
 - Reaching the goal commits `status: 'won'` and one `crossed` event. M5 does not
   require the older controller's carve/freeze objectives. Paused presentation
   cannot complete the crossing; lost actors cannot win.
-- Style switches between the existing classic tuning and the opt-in geological
-  material/direct-light profile. Exposure adjusts brightness in stops. Both use
+- Cinematic is the default. Style cycles Cinematic, Classic and Geological.
+  Cinematic compresses rock
+  texture contrast, uses directional ambient fill, softens distant and wet rock
+  normals, and adds calmer water and continuous frost patterns. Exposure adjusts
+  brightness in stops. The controls use
   the shared SDK renderer, pause playback, and retain the physical tick. Reset
-  keeps the selected style. These new shaders await native visual acceptance
-  under the existing hold; see [terrain appearance](../../docs/TERRAIN_APPEARANCE.md).
+  keeps the selected style. Native still comparisons cover a fixed material
+  fixture and the full Living Cavern; see
+  [terrain appearance](../../docs/TERRAIN_APPEARANCE.md) for evidence and scope.
+  Omit `style` to start in Cinematic, or use `?size=32&style=classic` for the
+  previous look. Explicit Geological and Cinematic startup choices also work.
 - After a frame error, Reset or a successful checkpoint recovery restarts the
   display loop in the paused state. Press Play to resume.
 
@@ -115,6 +121,7 @@ Mac workstation the supervised stages are `npm run verify:macos -- --stage
 m6-gameplay-{32,64}-{scene}` (the 32-frame pilot) and `m6-replay-{32,64}-{scene}`
 (CPU oracle versus dense and active GPU, 1,024 ticks at 32³ and 256 at 64³,
 action tick 16); a 64³ stage needs the same chamber's passing 32³ stage within
-24 hours. The workstation incident hold remains active. Do not run aggregate
-native suites or quarantined legacy demo trajectories, and do not run the
+24 hours. The historical workstation hold was released with explicit user
+authorization for the visual comparisons documented in the terrain appearance
+notes. Do not run aggregate native suites or quarantined legacy demo trajectories, and do not run the
 reactive chambers at 128³.

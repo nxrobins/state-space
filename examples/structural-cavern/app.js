@@ -18,7 +18,10 @@ function expectationText(scenario,e){
  return scenario.endsWith('control')?'Control: the crossing should remain intact for 1,024 ticks.':scenario==='ice-heat'?'Script: melt supports at tick 180. The span should fall at ticks 181–183.':'Script: remove or overheat supports at tick 180. The detached span falls that tick.';
 }
 let yaw=Math.PI/2,pitch=.1,orbit=false,orbitYaw=-.85,orbitPitch=.4,distance=13,drag=null,appearance='naturalistic',lightingMode=params.get('lighting')==='cached'?'cached':'reference',lastView='',lastCommit,remembered;
-let styleProfile='classic',exposureEV=0;
+const stylePresets={classic:{label:'Classic',exposure:0},geological:{label:'Geological',exposure:-.25},cinematic:{label:'Cinematic',exposure:-.5}};
+let styleProfile=params.get('style')??'cinematic';
+if(!Object.hasOwn(stylePresets,styleProfile))throw Error('Invalid terrain style.');
+let exposureEV=stylePresets[styleProfile].exposure;
 function controls(){
  for(const element of document.querySelectorAll('aside button, aside select, aside input'))element.disabled=exclusive||(failed&&element.id!=='reset');
  $('resume').disabled=exclusive||failed||!remembered;
@@ -26,7 +29,7 @@ function controls(){
  $('style').disabled=exclusive||failed||!renderer?.setStyle;
  $('exposure').disabled=exclusive||failed||!renderer?.setStyle;
 }
-function styleControls(){text('style',`Style · ${styleProfile==='geological'?'Geological':'Classic'}`);$('exposure').value=String(exposureEV);text('exposure-value',`${exposureEV.toFixed(2)} EV`);}
+function styleControls(){text('style',`Style · ${stylePresets[styleProfile].label}`);$('exposure').value=String(exposureEV);text('exposure-value',`${exposureEV.toFixed(2)} EV`);}
 async function applyStyle(profile,ev){
  if(!renderer?.setStyle)throw Error('This SDK does not support terrain style controls.');
  await renderer.setStyle({profile,tone:{exposureEV:ev}});
@@ -119,7 +122,7 @@ for(const id of ['reset','scene','size'])$(id)[id==='reset'?'onclick':'onchange'
 for(const action of ['cut','heat','melt'])$(action).onclick=()=>notify(()=>exclusiveOperation(()=>advance(input(field.tick+1),structuralAction(level,action))));
 $('appearance').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=appearance==='naturalistic'?'diagnostic':'naturalistic';await renderer.setAppearance(next);appearance=next;text('appearance',`A/B · ${appearance==='naturalistic'?'Naturalistic':'Diagnostic'}`);await present();}));
 $('lighting').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=lightingMode==='reference'?'cached':'reference';await applyLightingMode(next);lightingMode=next;text('lighting',next==='cached'?'Lighting B · Cached':'Lighting A · Reference');await present();}));
-$('style').onclick=()=>notify(()=>exclusiveOperation(async()=>{const next=styleProfile==='classic'?'geological':'classic';await applyStyle(next,next==='geological'?-.25:0);await present();}));
+$('style').onclick=()=>notify(()=>exclusiveOperation(async()=>{const profiles=Object.keys(stylePresets),next=profiles[(profiles.indexOf(styleProfile)+1)%profiles.length];await applyStyle(next,stylePresets[next].exposure);await present();}));
 $('exposure').onchange=()=>notify(()=>exclusiveOperation(async()=>{try{await applyStyle(styleProfile,Number($('exposure').value));await present();}finally{styleControls();}}));
 $('camera').onclick=()=>{orbit=!orbit;text('camera',orbit?'First-person view':'Orbit view');$('crosshair').hidden=orbit;lastView='';};
 $('inspect').onclick=()=>notify(()=>exclusiveOperation(async()=>{const balance=await field.energyBalance();text('energy',`${balance.driftQ} Q @ ${field.tick}`);}));

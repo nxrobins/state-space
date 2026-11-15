@@ -2,7 +2,9 @@
 
 ## Naturalistic material study
 
-The chamber now opens in the **B · Naturalistic** appearance. Its native WebGPU
+The chamber opens in the **B · Naturalistic** appearance with the shared
+**Cinematic** material preset: quieter rock contrast, cooler ambient fill,
+calmer water and continuous ice frost. Its native WebGPU
 pass adds scanned rock color, fissures and surface normals, roughness and
 wet-contact shading, a warm camera-mounted survey lamp, contact occlusion,
 temperature-driven lava/molten-glass lighting, HDR tone mapping and restrained

@@ -305,6 +305,7 @@ test('style and exposure changes stay outside physical state and survive reset',
   driver.step.mockClear();
   field.restore.mockClear();
   await element('style').onclick();
+  await element('style').onclick();
   expect(api.styleProfile).toBe('geological');
   expect(api.exposureEV).toBe(-0.25);
   expect(setStyle).toHaveBeenLastCalledWith({ profile: 'geological', tone: { exposureEV: -0.25 } });
@@ -323,10 +324,31 @@ test('style and exposure changes stay outside physical state and survive reset',
 test('failed style updates preserve the selected style and exposure', async () => {
   setStyle.mockRejectedValueOnce(Error('injected style failure'));
   await element('style').onclick();
+  expect(api.styleProfile).toBe('cinematic');
+  expect(api.exposureEV).toBe(-0.5);
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(element('error').hidden).toBe(false);
+});
+
+test('cinematic is the startup default, survives reset and can switch to Classic without advancing the world', async () => {
+  driver.step.mockClear();
+  field.restore.mockClear();
+  expect(api.styleProfile).toBe('cinematic');
+  expect(api.exposureEV).toBe(-0.5);
+  expect(element('style').textContent).toBe('Style · Cinematic');
+  expect(element('exposure').value).toBe('-0.5');
+  expect(element('exposure-value').textContent).toBe('-0.50 EV');
+  expect(setStyle).toHaveBeenLastCalledWith({ profile: 'cinematic', tone: { exposureEV: -0.5 } });
+  expect(driver.step).not.toHaveBeenCalled();
+  expect(field.restore).not.toHaveBeenCalled();
+  await element('reset').onclick();
+  expect(api.styleProfile).toBe('cinematic');
+  expect(setStyle).toHaveBeenLastCalledWith({ profile: 'cinematic', tone: { exposureEV: -0.5 } });
+  await element('style').onclick();
   expect(api.styleProfile).toBe('classic');
   expect(api.exposureEV).toBe(0);
   expect(driver.step).not.toHaveBeenCalled();
-  expect(element('error').hidden).toBe(false);
+  expect(field.tick).toBe(0);
 });
 
 test('remember and restore preserve the saved tick and reset clears the remembered checkpoint', async () => {
