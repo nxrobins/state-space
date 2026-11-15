@@ -40,10 +40,21 @@ fn rayColor(ray:OpticalRay)->vec3f{
  if(ray.hit){
   let m=ray.word&255u;let p=ray.point;let n=ray.normal;
   var uv=p.xy;if(abs(n.x)>.5){uv=p.zy;}if(abs(n.y)>.5){uv=p.xz;}
+  if(style.tone.w>1.5){
+   // Match the primary face projection, including its orientation, at optical hits.
+   uv=vec2f(p.x,p.y*sign(n.z));
+   if(abs(n.x)>.5){uv=vec2f(p.z,-p.y*sign(n.x));}
+   if(abs(n.y)>.5){uv=vec2f(p.x,-p.z*sign(n.y));}
+  }
   let rock=textureSampleLevel(rockColor,rockSampler,uv*style.rock.w,1.5).rgb;
   var albedo=rock*style.rock.rgb;if(m==1u&&style.finish.w>0.){albedo*=rockVariation(p);}if(m==3u){albedo=style.sand.rgb;}if(m==11u){albedo=vec3f(.1,.19,.2);}if(surface(m)){albedo=colors[m];}
+  if(m==1u&&style.tone.w>1.5){
+   var wet=0.;for(var j=0u;j<6u;j++){wet=max(wet,select(0.,1.,(cell(vec3i(floor(p))+normals[j])&255u)==2u));}
+   albedo=cinematicRock(p,rock)*mix(1.,1.-style.finish.y,wet);
+  }
   let toLamp=camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p;
   var irradiance=vec3f(.065,.095,.135)*style.lighting.x+style.lamp.rgb*style.lighting.y*max(0.,dot(n,safeDirection(toLamp)))*24./(3.+dot(toLamp,toLamp));
+  if(style.tone.w>1.5){irradiance+=(cinematicAmbient(n)-vec3f(.065,.095,.135))*style.lighting.x;}
   // Secondary surfaces use bounded unshadowed direct illumination. The ray
   // itself still stops at the first opaque voxel, including offscreen ones.
   for(var slot=0u;slot<regionalCount(p,false);slot++){
@@ -62,7 +73,9 @@ fn waterIce(v:Out,view:vec3f)->vec3f{
  let frozen=(v.word&255u)==8u;let front=dot(view,v.normal)>=0.;let geometric=select(-v.normal,v.normal,front);
  let p=v.world;let time=optics.x;var normal=geometric;
  if(!frozen){
-  let waves=vec3f(cos(p.x*2.3+p.z*.7+time*1.3)*.055,cos(p.y*2.1+p.x*.4+time)*.035,sin(p.z*2.7-p.x*.6-time*1.1)*.045);
+  var waves:vec3f;
+  if(style.tone.w>1.5){waves=vec3f(cos(p.x*.8+p.z*.31+time*.7)*.028,cos(p.y*.7+p.x*.23+time*.6)*.018,sin(p.z*.93-p.x*.27-time*.55)*.024);}
+  else{waves=vec3f(cos(p.x*2.3+p.z*.7+time*1.3)*.055,cos(p.y*2.1+p.x*.4+time)*.035,sin(p.z*2.7-p.x*.6-time*1.1)*.045);}
   normal=normalize(geometric+waves-geometric*dot(geometric,waves));
  }else{
   let ripple=vec3f(noise(p*4.1),noise(p.zxy*4.1),noise(p.yzx*4.1))-.5;
@@ -78,9 +91,17 @@ fn waterIce(v:Out,view:vec3f)->vec3f{
  // Fine static inclusions and frosted edges distinguish frozen water without
  // changing its physical surface or requiring a persistent visual state.
  if(frozen){
-  let crack=pow(1.-abs(2.*noise(p*3.7)-1.),38.);
-  let edge=1.-smoothstep(0.,.12,min(min(v.uv.x,1.-v.uv.x),min(v.uv.y,1.-v.uv.y)));
-  let frost=clamp((crack*.4+edge*.12+pow(noise(p*17.),8.)*.3)*style.sand.w,0.,.65);
+  var frost:f32;
+  if(style.tone.w>1.5){
+   // Continuous world-space inclusions do not trace every voxel's square UV border.
+   let seam=1.-smoothstep(.015,.065,abs(noise(p*.74+vec3f(7.1,2.3,4.8))-.5));
+   let cloud=smoothstep(.52,.78,noise(p*.38));
+   frost=clamp((seam*.24+cloud*.22)*style.sand.w,0.,.55);
+  }else{
+   let crack=pow(1.-abs(2.*noise(p*3.7)-1.),38.);
+   let edge=1.-smoothstep(0.,.12,min(min(v.uv.x,1.-v.uv.x),min(v.uv.y,1.-v.uv.y)));
+   frost=clamp((crack*.4+edge*.12+pow(noise(p*17.),8.)*.3)*style.sand.w,0.,.65);
+  }
   var frostColor=style.ice.rgb*v.irradiance;
   if(style.tone.w>.5){
    let direction=safeDirection(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);

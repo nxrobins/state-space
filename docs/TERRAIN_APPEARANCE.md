@@ -1,10 +1,10 @@
 # Reusable terrain materials, exposure and direct lighting
 
-This increment adds an opt-in `geological` profile and validated style controls to
-the shared chunked 3D renderer. Static checks and the focused CPU/mock regressions
-pass, but it has not been visually accepted or measured on a native GPU. The
-workstation incident hold remains active. Preset values are initial tuning values,
-not a claim of a measured image-quality or performance improvement.
+The shared chunked 3D renderer uses `cinematic` as its default naturalistic
+material style. `classic` and `geological` remain explicit alternatives. The
+user selected this default after reviewing actual fixed-scene and full-cavern
+GPU comparisons. Native still-image evidence is recorded below; whole-frame
+performance and moving-camera behavior have not been qualified by those captures.
 
 ## Use from an application
 
@@ -34,7 +34,7 @@ exported through all four existing GPU package entries. No package entry or
 physical material catalog is added.
 
 `setStyle` replaces the complete style. Omitted groups and fields use the selected
-profile's defaults; an omitted profile selects `classic`. To change one field of
+profile's defaults; an omitted profile selects `cinematic`. To change one field of
 an existing customized style, first obtain the complete `inspectStyle()` result
 and pass a modified copy. Inputs and inspection results are independently owned.
 Unknown fields, getters, hidden fields, malformed colors and out-of-range or
@@ -46,13 +46,15 @@ it does not allocate a GPU device, draw, step physics or submit a command buffer
 The next naturalistic presentation uploads one 112-byte uniform when needed.
 The setting survives diagnostic/naturalistic switches, lighting-cache switches,
 resize and physical snapshot restore. A newly created renderer starts with
-`classic`; the application owns persistence when replacing a renderer. Styles
+`cinematic`; the application owns persistence when replacing a renderer. Styles
 are deliberately absent from physical snapshots and replay commands.
 
 ## Profiles and controls
 
-`classic` is the default and retains the previous material/light tuning and
-vertex-lit hot sources. `geological` enables broad world-space mineral variation,
+`cinematic` is the default: quieter rock texture contrast, directional ambient
+fill, softer distant/wet rock normals, calmer water and continuous ice frost.
+`classic` retains the previous material/light tuning and vertex-lit hot sources.
+`geological` enables broad world-space mineral variation,
 cooler basalt, stronger wet/dry separation, restrained bloom and lower exposure.
 It also evaluates the camera lamp and up to two selected hot sources against
 the fragment's material normal and roughness. Historical pixel identity is not
@@ -79,7 +81,8 @@ are artistic radiance multipliers, not physical light or heat units.
 
 The geological defaults use exposure -0.25 EV, bloom 0.07 with threshold 1.5,
 ambient 0.72 and lamp 0.7. These can be adjusted independently of the profile.
-`setStyle({})` restores the classic defaults.
+`setStyle({})` restores the Cinematic defaults, including -0.5 EV exposure.
+`setStyle({ profile: 'classic' })` explicitly restores Classic, including 0 EV.
 
 ## Lighting and material boundary
 
@@ -112,12 +115,13 @@ readback is introduced. Native GPU costs and frame times have not been measured.
 
 ## Example and evidence
 
-Structural Cavern exposes **Style · Classic / Geological** and an exposure slider
+Structural Cavern exposes **Style · Cinematic / Classic / Geological** and an exposure slider
 through the public renderer API. Changes pause playback, preserve the current
 physical tick, and re-present it. Reset recreates the renderer with the selected
 style. Benchmark reports include complete resolved style settings outside timed
-frames. Existing application startup stays classic until the user selects the
-new profile; diagnostic appearance remains separately selectable.
+frames. Naturalistic application startup now uses Cinematic; diagnostic
+appearance remains separately selectable. The SDK still creates diagnostic
+renderers until the application selects naturalistic appearance.
 
 Regression cases cover strict validation, input/output ownership, exposure stops,
 uniform sharing/upload lifetime, atomic invalid updates, lazy setup, diagnostic
@@ -162,3 +166,97 @@ The [bounded native preparation](TERRAIN_NATIVE_VALIDATION.md) fixes a shader
 stage and a three-frame, zero-physics A/B fixture. Its offline packet generator
 preserves the hard hold; execution-host, scoped-authorization and real-browser
 containment prerequisites remain explicit. Preparation is not native acceptance.
+
+## Cinematic material pass (2026-11-15)
+
+`renderer.setStyle({ profile: 'cinematic' })` explicitly selects the default
+presentation profile. Structural Cavern's Style button cycles Cinematic,
+Classic and Geological; `?size=32&style=classic` opts into the previous look.
+Changing style pauses playback and reset retains it. The Living Cavern inherits
+the same Cinematic default from the shared renderer without a style override.
+
+The new treatment compresses the rock photograph's luminance contrast while
+retaining its hue and shared world-space mineral variation. Directional ambient
+fill gives upward-facing shelves a cooler tint and undersides a subdued warm
+fill; this is an artistic approximation, not indirect light or sky visibility.
+Fine rock normals fade with screen footprint and soften beside water. Sand uses
+less fine-grain contrast. Water has longer, lower-amplitude normal waves, while
+ice uses world-space inclusions and cloudy frost instead of outlining every
+voxel face. Geometry, material identity and physical state are unchanged.
+
+Primary and optical rock hits share the new color treatment and oriented texture
+projection. Optical hits also use adjacent water for wet darkening. Their direct
+lighting remains the existing unshadowed approximation. Existing reflection,
+refraction and shadow traversal budgets are unchanged. No new texture asset,
+render pass, resource binding, history buffer, command submission or CPU readback
+is introduced. The 112-byte style uniform uses profile selector 2 for Cinematic
+(Classic 0, Geological 1). Secondary rock hits add six neighboring grid reads;
+additional shading arithmetic has not been timed on a GPU.
+
+Initial tuning: exposure -0.5 EV, bloom 0.045 with threshold 1.8, ambient 0.8,
+lamp 0.9, rock texture scale 0.18, rock normal strength 0.55, wet roughness 0.22
+and frost strength 0.7. These are proposed settings, not measured improvements.
+Existing overrides, including zero light intensities, zero mineral variation,
+zero rock-normal strength and zero frost, retain their meanings.
+
+The focused CPU/mock suite passed **32 tests across four files**, covering style
+serialization and uniforms, shared resource uploads, lighting and client
+selection/reset without physics advancement. Its supervised receipt is retained
+at `dist/verification/cinematic-cpu-20261115-attempt2/report.json`; the earlier
+sandbox launch failure is retained separately.
+
+On 2026-11-15 the user explicitly authorized lifting the GPU hold for an actual
+Classic/Cinematic comparison. The original hold was archived byte-for-byte at
+`dist/verification/hold-releases/20261115-cinematic/safety-hold.before.json`,
+with the authorization and original hash in `release.json`. The earlier hold
+statements above describe historical checks. Release records permission to run;
+it does not establish the cause of the original incident. Existing containment,
+health checks and independent watchdogs remain enabled.
+
+Native comparison **passed on NVIDIA GeForce RTX 4090** using the production
+renderer, a fixed 16 x 8 x 16 authored material scene, identical camera and
+768 x 432 viewport, reference lighting and heat distortion disabled. Three
+frames selected the unmodified preset defaults in order: Classic, Cinematic,
+Classic. No physical world or animation loop was created. All 8192 input grid
+bytes matched after every frame, and the first and last PNGs were byte-identical.
+Decoded pixels independently confirmed the Classic round trip, a different
+Cinematic image, opaque alpha, and nonempty rendered content. Native pipelines
+compiled, no browser/device errors were recorded, and browser shutdown plus
+the 30-second, 12% CPU / 8 GiB supervised run completed successfully.
+
+Actual PNGs, source/bundle hashes, resolved settings and verification results
+are retained under `dist/visual-previews/cinematic/real/attempt-02/`;
+`attempt-02-supervisor/report.json` records containment. The first attempt's
+fixture-loader/readback failure is preserved in `attempt-01/`; it produced no
+comparison images. This evidence covers the fixed material scene and style
+round trip. Resize/restore, moving-camera aliasing, runtime physics equivalence
+and whole-frame GPU performance remain unverified.
+
+The subsequent full-cavern comparison also passed on the same hardware. It uses
+the unchanged `examples/active-cavern/scene.js` generator (`active-cavern-seed-1`,
+seed 1592642302), all 128 x 128 x 128 cells in 64 storage chunks, and the
+application's initial player eye position and Crossing/Lava view angles. Each
+view captures Classic, Cinematic and Classic again at 1280 x 720, tick zero,
+with reference lighting, fog and heat distortion enabled. The production
+renderer and generator dependencies are bundled from current source; the
+capture harness runs no physics steps or animation loop.
+
+All six frames retained the complete 8 MiB input grid. Each view's Classic
+round trip was byte- and pixel-identical; Cinematic differs visibly in both.
+Native rendering and supervised cleanup passed without reported browser or
+device errors. The actual PNGs, source hashes, camera/settings records and
+decoded-image verification are in
+`dist/visual-previews/cinematic/full-cavern/attempt-01/`; the corresponding
+`attempt-01-supervisor/report.json` records the bounded run. This adds native
+still-image evidence for the full scene, without qualifying animation,
+whole-frame performance or simulation/replay behavior.
+
+After the user selected Cinematic as the standard look, the shared resolver and
+Structural Cavern startup default were changed to `cinematic`. Preset values
+and shader code are the same as the reviewed captures. Classic and Geological
+remain explicit choices; an empty style resets to Cinematic. The SDK was rebuilt,
+type checking, structural lint and changed-file formatting passed, and all
+**32 focused CPU/mock tests** passed again with startup, default overrides,
+style switching, reset persistence and failure atomicity covered. The receipt
+is `dist/verification/cinematic-default-20261115-cpu/report.json`. This default
+selection change did not rerun the native captures above.

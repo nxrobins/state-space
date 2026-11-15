@@ -117,9 +117,11 @@ await renderer.setStyle?.({
 ```
 
 Style replaces the complete profile, changes presentation only, and persists
-across appearance switches and physical restores. The default is `classic`;
-diagnostic rendering ignores style. The geological profile is implemented but
-awaits native visual/runtime acceptance under the active incident hold. See
+across appearance switches and physical restores. The default is `cinematic`;
+omitting `profile` or calling `setStyle({})` selects its complete defaults.
+Use `setStyle({ profile: 'classic' })` for the previous look or select `geological`
+explicitly. Diagnostic rendering ignores style. Cinematic has native still-image
+comparisons in a material fixture and the full Living Cavern. See
 [terrain appearance](../TERRAIN_APPEARANCE.md) for ranges, ownership, cost and
 validation limits.
 
