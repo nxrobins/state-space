@@ -1,0 +1,1711 @@
+{
+  "schema": "collision-stack-solver-profile-checkpoint-v1",
+  "status": "diagnostic-complete",
+  "finalizedAtUtc": "2026-11-09T08:03:40.579Z",
+  "summary": {
+    "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/solver-profile-summary-corrected.json",
+    "sha256": "8d405a776f13b2e328a2bad4f8c844000faf16065f11089a5d1e0654b74dce1b"
+  },
+  "rawSummary": {
+    "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/solver-profile-summary.json",
+    "sha256": "1eeae3a6cb615454a850f5384afa93b4a687547280165c269e073f6a8491573a"
+  },
+  "review": {
+    "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/review.json",
+    "sha256": "b58f7eb0dca2817606495565c8dc2b45e0d7f292a9c885271038c14ff8210214"
+  },
+  "benchmark": {
+    "path": "dist/verification/collision-stack-solver-profile-20261108/packet.json",
+    "sha256": "7affae086b848c4b971f2f6a732a149f7f923eab67d04a0d53dc3fd1c4258df2"
+  },
+  "engineBundleSha256": "864cc291fc75ebfce7d6d53e6c15d1b13736679d0540c80c496298e991b19694",
+  "engineAndReplayHarnessUnchanged": true,
+  "frozenSourceFiles": [
+    {
+      "path": "engine/experimental/multiphysics/battery.ts",
+      "sha256": "dd7753dcd759a518f992c5e9ea02bacc8abfa6386b35ad25ede14434aa21de4e"
+    },
+    {
+      "path": "engine/experimental/multiphysics/circuit.ts",
+      "sha256": "05f35f023343b14ae7cf129bd4c4687bf9fcd5d37ae614e55b34c55caf1adc3c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/collision.ts",
+      "sha256": "30ba7c15e740c081b89eac2381c9de103f25296fcf8670f37a24185dbf7796ee"
+    },
+    {
+      "path": "engine/experimental/multiphysics/conservation.ts",
+      "sha256": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65"
+    },
+    {
+      "path": "engine/experimental/multiphysics/coupling-energy.ts",
+      "sha256": "9ab9f6ba9819f4f41854092005440fabad419d0e69ea92e907ac9ca012de67be"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluid-coupling.ts",
+      "sha256": "029ffee57d6ae9325f6824c00f14cc6b799170738f081fd7d248c8f0f51c5c29"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluids.ts",
+      "sha256": "f170c63631d92f3dfa3e3888322af6e2114c1821913b21cf8ce08a207603499d"
+    },
+    {
+      "path": "engine/experimental/multiphysics/math.ts",
+      "sha256": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/model.ts",
+      "sha256": "5c917e9279320663aeeea6f73a2ca538430692f504825175c1ca77e357a5316c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/profiles.ts",
+      "sha256": "4bbe59c25860106d03289166f58fb691300a7cf8fa0d6f879f963e27aaf62af9"
+    },
+    {
+      "path": "engine/experimental/multiphysics/rigid.ts",
+      "sha256": "2a9f951f01bb4b61d22dc5ccf416f7ef734f3072c6e1a936db52e5edb626dd7a"
+    },
+    {
+      "path": "engine/experimental/multiphysics/thermal.ts",
+      "sha256": "bbab5c74660f8d7bd463358f9ac153c45a4686027d169f8240e32168ecfc88a3"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world-tick.ts",
+      "sha256": "45b00c2960e3fc53abffb298233608bf48b87439ce4dce6cb800ab1f2857ed1f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world.ts",
+      "sha256": "e2c647b028633450f37c93a9fc43a1716044e243e009768ea0e1c10495734417"
+    },
+    {
+      "path": "engine/experimental/reactive/reactive-registry.ts",
+      "sha256": "9cb6059a466fdaf6882d0f07989849510ee2655152bdf2488afe3dd66d37738f"
+    },
+    {
+      "path": "engine/experimental/reactive/thermal-materials.ts",
+      "sha256": "bf87aef4438e8196f660ed0f43e3998222127bc206777abf541126bae16e86ff"
+    },
+    {
+      "path": "engine/generated/materials.ts",
+      "sha256": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead"
+    },
+    {
+      "path": "engine/portable-data.ts",
+      "sha256": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c"
+    },
+    {
+      "path": "engine/registry.ts",
+      "sha256": "bcbea8b2cb90d6b60b4c1780702351d28082d7f380dfc7dbb2e1ced6e73e60ac"
+    },
+    {
+      "path": "engine/validation.ts",
+      "sha256": "313cb8a28bfe619688d3ac9ff1f8b91b4ac4d90eff6dc3063ce7fd0e50c27881"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a5871b70bcfb0060ac22be0c722d2302ac8513fbfa373b1e651662f397e7a93a"
+    },
+    {
+      "path": "scripts/benchmark_collision_reference.mjs",
+      "sha256": "f8abcc67c487b2f6795164322d23a0618366d3e925a8834129a8cb1b3452b60c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-cpu.mjs",
+      "sha256": "db318cd9ff224065b4b8de7c6c2ea7060651008f7601aee6afe8204e63f99752"
+    },
+    {
+      "path": "scripts/collision-reference/collect-optimized.mjs",
+      "sha256": "434f70eb0298ad39d32f0f7b4dcb8d0d2b56fdc3fa3b611d89e2f19e7d28271c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-profile.mjs",
+      "sha256": "02efb076667259a9f7b53dc41428bcdcaec9167271b5ec3dc72a7d6ce63b6c33"
+    },
+    {
+      "path": "scripts/collision-reference/collect-solver-profile.mjs",
+      "sha256": "492cd9b4b2bf4f37b4f3da3c9981280b66c9d16ddf0af98555de77cb8f40f0c2"
+    },
+    {
+      "path": "scripts/collision-reference/collect-timing.mjs",
+      "sha256": "872388cf993e9130311d475faee7e24057ddedf99033c5ad41c99c380ac375af"
+    },
+    {
+      "path": "scripts/collision-reference/engine-entry.ts",
+      "sha256": "4ceea8a3082422579bb23399d43208352dee72c85527508b4dd0ed529f5ebb41"
+    },
+    {
+      "path": "scripts/collision-reference/exact-state.mjs",
+      "sha256": "995d3ec8bd9d6fdb7eeb00fd42134cd76169c130f4d9645af79ccd392a13dd73"
+    },
+    {
+      "path": "scripts/collision-reference/mujoco_runner.py",
+      "sha256": "9bab5cb33a2502d5a666073ae7394c17a077f59844c616430373e7ad105c889b"
+    },
+    {
+      "path": "scripts/collision-reference/optimized-runner.mjs",
+      "sha256": "15b2e658636cb795359b885723e2cb00112ba384c64f04cbf2ca16618c5b4017"
+    },
+    {
+      "path": "scripts/collision-reference/owned-regression.mjs",
+      "sha256": "3290acbfd0d9eb6891c7b446bff173d27a1675cbb2e6717cb2a57322596af465"
+    },
+    {
+      "path": "scripts/collision-reference/packet.mjs",
+      "sha256": "dbb58fd23d0124d255e8c09707768aade9264aba3451e6418cd02d417037ec15"
+    },
+    {
+      "path": "scripts/collision-reference/profile-data.mjs",
+      "sha256": "ac6c7fd74ea24eea8d1ec2bff194d574aab483e7b95d2cf11ee23010d39d981c"
+    },
+    {
+      "path": "scripts/collision-reference/profile-runner.mjs",
+      "sha256": "757dfe5ece637ff35eb6ac6545ce983424e9725d9fbdf885a19b8cb12a78c8a0"
+    },
+    {
+      "path": "scripts/collision-reference/protocol.mjs",
+      "sha256": "c5d5db8abb469056cbb9d418ba6cdd08e188a1147f94c2d8d50bf0b0abced1de"
+    },
+    {
+      "path": "scripts/collision-reference/replay.mjs",
+      "sha256": "2e081e472d81fff6ab7e167e63f5be31778c9db9b9beec328268ca1769ae68f1"
+    },
+    {
+      "path": "scripts/collision-reference/report.mjs",
+      "sha256": "1dbcde51643e3c773183225f7c1ea562bfb0e74f0cda0d6331453326e876d0c0"
+    },
+    {
+      "path": "scripts/collision-reference/requirements.txt",
+      "sha256": "babe3f403ce9d9a2f26a08402eaaab0d024f58c8517afdc374bf51e7983a41e9"
+    },
+    {
+      "path": "scripts/collision-reference/scoped-runner.mjs",
+      "sha256": "77118dda732472e4faa2a8051481c375013e9617aa27dd0d313f1e3f52c3fe12"
+    },
+    {
+      "path": "scripts/collision-reference/solver-profile-data.mjs",
+      "sha256": "1591c44d75d499248291489d2b64d28c6f0e4384ffbf7aadd14dd51ed2fa19df"
+    },
+    {
+      "path": "scripts/collision-reference/solver-profile-runner.mjs",
+      "sha256": "d82fa5ae3384f6f8ca6292c1f0d4642c4a76ee6bdcff6d98bed29165cf0f18d5"
+    },
+    {
+      "path": "scripts/collision-reference/state-space.mjs",
+      "sha256": "e4b91ce305a019eabe82953c6ecdf77251d8d9ee740300e713f76811e0f3096f"
+    },
+    {
+      "path": "scripts/collision-reference/timing-data.mjs",
+      "sha256": "47f9ab8567cfc867b64c9d8f57d3871baa146042eeb08e411526efddd8ab536d"
+    },
+    {
+      "path": "scripts/collision-reference/timing-runner.mjs",
+      "sha256": "11c4573b641440c01091a1e0337cb48b4fdd97bcc4f81f2f88549d619abc1f62"
+    },
+    {
+      "path": "scripts/verification_guard.mjs",
+      "sha256": "ddd8ee5619641a0e0f9419306617c232f47c6a48a0ea2e16fa9a2d371759c517"
+    },
+    {
+      "path": "scripts/verification_guard.py",
+      "sha256": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae"
+    },
+    {
+      "path": "scripts/verification_health.py",
+      "sha256": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b"
+    },
+    {
+      "path": "scripts/verification_journal.py",
+      "sha256": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593"
+    },
+    {
+      "path": "scripts/verification_watchdog.py",
+      "sha256": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f"
+    }
+  ],
+  "scopeSources": {
+    "scripts/collision_cpu_scope.py": "f0951df6197e0ccb5e6844b093dcaa05b1d75c90fa041e2fc2b775938dbd2c64",
+    "scripts/verify_collision_cpu.py": "2c48d0c9a123af32bd3146d4de97002428024749de116d47a72bb2a886a53dc6",
+    "scripts/collision_cpu_leaf.py": "22483ef7d90646ff73e42f4c533b348797b501988aa7f4cfe3ba363b05143efa",
+    "scripts/verification_scope.py": "a70e91052487b87bbef99d04a0e43c6ebfc8e7e82ca08b35275e901469096c7f",
+    "scripts/verify_browser_containment.py": "b0bf6c8a79a603f3d57e22450ed6b6b40b4073cd5f2bad8e16821452260dbe76",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_collision_cpu_scope.py": "64b96bf071aa3ca8e1b860b5a26899509c5a13126b0adaa4e598b04af7023022",
+    "tests/collision_profile.test.mjs": "10b80d28b68f1a49dc4eebe96c92d01d59d82126b62f780fda4ca83a6b624611",
+    "tests/collision_owned.test.mjs": "357fdb32c50cb39422ccf0bd2564c75bf3c296f1b7f4dc6a90f3e986135570a9",
+    "tests/collision_timing.test.mjs": "e4faae0d409265cfaeb875ef44f2f5671ec252e1515309aa299988a8b7613248",
+    "tests/collision_solver_profile.test.mjs": "85a0a75aa63c5b86d710591eb2db5784331c5c63d9d80b23fa938478883a95f1"
+  },
+  "postCollectionCorrection": {
+    "reason": "Prose-only timestep label correction after collection. Executed protocol and all row timesteps were 16/8/2 ms throughout.",
+    "originalSummary": {
+      "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/solver-profile-summary.json",
+      "sha256": "1eeae3a6cb615454a850f5384afa93b4a687547280165c269e073f6a8491573a"
+    },
+    "boundCollector": {
+      "path": "dist/verification/collision-solver-profile-review-20261108/collect-solver-profile.mjs.bound",
+      "sha256": "492cd9b4b2bf4f37b4f3da3c9981280b66c9d16ddf0af98555de77cb8f40f0c2"
+    },
+    "correctedCollector": {
+      "path": "scripts/collision-reference/collect-solver-profile.mjs",
+      "sha256": "f9b36df70e5f18e2010f7f585d34cbc7dbccd1c13d419165114d61fe000bbff3"
+    },
+    "frozenSourcesVerifiedBeforeCorrection": true,
+    "physicsOrReplayChanged": false
+  },
+  "host": {
+    "cpu": "11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz",
+    "logicalCpus": 16,
+    "windows": "10.0.26300",
+    "node": "v22.22.3"
+  },
+  "counts": {
+    "passedStages": 9,
+    "rows": 10,
+    "profiles": 9,
+    "measuredSamples": 70
+  },
+  "regressionChecks": 71,
+  "regression": {
+    "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-owned-regression/result.json",
+    "sha256": "a4565522821fd124a48a7f88c71323a704901b18ea7f3a563db61e8ecdbb1481"
+  },
+  "world": {
+    "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/world-reference/result.json",
+    "sha256": "44c95e210ee338ff2e70b2bd40d3468f09ec83e8d5a056b608d63e9c12153c45"
+  },
+  "historicalComparison": {
+    "path": "dist/verification/collision-cpu/b35049763d24429e86685ce0c0c6ba1d/comparison.json",
+    "sha256": "0be7ab135074ab762112db58b23af9fcd107198ca2544307fd50b8579806118b"
+  },
+  "aggregate": {
+    "all": {
+      "samples": 3707,
+      "kernelSamples": 2032,
+      "solverSamples": 1080,
+      "buckets": {
+        "harness-other-or-profiler": 93,
+        "harness-exact-state": 1374,
+        "kernel": 2032,
+        "gc": 194,
+        "engine-outside-recognized-step": 14
+      },
+      "inclusive": {
+        "ownedAdmission": 274,
+        "solver": 1080,
+        "geometry": 347,
+        "timeOfImpact": 117,
+        "effectiveResponse": 229,
+        "impulseUpdates": 220,
+        "relativeMotion": 236,
+        "projection": 113,
+        "portableCopy": 224
+      },
+      "solverBreakdown": {
+        "solver-other-or-inlined": 196,
+        "geometry": 211,
+        "effectiveResponse": 229,
+        "impulseUpdates": 213,
+        "relativeMotion": 231
+      }
+    },
+    "shortIntervals": {
+      "samples": 3680,
+      "kernelSamples": 2022,
+      "solverSamples": 1075,
+      "buckets": {
+        "harness-exact-state": 1368,
+        "kernel": 2022,
+        "gc": 192,
+        "engine-outside-recognized-step": 14,
+        "harness-other-or-profiler": 84
+      },
+      "inclusive": {
+        "ownedAdmission": 271,
+        "solver": 1075,
+        "geometry": 345,
+        "timeOfImpact": 116,
+        "effectiveResponse": 229,
+        "impulseUpdates": 218,
+        "relativeMotion": 235,
+        "projection": 112,
+        "portableCopy": 221
+      },
+      "solverBreakdown": {
+        "solver-other-or-inlined": 195,
+        "geometry": 210,
+        "effectiveResponse": 229,
+        "impulseUpdates": 211,
+        "relativeMotion": 230
+      }
+    }
+  },
+  "byDt": [
+    {
+      "dt": 0.016,
+      "all": {
+        "samples": 527,
+        "kernelSamples": 327,
+        "solverSamples": 159,
+        "buckets": {
+          "harness-other-or-profiler": 18,
+          "harness-exact-state": 154,
+          "kernel": 327,
+          "gc": 25,
+          "engine-outside-recognized-step": 3
+        },
+        "inclusive": {
+          "ownedAdmission": 47,
+          "solver": 159,
+          "geometry": 56,
+          "timeOfImpact": 22,
+          "effectiveResponse": 37,
+          "impulseUpdates": 35,
+          "relativeMotion": 42,
+          "projection": 24,
+          "portableCopy": 24
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 26,
+          "geometry": 21,
+          "effectiveResponse": 37,
+          "impulseUpdates": 35,
+          "relativeMotion": 40
+        }
+      },
+      "shortIntervals": {
+        "samples": 521,
+        "kernelSamples": 325,
+        "solverSamples": 158,
+        "buckets": {
+          "harness-exact-state": 153,
+          "kernel": 325,
+          "gc": 25,
+          "engine-outside-recognized-step": 3,
+          "harness-other-or-profiler": 15
+        },
+        "inclusive": {
+          "ownedAdmission": 47,
+          "solver": 158,
+          "geometry": 55,
+          "timeOfImpact": 22,
+          "effectiveResponse": 37,
+          "impulseUpdates": 34,
+          "relativeMotion": 42,
+          "projection": 23,
+          "portableCopy": 24
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 26,
+          "geometry": 21,
+          "effectiveResponse": 37,
+          "impulseUpdates": 34,
+          "relativeMotion": 40
+        }
+      }
+    },
+    {
+      "dt": 0.008,
+      "all": {
+        "samples": 642,
+        "kernelSamples": 340,
+        "solverSamples": 174,
+        "buckets": {
+          "harness-other-or-profiler": 24,
+          "kernel": 340,
+          "harness-exact-state": 240,
+          "gc": 38
+        },
+        "inclusive": {
+          "portableCopy": 46,
+          "ownedAdmission": 49,
+          "solver": 174,
+          "geometry": 63,
+          "relativeMotion": 41,
+          "impulseUpdates": 36,
+          "projection": 18,
+          "effectiveResponse": 36,
+          "timeOfImpact": 21
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 24,
+          "geometry": 39,
+          "relativeMotion": 41,
+          "impulseUpdates": 34,
+          "effectiveResponse": 36
+        }
+      },
+      "shortIntervals": {
+        "samples": 635,
+        "kernelSamples": 338,
+        "solverSamples": 173,
+        "buckets": {
+          "kernel": 338,
+          "harness-other-or-profiler": 21,
+          "harness-exact-state": 240,
+          "gc": 36
+        },
+        "inclusive": {
+          "portableCopy": 45,
+          "ownedAdmission": 48,
+          "solver": 173,
+          "geometry": 63,
+          "relativeMotion": 41,
+          "impulseUpdates": 35,
+          "projection": 18,
+          "effectiveResponse": 36,
+          "timeOfImpact": 21
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 24,
+          "geometry": 39,
+          "relativeMotion": 41,
+          "impulseUpdates": 33,
+          "effectiveResponse": 36
+        }
+      }
+    },
+    {
+      "dt": 0.002,
+      "all": {
+        "samples": 2538,
+        "kernelSamples": 1365,
+        "solverSamples": 747,
+        "buckets": {
+          "harness-other-or-profiler": 51,
+          "kernel": 1365,
+          "harness-exact-state": 980,
+          "gc": 131,
+          "engine-outside-recognized-step": 11
+        },
+        "inclusive": {
+          "solver": 747,
+          "relativeMotion": 153,
+          "ownedAdmission": 178,
+          "portableCopy": 154,
+          "effectiveResponse": 156,
+          "impulseUpdates": 149,
+          "timeOfImpact": 74,
+          "geometry": 228,
+          "projection": 71
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 146,
+          "relativeMotion": 150,
+          "effectiveResponse": 156,
+          "impulseUpdates": 144,
+          "geometry": 151
+        }
+      },
+      "shortIntervals": {
+        "samples": 2524,
+        "kernelSamples": 1359,
+        "solverSamples": 744,
+        "buckets": {
+          "harness-other-or-profiler": 48,
+          "kernel": 1359,
+          "harness-exact-state": 975,
+          "gc": 131,
+          "engine-outside-recognized-step": 11
+        },
+        "inclusive": {
+          "solver": 744,
+          "relativeMotion": 152,
+          "ownedAdmission": 176,
+          "portableCopy": 152,
+          "effectiveResponse": 156,
+          "impulseUpdates": 149,
+          "timeOfImpact": 73,
+          "geometry": 227,
+          "projection": 71
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 145,
+          "relativeMotion": 149,
+          "effectiveResponse": 156,
+          "impulseUpdates": 144,
+          "geometry": 150
+        }
+      }
+    }
+  ],
+  "shares": {
+    "solver": 0.531496062992126,
+    "effective": 0.11269685039370078,
+    "shortIntervalSolver": 0.5316518298714145,
+    "shortIntervalEffective": 0.1132542037586548
+  },
+  "candidate": {
+    "status": "identified-not-implemented",
+    "change": "Lazy per-contact normal effective-mass denominator cache, scoped to one solve.",
+    "source": "engine/experimental/multiphysics/rigid.ts",
+    "line": 1354,
+    "expression": "dotVec3(c.normal, effective(c, c.normal))",
+    "coverage": {
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-counts/coverage-0.002.json",
+        "sha256": "42e1d8a88d4ca15473644b1f494b8c0a5d631b1480a22a6f7e9417fc0f94dd0a"
+      },
+      "completedSteps": 356,
+      "solves": 1068,
+      "contactPoints": 8544,
+      "iterationBodies": 15308,
+      "normalEvaluations": 122464,
+      "frictionExecutions": 0,
+      "contactRange": {
+        "startOffset": 55976,
+        "endOffset": 57318,
+        "count": 8544,
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1320,
+        "column": 43,
+        "excerpt": "{\n                const speed = dotVec3(\n                  subtractVec3(pointVelocity(b, point), pointVelocity(a, point)),\n                  n\n       "
+      },
+      "iterationRange": {
+        "startOffset": 58021,
+        "endOffset": 61489,
+        "count": 15308,
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1368,
+        "column": 82,
+        "excerpt": "{\n        for (const c of contacts) {\n          yield progress(\"contact\");\n          const velocity = relative(c), denominator = dotVec3(c.normal, eff"
+      },
+      "visitRange": {
+        "startOffset": 58057,
+        "endOffset": 60418,
+        "count": 122464,
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1369,
+        "column": 35,
+        "excerpt": "{\n          yield progress(\"contact\");\n          const velocity = relative(c), denominator = dotVec3(c.normal, effective(c, c.normal));\n          cons"
+      },
+      "frictionRange": {
+        "startOffset": 58611,
+        "endOffset": 60418,
+        "count": 0,
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1380,
+        "column": 42,
+        "excerpt": "\n          const current = relative(c), t1 = c.tangent1, t2 = c.tangent2;\n          const k11 = dotVec3(t1, effective(c, t1)), k22 = dotVec3(t2, effec"
+      }
+    },
+    "inferredCallReduction": {
+      "before": 122464,
+      "after": 8544,
+      "avoided": 113920,
+      "fraction": 0.9302325581395349
+    },
+    "assumptions": [
+      "Contact point/normal and body center, mass, anchored state and inverse inertia remain fixed inside one solve.",
+      "Preserve first evaluation order after the same progress yield and relative velocity calculation; use explicit initialization state.",
+      "Retain original arithmetic, all yields/iterations, impulse updates, convergence and receipt calculations. Fresh cache per contact per solve.",
+      "Do not change TOI, geometry, friction/tangent work, public inputs, state or replay formats."
+    ],
+    "unproven": "No cache implementation or speedup measurement yet. Call reduction does not predict wall-time reduction.",
+    "requiredFollowup": "Exact differential states/receipts/work/cancellation/isolation/rejection checks, all original fixtures and timesteps, fresh capped baseline/new timing controls."
+  },
+  "rows": [
+    {
+      "case": "ss-stack-solver-profile-1",
+      "dt": 0.016,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/row-0.016.json",
+        "sha256": "499d0754d8fc4adbeb105129e1850c343651c071fd88d5a514d71a8b87393ceb"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/profile-0.016.cpuprofile",
+        "sha256": "3c5fa2ddd652978b7076a130f12174909b31e20f67c484deb312b6a73411b482"
+      },
+      "exactSha256": "0f1e9f0db7da9ad5c4152e6b6cb9f30304868a15af3f1cabb9ac979fb83e3a76",
+      "phaseWork": {
+        "assembly": 9,
+        "sweep": 18,
+        "contact": 1221,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          8.490999999999985,
+          8.776000000000067,
+          10.251099999999951,
+          6.259199999999737,
+          6.7952999999999975,
+          6.836000000000013,
+          7.025499999999965
+        ],
+        "medianMs": 7.025499999999965,
+        "p95Ms": 10.251099999999951,
+        "medianMsPerSimulatedSecond": 146.3645833333326,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 419.8409999999999,
+        "kernelWallMs": 137.39309999999114,
+        "outsideKernelWallMs": 282.44790000000876,
+        "threadUserMs": 172,
+        "threadSystemMs": 47,
+        "processUserMs": 484,
+        "processSystemMs": 235,
+        "metrics": {
+          "create": {
+            "calls": 42,
+            "wallMs": 13.027600000001485
+          },
+          "next": {
+            "calls": 17098,
+            "wallMs": 124.21029999998927
+          },
+          "close": {
+            "calls": 42,
+            "wallMs": 0.15520000000037726
+          },
+          "completed": 41,
+          "yielded": {
+            "assembly": 124,
+            "sweep": 246,
+            "contact": 16687,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 175,
+        "kernelSamples": 107,
+        "solverSamples": 49,
+        "buckets": {
+          "harness-other-or-profiler": 6,
+          "harness-exact-state": 53,
+          "kernel": 107,
+          "gc": 7,
+          "engine-outside-recognized-step": 2
+        },
+        "inclusive": {
+          "ownedAdmission": 15,
+          "solver": 49,
+          "geometry": 13,
+          "timeOfImpact": 4,
+          "effectiveResponse": 13,
+          "impulseUpdates": 11,
+          "relativeMotion": 13,
+          "projection": 8,
+          "portableCopy": 5
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 8,
+          "geometry": 6,
+          "effectiveResponse": 13,
+          "impulseUpdates": 11,
+          "relativeMotion": 11
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-1",
+      "dt": 0.008,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/row-0.008.json",
+        "sha256": "beff81377f17ae32b950c3a0d126009567eeb78b209d077996f1c3e97a30f2dc"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/profile-0.008.cpuprofile",
+        "sha256": "d396bf5fa3a2c93dc9dcf9b6aa5f4ffd2517077ac8c94b5016becf5d5e693eb2"
+      },
+      "exactSha256": "b1d193824322f382443fa55210dcdb8c321b9681784ab627eed96fe686618179",
+      "phaseWork": {
+        "assembly": 18,
+        "sweep": 36,
+        "contact": 2346,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          12.653000000000247,
+          12.12940000000026,
+          12.053699999999935,
+          11.752600000000257,
+          12.343899999999849,
+          12.732099999999264,
+          12.942900000000009
+        ],
+        "medianMs": 12.343899999999849,
+        "p95Ms": 12.942900000000009,
+        "medianMsPerSimulatedSecond": 257.1645833333302,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 675.3202999999999,
+        "kernelWallMs": 535.3981999999958,
+        "outsideKernelWallMs": 139.9221000000041,
+        "threadUserMs": 219,
+        "threadSystemMs": 110,
+        "processUserMs": 407,
+        "processSystemMs": 203,
+        "metrics": {
+          "create": {
+            "calls": 87,
+            "wallMs": 17.117300000001933
+          },
+          "next": {
+            "calls": 34487,
+            "wallMs": 517.9958999999933
+          },
+          "close": {
+            "calls": 87,
+            "wallMs": 0.2850000000005366
+          },
+          "completed": 86,
+          "yielded": {
+            "assembly": 259,
+            "sweep": 516,
+            "contact": 33626,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 207,
+        "kernelSamples": 108,
+        "solverSamples": 53,
+        "buckets": {
+          "harness-other-or-profiler": 9,
+          "kernel": 108,
+          "harness-exact-state": 75,
+          "gc": 15
+        },
+        "inclusive": {
+          "portableCopy": 14,
+          "ownedAdmission": 14,
+          "solver": 53,
+          "geometry": 23,
+          "relativeMotion": 11,
+          "impulseUpdates": 9,
+          "projection": 7,
+          "effectiveResponse": 14,
+          "timeOfImpact": 6
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 6,
+          "geometry": 13,
+          "relativeMotion": 11,
+          "impulseUpdates": 9,
+          "effectiveResponse": 14
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-1",
+      "dt": 0.002,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/row-0.002.json",
+        "sha256": "21b5df5ca9dd35aec3b7608dca7c71e651dc99f0561538df9073219a495c741e"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/profile-0.002.cpuprofile",
+        "sha256": "99e271027e77795131e314796b55aebe9aa9d725d59732d267c1189107397348"
+      },
+      "exactSha256": "89890909f934239cd42e1c425b4df83022cf61eaf8067b969cb4dcc5db79064e",
+      "phaseWork": {
+        "assembly": 72,
+        "sweep": 144,
+        "contact": 8616,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          52.04560000000174,
+          52.084800000000996,
+          47.121200000000044,
+          158.07779999999957,
+          48.108200000001034,
+          51.27419999999711,
+          57.265299999999115
+        ],
+        "medianMs": 52.04560000000174,
+        "p95Ms": 158.07779999999957,
+        "medianMsPerSimulatedSecond": 1084.2833333333697,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 1780.6922999999997,
+        "kernelWallMs": 975.3980000000997,
+        "outsideKernelWallMs": 805.2942999999,
+        "threadUserMs": 953,
+        "threadSystemMs": 203,
+        "processUserMs": 1359,
+        "processSystemMs": 297,
+        "metrics": {
+          "create": {
+            "calls": 357,
+            "wallMs": 213.4216000000033
+          },
+          "next": {
+            "calls": 131365,
+            "wallMs": 761.018200000095
+          },
+          "close": {
+            "calls": 357,
+            "wallMs": 0.9582000000013977
+          },
+          "completed": 356,
+          "yielded": {
+            "assembly": 1069,
+            "sweep": 2136,
+            "contact": 127804,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 839,
+        "kernelSamples": 448,
+        "solverSamples": 243,
+        "buckets": {
+          "harness-other-or-profiler": 18,
+          "kernel": 448,
+          "harness-exact-state": 325,
+          "gc": 44,
+          "engine-outside-recognized-step": 4
+        },
+        "inclusive": {
+          "solver": 243,
+          "relativeMotion": 59,
+          "ownedAdmission": 58,
+          "portableCopy": 54,
+          "effectiveResponse": 55,
+          "impulseUpdates": 43,
+          "timeOfImpact": 27,
+          "geometry": 74,
+          "projection": 27
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 41,
+          "relativeMotion": 57,
+          "effectiveResponse": 55,
+          "impulseUpdates": 43,
+          "geometry": 47
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-2",
+      "dt": 0.016,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/row-0.016.json",
+        "sha256": "2761c9b29e008becc85765585a68e3badf7383ec794e2b1ce3b0ef16a36fbc25"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/profile-0.016.cpuprofile",
+        "sha256": "4dd433047b0288f96c8e41378bb1b8409e377bbf315b791d11db8cda63e4a819"
+      },
+      "exactSha256": "0f1e9f0db7da9ad5c4152e6b6cb9f30304868a15af3f1cabb9ac979fb83e3a76",
+      "phaseWork": {
+        "assembly": 9,
+        "sweep": 18,
+        "contact": 1221,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          9.957699999999704,
+          11.673899999999776,
+          8.194600000000264,
+          6.269599999999855,
+          7.492499999999836,
+          6.212800000000016,
+          6.12319999999977
+        ],
+        "medianMs": 7.492499999999836,
+        "p95Ms": 11.673899999999776,
+        "medianMsPerSimulatedSecond": 156.0937499999966,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 342.61530000000016,
+        "kernelWallMs": 142.32689999999252,
+        "outsideKernelWallMs": 200.28840000000764,
+        "threadUserMs": 125,
+        "threadSystemMs": 94,
+        "processUserMs": 406,
+        "processSystemMs": 157,
+        "metrics": {
+          "create": {
+            "calls": 42,
+            "wallMs": 11.853000000000065
+          },
+          "next": {
+            "calls": 17098,
+            "wallMs": 129.99529999999277
+          },
+          "close": {
+            "calls": 42,
+            "wallMs": 0.4785999999996875
+          },
+          "completed": 41,
+          "yielded": {
+            "assembly": 124,
+            "sweep": 246,
+            "contact": 16687,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 170,
+        "kernelSamples": 111,
+        "solverSamples": 55,
+        "buckets": {
+          "harness-other-or-profiler": 7,
+          "harness-exact-state": 45,
+          "kernel": 111,
+          "gc": 6,
+          "engine-outside-recognized-step": 1
+        },
+        "inclusive": {
+          "portableCopy": 11,
+          "ownedAdmission": 19,
+          "solver": 55,
+          "relativeMotion": 16,
+          "impulseUpdates": 13,
+          "effectiveResponse": 10,
+          "geometry": 19,
+          "timeOfImpact": 9,
+          "projection": 6
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 10,
+          "relativeMotion": 16,
+          "impulseUpdates": 13,
+          "effectiveResponse": 10,
+          "geometry": 6
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-2",
+      "dt": 0.008,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/row-0.008.json",
+        "sha256": "ca29971f8c06d3dd69444198b2e73af8d6cac8436a12e267bb0d6842f81b4906"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/profile-0.008.cpuprofile",
+        "sha256": "a57b862d58cb2e44a8781ad71af11e25cfa960620ebfda9baa929868ccee500b"
+      },
+      "exactSha256": "b1d193824322f382443fa55210dcdb8c321b9681784ab627eed96fe686618179",
+      "phaseWork": {
+        "assembly": 18,
+        "sweep": 36,
+        "contact": 2346,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          13.324499999999716,
+          12.795600000000377,
+          11.854099999999107,
+          12.559000000000196,
+          12.531200000000354,
+          14.158600000000206,
+          15.812400000000252
+        ],
+        "medianMs": 12.795600000000377,
+        "p95Ms": 15.812400000000252,
+        "medianMsPerSimulatedSecond": 266.57500000000783,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 722.3795,
+        "kernelWallMs": 195.36180000001787,
+        "outsideKernelWallMs": 527.0176999999821,
+        "threadUserMs": 235,
+        "threadSystemMs": 93,
+        "processUserMs": 359,
+        "processSystemMs": 203,
+        "metrics": {
+          "create": {
+            "calls": 87,
+            "wallMs": 18.132100000000946
+          },
+          "next": {
+            "calls": 34487,
+            "wallMs": 176.7945000000168
+          },
+          "close": {
+            "calls": 87,
+            "wallMs": 0.4352000000001226
+          },
+          "completed": 86,
+          "yielded": {
+            "assembly": 259,
+            "sweep": 516,
+            "contact": 33626,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 227,
+        "kernelSamples": 121,
+        "solverSamples": 61,
+        "buckets": {
+          "harness-other-or-profiler": 4,
+          "kernel": 121,
+          "harness-exact-state": 86,
+          "gc": 16
+        },
+        "inclusive": {
+          "solver": 61,
+          "relativeMotion": 14,
+          "geometry": 20,
+          "portableCopy": 15,
+          "timeOfImpact": 8,
+          "impulseUpdates": 15,
+          "ownedAdmission": 18,
+          "projection": 6,
+          "effectiveResponse": 7
+        },
+        "solverBreakdown": {
+          "relativeMotion": 14,
+          "geometry": 13,
+          "solver-other-or-inlined": 13,
+          "impulseUpdates": 14,
+          "effectiveResponse": 7
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-2",
+      "dt": 0.002,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/row-0.002.json",
+        "sha256": "e2de3c2bb38f018b16b067c82be2bbdf43c51c6e3e384f72119b1eb8008f8b9c"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/profile-0.002.cpuprofile",
+        "sha256": "533e580d190a881c7832a11b2df03f587423b69c4dba2bce44e911bb8924ebff"
+      },
+      "exactSha256": "89890909f934239cd42e1c425b4df83022cf61eaf8067b969cb4dcc5db79064e",
+      "phaseWork": {
+        "assembly": 72,
+        "sweep": 144,
+        "contact": 8616,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          50.94810000000007,
+          55.572200000000066,
+          204.26249999999845,
+          48.19280000000026,
+          46.38349999999855,
+          56.196499999998196,
+          58.30760000000191
+        ],
+        "medianMs": 55.572200000000066,
+        "p95Ms": 204.26249999999845,
+        "medianMsPerSimulatedSecond": 1157.754166666668,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 2002.6326,
+        "kernelWallMs": 1092.2026999999584,
+        "outsideKernelWallMs": 910.4299000000415,
+        "threadUserMs": 859,
+        "threadSystemMs": 375,
+        "processUserMs": 1390,
+        "processSystemMs": 532,
+        "metrics": {
+          "create": {
+            "calls": 357,
+            "wallMs": 75.61050000000569
+          },
+          "next": {
+            "calls": 131365,
+            "wallMs": 1015.621699999961
+          },
+          "close": {
+            "calls": 357,
+            "wallMs": 0.9704999999917163
+          },
+          "completed": 356,
+          "yielded": {
+            "assembly": 1069,
+            "sweep": 2136,
+            "contact": 127804,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 836,
+        "kernelSamples": 443,
+        "solverSamples": 232,
+        "buckets": {
+          "harness-other-or-profiler": 17,
+          "gc": 49,
+          "kernel": 443,
+          "harness-exact-state": 323,
+          "engine-outside-recognized-step": 4
+        },
+        "inclusive": {
+          "solver": 232,
+          "relativeMotion": 45,
+          "impulseUpdates": 45,
+          "geometry": 80,
+          "effectiveResponse": 39,
+          "ownedAdmission": 61,
+          "timeOfImpact": 24,
+          "portableCopy": 50,
+          "projection": 21
+        },
+        "solverBreakdown": {
+          "relativeMotion": 45,
+          "solver-other-or-inlined": 47,
+          "impulseUpdates": 44,
+          "geometry": 57,
+          "effectiveResponse": 39
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-3",
+      "dt": 0.016,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/row-0.016.json",
+        "sha256": "d82038159182ca5da43df4946861afc1a3c45581ce1e03a8d233385faedf783e"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/profile-0.016.cpuprofile",
+        "sha256": "d7f918ce94e33814612841ad7bd47024759db678208922c6ca5baaeb129c9939"
+      },
+      "exactSha256": "0f1e9f0db7da9ad5c4152e6b6cb9f30304868a15af3f1cabb9ac979fb83e3a76",
+      "phaseWork": {
+        "assembly": 9,
+        "sweep": 18,
+        "contact": 1221,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          334.1170000000002,
+          9.337800000000016,
+          9.767799999999852,
+          7.318899999999985,
+          7.007000000000062,
+          6.279499999999871,
+          6.063800000000128
+        ],
+        "medianMs": 7.318899999999985,
+        "p95Ms": 334.1170000000002,
+        "medianMsPerSimulatedSecond": 152.477083333333,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 563.7542000000001,
+        "kernelWallMs": 469.6953000000042,
+        "outsideKernelWallMs": 94.0588999999959,
+        "threadUserMs": 156,
+        "threadSystemMs": 47,
+        "processUserMs": 468,
+        "processSystemMs": 172,
+        "metrics": {
+          "create": {
+            "calls": 42,
+            "wallMs": 13.288699999999608
+          },
+          "next": {
+            "calls": 17098,
+            "wallMs": 456.2404000000038
+          },
+          "close": {
+            "calls": 42,
+            "wallMs": 0.16620000000079926
+          },
+          "completed": 41,
+          "yielded": {
+            "assembly": 124,
+            "sweep": 246,
+            "contact": 16687,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 182,
+        "kernelSamples": 109,
+        "solverSamples": 55,
+        "buckets": {
+          "harness-other-or-profiler": 5,
+          "harness-exact-state": 56,
+          "kernel": 109,
+          "gc": 12
+        },
+        "inclusive": {
+          "portableCopy": 8,
+          "ownedAdmission": 13,
+          "solver": 55,
+          "geometry": 24,
+          "timeOfImpact": 9,
+          "effectiveResponse": 14,
+          "impulseUpdates": 11,
+          "relativeMotion": 13,
+          "projection": 10
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 8,
+          "geometry": 9,
+          "effectiveResponse": 14,
+          "impulseUpdates": 11,
+          "relativeMotion": 13
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-3",
+      "dt": 0.008,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/row-0.008.json",
+        "sha256": "30ae0ae46ff854f88eb3fe820cae96c6eda03d621ee76095b3d6aa20a58cb22c"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/profile-0.008.cpuprofile",
+        "sha256": "d779406e1548777e20cdb8f00515127dc274598986ab3addd8e03c90a612c859"
+      },
+      "exactSha256": "b1d193824322f382443fa55210dcdb8c321b9681784ab627eed96fe686618179",
+      "phaseWork": {
+        "assembly": 18,
+        "sweep": 36,
+        "contact": 2346,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          11.813599999999951,
+          12.83369999999968,
+          258.8615999999997,
+          12.619000000000597,
+          12.087199999999484,
+          13.42089999999962,
+          12.584899999999834
+        ],
+        "medianMs": 12.619000000000597,
+        "p95Ms": 258.8615999999997,
+        "medianMsPerSimulatedSecond": 262.89583333334576,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 564.613,
+        "kernelWallMs": 425.2497000000003,
+        "outsideKernelWallMs": 139.36329999999975,
+        "threadUserMs": 297,
+        "threadSystemMs": 31,
+        "processUserMs": 422,
+        "processSystemMs": 109,
+        "metrics": {
+          "create": {
+            "calls": 87,
+            "wallMs": 17.41689999999926
+          },
+          "next": {
+            "calls": 34487,
+            "wallMs": 407.5925000000004
+          },
+          "close": {
+            "calls": 87,
+            "wallMs": 0.2403000000006159
+          },
+          "completed": 86,
+          "yielded": {
+            "assembly": 259,
+            "sweep": 516,
+            "contact": 33626,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 208,
+        "kernelSamples": 111,
+        "solverSamples": 60,
+        "buckets": {
+          "harness-other-or-profiler": 11,
+          "kernel": 111,
+          "harness-exact-state": 79,
+          "gc": 7
+        },
+        "inclusive": {
+          "timeOfImpact": 7,
+          "portableCopy": 17,
+          "ownedAdmission": 17,
+          "solver": 60,
+          "geometry": 20,
+          "effectiveResponse": 15,
+          "impulseUpdates": 12,
+          "projection": 5,
+          "relativeMotion": 16
+        },
+        "solverBreakdown": {
+          "geometry": 13,
+          "effectiveResponse": 15,
+          "impulseUpdates": 11,
+          "solver-other-or-inlined": 5,
+          "relativeMotion": 16
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-profile-3",
+      "dt": 0.002,
+      "mode": "sampling",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/row-0.002.json",
+        "sha256": "946a35a0f033e46e841a7557a13c23672c0c39adb4fdb3d3409c273c1932c3dc"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/profile-0.002.cpuprofile",
+        "sha256": "d2ee3831559b458c00dcd987039f2863126ba5e727cb5ac1a85a8d7a48bf7c62"
+      },
+      "exactSha256": "89890909f934239cd42e1c425b4df83022cf61eaf8067b969cb4dcc5db79064e",
+      "phaseWork": {
+        "assembly": 72,
+        "sweep": 144,
+        "contact": 8616,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          54.276500000001306,
+          51.99329999999827,
+          48.848099999999704,
+          147.3808999999992,
+          46.98119999999926,
+          54.22150000000147,
+          55.655000000000655
+        ],
+        "medianMs": 54.22150000000147,
+        "p95Ms": 147.3808999999992,
+        "medianMsPerSimulatedSecond": 1129.614583333364,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 1930.2676999999994,
+        "kernelWallMs": 1033.7844000000946,
+        "outsideKernelWallMs": 896.4832999999048,
+        "threadUserMs": 969,
+        "threadSystemMs": 313,
+        "processUserMs": 1532,
+        "processSystemMs": 469,
+        "metrics": {
+          "create": {
+            "calls": 357,
+            "wallMs": 258.62719999999035
+          },
+          "next": {
+            "calls": 131365,
+            "wallMs": 774.2046000001119
+          },
+          "close": {
+            "calls": 357,
+            "wallMs": 0.9525999999923442
+          },
+          "completed": 356,
+          "yielded": {
+            "assembly": 1069,
+            "sweep": 2136,
+            "contact": 127804,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": {
+        "samples": 863,
+        "kernelSamples": 474,
+        "solverSamples": 272,
+        "buckets": {
+          "harness-other-or-profiler": 16,
+          "kernel": 474,
+          "harness-exact-state": 332,
+          "gc": 38,
+          "engine-outside-recognized-step": 3
+        },
+        "inclusive": {
+          "solver": 272,
+          "effectiveResponse": 62,
+          "impulseUpdates": 61,
+          "portableCopy": 50,
+          "ownedAdmission": 59,
+          "relativeMotion": 49,
+          "timeOfImpact": 23,
+          "geometry": 74,
+          "projection": 23
+        },
+        "solverBreakdown": {
+          "solver-other-or-inlined": 58,
+          "effectiveResponse": 62,
+          "impulseUpdates": 57,
+          "relativeMotion": 48,
+          "geometry": 47
+        }
+      }
+    },
+    {
+      "case": "ss-stack-solver-counts",
+      "dt": 0.002,
+      "mode": "precise-coverage",
+      "row": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-counts/row-0.002.json",
+        "sha256": "36c5f69bd0b1a68cb9dbef291aaa555f646cb6af50d13a263331fbd51a44c86d"
+      },
+      "artifact": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-counts/coverage-0.002.json",
+        "sha256": "42e1d8a88d4ca15473644b1f494b8c0a5d631b1480a22a6f7e9417fc0f94dd0a"
+      },
+      "exactSha256": "89890909f934239cd42e1c425b4df83022cf61eaf8067b969cb4dcc5db79064e",
+      "phaseWork": {
+        "assembly": 72,
+        "sweep": 144,
+        "contact": 8616,
+        "fracture": 0
+      },
+      "timing": {
+        "samplesMs": [
+          60.484099999999216,
+          64.892400000002,
+          209.3433999999993,
+          89.23949999999968,
+          87.11269999999922,
+          346.01449999999977,
+          59.77260000000024
+        ],
+        "medianMs": 87.11269999999922,
+        "p95Ms": 346.01449999999977,
+        "medianMsPerSimulatedSecond": 1814.8479166666505,
+        "diagnosticOnly": true
+      },
+      "clocks": {
+        "wallMs": 2728.0027,
+        "kernelWallMs": 2040.3200000000143,
+        "outsideKernelWallMs": 687.6826999999857,
+        "threadUserMs": 1625,
+        "threadSystemMs": 15,
+        "processUserMs": 2437,
+        "processSystemMs": 281,
+        "metrics": {
+          "create": {
+            "calls": 357,
+            "wallMs": 92.1559999999979
+          },
+          "next": {
+            "calls": 131365,
+            "wallMs": 1946.966100000016
+          },
+          "close": {
+            "calls": 357,
+            "wallMs": 1.1979000000003452
+          },
+          "completed": 356,
+          "yielded": {
+            "assembly": 1069,
+            "sweep": 2136,
+            "contact": 127804,
+            "fracture": 0
+          }
+        }
+      },
+      "sampleCounts": null
+    }
+  ],
+  "stages": [
+    {
+      "case": "startup-close",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/startup-close/report.json",
+        "sha256": "662cccf6bd757c0199aa13cd4d9c6cf67777032ee9274d2b5fcd036f033ae83e"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-startup-close.json",
+        "sha256": "e3c73673fa6600da32f2dfd01e6c66e43e7e82117d9c802df23326a5e432ac6a"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 11.458333333333337
+    },
+    {
+      "case": "stalled-cpu",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/stalled-cpu/report.json",
+        "sha256": "a4b32b1ba38f57b97c0a3b4f3443200343ef8aa20ece41e8ab82fee1baa4570c"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-stalled-cpu.json",
+        "sha256": "9c496646fdc7ecc621abfa1c6db3989b01eacab3cec84826a909f6e29db36426"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": 2.1500987999606878,
+      "maximumHostCpuPercent": 18.190386427898208
+    },
+    {
+      "case": "supervisor-loss",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/supervisor-loss/report.json",
+        "sha256": "4ff437176727ce6dcf13871b3cc7d1f42498dc8a291ed8dd8fc37c3becd7e742"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-supervisor-loss.json",
+        "sha256": "5bd88a7c7514df352940c7aa6597f8dc2af49c784dcc87a83c1aa20cd005ab48"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": 2.9451878999825567,
+      "maximumHostCpuPercent": 12.331406551059732
+    },
+    {
+      "case": "ss-owned-regression",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-owned-regression/report.json",
+        "sha256": "7eefba75d70bffe76f0a2b7611a4ad7963446591371ab168798fb94b0add5864"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-ss-owned-regression.json",
+        "sha256": "fe23bb10d34bb28dfc9b1cdfe55cb873dcfacd95cc6b144a728031246d84a668"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 12.642585551330798
+    },
+    {
+      "case": "world-reference",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/world-reference/report.json",
+        "sha256": "8eecfc2ac1d6923559c75f5451ffcbf803b92512f5461638ce96972054444b2a"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-world-reference.json",
+        "sha256": "be893c748055a794b9fbecf087411962abe58949ab37e64e036d7028c5dcb066"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 12.857142857142856
+    },
+    {
+      "case": "ss-stack-solver-profile-1",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-1/report.json",
+        "sha256": "f80ee6f78c1af98ebd434f3e7e997b355de15d5aa22a6b53173c3290491a6cb5"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-ss-stack-solver-profile-1.json",
+        "sha256": "7b8bda4f3d9658e31b16f7f8794cb38810153a4dd37ce9b2507df393e5be6705"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 25.239005736137663
+    },
+    {
+      "case": "ss-stack-solver-profile-2",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-2/report.json",
+        "sha256": "f35d9d820cca8ea51d629b02f977ffe76ff8a10ebff1989e6a6cdade9f7d62d6"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-ss-stack-solver-profile-2.json",
+        "sha256": "b9b55a4995c4837db38124bdb28f21637471c43ae18aa19e4aad55fb409843f0"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 27.019230769230774
+    },
+    {
+      "case": "ss-stack-solver-profile-3",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-profile-3/report.json",
+        "sha256": "cef0c9b3a84d540962a9483236ffefdb2c835b595f124dd98e7f8bdf0813ed49"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-ss-stack-solver-profile-3.json",
+        "sha256": "d1b0c6ec54fc23c3cc7c562fbbca947ee5c764f1901ccd2a7e0d246d05157795"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 19.326923076923073
+    },
+    {
+      "case": "ss-stack-solver-counts",
+      "passed": true,
+      "report": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/ss-stack-solver-counts/report.json",
+        "sha256": "bf4291f0ef71eab3f1e2f1085bc2014b2b4eab09401ebc061ecf94ce0a938cf2"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/1f8f93269a2e435d82004d20ed366e39/quiet-ss-stack-solver-counts.json",
+        "sha256": "cc7555060f3e53fc2dbfc8ecc6829d7b25ef2a8bfd3cdbe2cec00a66a8c385a3"
+      },
+      "error": null,
+      "faultToEmptyJobSeconds": null,
+      "maximumHostCpuPercent": 19.39163498098859
+    }
+  ],
+  "limits": {
+    "cpuPercent": 6,
+    "memoryMiB": 4096,
+    "deadlineSeconds": 30,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "freeMemoryMiB": 8192
+  },
+  "hold": {
+    "path": "dist/verification/safety-hold.json",
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "blockRecovery": true,
+    "unchanged": true
+  },
+  "originalFailedGpuReceipt": {
+    "path": "dist/verification/browser-containment/d40b35fb88374a749ef87c71add94948/supervisor-loss/report.json",
+    "sha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "remainsUnaccepted": true
+  },
+  "protectedWorktree": "D:\\state-space-cpu-performance",
+  "protectedSnapshotSha256": "a3d440f40ca7536dbd6999b61a1ab7337a85606ce49c17cfd8abbcf32572446b",
+  "cleanup": {
+    "allNamedJobsAbsent": true,
+    "executionLocks": []
+  },
+  "staticValidation": {
+    "nodeDataAnalysisTestsPassed": 10,
+    "pythonScopeCleanupTestsPassed": 28,
+    "pythonLint": "passed",
+    "nodeSyntax": "passed"
+  },
+  "qualification": {
+    "runtime": false,
+    "performance": false,
+    "gpu": false,
+    "worker": false,
+    "r1": false,
+    "purpose": "Bounded diagnostic comparison; no existing qualification gate is closed."
+  },
+  "interpretation": [
+    "Samples are counts, not CPU percentages or benchmark speedups; long elapsed gaps are never charged to the sampled function.",
+    "Inclusive categories overlap. Source positions may refer to inlined helpers; unresolved solver samples remain explicit.",
+    "Three fixed sampling jobs cover 16/8/2 ms; a separate fixed 2 ms coverage job measures calls with optimization disabled.",
+    "No engine, TOI, replay, deterministic work or qualification change. No GPU/browser workload or inspector listener."
+  ]
+}

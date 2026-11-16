@@ -1,9 +1,16 @@
+import { readFileSync } from 'node:fs';
+import ts from '@typescript/typescript6';
 import { describe, expect, test } from 'vitest';
 import {
   type Vec3,
+  type Quat,
   cuboidMassProperties,
   scaleVec3,
+  dotVec3,
   crossVec3,
+  lengthVec3,
+  normalizeVec3,
+  normalizeQuaternion,
   integrateOrientation,
   rotateVector,
   multiplyQuaternions,
@@ -603,4 +610,219 @@ test('tipping: a block tilted on its edge returns inside the critical angle and 
     const edge = addVec3(moved.center, rotateVector(moved.orientation, [0.25, -1, 0]));
     expect(Math.hypot(...subtractVec3(edge, pivot))).toBeLessThan(1e-3);
   }
+});
+
+test('owned parcel validation keeps every rejection when it skips the second copy', () => {
+  const step = (candidate: object) => () =>
+    createRigidStep3D([candidate as RigidParcel3D], [], [], { dt: 0.1 });
+  const massless: Record<string, unknown> = { ...parcel('a') };
+  delete massless.mass;
+  // Records the fast path does not recognise still take the copying reader.
+  expect(step(massless)).toThrow('Game state must be acyclic portable data.');
+  expect(step({ ...parcel('a'), mass: { kilograms: 1 } })).toThrow('Invalid finite mass.');
+  expect(step({ ...parcel('a'), velocity: [0, 0, [0]] })).toThrow('Invalid finite velocity.');
+  // Plainly portable records are read in place by the same reader.
+  expect(step({ ...parcel('a'), mass: 0 })).toThrow('Invalid positive mass.');
+  expect(step({ ...parcel('a'), center: [0, 0] })).toThrow('Invalid center.');
+  expect(step({ ...parcel('a'), orientation: [0, 0, 0, 2] })).toThrow(
+    'Parcel orientation must be a unit quaternion.',
+  );
+  expect(step({ ...parcel('a'), thermalQ: 1.5 })).toThrow(
+    'Parcel energy must be nonnegative safe integer Q.',
+  );
+  expect(step({ ...parcel('a'), halfExtents: [0.5, 0, 0.5] })).toThrow(
+    'Rigid half extents must be positive.',
+  );
+});
+
+type Box = Pick<RigidParcel3D, 'center' | 'halfExtents' | 'orientation'>;
+/** The kernel's box contact test and its early reject are private. Evaluating their shipped
+ * source compares the real code without widening the module's exports. */
+function privateContactTests() {
+  const source = ts.createSourceFile(
+      'rigid.ts',
+      readFileSync('engine/experimental/multiphysics/rigid.ts', 'utf8'),
+      ts.ScriptTarget.Latest,
+      true,
+    ),
+    names = [
+      'axes',
+      'projectionRadius',
+      'pairAxes',
+      'contactWithinTolerance',
+      'separatedOnFaceAxis',
+    ];
+  const wanted = source.statements.filter(
+    (statement) =>
+      (ts.isFunctionDeclaration(statement) && names.includes(statement.name?.text ?? '')) ||
+      (ts.isVariableStatement(statement) && statement.getText(source).startsWith('const BASIS')),
+  );
+  expect(wanted).toHaveLength(names.length + 1);
+  const helpers = {
+    rotateVector,
+    dotVec3,
+    crossVec3,
+    lengthVec3,
+    normalizeVec3,
+    subtractVec3,
+    scaleVec3,
+  };
+  const body = ts.transpileModule(wanted.map((statement) => statement.getText(source)).join('\n'), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  return new Function(
+    ...Object.keys(helpers),
+    `${body}\nreturn { contactWithinTolerance, separatedOnFaceAxis };`,
+  )(...Object.values(helpers)) as {
+    contactWithinTolerance(a: Box, b: Box, tolerance: number): { depth: number } | null;
+    separatedOnFaceAxis(a: Box, b: Box, tolerance: number): boolean;
+  };
+}
+/** Deterministic uniform values in [0, 1). */
+function sequence(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+test('the face-axis early reject fires only where the full contact test finds no contact', () => {
+  const { contactWithinTolerance, separatedOnFaceAxis } = privateContactTests(),
+    random = sequence(20261112),
+    between = (low: number, high: number) => low + (high - low) * random(),
+    point = (reach: number): Vec3 => [
+      between(-reach, reach),
+      between(-reach, reach),
+      between(-reach, reach),
+    ],
+    extents = (): Vec3 => [between(0.05, 2), between(0.05, 2), between(0.05, 2)],
+    spin = (): Quat =>
+      random() < 0.2
+        ? IDENTITY_QUATERNION
+        : normalizeQuaternion([between(-1, 1), between(-1, 1), between(-1, 1), between(-1, 1)]),
+    unit = (index: number, sign: number): Vec3 => [
+      index === 0 ? sign : 0,
+      index === 1 ? sign : 0,
+      index === 2 ? sign : 0,
+    ],
+    tolerances = [0, 0.001, 0.05];
+  const wrong: object[] = [],
+    missed: object[] = [],
+    lost: object[] = [];
+  let cases = 0,
+    rejected = 0,
+    touching = 0;
+  const check = (a: Box, b: Box, tolerance: number) => {
+    const early = separatedOnFaceAxis(a, b, tolerance),
+      full = contactWithinTolerance(a, b, tolerance);
+    cases++;
+    if (early) rejected++;
+    if (full) touching++;
+    if (early && full) wrong.push({ a, b, tolerance });
+    return { early, full };
+  };
+
+  // Arbitrary poses from overlapping to well apart.
+  for (let n = 0; n < 3000; n++) {
+    const a: Box = { center: point(3), halfExtents: extents(), orientation: spin() },
+      halfExtents = extents(),
+      distance = between(0, 1.5 * (lengthVec3(a.halfExtents) + lengthVec3(halfExtents) + 1)),
+      b: Box = {
+        center: addVec3(a.center, scaleVec3(normalizeVec3(point(1)), distance)),
+        halfExtents,
+        orientation: spin(),
+      };
+    for (const tolerance of tolerances) check(a, b, tolerance);
+  }
+
+  // The tightest case for the reject: a corner of b points straight at a face of a, so the
+  // sphere that bounds b touches that face exactly where b does. Gaps straddle the tolerance.
+  for (let n = 0; n < 300; n++) {
+    const a: Box = { center: point(3), halfExtents: extents(), orientation: spin() },
+      face = Math.floor(3 * random()),
+      normal = rotateVector(a.orientation, unit(face, random() < 0.5 ? -1 : 1)),
+      halfExtents = extents(),
+      radius = lengthVec3(halfExtents),
+      corner = scaleVec3(halfExtents, 1 / radius),
+      toward = scaleVec3(normal, -1),
+      alignment = dotVec3(corner, toward);
+    if (alignment < -0.9) continue;
+    const [x, y, z] = crossVec3(corner, toward),
+      orientation = normalizeQuaternion([x, y, z, 1 + alignment]),
+      slide = [(face + 1) % 3, (face + 2) % 3].reduce<Vec3>(
+        (sum, side) =>
+          addVec3(
+            sum,
+            scaleVec3(
+              rotateVector(a.orientation, unit(side, 1)),
+              between(-0.5, 0.5) * a.halfExtents[side],
+            ),
+          ),
+        [0, 0, 0],
+      );
+    for (const tolerance of tolerances) {
+      const reach = a.halfExtents[face] + radius + tolerance,
+        size =
+          lengthVec3(addVec3(slide, scaleVec3(normal, reach))) + lengthVec3(a.halfExtents) + radius;
+      for (const gap of [-1e-6, -1e-9, -1e-12, 0, 1e-12, 5e-10, 2e-9, 1e-6]) {
+        const b: Box = {
+            center: addVec3(a.center, addVec3(slide, scaleVec3(normal, reach + gap * size))),
+            halfExtents,
+            orientation,
+          },
+          { early, full } = check(a, b, tolerance);
+        if (gap >= 1e-6 && !early) missed.push({ a, b, tolerance, gap });
+        if (gap <= -1e-6 && !full) lost.push({ a, b, tolerance, gap });
+      }
+    }
+  }
+
+  // Far enough apart that some face axis must separate them, whatever the orientations.
+  for (let n = 0; n < 500; n++) {
+    const a: Box = { center: point(3), halfExtents: extents(), orientation: spin() },
+      halfExtents = extents(),
+      distance = 2 * (lengthVec3(a.halfExtents) + lengthVec3(halfExtents)) + 1,
+      b: Box = {
+        center: addVec3(a.center, scaleVec3(normalizeVec3(point(1)), distance)),
+        halfExtents,
+        orientation: spin(),
+      };
+    for (const tolerance of tolerances)
+      if (!check(a, b, tolerance).early) missed.push({ a, b, tolerance });
+  }
+
+  expect(wrong).toEqual([]);
+  expect(missed).toEqual([]);
+  expect(lost).toEqual([]);
+  expect(cases).toBeGreaterThan(15000);
+  expect(rejected).toBeGreaterThan(1000);
+  expect(touching).toBeGreaterThan(1000);
+
+  // Geometry the reject cannot vouch for goes to the full test, and an invalid orientation
+  // fails in both with the same message, even when the other cuboid alone would separate them.
+  const near: Box = { center: [0, 0, 0], halfExtents: [0.5, 0.5, 0.5], orientation: [0, 0, 0, 1] },
+    far: Box = { ...near, center: [9, 0, 0] };
+  expect(separatedOnFaceAxis(near, far, 0)).toBe(true);
+  expect(contactWithinTolerance(near, far, 0)).toBeNull();
+  for (const center of [
+    [Number.NaN, 0, 0],
+    [Number.POSITIVE_INFINITY, 0, 0],
+    [1e200, 0, 0],
+  ] as Vec3[])
+    expect(separatedOnFaceAxis(near, { ...near, center }, 0)).toBe(false);
+  expect(separatedOnFaceAxis(near, far, Number.NaN)).toBe(false);
+  for (const [orientation, message] of [
+    [[0, 0, 0, 0], 'Cannot normalize a zero quaternion.'],
+    [[0, Number.NaN, 0, 1], 'Invalid finite quaternion.'],
+  ] as [Quat, string][])
+    for (const [a, b] of [
+      [{ ...near, orientation }, far],
+      [near, { ...far, orientation }],
+    ]) {
+      expect(() => separatedOnFaceAxis(a, b, 0)).toThrow(message);
+      expect(() => contactWithinTolerance(a, b, 0)).toThrow(message);
+    }
 });

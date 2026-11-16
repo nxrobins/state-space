@@ -1,0 +1,107 @@
+{
+  "schema": "collision-cpu-scope-status-v1",
+  "date": "2026-11-08",
+  "status": "implemented-execution-gated-after-host-health-abort",
+  "baselineCommit": "0af27b6c928cc3c5fbda7f66536d8b2ccb0c0cdb",
+  "cpuReview": "dist/verification/collision-cpu/0a7b9cbec9734fff835cac3ab12652e7",
+  "reviewSha256": "83bf2010f8ca6d10e2062d689c1d1131205d15d438a37ae17eb72db0bad74e06",
+  "benchmarkPacket": "dist/verification/collision-reference-20261108-cpu-v2",
+  "benchmarkPacketSha256": "857e7e13317334c15f70a7923975d245c56601e5c27339bbaaa6d5ba459a15df",
+  "bundleSha256": "1ad2665bec3d972673ddcddf0b505f25cff9ee47e7938d30a57b687777d8a196",
+  "sourceFilesBound": 38,
+  "checks": {
+    "nodeSyntheticAndStaticTests": 16,
+    "pythonScopeMockAndRefusalTests": 9,
+    "pythonXmlTranslationTests": 1,
+    "pythonLint": "passed",
+    "javascriptSyntaxAndFormatting": "passed",
+    "genericCpuGpuBrowserHardHoldRefusal": "passed, including forged job environment"
+  },
+  "limits": {
+    "jobCpuPercent": 6,
+    "jobMemoryMiB": 4096,
+    "supervisorSeconds": 25,
+    "independentWatchdogSeconds": 30,
+    "heartbeatExpirySeconds": 3,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "minimumFreeMemoryMiB": 8192,
+    "runtimeHostCpuAbort": "above 85 percent for two seconds"
+  },
+  "attempts": [
+    {
+      "case": "startup-close",
+      "passed": true,
+      "reportSha256": "3c66273cfac6739301fa09ecda8923c16980697016f18efd2b09422eba1b383a",
+      "observerSeconds": 2.7729110717773438,
+      "jobCpuSeconds": 1.09375,
+      "peakJobMemoryMiB": 18.6875,
+      "priorQuietRefusalsCpuPercent": [
+        34.71153846153846,
+        35.77712609970675
+      ],
+      "namedJobAbsent": true
+    },
+    {
+      "case": "stalled-cpu",
+      "passed": false,
+      "reportSha256": "4a545bdac436ee0ef64cfa8fcc62e2f3b94cef1d1b47c1d183e267af010019e9",
+      "observerSeconds": 8.758724689483643,
+      "error": "Host CPU exceeded 85 percent for two seconds",
+      "hostCpuPercent": [
+        90.9090909090909,
+        93.07692307692308,
+        98.05735430157262
+      ],
+      "leafClaimed": false,
+      "faultReady": false,
+      "cleanupActiveProcesses": 0,
+      "namedJobAbsent": true,
+      "cleanupErrors": [],
+      "postCleanup": {
+        "supervisorExitCode": 1,
+        "leafExitCode": 125,
+        "watchdogExitCode": 125,
+        "watchdogReasonCode": 1
+      },
+      "qualification": "Failed health-aborted stage. Watchdog expiry after forced cleanup is not supervisor-loss acceptance."
+    }
+  ],
+  "comparison": {
+    "path": "dist/verification/collision-cpu/0a7b9cbec9734fff835cac3ab12652e7/comparison.json",
+    "sha256": "9c851015b0ef4d3088e239a5ac894cefb4342de46992f4f2525b53c9d0a12277",
+    "status": "incomplete",
+    "rows": 0
+  },
+  "preservation": {
+    "blockRecovery": true,
+    "holdSha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "holdUnchanged": true,
+    "originalFailedGpuReportSha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "originalFailedGpuReportUnchanged": true,
+    "protectedWorktreeUnchanged": true,
+    "protectedWorktreeManifestSha256": "a3d440f40ca7536dbd6999b61a1ab7337a85606ce49c17cfd8abbcf32572446b",
+    "boundSourcesUnchanged": true,
+    "executionLockPresent": false
+  },
+  "workloads": {
+    "physics": 0,
+    "mujocoImports": 0,
+    "browsers": 0,
+    "gpu": 0,
+    "gpuTelemetryQueries": 0
+  },
+  "acceptance": {
+    "runtime": false,
+    "performance": false,
+    "worker": false,
+    "gpu": false,
+    "r1": false
+  },
+  "pending": [
+    "Review host-load abort; cause of the transient load and original Windows freeze remains undetermined",
+    "Fresh complete containment sequence on a stable host; no skipping the failed stage",
+    "Actual LEG-WORKER replay and matched collision/MuJoCo measurements",
+    "All existing replay and qualification requirements remain unchanged"
+  ]
+}

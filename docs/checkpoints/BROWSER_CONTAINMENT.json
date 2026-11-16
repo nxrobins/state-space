@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "status": "startup-refused-cancellation-pending",
+  "recordedLocalDate": "2026-10-28",
+  "limits": {
+    "cpuPercent": 6,
+    "memoryMiB": 4096,
+    "deadlineSeconds": 30,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "freeMemoryMiB": 8192
+  },
+  "finalIsolatedTestsPassed": 25,
+  "browserAttempts": 2,
+  "explicitlyApprovedRetries": 1,
+  "browserStartupAccepted": false,
+  "stalledCdpCancellationAccepted": false,
+  "supervisorLossAccepted": false,
+  "nativeGpuAccepted": false,
+  "browserFailures": [
+    {
+      "packet": "257ab14edf834d5f8be802734b40eded",
+      "reason": "Reported browser arguments differed; original revision did not retain the returned array."
+    },
+    {
+      "packet": "2715b16ea3974ff489701e612928f163",
+      "reason": "Approved retry passed argument validation, then failed the single-blank-page target check. The returned target list was not retained by that revision."
+    }
+  ],
+  "finalChanges": "Preserve both reported command line and target discovery before validation. Only one adjacent empty Chrome experiment sentinel pair is normalized; all substantive flags and the single-blank-page rule remain strict. No further browser attempt.",
+  "finalSources": {
+    "scripts/verification_scope.py": "4afcc24b9fcc120c462eb24a2fe317ce2fb3514e39f5e06a0a1e62eabae3578c",
+    "scripts/verification_restricted_browser.py": "81495e97009fa1e907029d99f8e81fe7f6a6d8a475e07f2af87b80b863fc2974",
+    "scripts/verify_browser_containment.py": "03687ff40edfddf024e077304e4f752d3f7d4df92a234a3626d8f3721fe48ddc",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_verification_scope.py": "e737f09cb0dcac6a196273bb926be36757c9798d7379f78685e669d5cbf47cdd",
+    "tests/test_restricted_browser.py": "fe4ae741d594c63a9441efc569c45e2185190bbffda68044d1638793cebc82b3"
+  },
+  "hold": {
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "incident": {
+      "reportedAt": "2026-10-17T01:57:42.263124+00:00",
+      "reason": "User reported workstation freeze and manual restart during M5 verification.",
+      "interruptedStage": "level-trajectory-12cbb546",
+      "cause": "undetermined",
+      "resumePolicy": "No runtime verification, including recovery stages, until incident analysis and a revised safety approach are reviewed."
+    }
+  },
+  "preservation": {
+    "oldWorktree": "D:\\state-space-cpu-performance",
+    "head": "c8a2b2f0aad9c40ad8e546fc7a3e829c1a80c37c",
+    "branch": "codex/native-cpu-performance",
+    "trackedAndNonignoredFiles": 2227,
+    "matchedPrePackagingSnapshot": true,
+    "allNamedJobsAbsent": true,
+    "executionLocks": 0,
+    "unusedRecoveryPermit": false
+  },
+  "attempts": [
+    {
+      "packet": "257ab14edf834d5f8be802734b40eded",
+      "case": "unit",
+      "passed": true,
+      "receipts": {
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/unit/report.json": "4928cf2e2612a2647ed9be25667b7e97e770fbf3714b9aa9b9ca56328b47a4c5",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/unit/leaf-report.json": "a62f4bfea64bc23b13f8a0a041a7f48ea8ad61a4b3114ee661f608592a5f221f",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/unit/supervisor-report.json": "87e455e3ecca44908337d9f196241d231b86dbf124b05d903750b967184d3fb9",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/review.json": "96ee7cb365720a255e1743c0457604ce7a165726492d1ef2c50b4ed2b4e2f98a",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/quiet-unit.json": "0212fbceb66c24e6c179fc6472035c8b009e54f46760e30775596987102d5a5e"
+      }
+    },
+    {
+      "packet": "257ab14edf834d5f8be802734b40eded",
+      "case": "startup-close",
+      "passed": false,
+      "receipts": {
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/startup-close/report.json": "9d23939ab694b8e0ddc52f521c4a48fca57dbe402c84a96daceee74e75110b4f",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/startup-close/leaf-report.json": "42cbe00afffef263d8901e33ad34722b1f6ab47e78e88011dbb8d7f7397bb324",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/startup-close/supervisor-report.json": "c87de7bf8f9d6ffe4119cbfcea0c8730917e9169ca45ab56f9ab0058142a7bb0",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/review.json": "96ee7cb365720a255e1743c0457604ce7a165726492d1ef2c50b4ed2b4e2f98a",
+        "dist/verification/browser-containment/257ab14edf834d5f8be802734b40eded/quiet-startup-close.json": "ead28edba9b5560995870346459fca20964fbc5d0bdab6f7726aa4a284922c77"
+      }
+    },
+    {
+      "packet": "8346372c972b494a8e1d207ab98296df",
+      "case": "unit",
+      "passed": true,
+      "receipts": {
+        "dist/verification/browser-containment/8346372c972b494a8e1d207ab98296df/unit/report.json": "b1eda6cbca1143d68b72b839279b5b942e56b247749db243d86e8b1fc5e5dc87",
+        "dist/verification/browser-containment/8346372c972b494a8e1d207ab98296df/unit/leaf-report.json": "f7146423f888416d55441a4ddf8fcf9e88ccf170d3d7c0310c3e6b083435288a",
+        "dist/verification/browser-containment/8346372c972b494a8e1d207ab98296df/unit/supervisor-report.json": "de01f9f3ea67211b98181c82b5744b0944a15a3611dd5011e6c7e7b0500ce192",
+        "dist/verification/browser-containment/8346372c972b494a8e1d207ab98296df/review.json": "868c0bea47b965839448e95dc66225158bea7825808148fdb9439a74f86e7892",
+        "dist/verification/browser-containment/8346372c972b494a8e1d207ab98296df/quiet-unit.json": "457324ffd873e15d460d4263a958bf5cee81ebc7228fdfdea66220d954b607e5"
+      }
+    },
+    {
+      "packet": "2715b16ea3974ff489701e612928f163",
+      "case": "unit",
+      "passed": true,
+      "receipts": {
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/unit/report.json": "d203d5f93f34e5adaea207f9e30859e7d4dec3f97a1b2ebb2cbbd67e582dc5f1",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/unit/leaf-report.json": "b992fe3be4c2aa77aa021205d76e7a27b93db831e4b178c4dfe004f715b26d3d",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/unit/supervisor-report.json": "f407a863a0abbee4650c207eb45e39637da17229593e25f57515e79adfa72b2b",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/review.json": "0dbeec2591542d957383f7935c348ba750819738e2c7799447a30d40a69273c4",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/quiet-unit.json": "28c936dbb594c7e14dc22b58430320fe72e3a4091c73629ea7057290236493ed"
+      }
+    },
+    {
+      "packet": "2715b16ea3974ff489701e612928f163",
+      "case": "startup-close",
+      "passed": false,
+      "receipts": {
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/startup-close/report.json": "f5a19535bfa4b6b308b80567e5db221f60233f2bd357a2b128b3939dcb183c16",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/startup-close/leaf-report.json": "da6d3bfdddf24177a862e60b643a43c8cd813ce964589f7be75b914023775cca",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/startup-close/supervisor-report.json": "16bd8bc68598c4c7866a5e313d2ba4d14f12c6effcdd4183dfb26e5fbce9b85c",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/review.json": "0dbeec2591542d957383f7935c348ba750819738e2c7799447a30d40a69273c4",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/quiet-startup-close.json": "57e6f9862d9c42ba2885983833bdc264d1c21e236b05dcd1a17f94ca464ab5d5",
+        "dist/verification/browser-containment/2715b16ea3974ff489701e612928f163/startup-close/browser-command-line.json": "75f8e90b16d3487aba2bbb1284b60aab3a86b16ec0ede11f51b2f0101e250b50"
+      }
+    },
+    {
+      "packet": "62cf3bf6fc4e4cd3a09bf1804b6bddd7",
+      "case": "unit",
+      "passed": true,
+      "receipts": {
+        "dist/verification/browser-containment/62cf3bf6fc4e4cd3a09bf1804b6bddd7/unit/report.json": "494ddf0bd4e1b59d700f470d855ba25335d215c76bccc68201f30a226fc89c4c",
+        "dist/verification/browser-containment/62cf3bf6fc4e4cd3a09bf1804b6bddd7/unit/leaf-report.json": "cb3bc0dc5cbe95a515e6b1292433d1c16e0df02e96efe3cbb56f7edfe84f77cf",
+        "dist/verification/browser-containment/62cf3bf6fc4e4cd3a09bf1804b6bddd7/unit/supervisor-report.json": "696e9ed87bacf5f1da71f5af32a5069caae85b8d937cdbdda05cae7d895ab2d1",
+        "dist/verification/browser-containment/62cf3bf6fc4e4cd3a09bf1804b6bddd7/review.json": "97e01a30b00a92194a1c12a8c89486c34b649a08677c1805460e3092506e80b6",
+        "dist/verification/browser-containment/62cf3bf6fc4e4cd3a09bf1804b6bddd7/quiet-unit.json": "3b4a5fe64234b9fa67b046723ea009b2d770198679551ab936cf1a088895db95"
+      }
+    }
+  ]
+}

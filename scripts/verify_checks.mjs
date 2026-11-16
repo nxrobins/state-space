@@ -40,6 +40,22 @@ export function selectChecks(suite, argv = process.argv, env = process.env) {
         'examples/cavern/game.test.mjs',
         'examples/active-cavern/game.test.mjs',
       ],
+      [
+        '--test',
+        '--test-concurrency=1',
+        'tests/collision_history.test.mjs',
+        'tests/collision_reference.test.mjs',
+        'tests/collision_owned.test.mjs',
+        'tests/collision_normal_cache.test.mjs',
+        'tests/collision_offset_cache.test.mjs',
+        'tests/collision_profile.test.mjs',
+        'tests/collision_profile_analysis.test.mjs',
+        'tests/collision_solver_profile.test.mjs',
+        'tests/collision_cache_solver_profile.test.mjs',
+        'tests/collision_timing.test.mjs',
+        'tests/collision_cache_timing.test.mjs',
+        'tests/collision_offset_timing.test.mjs',
+      ],
     ];
   } else if (suite === 'native') {
     const file = argv[argv.indexOf('--file') + 1];

@@ -1,6 +1,14 @@
 /** Bounded rigid candidate kernel. Release qualification still requires coupled runtime evidence. */
-import { copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  copyPortableValue,
+  PORTABLE_VALUE_LIMITS,
+  type PortableValue,
+} from '../../portable-data.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import {
   type Vec3,
   type Quat,
@@ -139,8 +147,29 @@ function invertTensor(matrix: Matrix3): Matrix3 {
   }
   return result as unknown as Matrix3;
 }
-function readParcel<T extends RigidParcel3D>(raw: T): T {
-  const copy = copyPortableValue(raw as unknown as PortableValue) as unknown as T;
+/** Private: true only when copying this owned record again could neither reject it nor change
+ * what the parcel reader decides. Every field is then a scalar or a flat array of finite
+ * numbers, inside the portable budgets. Owned arrays are plain: the portable copy or this
+ * module's arithmetic built them. Any other record keeps the copying reader. */
+function copiesUnchanged(base: Record<string, unknown>): boolean {
+  let nodes = 1,
+    characters = 0;
+  for (const key of Object.keys(base)) {
+    const value = base[key];
+    nodes++;
+    characters += key.length;
+    if (typeof value === 'string') characters += value.length;
+    else if (Array.isArray(value)) {
+      nodes += value.length;
+      for (let i = 0; i < value.length; i++) if (!Number.isFinite(value[i])) return false;
+    } else if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return false;
+    } else if (value !== null && typeof value !== 'boolean') return false;
+  }
+  return nodes <= PORTABLE_VALUE_LIMITS.nodes && characters <= PORTABLE_VALUE_LIMITS.characters;
+}
+/** Private: the caller already owns portable data; this does not admit raw input. */
+function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
   const base = Object.fromEntries(
     [
       'id',
@@ -159,10 +188,24 @@ function readParcel<T extends RigidParcel3D>(raw: T): T {
       'principalInertia',
     ].map((key) => [key, (copy as unknown as Record<string, unknown>)[key]]),
   );
-  readMaterialParcel3D(base);
+  // A second copy of a plainly portable record cannot reject it, and the reader's verdict
+  // ignores the sign of zero, so such a record is read in place. Every other record takes
+  // the copying reader, which keeps each rejection and its message as they were.
+  if (copiesUnchanged(base)) readOwnedMaterialParcel3D(base);
+  else readMaterialParcel3D(base);
   assertFiniteVec3(copy.halfExtents);
   if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
   return copy;
+}
+/** Public assembly readers keep their ownership, bounds and admission boundary. */
+function admitAssembly(raw: readonly RigidParcel3D[]): RigidParcel3D[] {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
+    throw Error('Rigid assemblies require 1..256 parcels.');
+  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
+  const parcels = owned.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
+  if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
+    throw Error('Duplicate rigid parcel ID.');
+  return parcels;
 }
 export function rigidAssemblyMassProperties3D(raw: readonly RigidParcel3D[]): {
   mass: number;
@@ -170,12 +213,12 @@ export function rigidAssemblyMassProperties3D(raw: readonly RigidParcel3D[]): {
   inertia: Matrix3;
   inverseInertia: Matrix3;
 } {
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
-    throw Error('Rigid assemblies require 1..256 parcels.');
-  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
-  const parcels = owned.map(readParcel).sort((a, b) => lexical(a.id, b.id));
-  if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
-    throw Error('Duplicate rigid parcel ID.');
+  return assemblyMassPropertiesOfAdmitted(admitAssembly(raw));
+}
+/** Private: canonical, sorted, unique parcels owned and admitted by this module. */
+function assemblyMassPropertiesOfAdmitted(
+  parcels: readonly RigidParcel3D[],
+): ReturnType<typeof rigidAssemblyMassProperties3D> {
   const mass = finite(parcels.reduce((sum, p) => sum + p.mass, 0));
   const center = parcels.reduce<Vec3>(
     (sum, p) => addVec3(sum, scaleVec3(p.center, p.mass / mass)),
@@ -212,10 +255,14 @@ export function validateRigidAssemblyMotion3D(
   angularMomentum: Vec3;
   angularVelocity: Vec3;
 } {
-  const props = rigidAssemblyMassProperties3D(raw);
-  const members = (copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[])
-    .map(readParcel)
-    .sort((a, b) => lexical(a.id, b.id));
+  return assemblyMotionOfAdmitted(admitAssembly(raw), anchored);
+}
+/** Keeps all motion/anchor checks and arithmetic order; only repeated admission is omitted. */
+function assemblyMotionOfAdmitted(
+  members: readonly RigidParcel3D[],
+  anchored: boolean,
+): ReturnType<typeof validateRigidAssemblyMotion3D> {
+  const props = assemblyMassPropertiesOfAdmitted(members);
   const velocity = members.reduce<Vec3>(
     (v, p) => addVec3(v, scaleVec3(p.velocity, p.mass / props.mass)),
     ZERO,
@@ -279,6 +326,9 @@ type Contact<T extends RigidParcel3D> = {
   normal: Vec3;
   tangent1: Vec3;
   tangent2: Vec3;
+  normalDenominator: number | undefined;
+  offsetA: Vec3 | undefined;
+  offsetB: Vec3 | undefined;
   normalImpulse: number;
   tangentImpulse: Vec3;
   target: number;
@@ -788,6 +838,35 @@ function contactWithinTolerance(
   const selected = candidates.find((c) => c.depth <= depth + tolerance / 4)!;
   return { normal: selected.normal, depth: Math.max(0, depth) };
 }
+/** Private exact early reject for two cuboids, ahead of contactWithinTolerance. True only when
+ * a face axis of either one separates them by more than `tolerance` plus a rounding margin.
+ * That test takes its depth as a minimum over those same face axes, so it returns null for
+ * every pair accepted here. Each face axis bounds the other cuboid by its circumscribed
+ * sphere, so some separated pairs still reach the full test. An invalid orientation throws
+ * here as it would there, and non-finite or huge geometry is left to it.
+ */
+function separatedOnFaceAxis(a: RigidParcel3D, b: RigidParcel3D, tolerance: number): boolean {
+  const offset = subtractVec3(b.center, a.center),
+    radiusA = lengthVec3(a.halfExtents),
+    radiusB = lengthVec3(b.halfExtents),
+    scale = lengthVec3(offset) + radiusA + radiusB;
+  if (!(scale < 1e150) || a.orientation.length !== 4 || b.orientation.length !== 4) return false;
+  // 1e-9 of the pair's size is far above the roundoff of either test, about 1e-14 of it.
+  // The absolute floor covers subnormal sizes.
+  const margin = tolerance + 1e-9 * scale + 1e-300,
+    [ax, ay, az, aw] = a.orientation,
+    [bx, by, bz, bw] = b.orientation,
+    // The centre offset in each cuboid's own frame: component i is its face axis i dot offset.
+    inA = rotateVector([-ax, -ay, -az, aw], offset),
+    inB = rotateVector([-bx, -by, -bz, bw], offset);
+  for (let i = 0; i < 3; i++)
+    if (
+      Math.abs(inA[i]) - a.halfExtents[i] - radiusB > margin ||
+      Math.abs(inB[i]) - b.halfExtents[i] - radiusA > margin
+    )
+      return true;
+  return false;
+}
 function clipPolygon(points: Vec3[], center: Vec3, axis: Vec3, extent: number): Vec3[] {
   const result: Vec3[] = [];
   for (let i = 0; i < points.length; i++) {
@@ -903,8 +982,8 @@ export function rigidContactPatchArea3D(a: RigidParcel3D, b: RigidParcel3D): num
   return finite(area);
 }
 function effective<T extends RigidParcel3D>(contact: Contact<T>, direction: Vec3): Vec3 {
-  const ra = subtractVec3(contact.point, contact.a.center),
-    rb = subtractVec3(contact.point, contact.b.center);
+  const ra = (contact.offsetA ??= subtractVec3(contact.point, contact.a.center)),
+    rb = (contact.offsetB ??= subtractVec3(contact.point, contact.b.center));
   return addVec3(
     scaleVec3(direction, inverseMass(contact.a) + inverseMass(contact.b)),
     addVec3(
@@ -931,7 +1010,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   )
     throw Error('Rigid candidate exceeds bounded input limits.');
   const ownedParcels = copyPortableValue(rawParcels as unknown as PortableValue) as unknown as T[];
-  const parcels = ownedParcels.map(readParcel).sort((a, b) => lexical(a.id, b.id));
+  const parcels = ownedParcels.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
   const byId = new Map(parcels.map((p) => [p.id, p]));
   if (byId.size !== parcels.length) throw Error('Duplicate rigid parcel ID.');
   const bonds = copyPortableValue(rawBonds as unknown as PortableValue) as unknown as RigidBond3D[];
@@ -1023,7 +1102,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       particleIds.has(b.members[0].id));
   function contactGeometry(a: T, b: T, tolerance: number) {
     if (!particleIds.has(a.id) && !particleIds.has(b.id))
-      return contactWithinTolerance(a, b, tolerance);
+      return separatedOnFaceAxis(a, b, tolerance) ? null : contactWithinTolerance(a, b, tolerance);
     const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
     return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
   }
@@ -1063,7 +1142,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       yield progress('assembly');
       const members = ids.map((id) => byId.get(id)!),
         anchored = ids.some((id) => anchors.has(id));
-      const props = validateRigidAssemblyMotion3D(members, anchored);
+      const props = assemblyMotionOfAdmitted(members, anchored);
       const body: Body<T> = {
         ...props,
         members,
@@ -1114,7 +1193,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       row.linear = addVec3(row.linear, impulse);
       row.angular = addVec3(row.angular, crossVec3(point, impulse));
     }
-    function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3): void {
+    function apply(body: Body<T>, parcel: T, impulse: Vec3, point: Vec3, offset?: Vec3): void {
       record(parcel, impulse, point);
       if (body.anchored) {
         boundaryLinearImpulse = addVec3(boundaryLinearImpulse, impulse);
@@ -1123,7 +1202,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         body.velocity = addVec3(body.velocity, scaleVec3(impulse, 1 / body.mass));
         body.angularMomentum = addVec3(
           body.angularMomentum,
-          crossVec3(subtractVec3(point, body.center), impulse),
+          crossVec3(offset ?? subtractVec3(point, body.center), impulse),
         );
       }
     }
@@ -1303,6 +1382,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                   normal: n,
                   tangent1,
                   tangent2,
+                  normalDenominator: undefined,
+                  offsetA: undefined,
+                  offsetB: undefined,
                   normalImpulse: 0,
                   tangentImpulse: ZERO,
                   target: physicalImpact ? -restitution * speed : 0,
@@ -1328,16 +1410,26 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         0,
       );
       const relative = (c: Contact<T>) =>
-        subtractVec3(pointVelocity(c.b, c.point), pointVelocity(c.a, c.point));
+        subtractVec3(
+          addVec3(
+            c.b.velocity,
+            crossVec3(omega(c.b), (c.offsetB ??= subtractVec3(c.point, c.b.center))),
+          ),
+          addVec3(
+            c.a.velocity,
+            crossVec3(omega(c.a), (c.offsetA ??= subtractVec3(c.point, c.a.center))),
+          ),
+        );
       const impulse = (c: Contact<T>, j: Vec3) => {
-        apply(c.a, c.pa, scaleVec3(j, -1), c.point);
-        apply(c.b, c.pb, j, c.point);
+        apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
+        apply(c.b, c.pb, j, c.point, c.offsetB);
       };
       for (let iteration = 0; iteration < options.solverIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
+          // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
           const velocity = relative(c),
-            denominator = dotVec3(c.normal, effective(c, c.normal));
+            denominator = (c.normalDenominator ??= dotVec3(c.normal, effective(c, c.normal)));
           const next = Math.max(
             0,
             c.normalImpulse + (c.target - dotVec3(velocity, c.normal)) / denominator,
@@ -1641,7 +1733,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       (sum, row) => sum + row.impact + row.friction,
       0,
     );
-    for (const parcel of parcels) readParcel(parcel);
+    for (const parcel of parcels) validateOwnedParcel(parcel);
     return {
       parcels,
       loadDemands,

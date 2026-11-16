@@ -1,0 +1,1785 @@
+{
+  "schema": "collision-cpu-profile-results-v1",
+  "dateLocal": "2026-11-08",
+  "timezone": "America/Los_Angeles",
+  "finalizedAtUtc": "2026-11-09T05:36:53.853Z",
+  "status": "diagnostic-complete",
+  "review": {
+    "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/review.json",
+    "sha256": "240493309c6e86e98a62eb0787ec7b7aa97f12e7d01d065190f0566d929b1da7"
+  },
+  "benchmark": {
+    "path": "dist/verification/collision-reference-profile-20261108/packet.json",
+    "sha256": "68c39f27fabd81c70d34aee66e421065bfcc43738094dc4a362ca9205fcde2a9"
+  },
+  "sourceCommit": "0af27b6c928cc3c5fbda7f66536d8b2ccb0c0cdb",
+  "bundleSha256": "1ad2665bec3d972673ddcddf0b505f25cff9ee47e7938d30a57b687777d8a196",
+  "baseline": {
+    "path": "dist/verification/collision-cpu/e5929904a7a64fbb9e366695e16fcf24/comparison.json",
+    "sha256": "c3472c0695a57016108eacf9c05bc6b5cb168f8f6e87c1d368d85fdb0a4e84ff"
+  },
+  "summary": {
+    "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/profile-summary.json",
+    "sha256": "72edf1427471c4a8aff06410fc0ed548d8bc4f5fc1d7d01823c90be30f30d8a7"
+  },
+  "analysis": {
+    "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/profile-analysis.json",
+    "sha256": "ea6c21a20e59b6824151a19c28ca43c23d88c8af1a74b9441f06f0a5652d581a"
+  },
+  "analysisSource": {
+    "path": "scripts/analyze_collision_profile.mjs",
+    "sha256": "a9741b7027b26fbd57d67cc70b73b03bad34d9b89d1d4355a71f61c152c3047b"
+  },
+  "analysisTests": {
+    "path": "tests/collision_profile_analysis.test.mjs",
+    "sha256": "64eea337845afa4184b83aa6be35ae2bd2e413aefd6f1644d0a4d61e026e73bc"
+  },
+  "sourceFiles": [
+    {
+      "path": "engine/experimental/multiphysics/battery.ts",
+      "sha256": "dd7753dcd759a518f992c5e9ea02bacc8abfa6386b35ad25ede14434aa21de4e"
+    },
+    {
+      "path": "engine/experimental/multiphysics/circuit.ts",
+      "sha256": "05f35f023343b14ae7cf129bd4c4687bf9fcd5d37ae614e55b34c55caf1adc3c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/collision.ts",
+      "sha256": "30ba7c15e740c081b89eac2381c9de103f25296fcf8670f37a24185dbf7796ee"
+    },
+    {
+      "path": "engine/experimental/multiphysics/conservation.ts",
+      "sha256": "87a1ab6b5e3ff48426da70b9db73bbd369bd05773d5f8fed13ec6d83f7480a65"
+    },
+    {
+      "path": "engine/experimental/multiphysics/coupling-energy.ts",
+      "sha256": "9ab9f6ba9819f4f41854092005440fabad419d0e69ea92e907ac9ca012de67be"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluid-coupling.ts",
+      "sha256": "029ffee57d6ae9325f6824c00f14cc6b799170738f081fd7d248c8f0f51c5c29"
+    },
+    {
+      "path": "engine/experimental/multiphysics/fluids.ts",
+      "sha256": "f170c63631d92f3dfa3e3888322af6e2114c1821913b21cf8ce08a207603499d"
+    },
+    {
+      "path": "engine/experimental/multiphysics/math.ts",
+      "sha256": "8dc6644e47849858fc29f868b175054b67a284e9b1c2eab17f1b571f3a1cb43f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/model.ts",
+      "sha256": "5c917e9279320663aeeea6f73a2ca538430692f504825175c1ca77e357a5316c"
+    },
+    {
+      "path": "engine/experimental/multiphysics/profiles.ts",
+      "sha256": "4bbe59c25860106d03289166f58fb691300a7cf8fa0d6f879f963e27aaf62af9"
+    },
+    {
+      "path": "engine/experimental/multiphysics/rigid.ts",
+      "sha256": "fe61b8c38c505d287513ad4e45fe997e97eac14027593fe358becd2de8df3d64"
+    },
+    {
+      "path": "engine/experimental/multiphysics/thermal.ts",
+      "sha256": "bbab5c74660f8d7bd463358f9ac153c45a4686027d169f8240e32168ecfc88a3"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world-tick.ts",
+      "sha256": "45b00c2960e3fc53abffb298233608bf48b87439ce4dce6cb800ab1f2857ed1f"
+    },
+    {
+      "path": "engine/experimental/multiphysics/world.ts",
+      "sha256": "e2c647b028633450f37c93a9fc43a1716044e243e009768ea0e1c10495734417"
+    },
+    {
+      "path": "engine/experimental/reactive/reactive-registry.ts",
+      "sha256": "9cb6059a466fdaf6882d0f07989849510ee2655152bdf2488afe3dd66d37738f"
+    },
+    {
+      "path": "engine/experimental/reactive/thermal-materials.ts",
+      "sha256": "bf87aef4438e8196f660ed0f43e3998222127bc206777abf541126bae16e86ff"
+    },
+    {
+      "path": "engine/generated/materials.ts",
+      "sha256": "1a51ac69763ce429e9be27a7f5ad3e1e25b74c5c913b97f0fba0103322bfbead"
+    },
+    {
+      "path": "engine/portable-data.ts",
+      "sha256": "bbc8b6c6ca84f62ec279b0a7c728a7aa6e67a43f661e1414a2eab5ece680685c"
+    },
+    {
+      "path": "engine/registry.ts",
+      "sha256": "bcbea8b2cb90d6b60b4c1780702351d28082d7f380dfc7dbb2e1ced6e73e60ac"
+    },
+    {
+      "path": "engine/validation.ts",
+      "sha256": "313cb8a28bfe619688d3ac9ff1f8b91b4ac4d90eff6dc3063ce7fd0e50c27881"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a5871b70bcfb0060ac22be0c722d2302ac8513fbfa373b1e651662f397e7a93a"
+    },
+    {
+      "path": "scripts/benchmark_collision_reference.mjs",
+      "sha256": "f8abcc67c487b2f6795164322d23a0618366d3e925a8834129a8cb1b3452b60c"
+    },
+    {
+      "path": "scripts/collision-reference/collect-cpu.mjs",
+      "sha256": "db318cd9ff224065b4b8de7c6c2ea7060651008f7601aee6afe8204e63f99752"
+    },
+    {
+      "path": "scripts/collision-reference/collect-profile.mjs",
+      "sha256": "02efb076667259a9f7b53dc41428bcdcaec9167271b5ec3dc72a7d6ce63b6c33"
+    },
+    {
+      "path": "scripts/collision-reference/engine-entry.ts",
+      "sha256": "028ce0aefa0f54b54b683422afe6f7f3787ad5d0850bd841e9ad343a7a69054b"
+    },
+    {
+      "path": "scripts/collision-reference/exact-state.mjs",
+      "sha256": "995d3ec8bd9d6fdb7eeb00fd42134cd76169c130f4d9645af79ccd392a13dd73"
+    },
+    {
+      "path": "scripts/collision-reference/mujoco_runner.py",
+      "sha256": "9bab5cb33a2502d5a666073ae7394c17a077f59844c616430373e7ad105c889b"
+    },
+    {
+      "path": "scripts/collision-reference/packet.mjs",
+      "sha256": "dbb58fd23d0124d255e8c09707768aade9264aba3451e6418cd02d417037ec15"
+    },
+    {
+      "path": "scripts/collision-reference/profile-data.mjs",
+      "sha256": "ac6c7fd74ea24eea8d1ec2bff194d574aab483e7b95d2cf11ee23010d39d981c"
+    },
+    {
+      "path": "scripts/collision-reference/profile-runner.mjs",
+      "sha256": "757dfe5ece637ff35eb6ac6545ce983424e9725d9fbdf885a19b8cb12a78c8a0"
+    },
+    {
+      "path": "scripts/collision-reference/protocol.mjs",
+      "sha256": "c5d5db8abb469056cbb9d418ba6cdd08e188a1147f94c2d8d50bf0b0abced1de"
+    },
+    {
+      "path": "scripts/collision-reference/replay.mjs",
+      "sha256": "2e081e472d81fff6ab7e167e63f5be31778c9db9b9beec328268ca1769ae68f1"
+    },
+    {
+      "path": "scripts/collision-reference/report.mjs",
+      "sha256": "1dbcde51643e3c773183225f7c1ea562bfb0e74f0cda0d6331453326e876d0c0"
+    },
+    {
+      "path": "scripts/collision-reference/requirements.txt",
+      "sha256": "babe3f403ce9d9a2f26a08402eaaab0d024f58c8517afdc374bf51e7983a41e9"
+    },
+    {
+      "path": "scripts/collision-reference/scoped-runner.mjs",
+      "sha256": "77118dda732472e4faa2a8051481c375013e9617aa27dd0d313f1e3f52c3fe12"
+    },
+    {
+      "path": "scripts/collision-reference/state-space.mjs",
+      "sha256": "e4b91ce305a019eabe82953c6ecdf77251d8d9ee740300e713f76811e0f3096f"
+    },
+    {
+      "path": "scripts/verification_guard.mjs",
+      "sha256": "ddd8ee5619641a0e0f9419306617c232f47c6a48a0ea2e16fa9a2d371759c517"
+    },
+    {
+      "path": "scripts/verification_guard.py",
+      "sha256": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae"
+    },
+    {
+      "path": "scripts/verification_health.py",
+      "sha256": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b"
+    },
+    {
+      "path": "scripts/verification_journal.py",
+      "sha256": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593"
+    },
+    {
+      "path": "scripts/verification_watchdog.py",
+      "sha256": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f"
+    }
+  ],
+  "scopeSources": {
+    "scripts/collision_cpu_scope.py": "7cb4e77d3e91279dda9e733c65cfdf7981c5ad3f028dfd20f39c6e940053bac2",
+    "scripts/verify_collision_cpu.py": "1e14c14a79be818e4afd18e1a9c116eece8090289b84df537f9e687201bfce16",
+    "scripts/collision_cpu_leaf.py": "22483ef7d90646ff73e42f4c533b348797b501988aa7f4cfe3ba363b05143efa",
+    "scripts/verification_scope.py": "a70e91052487b87bbef99d04a0e43c6ebfc8e7e82ca08b35275e901469096c7f",
+    "scripts/verify_browser_containment.py": "b0bf6c8a79a603f3d57e22450ed6b6b40b4073cd5f2bad8e16821452260dbe76",
+    "scripts/verification_guard.py": "e770d4a5b5ced378387bba943ed2f2761995739387258f2168509c5b7ae30cae",
+    "scripts/verification_health.py": "88a0da7355e9a54a7160af46e8a80d31c8b92f6f35ba3f464f806f479a59a87b",
+    "scripts/verification_watchdog.py": "b80635c912fb49a960d07ba875380285b9f706605e87a7e677ad5332c087326f",
+    "scripts/verification_journal.py": "7da7386a813e556677b61d02c575ecd80f5abd1854c0e1bc6131a7d45213a593",
+    "scripts/prepare_terrain_validation.py": "07c892831d8df77a6a3fb3a448d5a213ca887a554fafd0472636253ac0e10728",
+    "tests/test_collision_cpu_scope.py": "b4072e70068cb2e4912d9609aef79e269dad90cb40ce38943219e3bddfff43c4",
+    "tests/collision_profile.test.mjs": "10b80d28b68f1a49dc4eebe96c92d01d59d82126b62f780fda4ca83a6b624611"
+  },
+  "backups": [
+    {
+      "source": "scripts/collision_cpu_scope.py",
+      "path": "dist/verification/collision-profile-review-20261108/collision_cpu_scope.py.before",
+      "sha256": "418149002c86d8bb0d62f749815b2d140734daf2a62cc462683bd3b8c1081803"
+    },
+    {
+      "source": "scripts/verify_collision_cpu.py",
+      "path": "dist/verification/collision-profile-review-20261108/verify_collision_cpu.py.before",
+      "sha256": "b7a6fdbe23e9213b3cfa49cd6c0ba1e2724a26b14325cf89f52a304bdfa64b27"
+    },
+    {
+      "source": "tests/test_collision_cpu_scope.py",
+      "path": "dist/verification/collision-profile-review-20261108/test_collision_cpu_scope.py.before",
+      "sha256": "b4c4e9068b26dec511a2e139dfcb79341044f1bf1aabc24ee6b5948c40a61dd5"
+    }
+  ],
+  "counts": {
+    "stages": 11,
+    "rows": 21,
+    "rawProfiles": 21,
+    "timingSamples": 147,
+    "sampledStacks": 5680
+  },
+  "replay": {
+    "allExactBaselineChecksPassed": true,
+    "worldExactSha256": "14d562172192afc514d16b1728e414bed18683fac3901f9d47f0a17d42a5d029",
+    "losslessAndJsonRestart": true,
+    "budgets": [
+      1,
+      7,
+      256
+    ],
+    "cancellationIsolationAndOwnership": true,
+    "workCountsUnchanged": true
+  },
+  "profiler": {
+    "samplingIntervalMicros": 1000,
+    "maxProfileBytes": 16777216,
+    "inProcessSession": true,
+    "debuggerListenerOpened": false,
+    "scope": "Complete benchmarkRigid invocation; clocks separately bracket original kernel API calls.",
+    "analysisCorrection": "The first collector uses wrapper-only stack attribution. This analysis also recognizes createRigidStep3D and the rigid.ts run generator when optimized stacks omit a wrapper. Raw profiles and measurements are unchanged.",
+    "wrapperOmittedKernelSamples": 615
+  },
+  "totals": {
+    "samples": 5680,
+    "kernelSamples": 3041,
+    "buckets": {
+      "harness-other-or-profiler": 122,
+      "harness-exact-state": 2267,
+      "kernel-create": 378,
+      "kernel-next": 2659,
+      "garbage-collection": 225,
+      "kernel-close": 4,
+      "engine-outside-recognized-step": 25
+    },
+    "inclusive": {
+      "portableCopy": 1228,
+      "parcelAdmission": 1014,
+      "assemblyAdmission": 931,
+      "contactSolve": 812,
+      "timeOfImpact": 206
+    },
+    "wrapperOmittedKernelSamples": 615,
+    "wallMs": 12953.5191,
+    "kernelWallMs": 6974.367899999985,
+    "outsideKernelWallMs": 5979.151200000015,
+    "createWallMs": 1247.9600999999843,
+    "nextWallMs": 5719.201500000003,
+    "createCalls": 3402,
+    "nextCalls": 256842,
+    "functions": [
+      {
+        "function": "run",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1103,
+        "column": 16,
+        "selfSamples": 109,
+        "inclusiveSamples": 2604
+      },
+      {
+        "function": "copyPortableValue",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 16,
+        "column": 27,
+        "selfSamples": 559,
+        "inclusiveSamples": 1227
+      },
+      {
+        "function": "readParcel",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 505,
+        "column": 20,
+        "selfSamples": 65,
+        "inclusiveSamples": 1014
+      },
+      {
+        "function": "validateRigidAssemblyMotion3D",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 555,
+        "column": 39,
+        "selfSamples": 18,
+        "inclusiveSamples": 931
+      },
+      {
+        "function": "copy",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 19,
+        "column": 16,
+        "selfSamples": 666,
+        "inclusiveSamples": 669
+      },
+      {
+        "function": "solve3",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1269,
+        "column": 21,
+        "selfSamples": 93,
+        "inclusiveSamples": 658
+      },
+      {
+        "function": "readMaterialParcel3D",
+        "source": "engine/experimental/multiphysics/conservation.ts",
+        "generatedLine": 210,
+        "column": 30,
+        "selfSamples": 25,
+        "inclusiveSamples": 528
+      },
+      {
+        "function": "rigidAssemblyMassProperties3D",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 530,
+        "column": 39,
+        "selfSamples": 16,
+        "inclusiveSamples": 466
+      },
+      {
+        "function": "data",
+        "source": "engine/experimental/multiphysics/conservation.ts",
+        "generatedLine": 207,
+        "column": 14,
+        "selfSamples": 0,
+        "inclusiveSamples": 408
+      },
+      {
+        "function": "createRigidStep3D",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1032,
+        "column": 27,
+        "selfSamples": 12,
+        "inclusiveSamples": 371
+      },
+      {
+        "function": "contactWithinTolerance",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 930,
+        "column": 32,
+        "selfSamples": 51,
+        "inclusiveSamples": 303
+      },
+      {
+        "function": "contactGeometry",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1096,
+        "column": 27,
+        "selfSamples": 2,
+        "inclusiveSamples": 281
+      },
+      {
+        "function": "rotateVector",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 121,
+        "column": 22,
+        "selfSamples": 87,
+        "inclusiveSamples": 237
+      },
+      {
+        "function": "nextImpact",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1446,
+        "column": 25,
+        "selfSamples": 28,
+        "inclusiveSamples": 206
+      },
+      {
+        "function": "pairAxes",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 710,
+        "column": 18,
+        "selfSamples": 41,
+        "inclusiveSamples": 199
+      },
+      {
+        "function": "project",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1232,
+        "column": 22,
+        "selfSamples": 16,
+        "inclusiveSamples": 154
+      },
+      {
+        "function": "axes",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 701,
+        "column": 14,
+        "selfSamples": 9,
+        "inclusiveSamples": 151
+      },
+      {
+        "function": "tensor",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 458,
+        "column": 16,
+        "selfSamples": 44,
+        "inclusiveSamples": 141
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 702,
+        "column": 20,
+        "selfSamples": 3,
+        "inclusiveSamples": 135
+      },
+      {
+        "function": "applyMatrix3",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 451,
+        "column": 22,
+        "selfSamples": 98,
+        "inclusiveSamples": 114
+      },
+      {
+        "function": "normalizeQuaternion",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 102,
+        "column": 29,
+        "selfSamples": 109,
+        "inclusiveSamples": 112
+      },
+      {
+        "function": "pointVelocity",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 594,
+        "column": 21,
+        "selfSamples": 55,
+        "inclusiveSamples": 107
+      },
+      {
+        "function": "manifold",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 954,
+        "column": 18,
+        "selfSamples": 29,
+        "inclusiveSamples": 97
+      },
+      {
+        "function": "assertRecordFields",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 7,
+        "column": 28,
+        "selfSamples": 90,
+        "inclusiveSamples": 93
+      },
+      {
+        "function": "relative",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1356,
+        "column": 24,
+        "selfSamples": 29,
+        "inclusiveSamples": 92
+      },
+      {
+        "function": "translationImpact",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 719,
+        "column": 27,
+        "selfSamples": 32,
+        "inclusiveSamples": 91
+      },
+      {
+        "function": "impulse",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1357,
+        "column": 23,
+        "selfSamples": 4,
+        "inclusiveSamples": 84
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 932,
+        "column": 41,
+        "selfSamples": 30,
+        "inclusiveSamples": 83
+      },
+      {
+        "function": "effective",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1022,
+        "column": 19,
+        "selfSamples": 8,
+        "inclusiveSamples": 79
+      },
+      {
+        "function": "apply",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1173,
+        "column": 19,
+        "selfSamples": 26,
+        "inclusiveSamples": 79
+      },
+      {
+        "function": "drift",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1208,
+        "column": 19,
+        "selfSamples": 11,
+        "inclusiveSamples": 77
+      },
+      {
+        "function": "boundedContactAdvance",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 829,
+        "column": 31,
+        "selfSamples": 8,
+        "inclusiveSamples": 73
+      },
+      {
+        "function": "addVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 77,
+        "column": 15,
+        "selfSamples": 69,
+        "inclusiveSamples": 69
+      },
+      {
+        "function": "crossVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 85,
+        "column": 17,
+        "selfSamples": 69,
+        "inclusiveSamples": 69
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 459,
+        "column": 27,
+        "selfSamples": 3,
+        "inclusiveSamples": 66
+      },
+      {
+        "function": "parcelEnergy",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1143,
+        "column": 26,
+        "selfSamples": 7,
+        "inclusiveSamples": 64
+      },
+      {
+        "function": "omega",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 591,
+        "column": 13,
+        "selfSamples": 8,
+        "inclusiveSamples": 58
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1145,
+        "column": 9,
+        "selfSamples": 4,
+        "inclusiveSamples": 57
+      },
+      {
+        "function": "projectionRadius",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 704,
+        "column": 26,
+        "selfSamples": 37,
+        "inclusiveSamples": 51
+      },
+      {
+        "function": "subtractVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 78,
+        "column": 20,
+        "selfSamples": 41,
+        "inclusiveSamples": 41
+      },
+      {
+        "function": "rotateTensor",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 465,
+        "column": 22,
+        "selfSamples": 18,
+        "inclusiveSamples": 40
+      },
+      {
+        "function": "sync",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 600,
+        "column": 14,
+        "selfSamples": 1,
+        "inclusiveSamples": 37
+      },
+      {
+        "function": "dotVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 84,
+        "column": 15,
+        "selfSamples": 33,
+        "inclusiveSamples": 33
+      },
+      {
+        "function": "record",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1168,
+        "column": 20,
+        "selfSamples": 24,
+        "inclusiveSamples": 32
+      },
+      {
+        "function": "normalizeVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 95,
+        "column": 23,
+        "selfSamples": 25,
+        "inclusiveSamples": 30
+      },
+      {
+        "function": "certifiedInterval",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 835,
+        "column": 29,
+        "selfSamples": 7,
+        "inclusiveSamples": 29
+      },
+      {
+        "function": "invertTensor",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 475,
+        "column": 22,
+        "selfSamples": 25,
+        "inclusiveSamples": 25
+      },
+      {
+        "function": "kick",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1186,
+        "column": 18,
+        "selfSamples": 8,
+        "inclusiveSamples": 24
+      },
+      {
+        "function": "scaleVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 79,
+        "column": 17,
+        "selfSamples": 24,
+        "inclusiveSamples": 24
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 462,
+        "column": 5,
+        "selfSamples": 12,
+        "inclusiveSamples": 23
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1306,
+        "column": 17,
+        "selfSamples": 5,
+        "inclusiveSamples": 19
+      },
+      {
+        "function": "corners",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 774,
+        "column": 17,
+        "selfSamples": 5,
+        "inclusiveSamples": 19
+      },
+      {
+        "function": "lengthVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 90,
+        "column": 18,
+        "selfSamples": 18,
+        "inclusiveSamples": 18
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 453,
+        "column": 5,
+        "selfSamples": 15,
+        "inclusiveSamples": 16
+      },
+      {
+        "function": "beforeKickVelocity",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1298,
+        "column": 42,
+        "selfSamples": 8,
+        "inclusiveSamples": 15
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 706,
+        "column": 5,
+        "selfSamples": 11,
+        "inclusiveSamples": 14
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1407,
+        "column": 28,
+        "selfSamples": 4,
+        "inclusiveSamples": 14
+      },
+      {
+        "function": "rigidLoadDemands3D",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 632,
+        "column": 28,
+        "selfSamples": 10,
+        "inclusiveSamples": 13
+      },
+      {
+        "function": "best",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 956,
+        "column": 16,
+        "selfSamples": 6,
+        "inclusiveSamples": 12
+      },
+      {
+        "function": "clipPolygon",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 944,
+        "column": 21,
+        "selfSamples": 7,
+        "inclusiveSamples": 12
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 462,
+        "column": 29,
+        "selfSamples": 11,
+        "inclusiveSamples": 11
+      },
+      {
+        "function": "integrateOrientation",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 129,
+        "column": 30,
+        "selfSamples": 1,
+        "inclusiveSamples": 10
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 467,
+        "column": 36,
+        "selfSamples": 9,
+        "inclusiveSamples": 9
+      },
+      {
+        "function": "assertFiniteVec3",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 91,
+        "column": 26,
+        "selfSamples": 9,
+        "inclusiveSamples": 9
+      },
+      {
+        "function": "swept",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1452,
+        "column": 25,
+        "selfSamples": 3,
+        "inclusiveSamples": 9
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 466,
+        "column": 29,
+        "selfSamples": 1,
+        "inclusiveSamples": 9
+      },
+      {
+        "function": "parcelMomentum",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1155,
+        "column": 28,
+        "selfSamples": 1,
+        "inclusiveSamples": 7
+      },
+      {
+        "function": "componentIds",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 610,
+        "column": 22,
+        "selfSamples": 7,
+        "inclusiveSamples": 7
+      },
+      {
+        "function": "separationPlane",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 817,
+        "column": 25,
+        "selfSamples": 2,
+        "inclusiveSamples": 7
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1188,
+        "column": 20,
+        "selfSamples": 0,
+        "inclusiveSamples": 6
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 957,
+        "column": 5,
+        "selfSamples": 1,
+        "inclusiveSamples": 6
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1353,
+        "column": 9,
+        "selfSamples": 1,
+        "inclusiveSamples": 5
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1158,
+        "column": 9,
+        "selfSamples": 1,
+        "inclusiveSamples": 5
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 996,
+        "column": 95,
+        "selfSamples": 1,
+        "inclusiveSamples": 5
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1113,
+        "column": 20,
+        "selfSamples": 1,
+        "inclusiveSamples": 4
+      },
+      {
+        "function": "finite2",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 447,
+        "column": 15,
+        "selfSamples": 4,
+        "inclusiveSamples": 4
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 980,
+        "column": 5,
+        "selfSamples": 2,
+        "inclusiveSamples": 4
+      },
+      {
+        "function": "boundsOverlap",
+        "source": "engine/experimental/multiphysics/collision.ts",
+        "generatedLine": 432,
+        "column": 23,
+        "selfSamples": 1,
+        "inclusiveSamples": 4
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 563,
+        "column": 5,
+        "selfSamples": 0,
+        "inclusiveSamples": 4
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 41,
+        "column": 7,
+        "selfSamples": 3,
+        "inclusiveSamples": 3
+      },
+      {
+        "function": "fractureRigidBonds3D",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 659,
+        "column": 31,
+        "selfSamples": 1,
+        "inclusiveSamples": 3
+      },
+      {
+        "function": "inverseMass",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 592,
+        "column": 19,
+        "selfSamples": 3,
+        "inclusiveSamples": 3
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 539,
+        "column": 5,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "validateBounds",
+        "source": "engine/experimental/multiphysics/collision.ts",
+        "generatedLine": 427,
+        "column": 24,
+        "selfSamples": 0,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 651,
+        "column": 31,
+        "selfSamples": 1,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 523,
+        "column": 11,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 8,
+        "column": 152,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1526,
+        "column": 47,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 777,
+        "column": 5,
+        "selfSamples": 1,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "vector",
+        "source": "engine/experimental/multiphysics/conservation.ts",
+        "generatedLine": 203,
+        "column": 16,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 110,
+        "column": 21,
+        "selfSamples": 2,
+        "inclusiveSamples": 2
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1156,
+        "column": 31,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 635,
+        "column": 41,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1571,
+        "column": 25,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "progress",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1107,
+        "column": 22,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 559,
+        "column": 5,
+        "selfSamples": 0,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "lexical",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 446,
+        "column": 15,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1036,
+        "column": 54,
+        "selfSamples": 0,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1137,
+        "column": 13,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1457,
+        "column": 17,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1434,
+        "column": 9,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1124,
+        "column": 40,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1555,
+        "column": 34,
+        "selfSamples": 0,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "changeBound",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 831,
+        "column": 23,
+        "selfSamples": 0,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "multiplyQuaternions",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 112,
+        "column": 29,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1291,
+        "column": 21,
+        "selfSamples": 0,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/math.ts",
+        "generatedLine": 107,
+        "column": 24,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/portable-data.ts",
+        "generatedLine": 9,
+        "column": 5,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "inverseTensor",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 593,
+        "column": 21,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/collision.ts",
+        "generatedLine": 430,
+        "column": 23,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "(anonymous)",
+        "source": "engine/experimental/multiphysics/collision.ts",
+        "generatedLine": 435,
+        "column": 22,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      },
+      {
+        "function": "skipPair",
+        "source": "engine/experimental/multiphysics/rigid.ts",
+        "generatedLine": 1095,
+        "column": 20,
+        "selfSamples": 1,
+        "inclusiveSamples": 1
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "scene": "free-drift",
+      "samples": 340,
+      "kernelSamples": 141,
+      "buckets": {
+        "harness-other-or-profiler": 12,
+        "harness-exact-state": 169,
+        "kernel-create": 23,
+        "kernel-next": 116,
+        "garbage-collection": 16,
+        "kernel-close": 2,
+        "engine-outside-recognized-step": 2
+      },
+      "inclusive": {
+        "portableCopy": 68,
+        "parcelAdmission": 56,
+        "assemblyAdmission": 57,
+        "contactSolve": 0,
+        "timeOfImpact": 1
+      },
+      "wrapperOmittedKernelSamples": 0,
+      "wallMs": 574.5202000000002,
+      "kernelWallMs": 276.0699999999954,
+      "outsideKernelWallMs": 298.45020000000477,
+      "createWallMs": 49.628699999998844,
+      "nextWallMs": 225.5088999999973,
+      "createCalls": 486,
+      "nextCalls": 969
+    },
+    {
+      "scene": "thin-wall",
+      "samples": 720,
+      "kernelSamples": 377,
+      "buckets": {
+        "harness-other-or-profiler": 19,
+        "harness-exact-state": 297,
+        "kernel-create": 60,
+        "kernel-next": 316,
+        "kernel-close": 1,
+        "garbage-collection": 23,
+        "engine-outside-recognized-step": 4
+      },
+      "inclusive": {
+        "portableCopy": 176,
+        "parcelAdmission": 157,
+        "assemblyAdmission": 125,
+        "contactSolve": 79,
+        "timeOfImpact": 20
+      },
+      "wrapperOmittedKernelSamples": 185,
+      "wallMs": 1790.7222000000002,
+      "kernelWallMs": 1272.5756999999817,
+      "outsideKernelWallMs": 518.1465000000185,
+      "createWallMs": 570.1140999999946,
+      "nextWallMs": 701.5030999999833,
+      "createCalls": 486,
+      "nextCalls": 11957
+    },
+    {
+      "scene": "occluded-wall",
+      "samples": 946,
+      "kernelSamples": 487,
+      "buckets": {
+        "harness-other-or-profiler": 23,
+        "kernel-create": 76,
+        "garbage-collection": 31,
+        "kernel-next": 411,
+        "harness-exact-state": 400,
+        "engine-outside-recognized-step": 5
+      },
+      "inclusive": {
+        "portableCopy": 227,
+        "parcelAdmission": 175,
+        "assemblyAdmission": 163,
+        "contactSolve": 112,
+        "timeOfImpact": 29
+      },
+      "wrapperOmittedKernelSamples": 241,
+      "wallMs": 2194.4897,
+      "kernelWallMs": 1218.905600000022,
+      "outsideKernelWallMs": 975.584099999978,
+      "createWallMs": 129.00960000000896,
+      "nextWallMs": 1088.8491000000188,
+      "createCalls": 486,
+      "nextCalls": 16149
+    },
+    {
+      "scene": "grazing-clearance",
+      "samples": 610,
+      "kernelSamples": 277,
+      "buckets": {
+        "harness-other-or-profiler": 11,
+        "harness-exact-state": 298,
+        "kernel-create": 47,
+        "kernel-next": 230,
+        "garbage-collection": 22,
+        "engine-outside-recognized-step": 2
+      },
+      "inclusive": {
+        "portableCopy": 151,
+        "parcelAdmission": 118,
+        "assemblyAdmission": 117,
+        "contactSolve": 28,
+        "timeOfImpact": 7
+      },
+      "wrapperOmittedKernelSamples": 0,
+      "wallMs": 1376.4429,
+      "kernelWallMs": 499.07059999998023,
+      "outsideKernelWallMs": 877.3723000000198,
+      "createWallMs": 158.0770999999943,
+      "nextWallMs": 340.2081999999873,
+      "createCalls": 486,
+      "nextCalls": 4833
+    },
+    {
+      "scene": "rotating-plate",
+      "samples": 711,
+      "kernelSamples": 366,
+      "buckets": {
+        "harness-other-or-profiler": 12,
+        "harness-exact-state": 294,
+        "kernel-create": 38,
+        "kernel-next": 328,
+        "garbage-collection": 37,
+        "engine-outside-recognized-step": 2
+      },
+      "inclusive": {
+        "portableCopy": 150,
+        "parcelAdmission": 128,
+        "assemblyAdmission": 122,
+        "contactSolve": 61,
+        "timeOfImpact": 74
+      },
+      "wrapperOmittedKernelSamples": 189,
+      "wallMs": 1623.3736,
+      "kernelWallMs": 595.8341000000044,
+      "outsideKernelWallMs": 1027.5394999999955,
+      "createWallMs": 88.36899999999423,
+      "nextWallMs": 506.5156000000036,
+      "createCalls": 486,
+      "nextCalls": 7980
+    },
+    {
+      "scene": "impact-chain",
+      "samples": 1042,
+      "kernelSamples": 582,
+      "buckets": {
+        "harness-other-or-profiler": 15,
+        "harness-exact-state": 402,
+        "kernel-create": 75,
+        "kernel-next": 507,
+        "garbage-collection": 36,
+        "engine-outside-recognized-step": 7
+      },
+      "inclusive": {
+        "portableCopy": 231,
+        "parcelAdmission": 181,
+        "assemblyAdmission": 162,
+        "contactSolve": 174,
+        "timeOfImpact": 32
+      },
+      "wrapperOmittedKernelSamples": 0,
+      "wallMs": 2496.4959999999996,
+      "kernelWallMs": 1340.7901999999874,
+      "outsideKernelWallMs": 1155.7058000000122,
+      "createWallMs": 126.62070000000062,
+      "nextWallMs": 1213.022299999985,
+      "createCalls": 486,
+      "nextCalls": 32004
+    },
+    {
+      "scene": "resting-stack",
+      "samples": 1311,
+      "kernelSamples": 811,
+      "buckets": {
+        "harness-other-or-profiler": 30,
+        "harness-exact-state": 407,
+        "kernel-create": 59,
+        "kernel-next": 751,
+        "garbage-collection": 60,
+        "engine-outside-recognized-step": 3,
+        "kernel-close": 1
+      },
+      "inclusive": {
+        "portableCopy": 225,
+        "parcelAdmission": 199,
+        "assemblyAdmission": 185,
+        "contactSolve": 358,
+        "timeOfImpact": 43
+      },
+      "wrapperOmittedKernelSamples": 0,
+      "wallMs": 2897.4745,
+      "kernelWallMs": 1771.1217000000136,
+      "outsideKernelWallMs": 1126.3527999999862,
+      "createWallMs": 126.14089999999283,
+      "nextWallMs": 1643.594300000029,
+      "createCalls": 486,
+      "nextCalls": 182950
+    }
+  ],
+  "profiles": [
+    {
+      "scene": "free-drift",
+      "dt": 0.016,
+      "exactSha256": "83532a443f8b7a5c0a881ca49a1b3d00666b5b7797a341476c9486348fd23c41",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-free-drift/profile-0.016.cpuprofile",
+        "sha256": "26e6e0f4055d7ca1141bbc5aaf8901f775b261152e2b137e5fecb3ec0eaeea10"
+      }
+    },
+    {
+      "scene": "free-drift",
+      "dt": 0.008,
+      "exactSha256": "bc320ef14bb8099f5216c49d77b326d1123f4ff372fb0e17e0eb4b9036c432f4",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-free-drift/profile-0.008.cpuprofile",
+        "sha256": "93dd393ac95bd412ccc4fbea592175d2d31a2abd6616194733c08a235c42b26b"
+      }
+    },
+    {
+      "scene": "free-drift",
+      "dt": 0.002,
+      "exactSha256": "00915891af0eec116cb929ff91b58ff3364a4114fcd9981c272ed722796ac518",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-free-drift/profile-0.002.cpuprofile",
+        "sha256": "746026ffc613c86ad7a6918f799e418b70a37e55e932d1ce4d87d7616cba25c0"
+      }
+    },
+    {
+      "scene": "thin-wall",
+      "dt": 0.016,
+      "exactSha256": "f84b735c138e5c3ce674a0fd77d76eb90848942faa738b51539418834c8fe450",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-thin-wall/profile-0.016.cpuprofile",
+        "sha256": "d85fa4986c8fbdf3e3be1fc744068f20eb1c75c7090ea26e6d48a2b5951d028a"
+      }
+    },
+    {
+      "scene": "thin-wall",
+      "dt": 0.008,
+      "exactSha256": "fd681eef0806d5c36b0b5d45b144243b4ef8993de7ef1268fabeaa032d9dbfaf",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-thin-wall/profile-0.008.cpuprofile",
+        "sha256": "ad21fe0d24092f23532d322f626e21773832dad19adcdd6ba42ae60810617482"
+      }
+    },
+    {
+      "scene": "thin-wall",
+      "dt": 0.002,
+      "exactSha256": "201a42c4a6f26f830a0c125b29d6fa129927bc74f6f6c2e9cff38463ec6df12c",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-thin-wall/profile-0.002.cpuprofile",
+        "sha256": "8cbd8ac04754c2193e836dc7368674691e4c3c2ee909dd350fa409074a2c684e"
+      }
+    },
+    {
+      "scene": "occluded-wall",
+      "dt": 0.016,
+      "exactSha256": "077f14d2b8fdd8cca3a43d9ca5645e83bd38dc49a42831e2232ffe55264a1c2e",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-occluded-wall/profile-0.016.cpuprofile",
+        "sha256": "273250c91864fe487f92627806e3dac6e2388963532ed0ac08af245744d224e8"
+      }
+    },
+    {
+      "scene": "occluded-wall",
+      "dt": 0.008,
+      "exactSha256": "7bc3109c92ac1da3be60e6e78df02678839ee3aa05ca281c546cf951791b0a99",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-occluded-wall/profile-0.008.cpuprofile",
+        "sha256": "c2a734fd94fc19aea6328750494008e255e15d62dbb5d15b630064f65a191349"
+      }
+    },
+    {
+      "scene": "occluded-wall",
+      "dt": 0.002,
+      "exactSha256": "17266c3f19bb1a7eeb5af9d162fd5dba5b86ae64344e2a74ea827d166a6d2bf1",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-occluded-wall/profile-0.002.cpuprofile",
+        "sha256": "ada70725b07948bb353a0af07fb8afc937e12cc8ad0dee6e881e7318e1856a8b"
+      }
+    },
+    {
+      "scene": "grazing-clearance",
+      "dt": 0.016,
+      "exactSha256": "88cfc73933f42da22efb0d677a053073ce8e57dfe70b2915c162af66e9a1ae73",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-grazing-clearance/profile-0.016.cpuprofile",
+        "sha256": "9c8a8252bba512e1834fd8e6c3862b5a5cbdf83f010b30704918f6df841aa6fb"
+      }
+    },
+    {
+      "scene": "grazing-clearance",
+      "dt": 0.008,
+      "exactSha256": "97b32f468816938d8c7951b372e17e2eefa8b946bf2ea8707edb501beea616ae",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-grazing-clearance/profile-0.008.cpuprofile",
+        "sha256": "87f2221c164d8985da171ff75de03d39d9c00f3ebe8c337985c68ffdc6fe4d4b"
+      }
+    },
+    {
+      "scene": "grazing-clearance",
+      "dt": 0.002,
+      "exactSha256": "d50bc2a3dd868e88a05e663a5b1144899449c829a3c7a0d75ac26038ec7a608a",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-grazing-clearance/profile-0.002.cpuprofile",
+        "sha256": "2c2692a78f4974a9cc353f7933ed8f0ed1cd968a8ed499db64be7e46b62200e0"
+      }
+    },
+    {
+      "scene": "rotating-plate",
+      "dt": 0.016,
+      "exactSha256": "b82256907e316bbf7ca36ffa430643b8826297e167c9c2aecb2fe392c2bc9d34",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-rotating-plate/profile-0.016.cpuprofile",
+        "sha256": "d4826e519c42a0b0f410631eb371f922f5a6252141c5b4844100321e10a78ae7"
+      }
+    },
+    {
+      "scene": "rotating-plate",
+      "dt": 0.008,
+      "exactSha256": "a2b71e3fbede5b9171bd99a7dd2e8795139663033721a2b04300eeff9b73ca7b",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-rotating-plate/profile-0.008.cpuprofile",
+        "sha256": "c53b7f62ccc7dc8a204bd358ed684a5d756311ef4547b5eae05f02fedc5273ec"
+      }
+    },
+    {
+      "scene": "rotating-plate",
+      "dt": 0.002,
+      "exactSha256": "a8157ff33f6ed04be525bcb7b3927b5dd65fb6199a36ca8ff9371ca32017e3a3",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-rotating-plate/profile-0.002.cpuprofile",
+        "sha256": "993a5fbb466c4ec00c72e38dff3316df23f47bdf9153607f2f2372ff65309462"
+      }
+    },
+    {
+      "scene": "impact-chain",
+      "dt": 0.016,
+      "exactSha256": "f0e44c490d06fa4ce9a7f330f259f4a5e26a8f9dc247e3f3537212269342b3a5",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-impact-chain/profile-0.016.cpuprofile",
+        "sha256": "b9993bbeb2851f4f2056a06a180d57ec4d454212a24085521829ee6326bfb56a"
+      }
+    },
+    {
+      "scene": "impact-chain",
+      "dt": 0.008,
+      "exactSha256": "87e12651074cfe55990b6d67df8f8efc57bc226f05758ce70d8a910ee88136ae",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-impact-chain/profile-0.008.cpuprofile",
+        "sha256": "e84262f8f9c54fad214984cdba29520b6b60e6951dfbcc02b0198ba95627aa9d"
+      }
+    },
+    {
+      "scene": "impact-chain",
+      "dt": 0.002,
+      "exactSha256": "c5342e8e862fa1eeee3aaa0accc6b78b329ceea0a9c95e9de2fb66a290f0a24d",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-impact-chain/profile-0.002.cpuprofile",
+        "sha256": "14e0a75b319857a94004b08e476ab6879fdb624510816c487611b27cdaabc086"
+      }
+    },
+    {
+      "scene": "resting-stack",
+      "dt": 0.016,
+      "exactSha256": "0f1e9f0db7da9ad5c4152e6b6cb9f30304868a15af3f1cabb9ac979fb83e3a76",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-resting-stack/profile-0.016.cpuprofile",
+        "sha256": "1d766e12c9cae137f1dbb336b8bb8dbfbed919eb216d4e71a6da26648dc23679"
+      }
+    },
+    {
+      "scene": "resting-stack",
+      "dt": 0.008,
+      "exactSha256": "b1d193824322f382443fa55210dcdb8c321b9681784ab627eed96fe686618179",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-resting-stack/profile-0.008.cpuprofile",
+        "sha256": "a32c9757e304f9a9705df3a2719ad3fd0392cbcc3948e06590395ffa421e35ea"
+      }
+    },
+    {
+      "scene": "resting-stack",
+      "dt": 0.002,
+      "exactSha256": "89890909f934239cd42e1c425b4df83022cf61eaf8067b969cb4dcc5db79064e",
+      "profile": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-resting-stack/profile-0.002.cpuprofile",
+        "sha256": "eab6f3d6484fe50a8f3901ed10349cbf3f403d8bb1e919f205a9a1222b027d04"
+      }
+    }
+  ],
+  "stages": [
+    {
+      "case": "startup-close",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/startup-close/report.json",
+        "sha256": "1215abd693627873e38e8f4d5618b94ccab8c0f24a5a57987fc0554b2f5ebb9d"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-startup-close.json",
+        "sha256": "5e17549c8036e917dd87df31fde8c57c19bd777c4528438b4be0fcdbcc5b506d"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "stalled-cpu",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/stalled-cpu/report.json",
+        "sha256": "667f27f05c006a9b8e88cb21944142f9bcb4b91945d4aad0ad1dd1f37eda1b40"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-stalled-cpu.json",
+        "sha256": "008f944bc7f76112e70102ca027a023b8bd9fe622efa874b308d6f7c3d704197"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": 2.2000542001333088
+    },
+    {
+      "case": "supervisor-loss",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/supervisor-loss/report.json",
+        "sha256": "4520dfb78909869a8de2d9fe75fbf609bb40a68de5e8b1624dee1d2f98bbb8ad"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-supervisor-loss.json",
+        "sha256": "58d932c1a0b89dc49b72a0d21a676e200b74f11845e7e44a7ab08b1e5c3c66a2"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": 2.9912228998728096
+    },
+    {
+      "case": "world-reference",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/world-reference/report.json",
+        "sha256": "1919ba95741d6225bf8f8c1ef4bd7025839248a741b512c0952d8b3db09122e3"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-world-reference.json",
+        "sha256": "06caeef23b2392a18286a4e52ce2aaa465789a44cd050aa9f668ceebc8ba6e9c"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-free-drift",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-free-drift/report.json",
+        "sha256": "234866e90325e13ad282ffea38dc7ace1eb26aa6a1f951fecc745b7d836fd64e"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-free-drift.json",
+        "sha256": "3e6d4b83388296df065a4d8f8c6692ee12aa977aa01165d34e2a49c11808f4de"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-thin-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-thin-wall/report.json",
+        "sha256": "c1e267602c42671ce5146ea3e7cc0762d83dd20990359e3ade93ff7b64be0989"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-thin-wall.json",
+        "sha256": "1c23e3f7962a0e2d8fdb24e7a85e98c4094c2b3a713a010abc6a66949fabcdf0"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-occluded-wall",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-occluded-wall/report.json",
+        "sha256": "6a14f31c6a630445d353209f4584dbaf1c7e4708d93b27f07db53ca82269890c"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-occluded-wall.json",
+        "sha256": "0c7c933352db2065b19918f28a3d6ded18bed476a3e6b977f292c3e82291f8a1"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-grazing-clearance",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-grazing-clearance/report.json",
+        "sha256": "156371e3b7838ad964cb0b22b2abab91a9a2bad3c1810aa48fc525f096d4a63a"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-grazing-clearance.json",
+        "sha256": "9d102a137321bd36401e2a1b75e467ef3c114d1f891b54b201afc3a15b226d1a"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-rotating-plate",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-rotating-plate/report.json",
+        "sha256": "fb7190b05bdbd15e4d752acc6187f84381d8bb158f3c41928498f772ec5ab9a5"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-rotating-plate.json",
+        "sha256": "4355b6df86250a5ae03d8f6f06f06a988e9ad25f35a6d1bef59313ecf53934fb"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-impact-chain",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-impact-chain/report.json",
+        "sha256": "74c7328e63cedf16b6a94a43746f50bf8956705539901fb008054c7309b5bfbc"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-impact-chain.json",
+        "sha256": "34857ae5dc3985a74cbcac57eed94a5d58c8951d351b894d24197a1c75c63221"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    },
+    {
+      "case": "ss-resting-stack",
+      "report": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/ss-resting-stack/report.json",
+        "sha256": "0ef0ab7fd412fd4ed2aba1c7ae031f29916d7a312b9e0b82da503b031b5bea89"
+      },
+      "quiet": {
+        "path": "dist/verification/collision-cpu/08671da1aaee4938bbe174b168fb6fca/quiet-ss-resting-stack.json",
+        "sha256": "ac83553eac8b4dbe19b73dac6b721308e2186cd7bd77c1353d43850926a4d724"
+      },
+      "passed": true,
+      "namedJobAbsent": true,
+      "faultToEmptyJobSeconds": null
+    }
+  ],
+  "limits": {
+    "cpuPercent": 6,
+    "memoryMiB": 4096,
+    "deadlineSeconds": 30,
+    "quietSeconds": 30,
+    "quietCpuPercent": 30,
+    "freeMemoryMiB": 8192
+  },
+  "supervisorDeadlineSeconds": 25,
+  "watchdogDeadlineSeconds": 30,
+  "quietObservationDeadlineSeconds": 90,
+  "hold": {
+    "path": "dist/verification/safety-hold.json",
+    "sha256": "f99d5948a531069090895c0c00a85538fb0b5d5b283a569ee870d5e33532312c",
+    "blockRecovery": true,
+    "unchanged": true
+  },
+  "originalFailedGpuReport": {
+    "path": "dist/verification/browser-containment/d40b35fb88374a749ef87c71add94948/supervisor-loss/report.json",
+    "sha256": "f0bef9222fa89cd95424e0228ccacbad175d6cfa9aca4d819ba67234f837ac3b",
+    "remainsUnaccepted": true
+  },
+  "preservation": {
+    "allNamedJobsAbsent": true,
+    "executionLocksPresent": [],
+    "protectedWorktreeUnchangedAtEveryStage": true,
+    "protectedWorktree": "D:\\state-space-cpu-performance",
+    "protectedSnapshotSha256": "a3d440f40ca7536dbd6999b61a1ab7337a85606ce49c17cfd8abbcf32572446b",
+    "boundSourcesMatch": true
+  },
+  "validation": {
+    "pythonStaticTestsPassed": 19,
+    "nodeStaticTestsPassed": 23,
+    "pythonLint": "passed"
+  },
+  "qualification": {
+    "runtime": false,
+    "performance": false,
+    "gpu": false,
+    "worker": false,
+    "r1": false,
+    "purpose": "Bounded diagnostic comparison; no existing qualification gate is closed."
+  },
+  "interpretation": "Inclusive category counts overlap; percentages describe sampled stacks, not CPU-time or potential speedup. Engine frames outside recognized step roots remain separate.",
+  "limitations": [
+    "Sampling and clocks include profiling effects and CPU throttling; no speedup or performance acceptance claim.",
+    "Inclusive categories overlap. Full-benchmark exact-state cost is outside the original stepping timing.",
+    "No engine changes, GPU/browser workloads, tolerance changes, or qualification promotions. Raw dist artifacts remain local."
+  ]
+}
