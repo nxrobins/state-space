@@ -61,6 +61,10 @@ date of the last change in the section.
   files those pages reference into `dist/site/` and fails on a missing
   reference or one outside the published trees; the held tactical slab is not
   published (#98).
+- `AGENTS.md`, instructions for coding agents: check for an incident hold
+  before running anything, how to verify a change, the exactness rules, the
+  files whose bytes matter, evidence and claim rules, pull-request conventions
+  and scope. `CLAUDE.md` imports it (#100).
 
 ### Changed
 
