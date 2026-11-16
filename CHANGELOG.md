@@ -64,6 +64,9 @@ date of the last change in the section.
 
 ### Changed
 
+- The README opens with an "At a glance" table of measured results, each
+  linked to its report, and the demo site's landing page lists four of them.
+  No result or claim is new (#101).
 - Vite 8 builds the SDK. `esbuild`, which the chamber, slab, multiphysics
   builder and fluid-study scripts import directly and Vite 6 used to bring in,
   is now an explicit development dependency at 0.28.2, the newest release Vite
