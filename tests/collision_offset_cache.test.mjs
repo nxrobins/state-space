@@ -4,9 +4,19 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import ts from '@typescript/typescript6';
+import {
+  readHistorical,
+  historicalSource,
+  verifyHistoricalSources,
+} from './helpers/collision-history.mjs';
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8').replaceAll('\r\n', '\n');
-const before = read('../dist/verification/collision-offset-cache-review-20261109/rigid.ts.before');
+const before = historicalSource('normal', 'engine/experimental/multiphysics/rigid.ts')
+  .toString('utf8')
+  .replaceAll('\r\n', '\n');
 const after = read('../engine/experimental/multiphysics/rigid.ts');
+const historicalAfter = historicalSource('offset', 'engine/experimental/multiphysics/rigid.ts')
+  .toString('utf8')
+  .replaceAll('\r\n', '\n');
 const parse = (s) => ts.createSourceFile('rigid.ts', s, ts.ScriptTarget.Latest, true);
 function find(source, name, kind) {
   const found = [];
@@ -22,21 +32,17 @@ const relative = (s) => find(parse(s), 'relative', ts.isVariableDeclaration).ini
 const apply = (s) => find(parse(s), 'apply', ts.isFunctionDeclaration).getText();
 const normalized = (s) => ts.createPrinter({ removeComments: false }).printFile(parse(s));
 
-test('whole-file proof confines the change to private offsets and their three solver uses', () => {
+test('historical whole-file proof confines the measured edit to private offsets and their three solver uses', () => {
+  verifyHistoricalSources('offset', ['engine/experimental/multiphysics/rigid.ts']);
   assert.equal(
     createHash('sha256')
       .update(
-        readFileSync(
-          new URL(
-            '../dist/verification/collision-offset-cache-review-20261109/rigid.ts.before',
-            import.meta.url,
-          ),
-        ),
+        readHistorical('dist/verification/collision-offset-cache-review-20261109/rigid.ts.before'),
       )
       .digest('hex'),
     '645697f27090db717dd065873f674dce896560f5b4f9123472fa0ebc042f470b',
   );
-  let restored = after.replace(relative(after), relative(before));
+  let restored = historicalAfter.replace(relative(historicalAfter), relative(before));
   restored = restored
     .replace(/  offset[AB]: Vec3 \| undefined;\n/g, '')
     .replace(/                  offset[AB]: undefined,\n/g, '');
@@ -54,13 +60,42 @@ test('whole-file proof confines the change to private offsets and their three so
     .replace('offset ?? subtractVec3(point, body.center)', 'subtractVec3(point, body.center)')
     .replace('c.point, c.offsetA', 'c.point')
     .replace('c.point, c.offsetB', 'c.point');
-  assert.deepEqual(parse(after).parseDiagnostics, []);
+  assert.deepEqual(parse(historicalAfter).parseDiagnostics, []);
   assert.equal(normalized(restored), normalized(before));
   assert(
-    after.includes(
+    historicalAfter.includes(
       "yield progress('contact');\n          // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.\n          const velocity = relative(c)",
     ),
   );
+});
+
+function verifyCurrentCacheWiring(current) {
+  assert.deepEqual(parse(current).parseDiagnostics, []);
+  // These scopes contain contact allocation, lazy cache reads, every impulse use,
+  // yield order, and per-solve lifetime. Admission/contact rejection may evolve outside them.
+  for (const [name, kind] of [
+    ['Contact', ts.isTypeAliasDeclaration],
+    ['solve', ts.isFunctionDeclaration],
+    ['effective', ts.isFunctionDeclaration],
+    ['apply', ts.isFunctionDeclaration],
+  ])
+    assert.equal(
+      normalized(find(parse(current), name, kind).getText()),
+      normalized(find(parse(historicalAfter), name, kind).getText()),
+      name,
+    );
+}
+
+test('current solver preserves cache allocation, lifetime, arithmetic, impulse wiring and yields', () => {
+  verifyCurrentCacheWiring(after);
+  for (const changed of [
+    after.replace('normalDenominator: undefined,', 'normalDenominator: 0,'),
+    after.replace('c.point, c.offsetA', 'c.point, c.offsetB'),
+    after.replace('offset ?? subtractVec3(point, body.center)', 'subtractVec3(point, body.center)'),
+  ]) {
+    assert.notEqual(changed, after);
+    assert.throws(() => verifyCurrentCacheWiring(changed));
+  }
 });
 
 const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];

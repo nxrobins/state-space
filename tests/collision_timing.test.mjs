@@ -1,7 +1,7 @@
 // Synthetic clocks/generators and static source reads only; no engine execution.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { verifyHistoricalSources } from './helpers/collision-history.mjs';
 import {
   timeRigidSteps,
   benchmarkLayout,
@@ -176,33 +176,12 @@ test('attribution fails on work/count drift, keeps coarse-clock negative gaps an
   );
 });
 
-test('engine graph and existing benchmark/replay code match the completed optimized packet', () => {
-  const packet = JSON.parse(
-    readFileSync(
-      new URL(
-        '../dist/verification/collision-reference-owned-20261108/packet.json',
-        import.meta.url,
-      ),
-    ),
-  );
-  // Data-only SHA checks enforce an unchanged measured engine and harness.
-  return import('node:crypto').then(({ createHash }) => {
-    const fixed = [
-      'scripts/collision-reference/state-space.mjs',
-      'scripts/collision-reference/protocol.mjs',
-      'scripts/collision-reference/replay.mjs',
-      'scripts/collision-reference/exact-state.mjs',
-    ];
-    for (const file of packet.files.filter(
-      (f) => f.path.startsWith('engine/') || fixed.includes(f.path),
-    )) {
-      // Historical timing ran before the separately verified normal cache.
-      const source =
-        file.path === 'engine/experimental/multiphysics/rigid.ts'
-          ? 'dist/verification/collision-normal-cache-review-20261109/rigid.ts.before'
-          : file.path;
-      const bytes = readFileSync(new URL('../' + source, import.meta.url));
-      assert.equal(createHash('sha256').update(bytes).digest('hex'), file.sha256, file.path);
-    }
-  });
+test('historical engine graph and benchmark/replay code match the completed owned packet', () => {
+  verifyHistoricalSources('owned', [
+    'engine/',
+    'scripts/collision-reference/state-space.mjs',
+    'scripts/collision-reference/protocol.mjs',
+    'scripts/collision-reference/replay.mjs',
+    'scripts/collision-reference/exact-state.mjs',
+  ]);
 });

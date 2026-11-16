@@ -1,16 +1,12 @@
 // Static source checks and retained coverage decoding only; no engine or inspector execution.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { decodeSolverCoverage } from '../scripts/collision-reference/solver-profile-data.mjs';
-const read = (p) => readFileSync(new URL('../' + p, import.meta.url));
+import { readHistorical as read, verifyHistoricalSources } from './helpers/collision-history.mjs';
 const hash = (b) => createHash('sha256').update(b).digest('hex');
 
-test('cached engine, replay, regression suites and attribution stay pinned to the completed cache comparison', () => {
-  const packet = JSON.parse(
-    read('dist/verification/collision-normal-cache-20261109-v3/packet.json'),
-  );
+test('historical cached engine, replay, regressions and attribution match the measured packet', () => {
   const fixed = [
     'engine/',
     ...[
@@ -25,18 +21,7 @@ test('cached engine, replay, regression suites and attribution stay pinned to th
       'solver-profile-data.mjs',
     ].map((p) => 'scripts/collision-reference/' + p),
   ];
-  for (const file of packet.files.filter((f) => fixed.some((prefix) => f.path.startsWith(prefix))))
-    assert.equal(
-      hash(
-        read(
-          file.path === 'engine/experimental/multiphysics/rigid.ts'
-            ? 'dist/verification/collision-offset-cache-review-20261109/rigid.ts.before'
-            : file.path,
-        ),
-      ),
-      file.sha256,
-      file.path,
-    );
+  verifyHistoricalSources('normal', fixed);
 });
 
 test('cached coverage baseline decodes the unchanged workload and zero-friction branch', () => {

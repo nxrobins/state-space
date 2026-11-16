@@ -1,7 +1,6 @@
 // Static source invariants only; real differential tests run through the fixed CPU scope.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import ts from '@typescript/typescript6';
 import {
@@ -10,16 +9,14 @@ import {
   progressPrefix,
 } from '../scripts/collision-reference/normal-cache-regression.mjs';
 import { captureExact } from '../scripts/collision-reference/exact-state.mjs';
-const read = (path) =>
-  readFileSync(new URL(path, import.meta.url), 'utf8').replaceAll('\r\n', '\n');
-const beforePath = '../dist/verification/collision-normal-cache-review-20261109/rigid.ts.before';
+import { readHistorical } from './helpers/collision-history.mjs';
+const read = (path) => readHistorical(path).toString('utf8').replaceAll('\r\n', '\n');
+const beforePath = 'dist/verification/collision-normal-cache-review-20261109/rigid.ts.before';
 const before = read(beforePath),
-  after = read('../dist/verification/collision-offset-cache-review-20261109/rigid.ts.before');
+  after = read('dist/verification/collision-offset-cache-review-20261109/rigid.ts.before');
 test('the entire engine edit is exactly one private lazy denominator cache', () => {
   assert.equal(
-    createHash('sha256')
-      .update(readFileSync(new URL(beforePath, import.meta.url)))
-      .digest('hex'),
+    createHash('sha256').update(readHistorical(beforePath)).digest('hex'),
     '2a9f951f01bb4b61d22dc5ccf416f7ef734f3072c6e1a936db52e5edb626dd7a',
   );
   const reverted = after

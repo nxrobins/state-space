@@ -10,6 +10,7 @@ import {
   rmSync,
   symlinkSync,
   readFileSync,
+  readdirSync,
   copyFileSync,
   existsSync,
 } from 'node:fs';
@@ -219,6 +220,17 @@ test('volume evidence hashes include moved modules', () => {
       assert.equal(report[source], expected, source);
     }
   }
+});
+
+test('CPU verification includes every portable collision tooling suite exactly once', () => {
+  const suites = readdirSync(new URL('./', import.meta.url))
+    .filter((name) => /^collision.*\.test\.mjs$/.test(name))
+    .map((name) => 'tests/' + name)
+    .sort();
+  const { checks, kind } = selectChecks('unit');
+  assert.equal(kind, 'cpu');
+  const selected = checks.flat().filter((arg) => /^tests\/collision.*\.test\.mjs$/.test(arg));
+  assert.deepEqual(selected.sort(), suites);
 });
 
 test('supervised vitest checks select a reporter that streams one mark per completed test', () => {

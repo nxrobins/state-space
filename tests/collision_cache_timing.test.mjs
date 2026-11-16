@@ -1,19 +1,10 @@
 // Static source identity and synthetic data only. No engine execution.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { verifyClockRecords } from '../scripts/collision-reference/cache-timing-data.mjs';
+import { verifyHistoricalSources } from './helpers/collision-history.mjs';
 
-test('cached engine, exact replay, differential checks and timing wrapper remain pinned', () => {
-  const packet = JSON.parse(
-    readFileSync(
-      new URL(
-        '../dist/verification/collision-normal-cache-20261109-v3/packet.json',
-        import.meta.url,
-      ),
-    ),
-  );
+test('historical cached engine, exact replay, differential checks and timing wrapper match their packet', () => {
   const fixed = [
     'engine/',
     ...[
@@ -28,20 +19,7 @@ test('cached engine, exact replay, differential checks and timing wrapper remain
       'timing-data.mjs',
     ].map((p) => 'scripts/collision-reference/' + p),
   ];
-  for (const file of packet.files.filter((f) =>
-    fixed.some((prefix) => f.path.startsWith(prefix)),
-  )) {
-    const bytes = readFileSync(
-      new URL(
-        '../' +
-          (file.path === 'engine/experimental/multiphysics/rigid.ts'
-            ? 'dist/verification/collision-offset-cache-review-20261109/rigid.ts.before'
-            : file.path),
-        import.meta.url,
-      ),
-    );
-    assert.equal(createHash('sha256').update(bytes).digest('hex'), file.sha256, file.path);
-  }
+  verifyHistoricalSources('normal', fixed);
 });
 
 test('clock validation preserves off-CPU gaps, coarse negative gaps and overlapping GC elapsed time', () => {

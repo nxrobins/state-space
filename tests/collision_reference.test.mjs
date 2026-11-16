@@ -1,7 +1,7 @@
 // Synthetic tooling tests only: no engine bridge, material profile or MuJoCo import.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
@@ -236,6 +236,7 @@ test('complete synthetic comparison keeps diagnostics separate and rejects trunc
 });
 
 test('static packet binds the actual source graph, refuses overwrite and detects tampering', async () => {
+  mkdirSync(join(ROOT, 'dist/verification'), { recursive: true });
   const parent = mkdtempSync(join(ROOT, 'dist/verification/collision-static-check-'));
   const path = join(parent, 'packet'),
     before = holdRecord();

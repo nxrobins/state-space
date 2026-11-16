@@ -1,21 +1,15 @@
 // Static source guards only: TypeScript parsing never evaluates the engine.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import ts from '@typescript/typescript6';
-const oldPath = new URL(
-  '../dist/verification/collision-owned-review-20261108/rigid.ts.before',
-  import.meta.url,
-);
+import { readHistorical } from './helpers/collision-history.mjs';
+const oldPath = 'dist/verification/collision-owned-review-20261108/rigid.ts.before';
 // Preserve this historical ownership-only proof; cache changes have a separate source guard.
-const newPath = new URL(
-  '../dist/verification/collision-normal-cache-review-20261109/rigid.ts.before',
-  import.meta.url,
-);
+const newPath = 'dist/verification/collision-normal-cache-review-20261109/rigid.ts.before';
 const parse = (path) =>
   ts.createSourceFile(
     'rigid.ts',
-    readFileSync(path, 'utf8').replaceAll('\r\n', '\n'),
+    readHistorical(path).toString('utf8').replaceAll('\r\n', '\n'),
     ts.ScriptTarget.Latest,
     true,
   );

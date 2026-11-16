@@ -1,8 +1,8 @@
 // Synthetic data only: no engine, inspector or benchmark execution.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { readHistorical } from './helpers/collision-history.mjs';
 import {
   analyzeSolverProfile,
   decodeSolverCoverage,
@@ -133,16 +133,13 @@ test('coverage rejects wrong script identity, invalid and escaping ranges', () =
   }
 });
 test('historical profiling preserves its frozen engine and replay harness source', () => {
-  const digest = (path) =>
-    createHash('sha256')
-      .update(readFileSync(new URL(path, import.meta.url)))
-      .digest('hex');
+  const digest = (path) => createHash('sha256').update(readHistorical(path)).digest('hex');
   assert.equal(
-    digest('../dist/verification/collision-normal-cache-review-20261109/rigid.ts.before'),
+    digest('dist/verification/collision-normal-cache-review-20261109/rigid.ts.before'),
     '2a9f951f01bb4b61d22dc5ccf416f7ef734f3072c6e1a936db52e5edb626dd7a',
   );
   assert.equal(
-    digest('../scripts/collision-reference/state-space.mjs'),
+    digest('source/scripts/collision-reference/state-space.mjs'),
     'e4b91ce305a019eabe82953c6ecdf77251d8d9ee740300e713f76811e0f3096f',
   );
 });

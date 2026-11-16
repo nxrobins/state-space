@@ -2,15 +2,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { summarizeTimingRows } from '../scripts/collision-reference/offset-timing-data.mjs';
+import { verifyHistoricalSources } from './helpers/collision-history.mjs';
 
-test('offset timing preserves the completed engine, replay, differential suites and clock wrapper', () => {
-  const packet = JSON.parse(
-    readFileSync(
-      new URL('../dist/verification/collision-offset-cache-20261109/packet.json', import.meta.url),
-    ),
-  );
+test('historical offset timing engine, replay, differential suites and clock wrapper match their packet', () => {
   const fixed = [
     'engine/',
     ...[
@@ -26,14 +21,7 @@ test('offset timing preserves the completed engine, replay, differential suites 
       'cache-timing-data.mjs',
     ].map((p) => 'scripts/collision-reference/' + p),
   ];
-  for (const file of packet.files.filter((f) => fixed.some((prefix) => f.path.startsWith(prefix))))
-    assert.equal(
-      createHash('sha256')
-        .update(readFileSync(new URL('../' + file.path, import.meta.url)))
-        .digest('hex'),
-      file.sha256,
-      file.path,
-    );
+  const packet = verifyHistoricalSources('offset', fixed);
   assert.equal(
     packet.bundleSha256,
     'f64bf7fd75f878a3a82d3a9fabe50daa384087efcc12f1285a6e70972466efa8',
