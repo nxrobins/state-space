@@ -776,7 +776,11 @@ export function createReactiveSession3D<T extends ReactiveGameValue3D>(
         if (r.status !== 'ready') throw Error('Reactive branch is not ready.');
         try {
           const revision = reactiveInteger3D(live.revision + 1, 0, Number.MAX_SAFE_INTEGER),
-            candidate = readReactiveSessionSnapshot3D<T>(registry, { ...draft(r), revision });
+            // Finalization validated this private state before marking it ready.
+            // Ready branches cannot enqueue or advance; public reads own their
+            // data, and a live mutation stales the branch. draft still copies
+            // the field/game, so commit needs no second domain read/validation.
+            candidate = { ...draft(r), revision };
           if (candidate.domains.tick !== r.base.tick + r.horizon)
             throw Error('Reactive preview duration differs.');
           compatibleReactiveDomains3D(live.domains, candidate.domains);
