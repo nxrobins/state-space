@@ -9,6 +9,7 @@ import {
   writeFileSync,
   rmSync,
   symlinkSync,
+  lstatSync,
   readFileSync,
   readdirSync,
   copyFileSync,
@@ -95,8 +96,10 @@ test('build CLI publishes new exports and declarations, ignores unrelated roots,
     symlinkSync(
       fileURLToPath(new URL('../node_modules', import.meta.url)),
       join(root, 'node_modules'),
-      'dir',
+      // Junctions exercise directory links without Windows symlink privileges.
+      process.platform === 'win32' ? 'junction' : 'dir',
     );
+    assert.ok(lstatSync(join(root, 'node_modules')).isSymbolicLink());
     writeFileSync(
       join(root, 'package.json'),
       JSON.stringify({
@@ -172,7 +175,12 @@ test('new nested TS and JS files enter lint automatically; generated trees and l
     writeFileSync(join(root, 'examples/new-demo/new.js'), "import './missing-extension';");
     for (const path of ['engine/dist', 'examples/node_modules', 'engine/.cache'])
       writeFileSync(join(root, path, 'ignored.ts'), 'input[0] = 7;');
-    symlinkSync(join(root, 'engine'), join(root, 'engine', 'loop'), 'dir');
+    symlinkSync(
+      join(root, 'engine'),
+      join(root, 'engine', 'loop'),
+      process.platform === 'win32' ? 'junction' : 'dir',
+    );
+    assert.ok(lstatSync(join(root, 'engine', 'loop')).isSymbolicLink());
     const result = lintProject(root);
     assert.equal(result.files.length, 2);
     assert.equal(result.errors.length, 2);
@@ -205,9 +213,10 @@ test('structural lint rejects syntax its compatibility parser cannot understand'
 });
 
 // Source-hash reports are retained evidence: nested implementation inputs must remain bound.
-test('volume evidence hashes include moved modules', () => {
+test('volume evidence hashes use portable paths and include moved modules', () => {
   for (const capture of [volumeSources, volumeM2Sources]) {
     const report = capture();
+    assert.ok(Object.keys(report).every((path) => !path.includes('\\')));
     for (const path of [
       'reactive/reactive-session.ts',
       'tactical/tactical-session-core.ts',

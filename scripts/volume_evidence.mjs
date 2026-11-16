@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
-import { resolve, dirname, relative } from 'node:path';
+import { resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 export const ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const hash = (value) =>
@@ -22,7 +22,7 @@ export function sources() {
   ];
   for (const directory of ['engine/experimental', 'examples/volume-lab'])
     for (const name of readdirSync(resolve(ROOT, directory), { recursive: true }))
-      if (/\.(ts|js|html|css)$/.test(name)) paths.push(`${directory}/${name}`);
+      if (/\.(ts|js|html|css)$/.test(name)) paths.push(`${directory}/${name.split(sep).join('/')}`);
   for (const name of [
     'thermal.ts',
     'registry.ts',
