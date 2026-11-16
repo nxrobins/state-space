@@ -9,10 +9,39 @@ test('profiles are complete, independently owned and replace rather than accumul
   const copy = resolveTerrainStyle(first);
   copy.lighting.lampIntensity = 0;
   expect(first.lighting.lampIntensity).toBeGreaterThan(0);
-  expect(resolveTerrainStyle({}).profile).toBe('classic');
+  const cinematic = resolveTerrainStyle({ profile: 'cinematic' });
+  expect(resolveTerrainStyle()).toEqual(cinematic);
+  expect(resolveTerrainStyle({})).toEqual(cinematic);
+  expect(resolveTerrainStyle({ tone: { exposureEV: 1 } })).toEqual({
+    ...cinematic,
+    tone: { ...cinematic.tone, exposureEV: 1 },
+  });
   expect(resolveTerrainStyle({ profile: 'geological' }).materials.rockTint).not.toEqual(
     first.materials.rockTint,
   );
+});
+
+test('cinematic styles round-trip and retain the shared uniform layout and override contract', () => {
+  const settings = resolveTerrainStyle({
+    profile: 'cinematic',
+    tone: { exposureEV: 0 },
+    lighting: { ambientIntensity: 0, lampIntensity: 0, emissiveIntensity: 0 },
+    materials: { rockNormalStrength: 0, macroVariation: 0, frostStrength: 0 },
+  });
+  expect(resolveTerrainStyle(JSON.parse(JSON.stringify(settings)))).toEqual(settings);
+  const packed = packTerrainStyle(settings);
+  expect(packed.byteLength).toBe(112);
+  expect(packed[3]).toBe(2);
+  expect(Array.from(packed.slice(4, 8))).toEqual([0, 0, 0, 0]);
+  expect(packed[15]).toBe(0);
+  expect(packed[19]).toBe(0);
+  expect(Array.from(packed).every(Number.isFinite)).toBe(true);
+  expect(packTerrainStyle(resolveTerrainStyle({ profile: 'classic' }))[3]).toBe(0);
+  expect(packTerrainStyle(resolveTerrainStyle({ profile: 'geological' }))[3]).toBe(1);
+  const fresh = resolveTerrainStyle({ profile: 'cinematic' });
+  expect(fresh.tone.exposureEV).toBe(-0.5);
+  expect(fresh.lighting.lampIntensity).toBeGreaterThan(0);
+  expect(fresh.materials.rockTint).not.toBe(settings.materials.rockTint);
 });
 
 test('exposure changes by stops without changing lighting or material settings', () => {

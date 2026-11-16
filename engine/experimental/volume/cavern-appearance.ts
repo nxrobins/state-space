@@ -112,6 +112,7 @@ fn visibility(p:vec3f,source:vec3f)->f32{
  var wet=0.;for(var j=0u;j<6u;j++){wet=max(wet,select(0.,1.,(cell(vec3i(coordinate(i))+normals[j])&255u)==2u));}
  let receiver=world+n*.09+(vec3f(.5)-local)*.04;
  var light=vec3f(.065,.095,.135)*(.65+.35*max(0.,-n.y))*ao*style.lighting.x;
+ if(style.tone.w>1.5){light=cinematicAmbient(n)*pow(ao,1.25)*style.lighting.x;}
  let lamp=camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35;let ld=lamp-receiver;let distance=length(ld);
  let lampShadow=.5*(visibility(receiver,lamp)+visibility(receiver,lamp+camera.up.xyz*.22));
  let facing=max(0.,dot(n,normalize(ld)));let cone=.45+.55*pow(max(0.,dot(-normalize(ld),camera.forward.xyz)),2.);
@@ -171,15 +172,24 @@ ${CAVERN_OPTICS}
  var roughness=.83;var emission=vec3f(0);var f0=vec3f(.045);${surfaceAlbedo}
  if(m==2u){albedo=vec3f(.018,.085,.11);roughness=.17;f0=vec3f(.02);}
  if(m==3u){albedo=style.sand.rgb*(.8+.3*grain);roughness=.96;}
+ if(m==3u&&style.tone.w>1.5){albedo=style.sand.rgb*(.86+.16*broad+.04*grain);}
  if(m==8u){albedo=mix(vec3f(.12,.29,.36),vec3f(.57,.68,.7),pow(grain,4.)*.75);roughness=.24;}
  if(m==11u){albedo=vec3f(.1,.19,.2);roughness=.16;}
  if(hazeOnly(m)){discard;} // Steam and smoke contribute in the volume pass, never to surface depth.
  if(melt(m)){let crust=smoothstep(.39,.64,noise(p*2.9)+grain*.12);albedo=vec3f(.065,.035,.025);roughness=.68;emission=mix(emissionColor(m),vec3f(.04,.009,.003),crust)*hot*style.lighting.z;}${flameSurface}
  if(m==1u){
-  albedo=rock*style.rock.rgb*(.85+.25*broad)*mix(1.,1.-style.finish.y,v.surface.y);
-  if(style.finish.w>0.){albedo*=rockVariation(p);}
   roughness=mix(clamp(rough*style.finish.x,.58,.96),style.finish.z,v.surface.y);
-  n=normalize(v.normal*max(detail.z,.35)+tangent*detail.x*style.lighting.w-bitangent*detail.y*style.lighting.w);
+  if(style.tone.w>1.5){
+   albedo=cinematicRock(p,rock)*mix(1.,1.-style.finish.y,v.surface.y);
+   // Fine normals fade as their world-space footprint grows and under a wet film.
+   // They never change the face silhouette, collision surface or stored material.
+   let strength=style.lighting.w*(1.-smoothstep(.035,.35,footprint))*mix(1.,.4,v.surface.y);
+   n=normalize(v.normal*max(detail.z,.35)+tangent*detail.x*strength-bitangent*detail.y*strength);
+  }else{
+   albedo=rock*style.rock.rgb*(.85+.25*broad)*mix(1.,1.-style.finish.y,v.surface.y);
+   if(style.finish.w>0.){albedo*=rockVariation(p);}
+   n=normalize(v.normal*max(detail.z,.35)+tangent*detail.x*style.lighting.w-bitangent*detail.y*style.lighting.w);
+  }
  }
  let view=safeDirection(camera.eye.xyz-p);let lamp=safeDirection(camera.eye.xyz+camera.up.xyz*.35+camera.right.xyz*.35-p);let halfVector=safeDirection(view+lamp);
  let nl=max(0.,dot(n,lamp));let nv=max(.01,dot(n,view));let nh=max(0.,dot(n,halfVector));let vh=max(0.,dot(view,halfVector));let a2=pow(roughness,4.);let d=a2/(3.141593*pow(nh*nh*(a2-1.)+1.,2.));let k=pow(roughness+1.,2.)/8.;let g=nv/(nv*(1.-k)+k)*nl/(nl*(1.-k)+k);let fresnel=f0+(1.-f0)*pow(1.-vh,5.);

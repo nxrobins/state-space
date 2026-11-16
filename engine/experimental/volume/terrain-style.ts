@@ -1,7 +1,7 @@
 /** Presentation data only: no material law, simulation state or native handles. */
 import { assertRecordFields } from '../../portable-data.js';
 
-export type TerrainStyleProfile = 'classic' | 'geological';
+export type TerrainStyleProfile = 'classic' | 'geological' | 'cinematic';
 export type TerrainStyleColor = readonly [number, number, number];
 export type TerrainStyleSettings = {
   profile: TerrainStyleProfile;
@@ -25,7 +25,7 @@ export type TerrainStyleSettings = {
     frostStrength: number;
   };
 };
-/** Each call replaces the style: omitted values come from the selected profile. */
+/** Each call replaces the style. Omitted values use the selected profile, or Cinematic. */
 export type TerrainStyleOptions = {
   profile?: TerrainStyleProfile;
   tone?: Partial<TerrainStyleSettings['tone']>;
@@ -34,6 +34,30 @@ export type TerrainStyleOptions = {
 };
 
 function defaults(profile: TerrainStyleProfile): TerrainStyleSettings {
+  if (profile === 'cinematic') {
+    return {
+      profile,
+      tone: { exposureEV: -0.5, bloomStrength: 0.045, bloomThreshold: 1.8 },
+      lighting: {
+        ambientIntensity: 0.8,
+        lampIntensity: 0.9,
+        emissiveIntensity: 1,
+        lampColor: [1, 0.94, 0.85],
+      },
+      materials: {
+        rockTint: [0.25, 0.29, 0.32],
+        rockTextureScale: 0.18,
+        rockNormalStrength: 0.55,
+        rockRoughness: 1.15,
+        wetDarkening: 0.48,
+        wetRoughness: 0.22,
+        macroVariation: 0.75,
+        sandTint: [0.36, 0.28, 0.18],
+        iceTint: [0.46, 0.64, 0.7],
+        frostStrength: 0.7,
+      },
+    };
+  }
   const geological = profile === 'geological';
   return {
     profile,
@@ -83,8 +107,9 @@ const bounds = {
 export function resolveTerrainStyle(value: unknown = {}): TerrainStyleSettings {
   const error = 'Invalid terrain style.';
   assertRecordFields(value, [], ['profile', 'tone', 'lighting', 'materials'], error);
-  const profile = Object.hasOwn(value, 'profile') ? value.profile : 'classic';
-  if (profile !== 'classic' && profile !== 'geological') throw Error(error);
+  const profile = Object.hasOwn(value, 'profile') ? value.profile : 'cinematic';
+  if (profile !== 'classic' && profile !== 'geological' && profile !== 'cinematic')
+    throw Error(error);
   const result = defaults(profile);
   for (const group of ['tone', 'lighting', 'materials'] as const) {
     if (!Object.hasOwn(value, group)) continue;
@@ -132,7 +157,7 @@ export function packTerrainStyle(s: TerrainStyleSettings): Float32Array {
     1.65 * 2 ** t.exposureEV,
     t.bloomStrength,
     t.bloomThreshold,
-    s.profile === 'geological' ? 1 : 0,
+    s.profile === 'cinematic' ? 2 : s.profile === 'geological' ? 1 : 0,
     l.ambientIntensity,
     l.lampIntensity,
     l.emissiveIntensity,

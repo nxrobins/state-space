@@ -97,6 +97,7 @@ async function fixture() {
 
 test('reference setup and rendering do not compile, allocate or bind the experimental cache', async () => {
   const { fake, appearance, prepare } = await fixture();
+  expect(appearance.inspectStyle()).toEqual(resolveTerrainStyle({ profile: 'cinematic' }));
   await appearance.prepareLighting(false);
   prepare();
   expect(
@@ -195,43 +196,47 @@ test('failed light-list initialization releases the source buffer', async () => 
   expect(fake.buffers[0].destroy).toHaveBeenCalledTimes(1);
 });
 
-test('style changes upload one owned uniform, share it across passes and add no submission', async () => {
-  const { fake, appearance, prepare } = await fixture();
-  const styleBuffer = fake.buffers.find((b) => b.size === TERRAIN_STYLE_BYTES)!;
-  const input = resolveTerrainStyle({ profile: 'geological', tone: { exposureEV: -1 } });
-  appearance.setStyle(input);
-  input.tone.exposureEV = 4;
-  fake.raw.queue.writeBuffer.mockClear();
-  fake.raw.queue.submit.mockClear();
-  prepare();
-  const writes = fake.raw.queue.writeBuffer.mock.calls as unknown as [
-    unknown,
-    number,
-    Float32Array,
-  ][];
-  const uploaded = writes.filter(([buffer]) => buffer === styleBuffer);
-  expect(uploaded).toHaveLength(1);
-  expect(uploaded[0][2][0]).toBeCloseTo(1.65 / 2);
-  const styledGroups = fake.raw.createBindGroup.mock.calls
-    .map(([d]) => Array.from(d.entries))
-    .filter((entries) => entries.some((e) => e.binding === 12));
-  expect(styledGroups).toHaveLength(3);
-  for (const entries of styledGroups)
-    expect(entries.find((e) => e.binding === 12)?.resource).toEqual({ buffer: styleBuffer });
-  prepare();
-  expect(
-    fake.raw.queue.writeBuffer.mock.calls.filter(([buffer]) => buffer === styleBuffer),
-  ).toHaveLength(1);
-  expect(fake.raw.queue.submit).not.toHaveBeenCalled();
-  const returned = appearance.inspectStyle();
-  returned.tone.exposureEV = 2;
-  expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
-  expect(() => appearance.setStyle({ ...input, profile: 'bad' } as never)).toThrow();
-  expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
-  appearance.close();
-  expect(styleBuffer.destroy).toHaveBeenCalledTimes(1);
-  expect(() => appearance.setStyle(input)).toThrow('closed');
-});
+test.each(['geological', 'cinematic'] as const)(
+  '%s style changes upload one owned uniform, share it across passes and add no submission',
+  async (profile) => {
+    const { fake, appearance, prepare } = await fixture();
+    const styleBuffer = fake.buffers.find((b) => b.size === TERRAIN_STYLE_BYTES)!;
+    const input = resolveTerrainStyle({ profile, tone: { exposureEV: -1 } });
+    appearance.setStyle(input);
+    input.tone.exposureEV = 4;
+    fake.raw.queue.writeBuffer.mockClear();
+    fake.raw.queue.submit.mockClear();
+    prepare();
+    const writes = fake.raw.queue.writeBuffer.mock.calls as unknown as [
+      unknown,
+      number,
+      Float32Array,
+    ][];
+    const uploaded = writes.filter(([buffer]) => buffer === styleBuffer);
+    expect(uploaded).toHaveLength(1);
+    expect(uploaded[0][2][0]).toBeCloseTo(1.65 / 2);
+    expect(uploaded[0][2][3]).toBe(profile === 'cinematic' ? 2 : 1);
+    const styledGroups = fake.raw.createBindGroup.mock.calls
+      .map(([d]) => Array.from(d.entries))
+      .filter((entries) => entries.some((e) => e.binding === 12));
+    expect(styledGroups).toHaveLength(3);
+    for (const entries of styledGroups)
+      expect(entries.find((e) => e.binding === 12)?.resource).toEqual({ buffer: styleBuffer });
+    prepare();
+    expect(
+      fake.raw.queue.writeBuffer.mock.calls.filter(([buffer]) => buffer === styleBuffer),
+    ).toHaveLength(1);
+    expect(fake.raw.queue.submit).not.toHaveBeenCalled();
+    const returned = appearance.inspectStyle();
+    returned.tone.exposureEV = 2;
+    expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
+    expect(() => appearance.setStyle({ ...input, profile: 'bad' } as never)).toThrow();
+    expect(appearance.inspectStyle().tone.exposureEV).toBe(-1);
+    appearance.close();
+    expect(styleBuffer.destroy).toHaveBeenCalledTimes(1);
+    expect(() => appearance.setStyle(input)).toThrow('closed');
+  },
+);
 
 test('chunk renderer retains style before lazy setup and across diagnostic switches without touching physics', async () => {
   const fake = fakeRendererDevice();
@@ -240,6 +245,7 @@ test('chunk renderer retains style before lazy setup and across diagnostic switc
   const canvas = { getContext: () => context } as unknown as HTMLCanvasElement;
   const state = vi.fn(() => ({ grid: {} as GPUBuffer, shape: [8, 8, 8] }));
   const renderer = await makeChunkRenderer(fake.device, canvas, state, {} as GPUBuffer, 4);
+  expect(await renderer.inspectStyle!()).toEqual(resolveTerrainStyle({ profile: 'cinematic' }));
   state.mockClear();
   fake.raw.queue.writeBuffer.mockClear();
   const count = fake.buffers.length;
@@ -254,6 +260,10 @@ test('chunk renderer retains style before lazy setup and across diagnostic switc
   await renderer.setAppearance!('diagnostic');
   await renderer.setAppearance!('naturalistic');
   expect((await renderer.inspectStyle!()).profile).toBe('geological');
+  await renderer.setStyle!({ profile: 'classic' });
+  expect((await renderer.inspectStyle!()).tone.exposureEV).toBe(0);
+  await renderer.setStyle!({});
+  expect(await renderer.inspectStyle!()).toEqual(resolveTerrainStyle({ profile: 'cinematic' }));
   expect(state).not.toHaveBeenCalled();
   renderer.close();
   await expect(renderer.inspectStyle!()).rejects.toThrow('closed');
