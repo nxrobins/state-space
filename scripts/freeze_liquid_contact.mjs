@@ -12,135 +12,42 @@
  *
  * Every mode runs inside one supervised CPU job. Output goes under the ignored
  * dist/liquid-contact/; only `record` writes a tracked file. Never changes a safety hold. */
-import { execFileSync } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { build, version as esbuildVersion } from 'esbuild';
+import { version as esbuildVersion } from 'esbuild';
+import {
+  BUNDLE,
+  bundleEngine,
+  extractCommit,
+  loadCatalogue,
+  readOptions,
+  selectCases,
+} from './liquid_contact_engine.mjs';
 import { guardNode } from './verification_guard.mjs';
 
 const FREEZE_FILE = 'engine/experimental/multiphysics/liquid-contact-freeze.json';
-const CATALOGUE = 'engine/test-support/multiphysics-frozen-cases.ts';
-const SOURCES = 'engine/experimental/multiphysics';
-const ENTRY = 'engine/experimental/multiphysics.ts';
-const BUNDLE = { bundle: true, platform: 'node', format: 'esm', target: 'es2022' };
 const USAGE =
   'Usage: node scripts/freeze_liquid_contact.mjs record [--commit <sha>] | check | compare --commit <sha>\n' +
   '  [--select light|heavy|all|<id-substring>] [--timeout <seconds, at most 1800>]';
 
 const [mode, ...rest] = process.argv.slice(2);
-const options = { select: 'all', timeout: '600' };
-for (let i = 0; i < rest.length; i += 2) {
-  const name = rest[i]?.replace(/^--/, '');
-  if (!['commit', 'select', 'timeout'].includes(name) || rest[i + 1] === undefined)
-    throw Error(USAGE);
-  options[name] = rest[i + 1];
-}
+const options = readOptions(rest, { commit: undefined, select: 'all', timeout: '600' }, USAGE);
 if (
   !['record', 'check', 'compare'].includes(mode) ||
   (mode === 'check' && options.commit !== undefined) ||
-  (mode === 'compare' && options.commit === undefined) ||
-  !/^[1-9][0-9]{1,3}$/.test(options.timeout) ||
-  Number(options.timeout) > 1800
+  (mode === 'compare' && options.commit === undefined)
 )
   throw Error(USAGE);
 await guardNode('cpu', Number(options.timeout));
 
-const hash = (data) => createHash('sha256').update(data).digest('hex');
 const output = resolve('dist/liquid-contact', `${mode}-${randomUUID()}`);
 await mkdir(output, { recursive: true });
 const say = (row) => console.log(JSON.stringify(row));
-
-async function loadCatalogue() {
-  const outfile = resolve(output, 'catalogue.mjs');
-  await build({ ...BUNDLE, entryPoints: [CATALOGUE], outfile, logLevel: 'warning' });
-  return {
-    sha256: hash(await readFile(CATALOGUE)),
-    ...(await import(pathToFileURL(outfile).href)),
-  };
-}
-const catalogue = await loadCatalogue();
-
-/** Bundle one engine. `root` is the checkout or an extracted commit. Only sources reachable
- * from the public multiphysics entry are read; their hashes identify the recorded engine. */
-async function bundleEngine(root, name) {
-  const outfile = resolve(output, `${name}.mjs`);
-  const result = await build({
-    ...BUNDLE,
-    absWorkingDir: root,
-    entryPoints: [ENTRY],
-    outfile,
-    metafile: true,
-    logLevel: 'warning',
-  });
-  const sources = {};
-  for (const file of Object.keys(result.metafile.inputs).sort())
-    sources[file] = hash(await readFile(resolve(root, file)));
-  const rejections = {};
-  for (const file of catalogue.FROZEN_REJECTION_SOURCES_3D)
-    rejections[file] = catalogue.rejectionVocabulary3D(
-      await readFile(resolve(root, SOURCES, file), 'utf8'),
-    );
-  return {
-    path: outfile,
-    sourceSha256: hash(
-      Object.entries(sources)
-        .map(([file, sha256]) => `${file}\0${sha256}\n`)
-        .join(''),
-    ),
-    sources,
-    rejections,
-  };
-}
-/** Write the commit's own engine/ blobs, straight from the object store. The working tree
- * cannot redirect them, and no archive tool or checkout filter touches the bytes. */
-async function extractCommit(commit) {
-  const git = (args, extra = {}) =>
-    execFileSync('git', args, { maxBuffer: 512 * 1024 * 1024, windowsHide: true, ...extra });
-  const sha = git(['rev-parse', '--verify', `${commit}^{commit}`])
-    .toString()
-    .trim();
-  const root = resolve(output, `source-${sha.slice(0, 12)}`);
-  const names = git(['ls-tree', '-r', '-z', '--name-only', sha, 'engine'])
-    .toString()
-    .split('\0')
-    .filter(Boolean);
-  if (!names.length || names.some((name) => /[\n\\]|(^|\/)\.\.(\/|$)/.test(name)))
-    throw Error('Unexpected engine tree in the frozen commit.');
-  const blobs = git(['cat-file', '--batch'], {
-    input: names.map((name) => `${sha}:${name}\n`).join(''),
-  });
-  const made = new Set();
-  let offset = 0;
-  for (const name of names) {
-    const end = blobs.indexOf(10, offset),
-      [, kind, size] = blobs.toString('utf8', offset, end).split(' ');
-    if (end < 0 || kind !== 'blob' || !/^[0-9]+$/.test(size))
-      throw Error(`Cannot read ${name} from the frozen commit.`);
-    const target = resolve(root, name),
-      folder = dirname(target);
-    if (!made.has(folder)) {
-      await mkdir(folder, { recursive: true });
-      made.add(folder);
-    }
-    await writeFile(target, blobs.subarray(end + 1, end + 1 + Number(size)));
-    offset = end + 2 + Number(size);
-  }
-  return { sha, root };
-}
-
-const selected = catalogue.FROZEN_CASES_3D.filter((frozen) =>
-  options.select === 'all'
-    ? true
-    : options.select === 'light'
-      ? !frozen.heavy
-      : options.select === 'heavy'
-        ? frozen.heavy
-        : frozen.id.includes(options.select),
-);
-if (!selected.length) throw Error('No frozen case matches --select.');
+const catalogue = await loadCatalogue(output);
+const selected = selectCases(catalogue, options.select);
 
 async function recorder(bundle) {
   const engine = await import(pathToFileURL(bundle.path).href),
@@ -219,8 +126,8 @@ function vocabularyChanges(expected, actual) {
 
 let failures = 0;
 if (mode === 'record') {
-  const source = options.commit ? await extractCommit(options.commit) : null,
-    bundle = await bundleEngine(source?.root ?? process.cwd(), 'frozen'),
+  const source = options.commit ? await extractCommit(options.commit, output) : null,
+    bundle = await bundleEngine(source?.root ?? process.cwd(), output, 'frozen', catalogue),
     record = await recorder(bundle);
   const previous = existsSync(FREEZE_FILE) ? JSON.parse(await readFile(FREEZE_FILE, 'utf8')) : null;
   // A partial selection updates only its own cases, so the engine must be the recorded one.
@@ -258,7 +165,7 @@ if (mode === 'record') {
   );
   say({ stage: 'recorded', file: FREEZE_FILE, cases: Object.keys(ordered).length, output });
 } else {
-  const candidate = await bundleEngine(process.cwd(), 'candidate'),
+  const candidate = await bundleEngine(process.cwd(), output, 'candidate', catalogue),
     recordCandidate = await recorder(candidate);
   let expected,
     frozenBundle = null,
@@ -281,8 +188,8 @@ if (mode === 'record') {
       sameSources: freeze.engine.sourceSha256 === candidate.sourceSha256,
     });
   } else {
-    const { sha, root } = await extractCommit(options.commit);
-    frozenBundle = { ...(await bundleEngine(root, 'frozen')), commit: sha };
+    const { sha, root } = await extractCommit(options.commit, output);
+    frozenBundle = { ...(await bundleEngine(root, output, 'frozen', catalogue)), commit: sha };
     frozenRejections = frozenBundle.rejections;
     const recordFrozen = await recorder(frozenBundle);
     expected = (frozen) => recordFrozen(frozen, 'frozen');
