@@ -55,6 +55,10 @@ export type RigidStepOptions3D = {
   /** A coupled caller will evaluate the sum of all operators' loads once. */
   deferFracture?: boolean;
   solverIterations?: number;
+  /** Sweep limit of one contact solve. The geometric projection and the impact-interval
+   * refinement keep `solverIterations`, which is also the point up to which a contact solve
+   * behaves exactly as it did when it shared that limit. Only former rejections can change. */
+  contactIterations?: number;
   maxWork?: number;
   maxEvents?: number;
   contactTolerance?: number;
@@ -76,6 +80,15 @@ export type RigidStepResult3D<T extends RigidParcel3D> = {
   numericalAngularMomentumResidual: Vec3;
   /** Signed kinetic work of support constraints; never deposited as physical heat. */
   supportConstraintEnergy: number;
+  /** The part of `supportConstraintEnergy` done at contacts between a non-colliding particle
+   * and a solid, and per parcel where that work was a loss. A coupled caller nets it against
+   * its own particle constraints; resting support of a particle cancels there. */
+  particleSupportEnergy: number;
+  particleSupportLoss: { id: string; loss: number }[];
+  /** Per parcel, the velocity change that this step's physical impacts and sliding friction
+   * caused, as opposed to gravity and resting support. A report only: the returned parcels
+   * already contain it. Angular impulses are converted with the final inertia. */
+  physicalVelocityChange: { id: string; velocity: Vec3; angularVelocity: Vec3 }[];
   report: { work: number; events: number; contacts: number };
 };
 const ZERO: Vec3 = [0, 0, 0];
@@ -501,7 +514,10 @@ function pairAxes(a: RigidParcel3D, b: RigidParcel3D): { a: Vec3[]; b: Vec3[]; a
     }
   return { a: aa, b: bb, all };
 }
-/** Exact interval clipping for constant-orientation motion, including its gravity arc. */
+/** Exact interval clipping for constant-orientation motion, including its gravity arc.
+ * With `persistent`, a pair already in contact whose separation along the contact normal
+ * stays within the projection allowance for the whole interval reports no event: it neither
+ * leaves the contact skin nor closes beyond what geometric projection already accepts. */
 function translationImpact(
   a: RigidParcel3D,
   b: RigidParcel3D,
@@ -509,6 +525,7 @@ function translationImpact(
   acceleration: Vec3,
   duration: number,
   tolerance: number,
+  persistent = false,
 ): number | null {
   const directions = pairAxes(a, b),
     offset = subtractVec3(b.center, a.center);
@@ -568,6 +585,18 @@ function translationImpact(
   }
   intervals.sort((x, y) => x[0] - y[0]);
   const contact = contactWithinTolerance(a, b, tolerance);
+  if (persistent && contact) {
+    // b moves `time * (speed + half * time)` along the normal relative to a.
+    const speed = dotVec3(velocity, contact.normal),
+      half = dotVec3(acceleration, contact.normal) / 2,
+      travel = (time: number) => Math.abs(time * (speed + half * time)),
+      turning = half === 0 ? 0 : -speed / (2 * half);
+    if (
+      Math.max(travel(duration), turning > 0 && turning < duration ? travel(turning) : 0) <=
+      tolerance / 8
+    )
+      return null;
+  }
   for (const [enter] of intervals) {
     if (enter === 0 && contact && dotVec3(velocity, contact.normal) >= -tolerance) continue;
     return enter;
@@ -1044,6 +1073,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     restitution: 0,
     friction: 0.5,
     solverIterations: 96,
+    contactIterations: 1024,
     maxWork: 200000,
     maxEvents: 64,
     contactTolerance: 1e-8,
@@ -1072,6 +1102,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     throw Error('Invalid rigid step options.');
   for (const [value, maximum] of [
     [options.solverIterations, 1024],
+    [options.contactIterations, 1024],
     [options.maxWork, 1000000],
     [options.maxEvents, 1024],
   ])
@@ -1112,7 +1143,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     let work = 0,
       events = 0,
       contactCount = 0,
-      supportConstraintEnergy = 0;
+      supportConstraintEnergy = 0,
+      particleSupportEnergy = 0;
+    const particleSupportLoss = new Map<string, number>();
     let boundaryLinearImpulse: Vec3 = ZERO,
       boundaryAngularImpulse: Vec3 = ZERO;
     let gravityLinearImpulse: Vec3 = ZERO,
@@ -1294,11 +1327,90 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     }
     const settledParticlePairs = new Set<string>();
     let captureSettledParticleContacts = options.resolvedParticleContacts === true;
+    // The three helpers below hold what this step does around the contact solve. The solve's
+    // own text is pinned to the source its collision measurements were taken on
+    // (tests/collision_offset_cache.test.mjs), so it differs from that source only by its
+    // sweep limit and by calling these. None of them yields.
+    const checkpoints = new WeakMap<Contact<T>[], number>();
+    /** Largest unmet normal condition, as a speed, from the offsets the solve has cached. */
+    const unmet = (contacts: Contact<T>[]) =>
+      contacts.reduce((worst, c) => {
+        const speed =
+          dotVec3(
+            subtractVec3(
+              addVec3(c.b.velocity, crossVec3(omega(c.b), c.offsetB!)),
+              addVec3(c.a.velocity, crossVec3(omega(c.a), c.offsetA!)),
+            ),
+            c.normal,
+          ) - c.target;
+        return Math.max(
+          worst,
+          c.normalImpulse > options.velocityTolerance ? Math.abs(speed) : -speed,
+        );
+      }, 0);
+    /** Past the former shared limit. Nothing here can act within that limit, so every solve
+     * that used to converge is unchanged. At the limit, a rebound too slow to leave the
+     * contact skin within the tick is dropped: such rebounds cannot be observed, and on a
+     * wedged body opposing ones have no joint solution. After that the solve continues while
+     * its unmet normal speed falls by at least a tenth every 32 sweeps. A slower solve could
+     * not reach tolerance within the sweep limit, so it stops there. */
+    function pastFormerSweepLimit(contacts: Contact<T>[], iteration: number): void {
+      const beyond = iteration + 1 - options.solverIterations;
+      if (beyond === 0) {
+        for (const c of contacts)
+          if (c.target * options.dt <= options.contactTolerance) c.target = 0;
+        checkpoints.set(contacts, unmet(contacts));
+      } else if (beyond > 0 && beyond % 32 === 0) {
+        const now = unmet(contacts);
+        if (now > 0.9 * checkpoints.get(contacts)!)
+          throw Error('Rigid contact solve did not converge.');
+        checkpoints.set(contacts, now);
+      }
+    }
+    /** Support work done where a non-colliding particle rests on a solid. */
+    function recordParticleSupport(contacts: Contact<T>[]): void {
+      for (const c of contacts) {
+        if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
+        const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
+        particleSupportEnergy += support;
+        if (support < 0)
+          for (const parcel of [c.pa, c.pb])
+            particleSupportLoss.set(
+              parcel.id,
+              (particleSupportLoss.get(parcel.id) ?? 0) - support / 2,
+            );
+      }
+    }
+    /** Which of the impulses a solve applied were physical: its impacts and sliding. */
+    function recordPhysicalImpulses(
+      contacts: Contact<T>[],
+      physical: Map<Body<T>, { linear: Vec3; angular: Vec3 }>,
+    ): void {
+      for (const c of contacts) {
+        const j = addVec3(
+          c.impact ? scaleVec3(c.normal, c.normalImpulse) : ZERO,
+          c.physicalFriction ? c.tangentImpulse : ZERO,
+        );
+        for (const [body, sign, offset] of [
+          [c.a, -1, c.offsetA!],
+          [c.b, 1, c.offsetB!],
+        ] as const) {
+          if (body.anchored) continue;
+          const row = physical.get(body) ?? { linear: ZERO, angular: ZERO },
+            applied = scaleVec3(j, sign);
+          physical.set(body, {
+            linear: addVec3(row.linear, applied),
+            angular: addVec3(row.angular, crossVec3(offset, applied)),
+          });
+        }
+      }
+    }
     function* solve(
       impact: boolean,
       prior?: Map<Body<T>, { velocity: Vec3; angular: Vec3 }>,
       restingPairs?: Set<string>,
       collectPairs?: Set<string>,
+      physical?: Map<Body<T>, { linear: Vec3; angular: Vec3 }>,
     ): Generator<RigidWork3D, void, void> {
       const contacts: Contact<T>[] = [];
       for (let i = 0; i < bodies.length; i++)
@@ -1424,7 +1536,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
         apply(c.b, c.pb, j, c.point, c.offsetB);
       };
-      for (let iteration = 0; iteration < options.solverIterations; iteration++) {
+      for (let iteration = 0; iteration < options.contactIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
           // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
@@ -1503,7 +1615,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           (contacts.every((c) => c.friction === 0) || iteration >= 3)
         )
           break;
-        if (iteration + 1 === options.solverIterations)
+        pastFormerSweepLimit(contacts, iteration);
+        if (iteration + 1 === options.contactIterations)
           throw Error('Rigid contact solve did not converge.');
       }
       const normalWork = contacts.reduce((sum, c) => sum + (c.impact ? c.normalWork : 0), 0),
@@ -1515,6 +1628,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
         0,
       );
+      recordParticleSupport(contacts);
       const roundoff =
         1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
       if (frictionWork > roundoff || (impact && normalWork > roundoff))
@@ -1540,11 +1654,13 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           if (frictionWeight > 0 && c.physicalFriction)
             row.friction += (0.5 * frictionLoss * lengthVec3(c.tangentImpulse)) / frictionWeight;
         }
+      if (physical) recordPhysicalImpulses(contacts, physical);
     }
 
     function* nextImpact(
       duration: number,
       starts: Map<Body<T>, Vec3>,
+      persistent = false,
     ): Generator<RigidWork3D, number | null, void> {
       let hit: number | null = null;
       for (let i = 0; i < bodies.length; i++)
@@ -1603,6 +1719,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                       relativeAcceleration,
                       duration,
                       options.contactTolerance,
+                      persistent,
                     );
               if (time !== null && (hit === null || time < hit)) hit = time;
             }
@@ -1615,7 +1732,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     // Trial support solves choose a conservative interval; rejected trials restore
     // every physical receipt while retaining their actual computational work.
     yield* project();
-    yield* solve(true);
+    const physical = new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
+    yield* solve(true, undefined, undefined, undefined, physical);
     captureSettledParticleContacts = false;
     let remaining = options.dt;
     while (remaining > 0) {
@@ -1631,6 +1749,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       const savedGravityP = gravityLinearImpulse,
         savedGravityL = gravityAngularImpulse;
       const savedSupport = supportConstraintEnergy,
+        savedParticleSupport = particleSupportEnergy,
+        savedParticleLoss = [...particleSupportLoss],
         savedContacts = contactCount;
       function restoreTrial(): void {
         for (const { body, velocity, angularMomentum } of motions) {
@@ -1644,6 +1764,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         gravityLinearImpulse = savedGravityP;
         gravityAngularImpulse = savedGravityL;
         supportConstraintEnergy = savedSupport;
+        particleSupportEnergy = savedParticleSupport;
+        particleSupportLoss.clear();
+        for (const [id, loss] of savedParticleLoss) particleSupportLoss.set(id, loss);
         contactCount = savedContacts;
       }
       let duration = remaining,
@@ -1657,8 +1780,21 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         predictedContact = hit !== null;
         if (hit === null || hit >= duration) break;
         if (!(hit > 0)) throw Error('Unresolved zero-time swept contact.');
-        if (trial >= options.solverIterations)
-          throw Error('Impact interval refinement did not converge.');
+        if (trial >= options.solverIterations) {
+          // A body held between two faces can report a re-contact just inside every interval
+          // tried: its normal speed is at solver noise, and the fitted arc returns to the
+          // face in proportion to the interval. Such a pair never leaves its contact skin.
+          // Sweep this last trial again without those pairs; any real event still rejects.
+          const real = yield* nextImpact(
+            duration,
+            new Map(motions.map((m) => [m.body, m.velocity])),
+            true,
+          );
+          if (real !== null && real < duration)
+            throw Error('Impact interval refinement did not converge.');
+          predictedContact = real !== null;
+          break;
+        }
         restoreTrial();
         duration = hit;
       }
@@ -1670,9 +1806,26 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       yield* project();
       // Use pre-kick approach/slip to distinguish an impact from resting support;
       // restitution and physical heat use the actual velocity at contact time.
-      yield* solve(true, beforeLastKick, restingPairs);
+      yield* solve(true, beforeLastKick, restingPairs, undefined, physical);
     }
     for (const body of bodies) sync(body);
+    const physicalById = new Map<string, { id: string; velocity: Vec3; angularVelocity: Vec3 }>();
+    for (const body of bodies) {
+      const impulse = physical.get(body);
+      const linear = impulse ? scaleVec3(impulse.linear, 1 / body.mass) : ZERO,
+        angularVelocity = impulse ? applyMatrix3(body.inverseInertia, impulse.angular) : ZERO;
+      assertFiniteVec3(linear, 'physical velocity change');
+      assertFiniteVec3(angularVelocity, 'physical angular velocity change');
+      for (const parcel of body.members)
+        physicalById.set(parcel.id, {
+          id: parcel.id,
+          velocity: addVec3(
+            linear,
+            crossVec3(angularVelocity, subtractVec3(parcel.center, body.center)),
+          ),
+          angularVelocity,
+        });
+    }
 
     const changes = parcels.map((p) => {
       const start = initial.get(p.id)!,
@@ -1747,6 +1900,11 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       numericalLinearMomentumResidual,
       numericalAngularMomentumResidual,
       supportConstraintEnergy: finite(supportConstraintEnergy),
+      particleSupportEnergy: finite(particleSupportEnergy),
+      particleSupportLoss: [...particleSupportLoss]
+        .map(([id, loss]) => ({ id, loss: finite(loss) }))
+        .sort((a, b) => lexical(a.id, b.id)),
+      physicalVelocityChange: parcels.map((parcel) => physicalById.get(parcel.id)!),
       report: { work, events, contacts: contactCount },
     };
   }

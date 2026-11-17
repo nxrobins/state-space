@@ -34,3 +34,15 @@ formatting change fails hosted CI instead of silently disabling a control.
 fluid regression and explicitly selected CPU profiling cases. It does not advance
 physics or export an SDK API. Domain assertions remain in their respective suites;
 the 27/64-particle cases keep the same geometry for before/after comparisons.
+
+## Frozen multiphysics behaviour
+
+`multiphysics-frozen-cases.ts` is the catalogue behind
+`engine/experimental/multiphysics/liquid-contact-freeze.json`: open failures,
+rejection boundaries, stress scenes and passing controls. Unlike the inputs above
+it does advance physics, through an engine passed in by the caller, so the same
+cases record the working tree or a bundle of an earlier commit. It records and
+never asserts. `liquid-contact-freeze.test.ts` compares the light cases in the
+CPU suite; `scripts/freeze_liquid_contact.mjs` compares or re-records all of them
+under the supervisor. Add a case with a new `id`; changing an existing case's
+scene changes what its frozen record means.

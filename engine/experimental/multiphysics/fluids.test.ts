@@ -825,3 +825,55 @@ test.each([
     );
   },
 );
+
+test('impact weights mark closing that existed before the predictor and none that it supplied', async () => {
+  const { createFluidStudyBlock3D } =
+    await import('../../test-support/multiphysics-fluid-fixtures.js');
+  // A 27-sample block resting on a fixed floor: the predictor alone closes it on the floor.
+  const resting = (): FluidReferenceInput3D => {
+    const scene = createFluidStudyBlock3D(3);
+    for (const p of scene.particles) p.parcel.velocity = [0, 0, 0];
+    scene.bodies[0] = {
+      ...scene.bodies[0],
+      velocity: [0, 0, 0],
+      angularVelocity: [0, 0, 0],
+      inverseMass: 0,
+      inverseInertia: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    };
+    scene.velocityPrediction = [0, -0.04, 0];
+    return scene;
+  };
+  const supported = solveFluidReference3D(resting());
+  expect(supported.impactLoss).toEqual({ particles: [], boundaries: [] });
+  // The floor takes the whole prediction back from the nine samples that touch it. The
+  // block has no side walls, so samples above them may also spread.
+  const lowest = supported.projectionVelocityChange.particles.filter(
+    (row) => resting().particles.find((p) => p.parcel.id === row.id)!.parcel.center[1] === 1,
+  );
+  expect(lowest.length).toBe(9);
+  for (const row of lowest) expect(row.velocity[1]).toBeCloseTo(0.04, 6);
+  expect(supported.projectionVelocityChange.bodies).toEqual([{ id: 'floor', velocity: [0, 0, 0] }]);
+
+  // The same block with its top layer already moving down at 0.5.
+  const closing = resting();
+  for (const p of closing.particles) if (p.parcel.center[1] === 3) p.parcel.velocity = [0, -0.5, 0];
+  const struck = solveFluidReference3D(closing),
+    weight = struck.impactLoss.particles.reduce((sum, row) => sum + row.loss, 0);
+  expect(struck.impactLoss.particles.length).toBeGreaterThan(0);
+  // The weights never exceed the kinetic energy the projection removed.
+  expect(weight).toBeGreaterThan(0);
+  expect(weight).toBeLessThanOrEqual(-struck.energy.projectionKineticChange);
+  // The solved motion and its energy report are the same with or without a reference; only
+  // the weights follow it. Against a reference in which nothing was closing, none remain.
+  const still = {
+    particles: closing.particles.map((p) => ({ id: p.parcel.id, velocity: [0, 0, 0] as Vec3 })),
+    bodies: [{ id: 'floor', velocity: [0, 0, 0] as Vec3, angularVelocity: [0, 0, 0] as Vec3 }],
+  };
+  const reclassified = solveFluidReference3D({ ...closing, reference: still });
+  expect(reclassified.particles).toEqual(struck.particles);
+  expect(reclassified.energy).toEqual(struck.energy);
+  expect(reclassified.impactLoss).toEqual({ particles: [], boundaries: [] });
+  expect(() => solveFluidReference3D({ ...closing, reference: { ...still, bodies: [] } })).toThrow(
+    'Fluid reference motion does not match its samples and bodies.',
+  );
+});
