@@ -1327,6 +1327,84 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     }
     const settledParticlePairs = new Set<string>();
     let captureSettledParticleContacts = options.resolvedParticleContacts === true;
+    // The three helpers below hold what this step does around the contact solve. The solve's
+    // own text is pinned to the source its collision measurements were taken on
+    // (tests/collision_offset_cache.test.mjs), so it differs from that source only by its
+    // sweep limit and by calling these. None of them yields.
+    const checkpoints = new WeakMap<Contact<T>[], number>();
+    /** Largest unmet normal condition, as a speed, from the offsets the solve has cached. */
+    const unmet = (contacts: Contact<T>[]) =>
+      contacts.reduce((worst, c) => {
+        const speed =
+          dotVec3(
+            subtractVec3(
+              addVec3(c.b.velocity, crossVec3(omega(c.b), c.offsetB!)),
+              addVec3(c.a.velocity, crossVec3(omega(c.a), c.offsetA!)),
+            ),
+            c.normal,
+          ) - c.target;
+        return Math.max(
+          worst,
+          c.normalImpulse > options.velocityTolerance ? Math.abs(speed) : -speed,
+        );
+      }, 0);
+    /** Past the former shared limit. Nothing here can act within that limit, so every solve
+     * that used to converge is unchanged. At the limit, a rebound too slow to leave the
+     * contact skin within the tick is dropped: such rebounds cannot be observed, and on a
+     * wedged body opposing ones have no joint solution. After that the solve continues while
+     * its unmet normal speed falls by at least a tenth every 32 sweeps. A slower solve could
+     * not reach tolerance within the sweep limit, so it stops there. */
+    function pastFormerSweepLimit(contacts: Contact<T>[], iteration: number): void {
+      const beyond = iteration + 1 - options.solverIterations;
+      if (beyond === 0) {
+        for (const c of contacts)
+          if (c.target * options.dt <= options.contactTolerance) c.target = 0;
+        checkpoints.set(contacts, unmet(contacts));
+      } else if (beyond > 0 && beyond % 32 === 0) {
+        const now = unmet(contacts);
+        if (now > 0.9 * checkpoints.get(contacts)!)
+          throw Error('Rigid contact solve did not converge.');
+        checkpoints.set(contacts, now);
+      }
+    }
+    /** Support work done where a non-colliding particle rests on a solid. */
+    function recordParticleSupport(contacts: Contact<T>[]): void {
+      for (const c of contacts) {
+        if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
+        const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
+        particleSupportEnergy += support;
+        if (support < 0)
+          for (const parcel of [c.pa, c.pb])
+            particleSupportLoss.set(
+              parcel.id,
+              (particleSupportLoss.get(parcel.id) ?? 0) - support / 2,
+            );
+      }
+    }
+    /** Which of the impulses a solve applied were physical: its impacts and sliding. */
+    function recordPhysicalImpulses(
+      contacts: Contact<T>[],
+      physical: Map<Body<T>, { linear: Vec3; angular: Vec3 }>,
+    ): void {
+      for (const c of contacts) {
+        const j = addVec3(
+          c.impact ? scaleVec3(c.normal, c.normalImpulse) : ZERO,
+          c.physicalFriction ? c.tangentImpulse : ZERO,
+        );
+        for (const [body, sign, offset] of [
+          [c.a, -1, c.offsetA!],
+          [c.b, 1, c.offsetB!],
+        ] as const) {
+          if (body.anchored) continue;
+          const row = physical.get(body) ?? { linear: ZERO, angular: ZERO },
+            applied = scaleVec3(j, sign);
+          physical.set(body, {
+            linear: addVec3(row.linear, applied),
+            angular: addVec3(row.angular, crossVec3(offset, applied)),
+          });
+        }
+      }
+    }
     function* solve(
       impact: boolean,
       prior?: Map<Body<T>, { velocity: Vec3; angular: Vec3 }>,
@@ -1458,16 +1536,6 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
         apply(c.b, c.pb, j, c.point, c.offsetB);
       };
-      /** Largest unmet normal condition, as a speed. */
-      const unmet = () =>
-        contacts.reduce((worst, c) => {
-          const speed = dotVec3(relative(c), c.normal) - c.target;
-          return Math.max(
-            worst,
-            c.normalImpulse > options.velocityTolerance ? Math.abs(speed) : -speed,
-          );
-        }, 0);
-      let checkpoint = 0;
       for (let iteration = 0; iteration < options.contactIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
@@ -1547,22 +1615,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           (contacts.every((c) => c.friction === 0) || iteration >= 3)
         )
           break;
-        // Past the former shared limit. Nothing here can act within that limit, so every
-        // solve that used to converge is unchanged. At the limit, a rebound too slow to leave
-        // the contact skin within the tick is dropped: such rebounds cannot be observed, and
-        // on a wedged body opposing ones have no joint solution. After that the solve
-        // continues while its unmet normal speed falls by at least a tenth every 32 sweeps. A
-        // slower solve could not reach tolerance within the sweep limit, so it stops there.
-        const beyond = iteration + 1 - options.solverIterations;
-        if (beyond === 0) {
-          for (const c of contacts)
-            if (c.target * options.dt <= options.contactTolerance) c.target = 0;
-          checkpoint = unmet();
-        } else if (beyond > 0 && beyond % 32 === 0) {
-          const now = unmet();
-          if (now > 0.9 * checkpoint) throw Error('Rigid contact solve did not converge.');
-          checkpoint = now;
-        }
+        pastFormerSweepLimit(contacts, iteration);
         if (iteration + 1 === options.contactIterations)
           throw Error('Rigid contact solve did not converge.');
       }
@@ -1575,17 +1628,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
         0,
       );
-      for (const c of contacts) {
-        if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
-        const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
-        particleSupportEnergy += support;
-        if (support < 0)
-          for (const parcel of [c.pa, c.pb])
-            particleSupportLoss.set(
-              parcel.id,
-              (particleSupportLoss.get(parcel.id) ?? 0) - support / 2,
-            );
-      }
+      recordParticleSupport(contacts);
       const roundoff =
         1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
       if (frictionWork > roundoff || (impact && normalWork > roundoff))
@@ -1611,26 +1654,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           if (frictionWeight > 0 && c.physicalFriction)
             row.friction += (0.5 * frictionLoss * lengthVec3(c.tangentImpulse)) / frictionWeight;
         }
-      // Impulses already applied above; this only records which of them were physical.
-      if (physical)
-        for (const c of contacts) {
-          const j = addVec3(
-            c.impact ? scaleVec3(c.normal, c.normalImpulse) : ZERO,
-            c.physicalFriction ? c.tangentImpulse : ZERO,
-          );
-          for (const [body, sign, offset] of [
-            [c.a, -1, c.offsetA!],
-            [c.b, 1, c.offsetB!],
-          ] as const) {
-            if (body.anchored) continue;
-            const row = physical.get(body) ?? { linear: ZERO, angular: ZERO },
-              applied = scaleVec3(j, sign);
-            physical.set(body, {
-              linear: addVec3(row.linear, applied),
-              angular: addVec3(row.angular, crossVec3(offset, applied)),
-            });
-          }
-        }
+      if (physical) recordPhysicalImpulses(contacts, physical);
     }
 
     function* nextImpact(

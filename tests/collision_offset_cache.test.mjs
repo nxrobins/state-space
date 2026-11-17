@@ -69,6 +69,28 @@ test('historical whole-file proof confines the measured edit to private offsets 
   );
 });
 
+// Everything the current solve adds to the measured one, each exactly once: a sweep limit of
+// its own in place of the shared one, and three calls to helpers defined outside it. The
+// helpers never yield and never run before the measured arithmetic of a sweep: one runs after
+// a sweep that did not converge, two after the solve has converged.
+const SOLVE_ADDITIONS = [
+  [
+    '      collectPairs?: Set<string>,\n      physical?: Map<Body<T>, { linear: Vec3; angular: Vec3 }>,\n',
+    '      collectPairs?: Set<string>,\n',
+  ],
+  ['iteration < options.contactIterations;', 'iteration < options.solverIterations;'],
+  ['        pastFormerSweepLimit(contacts, iteration);\n', ''],
+  ['iteration + 1 === options.contactIterations)', 'iteration + 1 === options.solverIterations)'],
+  ['      recordParticleSupport(contacts);\n', ''],
+  ['      if (physical) recordPhysicalImpulses(contacts, physical);\n', ''],
+];
+function measuredSolve(text) {
+  for (const [added, measured] of SOLVE_ADDITIONS) {
+    assert.equal(text.split(added).length, 2, added);
+    text = text.replace(added, measured);
+  }
+  return text;
+}
 function verifyCurrentCacheWiring(current) {
   assert.deepEqual(parse(current).parseDiagnostics, []);
   // These scopes contain contact allocation, lazy cache reads, every impulse use,
@@ -78,12 +100,14 @@ function verifyCurrentCacheWiring(current) {
     ['solve', ts.isFunctionDeclaration],
     ['effective', ts.isFunctionDeclaration],
     ['apply', ts.isFunctionDeclaration],
-  ])
+  ]) {
+    const text = find(parse(current), name, kind).getText();
     assert.equal(
-      normalized(find(parse(current), name, kind).getText()),
+      normalized(name === 'solve' ? measuredSolve(text) : text),
       normalized(find(parse(historicalAfter), name, kind).getText()),
       name,
     );
+  }
 }
 
 test('current solver preserves cache allocation, lifetime, arithmetic, impulse wiring and yields', () => {
