@@ -290,6 +290,59 @@ Open liquid findings, not converted to passing budgets:
   to 2.46%). It is visible in `accounting.numericalEnergy` as the Dissipation
   gate requires, but it is not heat.
 
+### Frozen liquid and contact behaviour (2026-11-17)
+
+Before further solver work, the behaviour of commit `06c737f` was recorded
+exactly: 36 cases in
+[`engine/test-support/multiphysics-frozen-cases.ts`](../engine/test-support/multiphysics-frozen-cases.ts),
+with their results in
+[`liquid-contact-freeze.json`](../engine/experimental/multiphysics/liquid-contact-freeze.json).
+Each case stores a digest and the work units of every committed tick, and for a
+rejection its message, stage and completed work. The file also lists every
+rejection message in the seven liquid, contact and world-tick sources. A
+recorded rejection is evidence of that behaviour, not a passing result.
+
+| Group | Cases | Recorded outcome |
+| --- | --- | --- |
+| Published open failures | Paddle at speed 1 (two timesteps); the builder's combined-failure journey; the same fixture with a full-width, wedged plate | All four rejected: `-0.0407`, `-0.0406` and `-0.472` unpaid energy; the wedged plate with `Rigid contact solve did not converge.` |
+| Rejection boundaries | Fluid and boundary travel, starting penetration, boundary and fluid sample limits, solid overlap, compressed liquid, gas closing speed | All eight rejected before any tick commits |
+| Stress scenes outside the gates | 13 liquid and contact scenes | Two complete (liquid sliding off a tilted plate; a plate spinning in liquid). Eleven are rejected, listed below |
+| Passing controls | The five demonstrations, the trajectory to the break, both timed cups, the resolved tank, the resting cup, the paddle at speed 0.5 | All eleven complete |
+
+The eleven rejected stress scenes, with the tick that fails:
+
+| Scene | Rejected at tick | Rejection |
+| --- | --- | --- |
+| 27 samples fall one unit onto a floor | 47, before touching | `-0.0111` unpaid |
+| Column with one wall missing | 21 | `-0.0103` unpaid |
+| Wax or copper body dropped into an 18-sample pool | 56, before touching | `-0.0116`, `-0.0117` unpaid |
+| Paddle at speed 2 | 44 | `-0.0178` unpaid |
+| Free plate lands on a nine-sample layer | 34 | `-1.39` unpaid |
+| Two samples fall into a V between fixed plates | 84 | `-11.4` unpaid |
+| Nine samples riding a plate that lands | 61 | `Rigid contact solve did not converge.` |
+| Cube strikes a floor and a wall together | 15 | `Rigid contact solve did not converge.` |
+| Cube in a slot exactly its width | 77 | `Impact interval refinement did not converge.` |
+| Six loose cubes pile up | 35 | `Rigid impact event limit exceeded.` |
+
+Every rejection left its input bit-identical, and a second attempt and an
+attempt from the JSON save rejected at the same stage, work and message.
+
+`liquid-contact-freeze.test.ts` runs 13 light cases and the rejection-message
+check in `npm test`. Digests are compared on the recording V8 and the outcome
+elsewhere. All 36 cases run under the supervisor:
+
+```sh
+node scripts/freeze_liquid_contact.mjs check
+node scripts/freeze_liquid_contact.mjs compare --commit 06c737f
+```
+
+`check` compares the working tree with the freeze file. `compare` bundles the
+named commit from its own blobs and runs both engines side by side. A change
+meant to keep behaviour exact must pass `check` unchanged. A change to the
+physical model re-records the file in the same commit
+(`node scripts/freeze_liquid_contact.mjs record`), so its diff states which
+cases changed.
+
 ## Implementation evidence
 
 The first foundation checkpoint passed 19 analytical reference tests, the full
