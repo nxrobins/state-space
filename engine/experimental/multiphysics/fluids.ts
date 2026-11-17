@@ -75,6 +75,15 @@ export type FluidReferenceInput3D = {
   projectionOnly?: boolean;
   /** Applied after physical pressure/viscosity/contact, solely for the constraint predictor. */
   velocityPrediction?: Vec3;
+  /** Motion that closing is classified against: each sample's and body's velocity with only
+   * the gravity that resting support did not cancel. Closing present in this motion is an
+   * inelastic impact; closing that support was answering is not. Without it, the motion just
+   * before `velocityPrediction` is used. It only shapes `impactLoss` and never alters the
+   * solved velocities. */
+  reference?: {
+    particles: { id: string; velocity: Vec3 }[];
+    bodies: { id: string; velocity: Vec3; angularVelocity: Vec3 }[];
+  };
   dt: number;
   /** Liquid kernel radius; dimensionless gas support factor h / cbrt(volume). */
   smoothingRadius: number;
@@ -140,6 +149,20 @@ export type FluidReferenceResult3D = {
     projectionKineticChange: number;
     predictionKineticChange: number;
     impulseWorkResidual: number;
+  };
+  /** Per sample and boundary sample, the kinetic work the constraint projection did against
+   * motion that was already closing in the reference; zero for resting support. A weight
+   * for where an inelastic loss is deposited, not an amount paid here. */
+  impactLoss: {
+    particles: { id: string; loss: number }[];
+    boundaries: { id: string; loss: number }[];
+  };
+  /** Linear velocity change of the constraint projection alone, per sample and body. A
+   * caller that applied a gravity predictor reads from it how much of that prediction
+   * resting support absorbed. */
+  projectionVelocityChange: {
+    particles: { id: string; velocity: Vec3 }[];
+    bodies: { id: string; velocity: Vec3 }[];
   };
   convergence: {
     densityIterations: number;
@@ -254,7 +277,7 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
   assertRecordFields(
     data,
     ['particles', 'bodies', 'boundaries', 'dt', 'smoothingRadius'],
-    ['contacts', 'projectionOnly', 'velocityPrediction'],
+    ['contacts', 'projectionOnly', 'velocityPrediction', 'reference'],
     'Invalid fluid reference fields.',
   );
   const particles = rows(
@@ -405,11 +428,49 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
   const smoothingRadius = scalar(data.smoothingRadius, 1e-3, 16, 'kernel radius');
   for (const particle of particles)
     if (particle.volume !== null) gasSupportRadius(particle.volume, smoothingRadius);
+  let reference: FluidReferenceInput3D['reference'];
+  if (data.reference !== undefined) {
+    fields(data.reference, ['particles', 'bodies']);
+    const motion = {
+      particles: rows(
+        data.reference.particles,
+        FLUID_REFERENCE_LIMITS_3D.particles,
+        (row) => {
+          fields(row, ['id', 'velocity']);
+          return { id: identity(row.id), velocity: vector(row.velocity) };
+        },
+        (row) => row.id,
+      ),
+      bodies: rows(
+        data.reference.bodies,
+        FLUID_REFERENCE_LIMITS_3D.bodies,
+        (row) => {
+          fields(row, ['id', 'velocity', 'angularVelocity']);
+          return {
+            id: identity(row.id),
+            velocity: vector(row.velocity),
+            angularVelocity: vector(row.angularVelocity),
+          };
+        },
+        (row) => row.id,
+      ),
+    };
+    // Both lists are sorted like the samples and bodies, so they pair by position.
+    if (
+      motion.particles.length !== particles.length ||
+      motion.bodies.length !== bodies.length ||
+      motion.particles.some((row, i) => row.id !== particles[i].parcel.id) ||
+      motion.bodies.some((row, i) => row.id !== bodies[i].id)
+    )
+      throw Error('Fluid reference motion does not match its samples and bodies.');
+    reference = motion;
+  }
   return {
     particles,
     bodies,
     boundaries,
     contacts,
+    reference,
     projectionOnly: data.projectionOnly === true,
     velocityPrediction,
     dt: scalar(data.dt, 1e-9, 1, 'time step'),
@@ -1195,6 +1256,35 @@ function* solve(
     }
   }
   const contactNumerical = kinetic() - beforeContacts + contactHeat;
+  const constraints = [...contactRows.map((c) => c.row), ...rows];
+  // The rate each row would have without the predictor and the support that answers it.
+  const reference = input.reference;
+  const priorRates = reference
+    ? constraints.map((row) =>
+        finite(
+          row.terms.reduce(
+            (sum, t) => sum + dotVec3(t.gradient, reference.particles[t.i].velocity),
+            0,
+          ) +
+            row.walls.reduce((sum, t) => {
+              const motion = reference.bodies[atBody[t.s]];
+              return (
+                sum +
+                dotVec3(
+                  t.gradient,
+                  addVec3(
+                    motion.velocity,
+                    crossVec3(
+                      motion.angularVelocity,
+                      subtractVec3(t.point ?? boundaries[t.s].position, bodies[atBody[t.s]].center),
+                    ),
+                  ),
+                )
+              );
+            }, 0),
+        ),
+      )
+    : constraints.map(rate);
   const beforePrediction = kinetic();
   const prediction = input.velocityPrediction ?? ZERO;
   for (const particle of p)
@@ -1205,6 +1295,8 @@ function* solve(
     density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity &&
     supportVolume[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportVolume * h ** 3;
   const beforeProjection = kinetic();
+  const predictedParticles = p.map((particle) => particle.parcel.velocity),
+    predictedBodies = bodies.map((body) => body.velocity);
   const predictionKineticChange = beforeProjection - beforePrediction;
   const convergence = {
     densityIterations: 0,
@@ -1223,7 +1315,6 @@ function* solve(
   // Accumulated unilateral impulses may decrease as neighboring constraints
   // change. One-way clipping can reach a feasible but over-corrected velocity,
   // pumping resting liquid or removing unrelated motion at a boundary.
-  const constraints = [...contactRows.map((c) => c.row), ...rows];
   const lambdas = constraints.map(() => 0);
   let capturedGradients: number[][] = [],
     capturedResponses: number[][] = [];
@@ -1478,6 +1569,40 @@ function* solve(
         change / (dt * rest),
       );
   }
+  // Where the projection removed motion that was already closing. Row k's impulse does
+  // exactly -lambda_k * (initial rate + final rate) / 2 of kinetic work, and its initial rate
+  // is the prior rate plus what the gravity predictor and resting support supplied. The work
+  // against the prior rate is an impact. The work against what was supplied is support only
+  // for the share of the impulse that answers it: a row carrying both splits its impulse in
+  // proportion to the two rates, which is exact for one sample meeting a wall. A dead band
+  // of four solver tolerances leaves a converged resting state with no impact rows at all.
+  // These amounts only weight where a caller deposits heat; the caller owns how much.
+  const impactLoss = {
+    particles: p.map(() => 0),
+    boundaries: boundaries.map(() => 0),
+  };
+  for (let k = 0; k < constraints.length; k++) {
+    if (lambdas[k] === 0) continue;
+    const band =
+        4 *
+        (k < contactRows.length
+          ? 1e-8
+          : p[constraints[k].i].restDensity * FLUID_REFERENCE_LIMITS_3D.divergenceTolerance),
+      prior = priorRates[k],
+      average = (prior + rate(constraints[k])) / 2,
+      supplied = initialRates[k] - prior,
+      closing = Math.max(0, prior - band),
+      loss =
+        lambdas[k] *
+        ((average > band ? average - band : 0) +
+          (supplied > 0 && closing > 0 ? (supplied / 2) * (closing / (supplied + closing)) : 0));
+    if (!(loss > 0)) continue;
+    // A liquid row belongs to its own sample; a contact row is shared with the solid it touches.
+    if (k < contactRows.length) {
+      impactLoss.particles[constraints[k].i] += loss / 2;
+      impactLoss.boundaries[contactRows[k].s] += loss - loss / 2;
+    } else impactLoss.particles[constraints[k].i] += loss;
+  }
   projectionKineticChange = kinetic() - beforeProjection + contactNumerical;
   const residual =
     kinetic() -
@@ -1545,6 +1670,28 @@ function* solve(
       viscousHeat: wallHeat[i],
       contactHeat: wallContactHeat[i],
     })),
+    impactLoss: {
+      particles: p.flatMap((particle, i) =>
+        impactLoss.particles[i] > 0
+          ? [{ id: particle.parcel.id, loss: finite(impactLoss.particles[i]) }]
+          : [],
+      ),
+      boundaries: boundaries.flatMap((sample, i) =>
+        impactLoss.boundaries[i] > 0
+          ? [{ id: sample.id, loss: finite(impactLoss.boundaries[i]) }]
+          : [],
+      ),
+    },
+    projectionVelocityChange: {
+      particles: p.map((particle, i) => ({
+        id: particle.parcel.id,
+        velocity: subtractVec3(particle.parcel.velocity, predictedParticles[i]),
+      })),
+      bodies: bodies.map((body, i) => ({
+        id: body.id,
+        velocity: subtractVec3(body.velocity, predictedBodies[i]),
+      })),
+    },
     energy: {
       gasMechanicalWork,
       viscousHeat,

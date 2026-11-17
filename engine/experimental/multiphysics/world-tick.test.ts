@@ -649,3 +649,61 @@ test('viscous decay: sheared liquid slows monotonically and every lost joule bec
   // Halving the step changes the dissipated energy by under one percent.
   expect(Math.abs(losses[0] - losses[1])).toBeLessThan(0.01 * losses[1]);
 });
+
+test('liquid closing on liquid is an inelastic loss paid as heat, and resting liquid pays none', () => {
+  const cup = (id: string, center: Vec3, halfExtents: Vec3) =>
+    seedThermalParcel3D(profiles, {
+      id,
+      material: 'ceramic',
+      owner: 'authored',
+      center,
+      halfExtents,
+    });
+  const walls = [
+    cup('floor', [0, 0, 0], [1.5, 0.5, 1.5]),
+    cup('left', [-2, 2, 0], [0.5, 1.5, 1.5]),
+    cup('right', [2, 2, 0], [0.5, 1.5, 1.5]),
+    cup('front', [0, 2, -2], [2.5, 1.5, 0.5]),
+    cup('back', [0, 2, 2], [2.5, 1.5, 0.5]),
+  ];
+  // 27 samples fill the cup; the top nine may start moving down onto the rest.
+  const filled = (topSpeed: number) =>
+    createMultiphysicsSnapshot3D(profiles, {
+      parcels: [
+        ...walls,
+        ...Array.from({ length: 27 }, (_, i) =>
+          seed(
+            `w${i}`,
+            'water',
+            [(i % 3) - 1, 1 + Math.floor(i / 9), (Math.floor(i / 3) % 3) - 1],
+            20,
+            [0, i >= 18 ? -topSpeed : 0, 0],
+          ),
+        ),
+      ],
+      anchors: walls.map((p) => p.id),
+    });
+  const stored = (state: MultiphysicsSnapshot3D) =>
+    state.parcels.reduce((sum, p) => sum + p.thermalQ + p.thermalRemainder, 0);
+
+  let rest = filled(0);
+  const restHeat = stored(rest);
+  for (let i = 0; i < 6; i++) {
+    const result = run(rest);
+    expect(result.report.mechanicalHeat).toBe(0);
+    rest = result.snapshot;
+  }
+  expect(stored(rest)).toBe(restHeat);
+
+  const moving = filled(0.5),
+    kinetic = 9 * 0.5 * moving.parcels.find((p) => p.id === 'w26')!.mass * 0.25,
+    result = run(moving);
+  // The liquid below cannot be compressed, so the layer stops and its kinetic energy is lost.
+  expect(result.report.mechanicalHeat).toBeCloseTo(kinetic, 3);
+  expect(result.report.mechanicalHeat).toBeLessThanOrEqual(kinetic);
+  expect(Math.abs(result.report.numericalEnergy)).toBeLessThan(1e-9);
+  expect(stored(result.snapshot)).toBeGreaterThan(stored(moving));
+  expect(Math.hypot(...result.report.numericalLinearMomentum)).toBeLessThan(1e-10);
+  for (const p of result.snapshot.parcels.filter((p) => p.id.startsWith('w')))
+    expect(Math.hypot(...p.velocity)).toBeLessThan(0.05);
+});

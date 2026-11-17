@@ -107,8 +107,12 @@ repair conservation by subtracting an unexplained residual from temperature.
   their application points. Restitution and friction produce nonnegative,
   identified mechanical losses that become heat once, at the contacting parcels.
 - Pressure work exchanges gas internal and mechanical energy. Physical viscosity
-  becomes heat. Incompressibility projection, stabilization, contact correction,
-  and integration error are numerical residuals, not physical dissipation.
+  becomes heat. Liquid constraints are inelastic: the net kinetic energy that
+  they, and the solid support of liquid samples, remove in a tick from motion
+  that was already closing becomes heat
+  ([rule and limits](#inelastic-liquid-loss-paid-as-heat-2026-11-17)). Resting
+  support, stabilization that adds energy, contact correction and integration
+  error remain numerical residuals, not physical dissipation.
 - Stationary anchors/walls receive a reported momentum reaction. Their zero
   velocity implies zero boundary work. Moving or creating anchors is an edit
   with explicit external momentum and energy accounting.
@@ -265,9 +269,9 @@ stall deadline).
 | Solids | Refinement (`rigid.test.ts`, symmetric top) | Halving `dt` cuts orientation error below 0.4× and energy error below 0.6× | Pass |
 | Liquids | Hydrostatic column (`world-tick.test.ts`) | Anchor reaction minus empty-cup control equals column weight × `dt` within `1e-6` relative; lateral below `1e-8` | Pass, 6 ticks |
 | Liquids | Sustained rest (extended) | Speed and movement below `1e-6`, heat below `1e-9`, absolute energy below `1e-6`, two timesteps over 0.5 s | Pass |
-| Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement | Pass, 26.7 s |
+| Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement. Since 2026-11-17 the energy is the unexplained residual plus the constraint loss paid as heat, the same total as before | Pass, 26.7 s; totals unchanged on 2026-11-17 (`1.35e-5` wax, `1.07e-4` copper, halving with the timestep) |
 | Liquids | Displaced liquid (tank) | Mean acceleration from rest is positive and at most the Archimedes value `g (rho_l - rho_s) / rho_s` | Pass: about 0.48 (wax) and 0.36 (copper) of that bound |
-| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 2.49% then 2.46%; clockwise spin `-0.19` |
+| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 2.49% then 2.46%; clockwise spin `-0.19`. Since 2026-11-17 the loss is paid as heat and the unexplained energy is 0.028% then 0.014% |
 | Liquids | Viscous decay (`world-tick.test.ts`) | Shear decreases every tick; heat equals kinetic loss within `1e-12`; halving `dt` changes the loss by under 1% | Pass |
 | Liquids | Equal and opposite impulses (`fluids.test.ts`, `world-tick.test.ts`) | Moving boundary, gas wall and liquid-to-conductor transfers match analytic impulse and torque, digits 11–12 | Pass |
 | Gas/reactive | Pressure work (`fluids.test.ts`) | Midpoint/adiabatic oracle and reflected-wall equivalence | Pass |
@@ -278,17 +282,19 @@ stall deadline).
 | Builder | Visible builder, six Mac stages (`examples/multiphysics-builder/`) | Preview p95 at most 250 ms and cancellation p95 at most 100 ms through the controls; every completed frame at most 16.667 ms over at least 180 frames; receipt, compare, atomic rejection and save/restart journeys | Pass on all six timed scenes |
 | Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six timed scenes |
 
-Open liquid findings, not converted to passing budgets:
+Liquid findings recorded on 2026-11-01, both changed on 2026-11-17 by
+[paying inelastic liquid loss as heat](#inelastic-liquid-loss-paid-as-heat-2026-11-17):
 
-- At plate speed 1 the moving paddle is still rejected, now at impact rather
-  than at a distance. The plate pays `0.20` and `0.23` of physical impact heat
-  on two ticks, and on the second a wetted row becomes divergence-supported and
-  the post-drift projection removes `-0.041` unpaid, against the `0.01` limit.
-  Whether part of an incompressible impact's projection loss is paid as heat is
-  an open energy-policy decision. At 0.5 the case passes.
-- The paddle's unpaid correction at 0.5 barely changes under refinement (2.49%
-  to 2.46%). It is visible in `accounting.numericalEnergy` as the Dissipation
-  gate requires, but it is not heat.
+- At plate speed 1 the moving paddle was rejected at impact. The plate paid
+  `0.20` and `0.23` of physical impact heat on two ticks, and on the second a
+  wetted row became divergence-supported and the post-drift projection removed
+  `-0.041` unpaid, against the `0.01` limit. Whether an incompressible impact's
+  projection loss is paid as heat was an open energy-policy decision. It is now
+  paid, and the case completes at speeds 1 and 2. It is frozen as a completing
+  case, not yet a gate with its own budget.
+- The paddle's unpaid correction at 0.5 barely changed under refinement (2.49%
+  to 2.46%). With the loss paid, the unexplained energy is 0.028% of the plate's
+  kinetic energy and halves with the timestep.
 
 ### Frozen liquid and contact behaviour (2026-11-17)
 
@@ -379,11 +385,94 @@ the four former contact rejections change.
 | Cube in a slot exactly its width | Interval refinement rejected at tick 77 | Sweep completes. The same tick is then rejected for `-0.353` unpaid energy |
 | Combined failure with a wedged plate | Rejected at tick 30 | Three more ticks commit. Tick 33 is rejected: the plate slides on both faces with friction, and the unmet speed falls by under 3% in 32 sweeps |
 
-Still open, and still recorded as rejections: sliding friction on a wedged
-body, where the normal load is statically indeterminate; the six-cube pile,
-where a face landing almost flat alternates between two corners every
-`3.7e-5` model seconds and passes the 64-event limit with the interval
-shrinking by under 1% per event; and every unpaid-energy rejection above.
+Left open by this change: sliding friction on a wedged body, where the normal
+load is statically indeterminate; the six-cube pile, where a face landing
+almost flat alternates between two corners every `3.7e-5` model seconds and
+passes the 64-event limit with the interval shrinking by under 1% per event;
+and the unpaid-energy rejections, which the next section addresses for liquid.
+
+### Inelastic liquid loss paid as heat (2026-11-17)
+
+This changes the physical model's energy accounting. No tolerance, limit or
+solved velocity changes.
+
+The liquid solver removes kinetic energy whenever it projects velocities onto
+motion that does not compress: that is a perfectly inelastic constraint. The
+loss was booked as numerical error, and the `0.01` limit then rejected any tick
+in which liquid actually struck something. In the seven rejected liquid scenes
+that were probed, the unpaid energy was this loss: in the post-drift projection
+in six, and in the solid contacts that carry liquid samples in the seventh (the
+plate landing on a layer).
+
+**Rule.** Each tick adds three unexplained kinetic changes: the first fluid
+pass, the rigid stage's non-impact contacts between a liquid sample and a
+solid, and the post-drift projection. For resting liquid they cancel: the
+first pass absorbs the predicted gravity, and the contacts and the projection
+give the same amount back. What is left is kinetic energy removed from closing
+motion. It is deposited as heat when both hold:
+
+- it is a loss larger than `1e-4` of the numerical limit, and
+- the closing motion is identified. Either a liquid row did work against
+  motion that was already closing in a reference motion (each sample and body
+  with only the gravity that resting support did not cancel, plus the rigid
+  stage's physical impacts), or a body that a physical impact struck was
+  carrying liquid samples.
+
+The amount is the tick's own net, so heat never exceeds the energy lost. It is
+shared in proportion to the work of those rows and contacts: a liquid row heats
+its own sample, and a contact shares with the solid. The tick report adds it to
+`mechanicalHeat`; no report field is added, so a tick without such a loss
+reports exactly what it did. A net gain is never paid, heat is never taken
+back, and the projection itself is untouched: motion changes only where the
+added heat later changes a temperature-dependent outcome.
+
+**Evidence.** Against the previous commit, 19 of the 36 frozen cases are
+bit-identical: all eight rejection boundaries, including the compressed liquid
+(still rejected for a gain of `3198.6`); the three solid-only stress scenes;
+and the wax valve, rotating contact, fluid switch, falling battery, both timed
+cups, the resolved tank's two ticks and the resting cup. The rest:
+
+| Scene | Before | Now |
+| --- | --- | --- |
+| Paddle at speed 1, both timesteps | Rejected at ticks 91 and 182 | Complete, 110 and 220 ticks |
+| Builder journey: 48 ticks, heat edit, next preview | Preview rejected, `-0.472` | Preview completes |
+| 27 samples fall onto a floor | Rejected at tick 47 | Completes 90 ticks |
+| Column with one wall missing | Rejected at tick 21 | Completes 90 ticks |
+| Wax or copper body dropped into a pool | Rejected at tick 56 | Complete, 110 ticks |
+| Paddle at speed 2 | Rejected at tick 44 | Completes 60 ticks |
+| Free plate lands on a liquid layer | Rejected at tick 34, `-1.39` | Completes 60 ticks |
+| Two samples in a V between fixed plates | Rejected at tick 84, `-11.4` | Completes 120 ticks |
+| Nine samples riding a plate that lands | Rejected at tick 61, `-30.2` | Fourteen more ticks commit; tick 75 is rejected with `Rigid work limit exceeded.` |
+| Paddle at 0.5; combined failure and its trajectory to the break; tilted plate; spinning plate; wedged plate | Complete (the wedged plate rejected at tick 33) | Same outcome, with heat now paid. The first tick that differs is 176, 29, 29, 63, 56 and 29 |
+
+The published gates were rerun on these sources: all five extended cases pass,
+and both tank cases pass with their energy measured across both ledgers. In
+`world-tick.test.ts` the top layer of a full cup driven down at `0.5` loses
+`1.125` of kinetic energy, of which `1.12496` becomes heat with `8.5e-14`
+unexplained, and the same cup at rest pays exactly zero for six ticks.
+
+**Limits.**
+
+- The amount is exact for the tick; which parcels receive it is a weighting,
+  exact only for one sample meeting a wall.
+- A tick whose constraints add energy is still rejected above the limit. Liquid
+  compressed beyond rest density is pushed apart by the density target, and
+  that push is not paid for.
+- A loss below the dead band stays unexplained. In the wax tank at the finest
+  timestep no tick reaches it.
+- The numerical limit is an absolute `0.01` per tick. It does not scale with
+  the number of samples; a world sets its own limit up to `1`.
+- Solid-only cases are not covered. The cube in a slot is still rejected for
+  `-0.353` that its resting wall contacts remove while it strikes the floor.
+- The Mac builder stage recorded the journey's rejection as its reachable edge.
+  That stage has not been rerun on these sources.
+- `scripts/compare_fluid_optimizations.mjs` compares against an older frozen
+  bundle whose results lack `impactLoss` and `projectionVelocityChange`; it
+  needs a new baseline before it is used again.
+
+After both changes, 10 of the 13 stress scenes complete (2 before), and 3 of
+the 4 published open failures complete. Still rejected: the riding plate, the
+cube in a slot, the six-cube pile and the wedged plate.
 
 ## Implementation evidence
 

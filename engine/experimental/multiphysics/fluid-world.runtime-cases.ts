@@ -21,11 +21,13 @@ for (const [material, direction] of [
       const liquid = state.parcels.find((p) => p.id === 'w0')!.mass,
         solid = state.parcels.find((p) => p.id === 'body')!.mass,
         archimedes = (-state.settings.gravity[1] * (liquid - solid)) / solid;
+      let paid = 0;
       for (let step = 0; step < Math.round(0.05 / dt); step++) {
         const job = createMultiphysicsTickJob3D(profiles, state);
         while (job.progress().status === 'running') job.advance(256);
         const result = job.result();
         state = result.snapshot;
+        paid += result.report.mechanicalHeat;
         expect(Math.hypot(...result.report.numericalLinearMomentum)).toBeLessThan(1e-8);
         // Geometric correction has an explicit, nonzero angular residual in the rigid contract.
         expect(Math.hypot(...result.report.numericalAngularMomentum)).toBeLessThan(1e-6);
@@ -48,7 +50,11 @@ for (const [material, direction] of [
         dt,
         height: body.center[1],
         speed: body.velocity[1],
-        energy: Math.abs(state.accounting.numericalEnergy),
+        // Nothing in this tank should dissipate except viscosity, so the kinetic energy the
+        // constraints remove is discretization error whichever ledger holds it: the part
+        // paid as heat, and the unexplained remainder. The budget is on their total, which
+        // is the quantity this gate measured when all of it was unexplained.
+        energy: Math.abs(state.accounting.numericalEnergy) + paid,
       });
     }
     expect(measured[0].energy).toBeLessThan(0.006);

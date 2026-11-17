@@ -80,6 +80,15 @@ export type RigidStepResult3D<T extends RigidParcel3D> = {
   numericalAngularMomentumResidual: Vec3;
   /** Signed kinetic work of support constraints; never deposited as physical heat. */
   supportConstraintEnergy: number;
+  /** The part of `supportConstraintEnergy` done at contacts between a non-colliding particle
+   * and a solid, and per parcel where that work was a loss. A coupled caller nets it against
+   * its own particle constraints; resting support of a particle cancels there. */
+  particleSupportEnergy: number;
+  particleSupportLoss: { id: string; loss: number }[];
+  /** Per parcel, the velocity change that this step's physical impacts and sliding friction
+   * caused, as opposed to gravity and resting support. A report only: the returned parcels
+   * already contain it. Angular impulses are converted with the final inertia. */
+  physicalVelocityChange: { id: string; velocity: Vec3; angularVelocity: Vec3 }[];
   report: { work: number; events: number; contacts: number };
 };
 const ZERO: Vec3 = [0, 0, 0];
@@ -1134,7 +1143,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     let work = 0,
       events = 0,
       contactCount = 0,
-      supportConstraintEnergy = 0;
+      supportConstraintEnergy = 0,
+      particleSupportEnergy = 0;
+    const particleSupportLoss = new Map<string, number>();
     let boundaryLinearImpulse: Vec3 = ZERO,
       boundaryAngularImpulse: Vec3 = ZERO;
     let gravityLinearImpulse: Vec3 = ZERO,
@@ -1321,6 +1332,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       prior?: Map<Body<T>, { velocity: Vec3; angular: Vec3 }>,
       restingPairs?: Set<string>,
       collectPairs?: Set<string>,
+      physical?: Map<Body<T>, { linear: Vec3; angular: Vec3 }>,
     ): Generator<RigidWork3D, void, void> {
       const contacts: Contact<T>[] = [];
       for (let i = 0; i < bodies.length; i++)
@@ -1563,6 +1575,17 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
         0,
       );
+      for (const c of contacts) {
+        if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
+        const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
+        particleSupportEnergy += support;
+        if (support < 0)
+          for (const parcel of [c.pa, c.pb])
+            particleSupportLoss.set(
+              parcel.id,
+              (particleSupportLoss.get(parcel.id) ?? 0) - support / 2,
+            );
+      }
       const roundoff =
         1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
       if (frictionWork > roundoff || (impact && normalWork > roundoff))
@@ -1587,6 +1610,26 @@ export function createRigidStep3D<T extends RigidParcel3D>(
             row.impact += (0.5 * impactLoss * c.normalImpulse) / normalWeight;
           if (frictionWeight > 0 && c.physicalFriction)
             row.friction += (0.5 * frictionLoss * lengthVec3(c.tangentImpulse)) / frictionWeight;
+        }
+      // Impulses already applied above; this only records which of them were physical.
+      if (physical)
+        for (const c of contacts) {
+          const j = addVec3(
+            c.impact ? scaleVec3(c.normal, c.normalImpulse) : ZERO,
+            c.physicalFriction ? c.tangentImpulse : ZERO,
+          );
+          for (const [body, sign, offset] of [
+            [c.a, -1, c.offsetA!],
+            [c.b, 1, c.offsetB!],
+          ] as const) {
+            if (body.anchored) continue;
+            const row = physical.get(body) ?? { linear: ZERO, angular: ZERO },
+              applied = scaleVec3(j, sign);
+            physical.set(body, {
+              linear: addVec3(row.linear, applied),
+              angular: addVec3(row.angular, crossVec3(offset, applied)),
+            });
+          }
         }
     }
 
@@ -1665,7 +1708,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     // Trial support solves choose a conservative interval; rejected trials restore
     // every physical receipt while retaining their actual computational work.
     yield* project();
-    yield* solve(true);
+    const physical = new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
+    yield* solve(true, undefined, undefined, undefined, physical);
     captureSettledParticleContacts = false;
     let remaining = options.dt;
     while (remaining > 0) {
@@ -1681,6 +1725,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       const savedGravityP = gravityLinearImpulse,
         savedGravityL = gravityAngularImpulse;
       const savedSupport = supportConstraintEnergy,
+        savedParticleSupport = particleSupportEnergy,
+        savedParticleLoss = [...particleSupportLoss],
         savedContacts = contactCount;
       function restoreTrial(): void {
         for (const { body, velocity, angularMomentum } of motions) {
@@ -1694,6 +1740,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         gravityLinearImpulse = savedGravityP;
         gravityAngularImpulse = savedGravityL;
         supportConstraintEnergy = savedSupport;
+        particleSupportEnergy = savedParticleSupport;
+        particleSupportLoss.clear();
+        for (const [id, loss] of savedParticleLoss) particleSupportLoss.set(id, loss);
         contactCount = savedContacts;
       }
       let duration = remaining,
@@ -1733,9 +1782,26 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       yield* project();
       // Use pre-kick approach/slip to distinguish an impact from resting support;
       // restitution and physical heat use the actual velocity at contact time.
-      yield* solve(true, beforeLastKick, restingPairs);
+      yield* solve(true, beforeLastKick, restingPairs, undefined, physical);
     }
     for (const body of bodies) sync(body);
+    const physicalById = new Map<string, { id: string; velocity: Vec3; angularVelocity: Vec3 }>();
+    for (const body of bodies) {
+      const impulse = physical.get(body);
+      const linear = impulse ? scaleVec3(impulse.linear, 1 / body.mass) : ZERO,
+        angularVelocity = impulse ? applyMatrix3(body.inverseInertia, impulse.angular) : ZERO;
+      assertFiniteVec3(linear, 'physical velocity change');
+      assertFiniteVec3(angularVelocity, 'physical angular velocity change');
+      for (const parcel of body.members)
+        physicalById.set(parcel.id, {
+          id: parcel.id,
+          velocity: addVec3(
+            linear,
+            crossVec3(angularVelocity, subtractVec3(parcel.center, body.center)),
+          ),
+          angularVelocity,
+        });
+    }
 
     const changes = parcels.map((p) => {
       const start = initial.get(p.id)!,
@@ -1810,6 +1876,11 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       numericalLinearMomentumResidual,
       numericalAngularMomentumResidual,
       supportConstraintEnergy: finite(supportConstraintEnergy),
+      particleSupportEnergy: finite(particleSupportEnergy),
+      particleSupportLoss: [...particleSupportLoss]
+        .map(([id, loss]) => ({ id, loss: finite(loss) }))
+        .sort((a, b) => lexical(a.id, b.id)),
+      physicalVelocityChange: parcels.map((parcel) => physicalById.get(parcel.id)!),
       report: { work, events, contacts: contactCount },
     };
   }
