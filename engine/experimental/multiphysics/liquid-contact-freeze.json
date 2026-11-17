@@ -2,8 +2,8 @@
   "schema": "liquid-contact-freeze-1",
   "note": "Exact behaviour of the named engine sources, including their rejections. Written only by scripts/freeze_liquid_contact.mjs record. A rejection recorded here is evidence of that behaviour, not a passing result.",
   "engine": {
-    "sourceSha256": "b1c854b3bb9cfc376dfeab7dbcaa1cf6e652a1ae785f2a478ad78f277a79e9af",
-    "commit": "06c737fb2102d0f15745ce18b869cae10d9230f4"
+    "sourceSha256": "9ab5c6b7d6b93cc1ca4513f053db9f0c6d3abcaefb733cda0d823d5e8be57520",
+    "commit": null
   },
   "runtime": {
     "node": "v22.22.3",
@@ -91,6 +91,7 @@
       "Rigid assemblies require 1..256 parcels.",
       "Rigid candidate exceeds bounded input limits.",
       "Rigid contact count exceeded.",
+      "Rigid contact solve did not converge.",
       "Rigid contact solve did not converge.",
       "Rigid geometric projection did not converge.",
       "Rigid half extents must be positive.",
@@ -210,23 +211,23 @@
       "id": "combined-failure-wedged-plate",
       "group": "open-failure",
       "outcome": "rejected",
-      "steps": ["6088a81d10b76e07 365", "3b14e6b84830832f 488", "92d701b716893c4a 491", "8eabbb1c6b5796c9 530", "d8d40663c0de9f8c 530", "070c8d84e253dcca 530", "2a3802273442d67b 530", "200ff46259008e33 530", "257a6a4cacc3ef46 529", "472c1f00c1294dfb 527", "d407a6351f391810 527", "b74c1e1070411984 527", "3f2c8650e12aee3f 529", "a5b654281726e7c8 529", "e5b3884fb6054359 529", "a5ec1a749ef05532 529", "4a81c2e493496eb7 529", "b3674f2c0198059b 529", "613fbe1b2069a129 529", "cc350d26479e6240 529", "a28bc111aeb6bd25 343", "2f1aa0c3970c40f3 343", "2815be4b1dc91489 349", "3e1fc25e99db708e 359", "7370366d76625c64 359", "2ba780a3a5e41541 359", "b2a1dbca475695d4 359", "fc6ef8bd03be9ef3 359", "20b6d926d6b8a544 504"],
-      "final": "4fe58e264d0b6dafc237ae133d00f982513053fd4d916ec3d4758cb95a7065a2",
+      "steps": ["6088a81d10b76e07 365", "3b14e6b84830832f 488", "92d701b716893c4a 491", "8eabbb1c6b5796c9 530", "d8d40663c0de9f8c 530", "070c8d84e253dcca 530", "2a3802273442d67b 530", "200ff46259008e33 530", "257a6a4cacc3ef46 529", "472c1f00c1294dfb 527", "d407a6351f391810 527", "b74c1e1070411984 527", "3f2c8650e12aee3f 529", "a5b654281726e7c8 529", "e5b3884fb6054359 529", "a5ec1a749ef05532 529", "4a81c2e493496eb7 529", "b3674f2c0198059b 529", "613fbe1b2069a129 529", "cc350d26479e6240 529", "a28bc111aeb6bd25 343", "2f1aa0c3970c40f3 343", "2815be4b1dc91489 349", "3e1fc25e99db708e 359", "7370366d76625c64 359", "2ba780a3a5e41541 359", "b2a1dbca475695d4 359", "fc6ef8bd03be9ef3 359", "20b6d926d6b8a544 504", "aa639098da8d4554 36694", "7bb743fd06793d05 35950", "04fa181225bedfa4 177179"],
+      "final": "41d6127c1fe56c8d0b88fffed3cb260a8e8682659717e1d6bfb6d8acd71a0c05",
       "rejection": {
-        "afterSteps": 29,
+        "afterSteps": 32,
         "message": "Rigid contact solve did not converge.",
         "stage": "rigid-contact",
-        "work": 33917,
+        "work": 38493,
         "atomic": true
       },
       "facts": {
-        "plate.y": 0.75,
-        "plate.speed": 0,
-        "water.y": 2.733223475743287,
-        "water.speed": 2.2866408874056643,
-        "valve.y": 1.75,
-        "valve.speed": 0,
-        "numericalEnergy": 0.000022049998871164647
+        "plate.y": 0.7469332124055812,
+        "plate.speed": 0.24525927034147663,
+        "water.y": 2.6730093436118145,
+        "water.speed": 2.5307525908722552,
+        "valve.y": 1.7469332124057835,
+        "valve.speed": 0.24525926994550393,
+        "numericalEnergy": 0.00002195701213003071
       }
     },
     "reject-fluid-point-travel": {
@@ -558,9 +559,9 @@
       "final": "89f07443305b0dbe521a737c2882616ff1f61729d60c3b888c91e2b76c64ac37",
       "rejection": {
         "afterSteps": 60,
-        "message": "Rigid contact solve did not converge.",
-        "stage": "rigid-contact",
-        "work": 7381,
+        "message": "World numerical energy limit exceeded (-30.18424027760082; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 8223,
         "atomic": true
       },
       "facts": {
@@ -604,9 +605,9 @@
       "final": "7a95ecb832a5caeff6dd7670befdbff38b45dddea417e658e47ba24e27a3bb04",
       "rejection": {
         "afterSteps": 76,
-        "message": "Impact interval refinement did not converge.",
-        "stage": "rigid-sweep",
-        "work": 150772,
+        "message": "World numerical energy limit exceeded (-0.35322292075514383; limit 0.01).",
+        "stage": "mechanical-heat",
+        "work": 155123,
         "atomic": true
       },
       "facts": {
@@ -620,20 +621,14 @@
       "heavy": false,
       "id": "stress-rigid-corner-impact",
       "group": "stress",
-      "outcome": "rejected",
-      "steps": ["3d214bd8fe1cc6c5 28", "e55215e7ec0f90e9 28", "b38708866431d3a3 28", "ba206edc93dd946f 28", "75841227559213cd 28", "23ec4d05381e325f 28", "d93a1c0de96611cf 28", "2900f844510329bc 28", "fe19d816a06111d3 28", "658424bb7b16239a 28", "d44a0338ec53a417 28", "4522883365fc9ab7 28", "3491e1e87b111ed6 28", "2b9cf9fd5be64c28 28"],
-      "final": "4a59076cfde4c4650ffe6116f67367e17644b8134daf84baeb7f243856639ecf",
-      "rejection": {
-        "afterSteps": 14,
-        "message": "Rigid contact solve did not converge.",
-        "stage": "rigid-contact",
-        "work": 34064,
-        "atomic": true
-      },
+      "outcome": "completed",
+      "steps": ["3d214bd8fe1cc6c5 28", "e55215e7ec0f90e9 28", "b38708866431d3a3 28", "ba206edc93dd946f 28", "75841227559213cd 28", "23ec4d05381e325f 28", "d93a1c0de96611cf 28", "2900f844510329bc 28", "fe19d816a06111d3 28", "658424bb7b16239a 28", "d44a0338ec53a417 28", "4522883365fc9ab7 28", "3491e1e87b111ed6 28", "2b9cf9fd5be64c28 28", "28f77e9f7b793947 189343", "9f85b68f35afd279 60", "185fa42cd64fe0b3 28", "aa6db1845f124024 28", "43b92d871aba9892 28", "6d932764619d7d20 28", "aa3ce41324e26acd 28", "161299d7e0c8a734 28", "ac04d10628ead3ee 28", "c422dfbc995e1c2c 28", "b70c2fd11542d8b0 28", "3c2f01f25ef0589d 28", "94b83901029a8689 28", "36143a7fac81efc5 28", "3e9a2f41554d848b 28", "340ce07b60c74644 28", "14a8307fbef2e66c 28", "86a80a170bc60151 28", "f523f3d6c281eee9 28", "fa6d5a48dd85976a 28", "4a5b741ccd00b43c 28", "3d1e1ab58251e192 28", "70c1a0180794de9d 28", "dbf928cbb481592e 28", "2e9cd031d9ed2fc5 28", "f769d26b11989b1e 28", "8654d3092ff03d6a 28", "f5d376129f2e0850 28", "b307e3fa7e3711d3 28", "0c2a7b0fb1d1a30b 28", "55204b90b2141e69 28", "e4b2b8429c97cc5e 28", "6d3bb8fde4559125 28", "94f672a09f10f9b7 28", "afecf016dd13c04a 28", "91260c6b5036c566 28", "38ce608df1166fe3 28", "25a99ef17fc5d0dd 28", "75c20c1b3f74a9da 28", "c867ebe9cd75cbfe 28", "600be2949f5f0840 28", "27cee6484780df9f 28", "f47f3572aef2e039 28", "acca17727cb9f377 28", "170dac18004ac92a 28", "01d4bff5f7d4d996 28"],
+      "final": "8bf056c5061c10f2bea9b705980235db2b1eb63eadc9019463ad951653c4b035",
+      "rejection": null,
       "facts": {
-        "cube.y": 1.0333333333333319,
-        "cube.speed": 5.656854249492381,
-        "numericalEnergy": 0
+        "cube.y": 1.149999999615821,
+        "cube.speed": 0.5656854235371789,
+        "numericalEnergy": 7.105427357601002e-15
       }
     },
     "stress-rigid-pile": {

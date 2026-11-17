@@ -55,6 +55,10 @@ export type RigidStepOptions3D = {
   /** A coupled caller will evaluate the sum of all operators' loads once. */
   deferFracture?: boolean;
   solverIterations?: number;
+  /** Sweep limit of one contact solve. The geometric projection and the impact-interval
+   * refinement keep `solverIterations`, which is also the point up to which a contact solve
+   * behaves exactly as it did when it shared that limit. Only former rejections can change. */
+  contactIterations?: number;
   maxWork?: number;
   maxEvents?: number;
   contactTolerance?: number;
@@ -501,7 +505,10 @@ function pairAxes(a: RigidParcel3D, b: RigidParcel3D): { a: Vec3[]; b: Vec3[]; a
     }
   return { a: aa, b: bb, all };
 }
-/** Exact interval clipping for constant-orientation motion, including its gravity arc. */
+/** Exact interval clipping for constant-orientation motion, including its gravity arc.
+ * With `persistent`, a pair already in contact whose separation along the contact normal
+ * stays within the projection allowance for the whole interval reports no event: it neither
+ * leaves the contact skin nor closes beyond what geometric projection already accepts. */
 function translationImpact(
   a: RigidParcel3D,
   b: RigidParcel3D,
@@ -509,6 +516,7 @@ function translationImpact(
   acceleration: Vec3,
   duration: number,
   tolerance: number,
+  persistent = false,
 ): number | null {
   const directions = pairAxes(a, b),
     offset = subtractVec3(b.center, a.center);
@@ -568,6 +576,18 @@ function translationImpact(
   }
   intervals.sort((x, y) => x[0] - y[0]);
   const contact = contactWithinTolerance(a, b, tolerance);
+  if (persistent && contact) {
+    // b moves `time * (speed + half * time)` along the normal relative to a.
+    const speed = dotVec3(velocity, contact.normal),
+      half = dotVec3(acceleration, contact.normal) / 2,
+      travel = (time: number) => Math.abs(time * (speed + half * time)),
+      turning = half === 0 ? 0 : -speed / (2 * half);
+    if (
+      Math.max(travel(duration), turning > 0 && turning < duration ? travel(turning) : 0) <=
+      tolerance / 8
+    )
+      return null;
+  }
   for (const [enter] of intervals) {
     if (enter === 0 && contact && dotVec3(velocity, contact.normal) >= -tolerance) continue;
     return enter;
@@ -1044,6 +1064,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     restitution: 0,
     friction: 0.5,
     solverIterations: 96,
+    contactIterations: 1024,
     maxWork: 200000,
     maxEvents: 64,
     contactTolerance: 1e-8,
@@ -1072,6 +1093,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     throw Error('Invalid rigid step options.');
   for (const [value, maximum] of [
     [options.solverIterations, 1024],
+    [options.contactIterations, 1024],
     [options.maxWork, 1000000],
     [options.maxEvents, 1024],
   ])
@@ -1424,7 +1446,17 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
         apply(c.b, c.pb, j, c.point, c.offsetB);
       };
-      for (let iteration = 0; iteration < options.solverIterations; iteration++) {
+      /** Largest unmet normal condition, as a speed. */
+      const unmet = () =>
+        contacts.reduce((worst, c) => {
+          const speed = dotVec3(relative(c), c.normal) - c.target;
+          return Math.max(
+            worst,
+            c.normalImpulse > options.velocityTolerance ? Math.abs(speed) : -speed,
+          );
+        }, 0);
+      let checkpoint = 0;
+      for (let iteration = 0; iteration < options.contactIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
           // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
@@ -1503,7 +1535,23 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           (contacts.every((c) => c.friction === 0) || iteration >= 3)
         )
           break;
-        if (iteration + 1 === options.solverIterations)
+        // Past the former shared limit. Nothing here can act within that limit, so every
+        // solve that used to converge is unchanged. At the limit, a rebound too slow to leave
+        // the contact skin within the tick is dropped: such rebounds cannot be observed, and
+        // on a wedged body opposing ones have no joint solution. After that the solve
+        // continues while its unmet normal speed falls by at least a tenth every 32 sweeps. A
+        // slower solve could not reach tolerance within the sweep limit, so it stops there.
+        const beyond = iteration + 1 - options.solverIterations;
+        if (beyond === 0) {
+          for (const c of contacts)
+            if (c.target * options.dt <= options.contactTolerance) c.target = 0;
+          checkpoint = unmet();
+        } else if (beyond > 0 && beyond % 32 === 0) {
+          const now = unmet();
+          if (now > 0.9 * checkpoint) throw Error('Rigid contact solve did not converge.');
+          checkpoint = now;
+        }
+        if (iteration + 1 === options.contactIterations)
           throw Error('Rigid contact solve did not converge.');
       }
       const normalWork = contacts.reduce((sum, c) => sum + (c.impact ? c.normalWork : 0), 0),
@@ -1545,6 +1593,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     function* nextImpact(
       duration: number,
       starts: Map<Body<T>, Vec3>,
+      persistent = false,
     ): Generator<RigidWork3D, number | null, void> {
       let hit: number | null = null;
       for (let i = 0; i < bodies.length; i++)
@@ -1603,6 +1652,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
                       relativeAcceleration,
                       duration,
                       options.contactTolerance,
+                      persistent,
                     );
               if (time !== null && (hit === null || time < hit)) hit = time;
             }
@@ -1657,8 +1707,21 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         predictedContact = hit !== null;
         if (hit === null || hit >= duration) break;
         if (!(hit > 0)) throw Error('Unresolved zero-time swept contact.');
-        if (trial >= options.solverIterations)
-          throw Error('Impact interval refinement did not converge.');
+        if (trial >= options.solverIterations) {
+          // A body held between two faces can report a re-contact just inside every interval
+          // tried: its normal speed is at solver noise, and the fitted arc returns to the
+          // face in proportion to the interval. Such a pair never leaves its contact skin.
+          // Sweep this last trial again without those pairs; any real event still rejects.
+          const real = yield* nextImpact(
+            duration,
+            new Map(motions.map((m) => [m.body, m.velocity])),
+            true,
+          );
+          if (real !== null && real < duration)
+            throw Error('Impact interval refinement did not converge.');
+          predictedContact = real !== null;
+          break;
+        }
         restoreTrial();
         duration = hit;
       }

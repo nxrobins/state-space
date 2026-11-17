@@ -341,7 +341,49 @@ named commit from its own blobs and runs both engines side by side. A change
 meant to keep behaviour exact must pass `check` unchanged. A change to the
 physical model re-records the file in the same commit
 (`node scripts/freeze_liquid_contact.mjs record`), so its diff states which
-cases changed.
+cases changed. The tables above describe `06c737f`; the freeze file describes
+the current sources.
+
+### Contact solves past the former sweep limit (2026-11-17)
+
+Three limits of the rigid contact solve were rejections of the solver's
+effort, not of the scene. Each change below acts only where a solve used to be
+rejected, so a solve that converged before takes the same sweeps and gives the
+same bits. Against `06c737f`, 32 of the 36 frozen cases are bit-identical and
+the four former contact rejections change.
+
+- **Own sweep limit.** A contact solve shared a 96-sweep limit with the
+  geometric projection and the impact-interval refinement. It now has its own
+  limit of 1,024 (`contactIterations`). Past sweep 96 it continues only while
+  its unmet normal speed falls by at least a tenth every 32 sweeps; a slower
+  solve could not reach the unchanged `1e-8` tolerance within the limit and is
+  rejected there. The work limit still bounds the whole step.
+- **Rebounds inside the contact skin.** At sweep 96 a rebound too slow to
+  leave the `1e-8` contact skin within the tick is dropped. Such a rebound
+  cannot be observed, and on a wedged body opposing ones have no joint
+  solution: no rigid motion separates from both faces. Larger rebounds keep
+  their targets, so an observable rebound with no joint solution is still
+  rejected.
+- **Persistent contact in the sweep.** A body held between two faces could
+  report a re-contact just inside every interval tried, because its normal
+  speed is at solver noise and the fitted arc returns to the face in
+  proportion to the interval. After 96 refinements the last trial is swept
+  again without pairs whose separation along the contact normal stays within
+  the projection allowance (`1.25e-9`) for the whole interval. Any other event
+  still rejects.
+
+| Scene | At `06c737f` | Now |
+| --- | --- | --- |
+| Cube strikes a floor and a wall together | Rejected at tick 15 | Completes 60 ticks. The solve takes 491 sweeps; the cube leaves both faces at the analytic `0.4` and pays `15.84` of heat (`rigid.test.ts`, digits 7 and 6) |
+| Nine samples riding a plate that lands | Contact solve rejected at tick 61 | Contact solve converges in 101 sweeps. The same tick is then rejected for `-30.2` unpaid energy as the liquid meets the stopped plate |
+| Cube in a slot exactly its width | Interval refinement rejected at tick 77 | Sweep completes. The same tick is then rejected for `-0.353` unpaid energy |
+| Combined failure with a wedged plate | Rejected at tick 30 | Three more ticks commit. Tick 33 is rejected: the plate slides on both faces with friction, and the unmet speed falls by under 3% in 32 sweeps |
+
+Still open, and still recorded as rejections: sliding friction on a wedged
+body, where the normal load is statically indeterminate; the six-cube pile,
+where a face landing almost flat alternates between two corners every
+`3.7e-5` model seconds and passes the 64-event limit with the interval
+shrinking by under 1% per event; and every unpaid-energy rejection above.
 
 ## Implementation evidence
 
