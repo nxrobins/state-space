@@ -124,11 +124,14 @@ function drive({ engine, profiles }, frozen, segments) {
   });
   return stats;
 }
-function timed(side, frozen) {
-  const before = process.cpuUsage(),
-    stats = drive(side, frozen),
-    used = process.cpuUsage(before);
-  return { ...stats, cpuMs: (used.user + used.system) / 1000 };
+/** CPU time of one run, averaged over `repeat` back-to-back runs. The process clock ticks in
+ * steps of about 16 ms on Windows, so a short case is repeated until one sample is long. */
+function timed(side, frozen, repeat = 1) {
+  const before = process.cpuUsage();
+  let stats;
+  for (let i = 0; i < repeat; i++) stats = drive(side, frozen);
+  const used = process.cpuUsage(before);
+  return { ...stats, cpuMs: (used.user + used.system) / 1000 / repeat };
 }
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b),
@@ -214,9 +217,12 @@ const frozenSide = options.commit
   : null;
 const rows = [];
 for (const frozen of selected) {
-  timed(candidate, frozen); // Warm the optimizing compiler outside the measured rounds.
+  // Warm the optimizing compiler outside the measured rounds, and size one sample to about
+  // a second and a half of CPU time.
+  const warm = timed(candidate, frozen);
   if (frozenSide) timed(frozenSide, frozen);
-  say({ case: frozen.id, stage: 'warmed' });
+  const repeat = Math.max(1, Math.min(40, Math.ceil(1500 / Math.max(1, warm.cpuMs))));
+  say({ case: frozen.id, stage: 'warmed', repeat });
   const samples = { candidate: [], frozen: [] };
   let last = null,
     lastFrozen = null;
@@ -224,7 +230,7 @@ for (const frozen of selected) {
     // Alternate which engine runs first, so order cannot favour either.
     for (const name of frozenSide && i % 2 ? ['frozen', 'candidate'] : ['candidate', 'frozen']) {
       if (name === 'frozen' && !frozenSide) continue;
-      const run = timed(name === 'frozen' ? frozenSide : candidate, frozen);
+      const run = timed(name === 'frozen' ? frozenSide : candidate, frozen, repeat);
       samples[name].push(run.cpuMs);
       if (name === 'frozen') lastFrozen = run;
       else last = run;
@@ -234,6 +240,7 @@ for (const frozen of selected) {
   const cpuMs = median(samples.candidate),
     row = {
       case: frozen.id,
+      runsPerSample: repeat,
       steps: last.steps,
       rejected: last.rejected,
       work: last.work,

@@ -6,6 +6,7 @@ import { assertRecordFields, copyPortableValue, type PortableValue } from '../..
 import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
 import {
   type Vec3,
+  type Quat,
   addVec3,
   subtractVec3,
   scaleVec3,
@@ -13,7 +14,7 @@ import {
   crossVec3,
   lengthVec3,
   assertFiniteVec3,
-  applyWorldInverseInertia,
+  normalizeQuaternion,
 } from './math.js';
 
 export type FluidMatrix3D = readonly [
@@ -613,20 +614,40 @@ function* solve(
   let gasMechanicalWork = 0,
     viscousHeat = 0,
     projectionKineticChange = 0;
-  function angularVelocity(i: number): Vec3 {
-    const parcel = p[i].parcel;
-    return applyWorldInverseInertia(
-      parcel.orientation,
-      parcel.principalInertia.map((v) => 1 / v) as unknown as Vec3,
-      parcel.intrinsicAngularMomentum,
-    );
+  // A sample's orientation and inertia are frozen for this job, and both were admitted with
+  // it: a unit quaternion and positive moments with finite reciprocals. applyWorldInverseInertia
+  // normalizes that orientation, then rotateVector normalizes the conjugate it rotates into the
+  // body frame with and, again, the quaternion it rotates back with. Those three results never
+  // change within a job, so they are formed once here by the same calls. Each use then repeats
+  // rotateVector's arithmetic and its checks on the vectors, in the same order, so every value
+  // and every rejection is the one applyWorldInverseInertia gives.
+  const frames = p.map(({ parcel }) => {
+    const q = normalizeQuaternion(parcel.orientation);
+    return {
+      inverse: parcel.principalInertia.map((v) => 1 / v) as unknown as Vec3,
+      toBody: normalizeQuaternion([-q[0], -q[1], -q[2], q[3]]),
+      toWorld: normalizeQuaternion(q),
+    };
+  });
+  function rotateByUnit(q: Quat, v: Vec3): Vec3 {
+    assertFiniteVec3(v);
+    const axis: Vec3 = [q[0], q[1], q[2]];
+    const twiceCross = scaleVec3(crossVec3(axis, v), 2);
+    const rotated = addVec3(v, addVec3(scaleVec3(twiceCross, q[3]), crossVec3(axis, twiceCross)));
+    assertFiniteVec3(rotated, 'rotated vector');
+    return rotated;
   }
-  const particleInverse = (i: number, v: Vec3) =>
-    applyWorldInverseInertia(
-      p[i].parcel.orientation,
-      p[i].parcel.principalInertia.map((x) => 1 / x) as unknown as Vec3,
-      v,
-    );
+  function particleInverse(i: number, v: Vec3): Vec3 {
+    const frame = frames[i],
+      local = rotateByUnit(frame.toBody, v);
+    return rotateByUnit(frame.toWorld, [
+      local[0] * frame.inverse[0],
+      local[1] * frame.inverse[1],
+      local[2] * frame.inverse[2],
+    ]);
+  }
+  const angularVelocity = (i: number): Vec3 =>
+    particleInverse(i, p[i].parcel.intrinsicAngularMomentum);
   function kinetic(): number {
     let total = 0;
     for (let i = 0; i < n; i++)

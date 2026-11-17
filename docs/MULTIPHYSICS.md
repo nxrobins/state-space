@@ -474,6 +474,59 @@ After both changes, 10 of the 13 stress scenes complete (2 before), and 3 of
 the 4 published open failures complete. Still rejected: the riding plate, the
 cube in a slot, the six-cube pile and the wedged plate.
 
+### Measured CPU cost (2026-11-17)
+
+`node scripts/profile_liquid_contact.mjs` profiles the frozen cases inside one
+supervised CPU job. It reports the process's own CPU time, because the
+supervisor's cap of about one logical CPU throttles wall time. A sample repeats
+its case until it lasts about 1.5 seconds; the process clock on Windows ticks
+in steps of about 16 ms. These figures are from an i9-11900K with Node 22.22.3.
+They are not the Mac qualification targets and do not replace them. Medians of
+five samples; a repeated run moves a median by up to about 15%.
+
+Before any optimization, on the sources of `35d064e`:
+
+| Scene | Parcels (liquid samples) | CPU per tick | Largest stages |
+| --- | --- | --- | --- |
+| Resolved tank | 105 (99) | 398 ms | First fluid pass 49%, post-drift projection 17%, contact scan 13% |
+| 4-wide cup | 69 (63) | 211 ms | First fluid pass 49%, contact scan 14%, post-drift projection 12% |
+| Timed cup | 32 (26) | 156 ms | First fluid pass 46%, contact scan 14%, post-drift projection 12%, rigid contact 10% |
+| Resting cup | 32 (27) | 86 ms | First fluid pass 50%, contact scan 11%, post-drift projection 11% |
+| Paddle at 0.5 | 28 (27) | 45 ms | First fluid pass 52%, fluid contact constraints 7%, contact scan 6% |
+| Combined failure | 10 (1) | 18 ms | First fluid pass 20%, contact scan 19% |
+| Wax valve | 8 (0) | 14 ms | Contact scan 22%, first fluid pass 18% |
+| Fluid switch | 5 (1) | 9.4 ms | First fluid pass 17%, rigid sweep 17%, rigid contact 13% |
+| Rotating contact | 4 (0) | 4.7 ms | Validation 18%, admission 17% |
+| Falling battery | 4 (0) | 3.6 ms | Validation 19%, admission 18% |
+
+By function, as a share of profile samples: deep copies of portable data are
+13–23% of the liquid loads and 30–56% of the small scenes; quaternion
+normalization is 8–14% of the liquid loads; record-shape checks are 3–15%. The
+constraint arithmetic itself (the solver loop, `compiledApplyConstraint`,
+`compiledRate`, `buildGram`) is 10–20% of the liquid loads. Most of a tick is
+therefore ownership and validation work around the solver, not the solver.
+
+**Exact-behaviour change 1: one normalization per liquid sample.** The liquid
+solver normalized each sample's orientation three times in every angular
+evaluation. It now forms those quaternions once per solve with the same calls
+and repeats the same arithmetic and checks on each use. All 36 frozen cases are
+bit-identical without re-recording the freeze. Paired against the previous
+commit over seven alternating samples, the CPU time is 0.89 of before for the
+tank, the 4-wide cup and the resting cup, 0.90 for the timed cup and 0.83 for
+the paddle. Scenes with at most one liquid sample are within noise (0.95 to
+1.09).
+
+Exact-behaviour targets not yet taken, by measured share:
+
+1. The portable copy inside `readThermalParcel3D`, reached from
+   `parcelTemperature3D`, from the snapshot readers and from every
+   `depositMechanicalHeat3D`, which copies and re-validates its parcel even for
+   a deposit of zero. Reading a parcel the tick already owns in place has to
+   reproduce the copy's normalization of negative zero and each of its
+   rejections.
+2. The scan of all parcel pairs for contact at the start of each tick.
+3. Quaternion normalization inside `rotateVector` in the contact tests.
+
 ## Implementation evidence
 
 The first foundation checkpoint passed 19 analytical reference tests, the full
