@@ -527,6 +527,76 @@ Exact-behaviour targets not yet taken, by measured share:
 2. The scan of all parcel pairs for contact at the start of each tick.
 3. Quaternion normalization inside `rotateVector` in the contact tests.
 
+### GPU feasibility and the limits on scale (2026-11-17)
+
+No GPU or browser workload was run for this. It rests on the solver source and
+on two CPU measurements under the supervisor. The question was whether the
+liquid and contact solver could move to a GPU, and what limits a much larger
+scene would meet first.
+
+**Measured: the sweeps do not reach the contract; a dense solve does.** The
+divergence residual after the coordinate sweeps, against its `1e-7` tolerance:
+
+| Scene | Constraint rows | After 1 sweep | After 8 | After 16 | After 32 | Dense iterations | Rows in the dense solve |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Timed cup, 26 samples | 77 | `1.8e-2` | `1.3e-3` | `2.5e-4` | `6.5e-5` | 5 to 13 | 73 to 74 |
+| 4-wide cup, 63 samples | 148 to 149 | `1.8e-2` | `2.8e-3` | `7.6e-4` to `1.1e-3` | `9.4e-5` to `5.1e-4` | 4 to 5 | 147 to 148 |
+| Resolved tank, 99 samples | 209 to 210 | `2.0e-2` | `3.0e-3` | `7.2e-4` | `5.3e-5` to `5.4e-4` | 13 to 14 | 208 to 209 |
+
+After the 32 sweeps the residual is about 500 to 5,000 times the tolerance, and
+in the tank it falls only from `7.2e-4` to `5.4e-4` over the last 16. Every
+solve on every tick then factorizes nearly all of its rows as one dense system,
+several times over. There are 2.1 to 3.0 rows per liquid sample.
+
+**Limits.** Each of these holds for the solver as it is specified today.
+
+1. *Float64 is the contract.* Committed state, the ledgers and the exactness
+   gates (direct, Worker and save/restart equal bit for bit) are Float64. WGSL
+   has no 64-bit float, so a GPU result cannot be that committed state. The
+   engine's existing GPU paths match their CPU reference because they are
+   integer arithmetic; that does not carry over.
+2. *The tolerances are below single precision.* Contact speed `1e-8`,
+   divergence `1e-7`, impulse-work identity `1e-9` relative, contact skin
+   `1e-8` and penetration limit `1e-5` in position. A 32-bit float resolves
+   `6e-8` near 1, `1.9e-6` at the model extent of 16 and `1.2e-4` at 1,024.
+   The contact skin cannot be represented in world coordinates at any of them.
+3. *Order is part of the result.* The liquid rows and the rigid contacts are
+   updated one at a time in canonical order, and rigid motion is split at
+   impact events found in sequence. A GPU needs simultaneous (Jacobi) or
+   coloured updates, which is a different iteration with different results even
+   in Float64, and no faster to converge than the sweeps measured above.
+4. *The dense solve is cubic.* It is what meets the tolerance, on any hardware.
+   At 10,000 samples it would be at least 21,000 rows (2.1 per sample, the
+   lowest measured): a 3.5 GB Float64 matrix and about `3e12` operations per
+   factorization, several per tick.
+5. *The model is capped and visits all pairs.* 256 parcels, 128 fluid samples,
+   128 boundary samples, extent 16. Neighbour search, viscosity, gas pressure
+   and the contact scan each visit every pair.
+6. *The heat ledger is exact integer arithmetic beyond 32 bits.* WGSL integers
+   are 32-bit, so the ledger stays on the CPU and every tick needs a readback
+   before it can commit.
+7. *Bounded work and atomic rejection are per row.* The tick is one cooperative
+   pipeline that yields after each bounded unit and rejects by abandoning the
+   candidate. A GPU pass can stop only between dispatches.
+
+WGSL also states floating-point accuracy as bounds rather than exact results
+for several operations, so two GPUs need not agree bit for bit with each other.
+That is my reading of the specification and should be confirmed against its
+current text before it is relied on.
+
+**What this means for a much larger scene.** Exact-behaviour work on the
+present solver removes constant factors: the copies, checks and pair scans
+measured above are most of a tick today. It does not remove the cubic term or
+the caps. A liquid at thousands of samples needs a different solver contract,
+qualified separately and not interchangeable with this one: a matrix-free
+iterative pressure solve over a spatial grid, single precision, tolerances
+stated where iteration actually lands (the table suggests `1e-4` to `1e-3`,
+not `1e-7`), and a numerical-energy limit that scales with the number of
+samples. The inelastic-loss rule above is what would let such a solver account
+for its energy without the fixed `0.01` limit. Whether the larger scene must
+keep bit-exact committed state decides between the two: if it must, it stays
+on the CPU and small.
+
 ## Implementation evidence
 
 The first foundation checkpoint passed 19 analytical reference tests, the full
