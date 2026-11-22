@@ -474,58 +474,146 @@ After both changes, 10 of the 13 stress scenes complete (2 before), and 3 of
 the 4 published open failures complete. Still rejected: the riding plate, the
 cube in a slot, the six-cube pile and the wedged plate.
 
-### Measured CPU cost (2026-11-17)
+### Measured CPU cost (2026-11-22)
 
-`node scripts/profile_liquid_contact.mjs` profiles the frozen cases inside one
-supervised CPU job. It reports the process's own CPU time, because the
-supervisor's cap of about one logical CPU throttles wall time. A sample repeats
-its case until it lasts about 1.5 seconds; the process clock on Windows ticks
-in steps of about 16 ms. These figures are from an i9-11900K with Node 22.22.3.
-They are not the Mac qualification targets and do not replace them. Medians of
-five samples; a repeated run moves a median by up to about 15%.
+`node scripts/profile_liquid_contact.mjs` measures the frozen cases inside one
+supervised CPU job. Each engine runs alone, in a fresh child process started
+with `--single-threaded`, and the figure is that process's CPU time: the engine
+and the runtime's own compilation and collection together, on one thread. A
+case is warmed until its hot functions are compiled, then timed in samples of
+about a second and a half; the clock on Windows ticks in steps of about 16 ms.
+With `--commit` the two engines take turns by process, and a ratio is that of
+their medians over ten samples each. These figures are from an i9-11900K with
+Node 22.22.3. They are not the Mac qualification targets and do not replace
+them.
 
-Before any optimization, on the sources of `35d064e`:
+**The figures published here on 2026-11-17 are superseded.** They were taken by
+timing the whole process with the runtime's background threads running, and by
+alternating two engines inside one process. Both misled:
 
-| Scene | Parcels (liquid samples) | CPU per tick | Largest stages |
-| --- | --- | --- | --- |
-| Resolved tank | 105 (99) | 398 ms | First fluid pass 49%, post-drift projection 17%, contact scan 13% |
-| 4-wide cup | 69 (63) | 211 ms | First fluid pass 49%, contact scan 14%, post-drift projection 12% |
-| Timed cup | 32 (26) | 156 ms | First fluid pass 46%, contact scan 14%, post-drift projection 12%, rigid contact 10% |
-| Resting cup | 32 (27) | 86 ms | First fluid pass 50%, contact scan 11%, post-drift projection 11% |
-| Paddle at 0.5 | 28 (27) | 45 ms | First fluid pass 52%, fluid contact constraints 7%, contact scan 6% |
-| Combined failure | 10 (1) | 18 ms | First fluid pass 20%, contact scan 19% |
-| Wax valve | 8 (0) | 14 ms | Contact scan 22%, first fluid pass 18% |
-| Fluid switch | 5 (1) | 9.4 ms | First fluid pass 17%, rigid sweep 17%, rigid contact 13% |
-| Rotating contact | 4 (0) | 4.7 ms | Validation 18%, admission 17% |
-| Falling battery | 4 (0) | 3.6 ms | Validation 19%, admission 18% |
+- The background compiler and collector threads added between 7 and 85% to the
+  engine thread's time for the same work.
+- Two engines in one process disturb each other. While one runs, every function
+  the other created for its last tick is unreferenced, so a collection drops
+  their optimized code and that engine starts its next sample cold.
 
-By function, as a share of profile samples: deep copies of portable data are
-13–23% of the liquid loads and 30–56% of the small scenes; quaternion
-normalization is 8–14% of the liquid loads; record-shape checks are 3–15%. The
-constraint arithmetic itself (the solver loop, `compiledApplyConstraint`,
-`compiledRate`, `buildGram`) is 10–20% of the liquid loads. Most of a tick is
-therefore ownership and validation work around the solver, not the solver.
+The same deterministic tank tick cost between 312 and 844 ms from one sample to
+the next, and one change measured 0.69 in one run and 1.19 in another. The
+ratios of 0.83 to 0.90 reported for the first exact-behaviour change (`0c01263`,
+one normalization per liquid sample) came from that method and have not been
+re-measured.
 
-**Exact-behaviour change 1: one normalization per liquid sample.** The liquid
-solver normalized each sample's orientation three times in every angular
-evaluation. It now forms those quaternions once per solve with the same calls
-and repeats the same arithmetic and checks on each use. All 36 frozen cases are
-bit-identical without re-recording the freeze. Paired against the previous
-commit over seven alternating samples, the CPU time is 0.89 of before for the
-tank, the 4-wide cup and the resting cup, 0.90 for the timed cup and 0.83 for
-the paddle. Scenes with at most one liquid sample are within noise (0.95 to
-1.09).
+**How the ticks are driven changes the cost.** V8 attaches a function's
+optimized machine code to the function objects that run it, and remembers it
+for later ones only weakly. A tick's jobs create their inner functions afresh,
+so between two ticks nothing holds that code. V8 completes a major collection
+in a task that runs when the process returns to its event loop. A collection
+that completes between two ticks discards the code, and the next tick runs
+those functions unoptimized until they are compiled again. A loop that never
+returns to the event loop hides this; a host with a tick rate pays it. The
+profile therefore drives ticks two ways:
+
+- `--host loop`, the default, runs a case back to back.
+- `--host paced` drives a case's tick sequence as a host does: slices of 256
+  work units, one per turn of the event loop, and 8 ms between ticks.
+
+This is my reading of V8's behaviour from its optimization trace and its code
+log on Node 22.22.3. It has not been checked in a browser Worker.
+
+CPU per tick on `main` before this work (`c65ca3e`) and after it (`3996abb`):
+
+| Scene | Parcels (liquid samples) | Loop, before | Loop, after | Ratio | Paced, before | Paced, after | Ratio |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Resolved tank | 105 (99) | 395 ms | 271 ms | 0.69 | 475 ms | 327 ms | 0.69 |
+| 4-wide cup | 69 (63) | 239 ms | 147 ms | 0.62 | 293 ms | 166 ms | 0.57 |
+| Timed cup | 32 (26) | 112 ms | 74.9 ms | 0.67 | 137 ms | 89.4 ms | 0.65 |
+| Resting cup | 32 (27) | 90.3 ms | 54.7 ms | 0.61 | 109 ms | 66.1 ms | 0.61 |
+| Paddle at 0.5 | 28 (27) | 35.2 ms | 17.7 ms | 0.50 | 39.4 ms | 22.4 ms | 0.57 |
+| Combined failure | 10 (1) | 12.8 ms | 6.60 ms | 0.52 | 18.3 ms | 9.86 ms | 0.54 |
+| Combined failure to the break | 10 (1) | 12.2 ms | 6.25 ms | 0.51 | Not measured | | |
+| Wax valve | 8 (0) | 11.6 ms | 5.49 ms | 0.47 | Not measured | | |
+| Fluid switch | 5 (1) | 7.70 ms | 4.54 ms | 0.59 | Not measured | | |
+| Rotating contact | 4 (0) | 3.51 ms | 1.80 ms | 0.51 | Not measured | | |
+| Falling battery | 4 (0) | 3.20 ms | 1.43 ms | 0.45 | Not measured | | |
+
+A second run of the same comparison moved the tank's median on `main` by 3%.
+In a loop, the ten samples of the tank and of each cup spread by 20 to 30% on
+`main` and by 9 to 14% after this work. The trajectory to the break advances one
+tick at a time, so the paced driver cannot be given its ticks. The four smallest
+scenes were not run paced.
+
+Every tick still commits the same bits: each change below left all 36 frozen
+cases bit-identical, with the freeze not re-recorded. Each was measured in a
+loop against the commit before it unless stated.
+
+1. **Parcels the tick already owns are read where they are** (`c4c91ab`). Every
+   parcel read made a deep portable copy first. For a flat record with exactly
+   the parcel fields the copy cannot reject anything and changes only negative
+   zeros, so that much is done without it and the same checks then run. Any
+   other record still takes the copying reader and its messages. The fluid job
+   read each particle's parcel with a second copy and validated its results
+   with a third; both read in place by the same rule.
+2. **Each touching pair of cuboids is tested once in the contact scan**
+   (`3c25e24`). The scan ran the full contact test on a touching pair and the
+   patch area ran it again; both also prepared each cuboid again. Changes 1 and
+   2 together: 0.68 to 0.88 across the eleven scenes.
+3. **The functions a tick creates stay alive until the next tick has its own**
+   (`c492e89`), which keeps their optimized code. Paced: 0.77 to 0.84 for the
+   tank and the cups, 0.79 for the combined failure, 0.99 for the paddle. In a
+   loop: 0.93 to 0.96 for the tank and the cups, 1.01 to 1.03 for the other
+   scenes. Nothing is computed differently; a few finished jobs' working arrays
+   per site stay in memory until later jobs replace them.
+4. **The tick's own data moves between its stages without re-inspection**
+   (`2b6d502`). The portable copy inspects every property descriptor and key
+   list, which is what admits a caller's data. The tick's hand-offs to the
+   rigid step, the fluid job, the assembly check, its closing snapshot check
+   and its result now use a copy that makes the same checks and the same
+   result without that inspection, and hands anything irregular to the portable
+   copy. 0.67 to 0.76 for the six scenes with at most one liquid sample, 0.82
+   for the paddle, 0.92 to 0.97 for the tank and the cups.
+5. **An orientation is normalized once where several vectors are rotated by
+   it** (`3996abb`): a cuboid's three axes, its eight corners, the two points of
+   a particle-against-box test, a solid's boundary samples. 0.97 to 1.00 over
+   seven scenes, which is at the edge of what the measurement resolves.
+
+Where a tick's time goes after this work, in a loop:
+
+| Scene | Largest stages | Largest functions, by self time |
+| --- | --- | --- |
+| Resolved tank | First fluid pass 49%, post-drift projection 25%, contact scan 9%, rigid contact 6% | Solver loop 14%, `compiledApplyConstraint` 13%, `buildGram` 5%, portable copy 4% |
+| 4-wide cup | First fluid pass 48%, post-drift projection 20%, contact scan 11%, rigid contact 8% | `compiledApplyConstraint` 10%, solver loop 6%, `crossVec3` 4%, coupling setup 4% |
+| Timed cup | First fluid pass 45%, post-drift projection 18%, rigid contact 14%, contact scan 10% | `compiledApplyConstraint` 14%, solver loop 8%, `compiledRate` 6%, rigid solve 6% |
+| Paddle at 0.5 | First fluid pass 50%, rigid contact 9%, contact scan 8%, rigid sweep 7% | `crossVec3` 7%, `particleInverse` 6%, `rotateByUnit` 5%, record-shape checks 4% |
+| Combined failure | Contact scan 21%, first fluid pass 16%, rigid contact 14%, admission 11% | Portable copy 8%, record-shape checks 7%, `plainCopy` 4%, normalization 4% |
+| Falling battery | Admission 26%, rigid contact 15%, validation 14%, contact scan 13% | Portable copy 27%, record-shape checks 8%, normalization 3% |
+
+On the liquid scenes the constraint arithmetic is now the largest cost, and
+the portable copy has fallen from 14 to 34% of profile samples to 2 to 4%. On
+the scenes with at most one liquid sample, reading and checking the snapshot,
+at admission and again at the end of the tick, is 11 to 34% of a tick with its
+callees. The copy at admission admits data the engine did not build and has to
+stay.
 
 Exact-behaviour targets not yet taken, by measured share:
 
-1. The portable copy inside `readThermalParcel3D`, reached from
-   `parcelTemperature3D`, from the snapshot readers and from every
-   `depositMechanicalHeat3D`, which copies and re-validates its parcel even for
-   a deposit of zero. Reading a parcel the tick already owns in place has to
-   reproduce the copy's normalization of negative zero and each of its
-   rejections.
-2. The scan of all parcel pairs for contact at the start of each tick.
-3. Quaternion normalization inside `rotateVector` in the contact tests.
+1. **Callback functions recompiled under a paced host.** About 75 small
+   callbacks (arguments to `map`, `some`, `every`, `reduce`, `sort` and
+   `findIndex` in the contact, coupling and admission code) are created on
+   every call, so nothing can hold them and their code is discarded at each
+   collection between ticks. A traced paced run of the tank after change 3
+   spent about 36 ms per tick compiling, and the tank still costs 327 ms paced
+   against 271 ms in a loop; slicing and the collections themselves are part of
+   that gap too. Replacing those callbacks with loops in the hot paths would
+   remove the recompilation and the allocation of the callbacks.
+2. **The contact scan's unused point.** The scan needs a touching pair's normal
+   only, but the contact test also computes its representative point: 2 to 5%
+   of a tick. Skipping it is exact only with a bound on the geometry, since the
+   test rejects a non-finite point.
+3. **The inventory on small scenes.** `multiphysicsInventory3D` is 6 to 11% of a
+   tick, with its callees, on the scenes with at most one liquid sample. A tick
+   calls it several times, and each call copies and re-checks the battery.
+4. **Record-shape checks**: 1 to 2% of the tank and the cups, 4% of the paddle
+   and 6 to 10% of the small scenes.
 
 ### GPU feasibility and the limits on scale (2026-11-17)
 
@@ -585,9 +673,9 @@ That is my reading of the specification and should be confirmed against its
 current text before it is relied on.
 
 **What this means for a much larger scene.** Exact-behaviour work on the
-present solver removes constant factors: the copies, checks and pair scans
-measured above are most of a tick today. It does not remove the cubic term or
-the caps. A liquid at thousands of samples needs a different solver contract,
+present solver removes constant factors: the changes measured above took 31 to
+55% off a tick's CPU time that way. It does not remove the cubic term or the
+caps. A liquid at thousands of samples needs a different solver contract,
 qualified separately and not interchangeable with this one: a matrix-free
 iterative pressure solve over a spatial grid, single precision, tolerances
 stated where iteration actually lands (the table suggests `1e-4` to `1e-3`,
