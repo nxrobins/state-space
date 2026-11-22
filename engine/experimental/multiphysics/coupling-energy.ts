@@ -1,5 +1,5 @@
 /** Mechanical/internal conversion on the owned candidate. Sub-lattice energy stays explicit. */
-import { depositParcelHeat3D, type ThermalParcel3D } from './thermal.js';
+import { depositOwnedParcelHeat3D, type ThermalParcel3D } from './thermal.js';
 import type { MultiphysicsProfiles3D } from './profiles.js';
 import { MULTIPHYSICS_SUBQ_PER_ENERGY_3D, type MultiphysicsSnapshot3D } from './model.js';
 
@@ -36,7 +36,7 @@ export function depositMechanicalHeat3D(
   const nextRemainder = fraction - carry;
   if (!Number.isFinite(nextRemainder) || nextRemainder < 0 || nextRemainder >= 1)
     throw Error('Invalid mechanical heat remainder.');
-  const parcel: ThermalParcel3D = depositParcelHeat3D(
+  const parcel: ThermalParcel3D = depositOwnedParcelHeat3D(
     profiles,
     state.parcels[at],
     BigInt(whole) + BigInt(carry),

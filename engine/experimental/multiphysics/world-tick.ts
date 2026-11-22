@@ -14,11 +14,11 @@ import {
 import { createFluidCoupling3D, type FluidCouplingResult3D } from './fluid-coupling.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
 import {
-  advanceParcelThermal3D,
+  advanceOwnedParcelThermal3D,
   settleThermalPhases3D,
   deferParcelPhase3D,
-  depositParcelHeat3D,
-  parcelTemperature3D,
+  depositOwnedParcelHeat3D,
+  ownedParcelTemperature3D,
   type ThermalParcel3D,
   type ThermalContact3D,
   type ThermalTransition3D,
@@ -137,14 +137,14 @@ function batteryIntact(profiles: MultiphysicsProfiles3D, state: MultiphysicsSnap
       p !== undefined &&
       readMultiphysicsProfile3D(profiles, p.material).phase === 'solid' &&
       p.owner === owner &&
-      parcelTemperature3D(profiles, p) < battery.failureTemperature,
+      ownedParcelTemperature3D(profiles, p) < battery.failureTemperature,
   );
 }
 function soften(profiles: MultiphysicsProfiles3D, parcel: ThermalParcel3D): number {
   const onset = readMultiphysicsProfile3D(profiles, parcel.material).softening;
   return onset === 0
     ? 1
-    : Math.max(0, Math.min(1, (onset + 64 - parcelTemperature3D(profiles, parcel)) / 64));
+    : Math.max(0, Math.min(1, (onset + 64 - ownedParcelTemperature3D(profiles, parcel)) / 64));
 }
 
 /**
@@ -332,7 +332,11 @@ export function createMultiphysicsTickJob3D(
       for (const heat of paid.heat) {
         const at = indices.get(heat.id);
         if (at === undefined) throw Error('Electrical heat has no material destination.');
-        state.parcels[at] = depositParcelHeat3D(profiles, state.parcels[at], BigInt(heat.units));
+        state.parcels[at] = depositOwnedParcelHeat3D(
+          profiles,
+          state.parcels[at],
+          BigInt(heat.units),
+        );
         yield 'electrical-heat';
       }
       batteryReport = {
@@ -397,7 +401,7 @@ export function createMultiphysicsTickJob3D(
     }
     const previous = state.parcels;
     yield 'thermal';
-    const thermal = advanceParcelThermal3D(profiles, state.parcels, contacts, dt);
+    const thermal = advanceOwnedParcelThermal3D(profiles, state.parcels, contacts, dt);
     state.parcels = thermal.parcels;
     yield* admitSolidification(previous, thermal.transitions);
     const phaseBroken: RigidBond3D[] = [];

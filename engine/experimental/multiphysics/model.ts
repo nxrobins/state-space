@@ -1,6 +1,11 @@
 /** Owned, versioned candidate-world data. Runtime qualification is separate from admission. */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readThermalParcel3D, THERMAL_FRACTION_SCALE_3D, type ThermalParcel3D } from './thermal.js';
+import {
+  readThermalParcel3D,
+  readOwnedThermalParcel3D,
+  THERMAL_FRACTION_SCALE_3D,
+  type ThermalParcel3D,
+} from './thermal.js';
 import {
   MULTIPHYSICS_ENERGY_SCALE_3D,
   readMultiphysicsProfile3D,
@@ -274,8 +279,9 @@ export function readMultiphysicsSnapshot3D(
   readSettings(value.settings);
   if (!Array.isArray(value.parcels) || value.parcels.length > MULTIPHYSICS_LIMITS_3D.parcels)
     throw Error('World parcel limit exceeded.');
+  // Each entry is part of the copy made above, so it is read where it is.
   value.parcels = value.parcels
-    .map((p) => readThermalParcel3D(profiles, p))
+    .map((p) => readOwnedThermalParcel3D(profiles, p))
     .sort((a, b) => compareIdentity3D(a.id, b.id));
   const byId = new Map(value.parcels.map((p) => [p.id, p]));
   if (byId.size !== value.parcels.length) throw Error('Duplicate world parcel.');

@@ -3,6 +3,9 @@ import { assertRecordFields, copyPortableValue, type PortableValue } from '../..
 import {
   readMaterialParcel3D,
   readOwnedMaterialParcel3D,
+  readShapedMaterialParcel3D,
+  ownedFlatRecord3D,
+  MATERIAL_PARCEL_FIELDS_3D,
   type MaterialParcel3D,
 } from './conservation.js';
 import { rotateVector, normalizeQuaternion, type Vec3, type Quat } from './math.js';
@@ -146,8 +149,36 @@ export function readThermalParcel3D(
   if (!owned || typeof owned !== 'object') throw Error('Invalid thermal parcel.');
   const { halfExtents, thermalRemainder, ...base } = owned;
   // `base` is a fresh plain record from the owned copy above; validating it needs no second copy.
-  const parcel = readOwnedMaterialParcel3D(base),
-    profile = readMultiphysicsProfile3D(profiles, parcel.material),
+  return thermalParcel(profiles, readOwnedMaterialParcel3D(base), halfExtents, thermalRemainder);
+}
+const THERMAL_PARCEL_FIELDS: ReadonlySet<string> = new Set([
+  ...MATERIAL_PARCEL_FIELDS_3D,
+  'halfExtents',
+  'thermalRemainder',
+]);
+/** `readThermalParcel3D` for a record this engine already owns: one the portable copy or a
+ * reader in this module built, whose fields the engine's own arithmetic may since have
+ * replaced. A flat record with exactly the parcel fields is read where it is. The copy would
+ * only have turned its negative zeros into zeros, and that is done here; the checks that
+ * follow are the same ones, so the parcel returned and every rejection are the same. Any other
+ * record takes `readThermalParcel3D`. Never for a caller's input: see `ownedFlatRecord3D`. */
+export function readOwnedThermalParcel3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: unknown,
+): ThermalParcel3D {
+  const owned = ownedFlatRecord3D(raw, THERMAL_PARCEL_FIELDS);
+  if (!owned) return readThermalParcel3D(profiles, raw);
+  const { halfExtents, thermalRemainder, ...base } = owned;
+  // `base` holds exactly the material parcel fields, so its field check cannot fail.
+  return thermalParcel(profiles, readShapedMaterialParcel3D(base), halfExtents, thermalRemainder);
+}
+function thermalParcel(
+  profiles: MultiphysicsProfiles3D,
+  parcel: MaterialParcel3D,
+  halfExtents: unknown,
+  thermalRemainder: unknown,
+): ThermalParcel3D {
+  const profile = readMultiphysicsProfile3D(profiles, parcel.material),
     half = vector(halfExtents);
   if (
     half.some((v) => v <= 0) ||
@@ -227,16 +258,37 @@ export function seedThermalParcel3D(
   };
   return readThermalParcel3D(profiles, withHeat(profiles, parcel, BigInt(units) + offset(profile)));
 }
-export function parcelTemperature3D(
-  profiles: MultiphysicsProfiles3D,
-  raw: ThermalParcel3D,
-): number {
-  const p = readThermalParcel3D(profiles, raw);
+/** Either parcel reader. The owned one is for a world tick's private candidate parcels only. */
+type ParcelReader = (profiles: MultiphysicsProfiles3D, raw: unknown) => ThermalParcel3D;
+function temperature(profiles: MultiphysicsProfiles3D, p: ThermalParcel3D): number {
   return (
     Number(sensible(profiles, readMultiphysicsProfile3D(profiles, p.material), heat(p))) /
     THERMAL_FRACTION_SCALE_3D /
     E
   );
+}
+export function parcelTemperature3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: ThermalParcel3D,
+): number {
+  return temperature(profiles, readThermalParcel3D(profiles, raw));
+}
+/** `parcelTemperature3D` for a parcel of the caller's own candidate state. */
+export function ownedParcelTemperature3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: ThermalParcel3D,
+): number {
+  return temperature(profiles, readOwnedThermalParcel3D(profiles, raw));
+}
+function deposit(
+  profiles: MultiphysicsProfiles3D,
+  raw: ThermalParcel3D,
+  deltaSubQ: bigint,
+  read: ParcelReader,
+): ThermalParcel3D {
+  if (typeof deltaSubQ !== 'bigint') throw Error('Heat deposit requires integer sub-Q units.');
+  const parcel = read(profiles, raw);
+  return withHeat(profiles, parcel, heat(parcel) + deltaSubQ);
 }
 /** Signed, exact lattice transfer. The caller owns any external or mechanical conversion receipt. */
 export function depositParcelHeat3D(
@@ -244,19 +296,29 @@ export function depositParcelHeat3D(
   raw: ThermalParcel3D,
   deltaSubQ: bigint,
 ): ThermalParcel3D {
-  if (typeof deltaSubQ !== 'bigint') throw Error('Heat deposit requires integer sub-Q units.');
-  const parcel = readThermalParcel3D(profiles, raw);
-  return withHeat(profiles, parcel, heat(parcel) + deltaSubQ);
+  return deposit(profiles, raw, deltaSubQ, readThermalParcel3D);
+}
+/** `depositParcelHeat3D` for a parcel of the caller's own candidate state. */
+export function depositOwnedParcelHeat3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: ThermalParcel3D,
+  deltaSubQ: bigint,
+): ThermalParcel3D {
+  return deposit(profiles, raw, deltaSubQ, readOwnedThermalParcel3D);
 }
 /** Private world admission rollback: retain the current enthalpy, mechanics,
- * and chemical store while postponing a geometrically inadmissible phase edge. */
+ * and chemical store while postponing a geometrically inadmissible phase edge.
+ * `parcel` belongs to the world tick's own candidate state. */
 export function deferParcelPhase3D(
   profiles: MultiphysicsProfiles3D,
   parcel: ThermalParcel3D,
   material: string,
 ): ThermalParcel3D {
-  const current = readThermalParcel3D(profiles, parcel);
-  return readThermalParcel3D(profiles, withHeat(profiles, { ...current, material }, heat(current)));
+  const current = readOwnedThermalParcel3D(profiles, parcel);
+  return readOwnedThermalParcel3D(
+    profiles,
+    withHeat(profiles, { ...current, material }, heat(current)),
+  );
 }
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 function total(parcels: readonly ThermalParcel3D[]): bigint {
@@ -308,21 +370,22 @@ function settleOwnedPhases(
   }
   return transitions;
 }
-/** Owned phase-only settlement after pressure work; all extensive state survives. */
+/** Owned phase-only settlement after pressure work; all extensive state survives.
+ * `raw` holds the parcels of the world tick's own candidate state. */
 export function settleThermalPhases3D(
   profiles: MultiphysicsProfiles3D,
   raw: readonly ThermalParcel3D[],
 ): { parcels: ThermalParcel3D[]; transitions: ThermalTransition3D[] } {
   readMultiphysicsProfile3D(profiles, 'air');
   const parcels = list(raw, THERMAL_LIMITS_3D.parcels)
-    .map((p) => readThermalParcel3D(profiles, p))
+    .map((p) => readOwnedThermalParcel3D(profiles, p))
     .sort((a, b) => compare(a.id, b.id));
   if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
     throw Error('Duplicate thermal parcel identity.');
   const before = total(parcels),
     transitions = settleOwnedPhases(profiles, parcels);
   energyReport(before, total(parcels));
-  return { parcels: parcels.map((p) => readThermalParcel3D(profiles, p)), transitions };
+  return { parcels: parcels.map((p) => readOwnedThermalParcel3D(profiles, p)), transitions };
 }
 /** One bounded pass: canonical pair heat exchange, phase changes, matched combustion, extinction. */
 export function advanceParcelThermal3D(
@@ -331,11 +394,29 @@ export function advanceParcelThermal3D(
   rawContacts: readonly ThermalContact3D[],
   dt: number,
 ): ThermalAdvanceResult3D {
+  return advance(profiles, raw, rawContacts, dt, readThermalParcel3D);
+}
+/** `advanceParcelThermal3D` for the parcels of the caller's own candidate state. */
+export function advanceOwnedParcelThermal3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: readonly ThermalParcel3D[],
+  rawContacts: readonly ThermalContact3D[],
+  dt: number,
+): ThermalAdvanceResult3D {
+  return advance(profiles, raw, rawContacts, dt, readOwnedThermalParcel3D);
+}
+function advance(
+  profiles: MultiphysicsProfiles3D,
+  raw: readonly ThermalParcel3D[],
+  rawContacts: readonly ThermalContact3D[],
+  dt: number,
+  read: ParcelReader,
+): ThermalAdvanceResult3D {
   readMultiphysicsProfile3D(profiles, 'air');
   if (!Number.isFinite(dt) || dt < 0 || dt > THERMAL_LIMITS_3D.maxDt)
     throw Error('Invalid bounded thermal time step.');
   const parcels = list(raw, THERMAL_LIMITS_3D.parcels)
-    .map((p) => readThermalParcel3D(profiles, p))
+    .map((p) => read(profiles, p))
     .sort((a, b) => compare(a.id, b.id));
   const index = new Map<string, number>();
   for (let i = 0; i < parcels.length; i++) {
@@ -478,7 +559,7 @@ export function advanceParcelThermal3D(
         change(i, 'smoke', 'extinction');
     }
   return {
-    parcels: parcels.map((p) => readThermalParcel3D(profiles, p)),
+    parcels: parcels.map((p) => read(profiles, p)),
     transitions,
     burns,
     energy: energyReport(before, total(parcels)),

@@ -20,7 +20,7 @@ import {
   inventoryEnergyDelta3D,
   type MultiphysicsSnapshot3D,
 } from './model.js';
-import { parcelTemperature3D } from './thermal.js';
+import { ownedParcelTemperature3D } from './thermal.js';
 import { readMultiphysicsProfile3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
 import {
@@ -235,7 +235,7 @@ export function* createFluidCoupling3D(
       restDensity: profile.restDensity,
       viscosity: profile.viscosity,
       volume: profile.phase === 'gas' ? volumes.get(p.id)! : null,
-      thermalEnergy: parcelTemperature3D(profiles, p) * p.heatCapacity,
+      thermalEnergy: ownedParcelTemperature3D(profiles, p) * p.heatCapacity,
     };
   });
   const checkTravel = (fluid: typeof particles, movingBodies: FluidBoundaryBody3D[]) => {
@@ -338,7 +338,8 @@ export function* createFluidCoupling3D(
       const updated = state.parcels.find((p) => p.id === heat.id)!;
       if (
         Math.abs(
-          parcelTemperature3D(profiles, updated) * updated.heatCapacity - expected.thermalEnergy,
+          ownedParcelTemperature3D(profiles, updated) * updated.heatCapacity -
+            expected.thermalEnergy,
         ) >
         1e-8 * Math.max(1, expected.thermalEnergy)
       )

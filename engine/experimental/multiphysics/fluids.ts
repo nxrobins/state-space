@@ -3,7 +3,14 @@
  * DFSPH coefficient iteration. Viscosity is pair relaxation, not an SI fit.
  */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  readShapedMaterialParcel3D,
+  ownedFlatRecord3D,
+  MATERIAL_PARCEL_FIELDS_3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import {
   type Vec3,
   type Quat,
@@ -329,7 +336,8 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
       } else if (rawParticle.thermalCurve !== null)
         throw Error('Liquid thermal curve must be null.');
       return {
-        parcel: readMaterialParcel3D(rawParticle.parcel),
+        // `rawParticle.parcel` is part of the copy made above, so it is read where it is.
+        parcel: readOwnedMaterialParcel3D(rawParticle.parcel as Record<string, unknown>),
         thermalEnergy,
         volume,
         thermalCurve,
@@ -1639,7 +1647,14 @@ function* solve(
     !Number.isFinite(residual)
   )
     throw Error('Fluid impulse-work residual exceeds tolerance.');
-  for (const particle of p) readMaterialParcel3D(particle.parcel);
+  // Validation only. This job built each parcel and replaced its vectors with its own
+  // arithmetic, so a flat one is checked where it is; any other takes the copying reader and
+  // its rejections.
+  for (const particle of p) {
+    const owned = ownedFlatRecord3D(particle.parcel, MATERIAL_PARCEL_FIELDS_3D);
+    if (owned) readShapedMaterialParcel3D(owned);
+    else readMaterialParcel3D(particle.parcel);
+  }
   for (const body of bodies) {
     assertFiniteVec3(body.velocity);
     assertFiniteVec3(body.angularVelocity);
