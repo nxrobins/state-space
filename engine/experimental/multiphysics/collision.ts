@@ -9,7 +9,7 @@ import {
   normalizeVec3,
   assertFiniteVec3,
   normalizeQuaternion,
-  rotateVector,
+  rotateBasis,
 } from './math.js';
 
 export type OrientedCuboid = { center: Vec3; halfExtents: Vec3; orientation: Quat };
@@ -40,11 +40,7 @@ function prepare(shape: OrientedCuboid): PreparedCuboid {
   return {
     ...shape,
     orientation,
-    axes: [
-      rotateVector(orientation, [1, 0, 0]),
-      rotateVector(orientation, [0, 1, 0]),
-      rotateVector(orientation, [0, 0, 1]),
-    ],
+    axes: rotateBasis(orientation),
   };
 }
 

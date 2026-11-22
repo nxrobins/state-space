@@ -32,7 +32,11 @@ import {
   crossVec3,
   lengthVec3,
   rotateVector,
+  rotateByUnitQuaternion,
+  normalizeQuaternion,
+  assertFiniteVec3,
   type Vec3,
+  type Quat,
 } from './math.js';
 const ZERO: Vec3 = [0, 0, 0];
 const ZERO_MATRIX: FluidMatrix3D = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -152,18 +156,20 @@ export function* createFluidCoupling3D(
     const volume =
       (8 * p.halfExtents[0] * p.halfExtents[1] * p.halfExtents[2]) /
       (counts[0] * counts[1] * counts[2]);
+    // One normalization per solid for all of its samples, made where the first sample's
+    // rotation would make it: after that sample's own offset has been checked.
+    let unit: Quat | undefined;
     for (let x = 0; x < counts[0]; x++)
       for (let y = 0; y < counts[1]; y++)
         for (let z = 0; z < counts[2]; z++) {
-          const position = addVec3(
-            p.center,
-            rotateVector(
-              p.orientation,
-              [x, y, z].map(
-                (c, axis) => ((2 * (c + 0.5)) / counts[axis] - 1) * p.halfExtents[axis],
-              ) as unknown as Vec3,
-            ),
-          );
+          const offset = [x, y, z].map(
+            (c, axis) => ((2 * (c + 0.5)) / counts[axis] - 1) * p.halfExtents[axis],
+          ) as unknown as Vec3;
+          if (unit === undefined) {
+            assertFiniteVec3(offset);
+            unit = normalizeQuaternion(p.orientation);
+          }
+          const position = addVec3(p.center, rotateByUnitQuaternion(unit, offset));
           if (
             liquidGas.some(
               (f) =>

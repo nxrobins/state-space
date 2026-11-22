@@ -13,6 +13,7 @@ import {
   normalizeQuaternion,
   integrateOrientation,
   rotateVector,
+  rotateBasis,
   multiplyQuaternions,
   subtractVec3,
   addVec3,
@@ -696,6 +697,7 @@ function privateContactTests() {
   expect(wanted).toHaveLength(names.length + 1);
   const helpers = {
     rotateVector,
+    rotateBasis,
     dotVec3,
     crossVec3,
     lengthVec3,

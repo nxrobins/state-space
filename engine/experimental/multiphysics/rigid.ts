@@ -22,6 +22,8 @@ import {
   normalizeVec3,
   assertFiniteVec3,
   rotateVector,
+  rotateByUnitQuaternion,
+  rotateBasis,
   integrateOrientation,
   multiplyQuaternions,
   normalizeQuaternion,
@@ -113,13 +115,13 @@ export function applyMatrix3(matrix: Matrix3, vector: Vec3): Vec3 {
   ) as unknown as Vec3;
 }
 function tensor(orientation: Quat, principal: Vec3): Matrix3 {
-  const axes = BASIS.map((axis) => rotateVector(orientation, axis));
+  const axes = rotateBasis(orientation);
   return Array.from({ length: 9 }, (_, at) =>
     axes.reduce((sum, axis, k) => sum + principal[k] * axis[Math.floor(at / 3)] * axis[at % 3], 0),
   ) as unknown as Matrix3;
 }
 function rotateTensor(matrix: Matrix3, orientation: Quat): Matrix3 {
-  const columns = BASIS.map((axis) => rotateVector(orientation, axis));
+  const columns = rotateBasis(orientation);
   return Array.from({ length: 9 }, (_, at) => {
     const row = Math.floor(at / 3),
       column = at % 3;
@@ -502,7 +504,7 @@ export function* fractureRigidBonds3D(
 }
 
 function axes(p: RigidParcel3D): Vec3[] {
-  return BASIS.map((axis) => rotateVector(p.orientation, axis));
+  return rotateBasis(p.orientation);
 }
 function projectionRadius(p: RigidParcel3D, directions: readonly Vec3[], axis: Vec3): number {
   return directions.reduce(
@@ -611,17 +613,19 @@ function translationImpact(
   return null;
 }
 function corners(parcel: RigidParcel3D): Vec3[] {
-  return Array.from({ length: 8 }, (_, bits) =>
-    addVec3(
-      parcel.center,
-      rotateVector(
-        parcel.orientation,
-        parcel.halfExtents.map((value, axis) =>
-          bits & (1 << axis) ? value : -value,
-        ) as unknown as Vec3,
-      ),
-    ),
-  );
+  // One normalization for the eight corners, made where the first rotation would make it:
+  // after that corner's own vector has been checked.
+  let unit: Quat | undefined;
+  return Array.from({ length: 8 }, (_, bits) => {
+    const corner = parcel.halfExtents.map((value, axis) =>
+      bits & (1 << axis) ? value : -value,
+    ) as unknown as Vec3;
+    if (unit === undefined) {
+      assertFiniteVec3(corner);
+      unit = normalizeQuaternion(parcel.orientation);
+    }
+    return addVec3(parcel.center, rotateByUnitQuaternion(unit, corner));
+  });
 }
 /** Round fluid exclusion against a solid OBB; finite spin/inertia stays authoritative.
  * Particle-particle exclusion is supplied by pressure, not this contact kernel.
@@ -654,8 +658,12 @@ export function particleBoxGeometry(a: RigidParcel3D, b: RigidParcel3D, first: b
     surface = local.map((v, i) => (i === axis ? sign * box.halfExtents[i] : v)) as unknown as Vec3;
     gap = -margins[axis] - radius;
   }
-  outward = rotateVector(q, outward);
-  const solidPoint = addVec3(box.center, rotateVector(q, surface));
+  // Both rotations below are by `q`. It is normalized once, where the first would do so:
+  // after that rotation's own vector has been checked.
+  assertFiniteVec3(outward);
+  const unit = normalizeQuaternion(q);
+  outward = rotateByUnitQuaternion(unit, outward);
+  const solidPoint = addVec3(box.center, rotateByUnitQuaternion(unit, surface));
   const point = scaleVec3(
     addVec3(solidPoint, subtractVec3(particle.center, scaleVec3(outward, radius))),
     0.5,

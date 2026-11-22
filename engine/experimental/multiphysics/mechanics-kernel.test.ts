@@ -13,6 +13,8 @@ import {
   normalizeQuaternion,
   multiplyQuaternions,
   rotateVector,
+  rotateByUnitQuaternion,
+  rotateBasis,
   integrateOrientation,
   cuboidMassProperties,
   applyWorldInverseInertia,
@@ -228,6 +230,69 @@ describe('oriented cuboid reference contact', () => {
       expect(() => orientedCuboidContact(body, invalid)).toThrow();
       expect(() => cuboidBounds(invalid)).toThrow();
       expect(() => sweptCuboidBounds(invalid, end)).toThrow();
+    }
+  });
+
+  test('rotating by an orientation normalized once equals rotating by the orientation bit for bit', () => {
+    const orientations: Quat[] = [
+      I,
+      [0, 0, 0, -1],
+      [0.3, -0.4, 0.5, 0.7],
+      [3, -4, 5, 7],
+      [1e-200, 2e-200, -3e-200, 4e-200],
+      [1e200, 0, -1e200, 1e200],
+      [0, 1, 0, 0],
+      [-0, 0, -1, 0],
+      rotation(normalizeVec3([1, 2, 3]), 0.7),
+      rotation([0, 0, 1], 1e-9),
+    ];
+    const vectors: Vec3[] = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+      [0.25, -1.5, 3],
+      [-0, 0, -0],
+      [1e-300, -1e150, 7],
+    ];
+    for (const q of orientations) {
+      const unit = normalizeQuaternion(q);
+      for (const v of vectors)
+        expect(encodeFrozen3D(rotateByUnitQuaternion(unit, v))).toBe(
+          encodeFrozen3D(rotateVector(q, v)),
+        );
+      expect(encodeFrozen3D(rotateBasis(q))).toBe(
+        encodeFrozen3D([
+          rotateVector(q, [1, 0, 0]),
+          rotateVector(q, [0, 1, 0]),
+          rotateVector(q, [0, 0, 1]),
+        ]),
+      );
+    }
+    const message = (run: () => unknown) => {
+      try {
+        run();
+        return null;
+      } catch (error) {
+        return (error as Error).message;
+      }
+    };
+    // The basis rejects an orientation as the first of its three rotations would.
+    for (const invalid of [[0, 0, 0, 0], [0, NaN, 0, 1], [1, 0, 0] as unknown] as Quat[]) {
+      const expected = message(() => rotateVector(invalid, [1, 0, 0]));
+      expect(expected).not.toBeNull();
+      expect(message(() => rotateBasis(invalid))).toBe(expected);
+    }
+    // A vector is checked before and after the arithmetic, as `rotateVector` checks it.
+    for (const invalid of [
+      [NaN, 0, 0],
+      [0, Infinity, 0],
+      [1e308, 1e308, 1e308],
+    ] as Vec3[]) {
+      const expected = message(() => rotateVector([0.3, -0.4, 0.5, 0.7], invalid));
+      expect(expected).not.toBeNull();
+      expect(
+        message(() => rotateByUnitQuaternion(normalizeQuaternion([0.3, -0.4, 0.5, 0.7]), invalid)),
+      ).toBe(expected);
     }
   });
 
