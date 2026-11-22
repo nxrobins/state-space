@@ -27,10 +27,11 @@
  * `--host` says how the ticks are driven, because the runtime does part of its collection in
  * tasks that only run when the process returns to its event loop, and what is unreferenced at
  * that moment decides what a collection may drop. `loop`, the default, runs a case back to
- * back and never returns. `sliced` takes the first tick sequence a case asks for and drives
- * it as a host does: one bounded slice of a tick per turn of the event loop. `paced` also
- * waits eight milliseconds between ticks, as a host with a fixed tick rate would. The stage
- * split and the function profile are taken in a loop whichever is chosen. */
+ * back and never returns. `sliced` takes a case that asks for one tick sequence and drives
+ * that as a host does: one bounded slice of a tick per turn of the event loop. `paced` also
+ * waits eight milliseconds between ticks, as a host with a fixed tick rate would. A case that
+ * advances in several steps is skipped under both. The stage split and the function profile
+ * are taken in a loop whichever is chosen. */
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Session } from 'node:inspector/promises';
@@ -61,8 +62,9 @@ const median = (values) => {
 const round = (value, digits = 3) => Number(value.toPrecision(digits));
 
 /** Run one case with no digests. `segments`, when given, receives one `[stage, work, ns]`
- * entry per run of a tick stage, in order; the clock is read only when the stage changes. */
-function drive({ engine, profiles }, frozen, segments) {
+ * entry per run of a tick stage, in order; the clock is read only when the stage changes.
+ * `asked`, when given, is told each tick sequence the case asks for. */
+function drive({ engine, profiles }, frozen, segments, asked) {
   const stats = { steps: 0, work: 0, rejected: null };
   const add = (stage, work, since) => {
     const now = process.hrtime.bigint();
@@ -82,6 +84,7 @@ function drive({ engine, profiles }, frozen, segments) {
         ...extra,
       }),
     advance(start, count, observe) {
+      asked?.(start, count);
       let snapshot = start;
       for (let step = 0; step < count; step++) {
         if (stats.rejected !== null) return { snapshot, rejected: true };
@@ -136,35 +139,13 @@ function drive({ engine, profiles }, frozen, segments) {
 }
 const turn = () => new Promise((done) => setImmediate(done));
 const pause = (ms) => new Promise((done) => setTimeout(done, ms));
-/** The first tick sequence a case asks for: its starting snapshot and its number of ticks. */
-function firstSequence({ engine, profiles }, frozen) {
-  const stop = Symbol('captured');
-  let sequence = null;
-  try {
-    frozen.run({
-      engine,
-      profiles,
-      seed: (id, material, center, extra = {}) =>
-        engine.seedThermalParcel3D(profiles, {
-          id,
-          material,
-          center,
-          owner: 'authored',
-          temperature: 20,
-          ...extra,
-        }),
-      advance(start, count) {
-        sequence = { start, count };
-        throw stop;
-      },
-      commit() {},
-      reject() {},
-      fact() {},
-    });
-  } catch (error) {
-    if (error !== stop) throw error;
-  }
-  return sequence;
+/** The tick sequence of a case that asks for exactly one: its starting snapshot and its number
+ * of ticks. A case that advances in several steps, or one tick at a time, has none: a host
+ * could not be given its ticks without the script that decides them. */
+function onlySequence(side, frozen) {
+  const sequences = [];
+  drive(side, frozen, undefined, (start, count) => sequences.push({ start, count }));
+  return sequences.length === 1 ? sequences[0] : null;
 }
 /** Drive one tick sequence as a host does: a bounded slice of work per turn of the event
  * loop and, when `gap` is set, that many idle milliseconds between ticks. */
@@ -287,10 +268,10 @@ async function measure({ output, bundle, select, rounds, focus, detail, host: mo
     engine = await import(pathToFileURL(bundle).href),
     side = { engine, profiles: await engine.createMultiphysicsProfiles3D() };
   for (const frozen of selectCases(catalogue, select)) {
-    const sequence = mode === 'loop' ? null : firstSequence(side, frozen),
+    const sequence = mode === 'loop' ? null : onlySequence(side, frozen),
       gap = mode === 'paced' ? 8 : 0;
     if (mode !== 'loop' && !sequence) {
-      say({ case: frozen.id, skipped: 'The case asks for no tick sequence.' });
+      say({ case: frozen.id, skipped: 'The case does not run as one tick sequence.' });
       continue;
     }
     // Warm until the optimizing compiler has had the hot functions: at least three runs and
