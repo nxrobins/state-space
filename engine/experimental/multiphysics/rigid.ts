@@ -27,6 +27,7 @@ import {
   normalizeQuaternion,
 } from './math.js';
 import { type OrientedCuboid, orientedCuboidContact, boundsOverlap } from './collision.js';
+import { retainJobFunctions } from './retained-functions.js';
 
 /** Row-major world-space tensor. */
 export type Matrix3 = readonly [
@@ -1145,6 +1146,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
     return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
   }
+  // See retained-functions.ts.
+  retainJobFunctions('rigid-step', [run, skipPair, contactGeometry]);
   return run();
 
   function* run(): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
@@ -1739,6 +1742,23 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     // proportional to the impulse and the impact's offset from the midpoint.
     // Trial support solves choose a conservative interval; rejected trials restore
     // every physical receipt while retaining their actual computational work.
+    // Every named function this step has created. See retained-functions.ts.
+    retainJobFunctions('rigid-run', [
+      progress,
+      parcelEnergy,
+      parcelMomentum,
+      record,
+      apply,
+      kick,
+      drift,
+      project,
+      unmet,
+      pastFormerSweepLimit,
+      recordParticleSupport,
+      recordPhysicalImpulses,
+      solve,
+      nextImpact,
+    ]);
     yield* project();
     const physical = new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
     yield* solve(true, undefined, undefined, undefined, physical);

@@ -3,6 +3,7 @@
  * DFSPH coefficient iteration. Viscosity is pair relaxation, not an SI fit.
  */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
+import { retainJobFunctions } from './retained-functions.js';
 import {
   readMaterialParcel3D,
   readOwnedMaterialParcel3D,
@@ -1323,6 +1324,39 @@ function* solve(
   const divergenceSupported = (row: Constraint) =>
     density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity &&
     supportVolume[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportVolume * h ** 3;
+  // Every named function this solve has created. See retained-functions.ts. A tick solves
+  // twice, and its projection-only solve does not call all of them, so three sets are held.
+  retainJobFunctions(
+    'fluid-solve',
+    [
+      rotateByUnit,
+      particleInverse,
+      angularVelocity,
+      kinetic,
+      bodyVelocity,
+      center,
+      velocityAt,
+      inverseAngular,
+      response,
+      impulse,
+      pairWork,
+      pressurePair,
+      particleHeat,
+      heat,
+      viscousPair,
+      viscousWeight,
+      referenceRate,
+      effectiveMass,
+      referenceApplyConstraint,
+      compiled,
+      compiledRate,
+      compiledApplyConstraint,
+      project,
+      divergenceSupported,
+      buildGram,
+    ],
+    3,
+  );
   const beforeProjection = kinetic();
   const predictedParticles = p.map((particle) => particle.parcel.velocity),
     predictedBodies = bodies.map((body) => body.velocity);
@@ -1765,7 +1799,7 @@ export function createFluidReferenceJob3D(
     completedWork,
     maxTotalWork: maximum,
   });
-  return Object.freeze({
+  const job: FluidReferenceJob3D = Object.freeze({
     progress,
     advance(maxWork = FLUID_REFERENCE_LIMITS_3D.advanceWork) {
       if (
@@ -1807,6 +1841,9 @@ export function createFluidReferenceJob3D(
       return structuredClone(result);
     },
   });
+  // The job's methods and its progress reader. See retained-functions.ts.
+  retainJobFunctions('fluid-job', [job, progress]);
+  return job;
 }
 /** One bounded reference step; this does not move positions or apply returned heat. */
 export function solveFluidReference3D(raw: FluidReferenceInput3D): FluidReferenceResult3D {

@@ -20,6 +20,7 @@ import {
 } from './rigid.js';
 import { createFluidCoupling3D, type FluidCouplingResult3D } from './fluid-coupling.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
+import { retainJobFunctions } from './retained-functions.js';
 import {
   advanceOwnedParcelThermal3D,
   settleThermalPhases3D,
@@ -172,7 +173,7 @@ export function createMultiphysicsTickJob3D(
     lastAdvanceWork = 0;
   let completed: MultiphysicsTickResult3D | undefined;
   const progress = (): MultiphysicsTickProgress3D => ({ status, stage, work, lastAdvanceWork });
-  return Object.freeze({
+  const job: MultiphysicsTickJob3D = Object.freeze({
     progress,
     advance(budget = MULTIPHYSICS_TICK_LIMITS_3D.advanceWork) {
       if (
@@ -227,8 +228,12 @@ export function createMultiphysicsTickJob3D(
       };
     },
   });
+  // The job's methods, its progress reader and its pipeline. See retained-functions.ts.
+  retainJobFunctions('world-tick', [job, progress, run]);
+  return job;
 
   function* run(): Generator<string, MultiphysicsTickResult3D, void> {
+    retainJobFunctions('world-tick-stages', [admitSolidification, refreshPhaseOwnership]);
     const before = multiphysicsInventory3D(state),
       dt = state.settings.dt;
     // Each parcel's cuboid is checked and given its axes once here, as its bounds need, and
