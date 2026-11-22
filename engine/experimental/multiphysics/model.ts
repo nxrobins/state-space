@@ -1,5 +1,6 @@
 /** Owned, versioned candidate-world data. Runtime qualification is separate from admission. */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 import {
   readThermalParcel3D,
   readOwnedThermalParcel3D,
@@ -244,8 +245,23 @@ export function readMultiphysicsSnapshot3D(
   profiles: MultiphysicsProfiles3D,
   raw: unknown,
 ): MultiphysicsSnapshot3D {
+  return readSnapshot(profiles, raw, copyPortableValue);
+}
+/** `readMultiphysicsSnapshot3D` for the candidate state a world tick built itself: the same
+ * copy, checks and rejections, without re-inspecting data the tick owns. */
+export function readOwnedMultiphysicsSnapshot3D(
+  profiles: MultiphysicsProfiles3D,
+  state: MultiphysicsSnapshot3D,
+): MultiphysicsSnapshot3D {
+  return readSnapshot(profiles, state, copyOwnedPortableValue);
+}
+function readSnapshot(
+  profiles: MultiphysicsProfiles3D,
+  raw: unknown,
+  copy: <T extends PortableValue>(value: T) => T,
+): MultiphysicsSnapshot3D {
   readMultiphysicsProfile3D(profiles, 'air');
-  const value = copyPortableValue(raw as PortableValue) as unknown as MultiphysicsSnapshot3D;
+  const value = copy(raw as PortableValue) as unknown as MultiphysicsSnapshot3D;
   assertRecordFields(
     value,
     [

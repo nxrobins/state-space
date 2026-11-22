@@ -23,6 +23,7 @@ import {
 import { ownedParcelTemperature3D } from './thermal.js';
 import { readMultiphysicsProfile3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 import {
   addVec3,
   subtractVec3,
@@ -255,27 +256,33 @@ export function* createFluidCoupling3D(
       }
   };
   checkTravel(particles, nearbyBodies);
-  const job = createFluidReferenceJob3D({
-    particles,
-    bodies: nearbyBodies,
-    boundaries,
-    contacts,
-    projectionOnly,
-    velocityPrediction: gravityPrediction,
-    ...(referenceOf
-      ? {
-          reference: {
-            particles: liquidGas.map((p) => ({
-              id: p.id,
-              velocity: referenceMotion(p.id).velocity,
-            })),
-            bodies: nearbyBodies.map((b) => ({ id: b.id, ...bodyReference.get(b.id)! })),
-          },
-        }
-      : {}),
-    dt,
-    smoothingRadius: h,
-  });
+  const job = createFluidReferenceJob3D(
+    {
+      particles,
+      bodies: nearbyBodies,
+      boundaries,
+      contacts,
+      projectionOnly,
+      velocityPrediction: gravityPrediction,
+      ...(referenceOf
+        ? {
+            reference: {
+              particles: liquidGas.map((p) => ({
+                id: p.id,
+                velocity: referenceMotion(p.id).velocity,
+              })),
+              bodies: nearbyBodies.map((b) => ({ id: b.id, ...bodyReference.get(b.id)! })),
+            },
+          }
+        : {}),
+      dt,
+      smoothingRadius: h,
+    },
+    undefined,
+    undefined,
+    // This input is built above from this tick's own data.
+    copyOwnedPortableValue,
+  );
   while (job.progress().status === 'running') {
     job.advance(1);
     yield 'fluid-solve';

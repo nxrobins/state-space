@@ -1,5 +1,6 @@
 /** Private, bounded operator-split candidate tick. This is not release qualification. */
-import { copyPortableValue, type PortableValue } from '../../portable-data.js';
+import type { PortableValue } from '../../portable-data.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 import { createCircuitSolveJob3D } from './circuit.js';
 import type { ResistiveConnection3D } from './circuit-reference.js';
 import { batteryStoredUnits3D, stepBatteryEnergy3D } from './battery.js';
@@ -35,6 +36,7 @@ import {
 import { readMultiphysicsProfile3D, type MultiphysicsProfiles3D } from './profiles.js';
 import {
   readMultiphysicsSnapshot3D,
+  readOwnedMultiphysicsSnapshot3D,
   multiphysicsInventory3D,
   inventoryEnergyDelta3D,
   rebuildOwners3D,
@@ -217,12 +219,13 @@ export function createMultiphysicsTickJob3D(
     },
     result() {
       if (status !== 'ready' || !completed) throw Error('World tick result is not ready.');
-      // The completed snapshot was validated at the end of the tick; callers receive an owned copy.
+      // The completed snapshot was validated at the end of the tick; callers receive an owned
+      // copy. This tick built both values, so the copy does not re-inspect them.
       return {
-        snapshot: copyPortableValue(
+        snapshot: copyOwnedPortableValue(
           completed.snapshot as unknown as PortableValue,
         ) as unknown as MultiphysicsSnapshot3D,
-        report: copyPortableValue(
+        report: copyOwnedPortableValue(
           completed.report as unknown as PortableValue,
         ) as unknown as MultiphysicsTickReport3D,
       };
@@ -475,17 +478,24 @@ export function createMultiphysicsTickJob3D(
       strength:
         b.strength * Math.min(soften(profiles, byId.get(b.a)!), soften(profiles, byId.get(b.b)!)),
     }));
-    const mechanical = createRigidStep3D(state.parcels, softened, state.anchors, {
-      dt,
-      gravity: state.settings.gravity,
-      restitution: state.settings.restitution,
-      friction: state.settings.friction,
-      resolvedParticleContacts: true,
-      deferFracture: true,
-      nonCollidingParticleIds: state.parcels
-        .filter((p) => !isRigidMaterial3D(profiles, p))
-        .map((p) => p.id),
-    });
+    const mechanical = createRigidStep3D(
+      state.parcels,
+      softened,
+      state.anchors,
+      {
+        dt,
+        gravity: state.settings.gravity,
+        restitution: state.settings.restitution,
+        friction: state.settings.friction,
+        resolvedParticleContacts: true,
+        deferFracture: true,
+        nonCollidingParticleIds: state.parcels
+          .filter((p) => !isRigidMaterial3D(profiles, p))
+          .map((p) => p.id),
+      },
+      // All four inputs are this tick's own data.
+      copyOwnedPortableValue,
+    );
     let mechanicalResult: ReturnType<typeof mechanical.next>;
     try {
       mechanicalResult = mechanical.next();
@@ -664,7 +674,7 @@ export function createMultiphysicsTickJob3D(
     ledger.numericalAngularMomentum = vector(addVec3(ledger.numericalAngularMomentum, numericalL));
     state.tick++;
     yield 'validation';
-    const snapshot = readMultiphysicsSnapshot3D(profiles, state);
+    const snapshot = readOwnedMultiphysicsSnapshot3D(profiles, state);
     const brokenBonds = [
       ...phaseBroken,
       ...[...rigid.brokenBonds, ...coupledBroken].map((b) => ({ ...originals.get(key(b))! })),

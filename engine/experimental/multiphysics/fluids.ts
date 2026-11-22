@@ -281,8 +281,11 @@ function inverse(m: FluidMatrix3D): FluidMatrix3D {
   if (!out.every(Number.isFinite)) throw Error('Fluid inertia inversion overflow.');
   return out;
 }
-function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
-  const data = copyPortableValue(raw as unknown as PortableValue);
+function readInput(
+  raw: FluidReferenceInput3D,
+  copy: <V extends PortableValue>(value: V) => V,
+): FluidReferenceInput3D {
+  const data = copy(raw as unknown as PortableValue);
   assertRecordFields(
     data,
     ['particles', 'bodies', 'boundaries', 'dt', 'smoothingRadius'],
@@ -1774,13 +1777,15 @@ function* solve(
   };
 }
 
-/** Input copies/validation are bounded setup; each work unit visits one bounded pair or row. */
+/** Input copies/validation are bounded setup; each work unit visits one bounded pair or row.
+ * `copy` is `copyOwnedPortableValue` only for the fluid coupling, which builds `raw` itself. */
 export function createFluidReferenceJob3D(
   raw: FluidReferenceInput3D,
   capture?: (face: FluidProjectionFaceCapture3D) => void,
   tuning: FluidReferenceTuning3D = {},
+  copy: <V extends PortableValue>(value: V) => V = copyPortableValue,
 ): FluidReferenceJob3D {
-  const input = readInput(raw),
+  const input = readInput(raw, copy),
     generator = solve(input, capture, { ...tuning });
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +

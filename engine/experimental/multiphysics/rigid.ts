@@ -28,6 +28,7 @@ import {
 } from './math.js';
 import { type OrientedCuboid, orientedCuboidContact, boundsOverlap } from './collision.js';
 import { retainJobFunctions } from './retained-functions.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 
 /** Row-major world-space tensor. */
 export type Matrix3 = readonly [
@@ -211,11 +212,14 @@ function validateOwnedParcel<T extends RigidParcel3D>(copy: T): T {
   if (copy.halfExtents.some((v) => v <= 0)) throw Error('Rigid half extents must be positive.');
   return copy;
 }
+/** Either portable copy: `copyPortableValue`, or `copyOwnedPortableValue` where the caller
+ * hands over data this engine built itself. */
+type PortableCopy = <V extends PortableValue>(value: V) => V;
 /** Public assembly readers keep their ownership, bounds and admission boundary. */
-function admitAssembly(raw: readonly RigidParcel3D[]): RigidParcel3D[] {
+function admitAssembly(raw: readonly RigidParcel3D[], copy: PortableCopy): RigidParcel3D[] {
   if (!Array.isArray(raw) || raw.length === 0 || raw.length > 256)
     throw Error('Rigid assemblies require 1..256 parcels.');
-  const owned = copyPortableValue(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
+  const owned = copy(raw as unknown as PortableValue) as unknown as RigidParcel3D[];
   const parcels = owned.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
   if (new Set(parcels.map((p) => p.id)).size !== parcels.length)
     throw Error('Duplicate rigid parcel ID.');
@@ -227,7 +231,7 @@ export function rigidAssemblyMassProperties3D(raw: readonly RigidParcel3D[]): {
   inertia: Matrix3;
   inverseInertia: Matrix3;
 } {
-  return assemblyMassPropertiesOfAdmitted(admitAssembly(raw));
+  return assemblyMassPropertiesOfAdmitted(admitAssembly(raw, copyPortableValue));
 }
 /** Private: canonical, sorted, unique parcels owned and admitted by this module. */
 function assemblyMassPropertiesOfAdmitted(
@@ -256,7 +260,9 @@ function assemblyMassPropertiesOfAdmitted(
   return { mass, center, inertia: matrix, inverseInertia: invertTensor(matrix) };
 }
 
-/** Shared admission check: no hidden unaccounted weld or moving anchor is accepted. */
+/** Shared admission check: no hidden unaccounted weld or moving anchor is accepted.
+ * Its callers are the snapshot reader and the fluid coupling, which pass parcels of a copy
+ * just made or of a tick's own candidate state. */
 export function validateRigidAssemblyMotion3D(
   raw: readonly RigidParcel3D[],
   anchored = false,
@@ -269,7 +275,7 @@ export function validateRigidAssemblyMotion3D(
   angularMomentum: Vec3;
   angularVelocity: Vec3;
 } {
-  return assemblyMotionOfAdmitted(admitAssembly(raw), anchored);
+  return assemblyMotionOfAdmitted(admitAssembly(raw, copyOwnedPortableValue), anchored);
 }
 /** Keeps all motion/anchor checks and arithmetic order; only repeated admission is omitted. */
 function assemblyMotionOfAdmitted(
@@ -1031,12 +1037,14 @@ function effective<T extends RigidParcel3D>(contact: Contact<T>, direction: Vec3
   );
 }
 
-/** Owns inputs immediately. No candidate state escapes through progress yields. */
+/** Owns inputs immediately. No candidate state escapes through progress yields.
+ * `copy` is `copyOwnedPortableValue` only for a world tick handing over its own data. */
 export function createRigidStep3D<T extends RigidParcel3D>(
   rawParcels: readonly T[],
   rawBonds: readonly RigidBond3D[],
   rawAnchors: readonly string[],
   rawOptions: RigidStepOptions3D,
+  copy: PortableCopy = copyPortableValue,
 ): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
   if (
     !Array.isArray(rawParcels) ||
@@ -1047,14 +1055,12 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     rawAnchors.length > rawParcels.length
   )
     throw Error('Rigid candidate exceeds bounded input limits.');
-  const ownedParcels = copyPortableValue(rawParcels as unknown as PortableValue) as unknown as T[];
+  const ownedParcels = copy(rawParcels as unknown as PortableValue) as unknown as T[];
   const parcels = ownedParcels.map(validateOwnedParcel).sort((a, b) => lexical(a.id, b.id));
   const byId = new Map(parcels.map((p) => [p.id, p]));
   if (byId.size !== parcels.length) throw Error('Duplicate rigid parcel ID.');
-  const bonds = copyPortableValue(rawBonds as unknown as PortableValue) as unknown as RigidBond3D[];
-  const ownedAnchors = copyPortableValue(
-    rawAnchors as unknown as PortableValue,
-  ) as unknown as string[];
+  const bonds = copy(rawBonds as unknown as PortableValue) as unknown as RigidBond3D[];
+  const ownedAnchors = copy(rawAnchors as unknown as PortableValue) as unknown as string[];
   const anchors = new Set(ownedAnchors);
   if (anchors.size !== rawAnchors.length || [...anchors].some((id) => !byId.has(id)))
     throw Error('Invalid rigid anchor IDs.');
@@ -1074,9 +1080,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   bonds.sort((a, b) => lexical(a.a, b.a) || lexical(a.b, b.b));
   if (bonds.some((b, i) => i > 0 && b.a === bonds[i - 1].a && b.b === bonds[i - 1].b))
     throw Error('Duplicate rigid bond.');
-  const input = copyPortableValue(
-    rawOptions as unknown as PortableValue,
-  ) as unknown as RigidStepOptions3D;
+  const input = copy(rawOptions as unknown as PortableValue) as unknown as RigidStepOptions3D;
   const options = {
     gravity: ZERO,
     restitution: 0,
