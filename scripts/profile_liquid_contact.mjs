@@ -266,10 +266,12 @@ for (const frozen of selected) {
       nsPerWorkUnit: last.work ? round((1e6 * cpuMs) / last.work) : null,
     };
   if (frozenSide) {
+    const ratios = samples.candidate.map((value, i) => value / samples.frozen[i]);
     Object.assign(row, {
       frozenCpuMs: round(median(samples.frozen), 4),
-      // Per round, so drift across the run cancels.
-      pairedRatio: round(median(samples.candidate.map((value, i) => value / samples.frozen[i])), 4),
+      // Per round, so drift across the run cancels. The spread says how far to trust it.
+      pairedRatio: round(median(ratios), 4),
+      pairedRatioMinMax: [round(Math.min(...ratios), 4), round(Math.max(...ratios), 4)],
       sameStepsAndWork: lastFrozen.steps === last.steps && lastFrozen.work === last.work,
     });
   } else {
