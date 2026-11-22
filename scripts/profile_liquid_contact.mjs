@@ -1,10 +1,11 @@
 /** Supervised CPU cost of the frozen liquid/contact cases.
  *
  *   node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id>]
- *     [--rounds <1..25>] [--focus <function>] [--timeout <seconds, at most 1800>]
+ *     [--rounds <1..25>] [--focus <function>[,<function>...]] [--timeout <seconds, at most 1800>]
  *
  * Without a commit it measures the working tree: per case its CPU time, deterministic work
- * units, the split by tick stage and the functions with the most self time. With a commit it
+ * units, the split by tick stage, the functions with the most self time, and who reaches the
+ * hottest of them (or each function --focus names), counted with its callees. With a commit it
  * runs that commit and the working tree in alternating order and reports the paired ratio,
  * which is how an exact-behaviour change is costed. It measures and never asserts
  * behaviour; `freeze_liquid_contact.mjs compare` is the exactness check.
@@ -29,7 +30,7 @@ import { guardNode } from './verification_guard.mjs';
 
 const USAGE =
   'Usage: node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id-substring>]\n' +
-  '  [--rounds <1..25>] [--focus <function>] [--timeout <seconds, at most 1800>]';
+  '  [--rounds <1..25>] [--focus <function>[,<function>...]] [--timeout <seconds, at most 1800>]';
 const options = readOptions(
   process.argv.slice(2),
   { commit: undefined, select: 'control', rounds: '5', timeout: '900', focus: undefined },
@@ -180,31 +181,43 @@ async function hottest(side, frozen) {
         !['(garbage collector)', '(idle)', '(program)', '(root)', '(node runtime)'].includes(key),
     )
     .sort((a, b) => b[1] - a[1]);
-  // Who reaches one function, the hottest unless --focus names another: the three nearest
-  // distinct callers of each of its samples.
-  const focus = options.focus
-      ? ranked.find(([key]) => key.startsWith(`${options.focus} :`))?.[0]
-      : ranked[0]?.[0],
-    chains = new Map();
-  profile.samples.forEach((id, i) => {
-    if (label(id) !== focus) return;
-    const chain = [];
-    for (let at = parents.get(id); at !== undefined && chain.length < 3; at = parents.get(at))
-      if (label(at) !== focus && label(at) !== chain.at(-1)) chain.push(label(at));
-    const key = chain.join(' < ');
-    chains.set(key, (chains.get(key) ?? 0) + profile.timeDeltas[i]);
-  });
+  // Who reaches a function: the hottest, or each one --focus names. A sample counts for a
+  // function when that function is anywhere on its stack, so the share includes the time
+  // spent in whatever it calls. Each such sample is filed under the three nearest distinct
+  // callers above the function's innermost frame.
+  const names = new Set(self.keys());
+  for (const frame of frames.keys()) names.add(label(frame));
   const percent = (micros) => round((100 * micros) / total);
+  const reached = (options.focus ? options.focus.split(',') : [null]).map((wanted) => {
+    const focus = wanted ? [...names].find((key) => key.startsWith(`${wanted} :`)) : ranked[0]?.[0],
+      chains = new Map();
+    let inclusive = 0;
+    profile.samples.forEach((id, i) => {
+      let at = id;
+      while (at !== undefined && label(at) !== focus) at = parents.get(at);
+      if (at === undefined) return;
+      inclusive += profile.timeDeltas[i];
+      const chain = [];
+      for (at = parents.get(at); at !== undefined && chain.length < 3; at = parents.get(at))
+        if (label(at) !== focus && label(at) !== chain.at(-1)) chain.push(label(at));
+      const key = chain.join(' < ');
+      chains.set(key, (chains.get(key) ?? 0) + profile.timeDeltas[i]);
+    });
+    return {
+      function: focus ?? wanted,
+      percentWithCallees: percent(inclusive),
+      from: [...chains]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12)
+        .map(([chain, micros]) => ({ chain, percent: percent(micros) })),
+    };
+  });
   return {
     garbageCollectorPercent: percent(self.get('(garbage collector)') ?? 0),
     functions: ranked
       .slice(0, 12)
       .map(([key, micros]) => ({ function: key, percent: percent(micros) })),
-    focus,
-    hottestReachedFrom: [...chains]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([chain, micros]) => ({ chain, percent: percent(micros) })),
+    reached,
   };
 }
 
