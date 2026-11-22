@@ -30,12 +30,20 @@ import {
   multiphysicsInventory3D,
   inventoryEnergyDelta3D,
   rebuildOwners3D,
+  bondedComponents3D,
   isRigidMaterial3D,
   compareIdentity3D,
   MULTIPHYSICS_LIMITS_3D,
   type MultiphysicsSnapshot3D,
 } from './model.js';
-import { addVec3, subtractVec3, assertFiniteVec3, type Vec3 } from './math.js';
+import {
+  addVec3,
+  subtractVec3,
+  scaleVec3,
+  applyWorldInverseInertia,
+  assertFiniteVec3,
+  type Vec3,
+} from './math.js';
 
 export const MULTIPHYSICS_TICK_LIMITS_3D = Object.freeze({
   advanceWork: 256,
@@ -76,6 +84,9 @@ export type MultiphysicsTickReport3D = {
   };
   fluid: FluidCouplingResult3D['report'];
   fluidPostProjection: FluidCouplingResult3D['report'];
+  /** Identified mechanical dissipation paid as heat this tick: rigid impacts and friction,
+   * and the net kinetic energy that liquid constraints and the solid support of liquid
+   * samples removed from closing motion. */
   mechanicalHeat: number;
   numericalEnergy: number;
   numericalLinearMomentum: Vec3;
@@ -484,9 +495,81 @@ export function createMultiphysicsTickJob3D(
       yield 'mechanical-heat';
     }
     rebuildOwners3D(profiles, state, beforeFracture);
+    // Each parcel's motion with only the gravity that resting support did not cancel: what
+    // entered the rigid stage, less the predicted gravity the first fluid pass absorbed, plus
+    // the whole step of gravity and the rigid stage's physical impacts. Closing present in
+    // it is an impact; the rest of what the post-drift projection removes is support.
+    const absorbed = new Map(fluidReceipt.supportVelocityChange.map((row) => [row.id, row])),
+      impacts = new Map(rigid.physicalVelocityChange.map((row) => [row.id, row])),
+      fixed = new Set(
+        bondedComponents3D(
+          beforeFracture.filter((p) => isRigidMaterial3D(profiles, p)),
+          state.bonds,
+        )
+          .filter((ids) => ids.some((id) => state.anchors.includes(id)))
+          .flat(),
+      ),
+      fall = scaleVec3(state.settings.gravity, dt);
+    const impactReference = beforeFracture.map((p) => {
+      const impact = impacts.get(p.id)!;
+      return {
+        id: p.id,
+        velocity: vector(
+          addVec3(
+            addVec3(p.velocity, absorbed.get(p.id)?.velocity ?? [0, 0, 0]),
+            addVec3(impact.velocity, fixed.has(p.id) ? [0, 0, 0] : fall),
+          ),
+        ),
+        angularVelocity: vector(
+          addVec3(
+            applyWorldInverseInertia(
+              p.orientation,
+              p.principalInertia.map((v) => 1 / v) as unknown as Vec3,
+              p.intrinsicAngularMomentum,
+            ),
+            impact.angularVelocity,
+          ),
+        ),
+      };
+    });
     // Finish at a full-step velocity boundary. Otherwise the last gravity half
     // kick survives in resting liquid and appears as artificial kinetic energy.
-    const postFluid = yield* createFluidCoupling3D(profiles, state, true);
+    const postFluid = yield* createFluidCoupling3D(profiles, state, true, impactReference);
+    // Liquid constraints and the solid support of liquid samples are inelastic. Their work on
+    // resting liquid cancels within the tick: the first pass absorbs the predicted gravity,
+    // and the solid contacts and this projection give the same amount back. What remains is
+    // kinetic energy they removed from motion that was closing. It is paid as heat when it is
+    // a loss beyond a dead band of 1e-4 of the numerical limit and the closing motion is
+    // identified: a liquid row found it, or a body that a physical impact struck was carrying
+    // liquid samples, so their support passed the blow on. The amount is the tick's own net,
+    // so heat can never exceed the energy lost, and it goes where those rows and contacts
+    // acted. A net gain is never paid and stays a numerical residual.
+    const constraintEnergy = finite(
+      fluidReceipt.numericalEnergy + rigid.particleSupportEnergy + postFluid.numericalEnergy,
+    );
+    let constraintHeat = 0;
+    if (-constraintEnergy > 1e-4 * state.settings.numericalEnergyLimit) {
+      const weights = new Map<string, number>();
+      for (const rows of [fluidReceipt.impactLoss, rigid.particleSupportLoss, postFluid.impactLoss])
+        for (const row of rows) weights.set(row.id, (weights.get(row.id) ?? 0) + row.loss);
+      const struck = new Set(
+        rigid.physicalVelocityChange
+          .filter((row) => [...row.velocity, ...row.angularVelocity].some((value) => value !== 0))
+          .map((row) => row.id),
+      );
+      const identified =
+          fluidReceipt.impactLoss.length > 0 ||
+          postFluid.impactLoss.length > 0 ||
+          rigid.particleSupportLoss.some((row) => struck.has(row.id)),
+        total = [...weights.values()].reduce((sum, value) => sum + value, 0);
+      if (identified && total > 0) {
+        constraintHeat = -constraintEnergy;
+        for (const id of [...weights.keys()].sort(compareIdentity3D)) {
+          depositMechanicalHeat3D(profiles, state, id, (constraintHeat * weights.get(id)!) / total);
+          yield 'constraint-heat';
+        }
+      }
+    }
     const demands = new Map(
       state.parcels.map((p) => [
         p.id,
@@ -527,9 +610,13 @@ export function createMultiphysicsTickJob3D(
     const after = multiphysicsInventory3D(state),
       numericalEnergy = finite(inventoryEnergyDelta3D(before, after));
     const expectedNumerical = finite(
-      rigid.numericalEnergyResidual + fluidReceipt.numericalEnergy + postFluid.numericalEnergy,
+      rigid.numericalEnergyResidual +
+        fluidReceipt.numericalEnergy +
+        postFluid.numericalEnergy +
+        constraintHeat,
     );
-    // Conversion is explicit; neither projection error nor integration drift becomes heat.
+    // Conversion is explicit: only the identified losses above became heat. Whatever is left
+    // is unexplained, whether projection error or integration drift, and is bounded here.
     if (Math.abs(numericalEnergy) > state.settings.numericalEnergyLimit)
       throw Error(
         `World numerical energy limit exceeded (${numericalEnergy}; limit ${state.settings.numericalEnergyLimit}).`,
@@ -575,7 +662,8 @@ export function createMultiphysicsTickJob3D(
         battery: batteryReport,
         fluid: fluidReceipt.report,
         fluidPostProjection: postFluid.report,
-        mechanicalHeat,
+        mechanicalHeat:
+          constraintHeat > 0 ? finite(mechanicalHeat + constraintHeat) : mechanicalHeat,
         numericalEnergy,
         numericalLinearMomentum: numericalP,
         numericalAngularMomentum: numericalL,

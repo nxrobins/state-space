@@ -107,8 +107,12 @@ repair conservation by subtracting an unexplained residual from temperature.
   their application points. Restitution and friction produce nonnegative,
   identified mechanical losses that become heat once, at the contacting parcels.
 - Pressure work exchanges gas internal and mechanical energy. Physical viscosity
-  becomes heat. Incompressibility projection, stabilization, contact correction,
-  and integration error are numerical residuals, not physical dissipation.
+  becomes heat. Liquid constraints are inelastic: the net kinetic energy that
+  they, and the solid support of liquid samples, remove in a tick from motion
+  that was already closing becomes heat
+  ([rule and limits](#inelastic-liquid-loss-paid-as-heat-2026-11-17)). Resting
+  support, stabilization that adds energy, contact correction and integration
+  error remain numerical residuals, not physical dissipation.
 - Stationary anchors/walls receive a reported momentum reaction. Their zero
   velocity implies zero boundary work. Moving or creating anchors is an edit
   with explicit external momentum and energy accounting.
@@ -265,9 +269,9 @@ stall deadline).
 | Solids | Refinement (`rigid.test.ts`, symmetric top) | Halving `dt` cuts orientation error below 0.4× and energy error below 0.6× | Pass |
 | Liquids | Hydrostatic column (`world-tick.test.ts`) | Anchor reaction minus empty-cup control equals column weight × `dt` within `1e-6` relative; lateral below `1e-8` | Pass, 6 ticks |
 | Liquids | Sustained rest (extended) | Speed and movement below `1e-6`, heat below `1e-9`, absolute energy below `1e-6`, two timesteps over 0.5 s | Pass |
-| Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement | Pass, 26.7 s |
+| Liquids | Floating and sinking (tank) | Per-tick momentum residual below `1e-8` linear, `1e-6` angular; divergence `1e-7`; coarse energy below `0.006`, decreasing under refinement. Since 2026-11-17 the energy is the unexplained residual plus the constraint loss paid as heat, the same total as before | Pass, 26.7 s; totals unchanged on 2026-11-17 (`1.35e-5` wax, `1.07e-4` copper, halving with the timestep) |
 | Liquids | Displaced liquid (tank) | Mean acceleration from rest is positive and at most the Archimedes value `g (rho_l - rho_s) / rho_s` | Pass: about 0.48 (wax) and 0.36 (copper) of that bound |
-| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 2.49% then 2.46%; clockwise spin `-0.19` |
+| Liquids | Moving paddle (extended) | Plate and liquid momentum change cancel within `1e-12`; off-center spin below `-1e-3`; total angular momentum within `1e-5`; unpaid correction below 5% of plate kinetic energy, decreasing under refinement | Pass at plate speed 0.5: correction 2.49% then 2.46%; clockwise spin `-0.19`. Since 2026-11-17 the loss is paid as heat and the unexplained energy is 0.028% then 0.014% |
 | Liquids | Viscous decay (`world-tick.test.ts`) | Shear decreases every tick; heat equals kinetic loss within `1e-12`; halving `dt` changes the loss by under 1% | Pass |
 | Liquids | Equal and opposite impulses (`fluids.test.ts`, `world-tick.test.ts`) | Moving boundary, gas wall and liquid-to-conductor transfers match analytic impulse and torque, digits 11–12 | Pass |
 | Gas/reactive | Pressure work (`fluids.test.ts`) | Midpoint/adiabatic oracle and reflected-wall equivalence | Pass |
@@ -278,17 +282,320 @@ stall deadline).
 | Builder | Visible builder, six Mac stages (`examples/multiphysics-builder/`) | Preview p95 at most 250 ms and cancellation p95 at most 100 ms through the controls; every completed frame at most 16.667 ms over at least 180 frames; receipt, compare, atomic rejection and save/restart journeys | Pass on all six timed scenes |
 | Integration | Native module Worker, six Mac stages (`worker-probe.ts`) | Exact equality at work budgets 1 and 256, over 24 committed two-tick previews after cancel/retry, and after save/restart | Pass on all six timed scenes |
 
-Open liquid findings, not converted to passing budgets:
+Liquid findings recorded on 2026-11-01, both changed on 2026-11-17 by
+[paying inelastic liquid loss as heat](#inelastic-liquid-loss-paid-as-heat-2026-11-17):
 
-- At plate speed 1 the moving paddle is still rejected, now at impact rather
-  than at a distance. The plate pays `0.20` and `0.23` of physical impact heat
-  on two ticks, and on the second a wetted row becomes divergence-supported and
-  the post-drift projection removes `-0.041` unpaid, against the `0.01` limit.
-  Whether part of an incompressible impact's projection loss is paid as heat is
-  an open energy-policy decision. At 0.5 the case passes.
-- The paddle's unpaid correction at 0.5 barely changes under refinement (2.49%
-  to 2.46%). It is visible in `accounting.numericalEnergy` as the Dissipation
-  gate requires, but it is not heat.
+- At plate speed 1 the moving paddle was rejected at impact. The plate paid
+  `0.20` and `0.23` of physical impact heat on two ticks, and on the second a
+  wetted row became divergence-supported and the post-drift projection removed
+  `-0.041` unpaid, against the `0.01` limit. Whether an incompressible impact's
+  projection loss is paid as heat was an open energy-policy decision. It is now
+  paid, and the case completes at speeds 1 and 2. It is frozen as a completing
+  case, not yet a gate with its own budget.
+- The paddle's unpaid correction at 0.5 barely changed under refinement (2.49%
+  to 2.46%). With the loss paid, the unexplained energy is 0.028% of the plate's
+  kinetic energy and halves with the timestep.
+
+### Frozen liquid and contact behaviour (2026-11-17)
+
+Before further solver work, the behaviour of commit `06c737f` was recorded
+exactly: 36 cases in
+[`engine/test-support/multiphysics-frozen-cases.ts`](../engine/test-support/multiphysics-frozen-cases.ts),
+with their results in
+[`liquid-contact-freeze.json`](../engine/experimental/multiphysics/liquid-contact-freeze.json).
+Each case stores a digest and the work units of every committed tick, and for a
+rejection its message, stage and completed work. The file also lists every
+rejection message in the seven liquid, contact and world-tick sources. A
+recorded rejection is evidence of that behaviour, not a passing result.
+
+| Group | Cases | Recorded outcome |
+| --- | --- | --- |
+| Published open failures | Paddle at speed 1 (two timesteps); the builder's combined-failure journey; the same fixture with a full-width, wedged plate | All four rejected: `-0.0407`, `-0.0406` and `-0.472` unpaid energy; the wedged plate with `Rigid contact solve did not converge.` |
+| Rejection boundaries | Fluid and boundary travel, starting penetration, boundary and fluid sample limits, solid overlap, compressed liquid, gas closing speed | All eight rejected before any tick commits |
+| Stress scenes outside the gates | 13 liquid and contact scenes | Two complete (liquid sliding off a tilted plate; a plate spinning in liquid). Eleven are rejected, listed below |
+| Passing controls | The five demonstrations, the trajectory to the break, both timed cups, the resolved tank, the resting cup, the paddle at speed 0.5 | All eleven complete |
+
+The eleven rejected stress scenes, with the tick that fails:
+
+| Scene | Rejected at tick | Rejection |
+| --- | --- | --- |
+| 27 samples fall one unit onto a floor | 47, before touching | `-0.0111` unpaid |
+| Column with one wall missing | 21 | `-0.0103` unpaid |
+| Wax or copper body dropped into an 18-sample pool | 56, before touching | `-0.0116`, `-0.0117` unpaid |
+| Paddle at speed 2 | 44 | `-0.0178` unpaid |
+| Free plate lands on a nine-sample layer | 34 | `-1.39` unpaid |
+| Two samples fall into a V between fixed plates | 84 | `-11.4` unpaid |
+| Nine samples riding a plate that lands | 61 | `Rigid contact solve did not converge.` |
+| Cube strikes a floor and a wall together | 15 | `Rigid contact solve did not converge.` |
+| Cube in a slot exactly its width | 77 | `Impact interval refinement did not converge.` |
+| Six loose cubes pile up | 35 | `Rigid impact event limit exceeded.` |
+
+Every rejection left its input bit-identical, and a second attempt and an
+attempt from the JSON save rejected at the same stage, work and message.
+
+`liquid-contact-freeze.test.ts` runs 13 light cases and the rejection-message
+check in `npm test`. Digests are compared on the recording V8 and the outcome
+elsewhere. All 36 cases run under the supervisor:
+
+```sh
+node scripts/freeze_liquid_contact.mjs check
+node scripts/freeze_liquid_contact.mjs compare --commit 06c737f
+```
+
+`check` compares the working tree with the freeze file. `compare` bundles the
+named commit from its own blobs and runs both engines side by side. A change
+meant to keep behaviour exact must pass `check` unchanged. A change to the
+physical model re-records the file in the same commit
+(`node scripts/freeze_liquid_contact.mjs record`), so its diff states which
+cases changed. The tables above describe `06c737f`; the freeze file describes
+the current sources.
+
+### Contact solves past the former sweep limit (2026-11-17)
+
+Three limits of the rigid contact solve were rejections of the solver's
+effort, not of the scene. Each change below acts only where a solve used to be
+rejected, so a solve that converged before takes the same sweeps and gives the
+same bits. Against `06c737f`, 32 of the 36 frozen cases are bit-identical and
+the four former contact rejections change.
+
+- **Own sweep limit.** A contact solve shared a 96-sweep limit with the
+  geometric projection and the impact-interval refinement. It now has its own
+  limit of 1,024 (`contactIterations`). Past sweep 96 it continues only while
+  its unmet normal speed falls by at least a tenth every 32 sweeps; a slower
+  solve could not reach the unchanged `1e-8` tolerance within the limit and is
+  rejected there. The work limit still bounds the whole step.
+- **Rebounds inside the contact skin.** At sweep 96 a rebound too slow to
+  leave the `1e-8` contact skin within the tick is dropped. Such a rebound
+  cannot be observed, and on a wedged body opposing ones have no joint
+  solution: no rigid motion separates from both faces. Larger rebounds keep
+  their targets, so an observable rebound with no joint solution is still
+  rejected.
+- **Persistent contact in the sweep.** A body held between two faces could
+  report a re-contact just inside every interval tried, because its normal
+  speed is at solver noise and the fitted arc returns to the face in
+  proportion to the interval. After 96 refinements the last trial is swept
+  again without pairs whose separation along the contact normal stays within
+  the projection allowance (`1.25e-9`) for the whole interval. Any other event
+  still rejects.
+
+| Scene | At `06c737f` | Now |
+| --- | --- | --- |
+| Cube strikes a floor and a wall together | Rejected at tick 15 | Completes 60 ticks. The solve takes 491 sweeps; the cube leaves both faces at the analytic `0.4` and pays `15.84` of heat (`rigid.test.ts`, digits 7 and 6) |
+| Nine samples riding a plate that lands | Contact solve rejected at tick 61 | Contact solve converges in 101 sweeps. The same tick is then rejected for `-30.2` unpaid energy as the liquid meets the stopped plate |
+| Cube in a slot exactly its width | Interval refinement rejected at tick 77 | Sweep completes. The same tick is then rejected for `-0.353` unpaid energy |
+| Combined failure with a wedged plate | Rejected at tick 30 | Three more ticks commit. Tick 33 is rejected: the plate slides on both faces with friction, and the unmet speed falls by under 3% in 32 sweeps |
+
+Left open by this change: sliding friction on a wedged body, where the normal
+load is statically indeterminate; the six-cube pile, where a face landing
+almost flat alternates between two corners every `3.7e-5` model seconds and
+passes the 64-event limit with the interval shrinking by under 1% per event;
+and the unpaid-energy rejections, which the next section addresses for liquid.
+
+### Inelastic liquid loss paid as heat (2026-11-17)
+
+This changes the physical model's energy accounting. No tolerance, limit or
+solved velocity changes.
+
+The liquid solver removes kinetic energy whenever it projects velocities onto
+motion that does not compress: that is a perfectly inelastic constraint. The
+loss was booked as numerical error, and the `0.01` limit then rejected any tick
+in which liquid actually struck something. In the seven rejected liquid scenes
+that were probed, the unpaid energy was this loss: in the post-drift projection
+in six, and in the solid contacts that carry liquid samples in the seventh (the
+plate landing on a layer).
+
+**Rule.** Each tick adds three unexplained kinetic changes: the first fluid
+pass, the rigid stage's non-impact contacts between a liquid sample and a
+solid, and the post-drift projection. For resting liquid they cancel: the
+first pass absorbs the predicted gravity, and the contacts and the projection
+give the same amount back. What is left is kinetic energy removed from closing
+motion. It is deposited as heat when both hold:
+
+- it is a loss larger than `1e-4` of the numerical limit, and
+- the closing motion is identified. Either a liquid row did work against
+  motion that was already closing in a reference motion (each sample and body
+  with only the gravity that resting support did not cancel, plus the rigid
+  stage's physical impacts), or a body that a physical impact struck was
+  carrying liquid samples.
+
+The amount is the tick's own net, so heat never exceeds the energy lost. It is
+shared in proportion to the work of those rows and contacts: a liquid row heats
+its own sample, and a contact shares with the solid. The tick report adds it to
+`mechanicalHeat`; no report field is added, so a tick without such a loss
+reports exactly what it did. A net gain is never paid, heat is never taken
+back, and the projection itself is untouched: motion changes only where the
+added heat later changes a temperature-dependent outcome.
+
+**Evidence.** Against the previous commit, 19 of the 36 frozen cases are
+bit-identical: all eight rejection boundaries, including the compressed liquid
+(still rejected for a gain of `3198.6`); the three solid-only stress scenes;
+and the wax valve, rotating contact, fluid switch, falling battery, both timed
+cups, the resolved tank's two ticks and the resting cup. The rest:
+
+| Scene | Before | Now |
+| --- | --- | --- |
+| Paddle at speed 1, both timesteps | Rejected at ticks 91 and 182 | Complete, 110 and 220 ticks |
+| Builder journey: 48 ticks, heat edit, next preview | Preview rejected, `-0.472` | Preview completes |
+| 27 samples fall onto a floor | Rejected at tick 47 | Completes 90 ticks |
+| Column with one wall missing | Rejected at tick 21 | Completes 90 ticks |
+| Wax or copper body dropped into a pool | Rejected at tick 56 | Complete, 110 ticks |
+| Paddle at speed 2 | Rejected at tick 44 | Completes 60 ticks |
+| Free plate lands on a liquid layer | Rejected at tick 34, `-1.39` | Completes 60 ticks |
+| Two samples in a V between fixed plates | Rejected at tick 84, `-11.4` | Completes 120 ticks |
+| Nine samples riding a plate that lands | Rejected at tick 61, `-30.2` | Fourteen more ticks commit; tick 75 is rejected with `Rigid work limit exceeded.` |
+| Paddle at 0.5; combined failure and its trajectory to the break; tilted plate; spinning plate; wedged plate | Complete (the wedged plate rejected at tick 33) | Same outcome, with heat now paid. The first tick that differs is 176, 29, 29, 63, 56 and 29 |
+
+The published gates were rerun on these sources: all five extended cases pass,
+and both tank cases pass with their energy measured across both ledgers. In
+`world-tick.test.ts` the top layer of a full cup driven down at `0.5` loses
+`1.125` of kinetic energy, of which `1.12496` becomes heat with `8.5e-14`
+unexplained, and the same cup at rest pays exactly zero for six ticks.
+
+**Limits.**
+
+- The amount is exact for the tick; which parcels receive it is a weighting,
+  exact only for one sample meeting a wall.
+- A tick whose constraints add energy is still rejected above the limit. Liquid
+  compressed beyond rest density is pushed apart by the density target, and
+  that push is not paid for.
+- A loss below the dead band stays unexplained. In the wax tank at the finest
+  timestep no tick reaches it.
+- The numerical limit is an absolute `0.01` per tick. It does not scale with
+  the number of samples; a world sets its own limit up to `1`.
+- Solid-only cases are not covered. The cube in a slot is still rejected for
+  `-0.353` that its resting wall contacts remove while it strikes the floor.
+- The Mac builder stage recorded the journey's rejection as its reachable edge.
+  That stage has not been rerun on these sources.
+- `scripts/compare_fluid_optimizations.mjs` compares against an older frozen
+  bundle whose results lack `impactLoss` and `projectionVelocityChange`; it
+  needs a new baseline before it is used again.
+
+After both changes, 10 of the 13 stress scenes complete (2 before), and 3 of
+the 4 published open failures complete. Still rejected: the riding plate, the
+cube in a slot, the six-cube pile and the wedged plate.
+
+### Measured CPU cost (2026-11-17)
+
+`node scripts/profile_liquid_contact.mjs` profiles the frozen cases inside one
+supervised CPU job. It reports the process's own CPU time, because the
+supervisor's cap of about one logical CPU throttles wall time. A sample repeats
+its case until it lasts about 1.5 seconds; the process clock on Windows ticks
+in steps of about 16 ms. These figures are from an i9-11900K with Node 22.22.3.
+They are not the Mac qualification targets and do not replace them. Medians of
+five samples; a repeated run moves a median by up to about 15%.
+
+Before any optimization, on the sources of `35d064e`:
+
+| Scene | Parcels (liquid samples) | CPU per tick | Largest stages |
+| --- | --- | --- | --- |
+| Resolved tank | 105 (99) | 398 ms | First fluid pass 49%, post-drift projection 17%, contact scan 13% |
+| 4-wide cup | 69 (63) | 211 ms | First fluid pass 49%, contact scan 14%, post-drift projection 12% |
+| Timed cup | 32 (26) | 156 ms | First fluid pass 46%, contact scan 14%, post-drift projection 12%, rigid contact 10% |
+| Resting cup | 32 (27) | 86 ms | First fluid pass 50%, contact scan 11%, post-drift projection 11% |
+| Paddle at 0.5 | 28 (27) | 45 ms | First fluid pass 52%, fluid contact constraints 7%, contact scan 6% |
+| Combined failure | 10 (1) | 18 ms | First fluid pass 20%, contact scan 19% |
+| Wax valve | 8 (0) | 14 ms | Contact scan 22%, first fluid pass 18% |
+| Fluid switch | 5 (1) | 9.4 ms | First fluid pass 17%, rigid sweep 17%, rigid contact 13% |
+| Rotating contact | 4 (0) | 4.7 ms | Validation 18%, admission 17% |
+| Falling battery | 4 (0) | 3.6 ms | Validation 19%, admission 18% |
+
+By function, as a share of profile samples: deep copies of portable data are
+13–23% of the liquid loads and 30–56% of the small scenes; quaternion
+normalization is 8–14% of the liquid loads; record-shape checks are 3–15%. The
+constraint arithmetic itself (the solver loop, `compiledApplyConstraint`,
+`compiledRate`, `buildGram`) is 10–20% of the liquid loads. Most of a tick is
+therefore ownership and validation work around the solver, not the solver.
+
+**Exact-behaviour change 1: one normalization per liquid sample.** The liquid
+solver normalized each sample's orientation three times in every angular
+evaluation. It now forms those quaternions once per solve with the same calls
+and repeats the same arithmetic and checks on each use. All 36 frozen cases are
+bit-identical without re-recording the freeze. Paired against the previous
+commit over seven alternating samples, the CPU time is 0.89 of before for the
+tank, the 4-wide cup and the resting cup, 0.90 for the timed cup and 0.83 for
+the paddle. Scenes with at most one liquid sample are within noise (0.95 to
+1.09).
+
+Exact-behaviour targets not yet taken, by measured share:
+
+1. The portable copy inside `readThermalParcel3D`, reached from
+   `parcelTemperature3D`, from the snapshot readers and from every
+   `depositMechanicalHeat3D`, which copies and re-validates its parcel even for
+   a deposit of zero. Reading a parcel the tick already owns in place has to
+   reproduce the copy's normalization of negative zero and each of its
+   rejections.
+2. The scan of all parcel pairs for contact at the start of each tick.
+3. Quaternion normalization inside `rotateVector` in the contact tests.
+
+### GPU feasibility and the limits on scale (2026-11-17)
+
+No GPU or browser workload was run for this. It rests on the solver source and
+on two CPU measurements under the supervisor. The question was whether the
+liquid and contact solver could move to a GPU, and what limits a much larger
+scene would meet first.
+
+**Measured: the sweeps do not reach the contract; a dense solve does.** The
+divergence residual after the coordinate sweeps, against its `1e-7` tolerance:
+
+| Scene | Constraint rows | After 1 sweep | After 8 | After 16 | After 32 | Dense iterations | Rows in the dense solve |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Timed cup, 26 samples | 77 | `1.8e-2` | `1.3e-3` | `2.5e-4` | `6.5e-5` | 5 to 13 | 73 to 74 |
+| 4-wide cup, 63 samples | 148 to 149 | `1.8e-2` | `2.8e-3` | `7.6e-4` to `1.1e-3` | `9.4e-5` to `5.1e-4` | 4 to 5 | 147 to 148 |
+| Resolved tank, 99 samples | 209 to 210 | `2.0e-2` | `3.0e-3` | `7.2e-4` | `5.3e-5` to `5.4e-4` | 13 to 14 | 208 to 209 |
+
+After the 32 sweeps the residual is about 500 to 5,000 times the tolerance, and
+in the tank it falls only from `7.2e-4` to `5.4e-4` over the last 16. Every
+solve on every tick then factorizes nearly all of its rows as one dense system,
+several times over. There are 2.1 to 3.0 rows per liquid sample.
+
+**Limits.** Each of these holds for the solver as it is specified today.
+
+1. *Float64 is the contract.* Committed state, the ledgers and the exactness
+   gates (direct, Worker and save/restart equal bit for bit) are Float64. WGSL
+   has no 64-bit float, so a GPU result cannot be that committed state. The
+   engine's existing GPU paths match their CPU reference because they are
+   integer arithmetic; that does not carry over.
+2. *The tolerances are below single precision.* Contact speed `1e-8`,
+   divergence `1e-7`, impulse-work identity `1e-9` relative, contact skin
+   `1e-8` and penetration limit `1e-5` in position. A 32-bit float resolves
+   `6e-8` near 1, `1.9e-6` at the model extent of 16 and `1.2e-4` at 1,024.
+   The contact skin cannot be represented in world coordinates at any of them.
+3. *Order is part of the result.* The liquid rows and the rigid contacts are
+   updated one at a time in canonical order, and rigid motion is split at
+   impact events found in sequence. A GPU needs simultaneous (Jacobi) or
+   coloured updates, which is a different iteration with different results even
+   in Float64, and no faster to converge than the sweeps measured above.
+4. *The dense solve is cubic.* It is what meets the tolerance, on any hardware.
+   At 10,000 samples it would be at least 21,000 rows (2.1 per sample, the
+   lowest measured): a 3.5 GB Float64 matrix and about `3e12` operations per
+   factorization, several per tick.
+5. *The model is capped and visits all pairs.* 256 parcels, 128 fluid samples,
+   128 boundary samples, extent 16. Neighbour search, viscosity, gas pressure
+   and the contact scan each visit every pair.
+6. *The heat ledger is exact integer arithmetic beyond 32 bits.* WGSL integers
+   are 32-bit, so the ledger stays on the CPU and every tick needs a readback
+   before it can commit.
+7. *Bounded work and atomic rejection are per row.* The tick is one cooperative
+   pipeline that yields after each bounded unit and rejects by abandoning the
+   candidate. A GPU pass can stop only between dispatches.
+
+WGSL also states floating-point accuracy as bounds rather than exact results
+for several operations, so two GPUs need not agree bit for bit with each other.
+That is my reading of the specification and should be confirmed against its
+current text before it is relied on.
+
+**What this means for a much larger scene.** Exact-behaviour work on the
+present solver removes constant factors: the copies, checks and pair scans
+measured above are most of a tick today. It does not remove the cubic term or
+the caps. A liquid at thousands of samples needs a different solver contract,
+qualified separately and not interchangeable with this one: a matrix-free
+iterative pressure solve over a spatial grid, single precision, tolerances
+stated where iteration actually lands (the table suggests `1e-4` to `1e-3`,
+not `1e-7`), and a numerical-energy limit that scales with the number of
+samples. The inelastic-loss rule above is what would let such a solver account
+for its energy without the fixed `0.01` limit. Whether the larger scene must
+keep bit-exact committed state decides between the two: if it must, it stays
+on the CPU and small.
 
 ## Implementation evidence
 

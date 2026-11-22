@@ -36,6 +36,13 @@ import {
 const ZERO: Vec3 = [0, 0, 0];
 const ZERO_MATRIX: FluidMatrix3D = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 export type FluidCouplingResult3D = {
+  /** Per parcel, the part of this pass's gravity prediction that resting support absorbed:
+   * the projection's velocity change along gravity, no larger than the prediction. Empty
+   * when the pass applied no prediction. */
+  supportVelocityChange: { id: string; velocity: Vec3 }[];
+  /** Per parcel, where this pass's projection removed motion that was already closing: a
+   * weight for depositing the tick's inelastic constraint loss. Zero for resting support. */
+  impactLoss: { id: string; loss: number }[];
   numericalEnergy: number;
   loadDemands: RigidImpulse3D[];
   boundaryLinearImpulse: Vec3;
@@ -46,15 +53,21 @@ export type FluidCouplingResult3D = {
       })
     | null;
 };
-/** Candidate state is private to the encompassing world job; no live publication occurs here. */
+/** Candidate state is private to the encompassing world job; no live publication occurs here.
+ * `impactReference` is each parcel's motion with only the gravity that resting support did
+ * not cancel. The post-drift projection classifies closing against it; the first pass of a
+ * tick has none and classifies against its own motion before the predictor. */
 export function* createFluidCoupling3D(
   profiles: MultiphysicsProfiles3D,
   state: MultiphysicsSnapshot3D,
   projectionOnly = false,
+  impactReference?: readonly { id: string; velocity: Vec3; angularVelocity: Vec3 }[],
 ): Generator<string, FluidCouplingResult3D, void> {
   const liquidGas = state.parcels.filter((p) => !isRigidMaterial3D(profiles, p));
   if (!liquidGas.length)
     return {
+      supportVelocityChange: [],
+      impactLoss: [],
       numericalEnergy: 0,
       loadDemands: [],
       boundaryLinearImpulse: ZERO,
@@ -80,6 +93,13 @@ export function* createFluidCoupling3D(
     volumes = new Map(state.gasVolumes.map((g) => [g.id, g.volume]));
   const bodies: FluidBoundaryBody3D[] = [],
     bodyMembers = new Map<string, string[]>();
+  const referenceOf = impactReference && new Map(impactReference.map((row) => [row.id, row]));
+  const referenceMotion = (id: string) => {
+    const row = referenceOf!.get(id);
+    if (!row) throw Error('Fluid impact reference does not cover the world.');
+    return row;
+  };
+  const bodyReference = new Map<string, { velocity: Vec3; angularVelocity: Vec3 }>();
   for (const ids of bondedComponents3D(solids, state.bonds)) {
     const anchored = ids.some((id) => state.anchors.includes(id)),
       members = ids.map((id) => byId.get(id)!);
@@ -106,6 +126,17 @@ export function* createFluidCoupling3D(
       inverseInertia: anchored ? ZERO_MATRIX : inverseInertia,
     });
     bodyMembers.set(members[0].owner, ids);
+    // A rigid assembly's reference motion at its centre of mass: the mass-weighted mean of
+    // its members' reference velocities, and the angular velocity they all share.
+    if (referenceOf)
+      bodyReference.set(members[0].owner, {
+        velocity: members.reduce<Vec3>(
+          (sum, p) =>
+            addVec3(sum, scaleVec3(referenceMotion(p.id).velocity, p.mass / assembly.mass)),
+          ZERO,
+        ),
+        angularVelocity: referenceMotion(members[0].id).angularVelocity,
+      });
     yield 'fluid-assemblies';
   }
   // Sample solid volume at at-most-unit spacing; collapsing a wide floor into
@@ -231,6 +262,17 @@ export function* createFluidCoupling3D(
     contacts,
     projectionOnly,
     velocityPrediction: gravityPrediction,
+    ...(referenceOf
+      ? {
+          reference: {
+            particles: liquidGas.map((p) => ({
+              id: p.id,
+              velocity: referenceMotion(p.id).velocity,
+            })),
+            bodies: nearbyBodies.map((b) => ({ id: b.id, ...bodyReference.get(b.id)! })),
+          },
+        }
+      : {}),
     dt,
     smoothingRadius: h,
   });
@@ -323,6 +365,25 @@ export function* createFluidCoupling3D(
     1e-7 * Math.max(1, Math.abs(numericalEnergy))
   )
     throw Error('Fluid/world energy transfer mismatch.');
+  // How much of the predicted gravity each parcel's support absorbed, as a velocity.
+  const predictionSpeed = lengthVec3(gravityPrediction);
+  const absorbed = (change: Vec3): Vec3 =>
+    scaleVec3(
+      gravityPrediction,
+      -Math.min(
+        1,
+        Math.max(0, -dotVec3(change, gravityPrediction) / (predictionSpeed * predictionSpeed)),
+      ),
+    );
+  const supportVelocityChange: { id: string; velocity: Vec3 }[] = [];
+  if (predictionSpeed > 0) {
+    for (const row of result.projectionVelocityChange.particles)
+      supportVelocityChange.push({ id: row.id, velocity: absorbed(row.velocity) });
+    for (const row of result.projectionVelocityChange.bodies) {
+      const velocity = absorbed(row.velocity);
+      for (const id of bodyMembers.get(row.id)!) supportVelocityChange.push({ id, velocity });
+    }
+  }
   const changes = solids.map((p) => {
     const start = beforeSolid.get(p.id)!,
       momentum = scaleVec3(p.velocity, p.mass);
@@ -335,7 +396,16 @@ export function* createFluidCoupling3D(
       ),
     };
   });
+  const impactLoss = new Map<string, number>();
+  for (const row of result.impactLoss.particles)
+    impactLoss.set(row.id, (impactLoss.get(row.id) ?? 0) + row.loss);
+  for (const row of result.impactLoss.boundaries) {
+    const id = sampleOwners.get(row.id)!;
+    impactLoss.set(id, (impactLoss.get(id) ?? 0) + row.loss);
+  }
   return {
+    supportVelocityChange,
+    impactLoss: [...impactLoss].map(([id, loss]) => ({ id, loss })),
     numericalEnergy,
     loadDemands: rigidLoadDemands3D(solids, state.bonds, state.anchors, changes, [
       ...applied.values(),

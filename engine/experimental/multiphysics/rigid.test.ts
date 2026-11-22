@@ -826,3 +826,58 @@ test('the face-axis early reject fires only where the full contact test finds no
       expect(() => contactWithinTolerance(a, b, 0)).toThrow(message);
     }
 });
+
+describe('contact solves past the former 96-sweep limit', () => {
+  const corner = () => [
+    parcel('cube', [-2.5, 1.5, 0], [-4, -4, 0]),
+    parcel('floor', [0, 0, 0], [0, 0, 0], [3.5, 0.5, 1.5]),
+    parcel('wall', [-4, 2, 0], [0, 0, 0], [0.5, 2.5, 1.5]),
+  ];
+  const wedged = (spin: number) => {
+    const cube = parcel('cube');
+    cube.intrinsicAngularMomentum = [0, 0, spin * cube.principalInertia[2]];
+    return [
+      cube,
+      parcel('left', [-1, 0, 0], [0, 0, 0], [0.5, 2, 2]),
+      parcel('right', [1, 0, 0], [0, 0, 0], [0.5, 2, 2]),
+    ];
+  };
+
+  test('a frictional impact on a floor and a wall together keeps both rebounds', () => {
+    const options = { dt: 0.2, friction: 0.5, restitution: 0.1 };
+    // The former shared limit rejected this solve; it needs several hundred sweeps.
+    expect(() =>
+      run(corner(), { ...options, contactIterations: 96 }, [], ['floor', 'wall']),
+    ).toThrow('Rigid contact solve did not converge.');
+    const result = run(corner(), options, [], ['floor', 'wall']),
+      cube = result.parcels.find((p) => p.id === 'cube')!;
+    // Both faces are reached after 0.125 at speed 4 and left at 0.4; the two friction torques cancel.
+    close(cube.velocity, [0.4, 0.4, 0], 7);
+    close(cube.intrinsicAngularMomentum, [0, 0, 0], 7);
+    close(cube.center, [-3 + 0.4 * 0.075, 1 + 0.4 * 0.075, 0], 7);
+    expect(heat(result)).toBeCloseTo(16 - 0.16, 6);
+  });
+
+  test('rebounds too slow to leave the contact skin do not block a wedged body', () => {
+    // A cube exactly filling a slot, turning at 1e-6: two points close on each face at 5e-7.
+    // Their rebounds of 5e-8 would move 4e-10 in the tick, inside the 1e-8 contact skin, and
+    // no rigid motion separates from both faces at once.
+    const options = { dt: 1 / 120, friction: 0, restitution: 0.1 };
+    expect(() =>
+      run(wedged(1e-6), { ...options, contactIterations: 96 }, [], ['left', 'right']),
+    ).toThrow('Rigid contact solve did not converge.');
+    const result = run(wedged(1e-6), options, [], ['left', 'right']),
+      cube = result.parcels.find((p) => p.id === 'cube')!;
+    expect(lengthVec3(cube.intrinsicAngularMomentum)).toBeLessThan(1e-9);
+    close(cube.center, [0, 0, 0], 9);
+    expect(heat(result)).toBeGreaterThanOrEqual(0);
+    expect(heat(result)).toBeLessThan(1e-12);
+  });
+
+  test('observable rebounds with no joint solution are still rejected', () => {
+    // The same wedge turning at 1: its rebounds of 0.05 are real, and remain unsolvable.
+    expect(() =>
+      run(wedged(1), { dt: 1 / 120, friction: 0, restitution: 0.1 }, [], ['left', 'right']),
+    ).toThrow('Rigid contact solve did not converge.');
+  });
+});
