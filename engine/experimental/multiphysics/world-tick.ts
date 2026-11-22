@@ -3,10 +3,17 @@ import { copyPortableValue, type PortableValue } from '../../portable-data.js';
 import { createCircuitSolveJob3D } from './circuit.js';
 import type { ResistiveConnection3D } from './circuit-reference.js';
 import { batteryStoredUnits3D, stepBatteryEnergy3D } from './battery.js';
-import { orientedCuboidContact, cuboidBounds, type AxisAlignedBounds } from './collision.js';
+import {
+  orientedCuboidContact,
+  prepareCuboid,
+  preparedCuboidBounds,
+  preparedCuboidContact,
+  type AxisAlignedBounds,
+  type PreparedCuboid,
+} from './collision.js';
 import {
   createRigidStep3D,
-  rigidContactPatchArea3D,
+  rigidContactPatchAreaAlong3D,
   particleBoxGeometry,
   fractureRigidBonds3D,
   type RigidBond3D,
@@ -224,22 +231,28 @@ export function createMultiphysicsTickJob3D(
   function* run(): Generator<string, MultiphysicsTickResult3D, void> {
     const before = multiphysicsInventory3D(state),
       dt = state.settings.dt;
-    const bounds: AxisAlignedBounds[] = [];
+    // Each parcel's cuboid is checked and given its axes once here, as its bounds need, and
+    // reused for every pair below: nothing moves a parcel during this stage.
+    const cuboids: PreparedCuboid[] = [],
+      bounds: AxisAlignedBounds[] = [];
     for (const parcel of state.parcels) {
-      bounds.push(cuboidBounds(parcel));
+      const cuboid = prepareCuboid(parcel);
+      cuboids.push(cuboid);
+      bounds.push(preparedCuboidBounds(cuboid));
       yield 'contacts';
     }
     const contacts: ThermalContact3D[] = [],
       contactAreas = new Map<string, number>();
     for (let i = 0; i < state.parcels.length; i++)
       for (let j = i + 1; j < state.parcels.length; j++) {
-        if (
-          nearBounds(bounds[i], bounds[j]) &&
-          orientedCuboidContact(state.parcels[i], state.parcels[j])
-        ) {
+        const contact = nearBounds(bounds[i], bounds[j])
+          ? preparedCuboidContact(cuboids[i], cuboids[j])
+          : null;
+        if (contact) {
           if (contacts.length >= MULTIPHYSICS_TICK_LIMITS_3D.contacts)
             throw Error('World contact limit exceeded.');
-          const area = rigidContactPatchArea3D(state.parcels[i], state.parcels[j]);
+          // The patch area starts from this same contact; it is not found a second time.
+          const area = rigidContactPatchAreaAlong3D(state.parcels[i], state.parcels[j], contact);
           if (area > 1e-10) {
             const pair = { a: state.parcels[i].id, b: state.parcels[j].id };
             contacts.push(pair);

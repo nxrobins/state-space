@@ -23,7 +23,11 @@ import {
   cuboidBounds,
   boundsOverlap,
   sweptCuboidBounds,
+  prepareCuboid,
+  preparedCuboidContact,
+  preparedCuboidBounds,
 } from './collision.js';
+import { encodeFrozen3D } from '../../test-support/multiphysics-frozen-cases.js';
 
 const box = (
   center: Vec3 = [0, 0, 0],
@@ -225,5 +229,68 @@ describe('oriented cuboid reference contact', () => {
       expect(() => cuboidBounds(invalid)).toThrow();
       expect(() => sweptCuboidBounds(invalid, end)).toThrow();
     }
+  });
+
+  test('cuboids prepared once give the contact and bounds of the unprepared calls bit for bit', () => {
+    const tilt = rotation(normalizeVec3([1, 2, 3]), 0.7),
+      slight = rotation([0, 0, 1], 1e-9);
+    const shapes = [
+      box(),
+      box([2, 0, 0]),
+      box([2 + 1e-14, 0, 0]),
+      box([1.5, 0.5, -0.25], [1, 0.5, 2]),
+      box([2, 2, 0]),
+      box([2, 2, 2]),
+      box([5, 0, 0]),
+      box([0.3, 1.9, 0.2], [1, 1, 1], tilt),
+      box([2.4, 0.1, 0], [0.5, 2, 1], rotation([0, 0, 1], Math.PI / 4)),
+      box([0, 2, 0], [1, 1, 1], slight),
+      box([-0, 0, -0], [0.25, 0.25, 0.25], [0, 0, 0, -1]),
+      // A caller's cuboid may carry other fields; they change nothing.
+      { ...box([1, 1, 1], [1, 2, 3], tilt), id: 'parcel', mass: 4 },
+    ];
+    const prepared = shapes.map(prepareCuboid);
+    let touching = 0;
+    for (let i = 0; i < shapes.length; i++) {
+      expect(encodeFrozen3D(preparedCuboidBounds(prepared[i]))).toBe(
+        encodeFrozen3D(cuboidBounds(shapes[i])),
+      );
+      for (let j = 0; j < shapes.length; j++) {
+        const contact = orientedCuboidContact(shapes[i], shapes[j]);
+        expect(encodeFrozen3D(preparedCuboidContact(prepared[i], prepared[j]))).toBe(
+          encodeFrozen3D(contact),
+        );
+        if (contact) touching++;
+      }
+    }
+    // Both outcomes occur, so the comparison above covers each.
+    expect(touching).toBeGreaterThan(shapes.length);
+    expect(touching).toBeLessThan(shapes.length * shapes.length);
+    const message = (run: () => unknown) => {
+      try {
+        run();
+        return null;
+      } catch (error) {
+        return (error as Error).message;
+      }
+    };
+    for (const invalid of [
+      box([NaN, 0, 0]),
+      box([0, 0, 0], [0, 1, 1]),
+      box([0, 0, 0], [1, 1, Infinity]),
+      box([0, 0, 0], [1, 1, 1], [0, 0, 0, 0]),
+      box([0, 0, 0], [1, 1, 1], [0, 0, NaN, 1]),
+    ]) {
+      const expected = message(() => cuboidBounds(invalid));
+      expect(expected).not.toBeNull();
+      expect(message(() => prepareCuboid(invalid))).toBe(expected);
+      expect(message(() => orientedCuboidContact(invalid, box()))).toBe(expected);
+    }
+    // Far-apart centres overflow in the test itself, after both cuboids were prepared.
+    const far = [box([Number.MAX_VALUE, 0, 0]), box([-Number.MAX_VALUE, 0, 0])];
+    expect(message(() => preparedCuboidContact(prepareCuboid(far[0]), prepareCuboid(far[1])))).toBe(
+      message(() => orientedCuboidContact(far[0], far[1])),
+    );
+    expect(message(() => orientedCuboidContact(far[0], far[1]))).toMatch(/relative center/);
   });
 });

@@ -982,7 +982,15 @@ function manifold(
  */
 export function rigidContactPatchArea3D(a: RigidParcel3D, b: RigidParcel3D): number {
   const contact = orientedCuboidContact(shape(a), shape(b));
-  if (!contact) return 0;
+  return contact ? rigidContactPatchAreaAlong3D(a, b, contact) : 0;
+}
+/** The same area, for a caller that already holds the `orientedCuboidContact` of these two
+ * parcels' cuboids and so need not find it again. */
+export function rigidContactPatchAreaAlong3D(
+  a: RigidParcel3D,
+  b: RigidParcel3D,
+  contact: { normal: Vec3 },
+): number {
   const points = manifold(a, b, contact.normal, 1e-8);
   if (points.length < 3) return 0;
   const center = points.reduce<Vec3>(
