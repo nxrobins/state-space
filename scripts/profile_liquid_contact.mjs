@@ -1,8 +1,8 @@
 /** Supervised CPU cost of the frozen liquid/contact cases.
  *
- *   node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id>]
- *     [--rounds <1..25>] [--passes <1..4>] [--focus <function>[,<function>...]]
- *     [--timeout <seconds, at most 1800>]
+ *   node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id>[,<id>...]]
+ *     [--rounds <1..25>] [--passes <1..4>] [--host loop|sliced|paced]
+ *     [--focus <function>[,<function>...]] [--timeout <seconds, at most 1800>]
  *
  * Without a commit it measures the working tree: per case its CPU time, deterministic work
  * units, the split by tick stage, the functions with the most self time, and who reaches the
@@ -22,7 +22,15 @@
  *
  * A case is warmed until its hot functions have been compiled, then timed in samples of about
  * a second and a half. With a commit the two engines take turns by process: working tree,
- * commit, commit, working tree for two passes. */
+ * commit, commit, working tree for two passes.
+ *
+ * `--host` says how the ticks are driven, because the runtime does part of its collection in
+ * tasks that only run when the process returns to its event loop, and what is unreferenced at
+ * that moment decides what a collection may drop. `loop`, the default, runs a case back to
+ * back and never returns. `sliced` takes the first tick sequence a case asks for and drives
+ * it as a host does: one bounded slice of a tick per turn of the event loop. `paced` also
+ * waits eight milliseconds between ticks, as a host with a fixed tick rate would. The stage
+ * split and the function profile are taken in a loop whichever is chosen. */
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Session } from 'node:inspector/promises';
@@ -41,9 +49,9 @@ import {
 import { guardNode } from './verification_guard.mjs';
 
 const USAGE =
-  'Usage: node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id-substring>]\n' +
-  '  [--rounds <1..25>] [--passes <1..4>] [--focus <function>[,<function>...]]\n' +
-  '  [--timeout <seconds, at most 1800>]';
+  'Usage: node scripts/profile_liquid_contact.mjs [--commit <sha>] [--select light|heavy|all|<id-substring>[,...]]\n' +
+  '  [--rounds <1..25>] [--passes <1..4>] [--host loop|sliced|paced]\n' +
+  '  [--focus <function>[,<function>...]] [--timeout <seconds, at most 1800>]';
 const say = (row) => console.log(JSON.stringify(row));
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b),
@@ -126,12 +134,69 @@ function drive({ engine, profiles }, frozen, segments) {
   });
   return stats;
 }
-/** CPU time of one run, averaged over `repeat` back-to-back runs. The clock ticks in steps of
- * about 16 ms on Windows, so a short case is repeated until one sample is long. */
-function timed(side, frozen, repeat = 1) {
+const turn = () => new Promise((done) => setImmediate(done));
+const pause = (ms) => new Promise((done) => setTimeout(done, ms));
+/** The first tick sequence a case asks for: its starting snapshot and its number of ticks. */
+function firstSequence({ engine, profiles }, frozen) {
+  const stop = Symbol('captured');
+  let sequence = null;
+  try {
+    frozen.run({
+      engine,
+      profiles,
+      seed: (id, material, center, extra = {}) =>
+        engine.seedThermalParcel3D(profiles, {
+          id,
+          material,
+          center,
+          owner: 'authored',
+          temperature: 20,
+          ...extra,
+        }),
+      advance(start, count) {
+        sequence = { start, count };
+        throw stop;
+      },
+      commit() {},
+      reject() {},
+      fact() {},
+    });
+  } catch (error) {
+    if (error !== stop) throw error;
+  }
+  return sequence;
+}
+/** Drive one tick sequence as a host does: a bounded slice of work per turn of the event
+ * loop and, when `gap` is set, that many idle milliseconds between ticks. */
+async function host({ engine, profiles }, { start, count }, gap) {
+  const stats = { steps: 0, work: 0, rejected: null };
+  let snapshot = start;
+  try {
+    for (let step = 0; step < count; step++) {
+      const job = engine.createMultiphysicsTickJob3D(profiles, snapshot);
+      while (job.progress().status === 'running') {
+        job.advance(256);
+        await turn();
+      }
+      const result = job.result();
+      snapshot = result.snapshot;
+      stats.steps++;
+      stats.work += result.report.work;
+      if (gap) await pause(gap);
+    }
+  } catch (error) {
+    stats.rejected = error.message;
+  }
+  return stats;
+}
+/** CPU time of one run, averaged over `repeat` runs. The clock ticks in steps of about 16 ms
+ * on Windows, so a short case is repeated until one sample is long. Whatever the runtime
+ * does while the process is back in its event loop is counted. */
+async function timed(side, frozen, repeat, sequence, gap) {
   const before = process.cpuUsage();
   let stats;
-  for (let i = 0; i < repeat; i++) stats = drive(side, frozen);
+  for (let i = 0; i < repeat; i++)
+    stats = sequence ? await host(side, sequence, gap) : drive(side, frozen);
   const used = process.cpuUsage(before);
   return { ...stats, cpuMs: (used.user + used.system) / 1000 / repeat };
 }
@@ -217,11 +282,17 @@ async function hottest(side, frozen, focusNames) {
 }
 
 /** One engine, alone in this process: warm each case, then time it. */
-async function measure({ output, bundle, select, rounds, focus, detail }) {
+async function measure({ output, bundle, select, rounds, focus, detail, host: mode }) {
   const catalogue = await import(pathToFileURL(resolve(output, 'catalogue.mjs')).href),
     engine = await import(pathToFileURL(bundle).href),
     side = { engine, profiles: await engine.createMultiphysicsProfiles3D() };
   for (const frozen of selectCases(catalogue, select)) {
+    const sequence = mode === 'loop' ? null : firstSequence(side, frozen),
+      gap = mode === 'paced' ? 8 : 0;
+    if (mode !== 'loop' && !sequence) {
+      say({ case: frozen.id, skipped: 'The case asks for no tick sequence.' });
+      continue;
+    }
     // Warm until the optimizing compiler has had the hot functions: at least three runs and
     // 24 ticks, and then six seconds of CPU time or thirty runs, whichever comes first.
     let run,
@@ -229,7 +300,7 @@ async function measure({ output, bundle, select, rounds, focus, detail }) {
       steps = 0,
       warmMs = 0;
     do {
-      run = timed(side, frozen);
+      run = await timed(side, frozen, 1, sequence, gap);
       runs++;
       steps += Math.max(1, run.steps);
       warmMs += run.cpuMs;
@@ -238,7 +309,7 @@ async function measure({ output, bundle, select, rounds, focus, detail }) {
     const repeat = Math.max(1, Math.min(40, Math.ceil(1500 / Math.max(1, run.cpuMs))));
     const samples = [];
     for (let i = 0; i < rounds; i++) {
-      run = timed(side, frozen, repeat);
+      run = await timed(side, frozen, repeat, sequence, gap);
       samples.push(run.cpuMs);
       say({ case: frozen.id, round: i + 1 });
     }
@@ -334,12 +405,17 @@ async function orchestrate() {
       select: 'control',
       rounds: '5',
       passes: '2',
+      host: 'loop',
       timeout: '900',
       focus: undefined,
     },
     USAGE,
   );
-  if (!/^([1-9]|1[0-9]|2[0-5])$/.test(options.rounds) || !/^[1-4]$/.test(options.passes))
+  if (
+    !/^([1-9]|1[0-9]|2[0-5])$/.test(options.rounds) ||
+    !/^[1-4]$/.test(options.passes) ||
+    !['loop', 'sliced', 'paced'].includes(options.host)
+  )
     throw Error(USAGE);
   const rounds = Number(options.rounds),
     passes = Number(options.passes);
@@ -363,6 +439,7 @@ async function orchestrate() {
     rounds,
     focus: options.focus,
     detail,
+    host: options.host,
   });
   const sides = { candidate: new Map(), frozen: new Map() };
   const keep = (name, measured) => {
@@ -422,6 +499,7 @@ async function orchestrate() {
         select: options.select,
         rounds,
         passes: frozen ? passes : 1,
+        host: options.host,
         runtime: {
           node: process.version,
           v8: process.versions.v8,
