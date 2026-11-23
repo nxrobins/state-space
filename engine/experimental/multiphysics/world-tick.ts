@@ -1,24 +1,33 @@
 /** Private, bounded operator-split candidate tick. This is not release qualification. */
-import { copyPortableValue, type PortableValue } from '../../portable-data.js';
+import type { PortableValue } from '../../portable-data.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 import { createCircuitSolveJob3D } from './circuit.js';
 import type { ResistiveConnection3D } from './circuit-reference.js';
 import { batteryStoredUnits3D, stepBatteryEnergy3D } from './battery.js';
-import { orientedCuboidContact, cuboidBounds, type AxisAlignedBounds } from './collision.js';
+import {
+  orientedCuboidContact,
+  prepareCuboid,
+  preparedCuboidBounds,
+  preparedCuboidContact,
+  type AxisAlignedBounds,
+  type PreparedCuboid,
+} from './collision.js';
 import {
   createRigidStep3D,
-  rigidContactPatchArea3D,
+  rigidContactPatchAreaAlong3D,
   particleBoxGeometry,
   fractureRigidBonds3D,
   type RigidBond3D,
 } from './rigid.js';
 import { createFluidCoupling3D, type FluidCouplingResult3D } from './fluid-coupling.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
+import { retainJobFunctions } from './retained-functions.js';
 import {
-  advanceParcelThermal3D,
+  advanceOwnedParcelThermal3D,
   settleThermalPhases3D,
   deferParcelPhase3D,
-  depositParcelHeat3D,
-  parcelTemperature3D,
+  depositOwnedParcelHeat3D,
+  ownedParcelTemperature3D,
   type ThermalParcel3D,
   type ThermalContact3D,
   type ThermalTransition3D,
@@ -27,6 +36,7 @@ import {
 import { readMultiphysicsProfile3D, type MultiphysicsProfiles3D } from './profiles.js';
 import {
   readMultiphysicsSnapshot3D,
+  readOwnedMultiphysicsSnapshot3D,
   multiphysicsInventory3D,
   inventoryEnergyDelta3D,
   rebuildOwners3D,
@@ -137,14 +147,14 @@ function batteryIntact(profiles: MultiphysicsProfiles3D, state: MultiphysicsSnap
       p !== undefined &&
       readMultiphysicsProfile3D(profiles, p.material).phase === 'solid' &&
       p.owner === owner &&
-      parcelTemperature3D(profiles, p) < battery.failureTemperature,
+      ownedParcelTemperature3D(profiles, p) < battery.failureTemperature,
   );
 }
 function soften(profiles: MultiphysicsProfiles3D, parcel: ThermalParcel3D): number {
   const onset = readMultiphysicsProfile3D(profiles, parcel.material).softening;
   return onset === 0
     ? 1
-    : Math.max(0, Math.min(1, (onset + 64 - parcelTemperature3D(profiles, parcel)) / 64));
+    : Math.max(0, Math.min(1, (onset + 64 - ownedParcelTemperature3D(profiles, parcel)) / 64));
 }
 
 /**
@@ -165,7 +175,7 @@ export function createMultiphysicsTickJob3D(
     lastAdvanceWork = 0;
   let completed: MultiphysicsTickResult3D | undefined;
   const progress = (): MultiphysicsTickProgress3D => ({ status, stage, work, lastAdvanceWork });
-  return Object.freeze({
+  const job: MultiphysicsTickJob3D = Object.freeze({
     progress,
     advance(budget = MULTIPHYSICS_TICK_LIMITS_3D.advanceWork) {
       if (
@@ -209,37 +219,48 @@ export function createMultiphysicsTickJob3D(
     },
     result() {
       if (status !== 'ready' || !completed) throw Error('World tick result is not ready.');
-      // The completed snapshot was validated at the end of the tick; callers receive an owned copy.
+      // The completed snapshot was validated at the end of the tick; callers receive an owned
+      // copy. This tick built both values, so the copy does not re-inspect them.
       return {
-        snapshot: copyPortableValue(
+        snapshot: copyOwnedPortableValue(
           completed.snapshot as unknown as PortableValue,
         ) as unknown as MultiphysicsSnapshot3D,
-        report: copyPortableValue(
+        report: copyOwnedPortableValue(
           completed.report as unknown as PortableValue,
         ) as unknown as MultiphysicsTickReport3D,
       };
     },
   });
+  // The job's methods, its progress reader and its pipeline. See retained-functions.ts.
+  retainJobFunctions('world-tick', [job, progress, run]);
+  return job;
 
   function* run(): Generator<string, MultiphysicsTickResult3D, void> {
+    retainJobFunctions('world-tick-stages', [admitSolidification, refreshPhaseOwnership]);
     const before = multiphysicsInventory3D(state),
       dt = state.settings.dt;
-    const bounds: AxisAlignedBounds[] = [];
+    // Each parcel's cuboid is checked and given its axes once here, as its bounds need, and
+    // reused for every pair below: nothing moves a parcel during this stage.
+    const cuboids: PreparedCuboid[] = [],
+      bounds: AxisAlignedBounds[] = [];
     for (const parcel of state.parcels) {
-      bounds.push(cuboidBounds(parcel));
+      const cuboid = prepareCuboid(parcel);
+      cuboids.push(cuboid);
+      bounds.push(preparedCuboidBounds(cuboid));
       yield 'contacts';
     }
     const contacts: ThermalContact3D[] = [],
       contactAreas = new Map<string, number>();
     for (let i = 0; i < state.parcels.length; i++)
       for (let j = i + 1; j < state.parcels.length; j++) {
-        if (
-          nearBounds(bounds[i], bounds[j]) &&
-          orientedCuboidContact(state.parcels[i], state.parcels[j])
-        ) {
+        const contact = nearBounds(bounds[i], bounds[j])
+          ? preparedCuboidContact(cuboids[i], cuboids[j])
+          : null;
+        if (contact) {
           if (contacts.length >= MULTIPHYSICS_TICK_LIMITS_3D.contacts)
             throw Error('World contact limit exceeded.');
-          const area = rigidContactPatchArea3D(state.parcels[i], state.parcels[j]);
+          // The patch area starts from this same contact; it is not found a second time.
+          const area = rigidContactPatchAreaAlong3D(state.parcels[i], state.parcels[j], contact);
           if (area > 1e-10) {
             const pair = { a: state.parcels[i].id, b: state.parcels[j].id };
             contacts.push(pair);
@@ -332,7 +353,11 @@ export function createMultiphysicsTickJob3D(
       for (const heat of paid.heat) {
         const at = indices.get(heat.id);
         if (at === undefined) throw Error('Electrical heat has no material destination.');
-        state.parcels[at] = depositParcelHeat3D(profiles, state.parcels[at], BigInt(heat.units));
+        state.parcels[at] = depositOwnedParcelHeat3D(
+          profiles,
+          state.parcels[at],
+          BigInt(heat.units),
+        );
         yield 'electrical-heat';
       }
       batteryReport = {
@@ -397,7 +422,7 @@ export function createMultiphysicsTickJob3D(
     }
     const previous = state.parcels;
     yield 'thermal';
-    const thermal = advanceParcelThermal3D(profiles, state.parcels, contacts, dt);
+    const thermal = advanceOwnedParcelThermal3D(profiles, state.parcels, contacts, dt);
     state.parcels = thermal.parcels;
     yield* admitSolidification(previous, thermal.transitions);
     const phaseBroken: RigidBond3D[] = [];
@@ -453,17 +478,24 @@ export function createMultiphysicsTickJob3D(
       strength:
         b.strength * Math.min(soften(profiles, byId.get(b.a)!), soften(profiles, byId.get(b.b)!)),
     }));
-    const mechanical = createRigidStep3D(state.parcels, softened, state.anchors, {
-      dt,
-      gravity: state.settings.gravity,
-      restitution: state.settings.restitution,
-      friction: state.settings.friction,
-      resolvedParticleContacts: true,
-      deferFracture: true,
-      nonCollidingParticleIds: state.parcels
-        .filter((p) => !isRigidMaterial3D(profiles, p))
-        .map((p) => p.id),
-    });
+    const mechanical = createRigidStep3D(
+      state.parcels,
+      softened,
+      state.anchors,
+      {
+        dt,
+        gravity: state.settings.gravity,
+        restitution: state.settings.restitution,
+        friction: state.settings.friction,
+        resolvedParticleContacts: true,
+        deferFracture: true,
+        nonCollidingParticleIds: state.parcels
+          .filter((p) => !isRigidMaterial3D(profiles, p))
+          .map((p) => p.id),
+      },
+      // All four inputs are this tick's own data.
+      copyOwnedPortableValue,
+    );
     let mechanicalResult: ReturnType<typeof mechanical.next>;
     try {
       mechanicalResult = mechanical.next();
@@ -642,7 +674,7 @@ export function createMultiphysicsTickJob3D(
     ledger.numericalAngularMomentum = vector(addVec3(ledger.numericalAngularMomentum, numericalL));
     state.tick++;
     yield 'validation';
-    const snapshot = readMultiphysicsSnapshot3D(profiles, state);
+    const snapshot = readOwnedMultiphysicsSnapshot3D(profiles, state);
     const brokenBonds = [
       ...phaseBroken,
       ...[...rigid.brokenBonds, ...coupledBroken].map((b) => ({ ...originals.get(key(b))! })),

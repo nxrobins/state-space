@@ -6,13 +6,18 @@ import {
 } from './profiles.js';
 import {
   advanceParcelThermal3D,
+  advanceOwnedParcelThermal3D,
   seedThermalParcel3D,
   parcelTemperature3D,
+  ownedParcelTemperature3D,
   readThermalParcel3D,
+  readOwnedThermalParcel3D,
   depositParcelHeat3D,
+  depositOwnedParcelHeat3D,
   THERMAL_FRACTION_SCALE_3D as S,
   type ThermalParcel3D,
 } from './thermal.js';
+import { encodeFrozen3D } from '../../test-support/multiphysics-frozen-cases.js';
 let profiles: MultiphysicsProfiles3D;
 beforeAll(async () => {
   profiles = await createMultiphysicsProfiles3D();
@@ -241,4 +246,129 @@ test('invalid contacts, fractional stores and noncanonical thermal state reject 
   ).toThrow(/Duplicate/);
   expect(advanceParcelThermal3D(profiles, [p], [], 0).parcels).toEqual([p]);
   expect(p).toEqual(before);
+});
+
+// Key order aside, every bit of every number and the sign of each zero.
+const outcome = (read: () => unknown) => {
+  try {
+    return `value ${encodeFrozen3D(read())}`;
+  } catch (error) {
+    return `error ${(error as Error).message}`;
+  }
+};
+test('the owned parcel reader returns the copying reader’s parcel, or its rejection, for every record', () => {
+  const p = seed('copper', 20),
+    { owner: _owner, ...ownerless } = p,
+    sparse = [0, 0, 0];
+  delete sparse[1];
+  class Parcel {
+    constructor() {
+      Object.assign(this, p);
+    }
+  }
+  const records: unknown[] = [
+    p,
+    seed('water', 30),
+    seed('wood', 20, 'fuel'),
+    // Negative zeros: the copy turns each into zero, and so must reading in place.
+    { ...p, center: [-0, 1, 2], velocity: [-0, 0, -0], intrinsicAngularMomentum: [0, -0, 0] },
+    { ...p, orientation: [-0, 0, -0, 1], chemicalQ: -0, thermalRemainder: -0 },
+    Object.assign(Object.create(null), p),
+    // Values the checks reject.
+    { ...p, principalInertia: [-0, 1, 1] },
+    { ...p, mass: -0 },
+    { ...p, orientation: [0, 0, 0, 2] },
+    { ...p, halfExtents: [0.5, -0.5, 0.5] },
+    { ...p, halfExtents: [0.5, 0.5] },
+    { ...p, thermalRemainder: 0.1 },
+    { ...p, thermalRemainder: 1 },
+    { ...p, chemicalQ: 1 },
+    { ...p, referenceAmount: 0.5 },
+    { ...p, thermalQ: 0.5 },
+    { ...p, material: 'unobtainium' },
+    { ...p, id: '' },
+    { ...p, id: 'x'.repeat(129) },
+    { ...p, center: [0, 0] },
+    // Values and shapes only the copy can judge: the owned reader must hand these over.
+    { ...p, velocity: [Number.NaN, 0, 0] },
+    { ...p, mass: Number.POSITIVE_INFINITY },
+    { ...p, mass: null },
+    { ...p, mass: true },
+    { ...p, mass: undefined },
+    { ...p, mass: 1n },
+    { ...p, id: 5 },
+    { ...p, center: 'abc' },
+    { ...p, center: [0, 0, '0'] },
+    { ...p, center: sparse },
+    { ...p, center: { 0: 0, 1: 0, 2: 0, length: 3 } },
+    { ...p, center: [[0], 0, 0] },
+    { ...p, center: new Float64Array(3) },
+    { ...p, center: Array<number>(70000).fill(0) },
+    { ...p, owner: 'y'.repeat(1048577) },
+    { ...p, extra: 1 },
+    ownerless,
+    Object.assign(Object.create({ inherited: 1 }), p),
+    new Parcel(),
+    [p],
+    [],
+    {},
+    null,
+    undefined,
+    5,
+    'parcel',
+  ];
+  let accepted = 0;
+  for (const record of records) {
+    const before = outcome(() => structuredClone(record)),
+      copied = outcome(() => readThermalParcel3D(profiles, record));
+    expect(outcome(() => readOwnedThermalParcel3D(profiles, record))).toBe(copied);
+    // Neither reader changes its input.
+    expect(outcome(() => structuredClone(record))).toBe(before);
+    if (copied.startsWith('value')) accepted++;
+  }
+  expect(accepted).toBe(6);
+  // The parcel returned shares no array with the record it was read from.
+  const moving = { ...p, velocity: [1, 2, 3] as [number, number, number] },
+    read = readOwnedThermalParcel3D(profiles, moving);
+  for (const key of ['center', 'velocity', 'orientation', 'halfExtents'] as const)
+    expect(read[key]).not.toBe(moving[key]);
+  expect(read.velocity).toEqual([1, 2, 3]);
+});
+
+test('owned temperature, deposit and thermal advance equal their copying forms bit for bit', () => {
+  const zeros = (parcel: ThermalParcel3D): ThermalParcel3D => ({
+    ...parcel,
+    velocity: [-0, 0, -0],
+    intrinsicAngularMomentum: [-0, -0, 0],
+  });
+  const hot = zeros(seed('copper', 90, 'hot')),
+    cold = zeros(seed('water', 10, 'cold')),
+    fuel = seed('wood', 100, 'fuel'),
+    air = seed('air', 100, 'oxidizer');
+  for (const parcel of [hot, cold, fuel, air]) {
+    expect(ownedParcelTemperature3D(profiles, parcel)).toBe(parcelTemperature3D(profiles, parcel));
+    for (const delta of [0n, BigInt(S / 2), BigInt(3 * E * S)])
+      expect(outcome(() => depositOwnedParcelHeat3D(profiles, parcel, delta))).toBe(
+        outcome(() => depositParcelHeat3D(profiles, parcel, delta)),
+      );
+  }
+  expect(outcome(() => depositOwnedParcelHeat3D(profiles, cold, -BigInt(21 * E * S)))).toBe(
+    outcome(() => depositParcelHeat3D(profiles, cold, -BigInt(21 * E * S))),
+  );
+  expect(outcome(() => ownedParcelTemperature3D(profiles, { ...hot, mass: Number.NaN }))).toBe(
+    outcome(() => parcelTemperature3D(profiles, { ...hot, mass: Number.NaN })),
+  );
+  for (const [parcels, contacts, dt] of [
+    [[hot, cold], [{ a: 'hot', b: 'cold' }], 1],
+    [[cold, hot], [{ a: 'cold', b: 'hot' }], 1 / 60],
+    [[fuel, air], [{ a: 'fuel', b: 'oxidizer' }], 1 / 60],
+    [[hot], [], 0],
+    [[hot, { ...cold, velocity: [Number.NaN, 0, 0] }], [], 1 / 60],
+    [[hot, hot], [], 1 / 60],
+  ] as [ThermalParcel3D[], { a: string; b: string }[], number][])
+    expect(outcome(() => advanceOwnedParcelThermal3D(profiles, parcels, contacts, dt))).toBe(
+      outcome(() => advanceParcelThermal3D(profiles, parcels, contacts, dt)),
+    );
+  // The deposit normalizes the sign of zero in the parcel it returns, as the copy does.
+  expect(Object.is(depositOwnedParcelHeat3D(profiles, hot, 0n).velocity[0], 0)).toBe(true);
 });

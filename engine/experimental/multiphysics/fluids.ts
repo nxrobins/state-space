@@ -3,7 +3,15 @@
  * DFSPH coefficient iteration. Viscosity is pair relaxation, not an SI fit.
  */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
-import { readMaterialParcel3D, type MaterialParcel3D } from './conservation.js';
+import { retainJobFunctions } from './retained-functions.js';
+import {
+  readMaterialParcel3D,
+  readOwnedMaterialParcel3D,
+  readShapedMaterialParcel3D,
+  ownedFlatRecord3D,
+  MATERIAL_PARCEL_FIELDS_3D,
+  type MaterialParcel3D,
+} from './conservation.js';
 import {
   type Vec3,
   type Quat,
@@ -273,8 +281,11 @@ function inverse(m: FluidMatrix3D): FluidMatrix3D {
   if (!out.every(Number.isFinite)) throw Error('Fluid inertia inversion overflow.');
   return out;
 }
-function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
-  const data = copyPortableValue(raw as unknown as PortableValue);
+function readInput(
+  raw: FluidReferenceInput3D,
+  copy: <V extends PortableValue>(value: V) => V,
+): FluidReferenceInput3D {
+  const data = copy(raw as unknown as PortableValue);
   assertRecordFields(
     data,
     ['particles', 'bodies', 'boundaries', 'dt', 'smoothingRadius'],
@@ -329,7 +340,8 @@ function readInput(raw: FluidReferenceInput3D): FluidReferenceInput3D {
       } else if (rawParticle.thermalCurve !== null)
         throw Error('Liquid thermal curve must be null.');
       return {
-        parcel: readMaterialParcel3D(rawParticle.parcel),
+        // `rawParticle.parcel` is part of the copy made above, so it is read where it is.
+        parcel: readOwnedMaterialParcel3D(rawParticle.parcel as Record<string, unknown>),
         thermalEnergy,
         volume,
         thermalCurve,
@@ -1315,6 +1327,39 @@ function* solve(
   const divergenceSupported = (row: Constraint) =>
     density[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportRatio * p[row.i].restDensity &&
     supportVolume[row.i] >= FLUID_REFERENCE_LIMITS_3D.divergenceSupportVolume * h ** 3;
+  // Every named function this solve has created. See retained-functions.ts. A tick solves
+  // twice, and its projection-only solve does not call all of them, so three sets are held.
+  retainJobFunctions(
+    'fluid-solve',
+    [
+      rotateByUnit,
+      particleInverse,
+      angularVelocity,
+      kinetic,
+      bodyVelocity,
+      center,
+      velocityAt,
+      inverseAngular,
+      response,
+      impulse,
+      pairWork,
+      pressurePair,
+      particleHeat,
+      heat,
+      viscousPair,
+      viscousWeight,
+      referenceRate,
+      effectiveMass,
+      referenceApplyConstraint,
+      compiled,
+      compiledRate,
+      compiledApplyConstraint,
+      project,
+      divergenceSupported,
+      buildGram,
+    ],
+    3,
+  );
   const beforeProjection = kinetic();
   const predictedParticles = p.map((particle) => particle.parcel.velocity),
     predictedBodies = bodies.map((body) => body.velocity);
@@ -1639,7 +1684,14 @@ function* solve(
     !Number.isFinite(residual)
   )
     throw Error('Fluid impulse-work residual exceeds tolerance.');
-  for (const particle of p) readMaterialParcel3D(particle.parcel);
+  // Validation only. This job built each parcel and replaced its vectors with its own
+  // arithmetic, so a flat one is checked where it is; any other takes the copying reader and
+  // its rejections.
+  for (const particle of p) {
+    const owned = ownedFlatRecord3D(particle.parcel, MATERIAL_PARCEL_FIELDS_3D);
+    if (owned) readShapedMaterialParcel3D(owned);
+    else readMaterialParcel3D(particle.parcel);
+  }
   for (const body of bodies) {
     assertFiniteVec3(body.velocity);
     assertFiniteVec3(body.angularVelocity);
@@ -1725,13 +1777,15 @@ function* solve(
   };
 }
 
-/** Input copies/validation are bounded setup; each work unit visits one bounded pair or row. */
+/** Input copies/validation are bounded setup; each work unit visits one bounded pair or row.
+ * `copy` is `copyOwnedPortableValue` only for the fluid coupling, which builds `raw` itself. */
 export function createFluidReferenceJob3D(
   raw: FluidReferenceInput3D,
   capture?: (face: FluidProjectionFaceCapture3D) => void,
   tuning: FluidReferenceTuning3D = {},
+  copy: <V extends PortableValue>(value: V) => V = copyPortableValue,
 ): FluidReferenceJob3D {
-  const input = readInput(raw),
+  const input = readInput(raw, copy),
     generator = solve(input, capture, { ...tuning });
   const maximum =
     input.particles.length * (2 * input.particles.length + 3 * input.boundaries.length + 4) +
@@ -1750,7 +1804,7 @@ export function createFluidReferenceJob3D(
     completedWork,
     maxTotalWork: maximum,
   });
-  return Object.freeze({
+  const job: FluidReferenceJob3D = Object.freeze({
     progress,
     advance(maxWork = FLUID_REFERENCE_LIMITS_3D.advanceWork) {
       if (
@@ -1792,6 +1846,9 @@ export function createFluidReferenceJob3D(
       return structuredClone(result);
     },
   });
+  // The job's methods and its progress reader. See retained-functions.ts.
+  retainJobFunctions('fluid-job', [job, progress]);
+  return job;
 }
 /** One bounded reference step; this does not move positions or apply returned heat. */
 export function solveFluidReference3D(raw: FluidReferenceInput3D): FluidReferenceResult3D {

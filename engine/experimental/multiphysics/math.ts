@@ -65,6 +65,28 @@ export function rotateVector(orientation: Quat, v: Vec3): Vec3 {
   assertFiniteVec3(rotated, 'rotated vector');
   return rotated;
 }
+/** `rotateVector` for an orientation that `normalizeQuaternion` has already returned: the same
+ * checks on the vector and the same arithmetic, without normalizing a second time. A caller
+ * that rotates several vectors by one orientation normalizes it once, at the point where the
+ * first `rotateVector` would have, and uses this for each. */
+export function rotateByUnitQuaternion(unit: Quat, v: Vec3): Vec3 {
+  assertFiniteVec3(v);
+  const axis: Vec3 = [unit[0], unit[1], unit[2]];
+  const twiceCross = scaleVec3(crossVec3(axis, v), 2);
+  const rotated = addVec3(v, addVec3(scaleVec3(twiceCross, unit[3]), crossVec3(axis, twiceCross)));
+  assertFiniteVec3(rotated, 'rotated vector');
+  return rotated;
+}
+/** `rotateVector(orientation, e)` for the three unit axes, normalizing the orientation once
+ * where each of those three calls would. */
+export function rotateBasis(orientation: Quat): [Vec3, Vec3, Vec3] {
+  const unit = normalizeQuaternion(orientation);
+  return [
+    rotateByUnitQuaternion(unit, [1, 0, 0]),
+    rotateByUnitQuaternion(unit, [0, 1, 0]),
+    rotateByUnitQuaternion(unit, [0, 0, 1]),
+  ];
+}
 
 /** Exact constant-world-angular-velocity rotation, not a torque or rigid-body integrator. */
 export function integrateOrientation(orientation: Quat, angularVelocity: Vec3, dt: number): Quat {

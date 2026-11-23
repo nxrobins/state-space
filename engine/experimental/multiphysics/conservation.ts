@@ -1,5 +1,10 @@
 /** Conservation references only: no phase, fracture, fluid or time-step solver. */
-import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
+import {
+  assertRecordFields,
+  copyPortableValue,
+  PORTABLE_VALUE_LIMITS,
+  type PortableValue,
+} from '../../portable-data.js';
 import {
   addVec3,
   subtractVec3,
@@ -52,6 +57,8 @@ const fields = [
   'intrinsicAngularMomentum',
   'principalInertia',
 ];
+/** The field names of a material parcel record. */
+export const MATERIAL_PARCEL_FIELDS_3D: ReadonlySet<string> = new Set(fields);
 const energyFields = ['thermalQ', 'latentQ', 'chemicalQ'] as const;
 const compareIds = (a: { id: string }, b: { id: string }) =>
   a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
@@ -83,6 +90,58 @@ export function readMaterialParcel3D(raw: unknown): MaterialParcel3D {
  * The returned parcel shares no arrays with its input. */
 export function readOwnedMaterialParcel3D(p: Record<string, unknown>): MaterialParcel3D {
   assertRecordFields(p, fields, [], 'Invalid material parcel fields.');
+  return readShapedMaterialParcel3D(p);
+}
+/** What `copyPortableValue(record)` returns, in some key order, for a record this engine already
+ * owns that holds exactly the fields in `shape`, each a string, a finite number or an array of
+ * finite numbers. Copying such a record cannot reject it and changes nothing but negative
+ * zeros, which become zero here as they do there. Every other value returns undefined, and
+ * the caller then takes its copying reader, which keeps each rejection and its message.
+ *
+ * Only for records and arrays that the portable copy, this engine's readers or its arithmetic
+ * built. Those are plain, with no accessors, hidden keys or extra array fields; that part of
+ * the copy's inspection is not repeated here, so this is never for a caller's input. An array
+ * without a negative zero is returned as it is: read the result, do not keep or change it. */
+export function ownedFlatRecord3D(
+  record: unknown,
+  shape: ReadonlySet<string>,
+): Record<string, unknown> | undefined {
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
+  const prototype = Object.getPrototypeOf(record);
+  if (prototype !== Object.prototype && prototype !== null) return undefined;
+  const keys = Object.keys(record);
+  if (keys.length !== shape.size) return undefined;
+  const owned: Record<string, unknown> = {};
+  let nodes = 1 + keys.length,
+    characters = 0;
+  for (const key of keys) {
+    if (!shape.has(key)) return undefined;
+    let value = (record as Record<string, unknown>)[key];
+    characters += key.length;
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return undefined;
+      if (value === 0) value = 0;
+    } else if (typeof value === 'string') characters += value.length;
+    else if (Array.isArray(value)) {
+      let negativeZero = false;
+      for (let i = 0; i < value.length; i++) {
+        const entry: unknown = value[i];
+        if (typeof entry !== 'number' || !Number.isFinite(entry)) return undefined;
+        if (Object.is(entry, -0)) negativeZero = true;
+      }
+      nodes += value.length;
+      if (negativeZero) value = value.map((entry: number) => (entry === 0 ? 0 : entry));
+    } else return undefined;
+    owned[key] = value;
+  }
+  return nodes <= PORTABLE_VALUE_LIMITS.nodes && characters <= PORTABLE_VALUE_LIMITS.characters
+    ? owned
+    : undefined;
+}
+/** The rest of that validation, for a plain record already known to hold exactly the parcel
+ * fields: `readOwnedMaterialParcel3D` after its field check, or an `ownedFlatRecord3D` result
+ * for `MATERIAL_PARCEL_FIELDS_3D`. The returned parcel shares no arrays with its input. */
+export function readShapedMaterialParcel3D(p: Record<string, unknown>): MaterialParcel3D {
   const orientation = p.orientation;
   if (
     !Array.isArray(orientation) ||

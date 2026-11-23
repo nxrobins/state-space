@@ -13,6 +13,8 @@ import {
   normalizeQuaternion,
   multiplyQuaternions,
   rotateVector,
+  rotateByUnitQuaternion,
+  rotateBasis,
   integrateOrientation,
   cuboidMassProperties,
   applyWorldInverseInertia,
@@ -23,7 +25,11 @@ import {
   cuboidBounds,
   boundsOverlap,
   sweptCuboidBounds,
+  prepareCuboid,
+  preparedCuboidContact,
+  preparedCuboidBounds,
 } from './collision.js';
+import { encodeFrozen3D } from '../../test-support/multiphysics-frozen-cases.js';
 
 const box = (
   center: Vec3 = [0, 0, 0],
@@ -225,5 +231,131 @@ describe('oriented cuboid reference contact', () => {
       expect(() => cuboidBounds(invalid)).toThrow();
       expect(() => sweptCuboidBounds(invalid, end)).toThrow();
     }
+  });
+
+  test('rotating by an orientation normalized once equals rotating by the orientation bit for bit', () => {
+    const orientations: Quat[] = [
+      I,
+      [0, 0, 0, -1],
+      [0.3, -0.4, 0.5, 0.7],
+      [3, -4, 5, 7],
+      [1e-200, 2e-200, -3e-200, 4e-200],
+      [1e200, 0, -1e200, 1e200],
+      [0, 1, 0, 0],
+      [-0, 0, -1, 0],
+      rotation(normalizeVec3([1, 2, 3]), 0.7),
+      rotation([0, 0, 1], 1e-9),
+    ];
+    const vectors: Vec3[] = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+      [0.25, -1.5, 3],
+      [-0, 0, -0],
+      [1e-300, -1e150, 7],
+    ];
+    for (const q of orientations) {
+      const unit = normalizeQuaternion(q);
+      for (const v of vectors)
+        expect(encodeFrozen3D(rotateByUnitQuaternion(unit, v))).toBe(
+          encodeFrozen3D(rotateVector(q, v)),
+        );
+      expect(encodeFrozen3D(rotateBasis(q))).toBe(
+        encodeFrozen3D([
+          rotateVector(q, [1, 0, 0]),
+          rotateVector(q, [0, 1, 0]),
+          rotateVector(q, [0, 0, 1]),
+        ]),
+      );
+    }
+    const message = (run: () => unknown) => {
+      try {
+        run();
+        return null;
+      } catch (error) {
+        return (error as Error).message;
+      }
+    };
+    // The basis rejects an orientation as the first of its three rotations would.
+    for (const invalid of [[0, 0, 0, 0], [0, NaN, 0, 1], [1, 0, 0] as unknown] as Quat[]) {
+      const expected = message(() => rotateVector(invalid, [1, 0, 0]));
+      expect(expected).not.toBeNull();
+      expect(message(() => rotateBasis(invalid))).toBe(expected);
+    }
+    // A vector is checked before and after the arithmetic, as `rotateVector` checks it.
+    for (const invalid of [
+      [NaN, 0, 0],
+      [0, Infinity, 0],
+      [1e308, 1e308, 1e308],
+    ] as Vec3[]) {
+      const expected = message(() => rotateVector([0.3, -0.4, 0.5, 0.7], invalid));
+      expect(expected).not.toBeNull();
+      expect(
+        message(() => rotateByUnitQuaternion(normalizeQuaternion([0.3, -0.4, 0.5, 0.7]), invalid)),
+      ).toBe(expected);
+    }
+  });
+
+  test('cuboids prepared once give the contact and bounds of the unprepared calls bit for bit', () => {
+    const tilt = rotation(normalizeVec3([1, 2, 3]), 0.7),
+      slight = rotation([0, 0, 1], 1e-9);
+    const shapes = [
+      box(),
+      box([2, 0, 0]),
+      box([2 + 1e-14, 0, 0]),
+      box([1.5, 0.5, -0.25], [1, 0.5, 2]),
+      box([2, 2, 0]),
+      box([2, 2, 2]),
+      box([5, 0, 0]),
+      box([0.3, 1.9, 0.2], [1, 1, 1], tilt),
+      box([2.4, 0.1, 0], [0.5, 2, 1], rotation([0, 0, 1], Math.PI / 4)),
+      box([0, 2, 0], [1, 1, 1], slight),
+      box([-0, 0, -0], [0.25, 0.25, 0.25], [0, 0, 0, -1]),
+      // A caller's cuboid may carry other fields; they change nothing.
+      { ...box([1, 1, 1], [1, 2, 3], tilt), id: 'parcel', mass: 4 },
+    ];
+    const prepared = shapes.map(prepareCuboid);
+    let touching = 0;
+    for (let i = 0; i < shapes.length; i++) {
+      expect(encodeFrozen3D(preparedCuboidBounds(prepared[i]))).toBe(
+        encodeFrozen3D(cuboidBounds(shapes[i])),
+      );
+      for (let j = 0; j < shapes.length; j++) {
+        const contact = orientedCuboidContact(shapes[i], shapes[j]);
+        expect(encodeFrozen3D(preparedCuboidContact(prepared[i], prepared[j]))).toBe(
+          encodeFrozen3D(contact),
+        );
+        if (contact) touching++;
+      }
+    }
+    // Both outcomes occur, so the comparison above covers each.
+    expect(touching).toBeGreaterThan(shapes.length);
+    expect(touching).toBeLessThan(shapes.length * shapes.length);
+    const message = (run: () => unknown) => {
+      try {
+        run();
+        return null;
+      } catch (error) {
+        return (error as Error).message;
+      }
+    };
+    for (const invalid of [
+      box([NaN, 0, 0]),
+      box([0, 0, 0], [0, 1, 1]),
+      box([0, 0, 0], [1, 1, Infinity]),
+      box([0, 0, 0], [1, 1, 1], [0, 0, 0, 0]),
+      box([0, 0, 0], [1, 1, 1], [0, 0, NaN, 1]),
+    ]) {
+      const expected = message(() => cuboidBounds(invalid));
+      expect(expected).not.toBeNull();
+      expect(message(() => prepareCuboid(invalid))).toBe(expected);
+      expect(message(() => orientedCuboidContact(invalid, box()))).toBe(expected);
+    }
+    // Far-apart centres overflow in the test itself, after both cuboids were prepared.
+    const far = [box([Number.MAX_VALUE, 0, 0]), box([-Number.MAX_VALUE, 0, 0])];
+    expect(message(() => preparedCuboidContact(prepareCuboid(far[0]), prepareCuboid(far[1])))).toBe(
+      message(() => orientedCuboidContact(far[0], far[1])),
+    );
+    expect(message(() => orientedCuboidContact(far[0], far[1]))).toMatch(/relative center/);
   });
 });

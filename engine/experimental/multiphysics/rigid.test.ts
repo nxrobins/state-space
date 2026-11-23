@@ -13,6 +13,7 @@ import {
   normalizeQuaternion,
   integrateOrientation,
   rotateVector,
+  rotateBasis,
   multiplyQuaternions,
   subtractVec3,
   addVec3,
@@ -26,7 +27,9 @@ import {
   rigidAssemblyMassProperties3D,
   applyMatrix3,
   rigidContactPatchArea3D,
+  rigidContactPatchAreaAlong3D,
 } from './rigid.js';
+import { orientedCuboidContact } from './collision.js';
 
 function parcel(
   id: string,
@@ -569,6 +572,40 @@ test('an almost face-aligned cross-edge contact retains its edge manifold after 
   expect(rigidContactPatchArea3D(a, b)).toBe(0);
 });
 
+test('the patch area along a contact already found equals the area that finds it again', () => {
+  // Unit cubes: centres one apart share a face, an edge or a corner.
+  const a = parcel('a', [0, 0, 0]);
+  let faces = 0,
+    touching = 0;
+  for (const b of [
+    parcel('b', [1, 0, 0]),
+    parcel('b', [1, 0.5, -0.25]),
+    parcel('b', [1, 1, 0]),
+    parcel('b', [1, 1, 1]),
+    parcel('b', [0.9999999, 0.375, 0]),
+    {
+      ...parcel('b', [0, 1, 0]),
+      orientation: integrateOrientation(IDENTITY_QUATERNION, [0, 1, 0], 0.4),
+    },
+    {
+      ...parcel('b', [1.1, 0, 0]),
+      orientation: integrateOrientation(IDENTITY_QUATERNION, [0, 0, 1], 0.6),
+    },
+    parcel('b', [5, 0, 0]),
+  ]) {
+    const contact = orientedCuboidContact(a, b),
+      area = rigidContactPatchArea3D(a, b);
+    if (!contact) expect(area).toBe(0);
+    else {
+      expect(Object.is(rigidContactPatchAreaAlong3D(a, b, contact), area)).toBe(true);
+      touching++;
+    }
+    if (area > 1e-10) faces++;
+  }
+  expect(touching).toBe(7);
+  expect(faces).toBeGreaterThan(2);
+});
+
 test('tipping: a block tilted on its edge returns inside the critical angle and falls beyond it', () => {
   // Half extents 0.25 x 1: the centre of mass passes over the pivot at atan(0.25), about 14 degrees.
   const halfExtents: Vec3 = [0.25, 1, 0.25],
@@ -660,6 +697,7 @@ function privateContactTests() {
   expect(wanted).toHaveLength(names.length + 1);
   const helpers = {
     rotateVector,
+    rotateBasis,
     dotVec3,
     crossVec3,
     lengthVec3,

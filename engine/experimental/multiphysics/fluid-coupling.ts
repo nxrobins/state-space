@@ -20,9 +20,10 @@ import {
   inventoryEnergyDelta3D,
   type MultiphysicsSnapshot3D,
 } from './model.js';
-import { parcelTemperature3D } from './thermal.js';
+import { ownedParcelTemperature3D } from './thermal.js';
 import { readMultiphysicsProfile3D, type MultiphysicsProfiles3D } from './profiles.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
+import { copyOwnedPortableValue } from './owned-data.js';
 import {
   addVec3,
   subtractVec3,
@@ -31,7 +32,11 @@ import {
   crossVec3,
   lengthVec3,
   rotateVector,
+  rotateByUnitQuaternion,
+  normalizeQuaternion,
+  assertFiniteVec3,
   type Vec3,
+  type Quat,
 } from './math.js';
 const ZERO: Vec3 = [0, 0, 0];
 const ZERO_MATRIX: FluidMatrix3D = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -151,18 +156,20 @@ export function* createFluidCoupling3D(
     const volume =
       (8 * p.halfExtents[0] * p.halfExtents[1] * p.halfExtents[2]) /
       (counts[0] * counts[1] * counts[2]);
+    // One normalization per solid for all of its samples, made where the first sample's
+    // rotation would make it: after that sample's own offset has been checked.
+    let unit: Quat | undefined;
     for (let x = 0; x < counts[0]; x++)
       for (let y = 0; y < counts[1]; y++)
         for (let z = 0; z < counts[2]; z++) {
-          const position = addVec3(
-            p.center,
-            rotateVector(
-              p.orientation,
-              [x, y, z].map(
-                (c, axis) => ((2 * (c + 0.5)) / counts[axis] - 1) * p.halfExtents[axis],
-              ) as unknown as Vec3,
-            ),
-          );
+          const offset = [x, y, z].map(
+            (c, axis) => ((2 * (c + 0.5)) / counts[axis] - 1) * p.halfExtents[axis],
+          ) as unknown as Vec3;
+          if (unit === undefined) {
+            assertFiniteVec3(offset);
+            unit = normalizeQuaternion(p.orientation);
+          }
+          const position = addVec3(p.center, rotateByUnitQuaternion(unit, offset));
           if (
             liquidGas.some(
               (f) =>
@@ -235,7 +242,7 @@ export function* createFluidCoupling3D(
       restDensity: profile.restDensity,
       viscosity: profile.viscosity,
       volume: profile.phase === 'gas' ? volumes.get(p.id)! : null,
-      thermalEnergy: parcelTemperature3D(profiles, p) * p.heatCapacity,
+      thermalEnergy: ownedParcelTemperature3D(profiles, p) * p.heatCapacity,
     };
   });
   const checkTravel = (fluid: typeof particles, movingBodies: FluidBoundaryBody3D[]) => {
@@ -255,27 +262,33 @@ export function* createFluidCoupling3D(
       }
   };
   checkTravel(particles, nearbyBodies);
-  const job = createFluidReferenceJob3D({
-    particles,
-    bodies: nearbyBodies,
-    boundaries,
-    contacts,
-    projectionOnly,
-    velocityPrediction: gravityPrediction,
-    ...(referenceOf
-      ? {
-          reference: {
-            particles: liquidGas.map((p) => ({
-              id: p.id,
-              velocity: referenceMotion(p.id).velocity,
-            })),
-            bodies: nearbyBodies.map((b) => ({ id: b.id, ...bodyReference.get(b.id)! })),
-          },
-        }
-      : {}),
-    dt,
-    smoothingRadius: h,
-  });
+  const job = createFluidReferenceJob3D(
+    {
+      particles,
+      bodies: nearbyBodies,
+      boundaries,
+      contacts,
+      projectionOnly,
+      velocityPrediction: gravityPrediction,
+      ...(referenceOf
+        ? {
+            reference: {
+              particles: liquidGas.map((p) => ({
+                id: p.id,
+                velocity: referenceMotion(p.id).velocity,
+              })),
+              bodies: nearbyBodies.map((b) => ({ id: b.id, ...bodyReference.get(b.id)! })),
+            },
+          }
+        : {}),
+      dt,
+      smoothingRadius: h,
+    },
+    undefined,
+    undefined,
+    // This input is built above from this tick's own data.
+    copyOwnedPortableValue,
+  );
   while (job.progress().status === 'running') {
     job.advance(1);
     yield 'fluid-solve';
@@ -338,7 +351,8 @@ export function* createFluidCoupling3D(
       const updated = state.parcels.find((p) => p.id === heat.id)!;
       if (
         Math.abs(
-          parcelTemperature3D(profiles, updated) * updated.heatCapacity - expected.thermalEnergy,
+          ownedParcelTemperature3D(profiles, updated) * updated.heatCapacity -
+            expected.thermalEnergy,
         ) >
         1e-8 * Math.max(1, expected.thermalEnergy)
       )

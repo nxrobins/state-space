@@ -1,6 +1,11 @@
 import { expect, test } from 'vitest';
+import { copyPortableValue, type PortableValue } from '../../portable-data.js';
+import { encodeFrozen3D } from '../../test-support/multiphysics-frozen-cases.js';
 import {
   readMaterialParcel3D,
+  readShapedMaterialParcel3D,
+  ownedFlatRecord3D,
+  MATERIAL_PARCEL_FIELDS_3D,
   transferMaterialParcel3D,
   partitionMaterialParcel3D,
   parcelConservation3D,
@@ -176,4 +181,61 @@ test('public boundaries reject invalid energies, missing state, duplicate owners
     parcel({ id: 'second', thermalQ: Number.MAX_SAFE_INTEGER }),
   ]);
   expect(exact.thermalQ).toBe('18014398509481982');
+});
+
+test('an owned flat record is the portable copy of that record, and anything else is left to the copy', () => {
+  const shape = MATERIAL_PARCEL_FIELDS_3D,
+    signed = parcel({ center: [-0, 1, -0], velocity: [0, -0, 0], thermalQ: -0, chemicalQ: 0 });
+  for (const record of [parcel(), signed, Object.assign(Object.create(null), signed)]) {
+    const owned = ownedFlatRecord3D(record, shape)!;
+    // Key order aside, the same record bit for bit, with every negative zero made zero.
+    expect(encodeFrozen3D(owned)).toBe(
+      encodeFrozen3D(copyPortableValue(record as unknown as PortableValue)),
+    );
+    expect(encodeFrozen3D(readShapedMaterialParcel3D(owned))).toBe(
+      encodeFrozen3D(readMaterialParcel3D(record)),
+    );
+    expect(owned).not.toBe(record);
+  }
+  // An array is copied only when it holds a negative zero; the record itself never changes.
+  const owned = ownedFlatRecord3D(signed, shape)!;
+  expect(owned.center).not.toBe(signed.center);
+  expect(owned.orientation).toBe(signed.orientation);
+  expect(Object.is(signed.center[0], -0) && Object.is(signed.thermalQ, -0)).toBe(true);
+  const { owner: _owner, ...ownerless } = parcel(),
+    sparse = [0, 0, 0];
+  delete sparse[2];
+  class Record {
+    constructor() {
+      Object.assign(this, parcel());
+    }
+  }
+  for (const record of [
+    { ...parcel(), density: 100 },
+    ownerless,
+    { ...ownerless, density: 100 },
+    { ...parcel(), mass: Number.NaN },
+    { ...parcel(), velocity: [0, Number.POSITIVE_INFINITY, 0] },
+    { ...parcel(), velocity: [0, '0', 0] },
+    { ...parcel(), velocity: sparse },
+    { ...parcel(), velocity: [[0], 0, 0] },
+    { ...parcel(), velocity: { 0: 0, 1: 0, 2: 0 } },
+    { ...parcel(), velocity: new Float64Array(3) },
+    { ...parcel(), velocity: Array<number>(70000).fill(0) },
+    { ...parcel(), owner: 'o'.repeat(1048577) },
+    { ...parcel(), mass: null },
+    { ...parcel(), mass: false },
+    { ...parcel(), mass: undefined },
+    Object.assign(Object.create({ inherited: 1 }), parcel()),
+    new Record(),
+    [parcel()],
+    null,
+    undefined,
+    7,
+    'parcel',
+  ])
+    expect(ownedFlatRecord3D(record, shape)).toBeUndefined();
+  // Strings and long arrays within the portable budgets are still flat data.
+  expect(ownedFlatRecord3D({ ...parcel(), owner: 'o'.repeat(4096) }, shape)).toBeDefined();
+  expect(ownedFlatRecord3D({ ...parcel(), velocity: [1, 2, 3, 4] }, shape)).toBeDefined();
 });

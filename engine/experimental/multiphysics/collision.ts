@@ -9,7 +9,7 @@ import {
   normalizeVec3,
   assertFiniteVec3,
   normalizeQuaternion,
-  rotateVector,
+  rotateBasis,
 } from './math.js';
 
 export type OrientedCuboid = { center: Vec3; halfExtents: Vec3; orientation: Quat };
@@ -21,8 +21,16 @@ export type CuboidContact = {
   /** Representative overlap point, not a contact manifold or impulse constraint. */
   point: Vec3;
 };
-type PreparedCuboid = OrientedCuboid & { axes: readonly [Vec3, Vec3, Vec3] };
+/** A cuboid as the contact test and the bounds first form it: checked, with its normalized
+ * orientation and its world axes. */
+export type PreparedCuboid = OrientedCuboid & { axes: readonly [Vec3, Vec3, Vec3] };
 
+/** What `orientedCuboidContact` and `cuboidBounds` do to a cuboid before anything else. A
+ * caller that tests one cuboid against many can do it once per cuboid and pass the result to
+ * `preparedCuboidContact` and `preparedCuboidBounds`, which repeat nothing else. */
+export function prepareCuboid(shape: OrientedCuboid): PreparedCuboid {
+  return prepare(shape);
+}
 function prepare(shape: OrientedCuboid): PreparedCuboid {
   assertFiniteVec3(shape.center, 'center');
   assertFiniteVec3(shape.halfExtents, 'half extents');
@@ -32,11 +40,7 @@ function prepare(shape: OrientedCuboid): PreparedCuboid {
   return {
     ...shape,
     orientation,
-    axes: [
-      rotateVector(orientation, [1, 0, 0]),
-      rotateVector(orientation, [0, 1, 0]),
-      rotateVector(orientation, [0, 0, 1]),
-    ],
+    axes: rotateBasis(orientation),
   };
 }
 
@@ -128,8 +132,22 @@ function representativePoint(a: PreparedCuboid, b: PreparedCuboid, normal: Vec3)
  */
 export function orientedCuboidContact(a: OrientedCuboid, b: OrientedCuboid): CuboidContact | null {
   const first = prepare(a),
-    second = prepare(b),
-    offset = subtractVec3(b.center, a.center);
+    second = prepare(b);
+  return contactOfPrepared(first, second, subtractVec3(b.center, a.center));
+}
+/** `orientedCuboidContact` for two cuboids already through `prepareCuboid`: the same contact,
+ * as long as neither cuboid has changed since. */
+export function preparedCuboidContact(
+  first: PreparedCuboid,
+  second: PreparedCuboid,
+): CuboidContact | null {
+  return contactOfPrepared(first, second, subtractVec3(second.center, first.center));
+}
+function contactOfPrepared(
+  first: PreparedCuboid,
+  second: PreparedCuboid,
+  offset: Vec3,
+): CuboidContact | null {
   assertFiniteVec3(offset, 'relative center');
   const axes = [...first.axes, ...second.axes];
   for (const x of first.axes)
@@ -160,8 +178,11 @@ export function orientedCuboidContact(a: OrientedCuboid, b: OrientedCuboid): Cub
 }
 
 export function cuboidBounds(shape: OrientedCuboid): AxisAlignedBounds {
-  const body = prepare(shape),
-    extent: Vec3 = [radius(body, [1, 0, 0]), radius(body, [0, 1, 0]), radius(body, [0, 0, 1])];
+  return preparedCuboidBounds(prepare(shape));
+}
+/** `cuboidBounds` for a cuboid already through `prepareCuboid`. */
+export function preparedCuboidBounds(body: PreparedCuboid): AxisAlignedBounds {
+  const extent: Vec3 = [radius(body, [1, 0, 0]), radius(body, [0, 1, 0]), radius(body, [0, 0, 1])];
   const bounds = { min: subtractVec3(body.center, extent), max: addVec3(body.center, extent) };
   validateBounds(bounds);
   return bounds;

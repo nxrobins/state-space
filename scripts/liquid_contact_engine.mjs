@@ -105,7 +105,7 @@ export function readOptions(args, defaults, usage) {
   return options;
 }
 
-/** `light`, `heavy`, `all`, or a substring of the case id. */
+/** `light`, `heavy`, `all`, or one or more substrings of the case id, separated by commas. */
 export function selectCases(catalogue, select) {
   const selected = catalogue.FROZEN_CASES_3D.filter((frozen) =>
     select === 'all'
@@ -114,7 +114,7 @@ export function selectCases(catalogue, select) {
         ? !frozen.heavy
         : select === 'heavy'
           ? frozen.heavy
-          : frozen.id.includes(select),
+          : select.split(',').some((part) => frozen.id.includes(part)),
   );
   if (!selected.length) throw Error('No frozen case matches --select.');
   return selected;
