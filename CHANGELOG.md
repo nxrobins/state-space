@@ -127,6 +127,17 @@ date of the last change in the section.
 
 ### Fixed
 
+- Run all 36 frozen liquid/contact cases in CI on the recorded Node/V8 runtime
+  and retain complete comparison records (#119).
+- Update optional evolution dependencies to AnyIO 4.14.2 and OpenTelemetry API
+  1.45.2, with an offline client compatibility check (#119).
+- Bound multiphysics Worker startup and release resources after failed handshakes
+  or invalid options (#119).
+- Resume Element Fighter from the accepted replay prefix so subsequent saves
+  retain progress (#119).
+- Keep both game clients playable through denied or full browser storage and
+  show when saves are unavailable (#119).
+
 - Preserve self-hosted verification incident state and receipts outside fresh
   workflow checkouts, inspect linked checkout holds, and exclude GPU tests before
   CPU adapter discovery (#118).

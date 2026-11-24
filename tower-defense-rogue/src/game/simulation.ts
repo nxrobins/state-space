@@ -49,6 +49,7 @@ import {
 } from '../../../engine/browser_state_space';
 import {
   addUnique,
+  getProfileStorage,
   loadProfile,
   resetProfile,
   saveProfile,
@@ -3316,7 +3317,7 @@ export class GameModel {
   profile: Profile;
   run: RunState | null = null;
 
-  constructor(storage: StorageLike | undefined = globalThis.localStorage) {
+  constructor(storage: StorageLike | undefined = getProfileStorage()) {
     this.storage = storage;
     this.profile = loadProfile(storage);
   }

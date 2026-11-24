@@ -20,6 +20,7 @@ import { pathToFileURL } from 'node:url';
 import { version as esbuildVersion } from 'esbuild';
 import {
   BUNDLE,
+  frozenDifference,
   bundleEngine,
   extractCommit,
   loadCatalogue,
@@ -93,21 +94,6 @@ const summary = (record) => ({
     : {}),
 });
 const same = (a, b) => catalogue.encodeFrozen3D(a) === catalogue.encodeFrozen3D(b);
-/** First place two records of one case part ways, in reading order. */
-function difference(expected, actual) {
-  if (same(expected, actual)) return null;
-  for (let i = 0; i < Math.max(expected.steps.length, actual.steps.length); i++)
-    if (expected.steps[i] !== actual.steps[i])
-      return expected.steps[i] === undefined || actual.steps[i] === undefined
-        ? `${expected.steps.length} steps expected, ${actual.steps.length} recorded`
-        : `step ${i + 1} (digest work): ${expected.steps[i]} -> ${actual.steps[i]}`;
-  if (!same(expected.rejection, actual.rejection))
-    return `rejection ${JSON.stringify(expected.rejection)} -> ${JSON.stringify(actual.rejection)}`;
-  for (const key of new Set([...Object.keys(expected.facts), ...Object.keys(actual.facts)]))
-    if (!Object.is(expected.facts[key], actual.facts[key]))
-      return `fact ${key}: ${expected.facts[key]} -> ${actual.facts[key]}`;
-  return 'records differ outside steps, rejection and facts';
-}
 /** Rejection messages added to or removed from each frozen source. */
 function vocabularyChanges(expected, actual) {
   const changes = [];
@@ -213,7 +199,7 @@ if (mode === 'record') {
       continue;
     }
     const after = recordCandidate(frozen, 'candidate'),
-      changed = difference(before.record, after.record);
+      changed = frozenDifference(before.record, after.record, catalogue.encodeFrozen3D);
     if (changed) failures++;
     const row = {
       case: frozen.id,
