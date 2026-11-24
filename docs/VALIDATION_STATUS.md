@@ -36,12 +36,13 @@ CI uses Node.js 22 and Ubuntu 24.04 with the existing 8 GiB available-memory
 preflight. Windows containment checks remain platform-specific. See the
 [contributor workflow](../CONTRIBUTING.md) for the local build/check order.
 
-Python tests that need a native adapter skip on hosts without one and report
-the reason. The release gate (`python -m engine.verify`) and the manual
+CPU jobs exclude native Python GPU tests before adapter discovery. Outside CPU
+jobs those tests skip on hosts without an adapter and report the reason. The release gate (`python -m engine.verify`) and the manual
 [GPU verification workflow](../.github/workflows/gpu-verification.yml) set
 `STATE_SPACE_REQUIRE_GPU=1`, which turns that skip into a failure. The GPU
 workflow runs only on a self-hosted runner with the `gpu` label, a WebGPU
-adapter and NVIDIA telemetry for one GPU; no such runner is registered yet, so it records
+adapter, NVIDIA telemetry for one GPU, and [durable host incident state](GPU_RUNNER.md);
+no such runner is registered yet, so it records
 no result until one is.
 
 ## Native acceptance and remaining scope

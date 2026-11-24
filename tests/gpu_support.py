@@ -1,6 +1,6 @@
-"""Skip native GPU tests on hosts without a WebGPU adapter, unless a GPU is required.
+"""Exclude native GPU tests from CPU jobs before attempting adapter discovery.
 
-Hosted CI runs no GPU workload. Without an adapter the native engine tests used to
+The CPU supervisor excludes these tests even on GPU hosts. Without an adapter they used to
 error in ``setUpClass``; they now skip with an explicit reason. A GPU host that must
 not skip sets ``STATE_SPACE_REQUIRE_GPU=1``: the probe failure then raises instead,
 so a missing or broken adapter fails closed on the machine that claims the result.
@@ -37,10 +37,15 @@ def gpu_required() -> bool:
 
 def requires_gpu(target):
     """Skip a test class or method without an adapter; fail instead when a GPU is required."""
+    required = gpu_required()
+    if os.environ.get('STATE_SPACE_VERIFICATION_KIND') == 'cpu':
+        if required:
+            raise RuntimeError('GPU-required tests cannot run inside a CPU verification job')
+        return unittest.skip('Native GPU test excluded from CPU verification')(target)
     error = adapter_error()
     if error is None:
         return target
-    if gpu_required():
+    if required:
         raise RuntimeError(f"{REQUIRE_GPU_VARIABLE}=1 but no WebGPU adapter is usable: {error}")
     return unittest.skip(f"No WebGPU adapter ({error}); set {REQUIRE_GPU_VARIABLE}=1 to fail instead")(target)
 

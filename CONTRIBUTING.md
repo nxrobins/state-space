@@ -85,9 +85,12 @@ A separate CI job runs `npm ci`, `npm test` and `npm run build` in `game/` and
 `tower-defense-rogue/`; both prototypes import engine sources directly, so they
 need the checkout but not a built SDK.
 
-Python tests that need a native adapter skip on hosts without one. Set
+Python tests that need a native adapter skip before discovery inside CPU jobs.
+Outside CPU jobs they skip on hosts without an adapter. Set
 `STATE_SPACE_REQUIRE_GPU=1` on a GPU host so a missing adapter fails instead;
-`python -m engine.verify` sets it. Native checks use the explicit bounded stages
+`python -m engine.verify` sets it. The self-hosted GPU workflow requires
+[durable host incident state](docs/GPU_RUNNER.md) outside its checkouts.
+Native checks use the explicit bounded stages
 in the [macOS guide](docs/MACOS.md). Python test modules import shared helpers as
 `tests.<module>`, so `python -m unittest tests.test_<name>` resolves them as well
 as `unittest discover -s tests` does.

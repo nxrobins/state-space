@@ -3,7 +3,8 @@ name: GPU verification
 # carries the `gpu` label, a usable WebGPU adapter and NVIDIA telemetry for
 # exactly one GPU: the `gpu` supervisor kind and `npm run test:native` refuse
 # to launch without nvidia-smi. A Mac host uses the bounded Metal stages in docs/MACOS.md
-# instead. Register the runner under
+# instead. Configure durable incident state as described in docs/GPU_RUNNER.md.
+# Register the runner under
 # Settings > Actions > Runners, then run the workflow by hand. Enable the
 # schedule below only after the runner is registered; a scheduled job with no
 # matching runner queues until GitHub cancels it.
@@ -21,6 +22,9 @@ jobs:
     name: Native GPU tests and fixtures
     runs-on: [self-hosted, gpu]
     timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: gpu-runs/${{ github.run_id }}-${{ github.run_attempt }}
     env:
       # Fail closed: a GPU test that cannot find an adapter must error, not skip.
       STATE_SPACE_REQUIRE_GPU: '1'
@@ -28,13 +32,42 @@ jobs:
       OPENBLAS_NUM_THREADS: '1'
       MKL_NUM_THREADS: '1'
     steps:
+      - name: Check durable host incident state before checkout
+        shell: python {0}
+        working-directory: ${{ github.workspace }}
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ.get('STATE_SPACE_HOST_STATE_DIR', '')
+          if not value or not Path(value).is_absolute():
+              raise RuntimeError('Configure an absolute STATE_SPACE_HOST_STATE_DIR on this runner')
+          directory = Path(value).resolve(strict=True)
+          workspace = Path(os.environ['RUNNER_WORKSPACE']).resolve()
+          if directory == workspace or workspace in directory.parents:
+              raise RuntimeError('Host incident state must be outside the runner workspace')
+          state = json.loads((directory / 'safety-hold.json').read_text(encoding='utf-8'))
+          if state.get('blockRecovery') is not False:
+              raise RuntimeError('Host verification is blocked pending incident review')
+          checkout = Path(os.environ['GITHUB_WORKSPACE']) / 'gpu-runs' / (
+              os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          if checkout.exists() or checkout.is_symlink():
+              raise RuntimeError('Refusing to reuse or clean a prior verification checkout')
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+              env.write('STATE_SPACE_HOST_STATE_DIR=' + str(directory) + '\n')
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          clean: false
+          path: gpu-runs/${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Check legacy checkout holds and register this checkout
+        run: python -B -m scripts.verification_host
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: gpu-runs/${{ github.run_id }}-${{ github.run_attempt }}/package-lock.json
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           version: '0.11.28'
@@ -54,10 +87,12 @@ jobs:
       - name: Native SDK fixture
         run: npm run test:native -- --file engine/sdk.test.ts
       - name: Retain receipts and failures
-        if: always()
+        if: ${{ always() && env.STATE_SPACE_HOST_STATE_DIR != '' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: gpu-evidence-${{ github.sha }}
-          path: dist/verification/
+          path: |
+            ${{ env.STATE_SPACE_HOST_STATE_DIR }}/receipts/${{ github.run_id }}-${{ github.run_attempt }}/
+            gpu-runs/${{ github.run_id }}-${{ github.run_attempt }}/dist/verification/
           retention-days: 14
           if-no-files-found: warn

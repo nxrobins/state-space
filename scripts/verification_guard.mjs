@@ -1,10 +1,18 @@
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { isAbsolute, join } from 'node:path';
 import { pythonInterpreter } from '../engine/test-support/python-interpreter.mjs';
 export const SAFETY_HOLD = new URL('../dist/verification/safety-hold.json', import.meta.url);
 /** Refuse while an incident hold blocks runtime work. Unsupervised workload entry
  * points (benchmarks, direct verifiers) call this before doing anything else. */
 export function assertRuntimeNotBlocked(hold = SAFETY_HOLD) {
+  const directory = process.env.STATE_SPACE_HOST_STATE_DIR;
+  if (directory !== undefined) {
+    if (!isAbsolute(directory)) throw Error('Host incident directory must be an absolute path');
+    const state = JSON.parse(readFileSync(join(directory, 'safety-hold.json'), 'utf8'));
+    if (state?.blockRecovery !== false)
+      throw Error('Host verification is blocked pending incident review');
+  }
   if (!existsSync(hold)) return;
   let state;
   try {
