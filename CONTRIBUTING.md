@@ -47,6 +47,11 @@ and test sources; `npm run format:check` is the CI gate. `.prettierignore`
 lists what stays byte-exact: generated code, vendored files, built output,
 archived evidence and the frozen material-law sources.
 
+The exact liquid/contact CI job uses Node 22.22.3, the runtime recorded in the
+baseline, and runs all 36 cases through the supervised freeze checker. It retains
+complete records under the workflow artifacts. The regular unit suite also checks
+the light cases on its current runtime.
+
 For a focused check, use the file's current path and the bounded CPU config:
 
 ```sh

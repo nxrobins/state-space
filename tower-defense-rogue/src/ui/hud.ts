@@ -1,3 +1,4 @@
+import { profileStorageAvailable } from '../game/profile';
 import {
   CARD_DEFS,
   CORE_AXIS_DEFS,
@@ -651,7 +652,8 @@ export function mountHud(model: GameModel, root: HTMLElement): void {
 
   function render(snapshot = model.snapshot()): void {
     lastSnapshot = snapshot;
-    root.innerHTML = renderRun(snapshot);
+    const saveNotice = profileStorageAvailable() ? '' : '<p role="status">Saving is unavailable. Progress will last while this page stays open.</p>';
+    root.innerHTML = saveNotice + renderRun(snapshot);
   }
 
   function handleButtonAction(button: HTMLButtonElement): void {

@@ -32,7 +32,7 @@ import {
   updateHud,
 } from '../../ui/hud';
 import { installGlobalOpsHandlers, recordOpsEvent, syncRuntimeStats } from '../../game/ops';
-import { appendReplayFrame, createReplayLog, replayBattle } from '../../game/replay';
+import { appendReplayFrame, createReplayLog, recoverReplay } from '../../game/replay';
 import { clearRunningReplay, loadRunningReplay, saveCompletedReplay, saveRunningReplay } from '../../game/replayStorage';
 import {
   FIGHTER_SPRITE_ANIMATIONS,
@@ -307,14 +307,16 @@ export class BattleScene extends Phaser.Scene {
   private recoverRunningMatch(): boolean {
     const log = loadRunningReplay();
     if (!log) return false;
-    const recovered = replayBattle(log);
+    const recovery = recoverReplay(log);
+    const recovered = recovery?.state;
     if (!recovered || recovered.matchPhase === 'finished') {
       clearRunningReplay();
       return false;
     }
     this.selectedSpec = log.selectedFighter;
     this.state = recovered;
-    this.replayLog = log;
+    this.replayLog = recovery!.log;
+    saveRunningReplay(this.replayLog);
     this.matchStarted = true;
     this.introTicks = 0;
     this.lastReplayFlushTick = recovered.tick;

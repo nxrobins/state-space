@@ -9,6 +9,20 @@ import {
   PROFILE_START_UNLOCKS,
 } from './content';
 
+let storageAvailable = true;
+export const profileStorageAvailable = () => storageAvailable;
+
+export function getProfileStorage(): StorageLike | undefined {
+  try {
+    const storage = globalThis.localStorage;
+    if (!storage) storageAvailable = false;
+    return storage;
+  } catch {
+    storageAvailable = false;
+    return undefined;
+  }
+}
+
 export const PROFILE_STORAGE_KEY = 'state-space.relic-line.profile.v1';
 
 export interface Profile {
@@ -93,35 +107,42 @@ function normalizeProfile(profile: Profile): Profile {
   };
 }
 
-export function loadProfile(storage: StorageLike | undefined = globalThis.localStorage): Profile {
-  if (!storage) {
+export function loadProfile(storage: StorageLike | undefined = getProfileStorage()): Profile {
+  let raw: string | null;
+  try {
+    if (!storage) throw Error('Profile storage unavailable');
+    raw = storage.getItem(PROFILE_STORAGE_KEY);
+  } catch {
+    storageAvailable = false;
     return createDefaultProfile();
   }
-
-  const raw = storage.getItem(PROFILE_STORAGE_KEY);
-  if (!raw) {
-    const profile = createDefaultProfile();
-    saveProfile(profile, storage);
-    return profile;
+  if (raw) {
+    try {
+      const profile = normalizeProfile(JSON.parse(raw) as Profile);
+      storageAvailable = true;
+      return profile;
+    } catch {
+      storageAvailable = false;
+    }
   }
+  const profile = createDefaultProfile();
+  saveProfile(profile, storage);
+  return profile;
+}
 
+export function saveProfile(profile: Profile, storage: StorageLike | undefined = getProfileStorage()): boolean {
   try {
-    return normalizeProfile(JSON.parse(raw) as Profile);
+    if (!storage) throw Error('Profile storage unavailable');
+    storage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(normalizeProfile(profile)));
+    storageAvailable = true;
+    return true;
   } catch {
-    const profile = createDefaultProfile();
-    saveProfile(profile, storage);
-    return profile;
+    storageAvailable = false;
+    return false;
   }
 }
 
-export function saveProfile(profile: Profile, storage: StorageLike | undefined = globalThis.localStorage): void {
-  if (!storage) {
-    return;
-  }
-  storage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(normalizeProfile(profile)));
-}
-
-export function resetProfile(storage: StorageLike | undefined = globalThis.localStorage): Profile {
+export function resetProfile(storage: StorageLike | undefined = getProfileStorage()): Profile {
   const profile = createDefaultProfile();
   saveProfile(profile, storage);
   return profile;

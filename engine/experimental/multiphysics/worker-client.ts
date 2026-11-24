@@ -284,35 +284,51 @@ export async function startMultiphysicsWorker3D(
   snapshot: MultiphysicsSnapshot3D,
   options: { work?: number; timeoutMs?: number } = {},
 ) {
+  const work = integer(options.work ?? 128, 1, 256);
+  const timeoutMs = integer(options.timeoutMs ?? 30000, 1, 60000);
   const worker = new Worker(url, { type: 'module' });
+  let client: ReturnType<typeof createMultiphysicsWorkerClient3D> | undefined;
   try {
     await new Promise<void>((resolve, reject) => {
-      const done = (event: MessageEvent) => {
+      const finish = (error?: Error) => {
+        clearTimeout(timer);
         worker.removeEventListener('message', done);
         worker.removeEventListener('error', failed);
-        const data = event.data as { kind?: unknown; ready?: unknown; error?: unknown };
-        if (data?.kind === MULTIPHYSICS_WORKER_BOOTSTRAP_3D && data.ready === true) resolve();
-        else reject(Error(String(data?.error ?? 'Multiphysics Worker did not start.')));
+        worker.removeEventListener('messageerror', failed);
+        if (error) reject(error);
+        else resolve();
       };
-      const failed = () => reject(Error('Multiphysics Worker failed to load.'));
+      const done = (event: MessageEvent) => {
+        const data = event.data as { kind?: unknown; ready?: unknown; error?: unknown };
+        if (data?.kind === MULTIPHYSICS_WORKER_BOOTSTRAP_3D && data.ready === true) finish();
+        else finish(Error(String(data?.error ?? 'Multiphysics Worker did not start.')));
+      };
+      const failed = () => finish(Error('Multiphysics Worker failed to load.'));
+      const timer = setTimeout(
+        () => finish(Error('Multiphysics Worker startup timed out.')),
+        timeoutMs,
+      );
       worker.addEventListener('message', done);
       worker.addEventListener('error', failed);
-      worker.postMessage({
-        kind: MULTIPHYSICS_WORKER_BOOTSTRAP_3D,
-        snapshot,
-        work: integer(options.work ?? 128, 1, 256),
-      });
+      worker.addEventListener('messageerror', failed);
+      try {
+        worker.postMessage({ kind: MULTIPHYSICS_WORKER_BOOTSTRAP_3D, snapshot, work });
+      } catch (error) {
+        finish(error instanceof Error ? error : Error('Multiphysics Worker failed to start.'));
+      }
     });
+    client = createMultiphysicsWorkerClient3D(
+      multiphysicsBrowserWorkerTransport3D(worker),
+      profiles,
+      { timeoutMs },
+    );
+    await client.ready;
+    return client;
   } catch (error) {
-    worker.terminate();
+    if (client) client.close();
+    else worker.terminate();
     throw error;
   }
-  const client = createMultiphysicsWorkerClient3D(
-    multiphysicsBrowserWorkerTransport3D(worker),
-    profiles,
-    { timeoutMs: options.timeoutMs },
-  );
-  await client.ready;
-  return client;
 }
+
 export type MultiphysicsWorkerClient3D = Awaited<ReturnType<typeof startMultiphysicsWorker3D>>;

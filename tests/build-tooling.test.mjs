@@ -1,3 +1,4 @@
+import { frozenDifference } from '../scripts/liquid_contact_engine.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -485,4 +486,12 @@ test('the hosted site serves a released hold status of its own', () => {
   assert.equal(JSON.parse(readFileSync(hold, 'utf8')).blockRecovery, false);
   // The bundled demos apply the same rule as the shared check before they start.
   assert.doesNotThrow(() => assertRuntimeNotBlocked(hold));
+});
+
+test('frozen comparison rejects an intermediate digest change despite equal outcomes and step counts', () => {
+  const expected = { outcome: 'completed', steps: ['first', 'middle', 'last'], facts: {} };
+  assert.equal(frozenDifference(expected, structuredClone(expected), JSON.stringify), null);
+  const changed = structuredClone(expected);
+  changed.steps[1] = 'different';
+  assert.match(frozenDifference(expected, changed, JSON.stringify), /step 2/);
 });

@@ -64,6 +64,13 @@ export function replayBattle(log: ReplayLog): BattleState | null {
   return state;
 }
 
+/** Recover only the contiguous inputs accepted by replay, ready to append and save. */
+export function recoverReplay(log: ReplayLog): { state: BattleState; log: ReplayLog } | null {
+  const state = replayBattle(log);
+  if (!state) return null;
+  return { state, log: { ...log, frames: log.frames.slice(0, state.tick) } };
+}
+
 export function completeReplay(log: ReplayLog, result: MatchResult): ReplayLog {
   return { ...log, completedResult: result };
 }

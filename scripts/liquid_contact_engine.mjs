@@ -119,3 +119,20 @@ export function selectCases(catalogue, select) {
   if (!selected.length) throw Error('No frozen case matches --select.');
   return selected;
 }
+
+/** First place two records of one case part ways, in reading order. */
+export function frozenDifference(expected, actual, encode) {
+  const same = (a, b) => encode(a) === encode(b);
+  if (same(expected, actual)) return null;
+  for (let i = 0; i < Math.max(expected.steps.length, actual.steps.length); i++)
+    if (expected.steps[i] !== actual.steps[i])
+      return expected.steps[i] === undefined || actual.steps[i] === undefined
+        ? `${expected.steps.length} steps expected, ${actual.steps.length} recorded`
+        : `step ${i + 1} (digest work): ${expected.steps[i]} -> ${actual.steps[i]}`;
+  if (!same(expected.rejection, actual.rejection))
+    return `rejection ${JSON.stringify(expected.rejection)} -> ${JSON.stringify(actual.rejection)}`;
+  for (const key of new Set([...Object.keys(expected.facts), ...Object.keys(actual.facts)]))
+    if (!Object.is(expected.facts[key], actual.facts[key]))
+      return `fact ${key}: ${expected.facts[key]} -> ${actual.facts[key]}`;
+  return 'records differ outside steps, rejection and facts';
+}

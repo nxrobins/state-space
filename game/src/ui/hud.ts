@@ -1,3 +1,4 @@
+import { replayStorageAvailable } from '../game/replayStorage';
 import { MATCH_TICKS, TICK_RATE } from '../game/simulation/constants';
 import { FIGHTER_SPECS } from '../game/simulation/fighters';
 import type { ActionState, BattleState, FighterId, FighterSpecId, FighterState } from '../game/simulation/types';
@@ -86,6 +87,8 @@ export function resolveTouchAction(value: string | undefined): TouchActionKey | 
 }
 
 export function updateHud(state: BattleState): void {
+  const saveStatus = document.getElementById('save-status');
+  if (saveStatus) saveStatus.hidden = replayStorageAvailable();
   updateFighterHud('p1', state.fighters.p1, state.fighters.cpu, state.tick);
   updateFighterHud('cpu', state.fighters.cpu, state.fighters.p1, state.tick);
   updateFighterSelectCards(state.fighters.p1.specId);
