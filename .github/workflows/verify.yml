@@ -52,9 +52,9 @@ jobs:
           uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest tests.test_compiler_tools -v
       - name: Supervisor regressions (no GPU)
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_verification*.py' -v
-      - name: Python engine tests (adapter tests skip without a GPU)
+      - name: Python engine tests (CPU, native adapter discovery disabled)
         # The whole suite, including the evolution and release regressions. Tests
-        # marked with tests/gpu_support.requires_gpu skip here and say why; the
+        # marked with tests/gpu_support.requires_gpu skip before probing an adapter; the
         # longer stall allowance covers single tests that run quietly.
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 300 --stall 120 -- .venv/bin/python -B -m unittest discover -s tests -p 'test_*.py' -v
       - name: Engine structural lint

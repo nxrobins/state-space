@@ -181,3 +181,23 @@ test('CDP rejects unknown response IDs and bounds retained errors by bytes', asy
   assert.match(second.fault.message, /buffer overflow/);
   assert.equal(second.errors.length, 0);
 });
+
+test('Node entry points honor the external host hold even when the checkout hold is absent', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'state-space-host-'));
+  const previous = process.env.STATE_SPACE_HOST_STATE_DIR;
+  try {
+    process.env.STATE_SPACE_HOST_STATE_DIR = directory;
+    const local = pathToFileURL(join(directory, 'absent-local.json'));
+    assert.throws(() => assertRuntimeNotBlocked(local));
+    for (const state of ['{}', 'null', '{"blockRecovery":true}', 'broken']) {
+      writeFileSync(join(directory, 'safety-hold.json'), state);
+      assert.throws(() => assertRuntimeNotBlocked(local));
+    }
+    writeFileSync(join(directory, 'safety-hold.json'), '{"blockRecovery":false}');
+    assert.doesNotThrow(() => assertRuntimeNotBlocked(local));
+  } finally {
+    if (previous === undefined) delete process.env.STATE_SPACE_HOST_STATE_DIR;
+    else process.env.STATE_SPACE_HOST_STATE_DIR = previous;
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

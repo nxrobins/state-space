@@ -19,6 +19,7 @@ import uuid
 from scripts.verification_health import HostHealth, GpuMonitor, gpu_sample, health_error, append_sample
 from scripts.verification_watchdog import IndependentWatchdog
 from scripts.verification_journal import durable_json
+from scripts.verification_host import assert_host_allowed, host_directory
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -96,6 +97,7 @@ def assert_recovery_enabled(state):
 
 def assert_runtime_not_blocked(root=ROOT):
     """Leaf entries also honor a hard incident block, even inside a job."""
+    assert_host_allowed(root)
     hold = root / 'dist/verification/safety-hold.json'
     if hold.exists():
         try:
@@ -112,6 +114,7 @@ def assert_verification_allowed(root=ROOT, *, command=None, kind=None, timeout=N
     the file to decide whether it applies; a damaged hold must also fail closed.
     Static inspection and isolated supervisor unit tests need no runtime job.
     """
+    assert_host_allowed(root)
     hold = root / 'dist/verification/safety-hold.json'
     if hold.exists():
         # Recovery is one exact command, consumed before launch. The global hold
@@ -134,7 +137,7 @@ def assert_verification_allowed(root=ROOT, *, command=None, kind=None, timeout=N
 
 class Lease:
     def __enter__(self):
-        path = ROOT / 'dist/verification/lease.lock'
+        path = (host_directory() or ROOT / 'dist/verification') / 'lease.lock'
         path.parent.mkdir(parents=True, exist_ok=True)
         self.file = path.open('a+b')
         if path.stat().st_size == 0:
@@ -297,7 +300,10 @@ def main():
         from scripts.verification_macos import validate_qualification
         metal_scope = validate_qualification(command, args.timeout)
     run_id = uuid.uuid4().hex
-    out = args.output or ROOT / 'dist/verification' / run_id
+    directory = host_directory()
+    group = os.environ.get('GITHUB_RUN_ID', 'local') + '-' + os.environ.get('GITHUB_RUN_ATTEMPT', '1')
+    evidence = directory / 'receipts' / group if directory else ROOT / 'dist/verification'
+    out = args.output or evidence / run_id
     out.mkdir(parents=True, exist_ok=True)
     cpu_limit = 6 if args.kind == 'cpu' else 12 if args.kind == 'gpu' else 0
     memory_limit = 4096 if args.kind == 'cpu' else 8192

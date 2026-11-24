@@ -127,6 +127,10 @@ date of the last change in the section.
 
 ### Fixed
 
+- Preserve self-hosted verification incident state and receipts outside fresh
+  workflow checkouts, inspect linked checkout holds, and exclude GPU tests before
+  CPU adapter discovery (#118).
+
 - The hosted demo site serves a released hold status of its own at
   `dist/verification/safety-hold.json`. The reactive sandbox and the
   multiphysics builder request that file at startup and stop unless the answer
