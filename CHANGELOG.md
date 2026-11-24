@@ -129,7 +129,7 @@ date of the last change in the section.
 
 - Preserve self-hosted verification incident state and receipts outside fresh
   workflow checkouts, inspect linked checkout holds, and exclude GPU tests before
-  CPU adapter discovery (PR pending).
+  CPU adapter discovery (#118).
 
 - The hosted demo site serves a released hold status of its own at
   `dist/verification/safety-hold.json`. The reactive sandbox and the
