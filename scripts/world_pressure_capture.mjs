@@ -16,15 +16,17 @@ export function captureScene(api, profiles, golden, scene, output) {
   const fixture = api.FROZEN_CASES_3D.find((item) => item.id === scene.id);
   const { heavy, why, ...expected } = golden.cases[scene.id];
   const referenceTicks = [];
+  let initial;
   const plainEngine = {
     ...api,
     createMultiphysicsTickJob3D(p, state) {
+      initial ??= structuredClone(state);
       const job = api.createMultiphysicsTickJob3D(p, state);
       return {
         ...job,
         result() {
           const result = job.result();
-          referenceTicks.push(api.digestFrozen3D(result));
+          referenceTicks.push(structuredClone(result));
           return result;
         },
       };
@@ -65,6 +67,7 @@ export function captureScene(api, profiles, golden, scene, output) {
         result() {
           const result = job.result();
           assert.equal(api.digestFrozen3D(state), inputDigest, 'tick mutated its input');
+          assert.deepEqual(result, referenceTicks[ticks.length], 'capture changed a full tick');
           const { report, snapshot } = result;
           ticks.push({
             tick: snapshot.tick,
@@ -96,11 +99,6 @@ export function captureScene(api, profiles, golden, scene, output) {
   };
   const observed = api.recordFrozenCase3D(engine, profiles, fixture);
   assert.deepEqual(observed, plain, 'capture changed the frozen trajectory');
-  assert.deepEqual(
-    ticks.map((t) => t.stateAndReport),
-    referenceTicks,
-    'capture changed a full tick',
-  );
   assert.equal(observed.outcome, 'completed');
   assert.equal(ticks.length, scene.ticks);
   if (scene.id === 'control-resting-cup')
@@ -111,24 +109,27 @@ export function captureScene(api, profiles, golden, scene, output) {
         rest.maxAbsLedger < 1e-6,
       'resting-water gate',
     );
-  else
-    for (const row of ticks) {
-      // Empty captures on a previously expensive fixture cannot establish a comparison.
+  // Each frozen tick reaches the dense fallback in both pressure passes.
+  for (const { tick } of ticks)
+    for (const pass of ['first', 'postDrift'])
       assert(
-        faces.some((f) => f.tick === row.tick),
-        'missing dense fallback for tick ' + row.tick,
+        faces.some((f) => f.tick === tick && f.pass === pass),
+        'missing ' + pass + ' capture on tick ' + tick,
       );
-    }
   // V8 serialization preserves Float64 bits including signed zero. Decode this exact packet
   // in both timed children; each distinct ordered operator is stored only once.
   const packet = gzipSync(serialize({ operators, faces }));
   const file = scene.id + '.v8.gz';
   writeFileSync(join(output, file), packet);
+  const worldFile = scene.id + '.ticks.v8.gz';
+  const world = gzipSync(serialize({ initial, results: referenceTicks }));
+  writeFileSync(join(output, worldFile), world);
   return {
     ...scene,
     file,
     sha256: hash(packet),
     bytes: packet.length,
+    world: { file: worldFile, sha256: hash(world), bytes: world.length },
     capturedFaces: faces.length,
     uniqueOperators: operators.size,
     trajectory: ticks,

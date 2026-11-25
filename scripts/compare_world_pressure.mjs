@@ -144,6 +144,11 @@ try {
     console.log('Comparing', scene.capturedFaces, 'faces from', fixture.id);
     Object.assign(scene, compare(scene));
     write('summary.json', report);
+    assert.equal(
+      scene.methods.dense.passing,
+      scene.capturedFaces,
+      'dense replay disagrees with v2',
+    );
   }
   // The catalogue repeats a rejection and retries from a serialized save. Both must retain
   // the exact stage, work, reason, and atomicity when the observer is installed.
