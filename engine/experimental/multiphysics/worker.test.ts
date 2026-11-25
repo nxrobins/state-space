@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { beforeAll, expect, test, vi } from 'vitest';
 import { createWorkerBus } from '../../test-support/worker-bus.js';
 import { createMultiphysicsProfiles3D, type MultiphysicsProfiles3D } from './profiles.js';
@@ -43,6 +44,33 @@ function setup(work = 7, source?: MultiphysicsSnapshot3D) {
     },
   };
 }
+test('restoring a v1 save into a v2 Worker continues the original trajectory', async () => {
+  const save = JSON.parse(
+    readFileSync(
+      new URL('../../test-support/fixtures/combined-v1-tick24.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const h = setup(256);
+  try {
+    await h.bus.settle(h.client.ready);
+    expect(h.initial.rules).toBe('multiphysics-world-2');
+    const restored = await h.bus.settle(h.client.restore(save));
+    expect(restored.snapshot).toEqual(save);
+    const direct = createMultiphysicsWorld3D(profiles, save);
+    // Tick 29 is the first changed heat payment in this trajectory.
+    for (let tick = 24; tick < 30; tick += 2) {
+      const candidate = direct.prepare([], 2);
+      while (candidate.progress().status === 'running') candidate.advance(1);
+      const preview = await h.bus.settle(h.client.preview([], 2));
+      const committed = await h.bus.settle(h.client.commit(preview));
+      expect(committed.result).toEqual(direct.commit(candidate).result);
+      expect(committed.result.snapshot.rules).toBe('multiphysics-world-1');
+    }
+  } finally {
+    h.close();
+  }
+});
 test.each([
   'freefall',
   'fluid-switch',

@@ -44,6 +44,7 @@ import {
   isRigidMaterial3D,
   compareIdentity3D,
   MULTIPHYSICS_LIMITS_3D,
+  LEGACY_MULTIPHYSICS_RULES_3D,
   type MultiphysicsSnapshot3D,
 } from './model.js';
 import {
@@ -167,6 +168,7 @@ export function createMultiphysicsTickJob3D(
   raw: MultiphysicsSnapshot3D,
 ): MultiphysicsTickJob3D {
   const state = readMultiphysicsSnapshot3D(profiles, raw);
+  const legacy = state.rules === LEGACY_MULTIPHYSICS_RULES_3D;
   if (state.tick >= MULTIPHYSICS_LIMITS_3D.ticks) throw Error('World tick counter exhausted.');
   const iterator = run();
   let status: MultiphysicsTickProgress3D['status'] = 'running',
@@ -495,6 +497,7 @@ export function createMultiphysicsTickJob3D(
       },
       // All four inputs are this tick's own data.
       copyOwnedPortableValue,
+      legacy,
     );
     let mechanicalResult: ReturnType<typeof mechanical.next>;
     try {
@@ -527,46 +530,53 @@ export function createMultiphysicsTickJob3D(
       yield 'mechanical-heat';
     }
     rebuildOwners3D(profiles, state, beforeFracture);
-    // Each parcel's motion with only the gravity that resting support did not cancel: what
-    // entered the rigid stage, less the predicted gravity the first fluid pass absorbed, plus
-    // the whole step of gravity and the rigid stage's physical impacts. Closing present in
-    // it is an impact; the rest of what the post-drift projection removes is support.
-    const absorbed = new Map(fluidReceipt.supportVelocityChange.map((row) => [row.id, row])),
-      impacts = new Map(rigid.physicalVelocityChange.map((row) => [row.id, row])),
-      fixed = new Set(
-        bondedComponents3D(
-          beforeFracture.filter((p) => isRigidMaterial3D(profiles, p)),
-          state.bonds,
-        )
-          .filter((ids) => ids.some((id) => state.anchors.includes(id)))
-          .flat(),
-      ),
-      fall = scaleVec3(state.settings.gravity, dt);
-    const impactReference = beforeFracture.map((p) => {
-      const impact = impacts.get(p.id)!;
-      return {
-        id: p.id,
-        velocity: vector(
-          addVec3(
-            addVec3(p.velocity, absorbed.get(p.id)?.velocity ?? [0, 0, 0]),
-            addVec3(impact.velocity, fixed.has(p.id) ? [0, 0, 0] : fall),
-          ),
+    function impactReference() {
+      // Each parcel's motion with only the gravity that resting support did not cancel: what
+      // entered the rigid stage, less the predicted gravity the first fluid pass absorbed, plus
+      // the whole step of gravity and the rigid stage's physical impacts. Closing present in
+      // it is an impact; the rest of what the post-drift projection removes is support.
+      const absorbed = new Map(fluidReceipt.supportVelocityChange.map((row) => [row.id, row])),
+        impacts = new Map(rigid.physicalVelocityChange.map((row) => [row.id, row])),
+        fixed = new Set(
+          bondedComponents3D(
+            beforeFracture.filter((p) => isRigidMaterial3D(profiles, p)),
+            state.bonds,
+          )
+            .filter((ids) => ids.some((id) => state.anchors.includes(id)))
+            .flat(),
         ),
-        angularVelocity: vector(
-          addVec3(
-            applyWorldInverseInertia(
-              p.orientation,
-              p.principalInertia.map((v) => 1 / v) as unknown as Vec3,
-              p.intrinsicAngularMomentum,
+        fall = scaleVec3(state.settings.gravity, dt);
+      return beforeFracture.map((p) => {
+        const impact = impacts.get(p.id)!;
+        return {
+          id: p.id,
+          velocity: vector(
+            addVec3(
+              addVec3(p.velocity, absorbed.get(p.id)?.velocity ?? [0, 0, 0]),
+              addVec3(impact.velocity, fixed.has(p.id) ? [0, 0, 0] : fall),
             ),
-            impact.angularVelocity,
           ),
-        ),
-      };
-    });
+          angularVelocity: vector(
+            addVec3(
+              applyWorldInverseInertia(
+                p.orientation,
+                p.principalInertia.map((v) => 1 / v) as unknown as Vec3,
+                p.intrinsicAngularMomentum,
+              ),
+              impact.angularVelocity,
+            ),
+          ),
+        };
+      });
+    }
     // Finish at a full-step velocity boundary. Otherwise the last gravity half
     // kick survives in resting liquid and appears as artificial kinetic energy.
-    const postFluid = yield* createFluidCoupling3D(profiles, state, true, impactReference);
+    const postFluid = yield* createFluidCoupling3D(
+      profiles,
+      state,
+      true,
+      legacy ? undefined : impactReference(),
+    );
     // Liquid constraints and the solid support of liquid samples are inelastic. Their work on
     // resting liquid cancels within the tick: the first pass absorbs the predicted gravity,
     // and the solid contacts and this projection give the same amount back. What remains is
@@ -576,9 +586,11 @@ export function createMultiphysicsTickJob3D(
     // liquid samples, so their support passed the blow on. The amount is the tick's own net,
     // so heat can never exceed the energy lost, and it goes where those rows and contacts
     // acted. A net gain is never paid and stays a numerical residual.
-    const constraintEnergy = finite(
-      fluidReceipt.numericalEnergy + rigid.particleSupportEnergy + postFluid.numericalEnergy,
-    );
+    const constraintEnergy = legacy
+      ? 0
+      : finite(
+          fluidReceipt.numericalEnergy + rigid.particleSupportEnergy + postFluid.numericalEnergy,
+        );
     let constraintHeat = 0;
     if (-constraintEnergy > 1e-4 * state.settings.numericalEnergyLimit) {
       const weights = new Map<string, number>();

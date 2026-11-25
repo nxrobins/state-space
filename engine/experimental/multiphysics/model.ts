@@ -17,7 +17,8 @@ import { validatedParcelConservation3D, type MaterialParcel3D } from './conserva
 import { validateRigidAssemblyMotion3D, type RigidBond3D } from './rigid.js';
 import { addVec3, assertFiniteVec3, type Vec3 } from './math.js';
 
-export const MULTIPHYSICS_RULES_3D = 'multiphysics-world-1';
+export const LEGACY_MULTIPHYSICS_RULES_3D = 'multiphysics-world-1';
+export const MULTIPHYSICS_RULES_3D = 'multiphysics-world-2';
 export const MULTIPHYSICS_LIMITS_3D = Object.freeze({
   parcels: 256,
   bonds: 768,
@@ -56,7 +57,7 @@ export type MultiphysicsAccounting3D = {
 };
 export type MultiphysicsSnapshot3D = {
   schema: 1;
-  rules: typeof MULTIPHYSICS_RULES_3D;
+  rules: typeof LEGACY_MULTIPHYSICS_RULES_3D | typeof MULTIPHYSICS_RULES_3D;
   profileVersion: string;
   catalogHash: string;
   tick: number;
@@ -247,6 +248,18 @@ export function readMultiphysicsSnapshot3D(
 ): MultiphysicsSnapshot3D {
   return readSnapshot(profiles, raw, copyPortableValue);
 }
+/** Import a save whose producer is known to have shipped the inelastic liquid heat law
+ * under the original v1 tag (#111 until v2). Ordinary restores honor the recorded tag. */
+export function importUnversionedLiquidHeatSnapshot3D(
+  profiles: MultiphysicsProfiles3D,
+  raw: unknown,
+): MultiphysicsSnapshot3D {
+  const snapshot = readMultiphysicsSnapshot3D(profiles, raw);
+  if (snapshot.rules !== LEGACY_MULTIPHYSICS_RULES_3D)
+    throw Error('Expected a snapshot from the unversioned liquid heat release.');
+  snapshot.rules = MULTIPHYSICS_RULES_3D;
+  return snapshot;
+}
 /** `readMultiphysicsSnapshot3D` for the candidate state a world tick built itself: the same
  * copy, checks and rejections, without re-inspecting data the tick owns. */
 export function readOwnedMultiphysicsSnapshot3D(
@@ -285,7 +298,7 @@ function readSnapshot(
   );
   if (
     value.schema !== 1 ||
-    value.rules !== MULTIPHYSICS_RULES_3D ||
+    (value.rules !== LEGACY_MULTIPHYSICS_RULES_3D && value.rules !== MULTIPHYSICS_RULES_3D) ||
     value.profileVersion !== profiles.version ||
     value.catalogHash !== profiles.catalogHash
   )

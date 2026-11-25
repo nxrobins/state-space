@@ -140,6 +140,10 @@ jobs:
       - run: npm ci
       - name: Compare every frozen case on its recorded V8 runtime
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check --select all --timeout 1200
+      - name: Replay the original v1 trajectories on the same runtime
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check-legacy --select all --timeout 1200
+      - name: Restore the historical mid-trajectory save
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 120 -- node node_modules/vitest/vitest.mjs run --config engine/vitest.cpu.config.ts engine/experimental/multiphysics/replay-compatibility.test.ts
       - name: Retain exact records and failures
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

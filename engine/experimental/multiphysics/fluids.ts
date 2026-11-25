@@ -212,6 +212,8 @@ export type FluidProjectionFaceCapture3D = {
 export type FluidReferenceTuning3D = {
   coordinateProjection?: boolean;
   zeroViscosity?: boolean;
+  /** v1 does not classify inelastic constraint work for heat. */
+  recordImpactLoss?: boolean;
 };
 const ZERO: Vec3 = [0, 0, 0];
 const axes: readonly Vec3[] = [
@@ -1292,32 +1294,38 @@ function* solve(
   const constraints = [...contactRows.map((c) => c.row), ...rows];
   // The rate each row would have without the predictor and the support that answers it.
   const reference = input.reference;
-  const priorRates = reference
-    ? constraints.map((row) =>
-        finite(
-          row.terms.reduce(
-            (sum, t) => sum + dotVec3(t.gradient, reference.particles[t.i].velocity),
-            0,
-          ) +
-            row.walls.reduce((sum, t) => {
-              const motion = reference.bodies[atBody[t.s]];
-              return (
-                sum +
-                dotVec3(
-                  t.gradient,
-                  addVec3(
-                    motion.velocity,
-                    crossVec3(
-                      motion.angularVelocity,
-                      subtractVec3(t.point ?? boundaries[t.s].position, bodies[atBody[t.s]].center),
-                    ),
-                  ),
-                )
-              );
-            }, 0),
-        ),
-      )
-    : constraints.map(rate);
+  const priorRates =
+    tuning.recordImpactLoss === false
+      ? []
+      : reference
+        ? constraints.map((row) =>
+            finite(
+              row.terms.reduce(
+                (sum, t) => sum + dotVec3(t.gradient, reference.particles[t.i].velocity),
+                0,
+              ) +
+                row.walls.reduce((sum, t) => {
+                  const motion = reference.bodies[atBody[t.s]];
+                  return (
+                    sum +
+                    dotVec3(
+                      t.gradient,
+                      addVec3(
+                        motion.velocity,
+                        crossVec3(
+                          motion.angularVelocity,
+                          subtractVec3(
+                            t.point ?? boundaries[t.s].position,
+                            bodies[atBody[t.s]].center,
+                          ),
+                        ),
+                      ),
+                    )
+                  );
+                }, 0),
+            ),
+          )
+        : constraints.map(rate);
   const beforePrediction = kinetic();
   const prediction = input.velocityPrediction ?? ZERO;
   for (const particle of p)
@@ -1647,7 +1655,7 @@ function* solve(
     particles: p.map(() => 0),
     boundaries: boundaries.map(() => 0),
   };
-  for (let k = 0; k < constraints.length; k++) {
+  for (let k = 0; k < priorRates.length; k++) {
     if (lambdas[k] === 0) continue;
     const band =
         4 *

@@ -12,6 +12,30 @@ parity, electricity, and the builder are subsequent release gates. Electricity
 must not ship ahead of the preceding gates. The independent circuit reference is
 an analytical oracle for this work, not electrical simulation in a world.
 
+### Saved worlds and liquid impact heat
+
+New worlds use `multiphysics-world-2`. Schema 1 still describes the JSON layout.
+The saved `rules` field selects the behavior for every tick, including previews,
+edits, Worker restore and subsequent saves.
+
+| Producer | How to resume |
+| --- | --- |
+| Original published v1, through `06c737f` | Load normally. Liquid constraint losses stay in the numerical ledger. The original rigid contact and refinement limits apply. |
+| Heat-paying builds beginning with #111 that still wrote v1 | If the producer is known, use **Older saves with liquid impact heat → Import heat-release save** in the builder, or call `importUnversionedLiquidHeatSnapshot3D(profiles, raw)` before restoring. This validates and copies the save and records v2. |
+| v2 | Load normally. Identified inelastic liquid losses are paid as heat. |
+
+Both earlier releases wrote the same identifier. Identical saved bytes can have
+either origin, including saves made before the first affected impact. Use the
+producer version or external provenance when choosing the explicit import.
+
+The v1 trajectory oracle in `engine/test-support/fixtures/liquid-contact-world-1.json`
+is the original freeze from `b1c581943e35c5aef7343f90bb559861cdbf148e` (physics at
+`06c737f`). The tick-24 combined-mechanism JSON was serialized by `06c737f` itself.
+The v2 oracle comes from `d51f17c` with only its rules literal relabeled.
+[Hosted capture](https://github.com/nxrobins/state-space/actions/runs/45693116895).
+The pinned CPU job compares all 36 cases for each ruleset and restores the
+tick-24 save through the heat edit and the original rejection.
+
 ### Milestone 1 reference boundary
 
 The reference surface covers quaternion/finite-cuboid geometry, mass and inertia,

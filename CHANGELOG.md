@@ -15,6 +15,9 @@ date of the last change in the section.
 
 ### Added
 
+- Version the experimental liquid heat rule and restore original v1 replay behavior.
+  The builder and SDK also support explicit import of the heat-paying release's v1 saves (#120).
+
 - Deterministic pressure, quantized velocity and dam/steam failure, with
   schema 4 and rules `ca-v4` (#14); refreshed physics demos (#16).
 - Native material shading, lighting, water, haze and heat distortion (#10).

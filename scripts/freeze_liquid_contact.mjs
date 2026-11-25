@@ -29,16 +29,17 @@ import {
 } from './liquid_contact_engine.mjs';
 import { guardNode } from './verification_guard.mjs';
 
-const FREEZE_FILE = 'engine/experimental/multiphysics/liquid-contact-freeze.json';
+const CURRENT_FREEZE = 'engine/experimental/multiphysics/liquid-contact-freeze.json';
+const LEGACY_FREEZE = 'engine/test-support/fixtures/liquid-contact-world-1.json';
 const USAGE =
-  'Usage: node scripts/freeze_liquid_contact.mjs record [--commit <sha>] | check | compare --commit <sha>\n' +
+  'Usage: node scripts/freeze_liquid_contact.mjs record [--commit <sha>] | check | check-legacy | compare --commit <sha>\n' +
   '  [--select light|heavy|all|<id-substring>] [--timeout <seconds, at most 1800>]';
 
 const [mode, ...rest] = process.argv.slice(2);
 const options = readOptions(rest, { commit: undefined, select: 'all', timeout: '600' }, USAGE);
 if (
-  !['record', 'check', 'compare'].includes(mode) ||
-  (mode === 'check' && options.commit !== undefined) ||
+  !['record', 'check', 'check-legacy', 'compare'].includes(mode) ||
+  ((mode === 'check' || mode === 'check-legacy') && options.commit !== undefined) ||
   (mode === 'compare' && options.commit === undefined)
 )
   throw Error(USAGE);
@@ -50,8 +51,27 @@ const say = (row) => console.log(JSON.stringify(row));
 const catalogue = await loadCatalogue(output);
 const selected = selectCases(catalogue, options.select);
 
+// The archived cases create their initial state through these four factories. Reconstruct
+// their original v1 inputs, then exercise the production readers, tick jobs and previews.
+function legacyFixtureEngine(engine) {
+  const fixture = { ...engine };
+  for (const factory of [
+    'createMultiphysicsSnapshot3D',
+    'createMultiphysicsDemonstration3D',
+    'createMultiphysicsTimedCup3D',
+    'createMultiphysicsResolvedTank3D',
+  ]) {
+    fixture[factory] = (...args) => ({
+      ...engine[factory](...args),
+      rules: 'multiphysics-world-1',
+    });
+  }
+  return fixture;
+}
+
 async function recorder(bundle) {
-  const engine = await import(pathToFileURL(bundle.path).href),
+  const module = await import(pathToFileURL(bundle.path).href),
+    engine = mode === 'check-legacy' ? legacyFixtureEngine(module) : module,
     profiles = await engine.createMultiphysicsProfiles3D();
   return (frozen, side) => {
     let reported = performance.now();
@@ -115,7 +135,9 @@ if (mode === 'record') {
   const source = options.commit ? await extractCommit(options.commit, output) : null,
     bundle = await bundleEngine(source?.root ?? process.cwd(), output, 'frozen', catalogue),
     record = await recorder(bundle);
-  const previous = existsSync(FREEZE_FILE) ? JSON.parse(await readFile(FREEZE_FILE, 'utf8')) : null;
+  const previous = existsSync(CURRENT_FREEZE)
+    ? JSON.parse(await readFile(CURRENT_FREEZE, 'utf8'))
+    : null;
   // A partial selection updates only its own cases, so the engine must be the recorded one.
   if (options.select !== 'all' && previous?.engine?.sourceSha256 !== bundle.sourceSha256)
     throw Error('A partial record needs the engine sources the freeze file already names.');
@@ -143,21 +165,23 @@ if (mode === 'record') {
     (_, body) => `"steps": [${body.replace(/\s*\n\s*/g, ' ').trim()}]`,
   );
   if (!same(JSON.parse(text), freeze)) throw Error('Freeze file formatting changed its data.');
-  await writeFile(FREEZE_FILE, text + '\n');
+  await writeFile(CURRENT_FREEZE, text + '\n');
   await writeFile(
     resolve(output, 'provenance.json'),
     JSON.stringify({ ...provenance, engine: { ...bundle, commit: source?.sha ?? null } }, null, 2) +
       '\n',
   );
-  say({ stage: 'recorded', file: FREEZE_FILE, cases: Object.keys(ordered).length, output });
+  say({ stage: 'recorded', file: CURRENT_FREEZE, cases: Object.keys(ordered).length, output });
 } else {
   const candidate = await bundleEngine(process.cwd(), output, 'candidate', catalogue),
     recordCandidate = await recorder(candidate);
   let expected,
     frozenBundle = null,
     frozenRejections;
-  if (mode === 'check') {
-    const freeze = JSON.parse(await readFile(FREEZE_FILE, 'utf8'));
+  if (mode === 'check' || mode === 'check-legacy') {
+    const freeze = JSON.parse(
+      await readFile(mode === 'check-legacy' ? LEGACY_FREEZE : CURRENT_FREEZE, 'utf8'),
+    );
     if (freeze.runtime.v8 !== runtime.v8)
       throw Error(
         `The freeze file was recorded on V8 ${freeze.runtime.v8}; exact comparison needs that runtime, not ${runtime.v8}.`,
@@ -185,7 +209,10 @@ if (mode === 'record') {
       sameSources: frozenBundle.sourceSha256 === candidate.sourceSha256,
     });
   }
-  const vocabulary = vocabularyChanges(frozenRejections, candidate.rejections);
+  // The combined implementation has one source vocabulary. The current freeze checks it;
+  // legacy failures are compared by their actual message, work and stage in every case.
+  const vocabulary =
+    mode === 'check-legacy' ? [] : vocabularyChanges(frozenRejections, candidate.rejections);
   for (const change of vocabulary) {
     failures++;
     say({ rejections: change });

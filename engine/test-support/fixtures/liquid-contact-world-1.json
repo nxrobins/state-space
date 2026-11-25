@@ -1,0 +1,819 @@
+{
+  "schema": "liquid-contact-freeze-1",
+  "note": "Exact behaviour of the named engine sources, including their rejections. Written only by scripts/freeze_liquid_contact.mjs record. A rejection recorded here is evidence of that behaviour, not a passing result.",
+  "engine": {
+    "sourceSha256": "b1c854b3bb9cfc376dfeab7dbcaa1cf6e652a1ae785f2a478ad78f277a79e9af",
+    "commit": "06c737fb2102d0f15745ce18b869cae10d9230f4"
+  },
+  "runtime": {
+    "node": "v22.22.3",
+    "v8": "12.4.254.21-node.56"
+  },
+  "rejections": {
+    "collision.ts": [],
+    "coupling-energy.ts": [
+      "Invalid mechanical heat remainder.",
+      "Mechanical heat conversion exceeds its integer range.",
+      "Mechanical heat must be finite.",
+      "Mechanical heat requires an owned parcel remainder."
+    ],
+    "fluid-coupling.ts": [
+      "Fluid boundary sampling exceeds the qualified candidate limit.",
+      "Fluid boundary starts with excessive penetration.",
+      "Fluid boundary travel exceeds the fixed-step accuracy bound.",
+      "Fluid contact has no boundary sample.",
+      "Fluid point travel exceeds the fixed-step accuracy bound.",
+      "Fluid/world energy transfer mismatch.",
+      "Gas caloric curve and parcel heat transfer disagree."
+    ],
+    "fluids.ts": [
+      "Duplicate fluid identity.",
+      "Fluid boundary has no body.",
+      "Fluid dynamic inverse inertia must be positive definite.",
+      "Fluid impact solve did not converge.",
+      "Fluid impulse-work residual exceeds tolerance.",
+      "Fluid inertia inversion overflow.",
+      "Fluid inverse inertia must be symmetric.",
+      "Fluid job exceeded its total work budget.",
+      "Fluid job is no longer running.",
+      "Fluid reference result is not complete.",
+      "Fluid reference size exceeds its bound.",
+      "Gas cumulative volume step exceeds its refinement bound.",
+      "Gas pressure solve did not converge within its work limit.",
+      "Gas pressure-work residual exceeds tolerance.",
+      "Gas sensible energy disagrees with caloric curve.",
+      "Gas volume became nonpositive.",
+      "Gas volume step exceeds its refinement bound.",
+      "Gas volume step exceeds its refinement bound.",
+      "Invalid SPH density.",
+      "Invalid fluid ${name}.",
+      "Invalid fluid boundary contact.",
+      "Invalid fluid identity.",
+      "Invalid fluid inverse tensor.",
+      "Invalid fluid phase.",
+      "Invalid fluid projection factor.",
+      "Invalid fluid projection mode.",
+      "Invalid fluid vector.",
+      "Invalid fluid work budget.",
+      "Invalid gas caloric plateau.",
+      "Invalid gas effective mass.",
+      "Invalid gas thermal result.",
+      "Invalid viscous angular effective mass.",
+      "Invalid viscous dissipation.",
+      "Invalid viscous effective mass.",
+      "Liquid ${kind} projection did not converge within its work limit (density ${convergence.densityError}, divergence ${convergence.divergenceError}, contact ${convergence.contactError}).",
+      "Liquid density constraint has no movable support.",
+      "Liquid fluid volume must be null.",
+      "Liquid thermal curve must be null.",
+      "Static fluid boundaries require zero inverse inertia and motion.",
+      "Unrepresentable fluid boundary mass."
+    ],
+    "rigid.ts": [
+      "Anchored assemblies require exactly stationary input.",
+      "Bonded parcel motion is not rigid; welding requires an accounted edit.",
+      "Contact iteration generated unclassified energy.",
+      "Duplicate rigid bond.",
+      "Duplicate rigid parcel ID.",
+      "Duplicate rigid parcel ID.",
+      "Elastic contact energy residual exceeds limit.",
+      "Impact interval refinement did not converge.",
+      "Invalid assembly inertia.",
+      "Invalid deferred fracture mode.",
+      "Invalid non-colliding particle list.",
+      "Invalid resolved particle contact mode.",
+      "Invalid rigid anchor IDs.",
+      "Invalid rigid bond.",
+      "Invalid rigid step options.",
+      "Invalid rigid work bound.",
+      "Invalid tangent effective inertia.",
+      "Non-colliding particles require unique existing unbonded IDs.",
+      "Rigid arithmetic exceeded finite range.",
+      "Rigid assemblies require 1..256 parcels.",
+      "Rigid candidate exceeds bounded input limits.",
+      "Rigid contact count exceeded.",
+      "Rigid contact solve did not converge.",
+      "Rigid geometric projection did not converge.",
+      "Rigid half extents must be positive.",
+      "Rigid impact event limit exceeded.",
+      "Rigid penetration exceeds correction-free candidate limit.",
+      "Rigid penetration exceeds geometric correction limit.",
+      "Rigid work limit exceeded.",
+      "Rotating contact requires overlap projection before advancement.",
+      "Rotational advancement failed to make finite progress.",
+      "Singular or ill-conditioned assembly inertia.",
+      "Unresolved contact manifold between ${pa.id} and ${pb.id}.",
+      "Unresolved zero-time swept contact."
+    ],
+    "world-tick.ts": [
+      "Electrical heat has no material destination.",
+      "Invalid world tick work budget.",
+      "Negative identified mechanical dissipation.",
+      "World contact limit exceeded.",
+      "World numerical energy limit exceeded (${numericalEnergy}; limit ${state.settings.numericalEnergyLimit}).",
+      "World numerical energy receipts disagree.",
+      "World tick arithmetic overflow.",
+      "World tick counter exhausted.",
+      "World tick result is not ready.",
+      "World tick work limit exceeded."
+    ],
+    "world.ts": [
+      "Bond already exists.",
+      "Cut refers to absent bond.",
+      "Edit batch exceeds its bound.",
+      "Edit refers to absent matter.",
+      "Heat edits require integer Q.",
+      "Invalid edit identities.",
+      "Invalid edit.",
+      "Invalid positive bond strength.",
+      "Invalid preview budget.",
+      "Invalid solid anchor.",
+      "Only solids can be bonded.",
+      "Parcel identity already exists.",
+      "Preview is not ready.",
+      "Preview is stale or belongs to another world.",
+      "Previews require zero, one or two ticks.",
+      "Transform requires complete bonded assemblies.",
+      "Unknown multiphysics edit.",
+      "World parcel limit exceeded.",
+      "World revision exhausted.",
+      "World revision exhausted."
+    ]
+  },
+  "cases": {
+    "paddle-speed-1-dt120": {
+      "why": "Published open finding: at plate speed 1 the moving paddle is rejected at impact.",
+      "heavy": true,
+      "id": "paddle-speed-1-dt120",
+      "group": "open-failure",
+      "outcome": "rejected",
+      "steps": ["d50a2bd2c5851881 2568", "158e068b715c4253 2568", "6c34a216c669f03d 2568", "9e8a432d101b2ac4 2568", "24a90d17db0da4b6 2568", "bcf0227282c8c399 2568", "006ac2809acd8150 2568", "7ca6d36ed7424686 2568", "2923bd8dec329b12 2568", "0e479e84e1cb5d20 2568", "485fb3993d2d21d0 2622", "e2720e65fb7966c3 2676", "6a76f9680bf9157f 2676", "9475882f3c5dc6da 2676", "7ecdd54c3764d8fc 2676", "f62bf2c84e4c0824 2676", "f7e30ed93f1915d2 2676", "c86d3874459f9b95 2676", "9122d21e37d558e9 2676", "d9b9cf29716b3319 2676", "eb02cb72f105f9ce 2676", "05e46b04eafbba3e 2676", "76f39b858003f765 2676", "eb10f33a1ad38bb7 2676", "60f153399bfd7a8a 2676", "f60bd3e5280ab122 2676", "9e8c8135fb8a5366 2676", "cafc5d4ec254464a 2676", "babe41ae0515a9c3 2676", "21a74976fc27c442 2676", "a4e1ea9e959a1750 2676", "ab4179a474043783 2676", "7fd5652e8d4e00c4 2676", "5d8091ef39a5fb7a 2676", "602ea91998628903 2676", "3c4ee50eae97448d 2676", "0213bc6638d2be73 2676", "b48efbbbd3251e3e 2676", "a4ca8db2a7a64d17 2676", "f58a2bf62a17a542 2676", "0cd98d554f7e919b 2676", "082d9d5fe299bb07 2676", "56ddd255e108cf79 2676", "c508696383aafc14 2676", "4f95c9056e5275b8 2676", "740e72ff9f3175e0 2676", "b627c1fcefa64b2e 2676", "db840c6b52c291ea 2676", "0bf3f10bb3b3face 2676", "0067e69941f8d572 2676", "ce99aaff90b7dfff 2676", "f4b5af4b556ed327 2676", "e910febc88322bf3 2676", "e1b675d83553ebe6 2676", "913333ea86ef23b5 2676", "8a7ed542ef6a656d 2676", "de0eafa773824a02 2676", "f01f57f33ce0fa55 2676", "068ec77dff5b9365 2676", "49fa7412a0e0ef33 2676", "c254f3b8942e1256 2676", "3218970bce2ee040 2676", "3d960019bc9f719d 2676", "b3f29afc201ac927 2676", "07c20f6d32a41d31 2676", "c0b47ebc7cefff67 2676", "fcb08d42fae7b12a 2676", "b91f199ceb3cc64b 2676", "a8fd6f3cbbe7ec44 2676", "83244fe82b9f3016 2676", "2f2f01e2ec556538 2676", "bd6cb14016c01bb5 2676", "f69605374c177995 2676", "eda6fe0d9cf8dcd7 2676", "3052ac7ff7df6f19 2676", "a2769cd639d537a6 2676", "b7f2f9134055157b 2676", "bd157c37a7136a6f 2676", "f48306321d2a702a 2676", "eddc862ebaf7474a 2676", "bd05784c27b41a86 2676", "b6a5daea6773d41a 2676", "384e208044724486 2676", "27a775b8a27bb332 2676", "4f8b5fe64bb62997 2676", "cf125cd5fb0031c2 2676", "6340bb7253ce2a84 2676", "3826bce76edfde14 2996", "779fa0c04014b2f2 4475", "2f55a686ed6033a2 4309"],
+      "final": "95ae9a53dbd86b6c60c9b76ce92880c27f1a90c534f43db0d30aa20780411dab",
+      "rejection": {
+        "afterSteps": 90,
+        "message": "World numerical energy limit exceeded (-0.040723167401007926; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 4817,
+        "atomic": true
+      },
+      "facts": {
+        "paddleX": -1.7568939230342204,
+        "paddleSpeed": 0.8011110108732122,
+        "impactHeat": 0.20249037163666225,
+        "numericalEnergy": -0.004924258397608164
+      }
+    },
+    "paddle-speed-1-dt240": {
+      "why": "The same finding at half the timestep; refinement does not clear it.",
+      "heavy": true,
+      "id": "paddle-speed-1-dt240",
+      "group": "open-failure",
+      "outcome": "rejected",
+      "steps": ["a81144a736f1b05a 2568", "c75edb3f80867e0f 2568", "d97d50892987453d 2568", "81cacfc3513af89d 2568", "5b34d8c9ec2a6737 2568", "81ea69b86e6fd138 2568", "a6dd6bcbe65c37e6 2568", "86421fd6db58bc79 2568", "1a209d85663135ca 2568", "addf26622dc6d560 2568", "286cc9a8e8521d35 2568", "5b37e508740cca8e 2568", "70a95e2836943661 2568", "5d333c7760ed4fb6 2568", "c161f91e599eac6a 2568", "5339b9fa719ba8fa 2568", "dfffda572672bcfb 2568", "e7465fe73969f938 2568", "3a92db3519ae4cd6 2568", "428bec1af2b5c2c8 2568", "3e76cb00fc57824e 2568", "7da4cc71dd11784e 2622", "bf6515c913167a27 2622", "b84814a79cc2935f 2622", "00049d2f009bbc7d 2676", "07621f3147129dc1 2676", "a037aa97343f4080 2676", "255bfa11edbb145e 2676", "b8b8dba726049422 2676", "f043419ecf655930 2676", "a1c929dfda6353e9 2676", "3f4d06b9cd5786d1 2676", "7e0c848386a2c928 2676", "103e03691d3c6dcd 2676", "17016cca39e93665 2676", "5632a59472ca0d56 2676", "b72c2cf2df1474e7 2676", "76c98b38185c84e5 2676", "3487ad859789afdb 2676", "6afa45bc9c0d241c 2676", "21f329f5731c6649 2676", "83369d34b470c1cf 2676", "4a4edbc25b8aec9d 2676", "1bad17c63530b39a 2676", "e41f4410803a4d0c 2676", "ae4e52dc0c06d8bb 2676", "9a464db7bfe9c0c9 2676", "5c536e946459798a 2676", "f8dd16f29f2cb019 2676", "80047561183f76bd 2676", "dd0752c0f0132289 2676", "620f44029c3aab04 2676", "f1354aa67181188c 2676", "eec97cf23de5dca6 2676", "3863b54a4335e77e 2676", "8ba325a53e61bf07 2676", "e0bd036c6059837a 2676", "fe3b1cb3100808fb 2676", "78896fcba47dc0ae 2676", "c39b3c87b76f2626 2676", "bfab73d34872c0e5 2676", "4564896eab695d0c 2676", "ec593a84180355d5 2676", "004c8dd51480e701 2676", "4cb81a9796692bbc 2676", "6077f8188f7d658e 2676", "75e8b7de87197cdf 2676", "e3265f5be42b45c1 2676", "01a5afdd1f89abcb 2676", "806deb6db5fefcaa 2676", "3ec37ab7de151868 2676", "afda447b9df78e6f 2676", "c1f7a68baf60ee20 2676", "a5955d0084a28658 2676", "64baa7302228ec8f 2676", "d5e91b3af5928ec5 2676", "f43ca86ff3a1da2a 2676", "e2b5cdc6d11bba87 2676", "79a5e84aea926003 2676", "67a2383f0ae36c97 2676", "52f0dc46debebb27 2676", "7c3902f2dd9b251b 2676", "5fc6bbef57e45fb5 2676", "3423c31c1461e6c9 2676", "cdb844df9dc3927c 2676", "e2dfb2dfc2a1b9f0 2676", "c146a5cebe9706a3 2676", "63171f6fd20ddff2 2676", "8e00cb3388e2f1c5 2676", "0e7ae413eab46795 2676", "fe12a98a153b22ea 2676", "f31bb1da900afb3e 2676", "e3a29e0556f48b18 2676", "ee6658ed97d6b263 2676", "5b48dd011b7ef4d8 2676", "a35c8260a956f915 2676", "1ae530394c357372 2676", "e6c86ecf1f99c38a 2676", "a216e5033f0136bd 2676", "f5a727ad09115fc5 2676", "f8e66e9d7bb095b5 2676", "3a55834da5283300 2676", "7f65c540ce4f70af 2676", "1804ee100eb2a1c7 2676", "8443676c416492cb 2676", "4de3c2d99b3c5027 2676", "9fed929ef35984a1 2676", "7a5c41855724870a 2676", "6d5e6917fecf1ecd 2676", "10ed584b17b19d9b 2676", "e37060429fde94be 2676", "cff461562ca6b388 2676", "9203ec11fb800bba 2676", "d456842645c70dce 2676", "77eee9a975f830ab 2676", "853cbda7a40e77c8 2676", "1290e6b1039c4bd6 2676", "5d58305b3b85c775 2676", "f21289fe7e63a55a 2676", "0630891b0c308d85 2676", "2134895afee14b8c 2676", "a759dcbf50110873 2676", "6925929d8250df37 2676", "2e784faa86fae9c5 2676", "a5e7bdfb276e7ea0 2676", "27c3a94bc21e0736 2676", "5bb3687a3bff5ac5 2676", "cf4dab5825b5da7f 2676", "e6024c505f765ccb 2676", "31f32478bb5080ab 2676", "e3bb36c893a283ad 2676", "3691d4e5ddded095 2676", "5a1b4080d2839812 2676", "86c2df56c7418093 2676", "7c820d79b52c75f6 2676", "bf1e30a4a12aca48 2676", "35b106abd96c740f 2676", "0532e5024fe57932 2676", "042465d826b094f6 2676", "f70d94fd65203965 2676", "0a890de9ef893d81 2676", "d72df617d19ef927 2676", "6bff12dcf9b8e30a 2676", "effcbf528832e026 2676", "ecaa53f2516c2e03 2676", "df19505de5182fb2 2676", "acfaba60782bad1c 2676", "bb60c24506946861 2676", "758b9b4ab513f3f1 2676", "3d45af5d91c60c4c 2676", "22d33297244da70d 2676", "eef3e3139c3a97ab 2676", "ebe6d2deec87ecba 2676", "2e18bbe1b5b5874b 2676", "b890f10079f00c02 2676", "0999e6602234e455 2676", "50ee95af6d5d3556 2676", "033db9af19af3cd2 2676", "b9b13780bd6ae586 2676", "48fe9ade89c8f669 2676", "c310a6b02b1f8900 2676", "51a598376f396238 2676", "fb3a62a91e60406f 2676", "06eb36e70562e69d 2676", "8c52de890bec1142 2676", "f86c46288d6cbec4 2676", "1d80f431db0e7d6d 2676", "419d45e8a64243fa 2676", "86f80ef8daf50380 2676", "d11a25fe1376fd49 2676", "966538fe0e43aa26 2676", "959ebce1db852549 2676", "81053a09cfa79abb 2676", "4a5dbab84a23c497 2676", "bde863ba651060fb 2676", "3ab53c8106e1191d 2996", "e563976cd475e191 3735", "ce7d2ad0aec664cb 3625", "617df07796ff8df4 3625", "7439370baff9f067 3625", "b6c88f05de9c6465 3625"],
+      "final": "e23d1c959e0cc9a8774e8b35b9bef07e734f335cb8297dbb975e7d31d0c90cae",
+      "rejection": {
+        "afterSteps": 181,
+        "message": "World numerical energy limit exceeded (-0.040611468797467576; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 4133,
+        "atomic": true
+      },
+      "facts": {
+        "paddleX": -1.7536159283468638,
+        "paddleSpeed": 0.8007283556618032,
+        "impactHeat": 0.20262509031095866,
+        "numericalEnergy": -0.004620805542671146
+      }
+    },
+    "combined-failure-builder-journey": {
+      "why": "Builder stage: 48 committed ticks and a 2,048 Q heat edit, then the next preview is rejected.",
+      "heavy": false,
+      "id": "combined-failure-builder-journey",
+      "group": "open-failure",
+      "outcome": "rejected",
+      "steps": ["9ca5c6d862e7f34e 853", "9bd4784882e38800 1021", "7546223bbedb7770 1060", "3cf037ebbd59eeda 1060", "007c407add81ab33 1056", "29193a20c58d8d3a 1054", "3b1e96372fdc4c57 1058", "f9a318f35926ca92 1058", "7fd2b1bbf02e2b16 1058", "b7be4dca4120cc94 1058", "6c626c8022deb453 686", "f9ccd39323424b16 708", "e6338024d0c4b6fb 718", "526c0091e00ea761 718", "d51083b895c92df0 1361", "f2a9f599ef1148b1 1690", "916717736f6768ee 1682", "a741de390d28414a 1682", "2d3e2a6ae909f20a 1682", "81e85780134cedd4 2534", "ef282d80278c01f1 1262", "43d54f1142b4cf5b 1262", "fc2a6b6c248afce6 844", "45b0f5dc123c538c 844", "51513b8d11518968 844"],
+      "final": "d39834cfc4caf85ebfe9ab70b4bd6555dd078c30c56678e5d79d6208a9df670e",
+      "rejection": {
+        "afterSteps": 25,
+        "message": "World numerical energy limit exceeded (-0.47227996193418625; limit 0.01).",
+        "stage": "preview tick 2",
+        "work": 902,
+        "atomic": true
+      },
+      "facts": {
+        "heatedParcel": "core",
+        "ticksBeforeRejection": 50
+      }
+    },
+    "combined-failure-wedged-plate": {
+      "why": "A full-width plate is wedged against both terminals: the unqualified wedged-support contact.",
+      "heavy": false,
+      "id": "combined-failure-wedged-plate",
+      "group": "open-failure",
+      "outcome": "rejected",
+      "steps": ["6088a81d10b76e07 365", "3b14e6b84830832f 488", "92d701b716893c4a 491", "8eabbb1c6b5796c9 530", "d8d40663c0de9f8c 530", "070c8d84e253dcca 530", "2a3802273442d67b 530", "200ff46259008e33 530", "257a6a4cacc3ef46 529", "472c1f00c1294dfb 527", "d407a6351f391810 527", "b74c1e1070411984 527", "3f2c8650e12aee3f 529", "a5b654281726e7c8 529", "e5b3884fb6054359 529", "a5ec1a749ef05532 529", "4a81c2e493496eb7 529", "b3674f2c0198059b 529", "613fbe1b2069a129 529", "cc350d26479e6240 529", "a28bc111aeb6bd25 343", "2f1aa0c3970c40f3 343", "2815be4b1dc91489 349", "3e1fc25e99db708e 359", "7370366d76625c64 359", "2ba780a3a5e41541 359", "b2a1dbca475695d4 359", "fc6ef8bd03be9ef3 359", "20b6d926d6b8a544 504"],
+      "final": "4fe58e264d0b6dafc237ae133d00f982513053fd4d916ec3d4758cb95a7065a2",
+      "rejection": {
+        "afterSteps": 29,
+        "message": "Rigid contact solve did not converge.",
+        "stage": "rigid-contact",
+        "work": 33917,
+        "atomic": true
+      },
+      "facts": {
+        "plate.y": 0.75,
+        "plate.speed": 0,
+        "water.y": 2.733223475743287,
+        "water.speed": 2.2866408874056643,
+        "valve.y": 1.75,
+        "valve.speed": 0,
+        "numericalEnergy": 0.000022049998871164647
+      }
+    },
+    "reject-fluid-point-travel": {
+      "why": "A fluid sample moving more than 0.2 kernel radii in one tick.",
+      "heavy": false,
+      "id": "reject-fluid-point-travel",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "978696c1165b68c0e209aff5c884de12f58c461727a899554d6162a71ca3baf5",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Fluid point travel exceeds the fixed-step accuracy bound.",
+        "stage": "phase-ownership",
+        "work": 3,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-fluid-boundary-travel": {
+      "why": "A solid moving more than 0.2 kernel radii in one tick beside fluid.",
+      "heavy": false,
+      "id": "reject-fluid-boundary-travel",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "d47b87eb87f5a8012983857d36b4fe6cce1a0c646224746d5563a8730c7fe627",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Fluid boundary travel exceeds the fixed-step accuracy bound.",
+        "stage": "fluid-coupling",
+        "work": 8,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-fluid-penetration": {
+      "why": "A fluid sample that starts 0.1 inside a solid.",
+      "heavy": false,
+      "id": "reject-fluid-penetration",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "9c212f78e8fb07406c7a19ca31ba2f87a566c663f27ad5e010d9268098d8a564",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Fluid boundary starts with excessive penetration.",
+        "stage": "fluid-coupling",
+        "work": 15,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-boundary-sample-limit": {
+      "why": "More than 128 solid boundary samples within reach of the fluid.",
+      "heavy": false,
+      "id": "reject-boundary-sample-limit",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "ff21132abd12e650e438c68ccd5ad1d8ee4129bacf1c1894080c224caed9ae0e",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Fluid boundary sampling exceeds the qualified candidate limit.",
+        "stage": "fluid-coupling",
+        "work": 5284,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-fluid-sample-limit": {
+      "why": "More than 128 fluid samples.",
+      "heavy": false,
+      "id": "reject-fluid-sample-limit",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "d1f119d11872b7c9993dbe991f79adaf0b44a4f3e6764e55b69c2ba195063767",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Fluid reference size exceeds its bound.",
+        "stage": "phase-ownership",
+        "work": 8387,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-rigid-overlap": {
+      "why": "Two free solids that start 0.1 inside each other.",
+      "heavy": false,
+      "id": "reject-rigid-overlap",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "0b63c97b1c61142427f57e66c9593c89d2fa0b274ffbd745d76c08ec3b5079b8",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Rigid penetration exceeds geometric correction limit.",
+        "stage": "rigid-contact",
+        "work": 9,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-compressed-liquid": {
+      "why": "Eight samples packed at half their rest spacing.",
+      "heavy": false,
+      "id": "reject-compressed-liquid",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "47f9245c7c3868d74f88e1708ea681293e305b167cd49fdf80a5c1d86dcda565",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "World numerical energy limit exceeded (3198.571161832196; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 679,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "reject-gas-closing-speed": {
+      "why": "Two gas samples closing fast enough to exceed the pair volume step.",
+      "heavy": false,
+      "id": "reject-gas-closing-speed",
+      "group": "rejection",
+      "outcome": "rejected",
+      "steps": [],
+      "final": "6f179c943ef3eed9b3396e5278c4263f5bfc31826557a1566172b01e91665261",
+      "rejection": {
+        "afterSteps": 0,
+        "message": "Gas volume step exceeds its refinement bound.",
+        "stage": "fluid-coupling",
+        "work": 6,
+        "atomic": true
+      },
+      "facts": {
+        "numericalEnergy": 0
+      }
+    },
+    "stress-liquid-drop-on-floor": {
+      "why": "A 27-sample block falls one unit onto an open floor and spreads.",
+      "heavy": true,
+      "id": "stress-liquid-drop-on-floor",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["4ffd1ed3817cc331 2163", "378b09c99f696409 2163", "70b57d0cd048f4cb 2163", "ee805d2f7b132dc5 2163", "09d2c02dba306347 2163", "962798329a515329 2163", "ac70d871f317e87a 2163", "4f3d80a21fa1c7ec 2163", "8f7e07f2ca75fbbc 2163", "0dd64b1347924c9a 2163", "3609ae48a074a13b 2163", "edd06622745920b2 2163", "456b6d6f99b6a868 2163", "977cd2c879cb07b3 2163", "93166faadd412bdd 2163", "7ca297acdfe54d11 2163", "f89795cae218ff3c 2163", "a4437cc1c55af353 2163", "449e3072a0b2cfd2 2163", "b0c16343824cd146 2163", "4b5fd5b8c1d980eb 2163", "d16f97281f32efcf 2163", "ba49ef6dc19517d2 2163", "821dca4403ea582b 2163", "6eff8cc961aabbfb 2163", "d940e39d49629821 2163", "947b0919a3e68a89 2163", "bc159b056e62be54 2163", "3278386701ce45e7 2163", "200d5b70dd2cfec2 2163", "1823df1990fb6239 2163", "55fdb26ca01c975e 2163", "c37f9f5ad76c2100 2416", "394b6cba6c6dc18c 2912", "c1447f71afac5283 2912", "8b0df4cfd22725b0 2912", "014d79a2ee134111 2912", "6441152cb7e6d33c 2912", "1044fdc0973500c1 3020", "04826abf40c6b409 3128", "0fee6f3cd7dff46d 3182", "d89184aeec7c2788 3182", "fe4d53fa38b18b11 3182", "023d8a49ad0802f4 3182", "0081d2af704a75ee 3518", "9e0927568335e295 4178"],
+      "final": "cb344cb522fb779187a76df8604136ecebd114b50fa96523df96d08bb18566e9",
+      "rejection": {
+        "afterSteps": 46,
+        "message": "World numerical energy limit exceeded (-0.011124384457388075; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 4176,
+        "atomic": true
+      },
+      "facts": {
+        "w000.y": 1.2799726026057894,
+        "w000.speed": 3.7566528882278267,
+        "w013.y": 2.282877256501797,
+        "w013.speed": 3.5802490607688804,
+        "w026.y": 3.279972219656635,
+        "w026.speed": 3.756667536057734,
+        "numericalEnergy": -0.021940322886941574
+      }
+    },
+    "stress-dam-break": {
+      "why": "A resting 27-sample column with one wall missing collapses sideways.",
+      "heavy": true,
+      "id": "stress-dam-break",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["7483f6baf96bf449 16580", "c64c07e6695c613e 16580", "591db2a926883444 16580", "fafec483c5a9223b 16580", "7e0d162857f4a5e9 16580", "ab981879a6d25a7e 16576", "185b92e9c6339862 16576", "473d600916e01244 16576", "e1123a6e00317482 16576", "3ec2c5ee898294dd 16576", "db74779edc4c476b 16580", "2649d768b117f8bd 16584", "83685c8dd9be0d1a 16584", "4454d13a30bfea0c 16586", "43c7d5e39161d3aa 16824", "51bb5b458a13b53e 16580", "e8b7c37c77a9813e 16584", "834bdc0773ee3f99 16582", "32501a35f716e95e 16582", "11b24fddd2428606 16582"],
+      "final": "98dc9d140352621b199d91ba9c493d45a989a8c9127cb407d630224288c818d5",
+      "rejection": {
+        "afterSteps": 20,
+        "message": "World numerical energy limit exceeded (-0.010342489916946774; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 16580,
+        "atomic": true
+      },
+      "facts": {
+        "w002.y": 1,
+        "w002.speed": 1.3528169565944934,
+        "w026.y": 2.9323400873496346,
+        "w026.speed": 0.8033014338055692,
+        "numericalEnergy": -0.06567648829630351
+      }
+    },
+    "stress-wax-drop-into-cup": {
+      "why": "A buoyant body falls 1.5 units into an 18-sample pool.",
+      "heavy": true,
+      "id": "stress-wax-drop-into-cup",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["1c8d3edc19eaa15d 11756", "f2f4ec62a3ea94e1 11756", "bde66ed06d1f2d13 11756", "a390a924f9640ae1 11756", "ae1eccac1b65476a 11756", "3ad971cdf1d9d2f3 11756", "95d9e7a5f0fdc1fc 11756", "15384b52e8196853 11756", "a1b8e9c1bf544465 11756", "ef9834c7040914d1 11756", "1031b082c9d4c4d4 11756", "143bbc06e0add21d 11756", "43ba42a152ae2916 11756", "c47acde76ed6d43e 11756", "2e6d57a8decc2d4c 11756", "cf342ff4462270c3 11756", "19310f07883be887 11756", "6969f13c1308ecd4 11756", "2aa6ae1c9f174094 11756", "c9c0de1ae388c488 11756", "6a379e74cae3af71 11756", "bcf8e092f1c81553 11756", "1d1d135e8ea6546b 11756", "f16a10c834fdf9ea 11756", "8eafad133c9d4925 11756", "6d8b7c7544f00fe5 11756", "c5b743b85f552dcf 11756", "31e11f3d53214fac 11756", "a34412d496f0c67f 11756", "232724dbd9562d27 11756", "d683e7c4eee34adc 11756", "870558eca59cf3e6 11756", "ecb47cca428e84f4 11756", "97ac64a64e727911 11756", "cab7a697e3d93bf4 11756", "c4f31815b9a4a11f 11756", "90ad332b62169b56 11756", "eddc2cd6b014fe82 11756", "57d66c4c3bdbf378 11756", "f28bc61d5aa67e4b 11756", "efab0869a3889cac 11756", "6a5d38a01462eb0f 11756", "e3d1cceda5739208 11756", "a1378dd55b89bdab 11756", "3145bb63754332a7 11756", "225873cbf8c104ad 11756", "17017afb5a638e68 11756", "8cf680f16d838667 11765", "744f75fcb877766c 11765", "ede376d0f1da7473 11785", "63189132df31d49d 11823", "ff8a727332338b73 11823", "b9c5b01caa1f9116 11823", "dbf3c33d2ba60114 11823", "2a3f9dd5b90c45f4 13221"],
+      "final": "aa7f06a163aee40e4eaab90289ac9c79e869054f26ffb998aa99f81d7ba496bb",
+      "rejection": {
+        "afterSteps": 55,
+        "message": "World numerical energy limit exceeded (-0.011647631892305062; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 14779,
+        "atomic": true
+      },
+      "facts": {
+        "body.y": 3.470659722222221,
+        "body.speed": 4.491193298642497,
+        "numericalEnergy": -0.0015256096208418034
+      }
+    },
+    "stress-copper-drop-into-cup": {
+      "why": "A dense body falls 1.5 units into an 18-sample pool.",
+      "heavy": true,
+      "id": "stress-copper-drop-into-cup",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["81528116d9577757 11756", "deba36867106ecbf 11756", "b8b284f3e1b3cffd 11756", "3ac8f9291c9ce3bf 11756", "5eb2c7a4ab73fd32 11756", "f14489cde3d44026 11756", "01cfdb0d0280c071 11756", "4f7ec32234bdc1e1 11756", "eb3b89e7acb90174 11756", "d065be9791b62669 11756", "b2913728a9eb9a8c 11756", "f6b8fd380e9c52ca 11756", "3334627df8d654de 11756", "dea04aa39d2947e2 11756", "3ab31292aa87cd3f 11756", "8f850178cc0fe545 11756", "bf357d7b1e01d739 11756", "88ecd699bfd7e9a5 11756", "afc2996097f6ee6a 11756", "f109f1ffff68d8b1 11756", "4e7907530172b0c8 11756", "f9c13a83c28fb502 11756", "f134cae8be75cd65 11756", "2fbb447e15b7e64d 11756", "cb9ecaeb7ae9d4de 11756", "cf66c4754a1ad03f 11756", "a92826753b60099b 11756", "c9f39cd148ee2c82 11756", "307e4c86ff1f7a98 11756", "b451b7cc8a696341 11756", "9ce7b082590a4700 11756", "10b3faf9c074ec4a 11756", "e1389a1008fdc05a 11756", "242351e768c559f2 11756", "2b77ce06d0018195 11756", "e7cdecb8b7267c9c 11756", "220b87a6ef583842 11756", "6c9a1a6ea62be3a1 11756", "e2a401f4bc501d33 11756", "fa0ed2b91dc43331 11756", "bd548a8f99f39261 11756", "9eb8836e26e43312 11756", "d1dd9901f2cb577b 11756", "77cc2601697b4b88 11756", "9f9e89039efc425a 11756", "86fc69103b6fb671 11756", "5649ce9ab9ac503a 11756", "15d4cf4474eb447d 11765", "1567a4327e25af90 11765", "ac9ba8b9762ada72 11785", "388e06f4bd55744b 11823", "993b0b95fe5790af 11823", "87f55185ca0cfd52 11823", "96b76209d2f7ad0a 11823", "6fa65a3c895c85a2 13221"],
+      "final": "55a68b9bafd4cbaff41e54a7f19ebb733b514ecaefc8235eab0833b95fb1586f",
+      "rejection": {
+        "afterSteps": 55,
+        "message": "World numerical energy limit exceeded (-0.011660232409058599; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 14779,
+        "atomic": true
+      },
+      "facts": {
+        "body.y": 3.470659722222221,
+        "body.speed": 4.491473011220345,
+        "numericalEnergy": -0.0015256692065008768
+      }
+    },
+    "stress-paddle-speed-2": {
+      "why": "The paddle at twice the rejected speed.",
+      "heavy": true,
+      "id": "stress-paddle-speed-2",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["4f249301d82eb4a0 2568", "d13b800e52b91571 2568", "5b044e891a496285 2568", "ca491c6dbcae4bca 2568", "29c3ba4bbea6f872 2568", "981974baa8e6a1a1 2676", "f9d4c20c2d8ffaad 2676", "95444e1b67823aef 2676", "96705fe961f6e108 2676", "c84e055f76427a76 2676", "744e3892d0f27a28 2730", "44d73580d4d4a810 2730", "c09a9937e4b73862 2730", "2aa9becf2e1ab7bf 2730", "f2c67df16ca421f9 2730", "d75ce0fa7646b333 2730", "5d3fdd903f621850 2730", "7f155d458c54f227 2730", "3293ba8372b00442 2730", "57ed251a90afcb83 2730", "537e1f643d8b1175 2730", "9ecf9c536cba35ca 2730", "f87f20b34f2629fd 2730", "62e464c0b35f5dd3 2730", "81f20e74560787d4 2730", "92eb173dace2173f 2730", "495573e1a1f8a0db 2730", "a584ade324b7524e 2730", "d4fd9cc5af9e73fb 2730", "f9d4dd0980225534 2730", "f39afe52933c1a41 2730", "bf77c7d0d834a36f 2730", "48f4eae3cf801f01 2730", "21fd100f1df14434 2730", "ff313dd78b9f3faf 2730", "e54704f54c30223b 2730", "5cb23c17b457f032 2730", "b3cc54448f5f4c7d 2730", "57372e437972b317 2730", "2f6326db3a1d0011 2730", "62d183a6909e8772 2730", "0988d28406179282 2730", "32ac90ffd0199bca 2730"],
+      "final": "ef6bb55f1778637ff2430986644cd2140e5156acf372cc601e7ff1c977ec8191",
+      "rejection": {
+        "afterSteps": 43,
+        "message": "World numerical energy limit exceeded (-0.017788240496907526; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 2994,
+        "atomic": true
+      },
+      "facts": {
+        "paddleX": -1.7859094425861366,
+        "paddleSpeed": 1.96664302886951,
+        "impactHeat": 0,
+        "numericalEnergy": -0.004221670388821797
+      }
+    },
+    "stress-liquid-on-tilted-plate": {
+      "why": "Four samples fall onto a fixed plate tilted 30 degrees and slide off.",
+      "heavy": true,
+      "id": "stress-liquid-on-tilted-plate",
+      "group": "stress",
+      "outcome": "completed",
+      "steps": ["ddd55b941cdade83 163", "fe1db83d199294c3 163", "538113ca8db1580f 163", "ce116b4ae64a31b8 163", "9f4e51f257b04fbf 163", "e0322488d180077f 163", "bbbdd39699993cb5 163", "698ab9953ddf9985 163", "408fe35184369505 163", "3588e6ff489ed13b 163", "6d09837d397b8d99 163", "8c5864c65f24c67a 163", "98a0151ac5caee1e 163", "187a38e725c6131c 163", "d4506da492eeaeba 163", "8a12d47542bdf23d 163", "ac3ac5d1f132c712 163", "aebabc7e52759795 163", "4abe2470fb4d0cdd 163", "e5e8e72a3cf13f42 163", "eb0075044be2a3c2 163", "aef0e2daf7c98b7f 163", "b69b6d425dde67a1 163", "3429cade45887c54 163", "b022756d5b82f613 163", "8dde0db18a9ae549 163", "013361516a209569 163", "02e2661af50d1fa8 163", "a76673730215cf13 163", "c3d9aff30dff3f89 163", "1422593c5b586700 163", "31421ff1351e6d5a 163", "edd30499f1871aec 163", "adcf8e63edea5c37 163", "41e39d2b10f521aa 163", "86f46fb20372a98c 163", "96406ca16fed3661 163", "dc7e952c3a201a2f 179", "2e5045b07d50e176 207", "7e5731d605558984 222", "fb381997593ea886 249", "5de8b56a82b0744d 249", "1ad55148ed9f25a2 249", "735276083dd14a6e 249", "a98d09d98e3e7346 249", "fbde4baaf08456f2 249", "322f8bc796b09508 249", "c727931357a3ca63 249", "b8049fb70386c1c5 249", "f334831b98195d76 249", "ced9a416d4d8b81f 249", "7914c53647b8b01e 249", "abceb7d949f17f2d 249", "9b03ef907e10778a 249", "1570c053dd6bf0ac 264", "fcd7666cd5105a4b 291", "d336a93dda262494 291", "729e95920f58f697 291", "3f1649e380dc8d6e 291", "ac7907c5be1c75af 291", "a4312f6599d71186 291", "4faa8eae6120031c 291", "6a1ad5efaa1d81a8 340", "3f47bdf840aa2f13 311", "9fe66e6be5be22da 311", "f4c59a8e450ae807 326", "173124a500b8c865 353", "1119952d6c96c703 353", "ba0c6f3a3a77134d 353", "e6511bd741b97d04 353", "8c02d82ebcc337b5 353", "8ae4979bcc50b763 353", "33795728c09107d9 353", "7039deebc44a4f21 353", "cb74abfa1617f474 353", "3d4ea4237ff87bdc 404", "fe81ca5054388919 373", "5c63a76c64ff975e 373", "c6b7969aef274fd3 373", "e0588891c7eaddad 358", "aa2f5ab30c67f01a 331", "6b7ef7f7fe2225db 331", "7492c2b7a97d08c9 331", "e4535b12ac357ca8 331", "9a21692e4809bc27 331", "9fb3a8da58236d9b 331", "b73125f4f8001ec1 331", "c3742e8826672f3d 331", "d3637fdb08d22472 331", "8233c337759063f3 331"],
+      "final": "ce95b2777646351ede7f7096edb216912aee890c81ce4a670d39b957111c56ec",
+      "rejection": null,
+      "facts": {
+        "w0.y": 0.36898387371902147,
+        "w0.speed": 3.673893374406301,
+        "w3.y": 0.8021246944648107,
+        "w3.speed": 3.672621025204584,
+        "numericalEnergy": 0.00008482368707988235
+      }
+    },
+    "stress-plate-squeezes-liquid": {
+      "why": "A free plate lands on a nine-sample layer resting on a floor.",
+      "heavy": true,
+      "id": "stress-plate-squeezes-liquid",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["a8c31b20ea968e6d 1987", "1b25cd518b39bf36 1987", "c246c68cb5e98274 1987", "e8014439b21127e1 1987", "4c778680c9efd3b3 1987", "2053ec3c6d07626e 1987", "f4819bb3b1e0b543 1987", "e7952791853d1f8d 1987", "357030ec4df57476 1951", "44f4009cf383ef63 1951", "ef282c9f58686e28 1951", "8cf822461dd94e5c 1951", "182b7f6f9c75dfdf 1951", "8ca272cb3f48b017 1951", "3822e1bba9de318c 1951", "ca40d0ffcb3ab3d9 1951", "14900b839fbe3ea7 1951", "c007bbe641ba93e4 1951", "4c4814095de413b1 1951", "b7e82a01ba8cd2de 1987", "8e6d08e6c7eec4c5 1987", "a3c096819ed2a3ed 1987", "8c2b7e3f75f75ec5 1987", "29ad1834a3b176cb 1987", "d6ed34cad4aab3cb 1987", "b0b7a611487b314e 1987", "2e3c23e167725733 1987", "2e75bc41f3318e69 1987", "d1a67bd93c1b21b4 1987", "399bab8142c227f0 1807", "e688963607261d02 1555", "a0a30189ce440b6b 1627", "93221ddd2b02e23c 1555"],
+      "final": "db22181a0354a956ebefaa5b7e61c536c4572034a6e030ab2e62c1f337b65cb7",
+      "rejection": {
+        "afterSteps": 33,
+        "message": "World numerical energy limit exceeded (-1.3873234451145087; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 17273,
+        "atomic": true
+      },
+      "facts": {
+        "press.y": 1.7558690329905464,
+        "press.speed": 2.0152910291980084,
+        "w004.y": 1.0000000000079796,
+        "w004.speed": 2.764532644615135e-9,
+        "numericalEnergy": -0.030549990599652483
+      }
+    },
+    "stress-spinning-plate-in-liquid": {
+      "why": "A plate spinning about its own axis sweeps an edge into a resting block, no gravity.",
+      "heavy": true,
+      "id": "stress-spinning-plate-in-liquid",
+      "group": "stress",
+      "outcome": "completed",
+      "steps": ["40dbe6c66e7d3a7e 2055", "ef926489a35cf684 2055", "4baa5d62ec678e2a 2055", "1d3a1db0f346fa21 2055", "6e6d6639e361670c 2055", "7b654a89fdef8128 2055", "6b1efef1c576c16f 2055", "248a23bcb7f7282b 2055", "0f067f4acce42301 2055", "53a48cfa6c57a989 2055", "a83550290a6dbec6 2055", "9c8f01e72d16ff78 2055", "4aa73134fa745124 2055", "2a55aaa8fff4814b 2055", "5d63ec2e09d8ec75 2055", "9775cdf946f9eebd 2055", "b5d349d3232af530 2055", "0bc7b060c3d6e014 2112", "21e967b862cf929b 2223", "db19d568fb434bd2 2223", "aa2b4a87b29ea44d 2223", "188a7d846d541bf7 2223", "9c8de7a31141c524 2223", "ff76180a49d19f09 2223", "c17d90805f84f2ac 2223", "66618863ab066094 2223", "23d1d56ac2669000 2223", "7dbe71a9c8015c9f 2223", "8bc59f50db5b934d 2223", "486afadc8152ae0f 2223", "b7c51b7f986e1e9c 2223", "b565f89afa45197e 2223", "0d5b0f2b403a30d3 2223", "a86a76a3eb0eff31 2223", "92971f8862d4386b 2223", "8b6d92bea53cc6d1 2223", "6ef92be9009b33e4 2223", "22125eb8c1938ac1 2223", "2a0aae8b33368934 2223", "6c9ef924d4c058c8 2223", "9646575cbbbd8b9c 2223", "3c10ab86ec1dd9fd 2223", "9f78698cff4ee45b 2277", "dc0b9fe5bae9f286 2277", "f78446b80f6cf676 2331", "31f5f3cfe746f444 2331", "5ec941bbe6adb4be 2331", "dcaf0b0e614dfa7f 2331", "3da568301b100114 2331", "a7654266b67198dd 2331", "c1ac647f2de8d86b 2331", "7a2c09de4ad397d1 2331", "f044ef7978916c29 2331", "ac2fef52fd15b042 2331", "370e9184ccde96c7 2331", "3501d81b3005372c 2331", "c2ece55bb4c27ed0 2331", "931574f60a73df03 2331", "67efe7f044b31861 2331", "9533483bde5ee116 2331", "721ce12c1fc89880 2331", "7303c9b8f7fe42f3 2331", "753c43e8c6240cb8 2331", "fcd3e6c64359e350 2331", "4ef52faf2886c55c 2331", "b9d6178bfb3fd538 2331", "ed3fb1c39b5d65f5 2331", "a835e7a74a588cd1 2331", "eab7e7985c833e21 2331", "f3bc35c162390b44 2331", "30f223d7c821bcd4 2331", "35d27302568b8070 2331", "1e63823bd41ec4ba 2331", "62a85a9b46cca7cb 2331", "c4facb5997f4880e 2331", "4bcae70169264097 2331", "1b1d11f0d3ebfc45 2331", "85e5ddd6a6ca280d 2331", "506d310b78b443ed 2331", "5b5225cc907f8b73 2331", "086f44a4f3bcdf62 2331", "f052344a636c7cc2 2331", "326e9abb33606365 2331", "b217b15ddf2b18f7 2331", "4bd789551a7410b4 2331", "644949a4c3b30299 2331", "f2f4c0ea66d36e93 2331", "6416d22266d23d79 2331", "fab4b943435f8fab 2331", "6660a7dc4bff35ed 2331", "936261e85e9a84e6 2331", "69e5812e4a4db1b8 2277", "22a2b525bc82b893 2223", "927a8b545781885e 2223", "b12061bba96b4e6b 2223", "9f3a59a1e2845d27 2223", "b1e8bcc7787ce527 2223", "50e2789a4549a064 2223", "3e4886c0dc300737 2223", "84244d7277b56d4d 2223", "151bedd323afce80 2223", "522fab149207b3f7 2223", "ddfb1f43efb6d800 2223", "30dadd38c0eb0e64 2223", "67cf36ce48905c7a 2223", "99f64f5f768c21ec 2223", "c0bfc063d7308856 2223", "3d6057ad725162a1 2223", "419b15f0bbb6005b 2223", "6f507221aca223fb 2223", "03d9e92ae3e70adc 2223", "50d19bbbbc20dd4a 2223", "2798815a2d27713b 2223", "00c5bd7c2f764c4c 2223", "641014ce8e954940 2223", "d75aabbc20438c5c 2223", "7bda91b411e5379d 2223", "a3a716ffec4fc303 2223", "c3797da7f8d09262 2223", "fd4d5353d0e9ff68 2223"],
+      "final": "1dba68461e48fe6b6e1f31a72bf8d95f3e48c8d931c81925c4cca9cc8360970c",
+      "rejection": null,
+      "facts": {
+        "plate.y": -2.032358622067827e-12,
+        "plate.speed": 0.0014361383685526634,
+        "numericalEnergy": -0.000042512389824633
+      }
+    },
+    "stress-liquid-riding-falling-plate": {
+      "why": "Nine samples ride a free plate that falls onto a floor.",
+      "heavy": true,
+      "id": "stress-liquid-riding-falling-plate",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["67f150406ca8c3d1 944", "f0301b8902e78c8b 944", "8e45d6c3d51c83f7 944", "583d029555da11ca 944", "46ad1834ac7fefd8 944", "181119fd6df53d5b 944", "a076f7e151830b9e 944", "cc5cea11440d7620 944", "11d17fe6de2b3291 944", "834ba5d2339af3f5 944", "5295b9e0c5ae7423 944", "d5b10c396f8a843e 944", "cecca5b4790a51eb 944", "37399e9b2abf81d3 944", "7b17936f16d741e0 944", "fc0b9416a6f5c500 944", "ae548deba1c893f4 944", "5afb78d087516284 944", "4f6aad155542f8ec 944", "7e9377c20d5cb5e3 944", "1a2df9f37c00b983 944", "3ca5c7e068a9619b 944", "8aaa6ecf84e1437f 944", "7a81218dab85d200 944", "f6c50b0e769dd834 944", "552baddc34e3c437 944", "cb117fa73f76d1ef 944", "da8076c0c93f175e 944", "8a4eb25e0d999100 944", "b7e407f574bf98de 944", "5d7e2b51ccc5e719 944", "ce683c35e615326b 944", "e11d6f10de2ae231 944", "78a69ae25233da04 944", "6d6d74e39294c224 944", "df6bec5ef9cfdd14 944", "27b4806582388006 944", "65098f109747b1fb 944", "c046fb0d97d3b8e2 944", "a9b0a6626ae52a88 944", "d4fecdfc73804874 944", "bb9c360049683d64 944", "85539980aa50225a 944", "5b8250b83e0fab82 944", "53c151c4325b7dee 944", "bf634e1c2b7a9c48 944", "a5b6cda3d2f5dd0d 944", "d32653d44299f9cc 944", "c373c5e5a3003e04 944", "8652cf07a88b31bd 944", "d31d8909ad55a523 944", "1f580d8f838dec77 944", "43b407ebe2900a69 944", "6216a9b52e036665 944", "f9d82a7e996f5f04 944", "1c02b1d6c9c9d992 944", "7eeb5c70277889cd 1035", "ec03d4144446310f 1207", "df6af7eab2af838e 1207", "9a50092cb07f28d6 1207"],
+      "final": "89f07443305b0dbe521a737c2882616ff1f61729d60c3b888c91e2b76c64ac37",
+      "rejection": {
+        "afterSteps": 60,
+        "message": "Rigid contact solve did not converge.",
+        "stage": "rigid-contact",
+        "work": 7381,
+        "atomic": true
+      },
+      "facts": {
+        "tray.y": 0.7749999999999992,
+        "tray.speed": 4.900000000000009,
+        "w004.y": 1.5249999999999988,
+        "w004.speed": 4.900000000000009,
+        "numericalEnergy": 3.979039320256561e-13
+      }
+    },
+    "stress-liquid-in-v-wedge": {
+      "why": "Two samples fall into the V between two fixed plates at plus and minus 45 degrees.",
+      "heavy": true,
+      "id": "stress-liquid-in-v-wedge",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["d812da5025d89f12 122", "9e401017181c9e68 122", "56b4cc3a4503cc35 122", "a3518aaa5f15bbd5 122", "49671379e1129fe6 122", "508f5587b6735f18 122", "120cfbf91d693d79 122", "1345df3a3d049e65 122", "27c886d4ddc9f1ec 122", "f0223269516414b8 122", "3b400b848f653ffa 122", "bcf8113baff33232 122", "12a4d3232ae25522 122", "51e9bad81c834b51 122", "bf851d8c0a2b5793 122", "a62aa479e8452de2 122", "a025021f26a03102 122", "2621e63bd5e98493 122", "99820377e7e7731c 122", "bf03e2123724aac5 122", "53e089fd328676b9 122", "06369eaf6e41c231 122", "eb366fa3121eb6c1 122", "cfc9959e55770368 122", "85522cbccb765e42 122", "76da64caca806b6f 122", "7865ab3aaa65f627 122", "10f8c75d5a8ae936 122", "a032581e400fa318 122", "4f82caa05057acf5 122", "db88dec2364e0557 122", "1a7d0fa526ca6122 122", "1498e062e78fd3ee 122", "dc99984b9fef7325 122", "36a12e537c189683 122", "d3bd0ce634c00ccc 122", "92bdad8aa364cdd7 122", "43e5df5bf4008b21 122", "5b56f1fadd0dd8c0 122", "022a59fc5058301f 122", "9ed6b337cf3bb501 122", "63af2849494534b7 122", "e697c7604df26bc4 122", "71d4b52c0dca534a 122", "6bb458f846d2076b 122", "e952243bc625b2d8 122", "3a31d745d3d828c0 122", "b710234de50fefd8 136", "02e87d4a8a58f5b5 158", "f0650d17b70980e0 158", "d6e9985b94333b33 158", "fbe0edf72a061057 158", "e1e5c1f62f9f7d12 158", "0a02a1adde5bd029 158", "44e18188151d4c6a 158", "483bd47d0a4919bf 170", "6525a9df1dd38050 190", "2fbfc1748c7044cb 190", "86cae4233ba47e3f 190", "447389783f6405bd 190", "b49b4e65f3406c06 190", "0ab96899473269d2 190", "11ca520f588ebcfe 190", "fc7ba633a8274cf8 190", "7732930cd9d70514 190", "d1e796c43a42c8b1 190", "e035cece86b4062b 190", "e839806a04773cca 190", "edba6b89de9846cc 190", "303275839d3cfa2d 190", "54382fbe65d4c032 190", "40c4e1ccd906030c 190", "6e4c280d352e6d8b 190", "83f5aa30d386e7c5 190", "3b17a1268b3b0881 190", "1b2213d29847a121 239", "16854aba9920c90d 210", "1b97c9e8f29bef24 210", "218b4c2c12f623f0 210", "cb3645c6d35fca5d 210", "c2dad3d090376a07 210", "def5fa0dd7e08bdc 210", "fb393c8ab4b8ae3a 210"],
+      "final": "afafc8c50758f478660779c05b16404306db0503cb8f0f6c74d6c35f09bf2787",
+      "rejection": {
+        "afterSteps": 83,
+        "message": "World numerical energy limit exceeded (-11.362863569556001; limit 0.01).",
+        "stage": "fluid-internal-work",
+        "work": 208,
+        "atomic": true
+      },
+      "facts": {
+        "w0.y": -0.43933982822017875,
+        "w0.speed": 6.490755082739463e-9,
+        "w1.y": 0.25585207308204067,
+        "w1.speed": 6.77735806275147,
+        "numericalEnergy": 0.000034565594714256606
+      }
+    },
+    "stress-rigid-slot-wedge": {
+      "why": "A cube falls into a slot exactly its own width, touching both walls and then the floor.",
+      "heavy": true,
+      "id": "stress-rigid-slot-wedge",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["9ed479e1bebb5aaa 136", "9c5ed5f9685512e8 136", "7e4a904c92332be5 136", "c487ac7b8b2abdae 136", "d4cd0bc49802bca8 136", "306a1c31c1cc095e 136", "5d9df24ebf5ed7d2 136", "d1036df449d7aee7 136", "ad64787d07a143b7 136", "30460535673773ba 136", "4a96fe2e58fcf301 136", "83fcdbcc4c52a41d 136", "ee4fed47d87ebcb0 136", "2875f124c3db2ad1 136", "3d0f93b07cbfa13f 136", "35d8a0329b1fb700 136", "f2e6dc58535e35e9 136", "af5d2f9c4202bae7 136", "5a94ea9c98475965 136", "7ef10537479feb45 136", "c59c904014ea0671 136", "3b8d430c1a4c817d 136", "c190adb518da0ec9 136", "f295d7d9ae2e56b0 136", "24937179052ea089 136", "ba3835ea785b6620 136", "e085b76407c8bfa2 136", "68a15b10ed9ffc37 136", "dfa1100fa6d72734 136", "f39d46d6ad3b3d27 136", "6133286fd13d188d 136", "94f1e079a5fb6fff 136", "6fff1292dd536449 136", "88e2688266ab0577 136", "9dcb238d6bfdf1b6 136", "70a53b1954921981 136", "0a48c15fc9e9e93e 136", "0928292d82a28959 136", "a1a0a2a80baaadab 136", "89d7cc4bc7828763 136", "c244b7ac99106057 136", "a7d219be99f8fabe 136", "0b2c2e2aadf27f51 136", "b0fc95a7f227c8eb 136", "9215ff1a5103c8bb 136", "5f8bd068d9f645a7 136", "782f82cf79743146 136", "5d70ad4d3d6f5c38 136", "4243e961a5d32a2a 136", "338d2d42be11750f 136", "324502a24e388f4a 136", "7684f3d2e4702d36 136", "b212c0c175a3908f 136", "9ee95e164266d80b 136", "0d96d15a1540b064 136", "3274ebd48a7cacb8 136", "f6a1c07443e1ec6e 136", "e3f37782dc03238c 136", "6a1667e52a5c948d 136", "6d10500193b450a2 136", "4b8ca37c71681519 136", "98c90c4e189ef2a0 136", "64b2d2308bed7e32 136", "85202bac7067f80b 136", "13da052e2c315b5d 136", "20bb2b374bb551a7 136", "4c39d5f2cf788ae4 136", "8be1f0bdc4c3ea20 136", "0f61d1658b3f9a68 136", "a8d67df745be6bab 136", "75cab37d0b4395cb 136", "9fa97ed86c148273 136", "4de19982dfaa5a17 136", "145eeb04df695103 136", "c4036ed44c6ff25c 136", "44aaab5c341585de 136"],
+      "final": "7a95ecb832a5caeff6dd7670befdbff38b45dddea417e658e47ba24e27a3bb04",
+      "rejection": {
+        "afterSteps": 76,
+        "message": "Impact interval refinement did not converge.",
+        "stage": "rigid-sweep",
+        "work": 150772,
+        "atomic": true
+      },
+      "facts": {
+        "cube.y": 1.0345555555555537,
+        "cube.speed": 6.206666666666681,
+        "numericalEnergy": 1.7053025658242404e-13
+      }
+    },
+    "stress-rigid-corner-impact": {
+      "why": "A cube strikes a floor and a wall in the same tick, with restitution on both.",
+      "heavy": false,
+      "id": "stress-rigid-corner-impact",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["3d214bd8fe1cc6c5 28", "e55215e7ec0f90e9 28", "b38708866431d3a3 28", "ba206edc93dd946f 28", "75841227559213cd 28", "23ec4d05381e325f 28", "d93a1c0de96611cf 28", "2900f844510329bc 28", "fe19d816a06111d3 28", "658424bb7b16239a 28", "d44a0338ec53a417 28", "4522883365fc9ab7 28", "3491e1e87b111ed6 28", "2b9cf9fd5be64c28 28"],
+      "final": "4a59076cfde4c4650ffe6116f67367e17644b8134daf84baeb7f243856639ecf",
+      "rejection": {
+        "afterSteps": 14,
+        "message": "Rigid contact solve did not converge.",
+        "stage": "rigid-contact",
+        "work": 34064,
+        "atomic": true
+      },
+      "facts": {
+        "cube.y": 1.0333333333333319,
+        "cube.speed": 5.656854249492381,
+        "numericalEnergy": 0
+      }
+    },
+    "stress-rigid-pile": {
+      "why": "Six loose cubes, three of them tilted, fall into a pile on a floor.",
+      "heavy": true,
+      "id": "stress-rigid-pile",
+      "group": "stress",
+      "outcome": "rejected",
+      "steps": ["0b614e22249761eb 176", "9a287bd6b97cbb7f 176", "7bb20d30d0c7b3a0 176", "30b9c406955ce837 176", "660d974154435c1e 176", "1a3245aabe321111 176", "8340f47c7b6c44ca 176", "0c9550536d9e54a8 176", "fed072f6d07df774 176", "06ca7451f50b0c28 176", "3bd748c781e147bd 176", "03e964773a3dcdde 176", "c81fe3ce82cd5b6e 176", "2bc5d509bc0a4e34 176", "4e79b58ccf456f44 176", "19372417e112bf31 176", "db15aeabe7426e23 176", "5eee8f70fedf00e2 176", "ded8a923c3cbc128 176", "3502bbda2001d8fe 176", "deaef5e440533265 176", "a265ae1d88da3ad6 176", "b4b1b9e06c4cf9fa 176", "6e98a3e37d8bfa12 176", "d398e77d1749e2b3 176", "54e278a34ea950a2 176", "b94a5caf02fa2c4a 176", "93ee6636534bd732 176", "42356738373f53a6 176", "df7b8f411a8a51d1 2250", "7bb4bf2889f1ff79 177", "12585b4b64367a61 177", "f7aab59ec1b1def8 177", "67f1081356e080d2 361"],
+      "final": "07457aff61ac0d8c126830eca457b46fcb97f29821f2a0cbd89281e095c29651",
+      "rejection": {
+        "afterSteps": 34,
+        "message": "Rigid impact event limit exceeded.",
+        "stage": "rigid-sweep",
+        "work": 19988,
+        "atomic": true
+      },
+      "facts": {
+        "c0.y": 1.001912057432268,
+        "c0.speed": 1.4407083237891327,
+        "c5.y": 7.156638888888887,
+        "c5.speed": 2.776666666666666,
+        "numericalEnergy": -9.947598300641403e-14
+      }
+    },
+    "control-wax-valve": {
+      "why": "Demonstration wax-valve, 30 ticks.",
+      "heavy": true,
+      "id": "control-wax-valve",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["7b137b14fdb3239c 190", "8ae427ca641ca7fa 346", "526eadd8aa53cb71 347", "5425004016096f68 349", "d0a8322b701443eb 349", "c5ba0eb6c8a63fca 349", "e5e50b937306e1d4 349", "f86e97b295d79f40 349", "9cb97917303774c3 348", "a858010a2ca3a27b 345", "e6d0d68954c9f5d4 345", "d21e89c49040137c 345", "5777f60f00a30b8d 347", "427bcf8b01188802 347", "778aa30805eb7bfd 347", "87bbdd5a1f840f57 347", "57d181c075072648 347", "9b93f0802aac7fb4 347", "6d03a71e638718cf 347", "64525baab5912662 347", "ed448cfc69e30393 205", "5c06e1b9b925a0c1 205", "4c7aa640dfde35e3 209", "71a891dc5b85d748 215", "61acd0a89bafc057 215", "655f0d81c7729586 215", "8d8f9041a20abdcf 215", "081e87116e23d990 215", "45f84e58408893c7 215", "9147fb7d93382a4c 215"],
+      "final": "2b0e4258fecb1aa1f590182d47caff9646ecbe2b166e4b5833500757e0d9fb67",
+      "rejection": null,
+      "facts": {
+        "numericalEnergy": -3.08028275966432e-12
+      }
+    },
+    "control-rotating-contact": {
+      "why": "Demonstration rotating-contact, 30 ticks.",
+      "heavy": false,
+      "id": "control-rotating-contact",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["c6b40d197a057093 111", "b9fd0a30c566767a 47", "317a1befc4e7e7e2 47", "fb1fcf008bae0081 47", "0639a9c70aedea04 47", "e3a53cc516b93496 47", "22e6055184d9f403 47", "0d9749abcc98b27e 47", "f472052359a184f4 47", "9736b8f04d6f00a8 47", "ea509246f24a15f1 47", "77e0f8ac0565435c 47", "e654defee7c3d2b1 47", "72f1929e5f863285 47", "f216b85426862e17 47", "17caf63108f52706 47", "09132fa8e300c1bd 47", "448ad511bdb76465 47", "bf9cc1dde07f0d43 47", "8131165fc54cf454 47", "07b420f5534a62fa 47", "a0f88b4f8e1ef43f 47", "a6ef0f3a6560b732 47", "b77e0b59a7fd1721 47", "982d8e079d1c49d6 47", "c33ecdbda5bcce9b 47", "37976a64baaf4270 47", "bde613f13252adae 47", "7623287d02114984 47", "83e28e52554d0a5f 47"],
+      "final": "2a4bb103124232250d6d0a70e3c3f365841addd04557f23a60da74c36c8b1dd1",
+      "rejection": null,
+      "facts": {
+        "numericalEnergy": 2.4980018054066022e-15
+      }
+    },
+    "control-fluid-switch": {
+      "why": "Demonstration fluid-switch, 30 ticks.",
+      "heavy": true,
+      "id": "control-fluid-switch",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["f6cb2a17c082fc20 309", "1231e3c2968864ce 211", "630610085ff3d828 211", "a550141aa7aea9cd 211", "7daca6d3aa5b3fae 211", "2da1383f25178f17 211", "b0149ae8782951e0 211", "bef7faf1b84d4a88 211", "5d368a6a6f6f56f5 211", "5340382bf320d424 211", "785e757fe638cc92 211", "0108c43c823264b0 211", "9d5ce2daaffe7913 211", "0d7425ead13ffefc 211", "30aae53eda889c11 211", "9fafd6957b84e28d 211", "9d680459905e1419 211", "f391cc70d5e21014 211", "569bccb6561ac16a 211", "9f9b9bdba9ffbc20 211", "90afdd041a538b78 211", "cac104b80bcdaed5 211", "3610b90d1201f8f8 211", "2d7ecb4bf07b1178 211", "3545c8aeba588d3f 211", "0ab4a46cf163c912 211", "c62f4b975be2c344 211", "c6c96a4bd87eb293 211", "b2a7c6101ae9612b 211", "c8b356ce3d512bb9 211"],
+      "final": "003bbe2861f8aca22ae4ab2c9b94bff60899c341e129e5ffda4f0e1ce9f61a1b",
+      "rejection": null,
+      "facts": {
+        "numericalEnergy": -0.000010821440207497653
+      }
+    },
+    "control-falling-battery": {
+      "why": "Demonstration falling-battery, 30 ticks.",
+      "heavy": false,
+      "id": "control-falling-battery",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["67c3051384c5c621 49", "983477fd35f4d27b 49", "1d6534d668025ddd 49", "3a1702005bf6aa9a 49", "7e585549e703b876 49", "b8204e0c49659ba0 49", "c14009b9785c6762 49", "6c89290130a9c945 49", "97101bddeae39e78 49", "aee4aa4e523bff53 49", "a0fa29e8ad2fa8a2 49", "f8e83cf8ea27c76b 49", "9117fcac1e793949 49", "18283f86078f3b92 49", "66c88cd95f5d2521 49", "9789878a97927afd 49", "ba3b295360ba663a 49", "6c3b2f3820db3b15 49", "d54c723ff3c5d5c1 49", "0a149ac1d8d83901 49", "488ee5575aecf53f 49", "b1985a837be4dd59 49", "c5e8edbfeccb1b8d 49", "66ca95d97e6104b7 49", "cc999308641a7049 49", "9845a16aee27f9dc 49", "dd717a25ed201529 49", "980444b39c6e1a1a 49", "2d9cd42e94fd6e86 49", "336d0fe6e5470dcc 49"],
+      "final": "0aebb998df3536e80c70df35cf276d2d003b88e04e11b0b284396d2b3c21235e",
+      "rejection": null,
+      "facts": {
+        "numericalEnergy": 2.842170943040401e-14
+      }
+    },
+    "control-combined-failure": {
+      "why": "Demonstration combined-failure, 30 ticks.",
+      "heavy": true,
+      "id": "control-combined-failure",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["0ccbf054da7a501e 365", "22642d341f164265 488", "91ce57604e6b4027 491", "387eccd6ed4c896e 530", "d61ea5252949ed95 530", "25e2d4301de360b6 530", "b31f878108a7ad60 530", "edeb6c538197cd24 530", "f5879c9ac09f2e13 529", "ab8bd98eecad973e 527", "3119cc934c40cd5f 527", "d2ca8156db2d43ac 527", "7d0dcd34ed26f013 529", "fa171185b609849b 529", "2f7f5868e781cbfc 529", "a627b30a92bbc51e 529", "da25c9c92ec0abbb 529", "17e501a92dd2cb58 529", "99c82644f90a64ef 529", "de422ae0196636af 529", "af99a4acdbb5fecb 343", "6b64f79e2e40424c 343", "65a374432c5fe03b 349", "31ff88c3a42ac7f1 359", "e3b6f43f389c5632 359", "24998b01189020ec 359", "3d84d302212e3853 359", "445b1133259c1062 359", "227206a2f4427ebc 504", "35ce8cb4b9eda3a0 857"],
+      "final": "f55fa68726d13d6a67a201eae3fc6408ae9bae673f900ca8ee22b85bc5d52043",
+      "rejection": null,
+      "facts": {
+        "numericalEnergy": 0.00002202149028201251
+      }
+    },
+    "control-combined-failure-to-break": {
+      "why": "The extended gate trajectory: release, break and eight further ticks.",
+      "heavy": true,
+      "id": "control-combined-failure-to-break",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["0ccbf054da7a501e 365", "22642d341f164265 488", "91ce57604e6b4027 491", "387eccd6ed4c896e 530", "d61ea5252949ed95 530", "25e2d4301de360b6 530", "b31f878108a7ad60 530", "edeb6c538197cd24 530", "f5879c9ac09f2e13 529", "ab8bd98eecad973e 527", "3119cc934c40cd5f 527", "d2ca8156db2d43ac 527", "7d0dcd34ed26f013 529", "fa171185b609849b 529", "2f7f5868e781cbfc 529", "a627b30a92bbc51e 529", "da25c9c92ec0abbb 529", "17e501a92dd2cb58 529", "99c82644f90a64ef 529", "de422ae0196636af 529", "af99a4acdbb5fecb 343", "6b64f79e2e40424c 343", "65a374432c5fe03b 349", "31ff88c3a42ac7f1 359", "e3b6f43f389c5632 359", "24998b01189020ec 359", "3d84d302212e3853 359", "445b1133259c1062 359", "227206a2f4427ebc 504", "35ce8cb4b9eda3a0 857", "d4cbcac3d9bf83dc 849", "87ac377e6218aff4 841", "e9e84b956b88a2b3 841", "3ae186180120f9e5 841", "3124fb4e2f05830a 841", "4905c83b8ab392a6 841", "ed8868fd74a36b5d 841"],
+      "final": "7ec44687fc854bebf4b9d66973e08fa19fa971e90056f72d15cbc96927408127",
+      "rejection": null,
+      "facts": {
+        "releasedAt": 1,
+        "brokenAt": 28,
+        "plate.y": 0.7281925014140005
+      }
+    },
+    "control-timed-cup": {
+      "why": "The 26-sample timed cup, the heaviest qualified interactive load, 6 ticks.",
+      "heavy": true,
+      "id": "control-timed-cup",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["d802e156dd7fde4f 31367", "677f48e7e85e03b2 31937", "f6644c1c41348c38 32213", "1740accdb4d0fba0 31363", "1cd8fa68245daaed 31941", "1404b63d96770359 31917"],
+      "final": "5a474ee1a85d6fa5a8fe962f3e20a9e4f01e3f402449173fe74f5fce44eea4c8",
+      "rejection": null,
+      "facts": {
+        "body.y": 2,
+        "body.speed": 0.0031729766547128266,
+        "numericalEnergy": 0.000009599879406320069
+      }
+    },
+    "control-timed-cup-4": {
+      "why": "The 63-sample cup that misses the preview target, 2 ticks.",
+      "heavy": true,
+      "id": "control-timed-cup-4",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["79bc53d1bb4e1bf9 58863", "1e60789e0844338d 58171"],
+      "final": "e5e36c8b98556dd78bc998e6351b009c4e0fb6f27b6d1055f3549f186dfa124b",
+      "rejection": null,
+      "facts": {
+        "body.y": 3.000054088663663,
+        "body.speed": 0.006479861855793538,
+        "numericalEnergy": -0.0000010531033094963045
+      }
+    },
+    "control-resolved-tank": {
+      "why": "The 99-sample resolved tank with a wax body, 2 ticks.",
+      "heavy": true,
+      "id": "control-resolved-tank",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["b0628332f8d1836f 118700", "b0b51a2f4fd11f3c 117738"],
+      "final": "7ba2a421378bd268539c25f63905a02f4f63cf2660ccbe69bb23a7adf8aa4018",
+      "rejection": null,
+      "facts": {
+        "body.y": 3.000073066641387,
+        "body.speed": 0.008759405057560624,
+        "numericalEnergy": -5.994266174206407e-7
+      }
+    },
+    "control-resting-cup": {
+      "why": "The sustained-rest gate scene, 27 samples in a closed cup, 6 ticks.",
+      "heavy": true,
+      "id": "control-resting-cup",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["b926af2e71cf5c2f 19636", "d51ba8d4565feb1a 19918", "68f048d6b3729940 19636", "fd42cf92b4cd551e 19636", "4643818c16b0ca96 19636", "410e35dbf0913b72 19636"],
+      "final": "21db24fcd6f4a168f430f60625d6ab61b69d67ed40bf885dd14dd7af0ac032b8",
+      "rejection": null,
+      "facts": {
+        "w013.y": 1.999999998182632,
+        "w013.speed": 3.618352896245901e-8,
+        "numericalEnergy": -2.8968997866625817e-8
+      }
+    },
+    "control-paddle-speed-half": {
+      "why": "The paddle at the passing gate speed, through impact.",
+      "heavy": true,
+      "id": "control-paddle-speed-half",
+      "group": "control",
+      "outcome": "completed",
+      "steps": ["538091985b2f60c2 2568", "23ccbab8a83c64b1 2568", "4165db0ce0dfa1be 2568", "ae37140727efa414 2568", "4780e210a50a65f3 2568", "f6e8396d6d87440c 2568", "42bc530de5bf6651 2568", "a8be809431c20c02 2568", "9e959364184f4045 2568", "a2ed10c09e4ba616 2568", "4e4784647464063b 2568", "3dcc566f1ba895fb 2568", "f983e95498782984 2568", "21a611923ebc48f7 2568", "70a062efb69ae402 2568", "89619a5606c0164b 2568", "47dbc44ea015ba86 2568", "ad094a87d2cc797a 2568", "948ff5d3532e7915 2568", "435e9e87342190fc 2568", "c1a9d158584f5100 2568", "e44b9ed8ea9c38d4 2622", "439b7622b2b29e5b 2622", "0dc8408fd07cb3f2 2622", "1082a00f25d822ae 2622", "171e8a6a7ae83aa8 2622", "fbeeb0224866cfba 2622", "88bfb23d3c6a7588 2622", "85c97987292af8e7 2676", "cfebff493e04532c 2676", "06f92f194994cfcb 2676", "d9acd4810738f52f 2676", "9fdaf53ac59e7ec2 2676", "02123e10f2cfb71d 2676", "aa800a64424df312 2676", "cb2b3e8af93f1d0b 2676", "7a638472f628cfc0 2676", "611c3147b8f7e45c 2676", "ca3d12bc3d4366a9 2676", "c582a825e6fbae77 2676", "a5853e1f09257e72 2676", "ab82c43ed62dbb2e 2676", "5b943457d6076c45 2676", "084d4fb461d07e92 2676", "6b029ee0e3acee6e 2676", "4ce2aaaaa7125866 2676", "9c8ec9e326036e4d 2676", "8bc6b961d297b49a 2676", "6cf216a12496d159 2676", "1baf03b0316e8314 2676", "39675ff7d7923d1f 2676", "9acbe0b5ea3bcb1e 2676", "dd253375b31d8b83 2676", "eb629f2a9dd20a42 2676", "4329b370bf086e4b 2676", "8361a720ad8000ce 2676", "6c63dddb7b7a9f53 2676", "c9b3b4ae72cdb838 2676", "a316f208d3123542 2676", "7c339d6a9cfe1a5a 2676", "8410724ef6237cef 2676", "cd0f70f2467b6ecb 2676", "bf20f366434834e1 2676", "24831f71c60f0dfc 2676", "1b21bc589ffdcb16 2676", "53b5f8369bc8a51b 2676", "4533bbe64118f684 2676", "e831483775254b45 2676", "4a38be0b7be599fc 2676", "fa2afcd43f444146 2676", "8a44e26622ca533b 2676", "553fa69b243ca096 2676", "6c11bfecc6bfc2cb 2676", "420ccfa6819e50a8 2676", "ca15e88b935be304 2676", "97c09489a5721a6c 2676", "0f7e09d5912d95fa 2676", "963ef13367fc5ec9 2676", "388600d7143e9408 2676", "30a6d7df10aac228 2676", "5bc7e5c454297e55 2676", "87b728408291092f 2676", "6c08b6ed8e3b1a73 2676", "99dbd13f89e94b9f 2676", "ca0c345ae2921ba9 2676", "52381b81059d5a38 2676", "9e332bf5fae5a789 2676", "945977b261bc7060 2676", "c6937fbfb4ac618e 2676", "7fb895861b6abddd 2676", "ea3c4f054fea1dc5 2676", "6916cb966a3cf649 2676", "f25655764f8e8983 2676", "dba890ef4b21035c 2676", "b807e02bc4d1331b 2676", "f6579afd0343ba26 2676", "f95b210b32d850a6 2676", "5746ebe0c712c27e 2676", "4f73d3b0c9612dbb 2676", "70667ddc22c9fb4e 2676", "21731e4e912e158c 2676", "b0fae6db5d288df4 2676", "7c8a47e59201784b 2676", "057cb5d40893d6e1 2676", "086d05836095a2b6 2676", "b75679bd74761e6b 2676", "e565c59724b477e9 2676", "f2787462140b486c 2676", "9295b357eac9532c 2676", "b77b0e344278a5fc 2676", "6d1b5b84aa2d74af 2676", "50159bbcf6de7d2b 2676", "4a74ceb75c1ee1c4 2676", "c393e539cf6c2c15 2676", "7933c912336603b1 2676", "bb875479d8c64966 2676", "0f5704ae753000cd 2676", "f4f04963d5193ff0 2676", "89da7eeecf24c414 2676", "38c8a23f61b4c48f 2676", "841dbbf085a10b42 2676", "8a4e0cd922cd8480 2676", "5e88f037db3ee6aa 2676", "284831a5841a8a36 2676", "dbb2af12cd919775 2676", "66626623a3472763 2676", "be2c1b4de9fec967 2676", "efb2518e132ee9ec 2676", "0e3c451c10009d68 2676", "5a267996741273b8 2676", "cec0aab394cb9800 2676", "38e247bdeec25934 2676", "46bafdec821c15e5 2676", "f8a920caa675e865 2676", "e3f602c812907031 2676", "68bfd9587106582d 2676", "f31c0abf6bb6c690 2676", "f80b56317b2abe13 2676", "bff6bbe7c33ab9a7 2676", "320bb97398d288ff 2676", "bc7da22225692243 2676", "4e26182a9bf2f5d9 2676", "1dbc44fddc92841d 2676", "a1edd77e744ab08c 2676", "bbcb0069dd2a4d04 2676", "97bc1fe18788e85b 2676", "4f684dc8ea2fb42e 2676", "7632d8ca04e8f741 2676", "ab3194ffae737633 2676", "d30b61d1a977885f 2676", "57957b3490884457 2676", "ef7e04723c8cdf18 2676", "12e9e9bc64c96973 2676", "060b2ee2629c840a 2676", "cf4b70054bfcec84 2676", "c9e5eddcad03442a 2676", "4a3cda7a7f1c61a2 2676", "9f1c469fefb5a6dd 2676", "8db3961d1138648a 2676", "22853110806417e9 2676", "1a0d13e9d322ecba 2676", "e987dbc94ce44e8d 2676", "771bde6c91c8e8dc 2676", "048fc908496e73c2 2676", "14ac4bdd89e60f62 2676", "cccd015eca2b05f6 2676", "1221721e47d082ba 2676", "0601a70870d92de7 2676", "0b005c5d49e2ab60 2676", "b704120030bd60e9 2676", "076959020f76e672 2676", "c4b440d72fd89b97 2676", "ed9102b53f97f670 2676", "70ee9df1001d8da1 2676", "35d8a9067df1afee 2676", "fff067f22a14620f 2996", "dac4e16369d7b861 3735", "a0001f79ddc2698d 3569", "f607e1c4898dd675 3569", "dd1e05fae17be9a3 3569", "addee69f16fb020e 3569", "876d4b4f8f5a7c69 3569", "41033e7ac5720a4a 4313", "313b961f1eb14eba 3459", "f21315faadc113f3 3432", "869a7cea8fec30e1 3307", "05078b607fc2be7d 3247", "ac7b492a57c7812f 3307", "b0d6ed4d79bec03c 3247", "e7e58252a72f2570 3307", "589aa4c6509951fd 3247", "5cc37858da3657fb 3307", "7515897e140f3420 3247", "454166570cb945dc 3307", "9c4219dfc608eca2 3247", "f7cb694c2b2d86f6 3307", "d86880384e45d0fe 3247", "aa44c3b2fd9ed5fa 3307", "f004fe70e0eaec37 3247", "70321e211688fde3 3251", "6f37334faa93e268 3247", "8a2356fb07d9583d 3251", "33889eeb0c5f22b3 3189", "03dde8d196a15ff2 3251", "2d3dbb9138cf2b7c 3189", "74bcf4fbc92143a1 3251", "2e1d5a33e0150ecb 3189", "79bb9ad277c5a24c 3251", "2440e28b08e589a8 3189", "1e9b71e289cae002 3251", "9c6aa78d8c01e251 3189", "409475aba07d419f 3251", "0e7840ed2c956bb0 3189", "331f237d03750d97 3251", "57552d5ef502e6db 3189", "e6143427d00c32fa 3251", "fdadd66355d92784 3189", "ed89c5967eab77dd 3251", "ed8bcb35d8f559df 3189", "b49e5c4a64eafb8e 3251", "c09518787b8933f3 3189"],
+      "final": "32b657e5022c9c04f6dc2e1f6aefeb2ef6c0a44ec4c623b6401907a6728e6f5c",
+      "rejection": null,
+      "facts": {
+        "paddleX": -1.7056877759111082,
+        "paddleSpeed": 0.1336966685529233,
+        "impactHeat": 0.1480668741041044,
+        "numericalEnergy": -0.006835502765994656
+      }
+    }
+  }
+}

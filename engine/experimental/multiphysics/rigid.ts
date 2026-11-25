@@ -1053,6 +1053,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   rawAnchors: readonly string[],
   rawOptions: RigidStepOptions3D,
   copy: PortableCopy = copyPortableValue,
+  legacyContacts = false,
 ): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
   if (
     !Array.isArray(rawParcels) ||
@@ -1102,6 +1103,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     maxPenetration: 1e-5,
     ...input,
   };
+  // Original saved worlds use the shared contact/projection sweep limit.
+  if (legacyContacts) options.contactIterations = options.solverIterations;
   assertFiniteVec3(options.gravity);
   if (
     !(options.dt > 0) ||
@@ -1378,6 +1381,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
      * its unmet normal speed falls by at least a tenth every 32 sweeps. A slower solve could
      * not reach tolerance within the sweep limit, so it stops there. */
     function pastFormerSweepLimit(contacts: Contact<T>[], iteration: number): void {
+      if (legacyContacts) return;
       const beyond = iteration + 1 - options.solverIterations;
       if (beyond === 0) {
         for (const c of contacts)
@@ -1392,6 +1396,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     }
     /** Support work done where a non-colliding particle rests on a solid. */
     function recordParticleSupport(contacts: Contact<T>[]): void {
+      if (legacyContacts) return;
       for (const c of contacts) {
         if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
         const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
@@ -1772,7 +1777,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       nextImpact,
     ]);
     yield* project();
-    const physical = new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
+    const physical = legacyContacts
+      ? undefined
+      : new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
     yield* solve(true, undefined, undefined, undefined, physical);
     captureSettledParticleContacts = false;
     let remaining = options.dt;
@@ -1825,11 +1832,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           // tried: its normal speed is at solver noise, and the fitted arc returns to the
           // face in proportion to the interval. Such a pair never leaves its contact skin.
           // Sweep this last trial again without those pairs; any real event still rejects.
-          const real = yield* nextImpact(
-            duration,
-            new Map(motions.map((m) => [m.body, m.velocity])),
-            true,
-          );
+          const real = legacyContacts
+            ? hit
+            : yield* nextImpact(duration, new Map(motions.map((m) => [m.body, m.velocity])), true);
           if (real !== null && real < duration)
             throw Error('Impact interval refinement did not converge.');
           predictedContact = real !== null;
@@ -1851,7 +1856,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     for (const body of bodies) sync(body);
     const physicalById = new Map<string, { id: string; velocity: Vec3; angularVelocity: Vec3 }>();
     for (const body of bodies) {
-      const impulse = physical.get(body);
+      const impulse = physical?.get(body);
       const linear = impulse ? scaleVec3(impulse.linear, 1 / body.mass) : ZERO,
         angularVelocity = impulse ? applyMatrix3(body.inverseInertia, impulse.angular) : ZERO;
       assertFiniteVec3(linear, 'physical velocity change');

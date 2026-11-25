@@ -1,0 +1,592 @@
+{
+  "accounting": {
+    "baseline": {
+      "angularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "conversionRemainderSubQ": 0,
+      "linearMomentum": [
+        0,
+        0,
+        0
+      ],
+      "mass": 18.5,
+      "mechanicalEnergy": 285.67,
+      "storedSubQ": "245783530045"
+    },
+    "externalAngularMomentum": [
+      0,
+      0,
+      0
+    ],
+    "externalConversionRemainderSubQ": 0,
+    "externalLinearMomentum": [
+      0,
+      0,
+      0
+    ],
+    "externalMass": 0,
+    "externalMechanicalEnergy": 0,
+    "externalStoredSubQ": "0",
+    "numericalAngularMomentum": [
+      -4.0245584642661925e-15,
+      1.4486010574754484e-22,
+      -4.0826988057657276e-19
+    ],
+    "numericalEnergy": -4.5253998217888647e-13,
+    "numericalLinearMomentum": [
+      -4.3943970041879595e-23,
+      3.6637359812630166e-15,
+      -9.952016744778614e-24
+    ],
+    "physicalAngularImpulse": [
+      3.5646726622529163,
+      -0.0000010160532620965262,
+      0.0011024945882596741
+    ],
+    "physicalLinearImpulse": [
+      -0.0000011311543954443682,
+      -3.563516101333171,
+      0.0000011669781226336739
+    ]
+  },
+  "anchors": [
+    "core",
+    "heater",
+    "left",
+    "right",
+    "support"
+  ],
+  "battery": {
+    "cores": [
+      {
+        "energyFractionQ": 0,
+        "energyQ": 0,
+        "id": "core"
+      }
+    ],
+    "drawRemainderUnits": 0,
+    "emf": 120,
+    "failed": false,
+    "failureRateQPerSecond": 3,
+    "failureTemperature": 180,
+    "id": "source",
+    "internalResistance": 2,
+    "negative": "negative",
+    "positive": "positive"
+  },
+  "bonds": [
+    {
+      "a": "core",
+      "b": "negative",
+      "restLength": 1,
+      "strength": 1000000
+    },
+    {
+      "a": "core",
+      "b": "plate",
+      "restLength": 1.0307764064044151,
+      "strength": 80
+    },
+    {
+      "a": "core",
+      "b": "positive",
+      "restLength": 1,
+      "strength": 1000000
+    }
+  ],
+  "catalogHash": "21e840506f7ccaddb1fe256d2d99299aaec6ee569493ac9bd13291c01d9433ab",
+  "conversionRemainders": [
+    {
+      "id": "core",
+      "subQ": 0.28509907221017006
+    },
+    {
+      "id": "heater",
+      "subQ": 0.798942653406975
+    },
+    {
+      "id": "left",
+      "subQ": 0.7581809076996824
+    },
+    {
+      "id": "negative",
+      "subQ": 0
+    },
+    {
+      "id": "plate",
+      "subQ": 0.8035539544859276
+    },
+    {
+      "id": "positive",
+      "subQ": 0
+    },
+    {
+      "id": "right",
+      "subQ": 0.8737618046384439
+    },
+    {
+      "id": "support",
+      "subQ": 0.27142811708572623
+    },
+    {
+      "id": "valve",
+      "subQ": 0.7955954073173928
+    },
+    {
+      "id": "water",
+      "subQ": 0.7148760536120582
+    }
+  ],
+  "gasVolumes": [],
+  "nextOwner": 6,
+  "parcels": [
+    {
+      "id": "core",
+      "material": "ceramic",
+      "owner": "solid:0",
+      "mass": 1.7,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 43451,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        0,
+        1,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.2833333333333333,
+        0.2833333333333333,
+        0.2833333333333333
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.10442924499511719
+    },
+    {
+      "id": "heater",
+      "material": "copper",
+      "owner": "solid:1",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 25779,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        0,
+        2,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3666666666666667,
+        0.3666666666666667
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.31846046447753906
+    },
+    {
+      "id": "left",
+      "material": "copper",
+      "owner": "solid:2",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 26101,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        -1,
+        2,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3666666666666667,
+        0.3666666666666667
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.8346662521362305
+    },
+    {
+      "id": "negative",
+      "material": "copper",
+      "owner": "solid:0",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 19330,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        1,
+        1,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3666666666666667,
+        0.3666666666666667
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.4835653305053711
+    },
+    {
+      "id": "plate",
+      "material": "copper",
+      "owner": "solid:0",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 10272,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        0,
+        0.75,
+        1
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3006666666666667,
+        0.3006666666666667
+      ],
+      "halfExtents": [
+        0.4,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.39636898040771484
+    },
+    {
+      "id": "positive",
+      "material": "copper",
+      "owner": "solid:0",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 19383,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        -1,
+        1,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3666666666666667,
+        0.3666666666666667
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.7898721694946289
+    },
+    {
+      "id": "right",
+      "material": "copper",
+      "owner": "solid:3",
+      "mass": 2.2,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 25509,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        1,
+        2,
+        0
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.3666666666666667,
+        0.3666666666666667,
+        0.3666666666666667
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.47259044647216797
+    },
+    {
+      "id": "support",
+      "material": "ceramic",
+      "owner": "solid:5",
+      "mass": 1.7,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 10256,
+      "latentQ": 0,
+      "chemicalQ": 0,
+      "center": [
+        1,
+        2,
+        1
+      ],
+      "velocity": [
+        0,
+        0,
+        0
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "intrinsicAngularMomentum": [
+        0,
+        0,
+        0
+      ],
+      "principalInertia": [
+        0.2833333333333333,
+        0.2833333333333333,
+        0.2833333333333333
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.35426998138427734
+    },
+    {
+      "id": "valve",
+      "material": "molten_wax",
+      "owner": "fluid",
+      "mass": 0.9,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 10816,
+      "latentQ": 2560,
+      "chemicalQ": 25600,
+      "center": [
+        0,
+        1.8203341595728333,
+        1.0000000000044253
+      ],
+      "velocity": [
+        0,
+        -1.8724372095938473,
+        0
+      ],
+      "orientation": [
+        0.00025592128987682685,
+        1.365343062372518e-8,
+        0.0002475377540112501,
+        0.9999999366146748
+      ],
+      "intrinsicAngularMomentum": [
+        0.0011493103418303678,
+        1.1505681481553293e-7,
+        0.0010953597361087733
+      ],
+      "principalInertia": [
+        0.15,
+        0.15,
+        0.15
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.07998371124267578
+    },
+    {
+      "id": "water",
+      "material": "water",
+      "owner": "fluid",
+      "mass": 1,
+      "referenceAmount": 1,
+      "heatCapacity": 1,
+      "thermalQ": 11498,
+      "latentQ": 3840,
+      "chemicalQ": 0,
+      "center": [
+        -5.6876002928955055e-8,
+        2.819993524227961,
+        1.0000000583517636
+      ],
+      "velocity": [
+        -0.0000011311543954443682,
+        -1.8783226126987054,
+        0.0000011669781226336739
+      ],
+      "orientation": [
+        4.952335898524792e-7,
+        4.3213579574137384e-12,
+        4.937594949861245e-7,
+        0.9999999999997555
+      ],
+      "intrinsicAngularMomentum": [
+        0.000003850096270119789,
+        4.43181641120558e-11,
+        0.000003838172598424178
+      ],
+      "principalInertia": [
+        0.16666666666666666,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "halfExtents": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "thermalRemainder": 0.38507938385009766
+    }
+  ],
+  "profileVersion": "multiphysics-profiles-1",
+  "rules": "multiphysics-world-1",
+  "schema": 1,
+  "settings": {
+    "dt": 0.008333333333333333,
+    "friction": 0.5,
+    "gravity": [
+      0,
+      -9.8,
+      0
+    ],
+    "numericalEnergyLimit": 0.01,
+    "restitution": 0.1
+  },
+  "tick": 24
+}
