@@ -208,6 +208,11 @@ export type FluidProjectionFaceCapture3D = {
   kind: 'density' | 'divergence';
   iteration: number;
 };
+/** Column ordering for interpreting the detached pressure operator. */
+export type FluidProjectionObserver3D = (
+  face: FluidProjectionFaceCapture3D,
+  columns: { particles: string[]; bodies: string[] },
+) => void;
 /** Private comparison controls; not part of the public SDK or saved world state. */
 export type FluidReferenceTuning3D = {
   coordinateProjection?: boolean;
@@ -598,7 +603,7 @@ type Constraint = {
 
 function* solve(
   input: FluidReferenceInput3D,
-  capture?: (face: FluidProjectionFaceCapture3D) => void,
+  capture?: FluidProjectionObserver3D,
   tuning: FluidReferenceTuning3D = {},
 ): Generator<string, FluidReferenceResult3D> {
   const { particles: p, bodies, boundaries, dt, smoothingRadius: h } = input;
@@ -1554,6 +1559,7 @@ function* solve(
               kind,
               iteration,
             }),
+            { particles: p.map((row) => row.parcel.id), bodies: bodies.map((body) => body.id) },
           );
         let step = 1,
           limiting = -1;
@@ -1789,7 +1795,7 @@ function* solve(
  * `copy` is `copyOwnedPortableValue` only for the fluid coupling, which builds `raw` itself. */
 export function createFluidReferenceJob3D(
   raw: FluidReferenceInput3D,
-  capture?: (face: FluidProjectionFaceCapture3D) => void,
+  capture?: FluidProjectionObserver3D,
   tuning: FluidReferenceTuning3D = {},
   copy: <V extends PortableValue>(value: V) => V = copyPortableValue,
 ): FluidReferenceJob3D {
