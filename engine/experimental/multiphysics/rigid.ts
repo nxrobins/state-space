@@ -1103,7 +1103,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     maxPenetration: 1e-5,
     ...input,
   };
-  const contactIterations = legacyContacts ? options.solverIterations : options.contactIterations;
+  // Original saved worlds use the shared contact/projection sweep limit.
+  if (legacyContacts) options.contactIterations = options.solverIterations;
   assertFiniteVec3(options.gravity);
   if (
     !(options.dt > 0) ||
@@ -1380,6 +1381,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
      * its unmet normal speed falls by at least a tenth every 32 sweeps. A slower solve could
      * not reach tolerance within the sweep limit, so it stops there. */
     function pastFormerSweepLimit(contacts: Contact<T>[], iteration: number): void {
+      if (legacyContacts) return;
       const beyond = iteration + 1 - options.solverIterations;
       if (beyond === 0) {
         for (const c of contacts)
@@ -1394,6 +1396,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     }
     /** Support work done where a non-colliding particle rests on a solid. */
     function recordParticleSupport(contacts: Contact<T>[]): void {
+      if (legacyContacts) return;
       for (const c of contacts) {
         if (!particleIds.has(c.pa.id) && !particleIds.has(c.pb.id)) continue;
         const support = (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork);
@@ -1561,7 +1564,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
         apply(c.b, c.pb, j, c.point, c.offsetB);
       };
-      for (let iteration = 0; iteration < contactIterations; iteration++) {
+      for (let iteration = 0; iteration < options.contactIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
           // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
@@ -1640,8 +1643,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           (contacts.every((c) => c.friction === 0) || iteration >= 3)
         )
           break;
-        if (!legacyContacts) pastFormerSweepLimit(contacts, iteration);
-        if (iteration + 1 === contactIterations)
+        pastFormerSweepLimit(contacts, iteration);
+        if (iteration + 1 === options.contactIterations)
           throw Error('Rigid contact solve did not converge.');
       }
       const normalWork = contacts.reduce((sum, c) => sum + (c.impact ? c.normalWork : 0), 0),
@@ -1653,7 +1656,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
         0,
       );
-      if (!legacyContacts) recordParticleSupport(contacts);
+      recordParticleSupport(contacts);
       const roundoff =
         1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
       if (frictionWork > roundoff || (impact && normalWork > roundoff))
