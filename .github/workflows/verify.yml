@@ -138,21 +138,12 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: npm ci
-      - name: Fetch original published engine for replay fixture capture
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: 06c737fb2102d0f15745ce18b869cae10d9230f4
-          path: prior-engine
-          persist-credentials: false
-      - name: Capture original save and independently relabeled post-heat freeze
-        run: |
-          mkdir -p dist/liquid-contact/replay-fixtures
-          uv run python -B -m scripts.verification_guard --kind cpu --timeout 120 -- node scripts/capture_replay_fixture.mjs
-          sed -i "s/'multiphysics-world-1'/'multiphysics-world-2'/" engine/experimental/multiphysics/model.ts
-          uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs record --select all --timeout 1200
-          cp engine/experimental/multiphysics/liquid-contact-freeze.json dist/liquid-contact/replay-fixtures/post-heat-freeze.json
       - name: Compare every frozen case on its recorded V8 runtime
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check --select all --timeout 1200
+      - name: Replay the original v1 trajectories on the same runtime
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check-legacy --select all --timeout 1200
+      - name: Restore the historical mid-trajectory save
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 120 -- node node_modules/vitest/vitest.mjs run --config engine/vitest.cpu.config.ts engine/experimental/multiphysics/replay-compatibility.test.ts
       - name: Retain exact records and failures
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

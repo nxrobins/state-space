@@ -1053,6 +1053,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
   rawAnchors: readonly string[],
   rawOptions: RigidStepOptions3D,
   copy: PortableCopy = copyPortableValue,
+  legacyContacts = false,
 ): Generator<RigidWork3D, RigidStepResult3D<T>, void> {
   if (
     !Array.isArray(rawParcels) ||
@@ -1102,6 +1103,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     maxPenetration: 1e-5,
     ...input,
   };
+  const contactIterations = legacyContacts ? options.solverIterations : options.contactIterations;
   assertFiniteVec3(options.gravity);
   if (
     !(options.dt > 0) ||
@@ -1559,7 +1561,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         apply(c.a, c.pa, scaleVec3(j, -1), c.point, c.offsetA);
         apply(c.b, c.pb, j, c.point, c.offsetB);
       };
-      for (let iteration = 0; iteration < options.contactIterations; iteration++) {
+      for (let iteration = 0; iteration < contactIterations; iteration++) {
         for (const c of contacts) {
           yield progress('contact');
           // Geometry and inertia stay fixed within this solve; each solve builds fresh contacts.
@@ -1638,8 +1640,8 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           (contacts.every((c) => c.friction === 0) || iteration >= 3)
         )
           break;
-        pastFormerSweepLimit(contacts, iteration);
-        if (iteration + 1 === options.contactIterations)
+        if (!legacyContacts) pastFormerSweepLimit(contacts, iteration);
+        if (iteration + 1 === contactIterations)
           throw Error('Rigid contact solve did not converge.');
       }
       const normalWork = contacts.reduce((sum, c) => sum + (c.impact ? c.normalWork : 0), 0),
@@ -1651,7 +1653,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
         (sum, c) => sum + (c.impact ? 0 : c.normalWork) + (c.physicalFriction ? 0 : c.frictionWork),
         0,
       );
-      recordParticleSupport(contacts);
+      if (!legacyContacts) recordParticleSupport(contacts);
       const roundoff =
         1e-8 * Math.max(1, kineticBefore, Math.abs(normalWork), Math.abs(frictionWork));
       if (frictionWork > roundoff || (impact && normalWork > roundoff))
@@ -1772,7 +1774,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       nextImpact,
     ]);
     yield* project();
-    const physical = new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
+    const physical = legacyContacts
+      ? undefined
+      : new Map<Body<T>, { linear: Vec3; angular: Vec3 }>();
     yield* solve(true, undefined, undefined, undefined, physical);
     captureSettledParticleContacts = false;
     let remaining = options.dt;
@@ -1825,11 +1829,9 @@ export function createRigidStep3D<T extends RigidParcel3D>(
           // tried: its normal speed is at solver noise, and the fitted arc returns to the
           // face in proportion to the interval. Such a pair never leaves its contact skin.
           // Sweep this last trial again without those pairs; any real event still rejects.
-          const real = yield* nextImpact(
-            duration,
-            new Map(motions.map((m) => [m.body, m.velocity])),
-            true,
-          );
+          const real = legacyContacts
+            ? hit
+            : yield* nextImpact(duration, new Map(motions.map((m) => [m.body, m.velocity])), true);
           if (real !== null && real < duration)
             throw Error('Impact interval refinement did not converge.');
           predictedContact = real !== null;
@@ -1851,7 +1853,7 @@ export function createRigidStep3D<T extends RigidParcel3D>(
     for (const body of bodies) sync(body);
     const physicalById = new Map<string, { id: string; velocity: Vec3; angularVelocity: Vec3 }>();
     for (const body of bodies) {
-      const impulse = physical.get(body);
+      const impulse = physical?.get(body);
       const linear = impulse ? scaleVec3(impulse.linear, 1 / body.mass) : ZERO,
         angularVelocity = impulse ? applyMatrix3(body.inverseInertia, impulse.angular) : ZERO;
       assertFiniteVec3(linear, 'physical velocity change');

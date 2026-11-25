@@ -1,6 +1,7 @@
 /** Builder page: controls, inspection and presentation. Physics lives only in the Worker. */
 import {
   createMultiphysicsProfiles3D,
+  importUnversionedLiquidHeatSnapshot3D,
   parcelTemperature3D,
   type MultiphysicsEdit3D,
   type MultiphysicsProfiles3D,
@@ -202,6 +203,7 @@ function refresh() {
   button('compare').textContent = showPreview ? 'Show committed' : 'Show preview';
   button('save').disabled = !idle;
   element<HTMLInputElement>('load').disabled = !idle;
+  element<HTMLInputElement>('load-heat-release').disabled = !idle;
   element<HTMLSelectElement>('scene').disabled = !idle;
   renderLedger();
   rebuildScene();
@@ -296,16 +298,19 @@ function bindControls() {
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   });
-  element<HTMLInputElement>('load').addEventListener(
-    'change',
-    guard(async () => {
-      const file = element<HTMLInputElement>('load').files?.[0];
-      element<HTMLInputElement>('load').value = '';
-      if (!file) return;
-      if (file.size > MAX_SAVE_BYTES) throw Error('Save file is too large.');
-      await builderApp.load(await file.text());
-    }),
-  );
+  for (const id of ['load', 'load-heat-release']) {
+    const input = element<HTMLInputElement>(id);
+    input.addEventListener(
+      'change',
+      guard(async () => {
+        const file = input.files?.[0];
+        input.value = '';
+        if (!file) return;
+        if (file.size > MAX_SAVE_BYTES) throw Error('Save file is too large.');
+        await builderApp.load(await file.text(), id === 'load-heat-release');
+      }),
+    );
+  }
   let drag: { x: number; y: number } | null = null;
   canvas.addEventListener('pointerdown', (event) => {
     drag = { x: event.clientX, y: event.clientY };
@@ -354,11 +359,14 @@ export const builderApp = {
     element<HTMLTextAreaElement>('edit').value = JSON.stringify(edits);
   },
   /** Restores a save in a fresh Worker; the current world stays if the save is rejected. */
-  async load(text: string) {
+  async load(text: string, fromUnversionedHeatRelease = false) {
     if (text.length > MAX_SAVE_BYTES) throw Error('Save file is too large.');
     const parsed = JSON.parse(text);
     if (!session || session.state.status !== 'ready') throw Error('Load requires an idle builder.');
-    await loadScene(scene, parsed);
+    const snapshot = fromUnversionedHeatRelease
+      ? importUnversionedLiquidHeatSnapshot3D(profiles, parsed)
+      : parsed;
+    await loadScene(scene, snapshot);
   },
   painted: () => view?.painted() ?? Promise.resolve(),
 };

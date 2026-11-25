@@ -49,11 +49,13 @@ export {
   type MultiphysicsProfiles3D,
 } from './multiphysics/profiles.js';
 export {
+  LEGACY_MULTIPHYSICS_RULES_3D,
   MULTIPHYSICS_RULES_3D,
   MULTIPHYSICS_LIMITS_3D,
   MULTIPHYSICS_SUBQ_PER_ENERGY_3D,
   createMultiphysicsSnapshot3D,
   readMultiphysicsSnapshot3D,
+  importUnversionedLiquidHeatSnapshot3D,
   multiphysicsInventory3D,
   inventoryEnergyDelta3D,
   type MultiphysicsSettings3D,

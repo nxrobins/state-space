@@ -13,6 +13,7 @@ import {
   type RigidImpulse3D,
 } from './rigid.js';
 import {
+  LEGACY_MULTIPHYSICS_RULES_3D,
   baseParcel3D,
   bondedComponents3D,
   isRigidMaterial3D,
@@ -285,7 +286,7 @@ export function* createFluidCoupling3D(
       smoothingRadius: h,
     },
     undefined,
-    undefined,
+    { recordImpactLoss: state.rules !== LEGACY_MULTIPHYSICS_RULES_3D },
     // This input is built above from this tick's own data.
     copyOwnedPortableValue,
   );
