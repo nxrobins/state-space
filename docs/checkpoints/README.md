@@ -5,6 +5,7 @@ Reports below preserve the implementation and host measured at their checkpoint.
 
 | Evidence | Scope |
 | --- | --- |
+| [Full v2 water ticks](FULL_V2_WATER_TICKS.md) | Hosted CPU timings, stage attribution and exact replay for the 63-water cup, 99-water tank and resting control |
 | [Thermal material pack](THERMAL_MATERIALS.md) | Five opt-in materials, three new 16³ scenes and all four original native regressions |
 | [Reactive sandbox](REACTIVE_SANDBOX.md) | Three 16³ scenarios, measured responsiveness, exact Worker/replay agreement and the retained 8³ regression |
 | [Reactive chamber](REACTIVE_CHAMBER.md) | 8³ real Worker, CPU reactive evolution, WebGPU presentation and save/replay |
