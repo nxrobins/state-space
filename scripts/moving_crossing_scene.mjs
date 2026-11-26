@@ -40,3 +40,20 @@ export function movingCrossingScene(api, profiles, { mass, strength }, speedX = 
     settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
   });
 }
+
+export function twoUnitCrossingScene(api, profiles, x = -1.57) {
+  const crew =
+    x === null
+      ? []
+      : [
+          crossingSolid(
+            api,
+            profiles,
+            'engineer',
+            [x, deckTop + 0.075, 0.26],
+            [0.075, 0.075, 0.12],
+            1,
+          ),
+        ];
+  return movingCrossingScene(api, profiles, { mass: 10, strength: 135 }, 0, crew);
+}
