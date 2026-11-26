@@ -31,7 +31,10 @@ import {
   type Quat,
 } from './math.js';
 
+import { applyCenterImpulse3D } from './impulse-edit.js';
+
 export type MultiphysicsEdit3D =
+  | { kind: 'impulse'; id: string; impulse: Vec3 }
   | { kind: 'place'; parcel: ThermalSeed3D }
   | { kind: 'remove'; ids: string[] }
   | { kind: 'bond'; a: string; b: string; strength: number }
@@ -201,6 +204,10 @@ function applyEdits(
             find(id).intrinsicAngularMomentum = zero;
           }
         }
+        break;
+      }
+      case 'impulse': {
+        applyCenterImpulse3D(profiles, state, edit);
         break;
       }
       case 'heat': {

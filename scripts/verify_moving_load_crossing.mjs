@@ -8,49 +8,21 @@ import { pathToFileURL } from 'node:url';
 import { serialize } from 'node:v8';
 import { gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
-import { at, crossingSolid, crossingWater, direct, replay } from './crossing_reference.mjs';
+import { at, direct, replay } from './crossing_reference.mjs';
 import { BUNDLE, ENTRY, hash, loadCatalogue } from './liquid_contact_engine.mjs';
+import {
+  dt,
+  gravity,
+  ticks,
+  deckY,
+  deckTop,
+  halfFoot,
+  startX,
+  bondLength,
+  cases,
+  movingCrossingScene,
+} from './moving_crossing_scene.mjs';
 import { guardNode } from './verification_guard.mjs';
-
-const dt = 1 / 480,
-  gravity = 9.8,
-  ticks = 250,
-  deckY = 1.0251;
-const deckTop = deckY + 0.125,
-  halfFoot = 0.075,
-  startX = -1.4,
-  speed = 5,
-  bondLength = 1.53;
-const cases = [
-  { id: 'unloaded', mass: 0, strength: 135 },
-  { id: 'light', mass: 1, strength: 135 },
-  { id: 'heavy', mass: 10, strength: 135 },
-  { id: 'reinforced', mass: 10, strength: 500 },
-];
-function scene(api, profiles, { mass, strength }) {
-  const solid = (...args) => crossingSolid(api, profiles, ...args);
-  return api.createMultiphysicsSnapshot3D(profiles, {
-    parcels: [
-      solid('abutment', [-bondLength, deckY, 0], [0.5, 0.125, 0.4], 1),
-      solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
-      solid('far-bank', [2.03, deckTop - 0.01, 0], [1, 0.01, 0.4], 1),
-      solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
-      ...crossingWater(api, profiles),
-      ...(mass
-        ? [
-            solid('unit', [startX, deckTop + halfFoot, 0], [halfFoot, halfFoot, 0.12], mass, [
-              speed,
-              0,
-              0,
-            ]),
-          ]
-        : []),
-    ],
-    anchors: ['abutment', 'far-bank', 'floor'],
-    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: bondLength }],
-    settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
-  });
-}
 
 // The public boundary impulse combines BOTH banks, the deck and floor. Observe the
 // existing deck-side impulse at the graph cut in a separate, compile-only diagnostic
@@ -289,7 +261,7 @@ try {
     pp = await probe.createMultiphysicsProfiles3D();
   const { digestFrozen3D: digest } = await loadCatalogue(folder);
   for (const spec of cases) {
-    const initial = scene(api, profiles, spec);
+    const initial = movingCrossingScene(api, profiles, spec);
     assert.equal(initial.rules, 'multiphysics-world-2');
     const c = (summary.cases[spec.id] = { ...spec, initialSHA256: digest(initial), rows: [] }),
       results = [];

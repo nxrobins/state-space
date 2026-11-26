@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/moving-load-crossing.yml'
       - 'scripts/verify_moving_load_crossing.mjs'
+      - 'scripts/moving_crossing_scene.mjs'
       - 'scripts/crossing_reference.mjs'
       - 'scripts/liquid_contact_engine.mjs'
       - 'engine/**'
