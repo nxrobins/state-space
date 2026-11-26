@@ -19,7 +19,8 @@ const dt = 1 / 480,
 const deckTop = deckY + 0.125,
   halfFoot = 0.075,
   startX = -1.4,
-  speed = 5;
+  speed = 5,
+  bondLength = 1.53;
 const cases = [
   { id: 'unloaded', mass: 0, strength: 135 },
   { id: 'light', mass: 1, strength: 135 },
@@ -30,7 +31,7 @@ function scene(api, profiles, { mass, strength }) {
   const solid = (...args) => crossingSolid(api, profiles, ...args);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
-      solid('abutment', [-1.53, deckY, 0], [0.5, 0.125, 0.4], 1),
+      solid('abutment', [-bondLength, deckY, 0], [0.5, 0.125, 0.4], 1),
       solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
       solid('far-bank', [2.03, deckTop - 0.01, 0], [1, 0.01, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
@@ -46,7 +47,7 @@ function scene(api, profiles, { mass, strength }) {
         : []),
     ],
     anchors: ['abutment', 'far-bank', 'floor'],
-    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.53 }],
+    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: bondLength }],
     settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
   });
 }
@@ -117,6 +118,23 @@ function observe(prev, r, cut, initial, digest) {
     water,
   };
 }
+// The bond midpoint is (-bondLength/2, deckY, 0) while the deck is fixed.
+function jointDemand(row) {
+  const [x, y, z] = row.cutImpulse.linear;
+  const [mx, my, mz] = row.cutImpulse.angular;
+  const moment = Math.hypot(
+    mx - deckY * z,
+    my - (bondLength * z) / 2,
+    mz + (bondLength * y) / 2 + deckY * x,
+  );
+  return (Math.hypot(x, y, z) + moment / bondLength) / dt;
+}
+const onFarBank = (r) =>
+  r.unit !== null &&
+  r.unit[0] - halfFoot > 1.03 &&
+  r.unit[0] + halfFoot < 3.03 &&
+  Math.abs(r.unit[2]) + 0.12 < 0.4 &&
+  Math.abs(r.unit[1] - halfFoot - deckTop) < 1e-6;
 function qualify(cs) {
   const { unloaded, light, heavy, reinforced } = cs;
   for (const c of [unloaded, light, reinforced]) {
@@ -143,12 +161,7 @@ function qualify(cs) {
   }
   for (const c of [light, reinforced]) {
     const onDeck = c.rows.filter((r) => r.unit[0] - halfFoot > -1 && r.unit[0] + halfFoot < 1);
-    const far = c.rows.filter(
-      (r) =>
-        r.unit[0] - halfFoot > 1.03 &&
-        r.unit[0] + halfFoot < 3.03 &&
-        Math.abs(r.unit[2]) + 0.12 < 0.4,
-    );
+    const far = c.rows.filter(onFarBank);
     assert(
       onDeck.length > 10 && far.length >= 5 && far.at(-1) === c.rows.at(-1),
       c.id + ' must reach and stay on far bank',
@@ -204,12 +217,17 @@ function qualify(cs) {
   // A bounding sphere encloses the entire rotated unit. Even its top lies below
   // the landing surface, so a horizontal crossing of x=1 alone cannot pass.
   assert(
-    missed.unit[1] + Math.hypot(halfFoot, halfFoot, 0.12) < deckTop &&
-      !heavy.rows.some(
-        (r) => r.unit[0] - halfFoot > 1 && Math.abs(r.unit[1] - halfFoot - deckTop) < 1e-6,
-      ),
+    missed.unit[1] + Math.hypot(halfFoot, halfFoot, 0.12) < deckTop && !heavy.rows.some(onFarBank),
     'heavy unit must miss the far landing',
   );
+  for (const c of Object.values(cs)) {
+    for (const r of c.rows.filter((r) => r.cutImpulse !== null))
+      assert.equal(
+        jointDemand(r) > c.strength,
+        r.broken.length > 0,
+        'force and bending must explain observed fracture',
+      );
+  }
   const paired = heavy.rows.map((r, i) =>
     Math.min(
       ...r.water.map((q, k) => {
@@ -230,6 +248,8 @@ function qualify(cs) {
     fractureTick: br.tick,
     unitXAtFracture: br.unit[0],
     reactionYAtFracture: br.reactionY,
+    demandBeforeFracture: jointDemand(heavy.rows[i - 1]),
+    demandAtFracture: jointDemand(br),
     incrementalDeckLoadAtFracture: br.reactionY - unloaded.rows[i].reactionY,
     totalUnitSupportAtFracture: br.unitSupportY,
     waterOnsetTick: onset,
@@ -287,9 +307,14 @@ try {
     }
     assert.equal(digest(initial), c.initialSHA256);
     const event = c.rows.find((r) => r.broken.length)?.tick;
-    const checkpoints = [...new Set([0, ...(event ? [event - 1, event] : []), ticks / 2])].sort(
-      (a, b) => a - b,
-    );
+    const landing = c.rows.find(onFarBank)?.tick;
+    const checkpoints = [
+      ...new Set([
+        0,
+        ticks / 2,
+        ...[event, landing].filter((t) => t !== undefined).flatMap((t) => [t - 1, t]),
+      ]),
+    ].sort((a, b) => a - b);
     c.restoredAt = replay(api, profiles, initial, results, checkpoints);
     c.trajectorySHA256 = digest(c.rows.map((r) => r.digest));
     c.observationsSHA256 = digest(c.rows);
@@ -300,6 +325,21 @@ try {
     save();
   }
   summary.comparison = qualify(summary.cases);
+  const baseline = JSON.parse(
+    readFileSync('engine/test-support/fixtures/moving-load-crossing-v2.json', 'utf8'),
+  );
+  assert.equal(baseline.v8, summary.v8);
+  const measured = Object.fromEntries(
+    Object.values(summary.cases).map((c) => [
+      c.id,
+      {
+        initialSHA256: c.initialSHA256,
+        trajectorySHA256: c.trajectorySHA256,
+        observationsSHA256: c.observationsSHA256,
+      },
+    ]),
+  );
+  assert.deepEqual(measured, baseline.cases, 'moving-load state, report or measurements changed');
   summary.status = 'complete';
 } catch (e) {
   summary.status = 'failed';
