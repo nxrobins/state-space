@@ -8,6 +8,7 @@ on:
       - 'scripts/commanded_crossing_turn.mjs'
       - 'scripts/moving_crossing_scene.mjs'
       - 'scripts/crossing_reference.mjs'
+      - 'scripts/crossing_order_replay.mjs'
       - 'scripts/liquid_contact_engine.mjs'
       - 'engine/**'
       - 'scripts/verification_guard.*'
