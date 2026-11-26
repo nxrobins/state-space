@@ -129,7 +129,7 @@ function compare(outcomes) {
     'fracture receipt and bond topology',
   );
   for (const c of [light, reinforced]) {
-    const initialHeight = at(c.initial, 'ballast').center[1];
+    const initialHeight = c.initialBallastY;
     assert(
       c.rows.every((r) => Math.abs(r.ballastY - initialHeight) < 1e-8),
       c.id + ' ballast left its supported height',
@@ -158,13 +158,23 @@ function compare(outcomes) {
     );
     c.initialUpwardBallastReaction = support;
   }
+  assert.equal(Object.keys(heavy.initialWaterCenters).length, 4);
+  assert.deepEqual(heavy.initialWaterCenters, reinforced.initialWaterCenters);
+  assert.deepEqual(
+    heavy.rows[0].water.map((q) => q.id),
+    reinforced.rows[0].water.map((q) => q.id),
+  );
+  assert(
+    heavy.rows.filter((r) => r.tick <= fractureTick).every((r) => r.maxWaterTravel < 1e-5),
+    'water moved before the deck fell',
+  );
   const paired = heavy.rows.map((r, i) => ({
     tick: r.tick,
     // Both wings must move outward relative to the same heavy ballast on the reinforced deck.
     minOutward: Math.min(
       ...r.water.map(
         (q, k) =>
-          Math.sign(at(heavy.initial, q.id).center[2]) *
+          Math.sign(heavy.initialWaterCenters[q.id][2]) *
           (q.center[2] - reinforced.rows[i].water[k].center[2]),
       ),
     ),
@@ -226,9 +236,17 @@ try {
     const initial = initialState(api, profiles, spec),
       initialSHA256 = catalogue.digestFrozen3D(initial);
     assert.equal(initial.rules, 'multiphysics-world-2');
-    const c = { ...spec, initialSHA256, rows: [] };
+    const c = {
+      ...spec,
+      initialSHA256,
+      initialBallastY: initial.parcels.find((p) => p.id === 'ballast')?.center[1] ?? null,
+      initialWaterCenters: Object.fromEntries(
+        initial.parcels.filter((p) => p.material === 'water').map((p) => [p.id, p.center]),
+      ),
+      rows: [],
+    };
     summary.cases.push(c);
-    outcomes[spec.id] = { initial, ...c };
+    outcomes[spec.id] = c;
     const results = [];
     let state = initial;
     for (let i = 0; i < ticks; i++) {
@@ -252,8 +270,23 @@ try {
     write('summary.json', summary);
   }
   summary.comparison = compare(outcomes);
-  for (const c of summary.cases)
-    c.initialUpwardBallastReaction = outcomes[c.id].initialUpwardBallastReaction;
+
+  const frozen = JSON.parse(
+    readFileSync('engine/test-support/fixtures/load-bearing-crossing-v2.json', 'utf8'),
+  );
+  assert.equal(frozen.rules, 'multiphysics-world-2');
+  assert.equal(frozen.v8, process.versions.v8);
+  const measured = Object.fromEntries(
+    summary.cases.map((c) => [
+      c.id,
+      { initialSHA256: c.initialSHA256, trajectorySHA256: c.trajectorySHA256 },
+    ]),
+  );
+  assert.deepEqual(
+    measured,
+    frozen.cases,
+    'crossing initial state or full-result trajectory changed',
+  );
   summary.status = 'complete';
 } catch (e) {
   summary.status = 'failed';

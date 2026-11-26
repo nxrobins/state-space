@@ -6,9 +6,9 @@ on:
       - '.github/workflows/load-bearing-crossing.yml'
       - 'scripts/verify_load_bearing_crossing.mjs'
       - 'scripts/liquid_contact_engine.mjs'
-      - 'engine/experimental/multiphysics/**'
-      - 'engine/experimental/multiphysics.ts'
-      - 'engine/test-support/fixtures/load-bearing-crossing-v2.json'
+      - 'engine/**'
+      - 'scripts/verification_guard.*'
+      - 'package-lock.json'
 permissions:
   contents: read
 jobs:
