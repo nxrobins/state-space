@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Add a multi-turn crossing with an engineer approach, a premature crossing control and hosted replay across the turn save (#127).
+
 - Add a two-unit crossing order with an in-reach deck reinforcement, a wait control, and hosted exact replay (#126).
 
 - Add a v2 center impulse edit and a hosted commanded crossing with transactional preview and replay (#125).

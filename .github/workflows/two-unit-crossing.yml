@@ -9,6 +9,7 @@ on:
       - 'scripts/moving_crossing_scene.mjs'
       - 'scripts/crossing_reference.mjs'
       - 'scripts/crossing_order_replay.mjs'
+      - 'scripts/crossing_checkpoint.mjs'
       - 'scripts/liquid_contact_engine.mjs'
       - 'engine/**'
       - 'scripts/verification_guard.*'

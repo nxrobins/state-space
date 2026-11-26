@@ -1,16 +1,13 @@
 /** Supervised CPU reference for a cooperative crossing choice from a single save. */
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { serialize } from 'node:v8';
 import { gzipSync } from 'node:zlib';
-import { guardNode } from './verification_guard.mjs';
-import { bundleEngine, hash, loadCatalogue } from './liquid_contact_engine.mjs';
-import { at, crossingSolid } from './crossing_reference.mjs';
-import { deckTop, movingCrossingScene, ticks } from './moving_crossing_scene.mjs';
+import { runCrossingCheckpoint } from './crossing_checkpoint.mjs';
+import { hash } from './liquid_contact_engine.mjs';
+import { at } from './crossing_reference.mjs';
+import { twoUnitCrossingScene, ticks } from './moving_crossing_scene.mjs';
 import { createCrossingSession, standingOn } from './commanded_crossing_turn.mjs';
 import { complete, impulsesMatch, logReplay } from './crossing_order_replay.mjs';
 
@@ -23,29 +20,13 @@ const upgrade = [
   { kind: 'cut', ...joint },
   { kind: 'bond', ...joint, strength: 500 },
 ];
-function scene(api, profiles, x = -1.57) {
-  const crew =
-    x === null
-      ? []
-      : [
-          crossingSolid(
-            api,
-            profiles,
-            'engineer',
-            [x, deckTop + 0.075, 0.26],
-            [0.075, 0.075, 0.12],
-            1,
-          ),
-        ];
-  return movingCrossingScene(api, profiles, { mass: 10, strength: 135 }, 0, crew);
-}
 function checkAdmission(api, profiles, initial) {
   const session = (s) => createCrossingSession(api, profiles, s);
   assert.throws(
-    () => session(scene(api, profiles, null)).prepareTeam(orders('reinforce-deck')),
+    () => session(twoUnitCrossingScene(api, profiles, null)).prepareTeam(orders('reinforce-deck')),
     /missing parcel engineer/,
   );
-  const distant = scene(api, profiles, -1.93);
+  const distant = twoUnitCrossingScene(api, profiles, -1.93);
   assert(standingOn(api, distant, 'abutment', 'engineer'));
   assert.throws(() => session(distant).prepareTeam(orders('reinforce-deck')), /within reach/);
   assert(session(distant).prepareTeam(orders('wait')).cancel());
@@ -234,55 +215,4 @@ function exercise(api, profiles, initial, digest, folder, summary) {
     assert.deepEqual(safe.frames[i].result.ticks, failed.frames[i].result.ticks);
   }
 }
-await guardNode('cpu', 600);
-const folder = resolve('dist/verification/two-unit-crossing', randomUUID());
-mkdirSync(folder, { recursive: true });
-const summary = {
-  schema: 'two-unit-crossing-1',
-  status: 'started',
-  revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
-  node: process.version,
-  v8: process.versions.v8,
-  platform: process.platform,
-  arch: process.arch,
-  ticks,
-  cases: {},
-};
-try {
-  const freeze = JSON.parse(
-    readFileSync('engine/experimental/multiphysics/liquid-contact-freeze.json', 'utf8'),
-  );
-  assert.equal(summary.v8, freeze.runtime.v8);
-  const catalogue = await loadCatalogue(folder);
-  const bundle = await bundleEngine(process.cwd(), folder, 'public', catalogue);
-  const api = await import(pathToFileURL(bundle.path).href);
-  const profiles = await api.createMultiphysicsProfiles3D();
-  const initial = scene(api, profiles);
-  assert.equal(initial.rules, 'multiphysics-world-2');
-  summary.rules = initial.rules;
-  summary.initialSHA256 = catalogue.digestFrozen3D(initial);
-  summary.engineSHA256 = bundle.sourceSha256;
-  exercise(api, profiles, initial, catalogue.digestFrozen3D, folder, summary);
-  const baseline = JSON.parse(
-    readFileSync('engine/test-support/fixtures/two-unit-crossing-v2.json', 'utf8'),
-  );
-  const cases = Object.fromEntries(
-    Object.entries(summary.cases).map(([action, c]) => [
-      action,
-      { historySHA256: c.historySHA256, finalSHA256: c.finalSHA256 },
-    ]),
-  );
-  assert.deepEqual(
-    { rules: summary.rules, v8: summary.v8, initialSHA256: summary.initialSHA256, cases },
-    baseline.expected,
-    'two-unit starting state, trajectory or outcome changed',
-  );
-  summary.status = 'complete';
-  console.log('Replayed both two-unit choices');
-} catch (e) {
-  summary.status = 'failed';
-  summary.error = String(e);
-  throw e;
-} finally {
-  writeFileSync(resolve(folder, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
-}
+await runCrossingCheckpoint('two-unit-crossing', twoUnitCrossingScene, exercise);
