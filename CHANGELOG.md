@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Verify moving units crossing a breakable deck on hosted CPU (#124).
+
 - Exercise a loaded crossing on the v2 CPU world and retain the support, fracture, water motion, and replay histories (#123).
 
 - Profile complete v2 water ticks on hosted CPU with exact replay checks (#122).

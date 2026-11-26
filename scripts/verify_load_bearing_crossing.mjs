@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { serialize } from 'node:v8';
 import { gzipSync } from 'node:zlib';
 import { bundleEngine, hash, loadCatalogue } from './liquid_contact_engine.mjs';
+import { at, crossingSolid, crossingWater, direct, replay } from './crossing_reference.mjs';
 import { guardNode } from './verification_guard.mjs';
 
 const dt = 1 / 480,
@@ -22,36 +23,9 @@ const cases = [
   { id: 'heavy', mass: 10, strength: 50 },
   { id: 'reinforced', mass: 10, strength: 500 },
 ];
-const at = (state, id) => {
-  const p = state.parcels.find((p) => p.id === id);
-  assert(p, 'missing parcel ' + id);
-  return p;
-};
 function initialState(api, profiles, { mass, strength }) {
-  const solid = (id, center, halfExtents, bodyMass) => {
-    const p = api.seedThermalParcel3D(profiles, {
-      id,
-      center,
-      halfExtents,
-      material: 'ceramic',
-      owner: 'authored',
-      temperature: 20,
-    });
-    const volume = 8 * halfExtents[0] * halfExtents[1] * halfExtents[2];
-    const props = api.cuboidMassProperties(halfExtents, bodyMass / volume);
-    return { ...p, mass: bodyMass, principalInertia: props.inertia };
-  };
-  const water = [-0.5, 0.5].flatMap((x, i) =>
-    [-0.7, 0.7].map((z, j) =>
-      api.seedThermalParcel3D(profiles, {
-        id: 'water-' + i + j,
-        center: [x, 0.5, z],
-        material: 'water',
-        owner: 'authored',
-        temperature: 20,
-      }),
-    ),
-  );
+  const solid = (...args) => crossingSolid(api, profiles, ...args);
+  const water = crossingWater(api, profiles);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
       solid('abutment', [-1.375, deckY, 0], [0.375, 0.125, 0.4], 1),
@@ -92,31 +66,6 @@ function observe(initial, { snapshot, report }, digest) {
     water,
     maxWaterTravel: Math.max(...water.map((q) => Math.hypot(...q.delta))),
   };
-}
-function direct(api, profiles, state) {
-  const job = api.createMultiphysicsTickJob3D(profiles, state);
-  while (job.progress().status === 'running') job.advance(256);
-  return job.result();
-}
-function replay(api, profiles, initial, results) {
-  const world = api.createMultiphysicsWorld3D(profiles, initial);
-  const checkpoints = [0, 1, Math.floor(ticks / 2)];
-  for (const [i, expected] of results.entries()) {
-    if (checkpoints.includes(i)) {
-      const save = JSON.parse(JSON.stringify(world.snapshot()));
-      world.restore(save);
-    }
-    const preview = world.prepare([], 1);
-    while (preview.progress().status === 'running') preview.advance(1);
-    const { result } = world.commit(preview);
-    assert.deepEqual(
-      { snapshot: result.snapshot, report: result.ticks[0] },
-      expected,
-      'restored replay at tick ' + (i + 1),
-    );
-    assert.deepEqual(world.snapshot(), expected.snapshot, 'published state at tick ' + (i + 1));
-  }
-  return checkpoints;
 }
 function compare(outcomes) {
   const { unloaded, light, heavy, reinforced } = outcomes;
@@ -278,7 +227,7 @@ try {
     }
     assert.equal(catalogue.digestFrozen3D(initial), initialSHA256);
     c.trajectorySHA256 = catalogue.digestFrozen3D(c.rows.map((r) => r.resultSHA256));
-    c.restoredAt = replay(api, profiles, initial, results);
+    c.restoredAt = replay(api, profiles, initial, results, [0, 1, Math.floor(ticks / 2)]);
     c.fullRecord = spec.id + '.ticks.v8.gz';
     const packet = gzipSync(serialize({ initial, results }));
     writeFileSync(resolve(output, c.fullRecord), packet);

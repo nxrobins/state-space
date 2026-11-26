@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/load-bearing-crossing.yml'
       - 'scripts/verify_load_bearing_crossing.mjs'
+      - 'scripts/crossing_reference.mjs'
       - 'scripts/liquid_contact_engine.mjs'
       - 'engine/**'
       - 'scripts/verification_guard.*'
