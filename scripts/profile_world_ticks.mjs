@@ -121,24 +121,28 @@ async function measure(output, scene) {
   };
 
   const samples = [];
-  // Warm the actual public path. Stop after at least three sequences, 24 ticks and 6 s or 30 sequences.
-  let warmups = 0,
-    warmCpu = 0;
-  do {
-    const results = [];
-    let snapshot = initial;
-    const start = process.cpuUsage();
-    for (let t = 0; t < scene.ticks; t++) {
-      const result = tick(engine, profiles, snapshot);
-      results.push(result);
-      snapshot = result.snapshot;
-    }
-    const used = process.cpuUsage(start);
-    warmCpu += (used.user + used.system) / 1000;
-    warmups++;
-    checked(results);
-  } while (warmups < 3 || warmups * scene.ticks < 24 || (warmCpu < 6000 && warmups < 30));
-
+  // Warm each bundle in its own measurement mode. A freshly loaded diagnostic generator
+  // can spend most of its early factor and solve time in lower compiler tiers.
+  function warm(api, pack, detailed) {
+    let runs = 0,
+      cpuMs = 0;
+    do {
+      const results = [];
+      let snapshot = initial;
+      const start = process.cpuUsage();
+      for (let t = 0; t < scene.ticks; t++) {
+        const result = tick(api, pack, snapshot, detailed ? {} : undefined);
+        results.push(result);
+        snapshot = result.snapshot;
+      }
+      const used = process.cpuUsage(start);
+      cpuMs += (used.user + used.system) / 1000;
+      runs++;
+      checked(results);
+    } while (runs * scene.ticks < 24 || (cpuMs < 6000 && runs < 30));
+    return runs;
+  }
+  const warmups = warm(engine, profiles, false);
   for (let round = 0; round < 9; round++) {
     let snapshot = initial;
     const results = [],
@@ -183,24 +187,44 @@ async function measure(output, scene) {
   }
   for (const results of sampled) checked(results);
   write(resolve(output, scene.id + '.cpuprofile'), profile);
-  const nodes = new Map(profile.nodes.map((n) => [n.id, n.callFrame])),
-    self = new Map();
+  const nodes = new Map(profile.nodes.map((n) => [n.id, n.callFrame]));
+  const parent = new Map(profile.nodes.flatMap((n) => (n.children ?? []).map((id) => [id, n.id])));
+  const self = new Map(),
+    inclusive = new Map();
+  let tickMicros = 0;
   for (const [i, id] of profile.samples.entries()) {
-    const frame = nodes.get(id);
+    const frame = nodes.get(id),
+      us = profile.timeDeltas[i];
     const label =
       frame.functionName +
       (frame.url ? ' (' + basename(frame.url) + ':' + (frame.lineNumber + 1) + ')' : '');
-    self.set(label, (self.get(label) ?? 0) + profile.timeDeltas[i]);
+    self.set(label, (self.get(label) ?? 0) + us);
+    // Each engine frame counts at most once per public-tick sample. Exclude sampler
+    // start/stop; detached GC is visible separately in whole-profile self time.
+    const stack = new Set();
+    for (let at = id; at !== undefined; at = parent.get(at)) {
+      const f = nodes.get(at);
+      if (f.url.endsWith('/public.mjs')) stack.add(f.functionName + ':' + (f.lineNumber + 1));
+      if (f.url === import.meta.url && f.functionName === 'tick') {
+        for (const name of stack) inclusive.set(name, (inclusive.get(name) ?? 0) + us);
+        tickMicros += us;
+        break;
+      }
+    }
   }
   const sum = [...self.values()].reduce((a, b) => a + b, 0);
-  assert(sum > 0);
-  const sampledSelf = [...self]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 20)
-    .map(([frame, us]) => ({ frame, percent: (100 * us) / sum }));
+  assert(tickMicros > 0 && tickMicros <= sum);
+  const ranking = (data, total) =>
+    [...data]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 25)
+      .map(([frame, us]) => ({ frame, percent: (100 * us) / total }));
+  const sampledSelf = ranking(self, sum),
+    sampledInclusive = ranking(inclusive, tickMicros);
 
   const diagnostic = await load('diagnostic');
   const diagProfiles = await diagnostic.createMultiphysicsProfiles3D();
+  const diagnosticWarmups = warm(diagnostic, diagProfiles, true);
   const stageSamples = [];
   for (let round = 0; round < 7; round++) {
     let snapshot = initial;
@@ -222,7 +246,7 @@ async function measure(output, scene) {
       snapshot = result.snapshot;
     }
     checked(results);
-    if (round >= 2) stageSamples.push(stagesByTick);
+    stageSamples.push(stagesByTick);
   }
   const perTick = reference.map((r, t) => ({
     tick: r.snapshot.tick,
@@ -250,6 +274,9 @@ async function measure(output, scene) {
     samples,
     perTick,
     sampledSelf,
+    sampledInclusive,
+    sampleTickPercent: (100 * tickMicros) / sum,
+    diagnosticWarmups,
     stageSamples,
     representativeStageRound: rep,
     breakdown,
