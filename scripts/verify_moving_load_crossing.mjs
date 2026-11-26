@@ -17,6 +17,7 @@ const dt = 1 / 480,
   ticks = 160,
   deckY = 1.0251;
 const deckTop = deckY + 0.125,
+  landingHalfHeight = 0.01,
   halfFoot = 0.075,
   startX = -1.4,
   speed = 8;
@@ -32,7 +33,7 @@ function scene(api, profiles, { mass, strength }) {
     parcels: [
       solid('abutment', [-1.5, deckY, 0], [0.5, 0.125, 0.4], 1),
       solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
-      solid('far-bank', [2, deckY, 0], [1, 0.125, 0.4], 1),
+      solid('far-bank', [2, deckTop - landingHalfHeight, 0], [1, landingHalfHeight, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...crossingWater(api, profiles),
       ...(mass
@@ -105,6 +106,7 @@ function observe(prev, r, cut, initial, digest) {
     deck: d.center,
     unit: u?.center ?? null,
     unitVelocity: u?.velocity ?? null,
+    unitOrientation: u?.orientation ?? null,
     unitSupportY: u
       ? u.mass * (gravity + (u.velocity[1] - at(prev, 'unit').velocity[1]) / dt)
       : null,
@@ -137,7 +139,10 @@ function qualify(cs) {
   }
   for (const c of [light, reinforced]) {
     const onDeck = c.rows.filter((r) => r.unit[0] - halfFoot > -1 && r.unit[0] + halfFoot < 1);
-    const far = c.rows.filter((r) => r.unit[0] - halfFoot > 1);
+    const far = c.rows.filter(
+      (r) =>
+        r.unit[0] - halfFoot > 1 && r.unit[0] + halfFoot < 3 && Math.abs(r.unit[2]) + 0.12 < 0.4,
+    );
     assert(
       onDeck.length > 10 && far.length >= 5 && far.at(-1) === c.rows.at(-1),
       c.id + ' must reach and stay on far bank',
@@ -180,6 +185,16 @@ function qualify(cs) {
   assert(
     br.reactionY - unloaded.rows[i].reactionY > 1 && br.unitSupportY > 1,
     'fracture requires a measured unit load on deck',
+  );
+  const missed = heavy.rows.at(-1);
+  // A bounding sphere encloses the entire rotated unit. Even its top lies below
+  // the landing surface, so a horizontal crossing of x=1 alone cannot pass.
+  assert(
+    missed.unit[1] + Math.hypot(halfFoot, halfFoot, 0.12) < deckTop &&
+      !heavy.rows.some(
+        (r) => r.unit[0] - halfFoot > 1 && Math.abs(r.unit[1] - halfFoot - deckTop) < 1e-6,
+      ),
+    'heavy unit must miss the far landing',
   );
   const paired = heavy.rows.map((r, i) =>
     Math.min(
