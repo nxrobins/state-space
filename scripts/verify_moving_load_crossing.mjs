@@ -18,6 +18,7 @@ const dt = 1 / 480,
   deckY = 1.0251;
 const deckTop = deckY + 0.125,
   landingHalfHeight = 0.01,
+  seam = 0.03,
   halfFoot = 0.075,
   startX = -1.4,
   speed = 8;
@@ -31,9 +32,9 @@ function scene(api, profiles, { mass, strength }) {
   const solid = (...args) => crossingSolid(api, profiles, ...args);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
-      solid('abutment', [-1.5, deckY, 0], [0.5, 0.125, 0.4], 1),
+      solid('abutment', [-1.5 - seam, deckY, 0], [0.5, 0.125, 0.4], 1),
       solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
-      solid('far-bank', [2, deckTop - landingHalfHeight, 0], [1, landingHalfHeight, 0.4], 1),
+      solid('far-bank', [2 + seam, deckTop - landingHalfHeight, 0], [1, landingHalfHeight, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...crossingWater(api, profiles),
       ...(mass
@@ -47,7 +48,7 @@ function scene(api, profiles, { mass, strength }) {
         : []),
     ],
     anchors: ['abutment', 'far-bank', 'floor'],
-    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.5 }],
+    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.5 + seam }],
     settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
   });
 }
@@ -125,15 +126,20 @@ function qualify(cs) {
       c.rows.every((r) => r.intact && !r.broken.length && Math.abs(r.deck[1] - deckY) < 1e-8),
       c.id + ' deck must hold',
     );
-    assert(
-      c.rows.every((r) => r.water.every((q) => Math.hypot(...q.delta) < 1e-5)),
-      c.id + ' resting water moved',
+    c.maxWaterTravel = Math.max(
+      ...c.rows.flatMap((r) => r.water.map((q) => Math.hypot(...q.delta))),
     );
+    c.maxLateralTravel = Math.max(
+      ...c.rows.flatMap((r) => r.water.map((q) => Math.abs(q.delta[2]))),
+    );
+    assert(c.maxLateralTravel < 1e-5, c.id + ' intact deck must not drive outward water movement');
+    if (c === unloaded)
+      assert.equal(c.maxWaterTravel, 0, 'empty crossing water must remain at rest');
   }
   for (const c of [light, heavy, reinforced]) {
     const first = c.rows[0];
     assert(
-      first.unit[0] + halfFoot < -1 && Math.abs(first.reactionY - gravity) < 1e-5,
+      first.unit[0] + halfFoot < -1 - seam && Math.abs(first.reactionY - gravity) < 1e-5,
       'near bank must initially carry unit',
     );
   }
@@ -141,7 +147,9 @@ function qualify(cs) {
     const onDeck = c.rows.filter((r) => r.unit[0] - halfFoot > -1 && r.unit[0] + halfFoot < 1);
     const far = c.rows.filter(
       (r) =>
-        r.unit[0] - halfFoot > 1 && r.unit[0] + halfFoot < 3 && Math.abs(r.unit[2]) + 0.12 < 0.4,
+        r.unit[0] - halfFoot > 1 + seam &&
+        r.unit[0] + halfFoot < 3 + seam &&
+        Math.abs(r.unit[2]) + 0.12 < 0.4,
     );
     assert(
       onDeck.length > 10 && far.length >= 5 && far.at(-1) === c.rows.at(-1),
@@ -173,12 +181,13 @@ function qualify(cs) {
   assert.deepEqual(br.broken, [['abutment', 'deck']]);
   assert(i > 0);
   assert(
-    heavy.rows.every((r) => r.intact === r.tick < br.tick),
+    heavy.rows.every((r) => (r.tick < br.tick ? r.intact : !r.intact)),
     'fracture must persist',
   );
   assert(
-    br.unit[0] + halfFoot > -1 &&
-      br.unit[0] - halfFoot < 1 &&
+    br.unit[0] > -1 &&
+      br.unit[0] < 1 &&
+      Math.abs(br.unit[2]) + 0.12 < 0.4 &&
       Math.abs(br.unit[1] - halfFoot - deckTop) < 1e-6,
     'fracture underfoot',
   );
@@ -186,6 +195,13 @@ function qualify(cs) {
     br.reactionY - unloaded.rows[i].reactionY > 1 && br.unitSupportY > 1,
     'fracture requires a measured unit load on deck',
   );
+  for (let j = 0; j <= i; j++) {
+    const a = heavy.rows[j],
+      b = reinforced.rows[j];
+    assert.deepEqual(a.water, b.water, 'heavy controls diverged before the deck fell');
+    assert.deepEqual(a.unit, b.unit, 'heavy approach paths diverged');
+    assert.equal(a.reactionY, b.reactionY, 'reinforcement changed the applied load');
+  }
   const missed = heavy.rows.at(-1);
   // A bounding sphere encloses the entire rotated unit. Even its top lies below
   // the landing surface, so a horizontal crossing of x=1 alone cannot pass.
@@ -207,11 +223,17 @@ function qualify(cs) {
   );
   const onset = paired.findIndex((x) => x > 0.001) + 1;
   assert(onset > br.tick && paired.at(-1) > 0.01, 'water must move outward after fracture');
+  assert(
+    paired.at(-1) > 100 * Math.max(light.maxWaterTravel, reinforced.maxWaterTravel),
+    'fracture displacement must dominate travel-induced water drift',
+  );
   assert(heavy.rows.at(-1).deck[1] < deckY - 0.05, 'fractured deck must fall');
   return {
     fractureTick: br.tick,
     unitXAtFracture: br.unit[0],
     reactionYAtFracture: br.reactionY,
+    incrementalDeckLoadAtFracture: br.reactionY - unloaded.rows[i].reactionY,
+    totalUnitSupportAtFracture: br.unitSupportY,
     waterOnsetTick: onset,
     finalMinOutward: paired.at(-1),
   };
