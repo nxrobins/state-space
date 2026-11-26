@@ -54,15 +54,15 @@ export function createCrossingSession(api, profiles, initial) {
       orders.unit,
       Object.freeze({ engineer: orders.engineer, unit: orders.unit }),
       edits,
+      state,
     );
   }
   function prepare(order) {
     if (order !== 'cross-to-far-bank' && order !== 'wait') throw Error('Unknown crossing order.');
     return prepareTurn(order, order, []);
   }
-  function prepareTurn(order, submitted, firstEdits) {
+  function prepareTurn(order, submitted, firstEdits, start = live.snapshot()) {
     const base = live,
-      start = base.snapshot(),
       fork = makeWorld(start);
     // A resting contact can leave tiny residual motion after a wait turn.
     const unit = at(start, 'unit');

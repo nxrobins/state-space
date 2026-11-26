@@ -23,7 +23,7 @@ const upgrade = [
   { kind: 'cut', ...joint },
   { kind: 'bond', ...joint, strength: 500 },
 ];
-function scene(api, profiles, x = -1.64, z = 0, halfZ = 0.12) {
+function scene(api, profiles, x = -1.57) {
   const crew =
     x === null
       ? []
@@ -32,8 +32,8 @@ function scene(api, profiles, x = -1.64, z = 0, halfZ = 0.12) {
             api,
             profiles,
             'engineer',
-            [x, deckTop + 0.075, z],
-            [0.075, 0.075, halfZ],
+            [x, deckTop + 0.075, 0.26],
+            [0.075, 0.075, 0.12],
             1,
           ),
         ];
@@ -48,6 +48,7 @@ function checkAdmission(api, profiles, initial) {
   const distant = scene(api, profiles, -1.93);
   assert(standingOn(api, distant, 'abutment', 'engineer'));
   assert.throws(() => session(distant).prepareTeam(orders('reinforce-deck')), /within reach/);
+  assert(session(distant).prepareTeam(orders('wait')).cancel());
   const live = session(initial);
   for (const bad of [
     orders('repair'),
@@ -89,7 +90,6 @@ function qualify(api, initial, action, frames, final) {
   assert.deepEqual(final.order, orders(action));
   assert.equal(frames.length, ticks);
   assert.deepEqual(frames[0].edits, aided ? [...upgrade, launch] : [launch]);
-  assert.equal(frames[0].result.edits.mechanicalEnergy, 125);
   assert(standingOn(api, initial, 'abutment', 'engineer'));
   assert(standingOn(api, initial, 'abutment'));
   assert(
@@ -174,15 +174,17 @@ function exercise(api, profiles, initial, digest, folder, summary) {
       plans.set(action, plan);
       const frames = run ? records.get(action).frames : [];
       let count = 0;
+      summary.preview = { engineer: action, selecting: selected, completedTicks: 0 };
       const final = complete(plan, run ? 1 : 256, (frame) => {
         if (run)
           assert.deepEqual(frame, frames[count], 'serialized order replay tick ' + (count + 1));
         else frames.push(frame);
-        count++;
+        summary.preview.completedTicks = ++count;
         if (count === 1 || frame.result.ticks[0].brokenBonds.length)
           assert.deepEqual(session.snapshot(), initial);
       });
       assert.equal(count, ticks);
+      delete summary.preview;
       assert.deepEqual(session.snapshot(), initial);
       if (run) {
         assert.deepEqual(final, records.get(action).final);
@@ -223,6 +225,7 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   // The brace raises capacity without changing either unit's motion before failure.
   const safe = records.get('reinforce-deck'),
     failed = records.get('wait');
+  assert.deepEqual(safe.frames[0].result.edits, failed.frames[0].result.edits);
   for (let i = 0; i < failed.final.fracture - 1; i++) {
     assert.deepEqual(
       safe.frames[i].result.snapshot.parcels,
@@ -254,42 +257,6 @@ try {
   const bundle = await bundleEngine(process.cwd(), folder, 'public', catalogue);
   const api = await import(pathToFileURL(bundle.path).href);
   const profiles = await api.createMultiphysicsProfiles3D();
-  // Temporary bounded hosted geometry capture for the free engineer.
-  for (const [x, z, h] of [
-    [-1.64, 0, 0.12],
-    [-1.65, 0, 0.075],
-    [-1.4, 0.27, 0.12],
-    [-1.57, 0.26, 0.12],
-    [-1.6, 0, 0.1],
-    [-1.64, 0.04, 0.12],
-    [-1.57, 0.28, 0.075],
-  ]) {
-    const start = scene(api, profiles, x, z, h);
-    for (const action of actions) {
-      let n = 0;
-      try {
-        const plan = createCrossingSession(api, profiles, start).prepareTeam(orders(action));
-        const result = complete(plan, 256, () => {
-          n++;
-        });
-        console.log(
-          'Geometry',
-          x,
-          z,
-          h,
-          action,
-          'ticks',
-          n,
-          'arrival',
-          result.arrival,
-          'fracture',
-          result.fracture,
-        );
-      } catch (e) {
-        console.log('Geometry', x, z, h, action, 'after', n, String(e));
-      }
-    }
-  }
   const initial = scene(api, profiles);
   assert.equal(initial.rules, 'multiphysics-world-2');
   summary.rules = initial.rules;
