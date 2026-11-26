@@ -63,6 +63,80 @@ test('atomic edits account for added and removed matter, internal heat, and mech
   expect(removed.result.edits.mass).toBeLessThan(0);
   expect(multiphysicsInventory3D(world.snapshot()).mass).toBe(initial.mass);
 });
+test('a center impulse edits only translation and accounts for the work and moment of the push', () => {
+  const world = make(),
+    before = world.snapshot(),
+    unit = before.parcels[0],
+    m = unit.mass;
+  const kick = { kind: 'impulse' as const, id: unit.id, impulse: [3 * m, 0, 0] as const };
+  const preview = world.prepare([kick], 0);
+  preview.advance();
+  expect(world.snapshot()).toEqual(before);
+  const { result } = world.commit(preview);
+  expect(result.snapshot.parcels[0]).toEqual({ ...unit, velocity: [3, 0, 0] });
+  expect(result.edits.linearMomentum).toEqual([3 * m, 0, 0]);
+  expect(result.edits.angularMomentum[2]).toBeCloseTo(-9 * m, 10);
+  expect(result.edits.mechanicalEnergy).toBeCloseTo(4.5 * m, 10);
+  expect(result.edits.mass).toBe(0);
+  expect(result.edits.storedSubQ).toBe('0');
+  const second = world.edit([kick]).result;
+  expect(second.snapshot.parcels[0].velocity).toEqual([6, 0, 0]);
+  expect(second.edits.mechanicalEnergy).toBeCloseTo(13.5 * m, 10);
+  expect(second.snapshot.accounting.externalMechanicalEnergy).toBeCloseTo(18 * m, 10);
+});
+
+test('invalid impulse batches are atomic and legacy worlds retain their original rejection', () => {
+  const world = make(),
+    kick = { kind: 'impulse' as const, id: 'a', impulse: [1, 0, 0] as const };
+  const b = seedThermalParcel3D(profiles, {
+    id: 'b',
+    material: 'copper',
+    owner: 'other',
+    center: [1, 3, 0],
+  });
+  const water = seedThermalParcel3D(profiles, {
+    id: 'liquid',
+    material: 'water',
+    owner: 'other',
+    center: [4, 3, 0],
+  });
+  for (const command of [
+    { ...kick, id: 'missing' },
+    { ...kick, id: 'liquid' },
+    { ...kick, impulse: [1, 0] as unknown as typeof kick.impulse },
+    { ...kick, impulse: { 0: 1, 1: 0, 2: 0, length: 3 } as unknown as typeof kick.impulse },
+    { ...kick, impulse: [Number.MAX_VALUE, 0, 0] as const },
+    { ...kick, extra: true },
+  ]) {
+    const testWorld = createMultiphysicsWorld3D(
+      profiles,
+      createMultiphysicsSnapshot3D(profiles, { parcels: [...world.snapshot().parcels, water] }),
+    );
+    const initial = testWorld.snapshot();
+    expect(() => testWorld.prepare([kick, command], 0)).toThrow();
+    expect(testWorld.snapshot()).toEqual(initial);
+    expect(testWorld.revision()).toBe(0);
+  }
+  for (const fixed of [
+    { anchors: ['a'] },
+    { bonds: [{ a: 'a', b: 'b', strength: 500, restLength: 1 }] },
+  ]) {
+    const s = createMultiphysicsSnapshot3D(profiles, {
+      parcels: [...world.snapshot().parcels, b],
+      ...fixed,
+    });
+    const fixedWorld = createMultiphysicsWorld3D(profiles, s);
+    expect(() => fixedWorld.edit([kick])).toThrow(/free solid/);
+    expect(fixedWorld.snapshot()).toEqual(s);
+  }
+  const legacy = createMultiphysicsWorld3D(profiles, {
+    ...world.snapshot(),
+    rules: 'multiphysics-world-1',
+  });
+  expect(() => legacy.prepare([kick], 1)).toThrow('Unknown multiphysics edit.');
+  expect(legacy.revision()).toBe(0);
+});
+
 test('invalid later command rolls back an entire edit batch; getters never execute', () => {
   const world = make(),
     before = world.snapshot();

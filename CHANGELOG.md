@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Add a v2 center impulse edit and a hosted commanded crossing with transactional preview and replay (#125).
+
 - Verify moving units crossing a breakable deck on hosted CPU (#124).
 
 - Exercise a loaded crossing on the v2 CPU world and retain the support, fracture, water motion, and replay histories (#123).

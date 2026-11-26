@@ -791,6 +791,13 @@ mass, energy, linear momentum and angular momentum ledgers, including saved
 sub-quantum conversion remainders. The default per-tick numerical energy limit is
 `0.01` model energy units; numerical corrections are never deposited as heat.
 
+On v2, `{kind: 'impulse', id, impulse: [jx, jy, jz]}` applies an external
+world-space impulse through the center of one free, unbonded solid. Its
+velocity changes by impulse divided by mass. The ordinary edit receipt and
+ledger account for work and linear and orbital angular momentum. The parcel
+retains its position, material and intrinsic spin. Invalid batches leave the
+world and its revision untouched. V1 retains its unknown-edit rejection.
+
 The private Worker host owns one live world and one candidate. It advances only
 bounded chunks on a macrotask scheduler. The client permits one operation plus a
 cancellation request, with no unbounded queue, and closes on timeout or malformed
