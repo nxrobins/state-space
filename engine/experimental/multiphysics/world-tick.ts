@@ -19,6 +19,7 @@ import {
   fractureRigidBonds3D,
   type RigidBond3D,
 } from './rigid.js';
+import type { FluidProjectionObserver3D } from './fluids.js';
 import { createFluidCoupling3D, type FluidCouplingResult3D } from './fluid-coupling.js';
 import { depositMechanicalHeat3D } from './coupling-energy.js';
 import { retainJobFunctions } from './retained-functions.js';
@@ -166,6 +167,15 @@ function soften(profiles: MultiphysicsProfiles3D, parcel: ThermalParcel3D): numb
 export function createMultiphysicsTickJob3D(
   profiles: MultiphysicsProfiles3D,
   raw: MultiphysicsSnapshot3D,
+): MultiphysicsTickJob3D {
+  return createWorldTickJob(profiles, raw);
+}
+
+/** Internal study entry. The SDK exposes only the two-argument tick constructor. */
+export function createWorldTickJob(
+  profiles: MultiphysicsProfiles3D,
+  raw: MultiphysicsSnapshot3D,
+  observe?: { first: FluidProjectionObserver3D; postDrift: FluidProjectionObserver3D },
 ): MultiphysicsTickJob3D {
   const state = readMultiphysicsSnapshot3D(profiles, raw);
   const legacy = state.rules === LEGACY_MULTIPHYSICS_RULES_3D;
@@ -452,7 +462,7 @@ export function createMultiphysicsTickJob3D(
     }
     refreshPhaseOwnership(previous);
     yield 'phase-ownership';
-    const fluid = createFluidCoupling3D(profiles, state);
+    const fluid = createFluidCoupling3D(profiles, state, false, undefined, observe?.first);
     let fluidResult: ReturnType<typeof fluid.next>;
     try {
       fluidResult = fluid.next();
@@ -576,6 +586,7 @@ export function createMultiphysicsTickJob3D(
       state,
       true,
       legacy ? undefined : impactReference(),
+      observe?.postDrift,
     );
     // Liquid constraints and the solid support of liquid samples are inelastic. Their work on
     // resting liquid cancels within the tick: the first pass absorbs the predicted gravity,

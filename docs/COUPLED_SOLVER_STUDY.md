@@ -17,6 +17,9 @@ cases now pass. Median paired speedups for the combined implementation are
 and work behavior in those cases. The earlier profile measurements below are
 historical; the fresh paired comparison is recorded in the optimization section.
 
+The [v2 world pressure comparison](checkpoints/WORLD_PRESSURE.md) replays both solvers on
+the 63-water cup, 99-water tank and six ticks of resting water.
+
 ## Question and first boundary
 
 Can the private liquid/rigid constraint projection get cheaper while retaining

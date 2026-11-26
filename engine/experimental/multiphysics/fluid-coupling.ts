@@ -4,6 +4,7 @@ import {
   type FluidBoundaryBody3D,
   type FluidBoundaryContact3D,
   type FluidMatrix3D,
+  type FluidProjectionObserver3D,
   type FluidReferenceResult3D,
 } from './fluids.js';
 import {
@@ -68,6 +69,7 @@ export function* createFluidCoupling3D(
   state: MultiphysicsSnapshot3D,
   projectionOnly = false,
   impactReference?: readonly { id: string; velocity: Vec3; angularVelocity: Vec3 }[],
+  capture?: FluidProjectionObserver3D,
 ): Generator<string, FluidCouplingResult3D, void> {
   const liquidGas = state.parcels.filter((p) => !isRigidMaterial3D(profiles, p));
   if (!liquidGas.length)
@@ -285,7 +287,7 @@ export function* createFluidCoupling3D(
       dt,
       smoothingRadius: h,
     },
-    undefined,
+    capture,
     { recordImpactLoss: state.rules !== LEGACY_MULTIPHYSICS_RULES_3D },
     // This input is built above from this tick's own data.
     copyOwnedPortableValue,
