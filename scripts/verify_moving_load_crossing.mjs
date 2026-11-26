@@ -14,25 +14,25 @@ import { guardNode } from './verification_guard.mjs';
 
 const dt = 1 / 480,
   gravity = 9.8,
-  ticks = 210,
+  ticks = 250,
   deckY = 1.0251;
 const deckTop = deckY + 0.125,
   halfFoot = 0.075,
   startX = -1.4,
-  speed = 6;
+  speed = 5;
 const cases = [
-  { id: 'unloaded', mass: 0, strength: 50 },
-  { id: 'light', mass: 1, strength: 50 },
-  { id: 'heavy', mass: 10, strength: 50 },
+  { id: 'unloaded', mass: 0, strength: 135 },
+  { id: 'light', mass: 1, strength: 135 },
+  { id: 'heavy', mass: 10, strength: 135 },
   { id: 'reinforced', mass: 10, strength: 500 },
 ];
 function scene(api, profiles, { mass, strength }) {
   const solid = (...args) => crossingSolid(api, profiles, ...args);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
-      solid('abutment', [-1.5, deckY, 0], [0.5, 0.125, 0.4], 1),
+      solid('abutment', [-1.53, deckY, 0], [0.5, 0.125, 0.4], 1),
       solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
-      solid('far-bank', [2, deckY, 0], [1, 0.125, 0.4], 1),
+      solid('far-bank', [2.03, deckTop - 0.01, 0], [1, 0.01, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...crossingWater(api, profiles),
       ...(mass
@@ -46,7 +46,7 @@ function scene(api, profiles, { mass, strength }) {
         : []),
     ],
     anchors: ['abutment', 'far-bank', 'floor'],
-    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.5 }],
+    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.53 }],
     settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
   });
 }
@@ -137,7 +137,7 @@ function qualify(cs) {
   for (const c of [light, heavy, reinforced]) {
     const first = c.rows[0];
     assert(
-      first.unit[0] + halfFoot < -1 && Math.abs(first.reactionY - gravity) < 1e-5,
+      first.unit[0] + halfFoot < -1.03 && Math.abs(first.reactionY - gravity) < 1e-5,
       'near bank must initially carry unit',
     );
   }
@@ -145,7 +145,9 @@ function qualify(cs) {
     const onDeck = c.rows.filter((r) => r.unit[0] - halfFoot > -1 && r.unit[0] + halfFoot < 1);
     const far = c.rows.filter(
       (r) =>
-        r.unit[0] - halfFoot > 1 && r.unit[0] + halfFoot < 3 && Math.abs(r.unit[2]) + 0.12 < 0.4,
+        r.unit[0] - halfFoot > 1.03 &&
+        r.unit[0] + halfFoot < 3.03 &&
+        Math.abs(r.unit[2]) + 0.12 < 0.4,
     );
     assert(
       onDeck.length > 10 && far.length >= 5 && far.at(-1) === c.rows.at(-1),
@@ -181,8 +183,8 @@ function qualify(cs) {
     'fracture must persist',
   );
   assert(
-    br.unit[0] > -1 &&
-      br.unit[0] < 1 &&
+    br.unit[0] - halfFoot > -1 &&
+      br.unit[0] + halfFoot < 1 &&
       Math.abs(br.unit[2]) + 0.12 < 0.4 &&
       Math.abs(br.unit[1] - halfFoot - deckTop) < 1e-6,
     'fracture underfoot',
@@ -238,6 +240,7 @@ await guardNode('cpu', 600);
 const folder = resolve('dist/verification/moving-load-crossing', randomUUID());
 mkdirSync(folder, { recursive: true });
 const summary = {
+  schema: 'moving-load-crossing-1',
   status: 'started',
   revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   node: process.version,
@@ -258,6 +261,8 @@ try {
     diag = resolve(folder, 'diagnostic.mjs');
   await build({ ...BUNDLE, entryPoints: [ENTRY], outfile: reference });
   await diagnosticBundle(diag);
+  summary.publicBundleSHA256 = hash(readFileSync(reference));
+  summary.diagnosticBundleSHA256 = hash(readFileSync(diag));
   const api = await import(pathToFileURL(reference).href),
     probe = await import(pathToFileURL(diag).href);
   const profiles = await api.createMultiphysicsProfiles3D(),
