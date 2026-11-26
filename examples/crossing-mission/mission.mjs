@@ -24,34 +24,33 @@ export function crossingMissionScene(api, profiles) {
 function outcome(api, world) {
   const turnsUsed = world.tick / ticks;
   const heavy = world.parcels.find((p) => p.id === 'unit');
-  const landed = standingOn(api, world, 'far-bank') && Math.hypot(...heavy.velocity) < 1e-4;
-  const intact = world.bonds.some((b) => b.a === 'abutment' && b.b === 'deck');
-  const reason = landed
-    ? 'far-bank'
-    : !intact
-      ? 'deck-fractured'
-      : turnsUsed === turnLimit
-        ? 'deadline'
-        : null;
-  return {
-    status: landed ? 'won' : reason ? 'lost' : 'active',
-    reason,
-    turnsUsed,
-    turnsRemaining: turnLimit - turnsUsed,
-  };
+  const budget = { turnsUsed, turnsRemaining: turnLimit - turnsUsed };
+  if (standingOn(api, world, 'far-bank') && Math.hypot(...heavy.velocity) < 1e-4)
+    return { status: 'won', reason: 'far-bank', ...budget };
+  if (!world.bonds.some((b) => b.a === 'abutment' && b.b === 'deck'))
+    return { status: 'lost', reason: 'deck-fractured', ...budget };
+  if (turnsUsed === turnLimit) return { status: 'lost', reason: 'deadline', ...budget };
+  return { status: 'active', reason: null, ...budget };
 }
 
 export function createCrossingMission(api, profiles, save) {
   let world;
+  let history = [];
   if (save === undefined) world = crossingMissionScene(api, profiles);
   else {
     if (
       save?.schema !== schema ||
       save.world?.rules !== 'multiphysics-world-2' ||
-      ![0, ticks, turnLimit * ticks].includes(save.world.tick)
+      !Array.isArray(save.orders) ||
+      save.orders.length > turnLimit ||
+      save.world.tick !== save.orders.length * ticks ||
+      !Array.from(save.orders).every(
+        (order) => typeof order === 'string' && Object.hasOwn(orders, order),
+      )
     )
       throw Error('Expected a crossing mission save at a committed turn boundary.');
     world = save.world;
+    history = [...save.orders];
   }
   const session = createCrossingSession(api, profiles, world);
   const initial = session.snapshot();
@@ -60,12 +59,13 @@ export function createCrossingMission(api, profiles, save) {
       throw Error('Mission save is missing ' + id + '.');
   }
   const handles = new WeakMap();
+  let current = outcome(api, initial);
   const report = (order, turn) => ({ order, mission: outcome(api, turn.snapshot), turn });
   return Object.freeze({
-    state: () => outcome(api, session.snapshot()),
-    save: () => ({ schema, world: session.snapshot() }),
+    state: () => ({ ...current }),
+    save: () => ({ schema, orders: [...history], world: session.snapshot() }),
     prepare(order) {
-      if (outcome(api, session.snapshot()).status !== 'active') throw Error('Mission is over.');
+      if (current.status !== 'active') throw Error('Mission is over.');
       if (typeof order !== 'string' || !Object.hasOwn(orders, order))
         throw Error('Unknown mission order.');
       const commands = orders[order];
@@ -84,7 +84,10 @@ export function createCrossingMission(api, profiles, save) {
       if (!entry) throw Error('Foreign or consumed mission preview.');
       const turn = session.commit(entry.turn);
       handles.delete(plan);
-      return report(entry.order, turn);
+      const result = report(entry.order, turn);
+      history.push(entry.order);
+      current = { ...result.mission };
+      return result;
     },
   });
 }

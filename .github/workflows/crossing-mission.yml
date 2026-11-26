@@ -51,10 +51,17 @@ jobs:
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 600 --stall 150 -- node scripts/verify_crossing_mission.mjs
       - run: npm run build:sdk
       - name: Play the mission through the public SDK
+        id: play
         env:
           FIRST_ORDER: ${{ inputs.first_order || 'move-engineer' }}
           SECOND_ORDER: ${{ inputs.second_order || 'reinforce-and-cross' }}
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 300 --stall 120 -- node examples/crossing-mission/play.mjs "$FIRST_ORDER" "$SECOND_ORDER"
+      - name: Check the public SDK mission outcome
+        if: github.event_name == 'pull_request'
+        env:
+          STATUS: ${{ steps.play.outputs.status }}
+          REASON: ${{ steps.play.outputs.reason }}
+        run: test "$STATUS/$REASON" = "won/far-bank"
       - name: Retain crossing trajectories and replay evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -55,6 +55,8 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   for (const invalid of [
     null,
     { ...start, schema: 'invalid' },
+    { ...start, orders: ['hold'] },
+    { ...start, world: { ...initial, tick: 250 }, orders: ['invalid'] },
     { ...start, world: { ...initial, tick: 1 } },
     { ...start, world: { ...initial, tick: 750 } },
   ])
@@ -132,9 +134,14 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   }
   function publish(session, id, plan) {
     const expected = turns.get(id).result;
+    const history = [...session.save().orders, expected.order];
     const receipt = session.commit(plan);
     assert.deepEqual(receipt, expected);
-    assert.deepEqual(session.save(), { schema: start.schema, world: expected.turn.snapshot });
+    assert.deepEqual(session.save(), {
+      schema: start.schema,
+      orders: history,
+      world: expected.turn.snapshot,
+    });
     assert.deepEqual(session.state(), expected.mission);
     assert.throws(() => session.commit(plan), /consumed/);
     return receipt;
@@ -166,6 +173,12 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   publish(live, 'setup', setup);
   assert.throws(() => live.commit(early), /stale/);
   const boundary = live.save();
+  const detached = copy(boundary);
+  const opened = create(detached);
+  detached.orders.length = 0;
+  opened.state().turnsUsed = 0;
+  assert.deepEqual(opened.save(), boundary);
+  checkState(opened.state(), 'setup');
   const loss = preview(live, 'unsupported', 256),
     timedOut = preview(live, 'timeout', 256),
     win = preview(live, 'win', 256);
@@ -176,11 +189,14 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   publish(live, 'win', win);
   for (const stale of [loss, timedOut]) assert.throws(() => live.commit(stale), /stale/);
   terminal(live, 'win');
+  const winningTape = copy(live.save().orders);
+  assert.deepEqual(winningTape, [orders.setup, orders.win]);
 
   // Replay only committed orders from the original save. Every turn opens in
   // a new controller and restores the preceding commit's JSON state.
   for (const [name, ids] of Object.entries(paths)) {
-    const tape = copy(ids.map((id) => turns.get(id).result.order));
+    const tape =
+      name === 'victory' ? winningTape : copy(ids.map((id) => turns.get(id).result.order));
     let session = create(copy(start));
     const missionReceipts = [];
     const boundaries = new Set([0]),
@@ -219,6 +235,7 @@ function exercise(api, profiles, initial, digest, folder, summary) {
     terminal(session, last);
     const save = session.save(),
       reopened = create(copy(save));
+    assert.deepEqual(save.orders, tape);
     assert.deepEqual(reopened.save(), save);
     terminal(reopened, last);
     const restoredAt = [...boundaries].filter((t) => t < frames.length).sort((a, b) => a - b);
