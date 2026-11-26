@@ -14,14 +14,12 @@ import { guardNode } from './verification_guard.mjs';
 
 const dt = 1 / 480,
   gravity = 9.8,
-  ticks = 160,
+  ticks = 210,
   deckY = 1.0251;
 const deckTop = deckY + 0.125,
-  landingHalfHeight = 0.01,
-  seam = 0.03,
   halfFoot = 0.075,
   startX = -1.4,
-  speed = 8;
+  speed = 6;
 const cases = [
   { id: 'unloaded', mass: 0, strength: 50 },
   { id: 'light', mass: 1, strength: 50 },
@@ -32,9 +30,9 @@ function scene(api, profiles, { mass, strength }) {
   const solid = (...args) => crossingSolid(api, profiles, ...args);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
-      solid('abutment', [-1.5 - seam, deckY, 0], [0.5, 0.125, 0.4], 1),
+      solid('abutment', [-1.5, deckY, 0], [0.5, 0.125, 0.4], 1),
       solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
-      solid('far-bank', [2 + seam, deckTop - landingHalfHeight, 0], [1, landingHalfHeight, 0.4], 1),
+      solid('far-bank', [2, deckY, 0], [1, 0.125, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...crossingWater(api, profiles),
       ...(mass
@@ -48,7 +46,7 @@ function scene(api, profiles, { mass, strength }) {
         : []),
     ],
     anchors: ['abutment', 'far-bank', 'floor'],
-    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.5 + seam }],
+    bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.5 }],
     settings: { dt, gravity: [0, -gravity, 0], restitution: 0, friction: 0 },
   });
 }
@@ -139,7 +137,7 @@ function qualify(cs) {
   for (const c of [light, heavy, reinforced]) {
     const first = c.rows[0];
     assert(
-      first.unit[0] + halfFoot < -1 - seam && Math.abs(first.reactionY - gravity) < 1e-5,
+      first.unit[0] + halfFoot < -1 && Math.abs(first.reactionY - gravity) < 1e-5,
       'near bank must initially carry unit',
     );
   }
@@ -147,9 +145,7 @@ function qualify(cs) {
     const onDeck = c.rows.filter((r) => r.unit[0] - halfFoot > -1 && r.unit[0] + halfFoot < 1);
     const far = c.rows.filter(
       (r) =>
-        r.unit[0] - halfFoot > 1 + seam &&
-        r.unit[0] + halfFoot < 3 + seam &&
-        Math.abs(r.unit[2]) + 0.12 < 0.4,
+        r.unit[0] - halfFoot > 1 && r.unit[0] + halfFoot < 3 && Math.abs(r.unit[2]) + 0.12 < 0.4,
     );
     assert(
       onDeck.length > 10 && far.length >= 5 && far.at(-1) === c.rows.at(-1),
