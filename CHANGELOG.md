@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Exercise a loaded crossing on the v2 CPU world and retain the support, fracture, water motion, and replay histories.
+
 - Profile complete v2 water ticks on hosted CPU with exact replay checks (#122).
 - Capture v2 cup, tank, and resting-water pressure systems for paired dense and matrix-free CPU replay (#121).
 - Version the experimental liquid heat rule and restore original v1 replay behavior.
