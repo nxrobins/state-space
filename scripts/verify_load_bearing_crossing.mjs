@@ -247,13 +247,30 @@ try {
     };
     summary.cases.push(c);
     outcomes[spec.id] = c;
+    // On supported ticks the floor carries the resting water; the two fixed
+    // solids also deliver their own weight directly to the boundaries.
+    const otherWeight =
+      gravity *
+      initial.parcels
+        .filter((p) => p.id !== 'deck' && p.id !== 'ballast')
+        .reduce((mass, p) => mass + p.mass, 0);
+    const supportedWeight = gravity * (at(initial, 'deck').mass + spec.mass);
     const results = [];
     let state = initial;
     for (let i = 0; i < ticks; i++) {
       try {
         const r = direct(api, profiles, state);
         results.push(r);
-        c.rows.push(observe(initial, r, catalogue.digestFrozen3D));
+        const row = observe(initial, r, catalogue.digestFrozen3D);
+        const beganSupported = i === 0 || c.rows[i - 1].bondIntact;
+        row.abutmentReactionY = beganSupported ? -row.boundaryImpulse[1] / dt - otherWeight : null;
+        if (beganSupported) {
+          assert(
+            row.maxWaterTravel === 0 && Math.abs(row.abutmentReactionY - supportedWeight) < 1e-5,
+            'supported deck and ballast weight must reach the abutment',
+          );
+        }
+        c.rows.push(row);
         state = r.snapshot;
       } catch (e) {
         throw Error(spec.id + ' at tick ' + (i + 1) + ': ' + e.message, { cause: e });
