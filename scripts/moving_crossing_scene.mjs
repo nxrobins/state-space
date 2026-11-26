@@ -15,7 +15,7 @@ export const cases = [
   { id: 'heavy', mass: 10, strength: 135 },
   { id: 'reinforced', mass: 10, strength: 500 },
 ];
-export function movingCrossingScene(api, profiles, { mass, strength }, speedX = speed) {
+export function movingCrossingScene(api, profiles, { mass, strength }, speedX = speed, crew = []) {
   const solid = (...args) => crossingSolid(api, profiles, ...args);
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
@@ -24,6 +24,7 @@ export function movingCrossingScene(api, profiles, { mass, strength }, speedX = 
       solid('far-bank', [2.03, deckTop - 0.01, 0], [1, 0.01, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...crossingWater(api, profiles),
+      ...crew,
       ...(mass
         ? [
             solid('unit', [startX, deckTop + halfFoot, 0], [halfFoot, halfFoot, 0.12], mass, [

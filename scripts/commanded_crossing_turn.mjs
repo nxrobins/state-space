@@ -2,8 +2,8 @@
 import { at } from './crossing_reference.mjs';
 import { speed, ticks } from './moving_crossing_scene.mjs';
 
-export function standingOn(api, state, surface) {
-  const foot = api.cuboidBounds(at(state, 'unit')),
+export function standingOn(api, state, surface, actor = 'unit') {
+  const foot = api.cuboidBounds(at(state, actor)),
     bank = api.cuboidBounds(at(state, surface));
   return (
     foot.min[0] >= bank.min[0] &&
@@ -18,10 +18,46 @@ export function createCrossingSession(api, profiles, initial) {
   const makeWorld = (s) => api.createMultiphysicsWorld3D(profiles, s);
   let live = makeWorld(initial);
   const plans = new WeakMap();
+  function prepareTeam(orders) {
+    const { engineer: action, unit: movement } = orders ?? {};
+    if (
+      !orders ||
+      Object.keys(orders).length !== 2 ||
+      !Object.hasOwn(orders, 'engineer') ||
+      !Object.hasOwn(orders, 'unit') ||
+      !['reinforce-deck', 'wait'].includes(action) ||
+      movement !== 'cross-to-far-bank'
+    )
+      throw Error('Expected one engineer order and one heavy crossing order.');
+    const state = live.snapshot();
+    const engineer = at(state, 'engineer');
+    const edits = [];
+    if (action === 'reinforce-deck') {
+      const joint = state.bonds.find((b) => b.a === 'abutment' && b.b === 'deck');
+      if (!joint || joint.strength >= 500)
+        throw Error('Reinforcement requires an intact weaker joint.');
+      // The support is operated at the centre of the seam along the top of the near bank.
+      const bank = api.cuboidBounds(at(state, 'abutment')),
+        deck = api.cuboidBounds(at(state, 'deck'));
+      const seam = [(bank.max[0] + deck.min[0]) / 2, bank.max[1], at(state, 'abutment').center[2]];
+      if (
+        !standingOn(api, state, 'abutment', 'engineer') ||
+        Math.hypot(...seam.map((x, i) => x - engineer.center[i])) > 0.75
+      )
+        throw Error('Engineer must stand within reach of the deck joint.');
+      edits.push(
+        { kind: 'cut', a: joint.a, b: joint.b },
+        { kind: 'bond', a: joint.a, b: joint.b, strength: 500 },
+      );
+    }
+    return prepareTurn(movement, Object.freeze({ engineer: action, unit: movement }), edits, state);
+  }
   function prepare(order) {
     if (order !== 'cross-to-far-bank' && order !== 'wait') throw Error('Unknown crossing order.');
+    return prepareTurn(order, order, []);
+  }
+  function prepareTurn(order, submitted, firstEdits, start = live.snapshot()) {
     const base = live,
-      start = base.snapshot(),
       fork = makeWorld(start);
     // A resting contact can leave tiny residual motion after a wait turn.
     const unit = at(start, 'unit');
@@ -51,10 +87,10 @@ export function createCrossingSession(api, profiles, initial) {
           if (!pending) {
             const state = fork.snapshot(),
               u = at(state, 'unit');
-            edits = [];
+            edits = state.tick === start.tick ? [...firstEdits] : [];
             if (order === 'cross-to-far-bank') {
               if (state.tick === start.tick)
-                edits = [{ kind: 'impulse', id: u.id, impulse: [u.mass * speed, 0, 0] }];
+                edits.push({ kind: 'impulse', id: u.id, impulse: [u.mass * speed, 0, 0] });
               else if (arrival !== null && braked === null) {
                 edits = [
                   {
@@ -95,7 +131,7 @@ export function createCrossingSession(api, profiles, initial) {
       },
       result() {
         if (phase !== 'ready') throw Error('Crossing preview is not ready.');
-        return { order, arrival, fracture, braked, snapshot: fork.snapshot() };
+        return { order: submitted, arrival, fracture, braked, snapshot: fork.snapshot() };
       },
     });
     plans.set(handle, {
@@ -110,6 +146,7 @@ export function createCrossingSession(api, profiles, initial) {
   return Object.freeze({
     snapshot: () => live.snapshot(),
     prepare,
+    prepareTeam,
     commit(handle) {
       const plan = plans.get(handle);
       if (!plan || plan.base !== live) throw Error('Foreign, consumed or stale crossing preview.');
