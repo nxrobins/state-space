@@ -10,9 +10,11 @@ import { gzipSync } from 'node:zlib';
 import { bundleEngine, hash, loadCatalogue } from './liquid_contact_engine.mjs';
 import { guardNode } from './verification_guard.mjs';
 
-const dt = 1 / 120,
+const dt = 1 / 480,
   gravity = 9.8,
-  ticks = 40;
+  ticks = 160;
+// The underside is initially tangent to the water samples at the deck edges.
+const deckY = 0.5 + 0.4 + 0.125;
 const cases = [
   { id: 'unloaded', mass: 0, strength: 50 },
   { id: 'light', mass: 1, strength: 50 },
@@ -51,11 +53,11 @@ function initialState(api, profiles, { mass, strength }) {
   );
   return api.createMultiphysicsSnapshot3D(profiles, {
     parcels: [
-      solid('abutment', [-1.375, 1.25, 0], [0.375, 0.125, 0.4], 1),
-      solid('deck', [0, 1.25, 0], [1, 0.125, 0.4], 1),
+      solid('abutment', [-1.375, deckY, 0], [0.375, 0.125, 0.4], 1),
+      solid('deck', [0, deckY, 0], [1, 0.125, 0.4], 1),
       solid('floor', [0, -0.5, 0], [2.5, 0.5, 2.5], 1),
       ...water,
-      ...(mass ? [solid('ballast', [0, 1.625, 0], [0.25, 0.25, 0.25], mass)] : []),
+      ...(mass ? [solid('ballast', [0, deckY + 0.125 + 0.25, 0], [0.25, 0.25, 0.25], mass)] : []),
     ],
     anchors: ['abutment', 'floor'],
     bonds: [{ a: 'abutment', b: 'deck', strength, restLength: 1.375 }],
@@ -129,7 +131,7 @@ function compare(outcomes) {
       'control fractured: ' + c.id,
     );
     assert(
-      c.rows.every((r) => Math.abs(r.deckY - 1.25) < 1e-8),
+      c.rows.every((r) => Math.abs(r.deckY - deckY) < 1e-8),
       'control deck moved: ' + c.id,
     );
   }
@@ -165,7 +167,7 @@ function compare(outcomes) {
   const onset = paired.find((r) => r.minOutward > 0.001);
   assert(onset && onset.tick > fractureTick, 'measurable outward water motion after break');
   assert(paired.at(-1).minOutward > 0.01, 'all four water centers displaced outwards');
-  assert(heavy.rows.at(-1).deckY < 1.25 - 0.1, 'broken deck must fall');
+  assert(heavy.rows.at(-1).deckY < deckY - 0.1, 'broken deck must fall');
   for (const c of [unloaded, light, reinforced])
     assert(
       c.rows.every((r) => r.maxWaterTravel < 1e-5),
