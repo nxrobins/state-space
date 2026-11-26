@@ -19,20 +19,20 @@ export function createCrossingSession(api, profiles, initial) {
   let live = makeWorld(initial);
   const plans = new WeakMap();
   function prepareTeam(orders) {
+    const { engineer: action, unit: movement } = orders ?? {};
     if (
       !orders ||
-      typeof orders !== 'object' ||
       Object.keys(orders).length !== 2 ||
       !Object.hasOwn(orders, 'engineer') ||
       !Object.hasOwn(orders, 'unit') ||
-      !['reinforce-deck', 'wait'].includes(orders.engineer) ||
-      orders.unit !== 'cross-to-far-bank'
+      !['reinforce-deck', 'wait'].includes(action) ||
+      movement !== 'cross-to-far-bank'
     )
       throw Error('Expected one engineer order and one heavy crossing order.');
     const state = live.snapshot();
     const engineer = at(state, 'engineer');
     const edits = [];
-    if (orders.engineer === 'reinforce-deck') {
+    if (action === 'reinforce-deck') {
       const joint = state.bonds.find((b) => b.a === 'abutment' && b.b === 'deck');
       if (!joint || joint.strength >= 500)
         throw Error('Reinforcement requires an intact weaker joint.');
@@ -50,12 +50,7 @@ export function createCrossingSession(api, profiles, initial) {
         { kind: 'bond', a: joint.a, b: joint.b, strength: 500 },
       );
     }
-    return prepareTurn(
-      orders.unit,
-      Object.freeze({ engineer: orders.engineer, unit: orders.unit }),
-      edits,
-      state,
-    );
+    return prepareTurn(movement, Object.freeze({ engineer: action, unit: movement }), edits, state);
   }
   function prepare(order) {
     if (order !== 'cross-to-far-bank' && order !== 'wait') throw Error('Unknown crossing order.');

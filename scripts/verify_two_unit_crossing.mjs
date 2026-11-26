@@ -263,6 +263,20 @@ try {
   summary.initialSHA256 = catalogue.digestFrozen3D(initial);
   summary.engineSHA256 = bundle.sourceSha256;
   exercise(api, profiles, initial, catalogue.digestFrozen3D, folder, summary);
+  const baseline = JSON.parse(
+    readFileSync('engine/test-support/fixtures/two-unit-crossing-v2.json', 'utf8'),
+  );
+  const cases = Object.fromEntries(
+    Object.entries(summary.cases).map(([action, c]) => [
+      action,
+      { historySHA256: c.historySHA256, finalSHA256: c.finalSHA256 },
+    ]),
+  );
+  assert.deepEqual(
+    { rules: summary.rules, v8: summary.v8, initialSHA256: summary.initialSHA256, cases },
+    baseline.expected,
+    'two-unit starting state, trajectory or outcome changed',
+  );
   summary.status = 'complete';
   console.log('Replayed both two-unit choices');
 } catch (e) {
