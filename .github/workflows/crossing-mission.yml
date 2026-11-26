@@ -1,0 +1,65 @@
+name: Crossing mission
+on:
+  workflow_dispatch:
+    inputs:
+      first_order:
+        description: First squad order
+        type: choice
+        default: move-engineer
+        options: [move-engineer, advance-together, cross, hold]
+      second_order:
+        description: Second squad order if the mission is active
+        type: choice
+        default: reinforce-and-cross
+        options: [reinforce-and-cross, cross, hold, move-engineer, advance-together]
+  pull_request:
+    paths:
+      - '.github/workflows/crossing-mission.yml'
+      - 'scripts/verify_crossing_mission.mjs'
+      - 'examples/crossing-mission/**'
+      - 'scripts/commanded_crossing_turn.mjs'
+      - 'scripts/moving_crossing_scene.mjs'
+      - 'scripts/crossing_reference.mjs'
+      - 'scripts/crossing_order_replay.mjs'
+      - 'scripts/crossing_checkpoint.mjs'
+      - 'scripts/liquid_contact_engine.mjs'
+      - 'engine/**'
+      - 'scripts/verification_guard.*'
+      - 'package-lock.json'
+permissions:
+  contents: read
+jobs:
+  profile:
+    name: Mission outcomes, preview, commit and exact replay (CPU)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22.22.3'
+          cache: npm
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          version: '0.11.28'
+          enable-cache: true
+      - run: uv sync --locked
+      - run: npm ci
+      - name: Preview crossing orders, commit and replay from saves
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 600 --stall 150 -- node scripts/verify_crossing_mission.mjs
+      - run: npm run build:sdk
+      - name: Play the mission through the public SDK
+        env:
+          FIRST_ORDER: ${{ inputs.first_order || 'move-engineer' }}
+          SECOND_ORDER: ${{ inputs.second_order || 'reinforce-and-cross' }}
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 300 --stall 120 -- node examples/crossing-mission/play.mjs "$FIRST_ORDER" "$SECOND_ORDER"
+      - name: Retain crossing trajectories and replay evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: crossing-mission-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/verification/
+          retention-days: 14
+          if-no-files-found: error
