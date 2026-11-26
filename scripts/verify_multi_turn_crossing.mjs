@@ -132,9 +132,9 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   const restore = (state) => createCrossingSession(api, profiles, copy(state));
   const savedOrders = copy(orders);
   const records = {};
-  function preview(session, id, budget) {
+  function preview(session, id, budget, recorded = savedOrders[id]) {
     const before = session.snapshot(),
-      input = copy(savedOrders[id]);
+      input = copy(recorded);
     const plan = session.prepareTeam(input);
     input.engineer = 'changed after submission';
     const known = records[id],
@@ -210,6 +210,19 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   assert.throws(() => live.commit(early), /stale/);
   const boundary = live.snapshot();
   assert.throws(() => live.prepareTeam(orders.setup), /outside joint reach/);
+  // Same second-turn launch without reinforcement isolates the effect of the deck edit.
+  const unsupported = live.prepareTeam({ engineer: 'wait', unit: 'cross-to-far-bank' });
+  let collapse;
+  while (!collapse && unsupported.status() === 'running') {
+    const frame = unsupported.advance(256);
+    if (frame?.result.ticks[0].brokenBonds.length) collapse = frame;
+  }
+  assert(collapse, 'delaying launch alone must still break the weak joint');
+  assert.deepEqual(collapse.result.ticks[0].brokenBonds, boundary.bonds);
+  assert(standingOn(api, collapse.result.snapshot, 'deck'));
+  summary.delayedUnreinforcedFracture = collapse.result.snapshot.tick;
+  assert(unsupported.cancel());
+  assert.deepEqual(live.snapshot(), boundary);
   const armed = preview(live, 'reinforced', 256);
   assert.deepEqual(live.snapshot(), boundary);
   publish(live, 'reinforced', armed);
@@ -221,12 +234,22 @@ function exercise(api, profiles, initial, digest, folder, summary) {
   publish(rushed, 'early', earlyAgain);
   assert.throws(() => rushed.commit(setupAgain), /stale/);
   assert.throws(() => rushed.prepareTeam(orders.reinforced), /intact weaker joint/);
+  assert.throws(() => rushed.prepareTeam(orders.setup), /intact joint/);
   assert.deepEqual(rushed.snapshot(), records.early.final.snapshot);
 
-  // Resume from the portable save, with a new session and no private controller state.
-  const resumed = restore(boundary);
+  // Play back the recorded winning orders from the original save. Discard the
+  // controller at the turn boundary and resume from this replay's own JSON save.
+  const tape = copy({
+    initial,
+    setup: records.setup.final.order,
+    reinforced: records.reinforced.final.order,
+  });
+  const playback = restore(tape.initial);
+  publish(playback, 'setup', preview(playback, 'setup', 1, tape.setup));
+  assert.deepEqual(playback.snapshot(), boundary);
+  const resumed = restore(playback.snapshot());
   assert.throws(() => resumed.commit(armed), /stale/);
-  publish(resumed, 'reinforced', preview(resumed, 'reinforced', 1));
+  publish(resumed, 'reinforced', preview(resumed, 'reinforced', 1, tape.reinforced));
   assert.deepEqual(resumed.snapshot(), live.snapshot());
 
   summary.paths = { prepared: ['setup', 'reinforced'], early: ['early'] };

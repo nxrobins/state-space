@@ -61,8 +61,10 @@ export function createCrossingSession(api, profiles, initial) {
     const state = live.snapshot();
     const engineer = at(state, 'engineer');
     const edits = [];
+    const joint = state.bonds.find((b) => b.a === 'abutment' && b.b === 'deck');
     let target;
     if (action === 'move-into-range') {
+      if (!joint) throw Error('Engineer approach requires an intact joint.');
       target = jointPosition(api, state);
       if (
         !standingOn(api, state, 'abutment', 'engineer') ||
@@ -74,7 +76,6 @@ export function createCrossingSession(api, profiles, initial) {
       edits.push({ kind: 'impulse', id: engineer.id, impulse: [engineer.mass, 0, 0] });
     }
     if (action === 'reinforce-deck') {
-      const joint = state.bonds.find((b) => b.a === 'abutment' && b.b === 'deck');
       if (!joint || joint.strength >= 500)
         throw Error('Reinforcement requires an intact weaker joint.');
       if (!withinReach(api, state, jointPosition(api, state)))

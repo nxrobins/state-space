@@ -1,0 +1,22 @@
+{
+  "captureRun": "https://github.com/nxrobins/state-space/actions/runs/45903926414",
+  "expected": {
+    "rules": "multiphysics-world-2",
+    "v8": "12.4.254.21-node.56",
+    "initialSHA256": "b303324fba5d1032744c284a6790f2e5089a009361901f51162aeee440941724",
+    "cases": {
+      "early": {
+        "historySHA256": "7dbf5a00aff4cf5c06fd4139717b20ad1ba7cd7a60a3abf057188bb549739ffa",
+        "finalSHA256": "ad792e38cd37cc8a2219270fd0d869e9ed106fc56c46e63f5422b53ec8ce2956"
+      },
+      "setup": {
+        "historySHA256": "e439f5a936557c7118b37b428e076e1cab052d343724ca8ccf7cbc487c93e638",
+        "finalSHA256": "2da302e4783e469b2fff5d4a6e1cabbc95ae0a5e27ebff8d1780864c6911c903"
+      },
+      "reinforced": {
+        "historySHA256": "dc27ea69d613286bdfe2e200f52917bbef86b50a3e24865417406d085f8473f2",
+        "finalSHA256": "1e6874186bf4bb55bbe5b6fc0b784d7be68cdc94017a05d8636630245324cea7"
+      }
+    }
+  }
+}
