@@ -23,7 +23,7 @@ const upgrade = [
   { kind: 'cut', ...joint },
   { kind: 'bond', ...joint, strength: 500 },
 ];
-function scene(api, profiles, x = -1.57) {
+function scene(api, profiles, x = -1.64, z = 0, halfZ = 0.12) {
   const crew =
     x === null
       ? []
@@ -32,8 +32,8 @@ function scene(api, profiles, x = -1.57) {
             api,
             profiles,
             'engineer',
-            [x, deckTop + 0.075, 0.28],
-            [0.075, 0.075, 0.075],
+            [x, deckTop + 0.075, z],
+            [0.075, 0.075, halfZ],
             1,
           ),
         ];
@@ -254,6 +254,42 @@ try {
   const bundle = await bundleEngine(process.cwd(), folder, 'public', catalogue);
   const api = await import(pathToFileURL(bundle.path).href);
   const profiles = await api.createMultiphysicsProfiles3D();
+  // Temporary bounded hosted geometry capture for the free engineer.
+  for (const [x, z, h] of [
+    [-1.64, 0, 0.12],
+    [-1.65, 0, 0.075],
+    [-1.4, 0.27, 0.12],
+    [-1.57, 0.26, 0.12],
+    [-1.6, 0, 0.1],
+    [-1.64, 0.04, 0.12],
+    [-1.57, 0.28, 0.075],
+  ]) {
+    const start = scene(api, profiles, x, z, h);
+    for (const action of actions) {
+      let n = 0;
+      try {
+        const plan = createCrossingSession(api, profiles, start).prepareTeam(orders(action));
+        const result = complete(plan, 256, () => {
+          n++;
+        });
+        console.log(
+          'Geometry',
+          x,
+          z,
+          h,
+          action,
+          'ticks',
+          n,
+          'arrival',
+          result.arrival,
+          'fracture',
+          result.fracture,
+        );
+      } catch (e) {
+        console.log('Geometry', x, z, h, action, 'after', n, String(e));
+      }
+    }
+  }
   const initial = scene(api, profiles);
   assert.equal(initial.rules, 'multiphysics-world-2');
   summary.rules = initial.rules;
