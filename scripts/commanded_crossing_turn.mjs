@@ -23,9 +23,18 @@ export function createCrossingSession(api, profiles, initial) {
     const base = live,
       start = base.snapshot(),
       fork = makeWorld(start);
+    // A resting contact can leave tiny residual motion after a wait turn.
+    const unit = at(start, 'unit');
+    const omega = api.applyWorldInverseInertia(
+      unit.orientation,
+      unit.principalInertia.map((i) => 1 / i),
+      unit.intrinsicAngularMomentum,
+    );
+    const surfaceSpeed =
+      Math.hypot(...unit.velocity) + Math.hypot(...omega) * Math.hypot(...unit.halfExtents);
     if (
       order === 'cross-to-far-bank' &&
-      (!standingOn(api, start, 'abutment') || at(start, 'unit').velocity.some((v) => v !== 0))
+      (!standingOn(api, start, 'abutment') || surfaceSpeed > 1e-7)
     )
       throw Error('Crossing starts from rest on the near bank.');
     let phase = 'running',

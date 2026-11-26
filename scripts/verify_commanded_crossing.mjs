@@ -56,6 +56,7 @@ function impulsesMatch(before, frame) {
 function qualify(api, spec, order, initial, frames, final) {
   const edits = frames.filter((f) => f.edits.length);
   assert(at(initial, 'unit').velocity.every((v) => v === 0));
+  assert(at(initial, 'unit').intrinsicAngularMomentum.every((v) => v === 0));
   assert(standingOn(api, initial, 'abutment'));
   let previous = initial;
   for (const f of frames) {
@@ -148,10 +149,15 @@ function logReplay(api, profiles, initial, frames, boundaries) {
 function exercise(api, profiles, spec, order, digest, folder, id) {
   const initial = movingCrossingScene(api, profiles, spec, 0);
   const session = createCrossingSession(api, profiles, initial);
+  assert.throws(() => session.prepare('invalid'), /Unknown/);
+  const failed = session.prepare(order);
+  assert.throws(() => failed.advance(0), /budget/);
+  assert.equal(failed.status(), 'failed');
+  assert.throws(() => session.commit(failed), /not ready/);
   const stale = session.prepare(order);
   const cancelled = session.prepare(order);
   cancelled.advance(1);
-  assert.throws(() => session.commit(cancelled));
+  assert.throws(() => session.commit(cancelled), /not ready/);
   assert(cancelled.cancel());
   assert.throws(() => session.commit(cancelled));
   assert.deepEqual(session.snapshot(), initial);
@@ -178,10 +184,32 @@ function exercise(api, profiles, spec, order, digest, folder, id) {
   plan.result().snapshot.parcels.length = 0;
   assert.deepEqual(session.commit(plan), final);
   assert.deepEqual(session.snapshot(), final.snapshot);
-  assert.deepEqual(again.commit(retry), final);
+  if (spec.id === 'heavy' && order === 'cross-to-far-bank') {
+    // Both possible outcomes are ready against the same original state. Select
+    // waiting after seeing collapse; the discarded prediction cannot publish.
+    const wait = again.prepare('wait');
+    const safe = complete(wait, 256, () => {});
+    assert.equal(safe.fracture, null);
+    assert(standingOn(api, safe.snapshot, 'abutment'));
+    assert.deepEqual(again.snapshot(), initial);
+    assert.deepEqual(again.commit(wait), safe);
+    assert.throws(() => again.commit(retry), /stale/);
+    assert.deepEqual(again.snapshot(), safe.snapshot);
+    measured.selectedWaitSHA256 = digest(safe);
+  } else assert.deepEqual(again.commit(retry), final);
   assert.throws(() => session.commit(plan));
-  assert.throws(() => session.commit(stale));
+  assert.throws(() => session.commit(stale), /stale/);
   stale.cancel();
+  if (order === 'wait') {
+    // Support jitter after a whole wait must still admit the next movement order.
+    const next = session.prepare('cross-to-far-bank');
+    let step;
+    while (!step) step = next.advance(256);
+    assert.equal(step.edits[0].kind, 'impulse');
+    assert.equal(step.result.snapshot.tick, final.snapshot.tick + 1);
+    assert(next.cancel());
+    assert.deepEqual(session.snapshot(), final.snapshot);
+  }
   const boundaries = [
     ...new Set([
       0,
@@ -254,6 +282,30 @@ try {
       console.log('Replayed', id, ticks, summary.cases[id].historySHA256);
     }
   }
+  assert.equal(
+    summary.cases['heavy-cross-to-far-bank'].selectedWaitSHA256,
+    summary.cases['heavy-wait'].finalSHA256,
+  );
+  const frozen = JSON.parse(
+    readFileSync('engine/test-support/fixtures/commanded-crossing-v2.json', 'utf8'),
+  );
+  assert.equal(frozen.rules, 'multiphysics-world-2');
+  assert.equal(frozen.v8, summary.runtime.v8);
+  const measured = Object.fromEntries(
+    Object.entries(summary.cases).map(([id, c]) => [
+      id,
+      {
+        initialSHA256: c.initialSHA256,
+        historySHA256: c.historySHA256,
+        finalSHA256: c.finalSHA256,
+      },
+    ]),
+  );
+  assert.deepEqual(
+    measured,
+    frozen.cases,
+    'commanded crossing initial state, history or outcome changed',
+  );
   summary.status = 'complete';
 } catch (e) {
   summary.status = 'failed';

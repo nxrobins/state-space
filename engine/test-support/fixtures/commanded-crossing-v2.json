@@ -1,0 +1,32 @@
+{
+  "rules": "multiphysics-world-2",
+  "v8": "12.4.254.21-node.56",
+  "captureRun": "https://github.com/nxrobins/state-space/actions/runs/45884447693",
+  "cases": {
+    "light-cross-to-far-bank": {
+      "initialSHA256": "bef607a9fe02c8c603a346d4eed5fb1bbef23c332a6a32701fc45e56a9f856f6",
+      "historySHA256": "101b1cf071f1d2e5b9d614f300e56cf86d9dd1df6a9becc82f2ccb52191aab71",
+      "finalSHA256": "bd05229b3269d124ebe7884c864da6e1ec4fa5adea82507ea950a83e3b630247"
+    },
+    "light-wait": {
+      "initialSHA256": "bef607a9fe02c8c603a346d4eed5fb1bbef23c332a6a32701fc45e56a9f856f6",
+      "historySHA256": "0cae6f95ce5ed3279d876d6820329674a833ef7e948fbb46b7af2fd3590e3c19",
+      "finalSHA256": "2ada3f399893178dfc2c4c09056b8d0af3e47cf7249cfce317151cfd4840fd2e"
+    },
+    "heavy-cross-to-far-bank": {
+      "initialSHA256": "9f55181c60e0d97b350d193fb8b31560573e5ad9030059a2c667fbc9201b0071",
+      "historySHA256": "59b1237608cd00743b548d1d92e0a3615ab387447f7f50bdcb0432c0fe8e191c",
+      "finalSHA256": "ed506a7c1c678a6c30219ad4190b2240e0990bb5ebd6d9c84985f985e899be12"
+    },
+    "heavy-wait": {
+      "initialSHA256": "9f55181c60e0d97b350d193fb8b31560573e5ad9030059a2c667fbc9201b0071",
+      "historySHA256": "47586f6dbb2a213ccf2a6a4778dd7e5e56d717b573c691935125c52ebc2ec4a3",
+      "finalSHA256": "edd03dd350e3a6c8015069f94e6c4f5548b62dff85f6de90686319dd3aa0cc6b"
+    },
+    "reinforced-cross-to-far-bank": {
+      "initialSHA256": "3bcf0181925a889755a5380df78f8e8ec1642f8d56b99250fa4240a0ac00540a",
+      "historySHA256": "32890594ba3007184d6ddb3c0c7550159692197f817167dc7fee8861090ce907",
+      "finalSHA256": "c4f3bfc00569001d3e8fba08b6cc4c88e81106d844ec98a67e6c1523df90a65a"
+    }
+  }
+}

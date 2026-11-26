@@ -5,6 +5,7 @@ Reports below preserve the implementation and host measured at their checkpoint.
 
 | Evidence | Scope |
 | --- | --- |
+| [Commanded crossing](COMMANDED_CROSSING.md) | Whole-order preview, atomic commit, impulse accounting and exact replay from rest on hosted CPU |
 | [Moving-load crossing](MOVING_LOAD_CROSSING.md) | Hosted bank-to-bank transit, deck reaction, underfoot fracture, water travel and replay |
 | [Load-bearing crossing](LOAD_BEARING_CROSSING.md) | Hosted v2 CPU support reactions, fracture, water displacement and exact save/restart trajectories |
 | [Full v2 water ticks](FULL_V2_WATER_TICKS.md) | Hosted CPU timings, stage attribution and exact replay for the 63-water cup, 99-water tank and resting control |
