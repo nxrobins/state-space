@@ -13,8 +13,9 @@ import { guardNode } from './verification_guard.mjs';
 const dt = 1 / 480,
   gravity = 9.8,
   ticks = 160;
-// The underside is initially tangent to the water samples at the deck edges.
-const deckY = 0.5 + 0.4 + 0.125;
+// A 3:4:5 edge-to-sample triangle gives tangency at y=1.025. Leave a small
+// vertical clearance so a supported deck cannot push the resting water.
+const deckY = 0.5 + 0.4 + 0.125 + 0.0001;
 const cases = [
   { id: 'unloaded', mass: 0, strength: 50 },
   { id: 'light', mass: 1, strength: 50 },
@@ -66,6 +67,7 @@ function initialState(api, profiles, { mass, strength }) {
 }
 
 function observe(initial, { snapshot, report }, digest) {
+  const ballast = snapshot.parcels.find((p) => p.id === 'ballast');
   const water = initial.parcels
     .filter((p) => p.material === 'water')
     .map((p) => {
@@ -77,12 +79,13 @@ function observe(initial, { snapshot, report }, digest) {
   return {
     tick: snapshot.tick,
     work: report.work,
+    numericalEnergy: report.numericalEnergy,
     resultSHA256: digest({ snapshot, report }),
     bondIntact: snapshot.bonds.some((b) => b.a === 'abutment' && b.b === 'deck'),
     broken: report.brokenBonds.map((b) => [b.a, b.b]),
     deckY: at(snapshot, 'deck').center[1],
-    ballastY: snapshot.parcels.find((p) => p.id === 'ballast')?.center[1] ?? null,
-    ballastVy: snapshot.parcels.find((p) => p.id === 'ballast')?.velocity[1] ?? null,
+    ballastY: ballast?.center[1] ?? null,
+    ballastVy: ballast?.velocity[1] ?? null,
     // The public receipt is the impulse received by ALL fixed boundaries.
     boundaryImpulse: report.boundaryLinearImpulse,
     boundaryAngularImpulse: report.boundaryAngularImpulse,
@@ -122,9 +125,16 @@ function compare(outcomes) {
   assert.deepEqual(crossingBreak[0].broken, [['abutment', 'deck']]);
   const fractureTick = crossingBreak[0].tick;
   assert(
-    heavy.rows.every((r) => r.bondIntact === r.tick < fractureTick),
+    heavy.rows.every((r) => (r.tick < fractureTick ? r.bondIntact : !r.bondIntact)),
     'fracture receipt and bond topology',
   );
+  for (const c of [light, reinforced]) {
+    const initialHeight = at(c.initial, 'ballast').center[1];
+    assert(
+      c.rows.every((r) => Math.abs(r.ballastY - initialHeight) < 1e-8),
+      c.id + ' ballast left its supported height',
+    );
+  }
   for (const c of [unloaded, light, reinforced]) {
     assert(
       c.rows.every((r) => r.bondIntact && !r.broken.length),
@@ -218,7 +228,7 @@ try {
     assert.equal(initial.rules, 'multiphysics-world-2');
     const c = { ...spec, initialSHA256, rows: [] };
     summary.cases.push(c);
-    outcomes[spec.id] = { ...c, initial };
+    outcomes[spec.id] = { initial, ...c };
     const results = [];
     let state = initial;
     for (let i = 0; i < ticks; i++) {
