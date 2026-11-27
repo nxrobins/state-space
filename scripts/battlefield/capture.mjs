@@ -28,6 +28,8 @@ import {
 import { geometry } from './scene.mjs';
 import { measurePass } from './passes.mjs';
 
+import { verifyChoices } from './verify-choices.mjs';
+
 await guardNode('cpu', 300);
 const root = resolve('dist/verification/battlefield');
 await mkdir(root, { recursive: true });
@@ -207,12 +209,17 @@ try {
       distribution(report.raw.map((r) => r[k])),
     ]),
   );
+  await worker.terminate();
+  worker = undefined;
+  const choices = await verifyChoices(packet);
+  report.twoChoice = choices.report;
   const bundle = resolve(output, 'native');
   await mkdir(bundle);
   await build({
     entryPoints: {
       app: 'scripts/battlefield/browser.mjs',
       worker: 'scripts/battlefield/worker.mjs',
+      'choice-worker': 'scripts/battlefield/choice-worker.mjs',
     },
     outdir: bundle,
     bundle: true,
@@ -222,8 +229,16 @@ try {
   });
   await copyFile('scripts/battlefield/index.html', resolve(bundle, 'index.html'));
   await writeFile(resolve(bundle, 'packet.json'), bytes);
+  await writeFile(resolve(bundle, 'choices.json'), pack(choices.reference));
   const files = {};
-  for (const name of ['app.js', 'worker.js', 'index.html', 'packet.json'])
+  for (const name of [
+    'app.js',
+    'worker.js',
+    'choice-worker.js',
+    'index.html',
+    'packet.json',
+    'choices.json',
+  ])
     files[name] = hash(await readFile(resolve(bundle, name)));
   await writeFile(
     resolve(bundle, 'manifest.json'),

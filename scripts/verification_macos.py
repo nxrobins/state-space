@@ -37,8 +37,9 @@ MULTIPHYSICS_WORKER_STAGES = tuple(f"multiphysics-worker-{scene}" for scene in M
 # drive 24 preview/cancel/commit rounds, an edit receipt, compare, an atomic rejection and save/restart
 # while the camera orbits every frame. Each requires that scene's passing Worker stage from the same sources.
 MULTIPHYSICS_BUILDER_STAGES = tuple(f"multiphysics-builder-{scene}-visible" for scene in MULTIPHYSICS_WORKER_SCENES)
+BATTLEFIELD_STAGES = ("battlefield-crossing-visible", "battlefield-prepared-visible", "battlefield-fresh-visible")
 STAGES = (
-    "battlefield-crossing-visible",
+    *BATTLEFIELD_STAGES,
     *SANDBOX_STAGES,
     "chamber-visible",
     "pilot",
@@ -75,7 +76,10 @@ def m6_stage(stage):
 
 def stage_bounds(stage):
     """(maxDimension, maxReplayTicks, maxFrames) that one fixed stage may reach."""
-    if stage == "battlefield-crossing-visible":
+    if stage == "battlefield-prepared-visible":
+        # Two four-tick options plus a fresh four-tick fallback, including warm-up.
+        return 64, 320, 4096
+    if stage in BATTLEFIELD_STAGES:
         return 64, 100, 4096
     m6 = m6_stage(stage)
     if stage in M6_PROBE_STAGES:
