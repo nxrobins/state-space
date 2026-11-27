@@ -57,6 +57,10 @@ def main():
         Path(__file__),
     ]
 
+    if args.stage == "battlefield-crossing-visible":
+        paths.extend(ROOT.glob("dist/battlefield-benchmark/*"))
+        paths.extend(ROOT.glob("scripts/battlefield/*"))
+
     def hashes():
         return {
             str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -90,7 +94,9 @@ def main():
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
         is_scale = args.stage == "scale-128-visible"
-        if args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
+        if args.stage == "battlefield-crossing-visible":
+            page = "dist/battlefield-benchmark/"
+        elif args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
             scenario = "chamber" if args.stage == "chamber-visible" else args.stage.split("-")[1]
             page = "dist/reactive-chamber/?" + urlencode({"scenario": scenario, "profile": "1"})
         elif args.stage in MULTIPHYSICS_BUILDER_STAGES:
