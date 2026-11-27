@@ -47,10 +47,12 @@ and test sources; `npm run format:check` is the CI gate. `.prettierignore`
 lists what stays byte-exact: generated code, vendored files, built output,
 archived evidence and the frozen material-law sources.
 
-The exact liquid/contact CI job uses Node 22.22.3, the runtime recorded in the
-baseline, and runs all 36 cases through the supervised freeze checker. It retains
-complete records under the workflow artifacts. The regular unit suite also checks
-the light cases on its current runtime.
+The liquid/contact CI jobs compare all 36 cases in each of the v1 and v2 archives
+on the pinned Linux x64 Node executable and on a newer runtime. The reference
+job also checks every cube vector against native exponentiation. Both jobs
+retain complete records in their workflow artifacts. Creating or updating a
+freeze requires the executable identified in
+[`density-cube-linux-x64.json`](engine/test-support/fixtures/density-cube-linux-x64.json).
 
 For a focused check, use the file's current path and the bounded CPU config:
 

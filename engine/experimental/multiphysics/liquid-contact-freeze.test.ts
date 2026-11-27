@@ -25,10 +25,6 @@ type Freeze = {
 };
 const read = (name: string) => readFileSync(new URL(name, import.meta.url), 'utf8');
 const freeze = JSON.parse(read('./liquid-contact-freeze.json')) as Freeze;
-// Float64 arithmetic is the same everywhere; Math's transcendental functions are only the
-// same on one V8. Elsewhere the digests are skipped and the outcome is still compared.
-const exact = process.versions.v8 === freeze.runtime.v8;
-const numberless = (message: string) => message.replace(/-?\d+(\.\d+)?(e[-+]?\d+)?/g, '#');
 let profiles: engine.MultiphysicsProfiles3D;
 beforeAll(async () => {
   profiles = await engine.createMultiphysicsProfiles3D();
@@ -62,15 +58,5 @@ test.each(FROZEN_REJECTION_SOURCES_3D)('the rejections in %s are the frozen ones
 test.each(FROZEN_CASES_3D.filter((frozen) => !frozen.heavy))('$id behaves as frozen', (frozen) => {
   const { why: _why, heavy: _heavy, ...expected } = freeze.cases[frozen.id];
   const record = recordFrozenCase3D(engine, profiles, frozen);
-  if (exact) {
-    expect(record).toEqual(expected);
-    return;
-  }
-  expect(record.outcome).toBe(expected.outcome);
-  expect(record.steps.length).toBe(expected.steps.length);
-  expect(record.rejection?.stage).toBe(expected.rejection?.stage);
-  expect(numberless(record.rejection?.message ?? '')).toBe(
-    numberless(expected.rejection?.message ?? ''),
-  );
-  expect(record.rejection?.atomic).toBe(expected.rejection?.atomic);
+  expect(record).toEqual(expected);
 });

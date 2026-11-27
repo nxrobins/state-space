@@ -36,6 +36,16 @@ The v2 oracle comes from `d51f17c` with only its rules literal relabeled.
 The pinned CPU job compares all 36 cases for each ruleset and restores the
 tick-24 save through the heat edit and the original rejection.
 
+The density kernel evaluates its cube with the historical Linux x64 binary64
+rounding in both rulesets. The reference is the official Linux x64 Node
+22.22.3 executable (V8 12.4.254.21-node.56). Its SHA-256, named boundary
+cases and deterministic corpus digest are pinned in the
+[arithmetic fixture](../engine/test-support/fixtures/density-cube-linux-x64.json).
+The same Node version on ARM64 can produce a different low bit for the same
+input. Saves resume from their stored state. Exact replay here means agreement
+with the canonical archived trajectory. An earlier producer using different
+native arithmetic could have recorded a different history.
+
 ### Milestone 1 reference boundary
 
 The reference surface covers quaternion/finite-cuboid geometry, mass and inertia,
@@ -358,11 +368,13 @@ Every rejection left its input bit-identical, and a second attempt and an
 attempt from the JSON save rejected at the same stage, work and message.
 
 `liquid-contact-freeze.test.ts` runs 13 light cases and the rejection-message
-check in `npm test`. Digests are compared on the recording V8 and the outcome
-elsewhere. All 36 cases run under the supervisor:
+check in `npm test`. Every runtime compares the frozen digests. The supervisor
+runs the rounding corpus and both complete catalogues:
 
 ```sh
+node scripts/check_density_cube.mjs
 node scripts/freeze_liquid_contact.mjs check
+node scripts/freeze_liquid_contact.mjs check-legacy
 node scripts/freeze_liquid_contact.mjs compare --commit 06c737f
 ```
 

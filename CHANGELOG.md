@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Pin density-kernel cube rounding to the Linux x64 reference and check exact v1 and v2 replay across runtimes (#130).
+
 - Add a two-turn squad crossing mission with preview, commit, win and loss conditions and hosted save/replay checks (#128).
 
 - Add a multi-turn crossing with an engineer approach, a premature crossing control and hosted replay across the turn save (#127).
