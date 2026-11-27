@@ -57,6 +57,10 @@ def main():
         Path(__file__),
     ]
 
+    if args.stage == "battlefield-crossing-visible":
+        paths.extend(ROOT.glob("dist/battlefield-benchmark/*"))
+        paths.extend(ROOT.glob("scripts/battlefield/*"))
+
     def hashes():
         return {
             str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -75,6 +79,15 @@ def main():
     }
     browser = server = None
     try:
+        if args.stage == "battlefield-crossing-visible":
+            bundle = ROOT / "dist/battlefield-benchmark"
+            manifest = json.loads((bundle / "manifest.json").read_bytes())
+            files = ["app.js", "worker.js", "index.html", "packet.json"]
+            if manifest["files"] != {
+                name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in files
+            }:
+                raise RuntimeError("Battlefield bundle differs from its hosted capture.")
+            report["battlefieldManifest"] = manifest
         report["prerequisite"] = require_preceding_stage(
             ROOT / "dist/verification", args.stage, before
         )
@@ -90,7 +103,9 @@ def main():
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
         is_scale = args.stage == "scale-128-visible"
-        if args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
+        if args.stage == "battlefield-crossing-visible":
+            page = "dist/battlefield-benchmark/"
+        elif args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
             scenario = "chamber" if args.stage == "chamber-visible" else args.stage.split("-")[1]
             page = "dist/reactive-chamber/?" + urlencode({"scenario": scenario, "profile": "1"})
         elif args.stage in MULTIPHYSICS_BUILDER_STAGES:
@@ -143,6 +158,7 @@ def main():
         )
         previous = None
         captured_chamber = False
+        battlefield_captures = {}
         while time.monotonic() < deadline:
             state = browser.call(
                 "eval",
@@ -166,6 +182,18 @@ def main():
                 report["viewSha256"] = hashlib.sha256((out / "builder-view.png").read_bytes()).hexdigest()
                 browser.call("eval", expression="window.builderCaptureAck = true")
                 captured_chamber = True
+            if args.stage == "battlefield-crossing-visible" and "captureKey" in state:
+                key = state["captureKey"]
+                if type(key) is not int or key not in (0, 64):
+                    raise RuntimeError("Unexpected battlefield camera key")
+                if key not in battlefield_captures:
+                    browser.call("screenshot")
+                    image = out / f"camera-{key}.png"
+                    shutil.copyfile(out / "view.png", image)
+                    battlefield_captures[key] = hashlib.sha256(image.read_bytes()).hexdigest()
+                    report["battlefieldImages"] = battlefield_captures
+                    ack = {"key": key, "url": "/" + image.relative_to(ROOT).as_posix()}
+                    browser.call("eval", expression="window.battlefieldCapture = " + json.dumps(ack))
             if state.get("done"):
                 break
             time.sleep(0.5)
