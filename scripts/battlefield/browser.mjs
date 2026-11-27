@@ -97,11 +97,24 @@ async function measure() {
     // Record a real nonblank GPU image outside the measurement windows.
     async function imageSignature(i) {
       await draw(viewOf(packet.initial), null, cameraAt(i));
+      // WebGPU can discard the canvas texture when presenting it. The supervisor
+      // captures the composited viewport while this camera and its GPU resources stay live.
+      report.captureKey = i;
+      publish(report);
+      const until = clock() + 10000;
+      while (window.battlefieldCapture?.key !== i) {
+        if (clock() > until) throw Error('Composited terrain capture timed out');
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      const screenshot = new Image();
+      screenshot.src = window.battlefieldCapture.url;
+      await screenshot.decode();
+      delete report.captureKey;
       const thumb = document.createElement('canvas');
       thumb.width = 96;
       thumb.height = 54;
       const ctx = thumb.getContext('2d');
-      ctx.drawImage(canvas, 0, 0, 96, 54);
+      ctx.drawImage(screenshot, 0, 0, 96, 54);
       const pixels = ctx.getImageData(0, 0, 96, 54).data;
       if (new Set(new Uint32Array(pixels.buffer)).size < 16) throw Error('Empty terrain capture');
       return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', pixels)), (v) =>

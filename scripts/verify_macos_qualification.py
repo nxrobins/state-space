@@ -158,6 +158,7 @@ def main():
         )
         previous = None
         captured_chamber = False
+        battlefield_captures = {}
         while time.monotonic() < deadline:
             state = browser.call(
                 "eval",
@@ -181,6 +182,18 @@ def main():
                 report["viewSha256"] = hashlib.sha256((out / "builder-view.png").read_bytes()).hexdigest()
                 browser.call("eval", expression="window.builderCaptureAck = true")
                 captured_chamber = True
+            if args.stage == "battlefield-crossing-visible" and "captureKey" in state:
+                key = state["captureKey"]
+                if type(key) is not int or key not in (0, 64):
+                    raise RuntimeError("Unexpected battlefield camera key")
+                if key not in battlefield_captures:
+                    browser.call("screenshot")
+                    image = out / f"camera-{key}.png"
+                    shutil.copyfile(out / "view.png", image)
+                    battlefield_captures[key] = hashlib.sha256(image.read_bytes()).hexdigest()
+                    report["battlefieldImages"] = battlefield_captures
+                    ack = {"key": key, "url": "/" + image.relative_to(ROOT).as_posix()}
+                    browser.call("eval", expression="window.battlefieldCapture = " + json.dumps(ack))
             if state.get("done"):
                 break
             time.sleep(0.5)
