@@ -92,15 +92,20 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
   const frame = distribution(frames.map((f) => f.completionMs)),
     prediction = distribution(queries.map((q) => q.predictionVisibleMs));
   const missedDeadlines = frames.filter((f) => f.completionMs > 1000 / 60).length;
-  const lostSlots = frames.reduce(
-    (s, f) => s + Math.max(0, Math.round((f.interval ?? 0) / (1000 / 60)) - 1),
-    0,
-  );
+  const span = frames.at(-1).stamp - frames[0].stamp;
+  const lostSlots = Math.max(0, Math.round(span / (1000 / 60)) - (frames.length - 1));
+  const stages = {};
+  for (const k of ['projectionMs', 'editMs', 'renderMs']) {
+    if (frames.every((f) => typeof f[k] === 'number'))
+      stages[k] = distribution(frames.map((f) => f[k]));
+  }
   return {
     frames,
     queries,
     frame,
     prediction,
+    stages,
+    completedHz: ((frames.length - 1) * 1000) / span,
     missedDeadlines,
     lostSlots,
     meetsDiagnosticBudgets:

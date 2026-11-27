@@ -79,6 +79,15 @@ def main():
     }
     browser = server = None
     try:
+        if args.stage == "battlefield-crossing-visible":
+            bundle = ROOT / "dist/battlefield-benchmark"
+            manifest = json.loads((bundle / "manifest.json").read_bytes())
+            files = ["app.js", "worker.js", "index.html", "packet.json"]
+            if manifest["files"] != {
+                name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in files
+            }:
+                raise RuntimeError("Battlefield bundle differs from its hosted capture.")
+            report["battlefieldManifest"] = manifest
         report["prerequisite"] = require_preceding_stage(
             ROOT / "dist/verification", args.stage, before
         )

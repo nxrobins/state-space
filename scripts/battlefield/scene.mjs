@@ -68,7 +68,7 @@ export function crossingCells(view, prediction) {
     const [x, y, z] = [
       Math.round(32 + 4 * center[0]),
       Math.round(12 - 4 * center[1]) + dy,
-      Math.floor(32 + 4 * center[2]),
+      Math.floor(32.125 + 4 * center[2]),
     ];
     if (x < 0 || x >= 64 || y < 0 || y >= 16 || z < 0 || z >= 64)
       throw Error('Crossing outside the battlefield');

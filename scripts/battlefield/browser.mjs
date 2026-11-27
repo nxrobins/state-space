@@ -4,18 +4,31 @@ import { pack, unpack, startTick, sliceCount, sliceTicks, viewOf } from './slice
 import { measurePass } from './passes.mjs';
 
 const stage = 'battlefield-crossing-visible';
-const boundary = () =>
-  new Promise((resolve) =>
-    requestAnimationFrame((t) => {
-      resolve(t);
-    }),
-  );
+// One callback per nominal 60 Hz slot even on a faster display.
+function displayClock() {
+  let origin,
+    last = -1;
+  return () =>
+    new Promise((resolve) => {
+      function frame(t) {
+        origin ??= t;
+        const slot = Math.floor((t - origin + 0.5) / (1000 / 60));
+        if (slot <= last) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        last = slot;
+        resolve(t);
+      }
+      requestAnimationFrame(frame);
+    });
+}
 const clock = () => performance.now();
 const publish = (r) => {
   document.getElementById('report').textContent = JSON.stringify(r);
 };
 async function measure() {
-  let field, renderer, worker, pending;
+  let field, renderer, worker, pending, workerFault;
   const report = {
     done: false,
     passed: false,
@@ -26,6 +39,7 @@ async function measure() {
     scope:
       '64x16x64 cinematic display grid, 12 unit markers, two physical actors and four moving water parcels. Application GPU completion; OS scanout excluded.',
   };
+  const boundary = displayClock();
   publish(report);
   try {
     const manifest = await (await fetch('./manifest.json')).json();
@@ -48,6 +62,8 @@ async function measure() {
     const canvas = document.querySelector('canvas'),
       terrain = createTerrain();
     report.resolution = [canvas.width, canvas.height];
+    report.viewport = [innerWidth, innerHeight];
+    report.devicePixelRatio = devicePixelRatio;
     field = await createStateSpaceStructuralWorld3DGPU({ ...geometry, mode: 'active' });
     report.adapter = field.backendInfo;
     if (
@@ -94,15 +110,9 @@ async function measure() {
     }
     report.images = [await imageSignature(0), await imageSignature(64)];
     if (report.images[0] === report.images[1]) throw Error('Camera views are identical');
-    worker = new Worker('./worker.js', { type: 'module' });
-    worker.onmessage = ({ data }) => {
-      if (data.error) pending.reject(Error(data.error));
-      else pending.resolve(data.value);
-      pending = null;
-    };
-    worker.onerror = (e) => pending?.reject(Error(e.message));
     function live(message) {
       return new Promise((resolve, reject) => {
+        if (workerFault) throw workerFault;
         if (pending) throw Error('Concurrent worker request');
         pending = { resolve, reject };
         worker.postMessage(message);
@@ -120,11 +130,22 @@ async function measure() {
           throw Error('Displayed prediction or commit differs at ' + i);
       }
     }
-    const counts = { frames: 0 };
+    const counts = { frames: 2 }; // includes the two image checks
     for (const mode of ['recorded', 'live']) {
       report.progress = mode;
       publish(report);
       if (mode === 'live') {
+        worker = new Worker('./worker.js', { type: 'module' });
+        worker.onmessage = ({ data }) => {
+          if (data.error) pending.reject(Error(data.error));
+          else pending.resolve(data.value);
+          pending = null;
+        };
+        worker.onerror = (e) => {
+          workerFault = Error(e.message);
+          pending?.reject(workerFault);
+          pending = null;
+        };
         await live({ kind: 'init', snapshot: packet.initial });
         await live({ kind: 'preview', tick: startTick, edits: packet.slices[0].edits });
         await live({ kind: 'commit', tick: startTick });
