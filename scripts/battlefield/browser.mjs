@@ -3,7 +3,13 @@ import { createTerrain, geometry, cameraAt, changedCells, crossingCells } from '
 import { firstDifference, unpack, startTick, sliceCount, sliceTicks, viewOf } from './slice.mjs';
 import { measurePass } from './passes.mjs';
 
-const stage = 'battlefield-crossing-visible';
+import { choiceChannel, choicePass, forecastTimings } from './choice-client.mjs';
+
+const stages = [
+  'battlefield-crossing-visible',
+  'battlefield-prepared-visible',
+  'battlefield-fresh-visible',
+];
 // One callback per nominal 60 Hz slot even on a faster display.
 function displayClock() {
   let origin,
@@ -27,7 +33,8 @@ const clock = () => performance.now();
 const publish = (r) => {
   document.getElementById('report').textContent = JSON.stringify(r);
 };
-async function measure() {
+async function measure(stage) {
+  const twoChoice = stage !== stages[0];
   let field, renderer, worker, pending, workerFault;
   const report = {
     done: false,
@@ -43,11 +50,12 @@ async function measure() {
   publish(report);
   try {
     const manifest = await (await fetch('./manifest.json')).json();
-    const bytes = await (await fetch('./packet.json')).arrayBuffer();
+    const packetFile = twoChoice ? 'choices.json' : 'packet.json';
+    const bytes = await (await fetch('./' + packetFile)).arrayBuffer();
     const digest = await crypto.subtle.digest('SHA-256', bytes);
     if (
       Array.from(new Uint8Array(digest), (v) => v.toString(16).padStart(2, '0')).join('') !==
-      manifest.files['packet.json']
+      manifest.files[packetFile]
     )
       throw Error('Packet digest changed');
     const packet = unpack(new TextDecoder().decode(bytes));
@@ -58,7 +66,7 @@ async function measure() {
     )
       throw Error('Unexpected crossing packet');
     report.revision = manifest.revision;
-    report.packetSHA256 = manifest.files['packet.json'];
+    report.packetSHA256 = manifest.files[packetFile];
     const canvas = document.querySelector('canvas'),
       terrain = createTerrain();
     report.resolution = [canvas.width, canvas.height];
@@ -123,6 +131,7 @@ async function measure() {
     }
     report.images = [await imageSignature(0), await imageSignature(64)];
     if (report.images[0] === report.images[1]) throw Error('Camera views are identical');
+    let requestLive;
     function live(message) {
       return new Promise((resolve, reject) => {
         if (workerFault) throw workerFault;
@@ -160,22 +169,30 @@ async function measure() {
       report.progress = mode;
       publish(report);
       if (mode === 'live') {
-        worker = new Worker('./worker.js', { type: 'module' });
-        worker.onmessage = ({ data }) => {
-          if (data.error) pending.reject(Error(data.error));
-          else pending.resolve(data.value);
-          pending = null;
-        };
-        worker.onerror = (e) => {
-          workerFault = Error(e.message);
-          pending?.reject(workerFault);
-          pending = null;
-        };
-        await live({ kind: 'init', snapshot: packet.initial });
-        await live({ kind: 'preview', tick: startTick, edits: packet.slices[0].edits });
-        await live({ kind: 'commit', tick: startTick });
-        await live({ kind: 'init', snapshot: packet.initial });
-        const initial = await live({ kind: 'audit', tick: startTick });
+        worker = new Worker(twoChoice ? './choice-worker.js' : './worker.js', { type: 'module' });
+        if (twoChoice) {
+          const channel = choiceChannel((message) => worker.postMessage(message));
+          worker.onmessage = ({ data }) => channel.receive(data);
+          worker.onerror = (e) => channel.fail(Error(e.message));
+          requestLive = choicePass(channel.request, stage === 'battlefield-prepared-visible');
+        } else {
+          requestLive = live;
+          worker.onmessage = ({ data }) => {
+            if (data.error) pending.reject(Error(data.error));
+            else pending.resolve(data.value);
+            pending = null;
+          };
+          worker.onerror = (e) => {
+            workerFault = Error(e.message);
+            pending?.reject(workerFault);
+            pending = null;
+          };
+        }
+        await requestLive({ kind: 'init', snapshot: packet.initial });
+        await requestLive({ kind: 'preview', tick: startTick, edits: packet.slices[0].edits });
+        await requestLive({ kind: 'commit', tick: startTick });
+        await requestLive({ kind: 'init', snapshot: packet.initial });
+        const initial = await requestLive({ kind: 'audit', tick: startTick });
         report.initialDifference = firstDifference(packet.initial, initial.live);
       }
       for (let i = 0; i < 32; i++) {
@@ -185,7 +202,7 @@ async function measure() {
       }
       report.passes[mode] = await measurePass({
         packet,
-        request: mode === 'live' ? live : recorded,
+        request: mode === 'live' ? requestLive : recorded,
         draw,
         boundary,
         clock,
@@ -193,7 +210,9 @@ async function measure() {
         counts,
       });
     }
-    const audit = await live({ kind: 'audit', tick: startTick + sliceTicks * sliceCount });
+    const audit = await requestLive({ kind: 'audit', tick: startTick + sliceTicks * sliceCount });
+    if (twoChoice)
+      report.forecastTimings = forecastTimings(report.passes.live.queries, 'predictionVisibleMs');
     const expected = packet.slices.flatMap((s) => s.results);
     if (audit.history.length !== expected.length) throw Error('Incomplete native history');
     report.exactTicks = 0;
@@ -241,8 +260,8 @@ let started = false;
 window.macQualification = {
   ready: true,
   run(name) {
-    if (name !== stage || started) throw Error('Unexpected benchmark stage');
+    if (!stages.includes(name) || started) throw Error('Unexpected benchmark stage');
     started = true;
-    void measure();
+    void measure(name);
   },
 };

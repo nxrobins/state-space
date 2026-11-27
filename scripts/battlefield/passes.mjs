@@ -78,6 +78,7 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
         queries.push({
           tick: slice.tick,
           workerMs: ready.workerMs,
+          ...(ready.path ? { path: ready.path } : {}),
           transportPreviewMs: received - submitted,
           predictionVisibleMs: previewVisible - submitted,
           commitAckMs: commitReceived - commitSent,

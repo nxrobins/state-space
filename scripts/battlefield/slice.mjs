@@ -21,6 +21,8 @@ export function firstDifference(expected, actual, path = '$') {
     typeof actual === 'object' &&
     Array.isArray(expected) === Array.isArray(actual)
   ) {
+    if (Array.isArray(expected) && expected.length !== actual.length)
+      return { path, expectedLength: expected.length, actualLength: actual.length };
     const keys = Object.keys(expected),
       other = Object.keys(actual);
     if (keys.length !== other.length || keys.some((k, i) => k !== other[i]))

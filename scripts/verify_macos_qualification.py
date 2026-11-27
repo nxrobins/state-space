@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 
 from scripts.verification_guard import ROOT, guarded_entry
 from scripts.verification_browser import PersistentBrowser
-from scripts.verification_macos import STAGES, SANDBOX_STAGES, MULTIPHYSICS_BUILDER_STAGES, require_preceding_stage
+from scripts.verification_macos import BATTLEFIELD_STAGES, STAGES, SANDBOX_STAGES, MULTIPHYSICS_BUILDER_STAGES, require_preceding_stage
 
 
 def main():
@@ -57,7 +57,7 @@ def main():
         Path(__file__),
     ]
 
-    if args.stage == "battlefield-crossing-visible":
+    if args.stage in BATTLEFIELD_STAGES:
         paths.extend(ROOT.glob("dist/battlefield-benchmark/*"))
         paths.extend(ROOT.glob("scripts/battlefield/*"))
 
@@ -79,10 +79,12 @@ def main():
     }
     browser = server = None
     try:
-        if args.stage == "battlefield-crossing-visible":
+        if args.stage in BATTLEFIELD_STAGES:
             bundle = ROOT / "dist/battlefield-benchmark"
             manifest = json.loads((bundle / "manifest.json").read_bytes())
             files = ["app.js", "worker.js", "index.html", "packet.json"]
+            if args.stage != "battlefield-crossing-visible" or "choice-worker.js" in manifest["files"]:
+                files.extend(["choice-worker.js", "choices.json"])
             if manifest["files"] != {
                 name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in files
             }:
@@ -103,7 +105,7 @@ def main():
         report["browser"] = browser.metadata
         is_gameplay = args.stage.startswith("gameplay-")
         is_scale = args.stage == "scale-128-visible"
-        if args.stage == "battlefield-crossing-visible":
+        if args.stage in BATTLEFIELD_STAGES:
             page = "dist/battlefield-benchmark/"
         elif args.stage == "chamber-visible" or args.stage in SANDBOX_STAGES:
             scenario = "chamber" if args.stage == "chamber-visible" else args.stage.split("-")[1]
@@ -182,7 +184,7 @@ def main():
                 report["viewSha256"] = hashlib.sha256((out / "builder-view.png").read_bytes()).hexdigest()
                 browser.call("eval", expression="window.builderCaptureAck = true")
                 captured_chamber = True
-            if args.stage == "battlefield-crossing-visible" and "captureKey" in state:
+            if args.stage in BATTLEFIELD_STAGES and "captureKey" in state:
                 key = state["captureKey"]
                 if type(key) is not int or key not in (0, 64):
                     raise RuntimeError("Unexpected battlefield camera key")
