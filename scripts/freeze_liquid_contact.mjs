@@ -25,6 +25,8 @@ import {
   extractCommit,
   loadCatalogue,
   readOptions,
+  readDensityCubeFreeze,
+  requireLiquidContactReference,
   selectCases,
 } from './liquid_contact_engine.mjs';
 import { guardNode } from './verification_guard.mjs';
@@ -44,6 +46,9 @@ if (
 )
   throw Error(USAGE);
 await guardNode('cpu', Number(options.timeout));
+
+const { reference } = await readDensityCubeFreeze();
+if (mode === 'record') await requireLiquidContactReference(reference);
 
 const output = resolve('dist/liquid-contact', `${mode}-${randomUUID()}`);
 await mkdir(output, { recursive: true });
@@ -97,6 +102,7 @@ const provenance = {
   mode,
   select: options.select,
   runtime,
+  reference,
   esbuild: esbuildVersion,
   bundleOptions: BUNDLE,
   catalogueSha256: catalogue.sha256,
@@ -182,10 +188,8 @@ if (mode === 'record') {
     const freeze = JSON.parse(
       await readFile(mode === 'check-legacy' ? LEGACY_FREEZE : CURRENT_FREEZE, 'utf8'),
     );
-    if (freeze.runtime.v8 !== runtime.v8)
-      throw Error(
-        `The freeze file was recorded on V8 ${freeze.runtime.v8}; exact comparison needs that runtime, not ${runtime.v8}.`,
-      );
+    if (freeze.runtime.v8 !== reference.v8 || freeze.runtime.node !== reference.node)
+      throw Error('Unexpected recording runtime in the frozen catalogue.');
     frozenRejections = freeze.rejections;
     expected = (frozen) => {
       const { why: _why, heavy: _heavy, ...record } = freeze.cases[frozen.id] ?? {};

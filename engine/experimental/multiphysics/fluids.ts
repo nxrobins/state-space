@@ -3,6 +3,7 @@
  * DFSPH coefficient iteration. Viscosity is pair relaxation, not an SI fit.
  */
 import { assertRecordFields, copyPortableValue, type PortableValue } from '../../portable-data.js';
+import { densityCube } from './density-cube.js';
 import { retainJobFunctions } from './retained-functions.js';
 import {
   readMaterialParcel3D,
@@ -506,7 +507,7 @@ export function fluidDensityKernel3D(offset: Vec3, h: number): { value: number; 
   if (r >= h) return { value: 0, gradient: ZERO };
   const c = 315 / (64 * Math.PI * h ** 9),
     q = h * h - r * r;
-  return { value: c * q ** 3, gradient: scaleVec3(offset, -6 * c * q * q) };
+  return { value: c * densityCube(q), gradient: scaleVec3(offset, -6 * c * q * q) };
 }
 function gasSupportRadius(volume: number, factor: number): number {
   return scalar(
