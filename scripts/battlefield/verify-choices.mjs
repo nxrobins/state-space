@@ -41,6 +41,21 @@ async function staleControls(initial, expected) {
   let { generation } = await init(initial);
   const send = (kind, opts = {}) => session({ kind, tick: startTick, generation, ...opts });
   const preview = (id) => send('preview', { requestId: id, edits: lateralOrder(1) });
+  // Both choices get a turn even when the client picks the second one immediately.
+  for (let turn = 0; turn < 2; turn++) {
+    assert.equal(paused.length, 1);
+    paused.shift()();
+    await Promise.resolve();
+  }
+  const secondChoice = preview(1);
+  while (paused.length) {
+    for (const resume of paused.splice(0)) resume();
+    await Promise.resolve();
+  }
+  const early = await secondChoice;
+  assert.ok(['in-flight', 'prepared'].includes(early.path));
+  assert.deepEqual(early.views, expected.views);
+  ({ generation } = await init(initial));
   const first = preview(1);
   await send('cancel', { requestId: 1 });
   const cancelled = assert.rejects(first, /Superseded/);

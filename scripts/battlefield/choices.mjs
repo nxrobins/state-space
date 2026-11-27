@@ -65,16 +65,17 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
     pool = batch;
     // Selecting, cancelling or restoring detaches the pool before the next quantum.
     void (async () => {
-      for (const choice of batch.choices) {
-        try {
-          while (choice.rows.length < sliceTicks) {
+      while (batch.choices.some((choice) => !choice.failed && choice.rows.length < sliceTicks)) {
+        for (const choice of batch.choices) {
+          if (choice.failed || choice.rows.length === sliceTicks) continue;
+          try {
             await yieldTask(true);
             if (pool !== batch) return;
             advance(choice);
+          } catch {
+            // Re-run a failed speculative branch through the normal request/rejection path.
+            choice.failed = true;
           }
-        } catch {
-          // Re-run a failed speculative branch through the normal request/rejection path.
-          choice.failed = true;
         }
       }
     })();
