@@ -5,6 +5,7 @@ Reports below preserve the implementation and host measured at their checkpoint.
 
 | Evidence | Scope |
 | --- | --- |
+| [Two-turn crossing mission](CROSSING_MISSION.md) | Squad objective, turn budget, terminal saves, distinct losses and exact mission replay |
 | [Multi-turn crossing](MULTI_TURN_CROSSING.md) | Engineer moves into range, saves the turn and reinforces before the heavy unit crosses |
 | [Two-unit crossing](TWO_UNIT_CROSSING.md) | Engineer reinforces or waits, paired heavy crossing and hosted exact replay |
 | [Commanded crossing](COMMANDED_CROSSING.md) | Whole-order preview, atomic commit, impulse accounting and exact replay from rest on hosted CPU |
