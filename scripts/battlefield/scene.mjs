@@ -38,8 +38,8 @@ export function createTerrain() {
     }
   // Ten background squad markers. The engineer and heavy are taken from the physics tape.
   for (const [x, z] of squad) {
-    put(x, 5, z, MAT.METAL);
-    put(x, 6, z, MAT.METAL);
+    put(x, 5, z, MAT.ICE);
+    put(x, 6, z, MAT.ICE);
   }
   field.step(0, { edits });
   return field.snapshot();
@@ -68,7 +68,7 @@ export function crossingCells(view, prediction) {
     const [x, y, z] = [
       Math.round(32 + 4 * center[0]),
       Math.round(12 - 4 * center[1]) + dy,
-      Math.round(32 + 4 * center[2]),
+      Math.floor(32 + 4 * center[2]),
     ];
     if (x < 0 || x >= 64 || y < 0 || y >= 16 || z < 0 || z >= 64)
       throw Error('Crossing outside the battlefield');
@@ -81,13 +81,13 @@ export function crossingCells(view, prediction) {
           const off = rotateVector(p.orientation, [i / 4, 0, k / 4]);
           put(
             p.center.map((v, j) => v + off[j]),
-            MAT.WOOD,
+            MAT.STONE,
           );
         }
     } else if (p.id.startsWith('water-')) put(p.center, MAT.WATER);
     else {
-      put(p.center, MAT.METAL);
-      put(p.center, MAT.METAL, -1);
+      put(p.center, MAT.ICE);
+      put(p.center, MAT.ICE, -1);
     }
   }
   if (prediction) {

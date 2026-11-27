@@ -10,7 +10,7 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
   let current = viewOf(packet.initial),
     previous;
   for (const [index, slice] of packet.slices.entries()) {
-    let pending, ready, commitReply, fault, submitted, received, commitSent, commitReceived;
+    let ready, commitReply, fault, submitted, received, commitSent, commitReceived;
     let previewVisible,
       commitVisible,
       playback = 0;
@@ -33,7 +33,6 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
         .catch((e) => {
           fault = e;
         });
-      return promise;
     }
     for (let n = 0; n < 120; n++) {
       const stamp = await boundary(),
@@ -42,7 +41,7 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
       if (++counts.frames > 4096) throw Error('Battlefield frame bound exceeded');
       if (n === 0) {
         submitted = clock();
-        pending = send('preview');
+        send('preview');
       }
       if (previewVisible !== undefined && commitSent === undefined) {
         commitSent = clock();
@@ -63,6 +62,8 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
       frames.push({
         tick: slice.tick,
         key,
+        visibleTick: current.tick,
+        forecastTick: shownPrediction ? ready.views.at(-1).tick : null,
         stamp,
         callback,
         completed,
@@ -73,7 +74,6 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
       });
       previous = stamp;
       if (commitVisible !== undefined && n + 1 >= framesPerSlice) {
-        await pending;
         observed.push({ views: ready.views, committed: commitReply });
         queries.push({
           tick: slice.tick,
