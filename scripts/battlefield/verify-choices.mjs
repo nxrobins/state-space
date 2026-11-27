@@ -2,8 +2,12 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Worker } from 'node:worker_threads';
-import { choiceChannel, choicePass, forecastTimings } from './choice-client.mjs';
-import { createChoiceSession, lateralOrder } from './choices.mjs';
+import {
+  createMultiphysicsProfiles3D,
+  createMultiphysicsWorld3D,
+} from 'state-space-engine/experimental/3d/multiphysics';
+import { choiceChannel, choicePass, forecastTimings, lateralOrder } from './choice-client.mjs';
+import { createChoiceSession } from './choices.mjs';
 import { createSliceSession, pack, sliceTicks, startTick } from './slice.mjs';
 
 // Independent of the speculative implementation. This digest predates this PR, from
@@ -32,7 +36,8 @@ async function staleControls(initial, expected) {
   // Park both speculative and foreground continuations so restore/cancel races are reproducible.
   const paused = [];
   const session = await createChoiceSession(() => new Promise((resolve) => paused.push(resolve)));
-  const init = (snapshot) => session({ kind: 'init', snapshot, prepare: true });
+  const menu = [-1, 1].map(lateralOrder);
+  const init = (snapshot) => session({ kind: 'init', snapshot, prepare: true, choices: menu });
   let { generation } = await init(initial);
   const send = (kind, opts = {}) => session({ kind, tick: startTick, generation, ...opts });
   const preview = (id) => send('preview', { requestId: id, edits: lateralOrder(1) });
@@ -44,8 +49,14 @@ async function staleControls(initial, expected) {
   const third = preview(3);
   const restored = assert.rejects(third, /Superseded/);
   const oldGeneration = generation;
-  const other = structuredClone(initial);
-  other.parcels.find((p) => p.id === 'engineer').velocity[2] += 0.0001;
+  const changed = createMultiphysicsWorld3D(await createMultiphysicsProfiles3D(), initial);
+  const edit = changed.prepare(lateralOrder(-1)[0], 0);
+  while (edit.advance(256).status === 'running') {
+    /* public zero-tick edit */
+  }
+  const other = changed.commit(edit).result.snapshot;
+  assert.equal(other.tick, initial.tick);
+  assert.notDeepEqual(other, initial);
   ({ generation } = await init(other));
   assert.notEqual(generation, oldGeneration);
   for (const resume of paused.splice(0)) resume();
@@ -72,6 +83,30 @@ async function staleControls(initial, expected) {
   await assert.rejects(send('commit', { requestId: 1 }), /Stale/);
   await assert.rejects(preview(1), /Invalid/);
   assert.deepEqual((await send('audit')).live, initial);
+  const replacing = preview(2);
+  const obsolete = assert.rejects(replacing, /Superseded/);
+  const previous = generation;
+  const wait = [[], [], [], []];
+  ({ generation } = await send('set-choices', { choices: [wait, menu[0]] }));
+  await assert.rejects(send('commit', { generation: previous, requestId: 2 }), /Stale/);
+  while (paused.length) {
+    for (const resume of paused.splice(0)) resume();
+    await Promise.resolve();
+  }
+  await obsolete;
+  const waitPreview = await send('preview', { requestId: 1, edits: wait });
+  assert.equal(waitPreview.path, 'prepared');
+  const waitReference = await createSliceSession();
+  waitReference({ kind: 'init', snapshot: initial });
+  assert.deepEqual(
+    waitPreview.views,
+    waitReference({ kind: 'preview', tick: startTick, edits: wait }).views,
+  );
+  await send('commit', { requestId: 1 });
+  assert.equal(
+    (await session({ kind: 'audit', tick: startTick + sliceTicks, generation })).history.length,
+    sliceTicks,
+  );
 }
 
 export async function verifyChoices(packet) {

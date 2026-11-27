@@ -1,5 +1,11 @@
 import { distribution } from './slice.mjs';
 
+// The crossing client offers these two lateral orders. The worker never receives a command tape.
+export function lateralOrder(direction) {
+  if (direction !== -1 && direction !== 1) throw Error('Invalid lateral order');
+  return [[{ kind: 'impulse', id: 'engineer', impulse: [0, 0, direction * 0.001] }], [], [], []];
+}
+
 // Use a distinct transport sequence for every operation, including overlapping requests.
 export function choiceChannel(post) {
   const pending = new Map();
@@ -40,7 +46,7 @@ export function choicePass(request, prepare) {
     requestId = 0;
   return async (message) => {
     if (message.kind === 'init') {
-      const result = await request({ ...message, prepare });
+      const result = await request({ ...message, prepare, choices: [-1, 1].map(lateralOrder) });
       generation = result.generation;
       return result;
     }

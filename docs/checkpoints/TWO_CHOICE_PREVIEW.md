@@ -1,6 +1,6 @@
 # Two-choice crossing preview
 
-One dedicated Worker owns a committed world snapshot and computes two possible four-tick forecasts serially while the presentation plays. The choices are left and right lateral impulses for the engineer. The worker receives the current state and the requested edits. The hosted reference packet and future selections stay with the client.
+One dedicated Worker owns a committed world snapshot and computes two possible four-tick forecasts serially while the presentation plays. The client supplies two distinct ordered edit sequences. In the benchmark they are left and right lateral impulses for the engineer. An accepted `set-choices` message replaces the menu, invalidates outstanding selections and returns a new generation without advancing the world. The worker receives the current state and the requested edits. The hosted reference packet and future selections stay with the client.
 
 An `init` or restore returns a new generation, including when the restored snapshot has the same tick. A preview carries that generation, the base tick, a strictly increasing request ID and all four ordered edit batches. A newer selection supersedes the earlier one. Commit and cancel require the matching generation, tick and request ID. Commit publishes the selected branch once. Speculation uses the ordinary CPU world with the same work accounting and rejection behavior. Background and foreground work yield between bounded advances so cancellation and restore can interrupt a running branch.
 

@@ -2,12 +2,23 @@ import {
   createMultiphysicsProfiles3D,
   createMultiphysicsWorld3D,
 } from 'state-space-engine/experimental/3d/multiphysics';
-import { firstDifference, sliceCount, sliceTicks, startTick, viewOf } from './slice.mjs';
+import { firstDifference, sliceCount, sliceTicks, viewOf } from './slice.mjs';
 
-// The crossing client offers these two lateral orders. The worker never receives a command tape.
-export function lateralOrder(direction) {
-  if (direction !== -1 && direction !== 1) throw Error('Invalid lateral order');
-  return [[{ kind: 'impulse', id: 'engineer', impulse: [0, 0, direction * 0.001] }], [], [], []];
+function validBatches(edits) {
+  return (
+    Array.isArray(edits) && edits.length === sliceTicks && Array.from(edits).every(Array.isArray)
+  );
+}
+
+function readChoices(input) {
+  if (
+    !Array.isArray(input) ||
+    input.length !== 2 ||
+    !Array.from(input).every(validBatches) ||
+    firstDifference(input[0], input[1]) === null
+  )
+    throw Error('Expected two distinct four-tick choices');
+  return structuredClone(input);
 }
 
 function yieldTurn(background) {
@@ -26,8 +37,7 @@ function yieldTurn(background) {
 export async function createChoiceSession(yieldTask = yieldTurn) {
   const profiles = await createMultiphysicsProfiles3D();
   const world = (snapshot) => createMultiphysicsWorld3D(profiles, snapshot);
-  const menu = [-1, 1].map(lateralOrder);
-  let live, pool, selected, history, prepare;
+  let menu, endTick, live, pool, selected, history, prepare;
   let generation = 0,
     latest = 0;
 
@@ -50,7 +60,7 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
 
   function schedule(base) {
     pool = undefined;
-    if (!prepare || base.tick >= startTick + sliceCount * sliceTicks) return;
+    if (!prepare || base.tick >= endTick) return;
     const batch = { base, choices: menu.map((edits) => branch(base, edits)) };
     pool = batch;
     // Selecting, cancelling or restoring detaches the pool before the next quantum.
@@ -73,13 +83,12 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
   return async function handle(message) {
     const { kind, tick, requestId, snapshot, edits } = message;
     if (kind === 'init') {
-      if (
-        snapshot?.tick !== startTick ||
-        snapshot.rules !== 'multiphysics-world-2' ||
-        typeof message.prepare !== 'boolean'
-      )
+      if (snapshot?.rules !== 'multiphysics-world-2' || typeof message.prepare !== 'boolean')
         throw Error('Invalid crossing start');
+      const choices = readChoices(message.choices);
       live = world(snapshot).snapshot();
+      endTick = live.tick + sliceCount * sliceTicks;
+      menu = choices;
       prepare = message.prepare;
       generation++;
       latest = 0;
@@ -90,6 +99,14 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
     }
     if (!live || message.generation !== generation || tick !== live.tick)
       throw Error('Stale battlefield request');
+    if (kind === 'set-choices') {
+      menu = readChoices(message.choices);
+      selected = undefined;
+      generation++;
+      latest = 0;
+      schedule(live);
+      return { tick: live.tick, generation };
+    }
     if (kind === 'audit') return { history, live };
     if (kind === 'status')
       return {
@@ -114,10 +131,8 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
       kind !== 'preview' ||
       !Number.isSafeInteger(requestId) ||
       requestId <= latest ||
-      !Array.isArray(edits) ||
-      edits.length !== sliceTicks ||
-      !Array.from(edits).every(Array.isArray) ||
-      live.tick >= startTick + sliceCount * sliceTicks
+      !validBatches(edits) ||
+      live.tick >= endTick
     )
       throw Error('Invalid battlefield preview');
 
@@ -126,7 +141,7 @@ export async function createChoiceSession(yieldTask = yieldTurn) {
     const match =
       pool?.base === live &&
       pool.choices.find((b) => !b.failed && firstDifference(b.edits, edits) === null);
-    const current = match || branch(live, edits);
+    const current = match || branch(live, structuredClone(edits));
     const path =
       current.rows.length === sliceTicks ? 'prepared' : current.fork ? 'in-flight' : 'fresh';
     const selection = { id: requestId, branch: current };
