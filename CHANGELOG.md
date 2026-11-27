@@ -15,6 +15,8 @@ date of the last change in the section.
 
 ### Added
 
+- Profile fresh and partially prepared battlefield forecasts against the exact crossing replay (#132).
+
 - Add a one-worker, two-choice crossing preview with stale-selection rejection and separate prepared and fresh latency receipts (#131).
 
 - Pin density-kernel cube rounding to the Linux x64 reference and check exact v1 and v2 replay across runtimes (#130).

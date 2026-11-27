@@ -34,9 +34,12 @@ function yieldTurn(background) {
 
 // One worker owns the public session and advances both private forecasts serially.
 // At most one selected four-tick result and two choices for its endpoint are retained.
-export async function createChoiceSession(yieldTask = yieldTurn) {
+export async function createChoiceSession(
+  yieldTask = yieldTurn,
+  openWorld = createMultiphysicsWorld3D,
+) {
   const profiles = await createMultiphysicsProfiles3D();
-  const world = (snapshot) => createMultiphysicsWorld3D(profiles, snapshot);
+  const world = (snapshot) => openWorld(profiles, snapshot);
   let menu, endTick, live, pool, selected, history, prepare;
   let generation = 0,
     latest = 0;
