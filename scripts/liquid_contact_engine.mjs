@@ -14,6 +14,25 @@ export const ENTRY = 'engine/experimental/multiphysics.ts';
 export const BUNDLE = { bundle: true, platform: 'node', format: 'esm', target: 'es2022' };
 export const hash = (data) => createHash('sha256').update(data).digest('hex');
 
+export const readDensityCubeFreeze = async () =>
+  JSON.parse(
+    await readFile(
+      new URL('../engine/test-support/fixtures/density-cube-linux-x64.json', import.meta.url),
+      'utf8',
+    ),
+  );
+
+export async function requireLiquidContactReference(reference) {
+  if (
+    process.platform !== reference.platform ||
+    process.arch !== reference.arch ||
+    process.version !== reference.node ||
+    process.versions.v8 !== reference.v8 ||
+    hash(await readFile(process.execPath)) !== reference.executableSHA256
+  )
+    throw Error('The liquid/contact oracle requires the pinned Linux x64 Node executable.');
+}
+
 export async function loadCatalogue(output) {
   const outfile = resolve(output, 'catalogue.mjs');
   await build({ ...BUNDLE, entryPoints: [CATALOGUE], outfile, logLevel: 'warning' });

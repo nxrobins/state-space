@@ -121,7 +121,17 @@ jobs:
           if-no-files-found: warn
 
   liquid-contact:
-    name: Exact liquid and contact baseline
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Exact liquid and contact baseline
+            node: '22.22.3'
+            cube_args: '--reference'
+          - name: Portable liquid and contact replay
+            node: '26.4.0'
+            cube_args: ''
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -130,7 +140,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: '22.22.3'
+          node-version: ${{ matrix.node }}
           cache: npm
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
@@ -138,7 +148,9 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: npm ci
-      - name: Compare every frozen case on its recorded V8 runtime
+      - name: Check cube rounding against the Linux x64 reference
+        run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 60 -- node scripts/check_density_cube.mjs ${{ matrix.cube_args }}
+      - name: Compare every v2 frozen case bit for bit
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check --select all --timeout 1200
       - name: Replay the original v1 trajectories on the same runtime
         run: uv run python -B -m scripts.verification_guard --kind cpu --timeout 1200 -- node scripts/freeze_liquid_contact.mjs check-legacy --select all --timeout 1200
@@ -148,7 +160,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: liquid-contact-evidence-${{ github.sha }}
+          name: liquid-contact-evidence-${{ github.sha }}-${{ matrix.node }}
           path: |
             dist/verification/
             dist/liquid-contact/

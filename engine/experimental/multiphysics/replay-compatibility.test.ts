@@ -43,7 +43,6 @@ test.each([
   expect({ ...initial, rules: saved.rules }).toEqual(saved);
   const freeze = read(path);
   const expected: FrozenRecord3D = freeze.cases[id];
-  const exact = process.versions.v8 === freeze.runtime.v8;
   const world = createMultiphysicsWorld3D(profiles, initial);
   for (let pair = 12; pair <= 24; pair++) {
     const edits =
@@ -53,19 +52,17 @@ test.each([
     const work = preview.progress().work;
     const { result } = world.commit(preview);
     expect(result.snapshot.rules).toBe(rules);
-    if (exact) expect(`${digestFrozen3D(result).slice(0, 16)} ${work}`).toBe(expected.steps[pair]);
+    expect(`${digestFrozen3D(result).slice(0, 16)} ${work}`).toBe(expected.steps[pair]);
     if (pair === 18) world.restore(JSON.parse(JSON.stringify(world.snapshot())));
   }
   const before = digestFrozen3D(world.snapshot());
-  if (exact) expect(before).toBe(expected.final);
+  expect(before).toBe(expected.final);
   const next = world.prepare([], 2);
   if (original) {
     expect(() => finish(next, 256)).toThrow(/World numerical energy limit exceeded/);
-    if (exact) {
-      expect(next.progress().work).toBe(expected.rejection!.work);
-      const retry = world.prepare([], 2);
-      expect(() => finish(retry, 1)).toThrow(expected.rejection!.message);
-    }
+    expect(next.progress().work).toBe(expected.rejection!.work);
+    const retry = world.prepare([], 2);
+    expect(() => finish(retry, 1)).toThrow(expected.rejection!.message);
     expect(digestFrozen3D(world.snapshot())).toBe(before);
   } else {
     finish(next, 256);

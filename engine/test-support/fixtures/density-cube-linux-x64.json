@@ -1,0 +1,135 @@
+{
+  "reference": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v22.22.3",
+    "v8": "12.4.254.21-node.56",
+    "executableSHA256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2"
+  },
+  "edges": [
+    {
+      "description": "crossing tick 93",
+      "input": "3fdb17ed01b4a9c0",
+      "output": "3fb36c06c4c3a8d6"
+    },
+    {
+      "description": "below tick-93 input",
+      "input": "3fdb17ed01b4a9bf",
+      "output": "3fb36c06c4c3a8d4"
+    },
+    {
+      "description": "above tick-93 input",
+      "input": "3fdb17ed01b4a9c1",
+      "output": "3fb36c06c4c3a8d9"
+    },
+    {
+      "description": "Mac ARM64 Node 22 rounding witness",
+      "input": "3fed2ae71e573b66",
+      "output": "3fe83b91a1477cae"
+    },
+    {
+      "description": "second architecture witness",
+      "input": "3eb7664da3155074",
+      "output": "3c49062443cb4ba0"
+    },
+    {
+      "description": "third architecture witness",
+      "input": "3ca8346504dce045",
+      "output": "361bb25814585390"
+    },
+    {
+      "description": "negative zero",
+      "input": "8000000000000000",
+      "output": "8000000000000000"
+    },
+    {
+      "description": "positive zero",
+      "input": "0000000000000000",
+      "output": "0000000000000000"
+    },
+    {
+      "description": "negative witness",
+      "input": "bfdb17ed01b4a9c0",
+      "output": "bfb36c06c4c3a8d6"
+    },
+    {
+      "description": "before one",
+      "input": "3fefffffffffffff",
+      "output": "3feffffffffffffd"
+    },
+    {
+      "description": "one",
+      "input": "3ff0000000000000",
+      "output": "3ff0000000000000"
+    },
+    {
+      "description": "after one",
+      "input": "3ff0000000000001",
+      "output": "3ff0000000000003"
+    },
+    {
+      "description": "maximum squared kernel radius",
+      "input": "40b0000000000000",
+      "output": "4230000000000000"
+    },
+    {
+      "description": "positive infinity",
+      "input": "7ff0000000000000",
+      "output": "7ff0000000000000"
+    },
+    {
+      "description": "negative infinity",
+      "input": "fff0000000000000",
+      "output": "fff0000000000000"
+    },
+    {
+      "description": "largest input",
+      "input": "7fefffffffffffff",
+      "output": "7ff0000000000000"
+    },
+    {
+      "description": "smallest normal input",
+      "input": "0010000000000000",
+      "output": "0000000000000000"
+    },
+    {
+      "description": "smallest subnormal input",
+      "input": "0000000000000001",
+      "output": "0000000000000000"
+    },
+    {
+      "description": "negative underflow",
+      "input": "8000000000000001",
+      "output": "8000000000000000"
+    },
+    {
+      "description": "subnormal result",
+      "input": "2990000000000000",
+      "output": "0000000000000001"
+    },
+    {
+      "description": "normal-to-subnormal result boundary",
+      "input": "2aa428a2f98d728b",
+      "output": "0010000000000000"
+    },
+    {
+      "description": "round to minimum subnormal boundary",
+      "input": "298965fea53d6e3d",
+      "output": "0000000000000001"
+    },
+    {
+      "description": "last finite cube boundary",
+      "input": "554428a2f98d728a",
+      "output": "7feffffffffffffc"
+    },
+    {
+      "description": "first overflowing cube boundary",
+      "input": "554428a2f98d728b",
+      "output": "7ff0000000000000"
+    }
+  ],
+  "corpus": {
+    "count": 71854,
+    "sha256": "cba113f7105d2d54e2e1caba625a2f88ed0ccbbf7308fe29a46e66695244e8b0"
+  }
+}
