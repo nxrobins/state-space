@@ -88,7 +88,7 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
       if (n === 119) throw Error('Four-tick crossing did not complete in 120 frames');
     }
   }
-  check(observed);
+  const comparison = check(observed);
   const frame = distribution(frames.map((f) => f.completionMs)),
     prediction = distribution(queries.map((q) => q.predictionVisibleMs));
   const missedDeadlines = frames.filter((f) => f.completionMs > 1000 / 60).length;
@@ -102,6 +102,7 @@ export async function measurePass({ packet, request, draw, boundary, clock, chec
   return {
     frames,
     queries,
+    comparison,
     frame,
     prediction,
     stages,

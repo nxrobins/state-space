@@ -11,6 +11,39 @@ export const sliceCount = 24;
 export const pack = (value) => JSON.stringify(value, (_, v) => (Object.is(v, -0) ? '~f64:-0' : v));
 export const unpack = (text) => JSON.parse(text, (_, v) => (v === '~f64:-0' ? -0 : v));
 
+// Diagnose the same ordered portable data that pack compares, including signed zero.
+export function firstDifference(expected, actual, path = '$') {
+  if (Object.is(expected, actual)) return null;
+  if (
+    expected &&
+    actual &&
+    typeof expected === 'object' &&
+    typeof actual === 'object' &&
+    Array.isArray(expected) === Array.isArray(actual)
+  ) {
+    const keys = Object.keys(expected),
+      other = Object.keys(actual);
+    if (keys.length !== other.length || keys.some((k, i) => k !== other[i]))
+      return { path, expectedKeys: keys, actualKeys: other };
+    for (const key of keys) {
+      const difference = firstDifference(expected[key], actual[key], path + '.' + key);
+      if (difference) return difference;
+    }
+    return null;
+  }
+  const describe = (value) => {
+    if (typeof value !== 'number')
+      return {
+        type: typeof value,
+        value: typeof value === 'object' && value !== null ? '[object]' : value,
+      };
+    const bits = new DataView(new ArrayBuffer(8));
+    bits.setFloat64(0, value);
+    return { value, bits: bits.getBigUint64(0).toString(16).padStart(16, '0') };
+  };
+  return { path, expected: describe(expected), actual: describe(actual) };
+}
+
 export function viewOf(snapshot) {
   const bodies = snapshot.parcels.filter(
     (p) => ['engineer', 'unit', 'deck'].includes(p.id) || p.id.startsWith('water-'),

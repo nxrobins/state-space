@@ -9,7 +9,16 @@ import { loadCatalogue, hash } from '../liquid_contact_engine.mjs';
 import { createCrossingMission } from '../../examples/crossing-mission/mission.mjs';
 import { complete } from '../crossing_order_replay.mjs';
 import * as api from 'state-space-engine/experimental/3d/multiphysics';
-import { pack, unpack, viewOf, distribution, startTick, sliceTicks, sliceCount } from './slice.mjs';
+import {
+  pack,
+  unpack,
+  viewOf,
+  distribution,
+  startTick,
+  sliceTicks,
+  sliceCount,
+  firstDifference,
+} from './slice.mjs';
 import { createTerrain, cameraAt, crossingCells, changedCells, framesPerSlice } from './scene.mjs';
 import { build } from 'esbuild';
 import {
@@ -91,6 +100,9 @@ try {
     framesPerSlice * sliceCount,
   );
   const packet = { schema: 'battlefield-crossing-1', initial, slices };
+  assert.equal(firstDifference(initial, unpack(pack(initial))), null);
+  assert.equal(firstDifference({ n: 0 }, { n: -0 }).actual.bits, '8000000000000000');
+  assert.equal(firstDifference({ a: 1, b: 2 }, { b: 2, a: 1 }).path, '$');
   // Exercise the native pass controller and every presentation edit on the hosted CPU.
   // The injected display clock is only a regression control and produces no frame evidence.
   const display = createStateSpaceStructuralWorld3D(geometry);

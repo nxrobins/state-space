@@ -1,6 +1,6 @@
 import { createStateSpaceStructuralWorld3DGPU } from 'state-space-engine/experimental/3d/structural-world/gpu';
 import { createTerrain, geometry, cameraAt, changedCells, crossingCells } from './scene.mjs';
-import { pack, unpack, startTick, sliceCount, sliceTicks, viewOf } from './slice.mjs';
+import { firstDifference, unpack, startTick, sliceCount, sliceTicks, viewOf } from './slice.mjs';
 import { measurePass } from './passes.mjs';
 
 const stage = 'battlefield-crossing-visible';
@@ -137,11 +137,23 @@ async function measure() {
       return kind === 'preview' ? { views, workerMs: 0 } : views.at(-1);
     }
     function check(observed) {
+      const differences = [],
+        commitDifferences = [];
       for (const [i, r] of observed.entries()) {
         const views = packet.slices[i].views;
-        if (pack(r.views) !== pack(views) || pack(r.committed) !== pack(views.at(-1)))
-          throw Error('Displayed prediction or commit differs at ' + i);
+        const difference =
+          firstDifference(views, r.views) ?? firstDifference(views.at(-1), r.committed);
+        if (difference) differences.push({ startTick: packet.slices[i].tick, ...difference });
+        const commitDifference = firstDifference(r.views.at(-1), r.committed);
+        if (commitDifference)
+          commitDifferences.push({ startTick: packet.slices[i].tick, ...commitDifference });
       }
+      return {
+        exactHostedSlices: observed.length - differences.length,
+        exactPreviewCommits: observed.length - commitDifferences.length,
+        firstHostedDifference: differences[0] ?? null,
+        firstCommitDifference: commitDifferences[0] ?? null,
+      };
     }
     const counts = { frames: 2 }; // includes the two image checks
     for (const mode of ['recorded', 'live']) {
@@ -163,6 +175,8 @@ async function measure() {
         await live({ kind: 'preview', tick: startTick, edits: packet.slices[0].edits });
         await live({ kind: 'commit', tick: startTick });
         await live({ kind: 'init', snapshot: packet.initial });
+        const initial = await live({ kind: 'audit', tick: startTick });
+        report.initialDifference = firstDifference(packet.initial, initial.live);
       }
       for (let i = 0; i < 32; i++) {
         await boundary();
@@ -181,12 +195,30 @@ async function measure() {
     }
     const audit = await live({ kind: 'audit', tick: startTick + sliceTicks * sliceCount });
     const expected = packet.slices.flatMap((s) => s.results);
+    if (audit.history.length !== expected.length) throw Error('Incomplete native history');
+    report.exactTicks = 0;
+    for (const [i, row] of expected.entries()) {
+      const difference = firstDifference(row, audit.history[i]);
+      if (!difference) report.exactTicks++;
+      else report.firstTickDifference ??= { tick: row.snapshot.tick, ...difference };
+    }
+    report.finalDifference = firstDifference(expected.at(-1).snapshot, audit.live);
+    report.fractureTicks = audit.history
+      .filter((row) => row.ticks.some((t) => t.brokenBonds.length))
+      .map((row) => row.snapshot.tick);
     if (
-      pack(audit.history) !== pack(expected) ||
-      pack(audit.live) !== pack(expected.at(-1).snapshot)
+      report.initialDifference ||
+      report.finalDifference ||
+      report.exactTicks !== expected.length ||
+      Object.values(report.passes).some(
+        (p) =>
+          p.comparison.exactHostedSlices !== sliceCount ||
+          p.comparison.exactPreviewCommits !== sliceCount,
+      )
     )
-      throw Error('Native continuation differs from frozen hosted trajectory');
-    report.exactTicks = expected.length;
+      throw Error(
+        'Native replay differs from the hosted reference; timings retained as diagnostics',
+      );
     report.passed = true;
     report.progress = 'measured';
   } catch (e) {
