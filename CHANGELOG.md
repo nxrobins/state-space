@@ -15,7 +15,7 @@ date of the last change in the section.
 
 ### Added
 
-- Profile fresh and partially prepared battlefield forecasts against the exact crossing replay (#132).
+- Profile late four-tick battlefield forecasts and reuse unchanged rigid contact geometry within each step (#132).
 
 - Add a one-worker, two-choice crossing preview with stale-selection rejection and separate prepared and fresh latency receipts (#131).
 

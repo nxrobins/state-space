@@ -1,4 +1,5 @@
 /** Bounded rigid candidate kernel. Release qualification still requires coupled runtime evidence. */
+import { cacheRigidContactGeometry } from './rigid-contact-cache.js';
 import {
   copyPortableValue,
   PORTABLE_VALUE_LIMITS,
@@ -1155,12 +1156,12 @@ export function createRigidStep3D<T extends RigidParcel3D>(
       b.members.length === 1 &&
       particleIds.has(a.members[0].id) &&
       particleIds.has(b.members[0].id));
-  function contactGeometry(a: T, b: T, tolerance: number) {
+  const contactGeometry = cacheRigidContactGeometry(parcels, (a, b, tolerance) => {
     if (!particleIds.has(a.id) && !particleIds.has(b.id))
       return separatedOnFaceAxis(a, b, tolerance) ? null : contactWithinTolerance(a, b, tolerance);
     const contact = particleBoxGeometry(a, b, particleIds.has(a.id));
     return contact.gap > tolerance ? null : { ...contact, depth: Math.max(0, -contact.gap) };
-  }
+  });
   // See retained-functions.ts.
   retainJobFunctions('rigid-step', [run, skipPair, contactGeometry]);
   return run();
